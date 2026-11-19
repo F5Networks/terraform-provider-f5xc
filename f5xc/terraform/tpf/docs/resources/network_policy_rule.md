@@ -77,7 +77,7 @@ resource "f5xc_network_policy_rule" "example" {
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `ports` (List of String) ports List of port ranges. Each range is a single port or a pair of start and end ports e.g. 8080-8192
 - `protocol` (String) protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp<br>**Default:** `ALL`<br>**Allowed Values (choose one):** `['ALL', 'TCP', 'UDP', 'ICMP']`
-- `remote_endpoint_choice` (Attributes) Remote Endpoint Remote endpoint is the other endpoint for ingress or egress session with local endpoint of network policy. If network policy rule is a ingress rule in network policy then remote endpoint indicates the source endpoint from  which session is initiated. If network policy rule is a egress rule in network policy then remote endpoint indicates the destination endpoint to which session is initiated. Not specifying any endpoint will result in creation of ANY endpoint (see [below for nested schema](#nestedatt--remote_endpoint_choice))
+- `remote_endpoint_choice` (Attributes) Remote Endpoint Remote endpoint is the other endpoint for ingress or egress session with local endpoint of network policy. If network policy rule is a ingress rule in network policy then remote endpoint indicates the source endpoint from  which session is initiated. If network policy rule is a egress rule in network policy then remote endpoint indicates the destination endpoint to which session is initiated. Not specifying any endpoint will result in creation of ANY endpoint<br>Exactly one of `ip_prefix_set`, `prefix`, or `prefix_selector` must be specified when `remote_endpoint_choice` is configured. (see [below for nested schema](#nestedatt--remote_endpoint_choice))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
@@ -105,9 +105,9 @@ Optional:
 
 Optional:
 
-- `ip_prefix_set` (Attributes) ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint (see [below for nested schema](#nestedatt--remote_endpoint_choice--ip_prefix_set))
-- `prefix` (Attributes) prefix List of IP prefixes that are member of set representing remote endpoint. Prefix is the list of IP addresses to match. For egress rules these IP prefixes are source.For ingress rules these IP prefixes are destination (see [below for nested schema](#nestedatt--remote_endpoint_choice--prefix))
-- `prefix_selector` (Attributes) prefix selector Remote endpoint is determined by label selector expression. Prefix selector is the set of labels to match. Labels can be specified in BNF grammar format. Constraint : Only first expression is selected even though LabelSelectorType can provide multiple (see [below for nested schema](#nestedatt--remote_endpoint_choice--prefix_selector))
+- `ip_prefix_set` (Attributes) ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint<br>Conflicts with `prefix` and `prefix_selector`. (see [below for nested schema](#nestedatt--remote_endpoint_choice--ip_prefix_set))
+- `prefix` (Attributes) prefix List of IP prefixes that are member of set representing remote endpoint. Prefix is the list of IP addresses to match. For egress rules these IP prefixes are source.For ingress rules these IP prefixes are destination<br>Conflicts with `ip_prefix_set` and `prefix_selector`. (see [below for nested schema](#nestedatt--remote_endpoint_choice--prefix))
+- `prefix_selector` (Attributes) prefix selector Remote endpoint is determined by label selector expression. Prefix selector is the set of labels to match. Labels can be specified in BNF grammar format. Constraint : Only first expression is selected even though LabelSelectorType can provide multiple<br>Conflicts with `ip_prefix_set` and `prefix`. (see [below for nested schema](#nestedatt--remote_endpoint_choice--prefix_selector))
 
 <a id="nestedatt--remote_endpoint_choice--ip_prefix_set"></a>
 ### Nested Schema for `remote_endpoint_choice.ip_prefix_set`
@@ -178,6 +178,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_network_policy_rule.example"
+	to = f5xc_network_policy_rule.example
 }
 ```

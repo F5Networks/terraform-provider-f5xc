@@ -116,21 +116,21 @@ resource "f5xc_aws_tgw_site" "example" {
 ### Required
 
 - `aws_parameters` (Attributes) AWS Credentials and Resources Section to provide information related to AWS credentials and AWS resources orchestrated and managed by F5XC. Example of the managed AWS resources to name few are VPC, TGW, Route Tables etc (see [below for nested schema](#nestedatt--aws_parameters))
-- `blocked_services_choice` (Attributes) Blocked Services on Site By default webui, ssh and dns are all blocked, you can choose other options to unblock. (see [below for nested schema](#nestedatt--blocked_services_choice))
-- `direct_connect_choice` (Attributes) Private Connectivity To Site Select Private Connectivity To Site (see [below for nested schema](#nestedatt--direct_connect_choice))
-- `logs_receiver_choice` (Attributes) Logs Streaming Select Logs receiver for logs streaming (see [below for nested schema](#nestedatt--logs_receiver_choice))
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
 
 ### Optional
 
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
+- `blocked_services_choice` (Attributes) Blocked Services on Site By default webui, ssh and dns are all blocked, you can choose other options to unblock.<br>Exactly one of `block_all_services`, `blocked_services`, or `default_blocked_services` must be specified when `blocked_services_choice` is configured. (see [below for nested schema](#nestedatt--blocked_services_choice))
 - `coordinates` (Attributes) coordinates Site longitude and latitude co-ordinates (see [below for nested schema](#nestedatt--coordinates))
 - `custom_dns` (Attributes) custom_dns custom dns configure to the CE site (see [below for nested schema](#nestedatt--custom_dns))
 - `description` (String) description Human readable description for the object
+- `direct_connect_choice` (Attributes) Private Connectivity To Site Select Private Connectivity To Site<br>Exactly one of `direct_connect_disabled`, `direct_connect_enabled`, or `private_connectivity` must be specified when `direct_connect_choice` is configured. (see [below for nested schema](#nestedatt--direct_connect_choice))
 - `error_description` (String) error_description Description of error on site<br>**Default:** ``
 - `kubernetes_upgrade_drain` (Attributes) Enable Drain Enable Kubernetes Drain during OS or SW upgrade (see [below for nested schema](#nestedatt--kubernetes_upgrade_drain))
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
+- `logs_receiver_choice` (Attributes) Logs Streaming Select Logs receiver for logs streaming<br>`logs_streaming_disabled` must be specified when `logs_receiver_choice` is configured. (see [below for nested schema](#nestedatt--logs_receiver_choice))
 - `offline_survivability_mode` (Attributes) Offline Survivability Mode Enable/Disable offline survivability mode (see [below for nested schema](#nestedatt--offline_survivability_mode))
 - `os` (Attributes) Operating System Operating System Details (see [below for nested schema](#nestedatt--os))
 - `performance_enhancement_mode` (Attributes) Performance Enhancement Choice Performance Enhancement Mode to optimize for L3 or L7 networking (see [below for nested schema](#nestedatt--performance_enhancement_mode))
@@ -159,21 +159,21 @@ Required:
 
 - `aws_region` (String) AWS Region AWS Region of your services vpc, where F5XC site will be deployed.
 - `az_nodes` (Attributes List) Nodes Only Single AZ or Three AZ(s) nodes are supported currently. (see [below for nested schema](#nestedatt--aws_parameters--az_nodes))
-- `deployment_choice` (Attributes) Cloud Credential Selection Reference to AWS cloud credential object used to deploy cloud resources (see [below for nested schema](#nestedatt--aws_parameters--deployment_choice))
+- `deployment_choice` (Attributes) Cloud Credential Selection Reference to AWS cloud credential object used to deploy cloud resources<br>`aws_cred` must be specified. (see [below for nested schema](#nestedatt--aws_parameters--deployment_choice))
 - `instance_type` (String) AWS Instance Type Instance size based on the performance.<br>**Validation:** `Length LengthAtMost(64)`
-- `internet_vip_choice` (Attributes) Advertise VIPs to Internet Manage Advertising VIP to Internet on Site (see [below for nested schema](#nestedatt--aws_parameters--internet_vip_choice))
-- `security_group_choice` (Attributes) Security Group Select the security group for slo and sli interfaces. (see [below for nested schema](#nestedatt--aws_parameters--security_group_choice))
-- `service_vpc_choice` (Attributes) New/Existing Services VPC Services VPC where F5XC site will be deployed can be an existing VPC or F5XC can orchestrate a new VPC and create required cloud resources within that VPC. (see [below for nested schema](#nestedatt--aws_parameters--service_vpc_choice))
+- `service_vpc_choice` (Attributes) New/Existing Services VPC Services VPC where F5XC site will be deployed can be an existing VPC or F5XC can orchestrate a new VPC and create required cloud resources within that VPC.<br>Exactly one of `new_vpc` or `vpc_id` must be specified. (see [below for nested schema](#nestedatt--aws_parameters--service_vpc_choice))
 - `ssh_key` (String) Public SSH key Public SSH key for accessing nodes of the site.<br>**Validation:** `Length LengthBetween(1, 8192)`
-- `tgw_choice` (Attributes) New/Existing Transit Gateway F5XC Site can work with an existing Transit Gateway(TGW) and orchestrate attachments, TGW routing and propagation or F5XC can orchestrate new TGW, attachments, TGW routing and propagation (see [below for nested schema](#nestedatt--aws_parameters--tgw_choice))
-- `tgw_cidr_choice` (Attributes) Transit gateway CIDR Block CIDR block for AWS Transit Gateway GRE connectivity. Defines the IP address range for GRE tunnel traffic over Transit Gateway. (see [below for nested schema](#nestedatt--aws_parameters--tgw_cidr_choice))
-- `worker_nodes_choice` (Attributes) Desired Worker Nodes Selection Desired number of worker nodes to be deployed on the site. (see [below for nested schema](#nestedatt--aws_parameters--worker_nodes_choice))
+- `tgw_choice` (Attributes) New/Existing Transit Gateway F5XC Site can work with an existing Transit Gateway(TGW) and orchestrate attachments, TGW routing and propagation or F5XC can orchestrate new TGW, attachments, TGW routing and propagation<br>Exactly one of `existing_tgw` or `new_tgw` must be specified. (see [below for nested schema](#nestedatt--aws_parameters--tgw_choice))
 
 Optional:
 
 - `admin_password` (Attributes) Admin Password Admin password user for accessing site through serial console . (see [below for nested schema](#nestedatt--aws_parameters--admin_password))
 - `disk_size` (Number) Node Disk size Node disk size for all node in the F5XC site. Unit is GiB<br>**Default:** `80`
-- `encryption_choice` (Attributes) Encryption Option to encrypt the node disk with CMK. Defaults to disable encryption (see [below for nested schema](#nestedatt--aws_parameters--encryption_choice))
+- `encryption_choice` (Attributes) Encryption Option to encrypt the node disk with CMK. Defaults to disable encryption<br>Exactly one of `disable_encryption` or `enable_encryption` must be specified when `encryption_choice` is configured. (see [below for nested schema](#nestedatt--aws_parameters--encryption_choice))
+- `internet_vip_choice` (Attributes) Advertise VIPs to Internet Manage Advertising VIP to Internet on Site<br>Exactly one of `disable_internet_vip` or `enable_internet_vip` must be specified when `internet_vip_choice` is configured. (see [below for nested schema](#nestedatt--aws_parameters--internet_vip_choice))
+- `security_group_choice` (Attributes) Security Group Select the security group for slo and sli interfaces.<br>Exactly one of `custom_security_group` or `f5xc_security_group` must be specified when `security_group_choice` is configured. (see [below for nested schema](#nestedatt--aws_parameters--security_group_choice))
+- `tgw_cidr_choice` (Attributes) Transit gateway CIDR Block CIDR block for AWS Transit Gateway GRE connectivity. Defines the IP address range for GRE tunnel traffic over Transit Gateway.<br>Exactly one of `reserved_tgw_cidr` or `tgw_cidr` must be specified when `tgw_cidr_choice` is configured. (see [below for nested schema](#nestedatt--aws_parameters--tgw_cidr_choice))
+- `worker_nodes_choice` (Attributes) Desired Worker Nodes Selection Desired number of worker nodes to be deployed on the site.<br>Exactly one of `no_worker_nodes`, `nodes_per_az`, or `total_nodes` must be specified when `worker_nodes_choice` is configured. (see [below for nested schema](#nestedatt--aws_parameters--worker_nodes_choice))
 
 <a id="nestedatt--aws_parameters--az_nodes"></a>
 ### Nested Schema for `aws_parameters.az_nodes`
@@ -181,35 +181,60 @@ Optional:
 Required:
 
 - `aws_az_name` (String) AWS AZ AWS availability zone, must be consistent with the selected AWS region.
-- `choice` (Attributes) Inside Subnet Choices Subnet for the inside interface of the node (see [below for nested schema](#nestedatt--aws_parameters--az_nodes--choice))
 - `outside_subnet` (Attributes) Outside Subnet Subnet for the outside interface of the node (see [below for nested schema](#nestedatt--aws_parameters--az_nodes--outside_subnet))
 
 Optional:
 
+- `choice` (Attributes) Inside Subnet Choices Subnet for the inside interface of the node<br>Exactly one of `inside_subnet` or `reserved_inside_subnet` must be specified when `choice` is configured. (see [below for nested schema](#nestedatt--aws_parameters--az_nodes--choice))
 - `workload_subnet` (Attributes) Workload Subnet Subnet in which workloads are launched (see [below for nested schema](#nestedatt--aws_parameters--az_nodes--workload_subnet))
+
+<a id="nestedatt--aws_parameters--az_nodes--outside_subnet"></a>
+### Nested Schema for `aws_parameters.az_nodes.outside_subnet`
+
+Required:
+
+- `choice` (Attributes) Choice of subnet Subnet for the Single interface of the site<br>Exactly one of `existing_subnet_id` or `subnet_param` must be specified. (see [below for nested schema](#nestedatt--aws_parameters--az_nodes--outside_subnet--choice))
+
+<a id="nestedatt--aws_parameters--az_nodes--outside_subnet--choice"></a>
+### Nested Schema for `aws_parameters.az_nodes.outside_subnet.choice`
+
+Optional:
+
+- `existing_subnet_id` (String) Existing Subnet ID Information about existing subnet ID<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `subnet_param`.
+- `subnet_param` (Attributes) New Subnet Parameters for creating new subnet<br>Conflicts with `existing_subnet_id`. (see [below for nested schema](#nestedatt--aws_parameters--az_nodes--outside_subnet--choice--subnet_param))
+
+<a id="nestedatt--aws_parameters--az_nodes--outside_subnet--choice--subnet_param"></a>
+### Nested Schema for `aws_parameters.az_nodes.outside_subnet.choice.subnet_param`
+
+Required:
+
+- `ipv4` (String) IPv4 Subnet IPv4 subnet prefix for this subnet
+
+
+
 
 <a id="nestedatt--aws_parameters--az_nodes--choice"></a>
 ### Nested Schema for `aws_parameters.az_nodes.choice`
 
 Optional:
 
-- `inside_subnet` (Attributes) Inside Subnet Choice Select Existing Subnet or Create New (see [below for nested schema](#nestedatt--aws_parameters--az_nodes--choice--inside_subnet))
-- `reserved_inside_subnet` (Boolean) Reserved Subnet Choice Autogenerate and reserve a subnet from the Primary CIDR
+- `inside_subnet` (Attributes) Inside Subnet Choice Select Existing Subnet or Create New<br>Conflicts with `reserved_inside_subnet`. (see [below for nested schema](#nestedatt--aws_parameters--az_nodes--choice--inside_subnet))
+- `reserved_inside_subnet` (Boolean) Reserved Subnet Choice Autogenerate and reserve a subnet from the Primary CIDR<br>Conflicts with `inside_subnet`.
 
 <a id="nestedatt--aws_parameters--az_nodes--choice--inside_subnet"></a>
 ### Nested Schema for `aws_parameters.az_nodes.choice.inside_subnet`
 
 Required:
 
-- `choice` (Attributes) Choice of subnet Subnet for the Single interface of the site (see [below for nested schema](#nestedatt--aws_parameters--az_nodes--choice--inside_subnet--choice))
+- `choice` (Attributes) Choice of subnet Subnet for the Single interface of the site<br>Exactly one of `existing_subnet_id` or `subnet_param` must be specified. (see [below for nested schema](#nestedatt--aws_parameters--az_nodes--choice--inside_subnet--choice))
 
 <a id="nestedatt--aws_parameters--az_nodes--choice--inside_subnet--choice"></a>
 ### Nested Schema for `aws_parameters.az_nodes.choice.inside_subnet.choice`
 
 Optional:
 
-- `existing_subnet_id` (String) Existing Subnet ID Information about existing subnet ID<br>**Validation:** `Length LengthAtMost(64)`
-- `subnet_param` (Attributes) New Subnet Parameters for creating new subnet (see [below for nested schema](#nestedatt--aws_parameters--az_nodes--choice--inside_subnet--choice--subnet_param))
+- `existing_subnet_id` (String) Existing Subnet ID Information about existing subnet ID<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `subnet_param`.
+- `subnet_param` (Attributes) New Subnet Parameters for creating new subnet<br>Conflicts with `existing_subnet_id`. (see [below for nested schema](#nestedatt--aws_parameters--az_nodes--choice--inside_subnet--choice--subnet_param))
 
 <a id="nestedatt--aws_parameters--az_nodes--choice--inside_subnet--choice--subnet_param"></a>
 ### Nested Schema for `aws_parameters.az_nodes.choice.inside_subnet.choice.subnet_param`
@@ -222,45 +247,20 @@ Required:
 
 
 
-<a id="nestedatt--aws_parameters--az_nodes--outside_subnet"></a>
-### Nested Schema for `aws_parameters.az_nodes.outside_subnet`
-
-Required:
-
-- `choice` (Attributes) Choice of subnet Subnet for the Single interface of the site (see [below for nested schema](#nestedatt--aws_parameters--az_nodes--outside_subnet--choice))
-
-<a id="nestedatt--aws_parameters--az_nodes--outside_subnet--choice"></a>
-### Nested Schema for `aws_parameters.az_nodes.outside_subnet.choice`
-
-Optional:
-
-- `existing_subnet_id` (String) Existing Subnet ID Information about existing subnet ID<br>**Validation:** `Length LengthAtMost(64)`
-- `subnet_param` (Attributes) New Subnet Parameters for creating new subnet (see [below for nested schema](#nestedatt--aws_parameters--az_nodes--outside_subnet--choice--subnet_param))
-
-<a id="nestedatt--aws_parameters--az_nodes--outside_subnet--choice--subnet_param"></a>
-### Nested Schema for `aws_parameters.az_nodes.outside_subnet.choice.subnet_param`
-
-Required:
-
-- `ipv4` (String) IPv4 Subnet IPv4 subnet prefix for this subnet
-
-
-
-
 <a id="nestedatt--aws_parameters--az_nodes--workload_subnet"></a>
 ### Nested Schema for `aws_parameters.az_nodes.workload_subnet`
 
 Required:
 
-- `choice` (Attributes) Choice of subnet Subnet for the Single interface of the site (see [below for nested schema](#nestedatt--aws_parameters--az_nodes--workload_subnet--choice))
+- `choice` (Attributes) Choice of subnet Subnet for the Single interface of the site<br>Exactly one of `existing_subnet_id` or `subnet_param` must be specified. (see [below for nested schema](#nestedatt--aws_parameters--az_nodes--workload_subnet--choice))
 
 <a id="nestedatt--aws_parameters--az_nodes--workload_subnet--choice"></a>
 ### Nested Schema for `aws_parameters.az_nodes.workload_subnet.choice`
 
 Optional:
 
-- `existing_subnet_id` (String) Existing Subnet ID Information about existing subnet ID<br>**Validation:** `Length LengthAtMost(64)`
-- `subnet_param` (Attributes) New Subnet Parameters for creating new subnet (see [below for nested schema](#nestedatt--aws_parameters--az_nodes--workload_subnet--choice--subnet_param))
+- `existing_subnet_id` (String) Existing Subnet ID Information about existing subnet ID<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `subnet_param`.
+- `subnet_param` (Attributes) New Subnet Parameters for creating new subnet<br>Conflicts with `existing_subnet_id`. (see [below for nested schema](#nestedatt--aws_parameters--az_nodes--workload_subnet--choice--subnet_param))
 
 <a id="nestedatt--aws_parameters--az_nodes--workload_subnet--choice--subnet_param"></a>
 ### Nested Schema for `aws_parameters.az_nodes.workload_subnet.choice.subnet_param`
@@ -294,56 +294,32 @@ Read-Only:
 
 
 
-<a id="nestedatt--aws_parameters--internet_vip_choice"></a>
-### Nested Schema for `aws_parameters.internet_vip_choice`
-
-Optional:
-
-- `disable_internet_vip` (Boolean) Disable VIP Advertisement to Internet on Site VIPs cannot be advertised to the internet directly on this Site
-- `enable_internet_vip` (Boolean) Enable VIP Advertisement to Internet on Site VIPs can be advertised to the internet directly on this Site
-
-
-<a id="nestedatt--aws_parameters--security_group_choice"></a>
-### Nested Schema for `aws_parameters.security_group_choice`
-
-Optional:
-
-- `custom_security_group` (Attributes) Custom Security Groups for SLO and SLI Interface With this option, ingress and egress traffic will be controlled via security group ids. (see [below for nested schema](#nestedatt--aws_parameters--security_group_choice--custom_security_group))
-- `f5xc_security_group` (Boolean) Default F5XC Security Group With this option, ingress and egress traffic will be controlled via f5xc created security group.
-
-<a id="nestedatt--aws_parameters--security_group_choice--custom_security_group"></a>
-### Nested Schema for `aws_parameters.security_group_choice.custom_security_group`
-
-Optional:
-
-- `inside_security_group_id` (String) Inside Security Group ID Security Group ID to be attached to SLI(Site Local Inside) Interface<br>**Validation:** `Length LengthAtMost(20)`
-- `outside_security_group_id` (String) Outside Security Group ID Security Group ID to be attached to SLO(Site Local Outside) Interface<br>**Validation:** `Length LengthAtMost(20)`
-
-
-
 <a id="nestedatt--aws_parameters--service_vpc_choice"></a>
 ### Nested Schema for `aws_parameters.service_vpc_choice`
 
 Optional:
 
-- `new_vpc` (Attributes) New VPC Details needed to create new VPC (see [below for nested schema](#nestedatt--aws_parameters--service_vpc_choice--new_vpc))
-- `vpc_id` (String) Existing VPC ID Existing VPC ID<br>**Validation:** `Length LengthAtMost(64)`
+- `new_vpc` (Attributes) New VPC Details needed to create new VPC<br>Conflicts with `vpc_id`. (see [below for nested schema](#nestedatt--aws_parameters--service_vpc_choice--new_vpc))
+- `vpc_id` (String) Existing VPC ID Existing VPC ID<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `new_vpc`.
 
 <a id="nestedatt--aws_parameters--service_vpc_choice--new_vpc"></a>
 ### Nested Schema for `aws_parameters.service_vpc_choice.new_vpc`
 
 Required:
 
-- `name_choice` (Attributes) AWS VPC Name Name for your AWS VPC (see [below for nested schema](#nestedatt--aws_parameters--service_vpc_choice--new_vpc--name_choice))
 - `primary_ipv4` (String) Primary IPv4 CIDR block IPv4 CIDR block for this VPC. It has to be private address space. The Primary IPv4 block cannot be modified. All subnets prefixes in this VPC must be part of this CIDR block.
+
+Optional:
+
+- `name_choice` (Attributes) AWS VPC Name Name for your AWS VPC<br>Exactly one of `autogenerate` or `name_tag` must be specified when `name_choice` is configured. (see [below for nested schema](#nestedatt--aws_parameters--service_vpc_choice--new_vpc--name_choice))
 
 <a id="nestedatt--aws_parameters--service_vpc_choice--new_vpc--name_choice"></a>
 ### Nested Schema for `aws_parameters.service_vpc_choice.new_vpc.name_choice`
 
 Optional:
 
-- `autogenerate` (Boolean) autogenerate Autogenerate the VPC Name
-- `name_tag` (String) name_tag Specify the VPC Name<br>**Validation:** `Length LengthAtMost(64)`
+- `autogenerate` (Boolean) autogenerate Autogenerate the VPC Name<br>Conflicts with `name_tag`.
+- `name_tag` (String) name_tag Specify the VPC Name<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `autogenerate`.
 
 
 
@@ -353,8 +329,8 @@ Optional:
 
 Optional:
 
-- `existing_tgw` (Attributes) Existing TGW Information about existing TGW (see [below for nested schema](#nestedatt--aws_parameters--tgw_choice--existing_tgw))
-- `new_tgw` (Attributes) New Transit Gateway Details needed to create new TGW (see [below for nested schema](#nestedatt--aws_parameters--tgw_choice--new_tgw))
+- `existing_tgw` (Attributes) Existing TGW Information about existing TGW<br>Conflicts with `new_tgw`. (see [below for nested schema](#nestedatt--aws_parameters--tgw_choice--existing_tgw))
+- `new_tgw` (Attributes) New Transit Gateway Details needed to create new TGW<br>Conflicts with `existing_tgw`. (see [below for nested schema](#nestedatt--aws_parameters--tgw_choice--new_tgw))
 
 <a id="nestedatt--aws_parameters--tgw_choice--existing_tgw"></a>
 ### Nested Schema for `aws_parameters.tgw_choice.existing_tgw`
@@ -369,17 +345,17 @@ Optional:
 <a id="nestedatt--aws_parameters--tgw_choice--new_tgw"></a>
 ### Nested Schema for `aws_parameters.tgw_choice.new_tgw`
 
-Required:
+Optional:
 
-- `asn_choice` (Attributes) BGP ASN config Select BGP ASN config mode (see [below for nested schema](#nestedatt--aws_parameters--tgw_choice--new_tgw--asn_choice))
+- `asn_choice` (Attributes) BGP ASN config Select BGP ASN config mode<br>Exactly one of `system_generated` or `user_assigned` must be specified when `asn_choice` is configured. (see [below for nested schema](#nestedatt--aws_parameters--tgw_choice--new_tgw--asn_choice))
 
 <a id="nestedatt--aws_parameters--tgw_choice--new_tgw--asn_choice"></a>
 ### Nested Schema for `aws_parameters.tgw_choice.new_tgw.asn_choice`
 
 Optional:
 
-- `system_generated` (Boolean) System Generated F5XC will automatically assign a private ASN for TGW and F5XC Site
-- `user_assigned` (Attributes) User Assigned User is managing the ASN for TGW and F5XC Site. (see [below for nested schema](#nestedatt--aws_parameters--tgw_choice--new_tgw--asn_choice--user_assigned))
+- `system_generated` (Boolean) System Generated F5XC will automatically assign a private ASN for TGW and F5XC Site<br>Conflicts with `user_assigned`.
+- `user_assigned` (Attributes) User Assigned User is managing the ASN for TGW and F5XC Site.<br>Conflicts with `system_generated`. (see [below for nested schema](#nestedatt--aws_parameters--tgw_choice--new_tgw--asn_choice--user_assigned))
 
 <a id="nestedatt--aws_parameters--tgw_choice--new_tgw--asn_choice--user_assigned"></a>
 ### Nested Schema for `aws_parameters.tgw_choice.new_tgw.asn_choice.user_assigned`
@@ -393,48 +369,21 @@ Optional:
 
 
 
-<a id="nestedatt--aws_parameters--tgw_cidr_choice"></a>
-### Nested Schema for `aws_parameters.tgw_cidr_choice`
-
-Optional:
-
-- `reserved_tgw_cidr` (Boolean) Reserved TGW CIDR Choice Autogenerate and reserve a TGW CIDR Block from the Primary CIDR
-- `tgw_cidr` (Attributes) TGW CIDR Choice Specify TGW CIDR block (see [below for nested schema](#nestedatt--aws_parameters--tgw_cidr_choice--tgw_cidr))
-
-<a id="nestedatt--aws_parameters--tgw_cidr_choice--tgw_cidr"></a>
-### Nested Schema for `aws_parameters.tgw_cidr_choice.tgw_cidr`
-
-Required:
-
-- `ipv4` (String) IPv4 Subnet IPv4 subnet prefix for this subnet
-
-
-
-<a id="nestedatt--aws_parameters--worker_nodes_choice"></a>
-### Nested Schema for `aws_parameters.worker_nodes_choice`
-
-Optional:
-
-- `no_worker_nodes` (Boolean) No Worker Nodes Worker nodes is set to zero
-- `nodes_per_az` (Number) Desired Worker Nodes Per AZ Desired Worker Nodes Per AZ. Max limit is up to 21
-- `total_nodes` (Number) Total Number of Worker Nodes for a Site Total number of worker nodes to be deployed across all AZ's used in the Site
-
-
 <a id="nestedatt--aws_parameters--admin_password"></a>
 ### Nested Schema for `aws_parameters.admin_password`
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--aws_parameters--admin_password--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--aws_parameters--admin_password--secret_info_choice))
 
 <a id="nestedatt--aws_parameters--admin_password--secret_info_choice"></a>
 ### Nested Schema for `aws_parameters.admin_password.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--aws_parameters--admin_password--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--aws_parameters--admin_password--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--aws_parameters--admin_password--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--aws_parameters--admin_password--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--aws_parameters--admin_password--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `aws_parameters.admin_password.secret_info_choice.blindfold_secret_info`
@@ -468,8 +417,8 @@ Optional:
 
 Optional:
 
-- `disable_encryption` (Boolean) Disable Encryption Disk attached to VM will not be encrypted
-- `enable_encryption` (Attributes) Enable Encryption Disk will be encrypted with the specified key (see [below for nested schema](#nestedatt--aws_parameters--encryption_choice--enable_encryption))
+- `disable_encryption` (Boolean) Disable Encryption Disk attached to VM will not be encrypted<br>Conflicts with `enable_encryption`.
+- `enable_encryption` (Attributes) Enable Encryption Disk will be encrypted with the specified key<br>Conflicts with `disable_encryption`. (see [below for nested schema](#nestedatt--aws_parameters--encryption_choice--enable_encryption))
 
 <a id="nestedatt--aws_parameters--encryption_choice--enable_encryption"></a>
 ### Nested Schema for `aws_parameters.encryption_choice.enable_encryption`
@@ -480,15 +429,69 @@ Required:
 
 
 
+<a id="nestedatt--aws_parameters--internet_vip_choice"></a>
+### Nested Schema for `aws_parameters.internet_vip_choice`
+
+Optional:
+
+- `disable_internet_vip` (Boolean) Disable VIP Advertisement to Internet on Site VIPs cannot be advertised to the internet directly on this Site<br>Conflicts with `enable_internet_vip`.
+- `enable_internet_vip` (Boolean) Enable VIP Advertisement to Internet on Site VIPs can be advertised to the internet directly on this Site<br>Conflicts with `disable_internet_vip`.
+
+
+<a id="nestedatt--aws_parameters--security_group_choice"></a>
+### Nested Schema for `aws_parameters.security_group_choice`
+
+Optional:
+
+- `custom_security_group` (Attributes) Custom Security Groups for SLO and SLI Interface With this option, ingress and egress traffic will be controlled via security group ids.<br>Conflicts with `f5xc_security_group`. (see [below for nested schema](#nestedatt--aws_parameters--security_group_choice--custom_security_group))
+- `f5xc_security_group` (Boolean) Default F5XC Security Group With this option, ingress and egress traffic will be controlled via f5xc created security group.<br>Conflicts with `custom_security_group`.
+
+<a id="nestedatt--aws_parameters--security_group_choice--custom_security_group"></a>
+### Nested Schema for `aws_parameters.security_group_choice.custom_security_group`
+
+Optional:
+
+- `inside_security_group_id` (String) Inside Security Group ID Security Group ID to be attached to SLI(Site Local Inside) Interface<br>**Validation:** `Length LengthAtMost(20)`
+- `outside_security_group_id` (String) Outside Security Group ID Security Group ID to be attached to SLO(Site Local Outside) Interface<br>**Validation:** `Length LengthAtMost(20)`
+
+
+
+<a id="nestedatt--aws_parameters--tgw_cidr_choice"></a>
+### Nested Schema for `aws_parameters.tgw_cidr_choice`
+
+Optional:
+
+- `reserved_tgw_cidr` (Boolean) Reserved TGW CIDR Choice Autogenerate and reserve a TGW CIDR Block from the Primary CIDR<br>Conflicts with `tgw_cidr`.
+- `tgw_cidr` (Attributes) TGW CIDR Choice Specify TGW CIDR block<br>Conflicts with `reserved_tgw_cidr`. (see [below for nested schema](#nestedatt--aws_parameters--tgw_cidr_choice--tgw_cidr))
+
+<a id="nestedatt--aws_parameters--tgw_cidr_choice--tgw_cidr"></a>
+### Nested Schema for `aws_parameters.tgw_cidr_choice.tgw_cidr`
+
+Required:
+
+- `ipv4` (String) IPv4 Subnet IPv4 subnet prefix for this subnet
+
+
+
+<a id="nestedatt--aws_parameters--worker_nodes_choice"></a>
+### Nested Schema for `aws_parameters.worker_nodes_choice`
+
+Optional:
+
+- `no_worker_nodes` (Boolean) No Worker Nodes Worker nodes is set to zero<br>Conflicts with `nodes_per_az` and `total_nodes`.
+- `nodes_per_az` (Number) Desired Worker Nodes Per AZ Desired Worker Nodes Per AZ. Max limit is up to 21<br>Conflicts with `no_worker_nodes` and `total_nodes`.
+- `total_nodes` (Number) Total Number of Worker Nodes for a Site Total number of worker nodes to be deployed across all AZ's used in the Site<br>Conflicts with `no_worker_nodes` and `nodes_per_az`.
+
+
 
 <a id="nestedatt--blocked_services_choice"></a>
 ### Nested Schema for `blocked_services_choice`
 
 Optional:
 
-- `block_all_services` (Boolean) Block DNS, SSH & WebUI services on Site Block DNS, SSH & WebUI services on Site
-- `blocked_services` (Attributes) Custom Blocked Services Configuration Use custom blocked services configuration, to list the services which need to be blocked (see [below for nested schema](#nestedatt--blocked_services_choice--blocked_services))
-- `default_blocked_services` (Boolean, Deprecated) Allow access to DNS, SSH services on Site Allow access to DNS, SSH services on Site
+- `block_all_services` (Boolean) Block DNS, SSH & WebUI services on Site Block DNS, SSH & WebUI services on Site<br>Conflicts with `blocked_services` and `default_blocked_services`.
+- `blocked_services` (Attributes) Custom Blocked Services Configuration Use custom blocked services configuration, to list the services which need to be blocked<br>Conflicts with `block_all_services` and `default_blocked_services`. (see [below for nested schema](#nestedatt--blocked_services_choice--blocked_services))
+- `default_blocked_services` (Boolean, Deprecated) Allow access to DNS, SSH services on Site Allow access to DNS, SSH services on Site<br>Conflicts with `block_all_services` and `blocked_services`.
 
 <a id="nestedatt--blocked_services_choice--blocked_services"></a>
 ### Nested Schema for `blocked_services_choice.blocked_services`
@@ -502,7 +505,7 @@ Optional:
 
 Optional:
 
-- `blocked_services_value_type_choice` (Attributes) blocked_services_type_choice Choose the Nodel Local Service to disable (see [below for nested schema](#nestedatt--blocked_services_choice--blocked_services--blocked_sevice--blocked_services_value_type_choice))
+- `blocked_services_value_type_choice` (Attributes) blocked_services_type_choice Choose the Nodel Local Service to disable<br>Exactly one of `dns` or `ssh` must be specified when `blocked_services_value_type_choice` is configured. (see [below for nested schema](#nestedatt--blocked_services_choice--blocked_services--blocked_sevice--blocked_services_value_type_choice))
 - `network_type` (List of String) network_type Site Local VRF on which this service will be disabled<br>**Allowed Values (choose one):** `['VIRTUAL_NETWORK_GLOBAL', 'VIRTUAL_NETWORK_MANAGEMENT', 'VIRTUAL_NETWORK_PER_SITE', 'VIRTUAL_NETWORK_SEGMENT', 'VIRTUAL_NETWORK_SITE_LOCAL', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE', 'VIRTUAL_NETWORK_SITE_SERVICE']`<br>**Default:** `VIRTUAL_NETWORK_SITE_LOCAL`
 
 <a id="nestedatt--blocked_services_choice--blocked_services--blocked_sevice--blocked_services_value_type_choice"></a>
@@ -510,134 +513,11 @@ Optional:
 
 Optional:
 
-- `dns` (Boolean) DNS Matches DNS port 53
-- `ssh` (Boolean) SSH
+- `dns` (Boolean) DNS Matches DNS port 53<br>Conflicts with `ssh`.
+- `ssh` (Boolean) SSH<br>Conflicts with `dns`.
 
 
 
-
-
-<a id="nestedatt--direct_connect_choice"></a>
-### Nested Schema for `direct_connect_choice`
-
-Optional:
-
-- `direct_connect_disabled` (Boolean) Disable Private Connectivity Disable Private Connectivity to Site
-- `direct_connect_enabled` (Attributes) Enable Private Connectivity via Direct Connect (Legacy)) Direct Connect Connection to Site is enabled(Legacy) (see [below for nested schema](#nestedatt--direct_connect_choice--direct_connect_enabled))
-- `private_connectivity` (Attributes) Enable Private Connectivity via CloudLink Enable Private Connectivity to Site via CloudLink (see [below for nested schema](#nestedatt--direct_connect_choice--private_connectivity))
-
-<a id="nestedatt--direct_connect_choice--direct_connect_enabled"></a>
-### Nested Schema for `direct_connect_choice.direct_connect_enabled`
-
-Required:
-
-- `asn_choice` (Attributes) ASN Configuration ASN Configuration (see [below for nested schema](#nestedatt--direct_connect_choice--direct_connect_enabled--asn_choice))
-- `vif_choice` (Attributes) AWS Direct Connect VIF Configuration AWS Direct Connect VIF Configuration (see [below for nested schema](#nestedatt--direct_connect_choice--direct_connect_enabled--vif_choice))
-
-<a id="nestedatt--direct_connect_choice--direct_connect_enabled--asn_choice"></a>
-### Nested Schema for `direct_connect_choice.direct_connect_enabled.asn_choice`
-
-Optional:
-
-- `auto_asn` (Boolean) Auto Automatically set ASN
-- `custom_asn` (Number) Custom ASN Custom Autonomous System Number
-
-
-<a id="nestedatt--direct_connect_choice--direct_connect_enabled--vif_choice"></a>
-### Nested Schema for `direct_connect_choice.direct_connect_enabled.vif_choice`
-
-Optional:
-
-- `hosted_vifs` (Attributes) Hosted VIF mode Hosted VIF mode. F5XC provisions an AWS DirectConnect Gateway and a Virtual Private Gateway, and automatically associate provided hosted VIF and also setup BGP Peering. (see [below for nested schema](#nestedatt--direct_connect_choice--direct_connect_enabled--vif_choice--hosted_vifs))
-- `standard_vifs` (Boolean) Standard VIF mode Standard Non Hosted VIF Mode. F5XC provisions an AWS DirectConnect Gateway and a Virtual Private Gateway, and a user associate VIF to the DirectConnect gateway and setup BGP Peering.
-
-<a id="nestedatt--direct_connect_choice--direct_connect_enabled--vif_choice--hosted_vifs"></a>
-### Nested Schema for `direct_connect_choice.direct_connect_enabled.vif_choice.hosted_vifs`
-
-Optional:
-
-- `connectivity_options_choice` (Attributes) Site Registration & Connectivity to RE (see [below for nested schema](#nestedatt--direct_connect_choice--direct_connect_enabled--vif_choice--hosted_vifs--connectivity_options_choice))
-- `vif_list` (Attributes List) List of Hosted VIF Config List of Hosted VIF Config (see [below for nested schema](#nestedatt--direct_connect_choice--direct_connect_enabled--vif_choice--hosted_vifs--vif_list))
-
-<a id="nestedatt--direct_connect_choice--direct_connect_enabled--vif_choice--hosted_vifs--connectivity_options_choice"></a>
-### Nested Schema for `direct_connect_choice.direct_connect_enabled.vif_choice.hosted_vifs.connectivity_options_choice`
-
-Optional:
-
-- `site_registration_over_direct_connect` (Attributes) Site Registration & Connectivity to RE over AWS Direct Connect Site Registration and Site to RE tunnels go over the AWS Direct Connect Connection (see [below for nested schema](#nestedatt--direct_connect_choice--direct_connect_enabled--vif_choice--hosted_vifs--connectivity_options_choice--site_registration_over_direct_connect))
-- `site_registration_over_internet` (Boolean) Site Registration & Connectivity to RE over Internet Site Registration and Site to RE tunnels go over the internet gateway
-
-<a id="nestedatt--direct_connect_choice--direct_connect_enabled--vif_choice--hosted_vifs--connectivity_options_choice--site_registration_over_direct_connect"></a>
-### Nested Schema for `direct_connect_choice.direct_connect_enabled.vif_choice.hosted_vifs.connectivity_options_choice.site_registration_over_direct_connect`
-
-Required:
-
-- `cloudlink_network_name` (String) Private ADN Network Establish private connectivity with the F5 Distributed Cloud Global Network using a Private ADN network. To provision a Private ADN network, please contact F5 Distributed Cloud support.
-
-
-
-<a id="nestedatt--direct_connect_choice--direct_connect_enabled--vif_choice--hosted_vifs--vif_list"></a>
-### Nested Schema for `direct_connect_choice.direct_connect_enabled.vif_choice.hosted_vifs.vif_list`
-
-Required:
-
-- `vif_id` (String) VIF ID AWS Direct Connect VIF ID that needs to be connected to the site
-- `vif_region_choice` (Attributes) Region of the VIF Region of the VIF (see [below for nested schema](#nestedatt--direct_connect_choice--direct_connect_enabled--vif_choice--hosted_vifs--vif_list--vif_region_choice))
-
-<a id="nestedatt--direct_connect_choice--direct_connect_enabled--vif_choice--hosted_vifs--vif_list--vif_region_choice"></a>
-### Nested Schema for `direct_connect_choice.direct_connect_enabled.vif_choice.hosted_vifs.vif_list.vif_region_choice`
-
-Optional:
-
-- `other_region` (String) Other Region Other Region<br>**Allowed Values (choose one):** `['af-south-1', 'ap-east-1', 'ap-northeast-1', 'ap-northeast-2', 'ap-south-1', 'ap-southeast-1', 'ap-southeast-2', 'ap-southeast-3', 'ca-central-1', 'eu-central-1', 'eu-north-1', 'eu-south-1', 'eu-west-1', 'eu-west-2', 'eu-west-3', 'me-south-1', 'sa-east-1', 'us-east-1', 'us-east-2', 'us-west-1', 'us-west-2']`
-- `same_as_site_region` (Boolean) Same Region as Site Use same region as that of the Site
-
-
-
-
-
-
-<a id="nestedatt--direct_connect_choice--private_connectivity"></a>
-### Nested Schema for `direct_connect_choice.private_connectivity`
-
-Required:
-
-- `cloud_link` (Attributes) Associate Cloud Link Reference to Cloud Link (see [below for nested schema](#nestedatt--direct_connect_choice--private_connectivity--cloud_link))
-
-Optional:
-
-- `network_options_choice` (Attributes) Choose Site Network Please use Outside Network if Private Connectivity to Regional Edge has been configured on the CloudLink (see [below for nested schema](#nestedatt--direct_connect_choice--private_connectivity--network_options_choice))
-
-<a id="nestedatt--direct_connect_choice--private_connectivity--cloud_link"></a>
-### Nested Schema for `direct_connect_choice.private_connectivity.cloud_link`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-<a id="nestedatt--direct_connect_choice--private_connectivity--network_options_choice"></a>
-### Nested Schema for `direct_connect_choice.private_connectivity.network_options_choice`
-
-Optional:
-
-- `inside` (Boolean) Inside Network CloudLink will be associated, and routes will be propagated with the Site Local Inside Network of this Site
-- `outside` (Boolean) Outside Network CloudLink will be associated, and routes will be propagated with the Site Local Outside Network of this Site
-
-
-
-
-<a id="nestedatt--logs_receiver_choice"></a>
-### Nested Schema for `logs_receiver_choice`
-
-Optional:
-
-- `logs_streaming_disabled` (Boolean) Disable Logs Receiver Logs Streaming is disabled
 
 
 <a id="nestedatt--coordinates"></a>
@@ -660,27 +540,148 @@ Optional:
 - `outside_nameserver_v6` (String) outside_nameserver_v6 Optional DNS server IPv6 to be used for name resolution in outside network
 
 
+<a id="nestedatt--direct_connect_choice"></a>
+### Nested Schema for `direct_connect_choice`
+
+Optional:
+
+- `direct_connect_disabled` (Boolean) Disable Private Connectivity Disable Private Connectivity to Site<br>Conflicts with `direct_connect_enabled` and `private_connectivity`.
+- `direct_connect_enabled` (Attributes) Enable Private Connectivity via Direct Connect (Legacy)) Direct Connect Connection to Site is enabled(Legacy)<br>Conflicts with `direct_connect_disabled` and `private_connectivity`. (see [below for nested schema](#nestedatt--direct_connect_choice--direct_connect_enabled))
+- `private_connectivity` (Attributes) Enable Private Connectivity via CloudLink Enable Private Connectivity to Site via CloudLink<br>Conflicts with `direct_connect_disabled` and `direct_connect_enabled`. (see [below for nested schema](#nestedatt--direct_connect_choice--private_connectivity))
+
+<a id="nestedatt--direct_connect_choice--direct_connect_enabled"></a>
+### Nested Schema for `direct_connect_choice.direct_connect_enabled`
+
+Required:
+
+- `vif_choice` (Attributes) AWS Direct Connect VIF Configuration AWS Direct Connect VIF Configuration<br>Exactly one of `hosted_vifs` or `standard_vifs` must be specified. (see [below for nested schema](#nestedatt--direct_connect_choice--direct_connect_enabled--vif_choice))
+
+Optional:
+
+- `asn_choice` (Attributes) ASN Configuration ASN Configuration<br>Exactly one of `auto_asn` or `custom_asn` must be specified when `asn_choice` is configured. (see [below for nested schema](#nestedatt--direct_connect_choice--direct_connect_enabled--asn_choice))
+
+<a id="nestedatt--direct_connect_choice--direct_connect_enabled--vif_choice"></a>
+### Nested Schema for `direct_connect_choice.direct_connect_enabled.vif_choice`
+
+Optional:
+
+- `hosted_vifs` (Attributes) Hosted VIF mode Hosted VIF mode. F5XC provisions an AWS DirectConnect Gateway and a Virtual Private Gateway, and automatically associate provided hosted VIF and also setup BGP Peering.<br>Conflicts with `standard_vifs`. (see [below for nested schema](#nestedatt--direct_connect_choice--direct_connect_enabled--vif_choice--hosted_vifs))
+- `standard_vifs` (Boolean) Standard VIF mode Standard Non Hosted VIF Mode. F5XC provisions an AWS DirectConnect Gateway and a Virtual Private Gateway, and a user associate VIF to the DirectConnect gateway and setup BGP Peering.<br>Conflicts with `hosted_vifs`.
+
+<a id="nestedatt--direct_connect_choice--direct_connect_enabled--vif_choice--hosted_vifs"></a>
+### Nested Schema for `direct_connect_choice.direct_connect_enabled.vif_choice.hosted_vifs`
+
+Optional:
+
+- `connectivity_options_choice` (Attributes) Site Registration & Connectivity to RE<br>Exactly one of `site_registration_over_direct_connect` or `site_registration_over_internet` must be specified when `connectivity_options_choice` is configured. (see [below for nested schema](#nestedatt--direct_connect_choice--direct_connect_enabled--vif_choice--hosted_vifs--connectivity_options_choice))
+- `vif_list` (Attributes List) List of Hosted VIF Config List of Hosted VIF Config (see [below for nested schema](#nestedatt--direct_connect_choice--direct_connect_enabled--vif_choice--hosted_vifs--vif_list))
+
+<a id="nestedatt--direct_connect_choice--direct_connect_enabled--vif_choice--hosted_vifs--connectivity_options_choice"></a>
+### Nested Schema for `direct_connect_choice.direct_connect_enabled.vif_choice.hosted_vifs.connectivity_options_choice`
+
+Optional:
+
+- `site_registration_over_direct_connect` (Attributes) Site Registration & Connectivity to RE over AWS Direct Connect Site Registration and Site to RE tunnels go over the AWS Direct Connect Connection<br>Conflicts with `site_registration_over_internet`. (see [below for nested schema](#nestedatt--direct_connect_choice--direct_connect_enabled--vif_choice--hosted_vifs--connectivity_options_choice--site_registration_over_direct_connect))
+- `site_registration_over_internet` (Boolean) Site Registration & Connectivity to RE over Internet Site Registration and Site to RE tunnels go over the internet gateway<br>Conflicts with `site_registration_over_direct_connect`.
+
+<a id="nestedatt--direct_connect_choice--direct_connect_enabled--vif_choice--hosted_vifs--connectivity_options_choice--site_registration_over_direct_connect"></a>
+### Nested Schema for `direct_connect_choice.direct_connect_enabled.vif_choice.hosted_vifs.connectivity_options_choice.site_registration_over_direct_connect`
+
+Required:
+
+- `cloudlink_network_name` (String) Private ADN Network Establish private connectivity with the F5 Distributed Cloud Global Network using a Private ADN network. To provision a Private ADN network, please contact F5 Distributed Cloud support.
+
+
+
+<a id="nestedatt--direct_connect_choice--direct_connect_enabled--vif_choice--hosted_vifs--vif_list"></a>
+### Nested Schema for `direct_connect_choice.direct_connect_enabled.vif_choice.hosted_vifs.vif_list`
+
+Required:
+
+- `vif_id` (String) VIF ID AWS Direct Connect VIF ID that needs to be connected to the site
+
+Optional:
+
+- `vif_region_choice` (Attributes) Region of the VIF Region of the VIF<br>Exactly one of `other_region` or `same_as_site_region` must be specified when `vif_region_choice` is configured. (see [below for nested schema](#nestedatt--direct_connect_choice--direct_connect_enabled--vif_choice--hosted_vifs--vif_list--vif_region_choice))
+
+<a id="nestedatt--direct_connect_choice--direct_connect_enabled--vif_choice--hosted_vifs--vif_list--vif_region_choice"></a>
+### Nested Schema for `direct_connect_choice.direct_connect_enabled.vif_choice.hosted_vifs.vif_list.vif_region_choice`
+
+Optional:
+
+- `other_region` (String) Other Region Other Region<br>**Allowed Values (choose one):** `['af-south-1', 'ap-east-1', 'ap-northeast-1', 'ap-northeast-2', 'ap-south-1', 'ap-southeast-1', 'ap-southeast-2', 'ap-southeast-3', 'ca-central-1', 'eu-central-1', 'eu-north-1', 'eu-south-1', 'eu-west-1', 'eu-west-2', 'eu-west-3', 'me-south-1', 'sa-east-1', 'us-east-1', 'us-east-2', 'us-west-1', 'us-west-2']`<br>Conflicts with `same_as_site_region`.
+- `same_as_site_region` (Boolean) Same Region as Site Use same region as that of the Site<br>Conflicts with `other_region`.
+
+
+
+
+
+<a id="nestedatt--direct_connect_choice--direct_connect_enabled--asn_choice"></a>
+### Nested Schema for `direct_connect_choice.direct_connect_enabled.asn_choice`
+
+Optional:
+
+- `auto_asn` (Boolean) Auto Automatically set ASN<br>Conflicts with `custom_asn`.
+- `custom_asn` (Number) Custom ASN Custom Autonomous System Number<br>Conflicts with `auto_asn`.
+
+
+
+<a id="nestedatt--direct_connect_choice--private_connectivity"></a>
+### Nested Schema for `direct_connect_choice.private_connectivity`
+
+Required:
+
+- `cloud_link` (Attributes) Associate Cloud Link Reference to Cloud Link (see [below for nested schema](#nestedatt--direct_connect_choice--private_connectivity--cloud_link))
+
+Optional:
+
+- `network_options_choice` (Attributes) Choose Site Network Please use Outside Network if Private Connectivity to Regional Edge has been configured on the CloudLink<br>Exactly one of `inside` or `outside` must be specified when `network_options_choice` is configured. (see [below for nested schema](#nestedatt--direct_connect_choice--private_connectivity--network_options_choice))
+
+<a id="nestedatt--direct_connect_choice--private_connectivity--cloud_link"></a>
+### Nested Schema for `direct_connect_choice.private_connectivity.cloud_link`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+<a id="nestedatt--direct_connect_choice--private_connectivity--network_options_choice"></a>
+### Nested Schema for `direct_connect_choice.private_connectivity.network_options_choice`
+
+Optional:
+
+- `inside` (Boolean) Inside Network CloudLink will be associated, and routes will be propagated with the Site Local Inside Network of this Site<br>Conflicts with `outside`.
+- `outside` (Boolean) Outside Network CloudLink will be associated, and routes will be propagated with the Site Local Outside Network of this Site<br>Conflicts with `inside`.
+
+
+
+
 <a id="nestedatt--kubernetes_upgrade_drain"></a>
 ### Nested Schema for `kubernetes_upgrade_drain`
 
 Required:
 
-- `kubernetes_upgrade_drain_enable_choice` (Attributes) F5XC Enable/Disable Node by Node Upgrade Specify how nodes within a site will be upgraded. If enabled, you can specify number of Worker nodes to be upgraded in parallel. Note: This does not influence Control nodes. This is benefitial for sites with large number of nodes. (see [below for nested schema](#nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice))
+- `kubernetes_upgrade_drain_enable_choice` (Attributes) F5XC Enable/Disable Node by Node Upgrade Specify how nodes within a site will be upgraded. If enabled, you can specify number of Worker nodes to be upgraded in parallel. Note: This does not influence Control nodes. This is benefitial for sites with large number of nodes.<br>Exactly one of `disable_upgrade_drain` or `enable_upgrade_drain` must be specified. (see [below for nested schema](#nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice))
 
 <a id="nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice"></a>
 ### Nested Schema for `kubernetes_upgrade_drain.kubernetes_upgrade_drain_enable_choice`
 
 Optional:
 
-- `disable_upgrade_drain` (Boolean) Disable upgrade drain
-- `enable_upgrade_drain` (Attributes) Enable Node by Node Upgrade (see [below for nested schema](#nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice--enable_upgrade_drain))
+- `disable_upgrade_drain` (Boolean) Disable upgrade drain<br>Conflicts with `enable_upgrade_drain`.
+- `enable_upgrade_drain` (Attributes) Enable Node by Node Upgrade<br>Conflicts with `disable_upgrade_drain`. (see [below for nested schema](#nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice--enable_upgrade_drain))
 
 <a id="nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice--enable_upgrade_drain"></a>
 ### Nested Schema for `kubernetes_upgrade_drain.kubernetes_upgrade_drain_enable_choice.enable_upgrade_drain`
 
 Required:
 
-- `drain_max_unavailable_choice` (Attributes) Node Batch Size Max number of worker nodes to be upgraded in parallel (see [below for nested schema](#nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice--enable_upgrade_drain--drain_max_unavailable_choice))
+- `drain_max_unavailable_choice` (Attributes) Node Batch Size Max number of worker nodes to be upgraded in parallel<br>`drain_max_unavailable_node_count` must be specified. (see [below for nested schema](#nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice--enable_upgrade_drain--drain_max_unavailable_choice))
 
 Optional:
 
@@ -697,91 +698,99 @@ Optional:
 
 
 
+<a id="nestedatt--logs_receiver_choice"></a>
+### Nested Schema for `logs_receiver_choice`
+
+Optional:
+
+- `logs_streaming_disabled` (Boolean) Disable Logs Receiver Logs Streaming is disabled
+
+
 <a id="nestedatt--offline_survivability_mode"></a>
 ### Nested Schema for `offline_survivability_mode`
 
-Required:
+Optional:
 
-- `offline_survivability_mode_choice` (Attributes) offline_survivability_mode_choice Offline Survivability allows the Site to continue functioning normally without traffic loss during periods of connectivity loss to the Regional Edge (RE) or the Global Controller (GC). When this feature is enabled, a site can continue to function as is with existing configuration for upto 7 days, even when the site is offline. The certificates needed to keep the services running on this site are signed using a local CA. Secrets would also be cached locally to handle the connectivity loss. When the mode is toggled, services will restart and traffic disruption will be seen. (see [below for nested schema](#nestedatt--offline_survivability_mode--offline_survivability_mode_choice))
+- `offline_survivability_mode_choice` (Attributes) offline_survivability_mode_choice Offline Survivability allows the Site to continue functioning normally without traffic loss during periods of connectivity loss to the Regional Edge (RE) or the Global Controller (GC). When this feature is enabled, a site can continue to function as is with existing configuration for upto 7 days, even when the site is offline. The certificates needed to keep the services running on this site are signed using a local CA. Secrets would also be cached locally to handle the connectivity loss. When the mode is toggled, services will restart and traffic disruption will be seen.<br>Exactly one of `enable_offline_survivability_mode` or `no_offline_survivability_mode` must be specified when `offline_survivability_mode_choice` is configured. (see [below for nested schema](#nestedatt--offline_survivability_mode--offline_survivability_mode_choice))
 
 <a id="nestedatt--offline_survivability_mode--offline_survivability_mode_choice"></a>
 ### Nested Schema for `offline_survivability_mode.offline_survivability_mode_choice`
 
 Optional:
 
-- `enable_offline_survivability_mode` (Boolean) Enable Offline Survivability Mode
-- `no_offline_survivability_mode` (Boolean) Disable Offline Survivability Mode
+- `enable_offline_survivability_mode` (Boolean) Enable Offline Survivability Mode<br>Conflicts with `no_offline_survivability_mode`.
+- `no_offline_survivability_mode` (Boolean) Disable Offline Survivability Mode<br>Conflicts with `enable_offline_survivability_mode`.
 
 
 
 <a id="nestedatt--os"></a>
 ### Nested Schema for `os`
 
-Required:
+Optional:
 
-- `operating_system_version_choice` (Attributes) Operating System Version Select the F5XC Operating System Version for the site. By default, latest available OS Version will be used. Refer to release notes to find required released OS versions. (see [below for nested schema](#nestedatt--os--operating_system_version_choice))
+- `operating_system_version_choice` (Attributes) Operating System Version Select the F5XC Operating System Version for the site. By default, latest available OS Version will be used. Refer to release notes to find required released OS versions.<br>Exactly one of `default_os_version` or `operating_system_version` must be specified when `operating_system_version_choice` is configured. (see [below for nested schema](#nestedatt--os--operating_system_version_choice))
 
 <a id="nestedatt--os--operating_system_version_choice"></a>
 ### Nested Schema for `os.operating_system_version_choice`
 
 Optional:
 
-- `default_os_version` (Boolean) Default OS Version Will assign latest available OS version
-- `operating_system_version` (String) Operating System Version Specify a OS version to be used e.g. 9.2024.6.<br>**Validation:** `Length LengthAtMost(20)`
+- `default_os_version` (Boolean) Default OS Version Will assign latest available OS version<br>Conflicts with `operating_system_version`.
+- `operating_system_version` (String) Operating System Version Specify a OS version to be used e.g. 9.2024.6.<br>**Validation:** `Length LengthAtMost(20)`<br>Conflicts with `default_os_version`.
 
 
 
 <a id="nestedatt--performance_enhancement_mode"></a>
 ### Nested Schema for `performance_enhancement_mode`
 
-Required:
+Optional:
 
-- `perf_mode_choice` (Attributes) Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation. (see [below for nested schema](#nestedatt--performance_enhancement_mode--perf_mode_choice))
+- `perf_mode_choice` (Attributes) Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.<br>Exactly one of `perf_mode_l3_enhanced` or `perf_mode_l7_enhanced` must be specified when `perf_mode_choice` is configured. (see [below for nested schema](#nestedatt--performance_enhancement_mode--perf_mode_choice))
 
 <a id="nestedatt--performance_enhancement_mode--perf_mode_choice"></a>
 ### Nested Schema for `performance_enhancement_mode.perf_mode_choice`
 
 Optional:
 
-- `perf_mode_l3_enhanced` (Boolean) L3 Mode Enhanced Performance Site optimized for L3 traffic processing
-- `perf_mode_l7_enhanced` (Boolean) Default Performance Mode Site optimized for L7 traffic processing
+- `perf_mode_l3_enhanced` (Boolean) L3 Mode Enhanced Performance Site optimized for L3 traffic processing<br>Conflicts with `perf_mode_l7_enhanced`.
+- `perf_mode_l7_enhanced` (Boolean) Default Performance Mode Site optimized for L7 traffic processing<br>Conflicts with `perf_mode_l3_enhanced`.
 
 
 
 <a id="nestedatt--sw"></a>
 ### Nested Schema for `sw`
 
-Required:
+Optional:
 
-- `volterra_sw_version_choice` (Attributes) F5XC Software Version Select the F5XC Software Version for the site. By default, latest available F5XC Software Version will be used. Refer to release notes to find required released SW versions. (see [below for nested schema](#nestedatt--sw--volterra_sw_version_choice))
+- `volterra_sw_version_choice` (Attributes) F5XC Software Version Select the F5XC Software Version for the site. By default, latest available F5XC Software Version will be used. Refer to release notes to find required released SW versions.<br>Exactly one of `default_sw_version` or `volterra_software_version` must be specified when `volterra_sw_version_choice` is configured. (see [below for nested schema](#nestedatt--sw--volterra_sw_version_choice))
 
 <a id="nestedatt--sw--volterra_sw_version_choice"></a>
 ### Nested Schema for `sw.volterra_sw_version_choice`
 
 Optional:
 
-- `default_sw_version` (Boolean) Default SW Version Will assign latest available F5XC Software Version
-- `volterra_software_version` (String) F5XC Software Version Specify a F5XC Software Version to be used e.g. crt-20210329-1002.<br>**Validation:** `Length LengthAtMost(20)`
+- `default_sw_version` (Boolean) Default SW Version Will assign latest available F5XC Software Version<br>Conflicts with `volterra_software_version`.
+- `volterra_software_version` (String) F5XC Software Version Specify a F5XC Software Version to be used e.g. crt-20210329-1002.<br>**Validation:** `Length LengthAtMost(20)`<br>Conflicts with `default_sw_version`.
 
 
 
 <a id="nestedatt--tgw_security"></a>
 ### Nested Schema for `tgw_security`
 
-Required:
+Optional:
 
-- `east_west_service_policy_choice` (Attributes) Manage East-West Service Policy Select service policy between east-west traffic between spoke VPC(s), traffic goes via proxy when service policy is enabled. (see [below for nested schema](#nestedatt--tgw_security--east_west_service_policy_choice))
-- `forward_proxy_choice` (Attributes) Manage Forward Proxy Manage Forward Proxy for this site (see [below for nested schema](#nestedatt--tgw_security--forward_proxy_choice))
-- `network_policy_choice` (Attributes) Manage Firewall Policy Manage Firewall Policy via this view (see [below for nested schema](#nestedatt--tgw_security--network_policy_choice))
+- `east_west_service_policy_choice` (Attributes) Manage East-West Service Policy Select service policy between east-west traffic between spoke VPC(s), traffic goes via proxy when service policy is enabled.<br>Exactly one of `active_east_west_service_policies`, `east_west_service_policy_allow_all`, or `no_east_west_policy` must be specified when `east_west_service_policy_choice` is configured. (see [below for nested schema](#nestedatt--tgw_security--east_west_service_policy_choice))
+- `forward_proxy_choice` (Attributes) Manage Forward Proxy Manage Forward Proxy for this site<br>Exactly one of `active_forward_proxy_policies`, `forward_proxy_allow_all`, or `no_forward_proxy` must be specified when `forward_proxy_choice` is configured. (see [below for nested schema](#nestedatt--tgw_security--forward_proxy_choice))
+- `network_policy_choice` (Attributes) Manage Firewall Policy Manage Firewall Policy via this view<br>Exactly one of `active_enhanced_firewall_policies`, `active_network_policies`, or `no_network_policy` must be specified when `network_policy_choice` is configured. (see [below for nested schema](#nestedatt--tgw_security--network_policy_choice))
 
 <a id="nestedatt--tgw_security--east_west_service_policy_choice"></a>
 ### Nested Schema for `tgw_security.east_west_service_policy_choice`
 
 Optional:
 
-- `active_east_west_service_policies` (Attributes) Enable East-West Service Policy Enable service policy so east-west traffic goes via proxy (see [below for nested schema](#nestedatt--tgw_security--east_west_service_policy_choice--active_east_west_service_policies))
-- `east_west_service_policy_allow_all` (Boolean) Enable East-West traffic Proxy with Allow All Policy Enable service policy with allow all so east-west traffic goes via proxy for monitoring
-- `no_east_west_policy` (Boolean) Disable East-West Service Policy Disable service policy so that east-west traffic does not go via proxy
+- `active_east_west_service_policies` (Attributes) Enable East-West Service Policy Enable service policy so east-west traffic goes via proxy<br>Conflicts with `east_west_service_policy_allow_all` and `no_east_west_policy`. (see [below for nested schema](#nestedatt--tgw_security--east_west_service_policy_choice--active_east_west_service_policies))
+- `east_west_service_policy_allow_all` (Boolean) Enable East-West traffic Proxy with Allow All Policy Enable service policy with allow all so east-west traffic goes via proxy for monitoring<br>Conflicts with `active_east_west_service_policies` and `no_east_west_policy`.
+- `no_east_west_policy` (Boolean) Disable East-West Service Policy Disable service policy so that east-west traffic does not go via proxy<br>Conflicts with `active_east_west_service_policies` and `east_west_service_policy_allow_all`.
 
 <a id="nestedatt--tgw_security--east_west_service_policy_choice--active_east_west_service_policies"></a>
 ### Nested Schema for `tgw_security.east_west_service_policy_choice.active_east_west_service_policies`
@@ -810,9 +819,9 @@ Read-Only:
 
 Optional:
 
-- `active_forward_proxy_policies` (Attributes) Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies (see [below for nested schema](#nestedatt--tgw_security--forward_proxy_choice--active_forward_proxy_policies))
-- `forward_proxy_allow_all` (Boolean) Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.
-- `no_forward_proxy` (Boolean) Disable Forward Proxy Disable Forward Proxy for this site
+- `active_forward_proxy_policies` (Attributes) Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies<br>Conflicts with `forward_proxy_allow_all` and `no_forward_proxy`. (see [below for nested schema](#nestedatt--tgw_security--forward_proxy_choice--active_forward_proxy_policies))
+- `forward_proxy_allow_all` (Boolean) Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.<br>Conflicts with `active_forward_proxy_policies` and `no_forward_proxy`.
+- `no_forward_proxy` (Boolean) Disable Forward Proxy Disable Forward Proxy for this site<br>Conflicts with `active_forward_proxy_policies` and `forward_proxy_allow_all`.
 
 <a id="nestedatt--tgw_security--forward_proxy_choice--active_forward_proxy_policies"></a>
 ### Nested Schema for `tgw_security.forward_proxy_choice.active_forward_proxy_policies`
@@ -841,9 +850,9 @@ Read-Only:
 
 Optional:
 
-- `active_enhanced_firewall_policies` (Attributes) Manage Enhanced Firewall Policy Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion. (see [below for nested schema](#nestedatt--tgw_security--network_policy_choice--active_enhanced_firewall_policies))
-- `active_network_policies` (Attributes) Manage Firewall Policy Firewall Policies active for this site. (see [below for nested schema](#nestedatt--tgw_security--network_policy_choice--active_network_policies))
-- `no_network_policy` (Boolean) Do Not Manage Firewall Policy Firewall Policy is disabled for this site.
+- `active_enhanced_firewall_policies` (Attributes) Manage Enhanced Firewall Policy Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion.<br>Conflicts with `active_network_policies` and `no_network_policy`. (see [below for nested schema](#nestedatt--tgw_security--network_policy_choice--active_enhanced_firewall_policies))
+- `active_network_policies` (Attributes) Manage Firewall Policy Firewall Policies active for this site.<br>Conflicts with `active_enhanced_firewall_policies` and `no_network_policy`. (see [below for nested schema](#nestedatt--tgw_security--network_policy_choice--active_network_policies))
+- `no_network_policy` (Boolean) Do Not Manage Firewall Policy Firewall Policy is disabled for this site.<br>Conflicts with `active_enhanced_firewall_policies` and `active_network_policies`.
 
 <a id="nestedatt--tgw_security--network_policy_choice--active_enhanced_firewall_policies"></a>
 ### Nested Schema for `tgw_security.network_policy_choice.active_enhanced_firewall_policies`
@@ -903,27 +912,80 @@ Optional:
 <a id="nestedatt--vn_config"></a>
 ### Nested Schema for `vn_config`
 
-Required:
-
-- `dc_cluster_group_choice` (Attributes) Select DC Cluster Group Is this site member of a dc cluster group via selected network type (see [below for nested schema](#nestedatt--vn_config--dc_cluster_group_choice))
-- `global_network_choice` (Attributes) Connect to Global Network Select global networks to connect via inside or outside network (see [below for nested schema](#nestedatt--vn_config--global_network_choice))
-- `inside_static_route_choice` (Attributes) Manage Static Routes for Inside Network Manage static routes for inside network. Used to reach indirectly connected subnets. (see [below for nested schema](#nestedatt--vn_config--inside_static_route_choice))
-- `outside_static_route_choice` (Attributes) Manage Static Routes for Outside Network Manage static routes for outside network. Used to reach indirectly connected subnets. (see [below for nested schema](#nestedatt--vn_config--outside_static_route_choice))
-- `site_mesh_group_choice` (Attributes) Site Mesh Group Connection Type Select how the site mesh group needs to be connected (see [below for nested schema](#nestedatt--vn_config--site_mesh_group_choice))
-
 Optional:
 
 - `allowed_vip_port` (Attributes) Allowed VIP Port Configuration Allowed VIP Port Configuration (see [below for nested schema](#nestedatt--vn_config--allowed_vip_port))
 - `allowed_vip_port_sli` (Attributes) Allowed VIP Port Configuration for Inside Network Allowed VIP Port Configuration for Inside Network (see [below for nested schema](#nestedatt--vn_config--allowed_vip_port_sli))
+- `dc_cluster_group_choice` (Attributes) Select DC Cluster Group Is this site member of a dc cluster group via selected network type<br>Exactly one of `dc_cluster_group_inside_vn`, `dc_cluster_group_outside_vn`, or `no_dc_cluster_group` must be specified when `dc_cluster_group_choice` is configured. (see [below for nested schema](#nestedatt--vn_config--dc_cluster_group_choice))
+- `global_network_choice` (Attributes) Connect to Global Network Select global networks to connect via inside or outside network<br>Exactly one of `global_network_list` or `no_global_network` must be specified when `global_network_choice` is configured. (see [below for nested schema](#nestedatt--vn_config--global_network_choice))
+- `inside_static_route_choice` (Attributes) Manage Static Routes for Inside Network Manage static routes for inside network. Used to reach indirectly connected subnets.<br>Exactly one of `inside_static_routes` or `no_inside_static_routes` must be specified when `inside_static_route_choice` is configured. (see [below for nested schema](#nestedatt--vn_config--inside_static_route_choice))
+- `outside_static_route_choice` (Attributes) Manage Static Routes for Outside Network Manage static routes for outside network. Used to reach indirectly connected subnets.<br>Exactly one of `no_outside_static_routes` or `outside_static_routes` must be specified when `outside_static_route_choice` is configured. (see [below for nested schema](#nestedatt--vn_config--outside_static_route_choice))
+- `site_mesh_group_choice` (Attributes) Site Mesh Group Connection Type Select how the site mesh group needs to be connected<br>Exactly one of `sm_connection_public_ip` or `sm_connection_pvt_ip` must be specified when `site_mesh_group_choice` is configured. (see [below for nested schema](#nestedatt--vn_config--site_mesh_group_choice))
+
+<a id="nestedatt--vn_config--allowed_vip_port"></a>
+### Nested Schema for `vn_config.allowed_vip_port`
+
+Optional:
+
+- `port_choice` (Attributes) VIP Port Choice This defines various port which can be used to connect to the http/tcp loadbalancer using the VIP<br>Exactly one of `custom_ports`, `disable_allowed_vip_port`, `use_http_https_port`, `use_http_port`, or `use_https_port` must be specified when `port_choice` is configured. (see [below for nested schema](#nestedatt--vn_config--allowed_vip_port--port_choice))
+
+<a id="nestedatt--vn_config--allowed_vip_port--port_choice"></a>
+### Nested Schema for `vn_config.allowed_vip_port.port_choice`
+
+Optional:
+
+- `custom_ports` (Attributes) Custom Ports Custom list of ports to be allowed<br>Conflicts with `disable_allowed_vip_port`, `use_http_https_port`, `use_http_port`, and `use_https_port`. (see [below for nested schema](#nestedatt--vn_config--allowed_vip_port--port_choice--custom_ports))
+- `disable_allowed_vip_port` (Boolean) Disable Allowed VIP Port HTTP Port (80) & HTTPS Port (443) will be disabled.<br>Conflicts with `custom_ports`, `use_http_https_port`, `use_http_port`, and `use_https_port`.
+- `use_http_https_port` (Boolean) Allow HTTP & HTTPS Port HTTP Port (80) & HTTPS Port (443) will be allowed.<br>Conflicts with `custom_ports`, `disable_allowed_vip_port`, `use_http_port`, and `use_https_port`.
+- `use_http_port` (Boolean) Allow HTTP Port Only HTTP Port (80) will be allowed.<br>Conflicts with `custom_ports`, `disable_allowed_vip_port`, `use_http_https_port`, and `use_https_port`.
+- `use_https_port` (Boolean) Allow HTTPS Port Only HTTPS Port (443) will be allowed.<br>Conflicts with `custom_ports`, `disable_allowed_vip_port`, `use_http_https_port`, and `use_http_port`.
+
+<a id="nestedatt--vn_config--allowed_vip_port--port_choice--custom_ports"></a>
+### Nested Schema for `vn_config.allowed_vip_port.port_choice.custom_ports`
+
+Required:
+
+- `port_ranges` (String) Port Ranges Port Ranges<br>**Validation:** `Length LengthBetween(1, 512)`
+
+
+
+
+<a id="nestedatt--vn_config--allowed_vip_port_sli"></a>
+### Nested Schema for `vn_config.allowed_vip_port_sli`
+
+Optional:
+
+- `port_choice` (Attributes) VIP Port Choice This defines various port which can be used to connect to the http/tcp loadbalancer using the VIP<br>Exactly one of `custom_ports`, `disable_allowed_vip_port`, `use_http_https_port`, `use_http_port`, or `use_https_port` must be specified when `port_choice` is configured. (see [below for nested schema](#nestedatt--vn_config--allowed_vip_port_sli--port_choice))
+
+<a id="nestedatt--vn_config--allowed_vip_port_sli--port_choice"></a>
+### Nested Schema for `vn_config.allowed_vip_port_sli.port_choice`
+
+Optional:
+
+- `custom_ports` (Attributes) Custom Ports Custom list of ports to be allowed<br>Conflicts with `disable_allowed_vip_port`, `use_http_https_port`, `use_http_port`, and `use_https_port`. (see [below for nested schema](#nestedatt--vn_config--allowed_vip_port_sli--port_choice--custom_ports))
+- `disable_allowed_vip_port` (Boolean) Disable Allowed VIP Port HTTP Port (80) & HTTPS Port (443) will be disabled.<br>Conflicts with `custom_ports`, `use_http_https_port`, `use_http_port`, and `use_https_port`.
+- `use_http_https_port` (Boolean) Allow HTTP & HTTPS Port HTTP Port (80) & HTTPS Port (443) will be allowed.<br>Conflicts with `custom_ports`, `disable_allowed_vip_port`, `use_http_port`, and `use_https_port`.
+- `use_http_port` (Boolean) Allow HTTP Port Only HTTP Port (80) will be allowed.<br>Conflicts with `custom_ports`, `disable_allowed_vip_port`, `use_http_https_port`, and `use_https_port`.
+- `use_https_port` (Boolean) Allow HTTPS Port Only HTTPS Port (443) will be allowed.<br>Conflicts with `custom_ports`, `disable_allowed_vip_port`, `use_http_https_port`, and `use_http_port`.
+
+<a id="nestedatt--vn_config--allowed_vip_port_sli--port_choice--custom_ports"></a>
+### Nested Schema for `vn_config.allowed_vip_port_sli.port_choice.custom_ports`
+
+Required:
+
+- `port_ranges` (String) Port Ranges Port Ranges<br>**Validation:** `Length LengthBetween(1, 512)`
+
+
+
 
 <a id="nestedatt--vn_config--dc_cluster_group_choice"></a>
 ### Nested Schema for `vn_config.dc_cluster_group_choice`
 
 Optional:
 
-- `dc_cluster_group_inside_vn` (Attributes) Member of DC cluster Group via Inside Network This site is member of dc cluster group connected via inside network (see [below for nested schema](#nestedatt--vn_config--dc_cluster_group_choice--dc_cluster_group_inside_vn))
-- `dc_cluster_group_outside_vn` (Attributes) Member of DC cluster Group via Outside Network This site is member of dc cluster group connected via outside network (see [below for nested schema](#nestedatt--vn_config--dc_cluster_group_choice--dc_cluster_group_outside_vn))
-- `no_dc_cluster_group` (Boolean) Not a Member of DC Cluster Group This site is not a member of dc cluster group
+- `dc_cluster_group_inside_vn` (Attributes) Member of DC cluster Group via Inside Network This site is member of dc cluster group connected via inside network<br>Conflicts with `dc_cluster_group_outside_vn` and `no_dc_cluster_group`. (see [below for nested schema](#nestedatt--vn_config--dc_cluster_group_choice--dc_cluster_group_inside_vn))
+- `dc_cluster_group_outside_vn` (Attributes) Member of DC cluster Group via Outside Network This site is member of dc cluster group connected via outside network<br>Conflicts with `dc_cluster_group_inside_vn` and `no_dc_cluster_group`. (see [below for nested schema](#nestedatt--vn_config--dc_cluster_group_choice--dc_cluster_group_outside_vn))
+- `no_dc_cluster_group` (Boolean) Not a Member of DC Cluster Group This site is not a member of dc cluster group<br>Conflicts with `dc_cluster_group_inside_vn` and `dc_cluster_group_outside_vn`.
 
 <a id="nestedatt--vn_config--dc_cluster_group_choice--dc_cluster_group_inside_vn"></a>
 ### Nested Schema for `vn_config.dc_cluster_group_choice.dc_cluster_group_inside_vn`
@@ -957,8 +1019,8 @@ Read-Only:
 
 Optional:
 
-- `global_network_list` (Attributes) Connect Global Networks List of global network connections (see [below for nested schema](#nestedatt--vn_config--global_network_choice--global_network_list))
-- `no_global_network` (Boolean) Do not Connect Global Networks No global network to connect
+- `global_network_list` (Attributes) Connect Global Networks List of global network connections<br>Conflicts with `no_global_network`. (see [below for nested schema](#nestedatt--vn_config--global_network_choice--global_network_list))
+- `no_global_network` (Boolean) Do not Connect Global Networks No global network to connect<br>Conflicts with `global_network_list`.
 
 <a id="nestedatt--vn_config--global_network_choice--global_network_list"></a>
 ### Nested Schema for `vn_config.global_network_choice.global_network_list`
@@ -972,15 +1034,15 @@ Required:
 
 Required:
 
-- `connection_choice` (Attributes) Connector Choice Select the networks and method in which they are connected. (see [below for nested schema](#nestedatt--vn_config--global_network_choice--global_network_list--global_network_connections--connection_choice))
+- `connection_choice` (Attributes) Connector Choice Select the networks and method in which they are connected.<br>Exactly one of `sli_to_global_dr` or `slo_to_global_dr` must be specified. (see [below for nested schema](#nestedatt--vn_config--global_network_choice--global_network_list--global_network_connections--connection_choice))
 
 <a id="nestedatt--vn_config--global_network_choice--global_network_list--global_network_connections--connection_choice"></a>
 ### Nested Schema for `vn_config.global_network_choice.global_network_list.global_network_connections.connection_choice`
 
 Optional:
 
-- `sli_to_global_dr` (Attributes) Site Local Inside to a Global Network' Site local inside is connected directly to a given global network (see [below for nested schema](#nestedatt--vn_config--global_network_choice--global_network_list--global_network_connections--connection_choice--sli_to_global_dr))
-- `slo_to_global_dr` (Attributes) Site Local Outside to a Global Network' Site local outside is connected directly to a given global network (see [below for nested schema](#nestedatt--vn_config--global_network_choice--global_network_list--global_network_connections--connection_choice--slo_to_global_dr))
+- `sli_to_global_dr` (Attributes) Site Local Inside to a Global Network' Site local inside is connected directly to a given global network<br>Conflicts with `slo_to_global_dr`. (see [below for nested schema](#nestedatt--vn_config--global_network_choice--global_network_list--global_network_connections--connection_choice--sli_to_global_dr))
+- `slo_to_global_dr` (Attributes) Site Local Outside to a Global Network' Site local outside is connected directly to a given global network<br>Conflicts with `sli_to_global_dr`. (see [below for nested schema](#nestedatt--vn_config--global_network_choice--global_network_list--global_network_connections--connection_choice--slo_to_global_dr))
 
 <a id="nestedatt--vn_config--global_network_choice--global_network_list--global_network_connections--connection_choice--sli_to_global_dr"></a>
 ### Nested Schema for `vn_config.global_network_choice.global_network_list.global_network_connections.connection_choice.sli_to_global_dr`
@@ -1033,8 +1095,8 @@ Read-Only:
 
 Optional:
 
-- `inside_static_routes` (Attributes) Manage Static routes Manage static routes for inside network. (see [below for nested schema](#nestedatt--vn_config--inside_static_route_choice--inside_static_routes))
-- `no_inside_static_routes` (Boolean) Do Not Manage Static Routes Static Routes disabled for inside network.
+- `inside_static_routes` (Attributes) Manage Static routes Manage static routes for inside network.<br>Conflicts with `no_inside_static_routes`. (see [below for nested schema](#nestedatt--vn_config--inside_static_route_choice--inside_static_routes))
+- `no_inside_static_routes` (Boolean) Do Not Manage Static Routes Static Routes disabled for inside network.<br>Conflicts with `inside_static_routes`.
 
 <a id="nestedatt--vn_config--inside_static_route_choice--inside_static_routes"></a>
 ### Nested Schema for `vn_config.inside_static_route_choice.inside_static_routes`
@@ -1048,15 +1110,15 @@ Required:
 
 Required:
 
-- `config_mode_choice` (Attributes) Static Route Config Mode Select method for configuring the route (see [below for nested schema](#nestedatt--vn_config--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice))
+- `config_mode_choice` (Attributes) Static Route Config Mode Select method for configuring the route<br>Exactly one of `custom_static_route` or `simple_static_route` must be specified. (see [below for nested schema](#nestedatt--vn_config--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice))
 
 <a id="nestedatt--vn_config--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice"></a>
 ### Nested Schema for `vn_config.inside_static_route_choice.inside_static_routes.static_route_list.config_mode_choice`
 
 Optional:
 
-- `custom_static_route` (Attributes) Custom Static Route Use Custom static route to configure all advanced options (see [below for nested schema](#nestedatt--vn_config--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route))
-- `simple_static_route` (String) Simple Static Route Use simple static route for prefix pointing to single interface in the network
+- `custom_static_route` (Attributes) Custom Static Route Use Custom static route to configure all advanced options<br>Conflicts with `simple_static_route`. (see [below for nested schema](#nestedatt--vn_config--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route))
+- `simple_static_route` (String) Simple Static Route Use simple static route for prefix pointing to single interface in the network<br>Conflicts with `custom_static_route`.
 
 <a id="nestedatt--vn_config--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route"></a>
 ### Nested Schema for `vn_config.inside_static_route_choice.inside_static_routes.static_route_list.config_mode_choice.custom_static_route`
@@ -1076,7 +1138,7 @@ Optional:
 
 Required:
 
-- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address (see [below for nested schema](#nestedatt--vn_config--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--subnets--ver_choice))
+- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address<br>`ipv4` must be specified. (see [below for nested schema](#nestedatt--vn_config--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--subnets--ver_choice))
 
 <a id="nestedatt--vn_config--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--subnets--ver_choice"></a>
 ### Nested Schema for `vn_config.inside_static_route_choice.inside_static_routes.static_route_list.config_mode_choice.custom_static_route.subnets.ver_choice`
@@ -1123,15 +1185,15 @@ Read-Only:
 
 Optional:
 
-- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 Address or IPv6 Address (see [below for nested schema](#nestedatt--vn_config--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice))
+- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 Address or IPv6 Address<br>Exactly one of `dual_stack` or `ipv4` must be specified when `ver_choice` is configured. (see [below for nested schema](#nestedatt--vn_config--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice))
 
 <a id="nestedatt--vn_config--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice"></a>
 ### Nested Schema for `vn_config.inside_static_route_choice.inside_static_routes.static_route_list.config_mode_choice.custom_static_route.nexthop.nexthop_address.ver_choice`
 
 Optional:
 
-- `dual_stack` (Attributes) Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together (see [below for nested schema](#nestedatt--vn_config--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--dual_stack))
-- `ipv4` (Attributes) IPv4 Address IPv4 Address (see [below for nested schema](#nestedatt--vn_config--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--ipv4))
+- `dual_stack` (Attributes) Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together<br>Conflicts with `ipv4`. (see [below for nested schema](#nestedatt--vn_config--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--dual_stack))
+- `ipv4` (Attributes) IPv4 Address IPv4 Address<br>Conflicts with `dual_stack`. (see [below for nested schema](#nestedatt--vn_config--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--ipv4))
 
 <a id="nestedatt--vn_config--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--dual_stack"></a>
 ### Nested Schema for `vn_config.inside_static_route_choice.inside_static_routes.static_route_list.config_mode_choice.custom_static_route.nexthop.nexthop_address.ver_choice.dual_stack`
@@ -1179,8 +1241,8 @@ Optional:
 
 Optional:
 
-- `no_outside_static_routes` (Boolean) Do Not Manage Static Routes Static Routes disabled for outside network.
-- `outside_static_routes` (Attributes) Manage Static routes Manage static routes for outside network. (see [below for nested schema](#nestedatt--vn_config--outside_static_route_choice--outside_static_routes))
+- `no_outside_static_routes` (Boolean) Do Not Manage Static Routes Static Routes disabled for outside network.<br>Conflicts with `outside_static_routes`.
+- `outside_static_routes` (Attributes) Manage Static routes Manage static routes for outside network.<br>Conflicts with `no_outside_static_routes`. (see [below for nested schema](#nestedatt--vn_config--outside_static_route_choice--outside_static_routes))
 
 <a id="nestedatt--vn_config--outside_static_route_choice--outside_static_routes"></a>
 ### Nested Schema for `vn_config.outside_static_route_choice.outside_static_routes`
@@ -1194,15 +1256,15 @@ Required:
 
 Required:
 
-- `config_mode_choice` (Attributes) Static Route Config Mode Select method for configuring the route (see [below for nested schema](#nestedatt--vn_config--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice))
+- `config_mode_choice` (Attributes) Static Route Config Mode Select method for configuring the route<br>Exactly one of `custom_static_route` or `simple_static_route` must be specified. (see [below for nested schema](#nestedatt--vn_config--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice))
 
 <a id="nestedatt--vn_config--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice"></a>
 ### Nested Schema for `vn_config.outside_static_route_choice.outside_static_routes.static_route_list.config_mode_choice`
 
 Optional:
 
-- `custom_static_route` (Attributes) Custom Static Route Use Custom static route to configure all advanced options (see [below for nested schema](#nestedatt--vn_config--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route))
-- `simple_static_route` (String) Simple Static Route Use simple static route for prefix pointing to single interface in the network
+- `custom_static_route` (Attributes) Custom Static Route Use Custom static route to configure all advanced options<br>Conflicts with `simple_static_route`. (see [below for nested schema](#nestedatt--vn_config--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route))
+- `simple_static_route` (String) Simple Static Route Use simple static route for prefix pointing to single interface in the network<br>Conflicts with `custom_static_route`.
 
 <a id="nestedatt--vn_config--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route"></a>
 ### Nested Schema for `vn_config.outside_static_route_choice.outside_static_routes.static_route_list.config_mode_choice.custom_static_route`
@@ -1222,7 +1284,7 @@ Optional:
 
 Required:
 
-- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address (see [below for nested schema](#nestedatt--vn_config--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--subnets--ver_choice))
+- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address<br>`ipv4` must be specified. (see [below for nested schema](#nestedatt--vn_config--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--subnets--ver_choice))
 
 <a id="nestedatt--vn_config--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--subnets--ver_choice"></a>
 ### Nested Schema for `vn_config.outside_static_route_choice.outside_static_routes.static_route_list.config_mode_choice.custom_static_route.subnets.ver_choice`
@@ -1269,15 +1331,15 @@ Read-Only:
 
 Optional:
 
-- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 Address or IPv6 Address (see [below for nested schema](#nestedatt--vn_config--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice))
+- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 Address or IPv6 Address<br>Exactly one of `dual_stack` or `ipv4` must be specified when `ver_choice` is configured. (see [below for nested schema](#nestedatt--vn_config--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice))
 
 <a id="nestedatt--vn_config--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice"></a>
 ### Nested Schema for `vn_config.outside_static_route_choice.outside_static_routes.static_route_list.config_mode_choice.custom_static_route.nexthop.nexthop_address.ver_choice`
 
 Optional:
 
-- `dual_stack` (Attributes) Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together (see [below for nested schema](#nestedatt--vn_config--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--dual_stack))
-- `ipv4` (Attributes) IPv4 Address IPv4 Address (see [below for nested schema](#nestedatt--vn_config--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--ipv4))
+- `dual_stack` (Attributes) Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together<br>Conflicts with `ipv4`. (see [below for nested schema](#nestedatt--vn_config--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--dual_stack))
+- `ipv4` (Attributes) IPv4 Address IPv4 Address<br>Conflicts with `dual_stack`. (see [below for nested schema](#nestedatt--vn_config--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--ipv4))
 
 <a id="nestedatt--vn_config--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--dual_stack"></a>
 ### Nested Schema for `vn_config.outside_static_route_choice.outside_static_routes.static_route_list.config_mode_choice.custom_static_route.nexthop.nexthop_address.ver_choice.dual_stack`
@@ -1325,64 +1387,8 @@ Optional:
 
 Optional:
 
-- `sm_connection_public_ip` (Boolean) Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group
-- `sm_connection_pvt_ip` (Boolean) Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group
-
-
-<a id="nestedatt--vn_config--allowed_vip_port"></a>
-### Nested Schema for `vn_config.allowed_vip_port`
-
-Optional:
-
-- `port_choice` (Attributes) VIP Port Choice This defines various port which can be used to connect to the http/tcp loadbalancer using the VIP (see [below for nested schema](#nestedatt--vn_config--allowed_vip_port--port_choice))
-
-<a id="nestedatt--vn_config--allowed_vip_port--port_choice"></a>
-### Nested Schema for `vn_config.allowed_vip_port.port_choice`
-
-Optional:
-
-- `custom_ports` (Attributes) Custom Ports Custom list of ports to be allowed (see [below for nested schema](#nestedatt--vn_config--allowed_vip_port--port_choice--custom_ports))
-- `disable_allowed_vip_port` (Boolean) Disable Allowed VIP Port HTTP Port (80) & HTTPS Port (443) will be disabled.
-- `use_http_https_port` (Boolean) Allow HTTP & HTTPS Port HTTP Port (80) & HTTPS Port (443) will be allowed.
-- `use_http_port` (Boolean) Allow HTTP Port Only HTTP Port (80) will be allowed.
-- `use_https_port` (Boolean) Allow HTTPS Port Only HTTPS Port (443) will be allowed.
-
-<a id="nestedatt--vn_config--allowed_vip_port--port_choice--custom_ports"></a>
-### Nested Schema for `vn_config.allowed_vip_port.port_choice.custom_ports`
-
-Required:
-
-- `port_ranges` (String) Port Ranges Port Ranges<br>**Validation:** `Length LengthBetween(1, 512)`
-
-
-
-
-<a id="nestedatt--vn_config--allowed_vip_port_sli"></a>
-### Nested Schema for `vn_config.allowed_vip_port_sli`
-
-Optional:
-
-- `port_choice` (Attributes) VIP Port Choice This defines various port which can be used to connect to the http/tcp loadbalancer using the VIP (see [below for nested schema](#nestedatt--vn_config--allowed_vip_port_sli--port_choice))
-
-<a id="nestedatt--vn_config--allowed_vip_port_sli--port_choice"></a>
-### Nested Schema for `vn_config.allowed_vip_port_sli.port_choice`
-
-Optional:
-
-- `custom_ports` (Attributes) Custom Ports Custom list of ports to be allowed (see [below for nested schema](#nestedatt--vn_config--allowed_vip_port_sli--port_choice--custom_ports))
-- `disable_allowed_vip_port` (Boolean) Disable Allowed VIP Port HTTP Port (80) & HTTPS Port (443) will be disabled.
-- `use_http_https_port` (Boolean) Allow HTTP & HTTPS Port HTTP Port (80) & HTTPS Port (443) will be allowed.
-- `use_http_port` (Boolean) Allow HTTP Port Only HTTP Port (80) will be allowed.
-- `use_https_port` (Boolean) Allow HTTPS Port Only HTTPS Port (443) will be allowed.
-
-<a id="nestedatt--vn_config--allowed_vip_port_sli--port_choice--custom_ports"></a>
-### Nested Schema for `vn_config.allowed_vip_port_sli.port_choice.custom_ports`
-
-Required:
-
-- `port_ranges` (String) Port Ranges Port Ranges<br>**Validation:** `Length LengthBetween(1, 512)`
-
-
+- `sm_connection_public_ip` (Boolean) Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group<br>Conflicts with `sm_connection_pvt_ip`.
+- `sm_connection_pvt_ip` (Boolean) Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group<br>Conflicts with `sm_connection_public_ip`.
 
 
 
@@ -1406,17 +1412,17 @@ Optional:
 <a id="nestedatt--waf_signatures"></a>
 ### Nested Schema for `waf_signatures`
 
-Required:
+Optional:
 
-- `signatures_update_mode_choice` (Attributes) WAF Signatures update mode Select F5XC WAF Signatures update mode for the site. By default, new signatures will be applied manually. Refer to release notes for details about available Signatures update modes and versions. (see [below for nested schema](#nestedatt--waf_signatures--signatures_update_mode_choice))
+- `signatures_update_mode_choice` (Attributes) WAF Signatures update mode Select F5XC WAF Signatures update mode for the site. By default, new signatures will be applied manually. Refer to release notes for details about available Signatures update modes and versions.<br>Exactly one of `automatic` or `manual` must be specified when `signatures_update_mode_choice` is configured. (see [below for nested schema](#nestedatt--waf_signatures--signatures_update_mode_choice))
 
 <a id="nestedatt--waf_signatures--signatures_update_mode_choice"></a>
 ### Nested Schema for `waf_signatures.signatures_update_mode_choice`
 
 Optional:
 
-- `automatic` (Boolean) Automatic update mode New WAF signatures will be applied automatically as soon as they are released.
-- `manual` (Boolean) Manual update mode New WAF signatures will only be applied when an update is triggered manually.
+- `automatic` (Boolean) Automatic update mode New WAF signatures will be applied automatically as soon as they are released.<br>Conflicts with `manual`.
+- `manual` (Boolean) Manual update mode New WAF signatures will only be applied when an update is triggered manually.<br>Conflicts with `automatic`.
 
 
 
@@ -1523,6 +1529,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_aws_tgw_site.example"
+	to = f5xc_aws_tgw_site.example
 }
 ```

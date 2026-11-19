@@ -128,7 +128,7 @@ resource "f5xc_network_policy" "example" {
 - `description` (String) description Human readable description for the object
 - `endpoint` (Attributes) Policy Endpoint Policy is for set of endpoints defined, rules are applied to connections to or from these endpoints. (see [below for nested schema](#nestedatt--endpoint))
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
-- `rule_choice` (Attributes) Rule Choice Style of rules used when the policy was created. This cannot be modified. (see [below for nested schema](#nestedatt--rule_choice))
+- `rule_choice` (Attributes) Rule Choice Style of rules used when the policy was created. This cannot be modified.<br>`rules` must be specified when `rule_choice` is configured. (see [below for nested schema](#nestedatt--rule_choice))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
@@ -140,18 +140,18 @@ resource "f5xc_network_policy" "example" {
 
 Required:
 
-- `endpoint_choice` (Attributes) endpoint_choice Policy is for set of endpoints defined, rules are applied to connections to or from these endpoints. (see [below for nested schema](#nestedatt--endpoint--endpoint_choice))
+- `endpoint_choice` (Attributes) endpoint_choice Policy is for set of endpoints defined, rules are applied to connections to or from these endpoints.<br>Exactly one of `any`, `inside_endpoints`, `label_selector`, `outside_endpoints`, or `prefix_list` must be specified. (see [below for nested schema](#nestedatt--endpoint--endpoint_choice))
 
 <a id="nestedatt--endpoint--endpoint_choice"></a>
 ### Nested Schema for `endpoint.endpoint_choice`
 
 Optional:
 
-- `any` (Boolean) Any Endpoint Any Endpoint that matches 0/0 ip prefix
-- `inside_endpoints` (Boolean) All Endpoints Reachable via all inside interfaces All ip prefixes that are reachable via inside interfaces are chosen as Endpoints
-- `label_selector` (Attributes) prefix Label selector local end point is set of prefixes determined by label selector expression (see [below for nested schema](#nestedatt--endpoint--endpoint_choice--label_selector))
-- `outside_endpoints` (Boolean) All Endpoints Reachable via all outside interfaces All ip prefixes that are reachable via outside interfaces are chosen as Endpoints
-- `prefix_list` (Attributes) ipv4/ipv6 prefix list List of ip prefixes that are representing endpoint For egress rules: from this endpoints to remote endpoints these ip prefixes are source ip. For Ingress rules: To this endpoints from remote endpoints these ip prefixes are destination ip. (see [below for nested schema](#nestedatt--endpoint--endpoint_choice--prefix_list))
+- `any` (Boolean) Any Endpoint Any Endpoint that matches 0/0 ip prefix<br>Conflicts with `inside_endpoints`, `label_selector`, `outside_endpoints`, and `prefix_list`.
+- `inside_endpoints` (Boolean) All Endpoints Reachable via all inside interfaces All ip prefixes that are reachable via inside interfaces are chosen as Endpoints<br>Conflicts with `any`, `label_selector`, `outside_endpoints`, and `prefix_list`.
+- `label_selector` (Attributes) prefix Label selector local end point is set of prefixes determined by label selector expression<br>Conflicts with `any`, `inside_endpoints`, `outside_endpoints`, and `prefix_list`. (see [below for nested schema](#nestedatt--endpoint--endpoint_choice--label_selector))
+- `outside_endpoints` (Boolean) All Endpoints Reachable via all outside interfaces All ip prefixes that are reachable via outside interfaces are chosen as Endpoints<br>Conflicts with `any`, `inside_endpoints`, `label_selector`, and `prefix_list`.
+- `prefix_list` (Attributes) ipv4/ipv6 prefix list List of ip prefixes that are representing endpoint For egress rules: from this endpoints to remote endpoints these ip prefixes are source ip. For Ingress rules: To this endpoints from remote endpoints these ip prefixes are destination ip.<br>Conflicts with `any`, `inside_endpoints`, `label_selector`, and `outside_endpoints`. (see [below for nested schema](#nestedatt--endpoint--endpoint_choice--prefix_list))
 
 <a id="nestedatt--endpoint--endpoint_choice--label_selector"></a>
 ### Nested Schema for `endpoint.endpoint_choice.label_selector`
@@ -199,8 +199,8 @@ Optional:
 - `action` (List of String) action Action to be taken at rule match. Currently supported actions are Allow and Deny<br>**Allowed Values (choose one):** `['ALLOW', 'DENY']`<br>**Default:** `DENY`<br>**Default:** `DENY`
 - `adv_action` (Attributes) adv_action Enable or disable logging. (see [below for nested schema](#nestedatt--rule_choice--rules--egress_rules--adv_action))
 - `label_matcher` (Attributes) label matcher A list of label keys that identify the label values that need to be the same for the source and destination endpoints. Note that the actual label values are not specified here, just the label keys. This facilitates reuse of policies across multiple dimensions such as deployment, environment, and location. (see [below for nested schema](#nestedatt--rule_choice--rules--egress_rules--label_matcher))
-- `other_endpoint_choice` (Attributes) Other Endpoint Other endpoint of ingress or egress session with endpoint of policy. If rule is an ingress rule then other endpoint indicates the source endpoint from which session is initiated. If rule is an egress rule then other endpoint indicates the destination endpoint to which session is initiated from policy endpoint. (see [below for nested schema](#nestedatt--rule_choice--rules--egress_rules--other_endpoint_choice))
-- `traffic_choice` (Attributes) Traffic Type Select type of traffic to match (see [below for nested schema](#nestedatt--rule_choice--rules--egress_rules--traffic_choice))
+- `other_endpoint_choice` (Attributes) Other Endpoint Other endpoint of ingress or egress session with endpoint of policy. If rule is an ingress rule then other endpoint indicates the source endpoint from which session is initiated. If rule is an egress rule then other endpoint indicates the destination endpoint to which session is initiated from policy endpoint.<br>Exactly one of `any`, `inside_endpoints`, `ip_prefix_set`, `label_selector`, `outside_endpoints`, or `prefix_list` must be specified when `other_endpoint_choice` is configured. (see [below for nested schema](#nestedatt--rule_choice--rules--egress_rules--other_endpoint_choice))
+- `traffic_choice` (Attributes) Traffic Type Select type of traffic to match<br>Exactly one of `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, `applications`, or `protocol_port_range` must be specified when `traffic_choice` is configured. (see [below for nested schema](#nestedatt--rule_choice--rules--egress_rules--traffic_choice))
 
 <a id="nestedatt--rule_choice--rules--egress_rules--metadata"></a>
 ### Nested Schema for `rule_choice.rules.egress_rules.metadata`
@@ -235,12 +235,12 @@ Optional:
 
 Optional:
 
-- `any` (Boolean) Any Endpoint Any Endpoint that matches 0/0 ip prefix
-- `inside_endpoints` (Boolean) All Endpoints Reachable via all inside interfaces All ip prefixes that are reachable via inside interfaces are chosen as Endpoints
-- `ip_prefix_set` (Attributes) ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint (see [below for nested schema](#nestedatt--rule_choice--rules--egress_rules--other_endpoint_choice--ip_prefix_set))
-- `label_selector` (Attributes) prefix Label selector local end point is set of prefixes determined by label selector expression (see [below for nested schema](#nestedatt--rule_choice--rules--egress_rules--other_endpoint_choice--label_selector))
-- `outside_endpoints` (Boolean) All Endpoints Reachable via all outside interfaces All ip prefixes that are reachable via outside interfaces are chosen as Endpoints
-- `prefix_list` (Attributes) ipv4/ipv6 prefix list list of ip prefixes that are representing endpoint For Egress rules: from these endpoints to remote endpoints these ip prefixes are source IPs. For Ingress rules: To these endpoints from remote endpoints these ip prefixes are destination IPs. (see [below for nested schema](#nestedatt--rule_choice--rules--egress_rules--other_endpoint_choice--prefix_list))
+- `any` (Boolean) Any Endpoint Any Endpoint that matches 0/0 ip prefix<br>Conflicts with `inside_endpoints`, `ip_prefix_set`, `label_selector`, `outside_endpoints`, and `prefix_list`.
+- `inside_endpoints` (Boolean) All Endpoints Reachable via all inside interfaces All ip prefixes that are reachable via inside interfaces are chosen as Endpoints<br>Conflicts with `any`, `ip_prefix_set`, `label_selector`, `outside_endpoints`, and `prefix_list`.
+- `ip_prefix_set` (Attributes) ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint<br>Conflicts with `any`, `inside_endpoints`, `label_selector`, `outside_endpoints`, and `prefix_list`. (see [below for nested schema](#nestedatt--rule_choice--rules--egress_rules--other_endpoint_choice--ip_prefix_set))
+- `label_selector` (Attributes) prefix Label selector local end point is set of prefixes determined by label selector expression<br>Conflicts with `any`, `inside_endpoints`, `ip_prefix_set`, `outside_endpoints`, and `prefix_list`. (see [below for nested schema](#nestedatt--rule_choice--rules--egress_rules--other_endpoint_choice--label_selector))
+- `outside_endpoints` (Boolean) All Endpoints Reachable via all outside interfaces All ip prefixes that are reachable via outside interfaces are chosen as Endpoints<br>Conflicts with `any`, `inside_endpoints`, `ip_prefix_set`, `label_selector`, and `prefix_list`.
+- `prefix_list` (Attributes) ipv4/ipv6 prefix list list of ip prefixes that are representing endpoint For Egress rules: from these endpoints to remote endpoints these ip prefixes are source IPs. For Ingress rules: To these endpoints from remote endpoints these ip prefixes are destination IPs.<br>Conflicts with `any`, `inside_endpoints`, `ip_prefix_set`, `label_selector`, and `outside_endpoints`. (see [below for nested schema](#nestedatt--rule_choice--rules--egress_rules--other_endpoint_choice--prefix_list))
 
 <a id="nestedatt--rule_choice--rules--egress_rules--other_endpoint_choice--ip_prefix_set"></a>
 ### Nested Schema for `rule_choice.rules.egress_rules.other_endpoint_choice.ip_prefix_set`
@@ -286,11 +286,11 @@ Optional:
 
 Optional:
 
-- `all_tcp_traffic` (Boolean) All TCP Traffic Select all TCP traffic to match
-- `all_traffic` (Boolean) All Traffic Select all traffic to match
-- `all_udp_traffic` (Boolean) All UDP Traffic Select all UDP traffic to match
-- `applications` (Attributes) Specific Applications Select Application traffic to match (see [below for nested schema](#nestedatt--rule_choice--rules--egress_rules--traffic_choice--applications))
-- `protocol_port_range` (Attributes) Protocol and Port Ranges Select specific protocol and port ranges traffic to match (see [below for nested schema](#nestedatt--rule_choice--rules--egress_rules--traffic_choice--protocol_port_range))
+- `all_tcp_traffic` (Boolean) All TCP Traffic Select all TCP traffic to match<br>Conflicts with `all_traffic`, `all_udp_traffic`, `applications`, and `protocol_port_range`.
+- `all_traffic` (Boolean) All Traffic Select all traffic to match<br>Conflicts with `all_tcp_traffic`, `all_udp_traffic`, `applications`, and `protocol_port_range`.
+- `all_udp_traffic` (Boolean) All UDP Traffic Select all UDP traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `applications`, and `protocol_port_range`.
+- `applications` (Attributes) Specific Applications Select Application traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, and `protocol_port_range`. (see [below for nested schema](#nestedatt--rule_choice--rules--egress_rules--traffic_choice--applications))
+- `protocol_port_range` (Attributes) Protocol and Port Ranges Select specific protocol and port ranges traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, and `applications`. (see [below for nested schema](#nestedatt--rule_choice--rules--egress_rules--traffic_choice--protocol_port_range))
 
 <a id="nestedatt--rule_choice--rules--egress_rules--traffic_choice--applications"></a>
 ### Nested Schema for `rule_choice.rules.egress_rules.traffic_choice.applications`
@@ -323,8 +323,8 @@ Optional:
 - `action` (List of String) action Action to be taken at rule match. Currently supported actions are Allow and Deny<br>**Allowed Values (choose one):** `['ALLOW', 'DENY']`<br>**Default:** `DENY`<br>**Default:** `DENY`
 - `adv_action` (Attributes) adv_action Enable or disable logging. (see [below for nested schema](#nestedatt--rule_choice--rules--ingress_rules--adv_action))
 - `label_matcher` (Attributes) label matcher A list of label keys that identify the label values that need to be the same for the source and destination endpoints. Note that the actual label values are not specified here, just the label keys. This facilitates reuse of policies across multiple dimensions such as deployment, environment, and location. (see [below for nested schema](#nestedatt--rule_choice--rules--ingress_rules--label_matcher))
-- `other_endpoint_choice` (Attributes) Other Endpoint Other endpoint of ingress or egress session with endpoint of policy. If rule is an ingress rule then other endpoint indicates the source endpoint from which session is initiated. If rule is an egress rule then other endpoint indicates the destination endpoint to which session is initiated from policy endpoint. (see [below for nested schema](#nestedatt--rule_choice--rules--ingress_rules--other_endpoint_choice))
-- `traffic_choice` (Attributes) Traffic Type Select type of traffic to match (see [below for nested schema](#nestedatt--rule_choice--rules--ingress_rules--traffic_choice))
+- `other_endpoint_choice` (Attributes) Other Endpoint Other endpoint of ingress or egress session with endpoint of policy. If rule is an ingress rule then other endpoint indicates the source endpoint from which session is initiated. If rule is an egress rule then other endpoint indicates the destination endpoint to which session is initiated from policy endpoint.<br>Exactly one of `any`, `inside_endpoints`, `ip_prefix_set`, `label_selector`, `outside_endpoints`, or `prefix_list` must be specified when `other_endpoint_choice` is configured. (see [below for nested schema](#nestedatt--rule_choice--rules--ingress_rules--other_endpoint_choice))
+- `traffic_choice` (Attributes) Traffic Type Select type of traffic to match<br>Exactly one of `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, `applications`, or `protocol_port_range` must be specified when `traffic_choice` is configured. (see [below for nested schema](#nestedatt--rule_choice--rules--ingress_rules--traffic_choice))
 
 <a id="nestedatt--rule_choice--rules--ingress_rules--metadata"></a>
 ### Nested Schema for `rule_choice.rules.ingress_rules.metadata`
@@ -359,12 +359,12 @@ Optional:
 
 Optional:
 
-- `any` (Boolean) Any Endpoint Any Endpoint that matches 0/0 ip prefix
-- `inside_endpoints` (Boolean) All Endpoints Reachable via all inside interfaces All ip prefixes that are reachable via inside interfaces are chosen as Endpoints
-- `ip_prefix_set` (Attributes) ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint (see [below for nested schema](#nestedatt--rule_choice--rules--ingress_rules--other_endpoint_choice--ip_prefix_set))
-- `label_selector` (Attributes) prefix Label selector local end point is set of prefixes determined by label selector expression (see [below for nested schema](#nestedatt--rule_choice--rules--ingress_rules--other_endpoint_choice--label_selector))
-- `outside_endpoints` (Boolean) All Endpoints Reachable via all outside interfaces All ip prefixes that are reachable via outside interfaces are chosen as Endpoints
-- `prefix_list` (Attributes) ipv4/ipv6 prefix list list of ip prefixes that are representing endpoint For Egress rules: from these endpoints to remote endpoints these ip prefixes are source IPs. For Ingress rules: To these endpoints from remote endpoints these ip prefixes are destination IPs. (see [below for nested schema](#nestedatt--rule_choice--rules--ingress_rules--other_endpoint_choice--prefix_list))
+- `any` (Boolean) Any Endpoint Any Endpoint that matches 0/0 ip prefix<br>Conflicts with `inside_endpoints`, `ip_prefix_set`, `label_selector`, `outside_endpoints`, and `prefix_list`.
+- `inside_endpoints` (Boolean) All Endpoints Reachable via all inside interfaces All ip prefixes that are reachable via inside interfaces are chosen as Endpoints<br>Conflicts with `any`, `ip_prefix_set`, `label_selector`, `outside_endpoints`, and `prefix_list`.
+- `ip_prefix_set` (Attributes) ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint<br>Conflicts with `any`, `inside_endpoints`, `label_selector`, `outside_endpoints`, and `prefix_list`. (see [below for nested schema](#nestedatt--rule_choice--rules--ingress_rules--other_endpoint_choice--ip_prefix_set))
+- `label_selector` (Attributes) prefix Label selector local end point is set of prefixes determined by label selector expression<br>Conflicts with `any`, `inside_endpoints`, `ip_prefix_set`, `outside_endpoints`, and `prefix_list`. (see [below for nested schema](#nestedatt--rule_choice--rules--ingress_rules--other_endpoint_choice--label_selector))
+- `outside_endpoints` (Boolean) All Endpoints Reachable via all outside interfaces All ip prefixes that are reachable via outside interfaces are chosen as Endpoints<br>Conflicts with `any`, `inside_endpoints`, `ip_prefix_set`, `label_selector`, and `prefix_list`.
+- `prefix_list` (Attributes) ipv4/ipv6 prefix list list of ip prefixes that are representing endpoint For Egress rules: from these endpoints to remote endpoints these ip prefixes are source IPs. For Ingress rules: To these endpoints from remote endpoints these ip prefixes are destination IPs.<br>Conflicts with `any`, `inside_endpoints`, `ip_prefix_set`, `label_selector`, and `outside_endpoints`. (see [below for nested schema](#nestedatt--rule_choice--rules--ingress_rules--other_endpoint_choice--prefix_list))
 
 <a id="nestedatt--rule_choice--rules--ingress_rules--other_endpoint_choice--ip_prefix_set"></a>
 ### Nested Schema for `rule_choice.rules.ingress_rules.other_endpoint_choice.ip_prefix_set`
@@ -410,11 +410,11 @@ Optional:
 
 Optional:
 
-- `all_tcp_traffic` (Boolean) All TCP Traffic Select all TCP traffic to match
-- `all_traffic` (Boolean) All Traffic Select all traffic to match
-- `all_udp_traffic` (Boolean) All UDP Traffic Select all UDP traffic to match
-- `applications` (Attributes) Specific Applications Select Application traffic to match (see [below for nested schema](#nestedatt--rule_choice--rules--ingress_rules--traffic_choice--applications))
-- `protocol_port_range` (Attributes) Protocol and Port Ranges Select specific protocol and port ranges traffic to match (see [below for nested schema](#nestedatt--rule_choice--rules--ingress_rules--traffic_choice--protocol_port_range))
+- `all_tcp_traffic` (Boolean) All TCP Traffic Select all TCP traffic to match<br>Conflicts with `all_traffic`, `all_udp_traffic`, `applications`, and `protocol_port_range`.
+- `all_traffic` (Boolean) All Traffic Select all traffic to match<br>Conflicts with `all_tcp_traffic`, `all_udp_traffic`, `applications`, and `protocol_port_range`.
+- `all_udp_traffic` (Boolean) All UDP Traffic Select all UDP traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `applications`, and `protocol_port_range`.
+- `applications` (Attributes) Specific Applications Select Application traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, and `protocol_port_range`. (see [below for nested schema](#nestedatt--rule_choice--rules--ingress_rules--traffic_choice--applications))
+- `protocol_port_range` (Attributes) Protocol and Port Ranges Select specific protocol and port ranges traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, and `applications`. (see [below for nested schema](#nestedatt--rule_choice--rules--ingress_rules--traffic_choice--protocol_port_range))
 
 <a id="nestedatt--rule_choice--rules--ingress_rules--traffic_choice--applications"></a>
 ### Nested Schema for `rule_choice.rules.ingress_rules.traffic_choice.applications`
@@ -467,6 +467,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_network_policy.example"
+	to = f5xc_network_policy.example
 }
 ```

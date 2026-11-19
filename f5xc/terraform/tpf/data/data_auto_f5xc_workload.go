@@ -7,6 +7,7 @@ package data
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"time"
 
@@ -31827,6 +31828,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																						// data specToModelNested StringField --> ResponseBodyEncoded
 																						if routeDirectResponseElement.GetResponseBodyEncoded() != "" {
 																							workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringValue(routeDirectResponseElement.GetResponseBodyEncoded())
+																						} else if legacyVal := routeDirectResponseElement.GetResponseBody(); legacyVal != "" {
+																							// Objects from the UI, REST API, or SDKv2 can hold the content only in the hidden legacy field.
+																							workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringValue("string:///" + base64.StdEncoding.EncodeToString([]byte(legacyVal)))
 																						} else {
 																							// Empty string, set to null
 																							workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringNull()
@@ -36396,6 +36400,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																									// data specToModelNested StringField --> ResponseBodyEncoded
 																									if routeDirectResponseElement.GetResponseBodyEncoded() != "" {
 																										workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringValue(routeDirectResponseElement.GetResponseBodyEncoded())
+																									} else if legacyVal := routeDirectResponseElement.GetResponseBody(); legacyVal != "" {
+																										// Objects from the UI, REST API, or SDKv2 can hold the content only in the hidden legacy field.
+																										workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringValue("string:///" + base64.StdEncoding.EncodeToString([]byte(legacyVal)))
 																									} else {
 																										// Empty string, set to null
 																										workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringNull()
@@ -40621,6 +40628,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																							// data specToModelNested StringField --> ResponseBodyEncoded
 																							if routeDirectResponseElement.GetResponseBodyEncoded() != "" {
 																								workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringValue(routeDirectResponseElement.GetResponseBodyEncoded())
+																							} else if legacyVal := routeDirectResponseElement.GetResponseBody(); legacyVal != "" {
+																								// Objects from the UI, REST API, or SDKv2 can hold the content only in the hidden legacy field.
+																								workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringValue("string:///" + base64.StdEncoding.EncodeToString([]byte(legacyVal)))
 																							} else {
 																								// Empty string, set to null
 																								workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringNull()
@@ -48970,6 +48980,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																						// data specToModelNested StringField --> ResponseBodyEncoded
 																						if routeDirectResponseElement.GetResponseBodyEncoded() != "" {
 																							workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringValue(routeDirectResponseElement.GetResponseBodyEncoded())
+																						} else if legacyVal := routeDirectResponseElement.GetResponseBody(); legacyVal != "" {
+																							// Objects from the UI, REST API, or SDKv2 can hold the content only in the hidden legacy field.
+																							workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringValue("string:///" + base64.StdEncoding.EncodeToString([]byte(legacyVal)))
 																						} else {
 																							// Empty string, set to null
 																							workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringNull()
@@ -53539,6 +53552,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																									// data specToModelNested StringField --> ResponseBodyEncoded
 																									if routeDirectResponseElement.GetResponseBodyEncoded() != "" {
 																										workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringValue(routeDirectResponseElement.GetResponseBodyEncoded())
+																									} else if legacyVal := routeDirectResponseElement.GetResponseBody(); legacyVal != "" {
+																										// Objects from the UI, REST API, or SDKv2 can hold the content only in the hidden legacy field.
+																										workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringValue("string:///" + base64.StdEncoding.EncodeToString([]byte(legacyVal)))
 																									} else {
 																										// Empty string, set to null
 																										workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringNull()
@@ -57764,6 +57780,9 @@ func (d *DataSourceF5XCWorkload) Read(ctx context.Context, request datasource.Re
 																							// data specToModelNested StringField --> ResponseBodyEncoded
 																							if routeDirectResponseElement.GetResponseBodyEncoded() != "" {
 																								workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringValue(routeDirectResponseElement.GetResponseBodyEncoded())
+																							} else if legacyVal := routeDirectResponseElement.GetResponseBody(); legacyVal != "" {
+																								// Objects from the UI, REST API, or SDKv2 can hold the content only in the hidden legacy field.
+																								workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringValue("string:///" + base64.StdEncoding.EncodeToString([]byte(legacyVal)))
 																							} else {
 																								// Empty string, set to null
 																								workloadRouteDirectRespModel.ResponseBodyEncoded = types.StringNull()

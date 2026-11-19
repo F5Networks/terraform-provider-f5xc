@@ -54,7 +54,7 @@ resource "f5xc_api_credential" "example" {
 - `name` (String) Name Name of API credential record. It will be saved in metadata.
 - `namespace` (String) Namespace Value of namespace is always 'system'.
 - `renew_trigger` (Boolean) Local Terraform trigger flag for API token renewal.
-- `self_credential_choice` (Attributes) API Credential Spec The credential specification can be one of the following types: - API token - API certificate (see [below for nested schema](#nestedatt--self_credential_choice))
+- `self_credential_choice` (Attributes) API Credential Spec The credential specification can be one of the following types: - API token - API certificate<br>Exactly one of `api_certificate` or `api_token` must be specified when `self_credential_choice` is configured. (see [below for nested schema](#nestedatt--self_credential_choice))
 - `spec` (Attributes, Deprecated) Specification Shape of the api credential specification. (see [below for nested schema](#nestedatt--spec))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -67,8 +67,8 @@ resource "f5xc_api_credential" "example" {
 
 Optional:
 
-- `api_certificate` (Attributes) api_certificate API certificate parameters. (see [below for nested schema](#nestedatt--self_credential_choice--api_certificate))
-- `api_token` (Boolean) api_token API token parameters.
+- `api_certificate` (Attributes) api_certificate API certificate parameters.<br>Conflicts with `api_token`. (see [below for nested schema](#nestedatt--self_credential_choice--api_certificate))
+- `api_token` (Boolean) api_token API token parameters.<br>Conflicts with `api_certificate`.
 
 <a id="nestedatt--self_credential_choice--api_certificate"></a>
 ### Nested Schema for `self_credential_choice.api_certificate`
@@ -113,6 +113,10 @@ In Terraform v1.5.0 and later, use an `import` block to import this resource by 
 Use the following `command` to import this resource from the command line:
 
 ```shell
+# System-scoped credentials: system/<credential_name>
+# vK8s KubeConfig credentials (spec.type = ["KUBE_CONFIG"]): system/<vk8s_namespace>/<credential_name> or <vk8s_namespace>/<credential_name>
+# After import, name, expiration_days and spec (except spec.virtual_k8s_namespace) are not populated from the API and remain unset.
+# Because name and spec require replacement, the first plan after import proposes replacing the credential; add lifecycle { ignore_changes = [name, spec, expiration_days] } to keep the imported credential.
 terraform import f5xc_api_credential.example <namespace>/<credential_name>
 ```
 
@@ -122,7 +126,11 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 
 ```hcl
 import {
+	# System-scoped credentials: system/<credential_name>
+	# vK8s KubeConfig credentials (spec.type = ["KUBE_CONFIG"]): system/<vk8s_namespace>/<credential_name> or <vk8s_namespace>/<credential_name>
+	# After import, name, expiration_days and spec (except spec.virtual_k8s_namespace) are not populated from the API and remain unset.
+	# Because name and spec require replacement, the first plan after import proposes replacing the credential; add lifecycle { ignore_changes = [name, spec, expiration_days] } to keep the imported credential.
 	id = "<namespace>/<credential_name>"
-	to = "f5xc_api_credential.example"
+	to = f5xc_api_credential.example
 }
 ```

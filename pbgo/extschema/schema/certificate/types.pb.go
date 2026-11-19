@@ -5,17 +5,18 @@ package certificate
 
 import (
 	fmt "fmt"
+	_ "github.com/gogo/protobuf/gogoproto"
+	proto "github.com/gogo/protobuf/proto"
+	types "github.com/gogo/protobuf/types"
+	golang_proto "github.com/golang/protobuf/proto"
+	schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
+	views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
+	strconv "strconv"
 	strings "strings"
-
-	_ "github.com/gogo/protobuf/gogoproto"
-	proto "github.com/gogo/protobuf/proto"
-	golang_proto "github.com/golang/protobuf/proto"
-	schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
-	views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -30,6 +31,153 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
+// Key Algorithm
+//
+// x-displayName: "Key Algorithm"
+// Cryptographic key algorithm for certificate key pair generation
+type KeyAlgorithm int32
+
+const (
+	// x-displayName: "RSA 2048"
+	// RSA key with 2048-bit modulus
+	RSA_2048 KeyAlgorithm = 0
+	// x-displayName: "RSA 4096"
+	// RSA key with 4096-bit modulus
+	RSA_4096 KeyAlgorithm = 1
+	// x-displayName: "ECDSA P-256"
+	// ECDSA key using NIST P-256 curve
+	ECDSA_P256 KeyAlgorithm = 2
+	// x-displayName: "ECDSA P-384"
+	// ECDSA key using NIST P-384 curve
+	ECDSA_P384 KeyAlgorithm = 3
+)
+
+var KeyAlgorithm_name = map[int32]string{
+	0: "RSA_2048",
+	1: "RSA_4096",
+	2: "ECDSA_P256",
+	3: "ECDSA_P384",
+}
+
+var KeyAlgorithm_value = map[string]int32{
+	"RSA_2048":   0,
+	"RSA_4096":   1,
+	"ECDSA_P256": 2,
+	"ECDSA_P384": 3,
+}
+
+func (KeyAlgorithm) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_69aed30bcdf1d256, []int{0}
+}
+
+// Certificate Lifecycle State
+//
+// x-displayName: "Certificate Lifecycle State"
+// Lifecycle state of an auto-managed certificate
+type CertLifecycleState int32
+
+const (
+	// x-displayName: "Pending"
+	// Certificate object created, issuance not yet started
+	CERT_PENDING CertLifecycleState = 0
+	// x-displayName: "Issuing"
+	// ACME order created, issuance in progress
+	CERT_ISSUING CertLifecycleState = 1
+	// x-displayName: "Challenge In Progress"
+	// ACME challenge (DNS-01 or HTTP-01) is being processed
+	CERT_CHALLENGE_IN_PROGRESS CertLifecycleState = 2
+	// x-displayName: "Valid"
+	// Certificate has been issued and is valid
+	CERT_VALID CertLifecycleState = 3
+	// x-displayName: "Renewing"
+	// Certificate renewal is in progress
+	CERT_RENEWING CertLifecycleState = 4
+	// x-displayName: "Expired"
+	// Certificate has expired without successful renewal
+	CERT_EXPIRED CertLifecycleState = 5
+	// x-displayName: "Revoked"
+	// Certificate has been revoked
+	CERT_REVOKED CertLifecycleState = 6
+	// x-displayName: "Error"
+	// Certificate issuance or renewal encountered an error
+	CERT_ERROR CertLifecycleState = 7
+	// x-displayName: "Revoking"
+	// Certificate revocation is in progress
+	CERT_REVOKING CertLifecycleState = 8
+	// x-displayName: "Waiting for DNS"
+	// Waiting for customer to create required DNS records for certificate validation
+	CERT_WAITING_FOR_DNS CertLifecycleState = 9
+	// x-displayName: "Revocation Failed"
+	// The last certificate revocation attempt failed and requires an explicit retry.
+	CERT_REVOKE_FAILED CertLifecycleState = 10
+)
+
+var CertLifecycleState_name = map[int32]string{
+	0:  "CERT_PENDING",
+	1:  "CERT_ISSUING",
+	2:  "CERT_CHALLENGE_IN_PROGRESS",
+	3:  "CERT_VALID",
+	4:  "CERT_RENEWING",
+	5:  "CERT_EXPIRED",
+	6:  "CERT_REVOKED",
+	7:  "CERT_ERROR",
+	8:  "CERT_REVOKING",
+	9:  "CERT_WAITING_FOR_DNS",
+	10: "CERT_REVOKE_FAILED",
+}
+
+var CertLifecycleState_value = map[string]int32{
+	"CERT_PENDING":               0,
+	"CERT_ISSUING":               1,
+	"CERT_CHALLENGE_IN_PROGRESS": 2,
+	"CERT_VALID":                 3,
+	"CERT_RENEWING":              4,
+	"CERT_EXPIRED":               5,
+	"CERT_REVOKED":               6,
+	"CERT_ERROR":                 7,
+	"CERT_REVOKING":              8,
+	"CERT_WAITING_FOR_DNS":       9,
+	"CERT_REVOKE_FAILED":         10,
+}
+
+func (CertLifecycleState) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_69aed30bcdf1d256, []int{1}
+}
+
+// DNS Instruction Status
+//
+// x-displayName: "DNS Instruction Status"
+// Verification status for a DNS instruction
+type DNSInstructionStatus int32
+
+const (
+	// x-displayName: "Pending User Action"
+	// The DNS record has not been created yet. Customer action required.
+	DNS_INSTRUCTION_PENDING DNSInstructionStatus = 0
+	// x-displayName: "Verified"
+	// The DNS record has been verified.
+	DNS_INSTRUCTION_VERIFIED DNSInstructionStatus = 1
+	// x-displayName: "Failed"
+	// Verification of the DNS record timed out or failed.
+	DNS_INSTRUCTION_FAILED DNSInstructionStatus = 2
+)
+
+var DNSInstructionStatus_name = map[int32]string{
+	0: "DNS_INSTRUCTION_PENDING",
+	1: "DNS_INSTRUCTION_VERIFIED",
+	2: "DNS_INSTRUCTION_FAILED",
+}
+
+var DNSInstructionStatus_value = map[string]int32{
+	"DNS_INSTRUCTION_PENDING":  0,
+	"DNS_INSTRUCTION_VERIFIED": 1,
+	"DNS_INSTRUCTION_FAILED":   2,
+}
+
+func (DNSInstructionStatus) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_69aed30bcdf1d256, []int{2}
+}
+
 // Certificate specification
 //
 // x-displayName: "Specification"
@@ -39,15 +187,15 @@ type GlobalSpecType struct {
 	//
 	// x-displayName: "Certificate"
 	// x-example: "value"
-	// x-required
 	// Certificate.
 	// Certificate or certificate chain in PEM format including the PEM headers.
+	// Required unless this is an Automatic type certificate (certificate URL will be added once provisioned).
 	CertificateUrl string `protobuf:"bytes,1,opt,name=certificate_url,json=certificateUrl,proto3" json:"certificate_url,omitempty"`
 	// private_key
 	//
 	// x-displayName: "Private Key"
-	// x-required
 	// Private Key data in unencrypted PEM format including the PEM headers. The data may be optionally secured using BlindFold. Key has to match the accompanying certificate.
+	// Required unless this is an Automatic type certificate (private key will be generated).
 	PrivateKey *schema.SecretType `protobuf:"bytes,2,opt,name=private_key,json=privateKey,proto3" json:"private_key,omitempty"`
 	// OCSP Response choice
 	//
@@ -86,12 +234,13 @@ type GlobalSpecType struct {
 	Infos []*schema.CertInfoType `protobuf:"bytes,1002,rep,name=infos,proto3" json:"infos,omitempty"`
 	// Provider
 	//
-	// x-displayName: "Provider"
-	// The provider of this certificate
+	// x-displayName: "Certificate Provider"
+	// How this certificate is provisioned and managed.
 	//
 	// Types that are valid to be assigned to Provider:
 	//	*GlobalSpecType_Manual
 	//	*GlobalSpecType_VirtualHostAutoCert
+	//	*GlobalSpecType_AutoCert
 	Provider isGlobalSpecType_Provider `protobuf_oneof:"provider"`
 }
 
@@ -151,12 +300,16 @@ type GlobalSpecType_Manual struct {
 type GlobalSpecType_VirtualHostAutoCert struct {
 	VirtualHostAutoCert *VirtualHostAutoCert `protobuf:"bytes,1005,opt,name=virtual_host_auto_cert,json=virtualHostAutoCert,proto3,oneof" json:"virtual_host_auto_cert,omitempty"`
 }
+type GlobalSpecType_AutoCert struct {
+	AutoCert *AutoCertConfig `protobuf:"bytes,1010,opt,name=auto_cert,json=autoCert,proto3,oneof" json:"auto_cert,omitempty"`
+}
 
 func (*GlobalSpecType_UseSystemDefaults) isGlobalSpecType_OcspStaplingChoice()    {}
 func (*GlobalSpecType_DisableOcspStapling) isGlobalSpecType_OcspStaplingChoice()  {}
 func (*GlobalSpecType_CustomHashAlgorithms) isGlobalSpecType_OcspStaplingChoice() {}
 func (*GlobalSpecType_Manual) isGlobalSpecType_Provider()                         {}
 func (*GlobalSpecType_VirtualHostAutoCert) isGlobalSpecType_Provider()            {}
+func (*GlobalSpecType_AutoCert) isGlobalSpecType_Provider()                       {}
 
 func (m *GlobalSpecType) GetOcspStaplingChoice() isGlobalSpecType_OcspStaplingChoice {
 	if m != nil {
@@ -255,6 +408,13 @@ func (m *GlobalSpecType) GetVirtualHostAutoCert() *VirtualHostAutoCert {
 	return nil
 }
 
+func (m *GlobalSpecType) GetAutoCert() *AutoCertConfig {
+	if x, ok := m.GetProvider().(*GlobalSpecType_AutoCert); ok {
+		return x.AutoCert
+	}
+	return nil
+}
+
 // XXX_OneofWrappers is for the internal use of the proto package.
 func (*GlobalSpecType) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
@@ -263,13 +423,15 @@ func (*GlobalSpecType) XXX_OneofWrappers() []interface{} {
 		(*GlobalSpecType_CustomHashAlgorithms)(nil),
 		(*GlobalSpecType_Manual)(nil),
 		(*GlobalSpecType_VirtualHostAutoCert)(nil),
+		(*GlobalSpecType_AutoCert)(nil),
 	}
 }
 
 // Virtual Host Auto Cert
 //
 // x-displayName: "Virtual Host Auto Cert"
-// AutoCert provider information
+// AutoCert provider set by the system when a virtual host manages
+// the certificate. Not user-configurable.
 type VirtualHostAutoCert struct {
 	// Owner Virtual Host
 	//
@@ -313,6 +475,599 @@ func (m *VirtualHostAutoCert) GetOwnerVirtualHost() []*schema.ObjectRefType {
 	return nil
 }
 
+// DNS-01 Challenge Configuration
+//
+// x-displayName: "DNS-01 Challenge Configuration"
+// Configuration for ACME DNS-01 challenge validation.
+type DNS01ChallengeConfig struct {
+	// DNS Provider Choice
+	//
+	// x-displayName: "DNS Provider"
+	// x-required
+	// Method used to manage DNS-01 challenge TXT records.
+	//
+	// Types that are valid to be assigned to DnsProviderChoice:
+	//	*DNS01ChallengeConfig_CnameDelegation
+	//	*DNS01ChallengeConfig_Delegated
+	DnsProviderChoice isDNS01ChallengeConfig_DnsProviderChoice `protobuf_oneof:"dns_provider_choice"`
+}
+
+func (m *DNS01ChallengeConfig) Reset()      { *m = DNS01ChallengeConfig{} }
+func (*DNS01ChallengeConfig) ProtoMessage() {}
+func (*DNS01ChallengeConfig) Descriptor() ([]byte, []int) {
+	return fileDescriptor_69aed30bcdf1d256, []int{2}
+}
+func (m *DNS01ChallengeConfig) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *DNS01ChallengeConfig) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *DNS01ChallengeConfig) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DNS01ChallengeConfig.Merge(m, src)
+}
+func (m *DNS01ChallengeConfig) XXX_Size() int {
+	return m.Size()
+}
+func (m *DNS01ChallengeConfig) XXX_DiscardUnknown() {
+	xxx_messageInfo_DNS01ChallengeConfig.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DNS01ChallengeConfig proto.InternalMessageInfo
+
+type isDNS01ChallengeConfig_DnsProviderChoice interface {
+	isDNS01ChallengeConfig_DnsProviderChoice()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+
+type DNS01ChallengeConfig_CnameDelegation struct {
+	CnameDelegation *schema.Empty `protobuf:"bytes,3,opt,name=cname_delegation,json=cnameDelegation,proto3,oneof" json:"cname_delegation,omitempty"`
+}
+type DNS01ChallengeConfig_Delegated struct {
+	Delegated *schema.Empty `protobuf:"bytes,4,opt,name=delegated,proto3,oneof" json:"delegated,omitempty"`
+}
+
+func (*DNS01ChallengeConfig_CnameDelegation) isDNS01ChallengeConfig_DnsProviderChoice() {}
+func (*DNS01ChallengeConfig_Delegated) isDNS01ChallengeConfig_DnsProviderChoice()       {}
+
+func (m *DNS01ChallengeConfig) GetDnsProviderChoice() isDNS01ChallengeConfig_DnsProviderChoice {
+	if m != nil {
+		return m.DnsProviderChoice
+	}
+	return nil
+}
+
+func (m *DNS01ChallengeConfig) GetCnameDelegation() *schema.Empty {
+	if x, ok := m.GetDnsProviderChoice().(*DNS01ChallengeConfig_CnameDelegation); ok {
+		return x.CnameDelegation
+	}
+	return nil
+}
+
+func (m *DNS01ChallengeConfig) GetDelegated() *schema.Empty {
+	if x, ok := m.GetDnsProviderChoice().(*DNS01ChallengeConfig_Delegated); ok {
+		return x.Delegated
+	}
+	return nil
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*DNS01ChallengeConfig) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*DNS01ChallengeConfig_CnameDelegation)(nil),
+		(*DNS01ChallengeConfig_Delegated)(nil),
+	}
+}
+
+// HTTP-01 Challenge Configuration
+//
+// x-displayName: "HTTP-01 Challenge Configuration"
+// Configuration for ACME HTTP-01 challenge validation.
+// HTTP-01 challenge validation serves a token at
+// http://<domain>/.well-known/acme-challenge/<token>. This method supports only
+// non-wildcard domains. A temporary route in the virtual host's redirect listener
+// serves the challenge through the data plane pipeline.
+type HTTP01ChallengeConfig struct {
+	// Virtual Host Reference
+	//
+	// x-displayName: "Virtual Host"
+	// x-required
+	// Reference to the virtual_host that serves the domain(s) in this certificate.
+	// A temporary /.well-known/acme-challenge/<token> route is injected into this
+	// virtual host's redirect listener during ACME HTTP-01 validation.
+	// The route is removed after validation completes.
+	VirtualHostRef *views.ObjectRefType `protobuf:"bytes,1,opt,name=virtual_host_ref,json=virtualHostRef,proto3" json:"virtual_host_ref,omitempty"`
+}
+
+func (m *HTTP01ChallengeConfig) Reset()      { *m = HTTP01ChallengeConfig{} }
+func (*HTTP01ChallengeConfig) ProtoMessage() {}
+func (*HTTP01ChallengeConfig) Descriptor() ([]byte, []int) {
+	return fileDescriptor_69aed30bcdf1d256, []int{3}
+}
+func (m *HTTP01ChallengeConfig) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *HTTP01ChallengeConfig) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *HTTP01ChallengeConfig) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_HTTP01ChallengeConfig.Merge(m, src)
+}
+func (m *HTTP01ChallengeConfig) XXX_Size() int {
+	return m.Size()
+}
+func (m *HTTP01ChallengeConfig) XXX_DiscardUnknown() {
+	xxx_messageInfo_HTTP01ChallengeConfig.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_HTTP01ChallengeConfig proto.InternalMessageInfo
+
+func (m *HTTP01ChallengeConfig) GetVirtualHostRef() *views.ObjectRefType {
+	if m != nil {
+		return m.VirtualHostRef
+	}
+	return nil
+}
+
+// Pre-Validated Configuration
+//
+// x-displayName: "Pre-Validated Configuration"
+// Configuration for domains validated directly with the certificate authority.
+type PreValidatedConfig struct {
+}
+
+func (m *PreValidatedConfig) Reset()      { *m = PreValidatedConfig{} }
+func (*PreValidatedConfig) ProtoMessage() {}
+func (*PreValidatedConfig) Descriptor() ([]byte, []int) {
+	return fileDescriptor_69aed30bcdf1d256, []int{4}
+}
+func (m *PreValidatedConfig) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *PreValidatedConfig) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *PreValidatedConfig) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PreValidatedConfig.Merge(m, src)
+}
+func (m *PreValidatedConfig) XXX_Size() int {
+	return m.Size()
+}
+func (m *PreValidatedConfig) XXX_DiscardUnknown() {
+	xxx_messageInfo_PreValidatedConfig.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_PreValidatedConfig proto.InternalMessageInfo
+
+// Auto Certificate Configuration
+//
+// x-displayName: "Auto Certificate Configuration"
+// Configuration for automated ACME certificate issuance and lifecycle management.
+type AutoCertConfig struct {
+	// Domains
+	//
+	// x-displayName: "Domains"
+	// x-example: "example.com"
+	// x-required
+	// Domains this certificate covers. These are used as Subject Alternative Names (SANs)
+	// in the ACME certificate order. At least one domain is required.
+	Domains []string `protobuf:"bytes,1,rep,name=domains,proto3" json:"domains,omitempty"`
+	// Select Issuer
+	//
+	// x-displayName: "Select Issuer"
+	// Select the ACME issuer used to issue and renew this certificate.
+	//
+	// Types that are valid to be assigned to IssuerChoice:
+	//	*AutoCertConfig_Default
+	//	*AutoCertConfig_CustomIssuer
+	IssuerChoice isAutoCertConfig_IssuerChoice `protobuf_oneof:"issuer_choice"`
+	// Challenge Method
+	//
+	// x-displayName: "ACME Challenge Method"
+	// Selected ACME challenge method for domain validation. No challenge is performed
+	// for a domain that the certificate authority reports as already validated.
+	//
+	// Types that are valid to be assigned to ChallengeChoice:
+	//	*AutoCertConfig_Dns_01
+	//	*AutoCertConfig_PreValidated
+	//	*AutoCertConfig_Http_01
+	ChallengeChoice isAutoCertConfig_ChallengeChoice `protobuf_oneof:"challenge_choice"`
+	// Renew Before Days
+	//
+	// x-displayName: "Renew Before Expiry (Days)"
+	// x-example: "15"
+	// Days before certificate expiration to trigger renewal. Recommended: two-thirds of the
+	// certificate lifespan.
+	// If this value is greater than or nearly equal to the certificate's actual lifetime,
+	// such that renewal would occur less than 24 hours after its validity begins, renewal
+	// will default to two-thirds through its actual lifetime.
+	RenewBeforeDays uint32 `protobuf:"varint,12,opt,name=renew_before_days,json=renewBeforeDays,proto3" json:"renew_before_days,omitempty"`
+	// Key Algorithm
+	//
+	// x-displayName: "Key Algorithm"
+	// Preferred key algorithm for certificate key pair generation.
+	KeyAlgorithm KeyAlgorithm `protobuf:"varint,10,opt,name=key_algorithm,json=keyAlgorithm,proto3,enum=ves.io.schema.certificate.KeyAlgorithm" json:"key_algorithm,omitempty"`
+}
+
+func (m *AutoCertConfig) Reset()      { *m = AutoCertConfig{} }
+func (*AutoCertConfig) ProtoMessage() {}
+func (*AutoCertConfig) Descriptor() ([]byte, []int) {
+	return fileDescriptor_69aed30bcdf1d256, []int{5}
+}
+func (m *AutoCertConfig) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *AutoCertConfig) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *AutoCertConfig) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AutoCertConfig.Merge(m, src)
+}
+func (m *AutoCertConfig) XXX_Size() int {
+	return m.Size()
+}
+func (m *AutoCertConfig) XXX_DiscardUnknown() {
+	xxx_messageInfo_AutoCertConfig.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AutoCertConfig proto.InternalMessageInfo
+
+type isAutoCertConfig_IssuerChoice interface {
+	isAutoCertConfig_IssuerChoice()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+type isAutoCertConfig_ChallengeChoice interface {
+	isAutoCertConfig_ChallengeChoice()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+
+type AutoCertConfig_Default struct {
+	Default *schema.Empty `protobuf:"bytes,14,opt,name=default,proto3,oneof" json:"default,omitempty"`
+}
+type AutoCertConfig_CustomIssuer struct {
+	CustomIssuer *CustomIssuer `protobuf:"bytes,15,opt,name=custom_issuer,json=customIssuer,proto3,oneof" json:"custom_issuer,omitempty"`
+}
+type AutoCertConfig_Dns_01 struct {
+	Dns_01 *DNS01ChallengeConfig `protobuf:"bytes,6,opt,name=dns_01,json=dns01,proto3,oneof" json:"dns_01,omitempty"`
+}
+type AutoCertConfig_PreValidated struct {
+	PreValidated *PreValidatedConfig `protobuf:"bytes,16,opt,name=pre_validated,json=preValidated,proto3,oneof" json:"pre_validated,omitempty"`
+}
+type AutoCertConfig_Http_01 struct {
+	Http_01 *HTTP01ChallengeConfig `protobuf:"bytes,7,opt,name=http_01,json=http01,proto3,oneof" json:"http_01,omitempty"`
+}
+
+func (*AutoCertConfig_Default) isAutoCertConfig_IssuerChoice()         {}
+func (*AutoCertConfig_CustomIssuer) isAutoCertConfig_IssuerChoice()    {}
+func (*AutoCertConfig_Dns_01) isAutoCertConfig_ChallengeChoice()       {}
+func (*AutoCertConfig_PreValidated) isAutoCertConfig_ChallengeChoice() {}
+func (*AutoCertConfig_Http_01) isAutoCertConfig_ChallengeChoice()      {}
+
+func (m *AutoCertConfig) GetIssuerChoice() isAutoCertConfig_IssuerChoice {
+	if m != nil {
+		return m.IssuerChoice
+	}
+	return nil
+}
+func (m *AutoCertConfig) GetChallengeChoice() isAutoCertConfig_ChallengeChoice {
+	if m != nil {
+		return m.ChallengeChoice
+	}
+	return nil
+}
+
+func (m *AutoCertConfig) GetDomains() []string {
+	if m != nil {
+		return m.Domains
+	}
+	return nil
+}
+
+func (m *AutoCertConfig) GetDefault() *schema.Empty {
+	if x, ok := m.GetIssuerChoice().(*AutoCertConfig_Default); ok {
+		return x.Default
+	}
+	return nil
+}
+
+func (m *AutoCertConfig) GetCustomIssuer() *CustomIssuer {
+	if x, ok := m.GetIssuerChoice().(*AutoCertConfig_CustomIssuer); ok {
+		return x.CustomIssuer
+	}
+	return nil
+}
+
+func (m *AutoCertConfig) GetDns_01() *DNS01ChallengeConfig {
+	if x, ok := m.GetChallengeChoice().(*AutoCertConfig_Dns_01); ok {
+		return x.Dns_01
+	}
+	return nil
+}
+
+func (m *AutoCertConfig) GetPreValidated() *PreValidatedConfig {
+	if x, ok := m.GetChallengeChoice().(*AutoCertConfig_PreValidated); ok {
+		return x.PreValidated
+	}
+	return nil
+}
+
+func (m *AutoCertConfig) GetHttp_01() *HTTP01ChallengeConfig {
+	if x, ok := m.GetChallengeChoice().(*AutoCertConfig_Http_01); ok {
+		return x.Http_01
+	}
+	return nil
+}
+
+func (m *AutoCertConfig) GetRenewBeforeDays() uint32 {
+	if m != nil {
+		return m.RenewBeforeDays
+	}
+	return 0
+}
+
+func (m *AutoCertConfig) GetKeyAlgorithm() KeyAlgorithm {
+	if m != nil {
+		return m.KeyAlgorithm
+	}
+	return RSA_2048
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*AutoCertConfig) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*AutoCertConfig_Default)(nil),
+		(*AutoCertConfig_CustomIssuer)(nil),
+		(*AutoCertConfig_Dns_01)(nil),
+		(*AutoCertConfig_PreValidated)(nil),
+		(*AutoCertConfig_Http_01)(nil),
+	}
+}
+
+// Custom Issuer
+//
+// x-displayName: "Custom Issuer"
+// User-selected ACME issuer configuration.
+type CustomIssuer struct {
+	// Issuer Reference
+	//
+	// x-displayName: "ACME Issuer"
+	// x-required
+	// Select an existing ACME issuer or create a new one.
+	IssuerRef []*schema.ObjectRefType `protobuf:"bytes,1,rep,name=issuer_ref,json=issuerRef,proto3" json:"issuer_ref,omitempty"`
+}
+
+func (m *CustomIssuer) Reset()      { *m = CustomIssuer{} }
+func (*CustomIssuer) ProtoMessage() {}
+func (*CustomIssuer) Descriptor() ([]byte, []int) {
+	return fileDescriptor_69aed30bcdf1d256, []int{6}
+}
+func (m *CustomIssuer) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *CustomIssuer) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *CustomIssuer) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CustomIssuer.Merge(m, src)
+}
+func (m *CustomIssuer) XXX_Size() int {
+	return m.Size()
+}
+func (m *CustomIssuer) XXX_DiscardUnknown() {
+	xxx_messageInfo_CustomIssuer.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CustomIssuer proto.InternalMessageInfo
+
+func (m *CustomIssuer) GetIssuerRef() []*schema.ObjectRefType {
+	if m != nil {
+		return m.IssuerRef
+	}
+	return nil
+}
+
+// Certificate Lifecycle Status
+//
+// x-displayName: "Certificate Lifecycle Status"
+// Lifecycle status for auto-managed certificates.
+type CertificateLifecycleStatus struct {
+	// State
+	//
+	// x-displayName: "Lifecycle State"
+	// Current lifecycle state of the certificate
+	State CertLifecycleState `protobuf:"varint,1,opt,name=state,proto3,enum=ves.io.schema.certificate.CertLifecycleState" json:"state,omitempty"`
+	// Error Message
+	//
+	// x-displayName: "Error Message"
+	// Error message if the certificate is in an error state
+	ErrorMessage string `protobuf:"bytes,10,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	// DNS Instructions
+	//
+	// x-displayName: "DNS Instructions"
+	// DNS records the customer must create for non-delegated DNS-01 validation.
+	// Populated when the certificate uses DNS-01 with a non-delegated domain
+	// (CNAME delegation mode). Empty for delegated domains where DNS is managed directly.
+	DnsInstructions []*DNSInstruction `protobuf:"bytes,31,rep,name=dns_instructions,json=dnsInstructions,proto3" json:"dns_instructions,omitempty"`
+	// Next Renewal Time
+	//
+	// x-displayName: "Next Renewal Time"
+	// Time (UTC) when the next certificate renewal is scheduled.
+	NextRenewalTime *types.Timestamp `protobuf:"bytes,4,opt,name=next_renewal_time,json=nextRenewalTime,proto3" json:"next_renewal_time,omitempty"`
+}
+
+func (m *CertificateLifecycleStatus) Reset()      { *m = CertificateLifecycleStatus{} }
+func (*CertificateLifecycleStatus) ProtoMessage() {}
+func (*CertificateLifecycleStatus) Descriptor() ([]byte, []int) {
+	return fileDescriptor_69aed30bcdf1d256, []int{7}
+}
+func (m *CertificateLifecycleStatus) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *CertificateLifecycleStatus) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *CertificateLifecycleStatus) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CertificateLifecycleStatus.Merge(m, src)
+}
+func (m *CertificateLifecycleStatus) XXX_Size() int {
+	return m.Size()
+}
+func (m *CertificateLifecycleStatus) XXX_DiscardUnknown() {
+	xxx_messageInfo_CertificateLifecycleStatus.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CertificateLifecycleStatus proto.InternalMessageInfo
+
+func (m *CertificateLifecycleStatus) GetState() CertLifecycleState {
+	if m != nil {
+		return m.State
+	}
+	return CERT_PENDING
+}
+
+func (m *CertificateLifecycleStatus) GetErrorMessage() string {
+	if m != nil {
+		return m.ErrorMessage
+	}
+	return ""
+}
+
+func (m *CertificateLifecycleStatus) GetDnsInstructions() []*DNSInstruction {
+	if m != nil {
+		return m.DnsInstructions
+	}
+	return nil
+}
+
+func (m *CertificateLifecycleStatus) GetNextRenewalTime() *types.Timestamp {
+	if m != nil {
+		return m.NextRenewalTime
+	}
+	return nil
+}
+
+// DNS Instruction
+//
+// x-displayName: "DNS Instruction"
+// A DNS record that the customer must create for non-delegated DNS-01 challenge validation.
+// Displayed in the dashboard/UI to guide the customer through CNAME setup.
+type DNSInstruction struct {
+	// Record Type
+	//
+	// x-displayName: "Record Type"
+	// DNS record type. Always "CNAME" for non-delegated DNS-01.
+	RecordType string `protobuf:"bytes,1,opt,name=record_type,json=recordType,proto3" json:"record_type,omitempty"`
+	// Name
+	//
+	// x-displayName: "DNS Record Name"
+	// x-example: "_acme-challenge.app.example.com"
+	// Full DNS record name that the customer must create at their DNS registrar.
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	// Value
+	//
+	// x-displayName: "DNS Record Value"
+	// x-example: "abc123.ves.io"
+	// Target value for the DNS record.
+	Value string `protobuf:"bytes,3,opt,name=value,proto3" json:"value,omitempty"`
+	// Status
+	//
+	// x-displayName: "Verification Status"
+	// Current verification status of this DNS record.
+	Status DNSInstructionStatus `protobuf:"varint,4,opt,name=status,proto3,enum=ves.io.schema.certificate.DNSInstructionStatus" json:"status,omitempty"`
+}
+
+func (m *DNSInstruction) Reset()      { *m = DNSInstruction{} }
+func (*DNSInstruction) ProtoMessage() {}
+func (*DNSInstruction) Descriptor() ([]byte, []int) {
+	return fileDescriptor_69aed30bcdf1d256, []int{8}
+}
+func (m *DNSInstruction) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *DNSInstruction) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *DNSInstruction) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DNSInstruction.Merge(m, src)
+}
+func (m *DNSInstruction) XXX_Size() int {
+	return m.Size()
+}
+func (m *DNSInstruction) XXX_DiscardUnknown() {
+	xxx_messageInfo_DNSInstruction.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DNSInstruction proto.InternalMessageInfo
+
+func (m *DNSInstruction) GetRecordType() string {
+	if m != nil {
+		return m.RecordType
+	}
+	return ""
+}
+
+func (m *DNSInstruction) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *DNSInstruction) GetValue() string {
+	if m != nil {
+		return m.Value
+	}
+	return ""
+}
+
+func (m *DNSInstruction) GetStatus() DNSInstructionStatus {
+	if m != nil {
+		return m.Status
+	}
+	return DNS_INSTRUCTION_PENDING
+}
+
 // Create Certificate
 //
 // x-displayName: "Create Certificate"
@@ -326,12 +1081,16 @@ type CreateSpecType struct {
 	//	*CreateSpecType_CustomHashAlgorithms
 	OcspStaplingChoice isCreateSpecType_OcspStaplingChoice `protobuf_oneof:"ocsp_stapling_choice"`
 	CertificateChain   *views.ObjectRefType                `protobuf:"bytes,7,opt,name=certificate_chain,json=certificateChain,proto3" json:"certificate_chain,omitempty"`
+	// Types that are valid to be assigned to Provider:
+	//	*CreateSpecType_Manual
+	//	*CreateSpecType_AutoCert
+	Provider isCreateSpecType_Provider `protobuf_oneof:"provider"`
 }
 
 func (m *CreateSpecType) Reset()      { *m = CreateSpecType{} }
 func (*CreateSpecType) ProtoMessage() {}
 func (*CreateSpecType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_69aed30bcdf1d256, []int{2}
+	return fileDescriptor_69aed30bcdf1d256, []int{9}
 }
 func (m *CreateSpecType) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -362,6 +1121,12 @@ type isCreateSpecType_OcspStaplingChoice interface {
 	MarshalTo([]byte) (int, error)
 	Size() int
 }
+type isCreateSpecType_Provider interface {
+	isCreateSpecType_Provider()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
 
 type CreateSpecType_UseSystemDefaults struct {
 	UseSystemDefaults *schema.Empty `protobuf:"bytes,4,opt,name=use_system_defaults,json=useSystemDefaults,proto3,oneof" json:"use_system_defaults,omitempty"`
@@ -372,14 +1137,28 @@ type CreateSpecType_DisableOcspStapling struct {
 type CreateSpecType_CustomHashAlgorithms struct {
 	CustomHashAlgorithms *schema.HashAlgorithms `protobuf:"bytes,6,opt,name=custom_hash_algorithms,json=customHashAlgorithms,proto3,oneof" json:"custom_hash_algorithms,omitempty"`
 }
+type CreateSpecType_Manual struct {
+	Manual *schema.Empty `protobuf:"bytes,1004,opt,name=manual,proto3,oneof" json:"manual,omitempty"`
+}
+type CreateSpecType_AutoCert struct {
+	AutoCert *AutoCertConfig `protobuf:"bytes,1010,opt,name=auto_cert,json=autoCert,proto3,oneof" json:"auto_cert,omitempty"`
+}
 
 func (*CreateSpecType_UseSystemDefaults) isCreateSpecType_OcspStaplingChoice()    {}
 func (*CreateSpecType_DisableOcspStapling) isCreateSpecType_OcspStaplingChoice()  {}
 func (*CreateSpecType_CustomHashAlgorithms) isCreateSpecType_OcspStaplingChoice() {}
+func (*CreateSpecType_Manual) isCreateSpecType_Provider()                         {}
+func (*CreateSpecType_AutoCert) isCreateSpecType_Provider()                       {}
 
 func (m *CreateSpecType) GetOcspStaplingChoice() isCreateSpecType_OcspStaplingChoice {
 	if m != nil {
 		return m.OcspStaplingChoice
+	}
+	return nil
+}
+func (m *CreateSpecType) GetProvider() isCreateSpecType_Provider {
+	if m != nil {
+		return m.Provider
 	}
 	return nil
 }
@@ -426,12 +1205,28 @@ func (m *CreateSpecType) GetCertificateChain() *views.ObjectRefType {
 	return nil
 }
 
+func (m *CreateSpecType) GetManual() *schema.Empty {
+	if x, ok := m.GetProvider().(*CreateSpecType_Manual); ok {
+		return x.Manual
+	}
+	return nil
+}
+
+func (m *CreateSpecType) GetAutoCert() *AutoCertConfig {
+	if x, ok := m.GetProvider().(*CreateSpecType_AutoCert); ok {
+		return x.AutoCert
+	}
+	return nil
+}
+
 // XXX_OneofWrappers is for the internal use of the proto package.
 func (*CreateSpecType) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
 		(*CreateSpecType_UseSystemDefaults)(nil),
 		(*CreateSpecType_DisableOcspStapling)(nil),
 		(*CreateSpecType_CustomHashAlgorithms)(nil),
+		(*CreateSpecType_Manual)(nil),
+		(*CreateSpecType_AutoCert)(nil),
 	}
 }
 
@@ -448,12 +1243,16 @@ type ReplaceSpecType struct {
 	//	*ReplaceSpecType_CustomHashAlgorithms
 	OcspStaplingChoice isReplaceSpecType_OcspStaplingChoice `protobuf_oneof:"ocsp_stapling_choice"`
 	CertificateChain   *views.ObjectRefType                 `protobuf:"bytes,7,opt,name=certificate_chain,json=certificateChain,proto3" json:"certificate_chain,omitempty"`
+	// Types that are valid to be assigned to Provider:
+	//	*ReplaceSpecType_Manual
+	//	*ReplaceSpecType_AutoCert
+	Provider isReplaceSpecType_Provider `protobuf_oneof:"provider"`
 }
 
 func (m *ReplaceSpecType) Reset()      { *m = ReplaceSpecType{} }
 func (*ReplaceSpecType) ProtoMessage() {}
 func (*ReplaceSpecType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_69aed30bcdf1d256, []int{3}
+	return fileDescriptor_69aed30bcdf1d256, []int{10}
 }
 func (m *ReplaceSpecType) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -484,6 +1283,12 @@ type isReplaceSpecType_OcspStaplingChoice interface {
 	MarshalTo([]byte) (int, error)
 	Size() int
 }
+type isReplaceSpecType_Provider interface {
+	isReplaceSpecType_Provider()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
 
 type ReplaceSpecType_UseSystemDefaults struct {
 	UseSystemDefaults *schema.Empty `protobuf:"bytes,4,opt,name=use_system_defaults,json=useSystemDefaults,proto3,oneof" json:"use_system_defaults,omitempty"`
@@ -494,14 +1299,28 @@ type ReplaceSpecType_DisableOcspStapling struct {
 type ReplaceSpecType_CustomHashAlgorithms struct {
 	CustomHashAlgorithms *schema.HashAlgorithms `protobuf:"bytes,6,opt,name=custom_hash_algorithms,json=customHashAlgorithms,proto3,oneof" json:"custom_hash_algorithms,omitempty"`
 }
+type ReplaceSpecType_Manual struct {
+	Manual *schema.Empty `protobuf:"bytes,1004,opt,name=manual,proto3,oneof" json:"manual,omitempty"`
+}
+type ReplaceSpecType_AutoCert struct {
+	AutoCert *AutoCertConfig `protobuf:"bytes,1010,opt,name=auto_cert,json=autoCert,proto3,oneof" json:"auto_cert,omitempty"`
+}
 
 func (*ReplaceSpecType_UseSystemDefaults) isReplaceSpecType_OcspStaplingChoice()    {}
 func (*ReplaceSpecType_DisableOcspStapling) isReplaceSpecType_OcspStaplingChoice()  {}
 func (*ReplaceSpecType_CustomHashAlgorithms) isReplaceSpecType_OcspStaplingChoice() {}
+func (*ReplaceSpecType_Manual) isReplaceSpecType_Provider()                         {}
+func (*ReplaceSpecType_AutoCert) isReplaceSpecType_Provider()                       {}
 
 func (m *ReplaceSpecType) GetOcspStaplingChoice() isReplaceSpecType_OcspStaplingChoice {
 	if m != nil {
 		return m.OcspStaplingChoice
+	}
+	return nil
+}
+func (m *ReplaceSpecType) GetProvider() isReplaceSpecType_Provider {
+	if m != nil {
+		return m.Provider
 	}
 	return nil
 }
@@ -548,12 +1367,28 @@ func (m *ReplaceSpecType) GetCertificateChain() *views.ObjectRefType {
 	return nil
 }
 
+func (m *ReplaceSpecType) GetManual() *schema.Empty {
+	if x, ok := m.GetProvider().(*ReplaceSpecType_Manual); ok {
+		return x.Manual
+	}
+	return nil
+}
+
+func (m *ReplaceSpecType) GetAutoCert() *AutoCertConfig {
+	if x, ok := m.GetProvider().(*ReplaceSpecType_AutoCert); ok {
+		return x.AutoCert
+	}
+	return nil
+}
+
 // XXX_OneofWrappers is for the internal use of the proto package.
 func (*ReplaceSpecType) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
 		(*ReplaceSpecType_UseSystemDefaults)(nil),
 		(*ReplaceSpecType_DisableOcspStapling)(nil),
 		(*ReplaceSpecType_CustomHashAlgorithms)(nil),
+		(*ReplaceSpecType_Manual)(nil),
+		(*ReplaceSpecType_AutoCert)(nil),
 	}
 }
 
@@ -576,13 +1411,15 @@ type GetSpecType struct {
 	// Types that are valid to be assigned to Provider:
 	//	*GetSpecType_Manual
 	//	*GetSpecType_VirtualHostAutoCert
-	Provider isGetSpecType_Provider `protobuf_oneof:"provider"`
+	//	*GetSpecType_AutoCert
+	Provider       isGetSpecType_Provider `protobuf_oneof:"provider"`
+	VirtualServers []*views.ObjectRefType `protobuf:"bytes,1006,rep,name=virtual_servers,json=virtualServers,proto3" json:"virtual_servers,omitempty"`
 }
 
 func (m *GetSpecType) Reset()      { *m = GetSpecType{} }
 func (*GetSpecType) ProtoMessage() {}
 func (*GetSpecType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_69aed30bcdf1d256, []int{4}
+	return fileDescriptor_69aed30bcdf1d256, []int{11}
 }
 func (m *GetSpecType) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -635,12 +1472,16 @@ type GetSpecType_Manual struct {
 type GetSpecType_VirtualHostAutoCert struct {
 	VirtualHostAutoCert *VirtualHostAutoCert `protobuf:"bytes,1005,opt,name=virtual_host_auto_cert,json=virtualHostAutoCert,proto3,oneof" json:"virtual_host_auto_cert,omitempty"`
 }
+type GetSpecType_AutoCert struct {
+	AutoCert *AutoCertConfig `protobuf:"bytes,1010,opt,name=auto_cert,json=autoCert,proto3,oneof" json:"auto_cert,omitempty"`
+}
 
 func (*GetSpecType_UseSystemDefaults) isGetSpecType_OcspStaplingChoice()    {}
 func (*GetSpecType_DisableOcspStapling) isGetSpecType_OcspStaplingChoice()  {}
 func (*GetSpecType_CustomHashAlgorithms) isGetSpecType_OcspStaplingChoice() {}
 func (*GetSpecType_Manual) isGetSpecType_Provider()                         {}
 func (*GetSpecType_VirtualHostAutoCert) isGetSpecType_Provider()            {}
+func (*GetSpecType_AutoCert) isGetSpecType_Provider()                       {}
 
 func (m *GetSpecType) GetOcspStaplingChoice() isGetSpecType_OcspStaplingChoice {
 	if m != nil {
@@ -732,6 +1573,20 @@ func (m *GetSpecType) GetVirtualHostAutoCert() *VirtualHostAutoCert {
 	return nil
 }
 
+func (m *GetSpecType) GetAutoCert() *AutoCertConfig {
+	if x, ok := m.GetProvider().(*GetSpecType_AutoCert); ok {
+		return x.AutoCert
+	}
+	return nil
+}
+
+func (m *GetSpecType) GetVirtualServers() []*views.ObjectRefType {
+	if m != nil {
+		return m.VirtualServers
+	}
+	return nil
+}
+
 // XXX_OneofWrappers is for the internal use of the proto package.
 func (*GetSpecType) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
@@ -740,14 +1595,35 @@ func (*GetSpecType) XXX_OneofWrappers() []interface{} {
 		(*GetSpecType_CustomHashAlgorithms)(nil),
 		(*GetSpecType_Manual)(nil),
 		(*GetSpecType_VirtualHostAutoCert)(nil),
+		(*GetSpecType_AutoCert)(nil),
 	}
 }
 
 func init() {
+	proto.RegisterEnum("ves.io.schema.certificate.KeyAlgorithm", KeyAlgorithm_name, KeyAlgorithm_value)
+	golang_proto.RegisterEnum("ves.io.schema.certificate.KeyAlgorithm", KeyAlgorithm_name, KeyAlgorithm_value)
+	proto.RegisterEnum("ves.io.schema.certificate.CertLifecycleState", CertLifecycleState_name, CertLifecycleState_value)
+	golang_proto.RegisterEnum("ves.io.schema.certificate.CertLifecycleState", CertLifecycleState_name, CertLifecycleState_value)
+	proto.RegisterEnum("ves.io.schema.certificate.DNSInstructionStatus", DNSInstructionStatus_name, DNSInstructionStatus_value)
+	golang_proto.RegisterEnum("ves.io.schema.certificate.DNSInstructionStatus", DNSInstructionStatus_name, DNSInstructionStatus_value)
 	proto.RegisterType((*GlobalSpecType)(nil), "ves.io.schema.certificate.GlobalSpecType")
 	golang_proto.RegisterType((*GlobalSpecType)(nil), "ves.io.schema.certificate.GlobalSpecType")
 	proto.RegisterType((*VirtualHostAutoCert)(nil), "ves.io.schema.certificate.VirtualHostAutoCert")
 	golang_proto.RegisterType((*VirtualHostAutoCert)(nil), "ves.io.schema.certificate.VirtualHostAutoCert")
+	proto.RegisterType((*DNS01ChallengeConfig)(nil), "ves.io.schema.certificate.DNS01ChallengeConfig")
+	golang_proto.RegisterType((*DNS01ChallengeConfig)(nil), "ves.io.schema.certificate.DNS01ChallengeConfig")
+	proto.RegisterType((*HTTP01ChallengeConfig)(nil), "ves.io.schema.certificate.HTTP01ChallengeConfig")
+	golang_proto.RegisterType((*HTTP01ChallengeConfig)(nil), "ves.io.schema.certificate.HTTP01ChallengeConfig")
+	proto.RegisterType((*PreValidatedConfig)(nil), "ves.io.schema.certificate.PreValidatedConfig")
+	golang_proto.RegisterType((*PreValidatedConfig)(nil), "ves.io.schema.certificate.PreValidatedConfig")
+	proto.RegisterType((*AutoCertConfig)(nil), "ves.io.schema.certificate.AutoCertConfig")
+	golang_proto.RegisterType((*AutoCertConfig)(nil), "ves.io.schema.certificate.AutoCertConfig")
+	proto.RegisterType((*CustomIssuer)(nil), "ves.io.schema.certificate.CustomIssuer")
+	golang_proto.RegisterType((*CustomIssuer)(nil), "ves.io.schema.certificate.CustomIssuer")
+	proto.RegisterType((*CertificateLifecycleStatus)(nil), "ves.io.schema.certificate.CertificateLifecycleStatus")
+	golang_proto.RegisterType((*CertificateLifecycleStatus)(nil), "ves.io.schema.certificate.CertificateLifecycleStatus")
+	proto.RegisterType((*DNSInstruction)(nil), "ves.io.schema.certificate.DNSInstruction")
+	golang_proto.RegisterType((*DNSInstruction)(nil), "ves.io.schema.certificate.DNSInstruction")
 	proto.RegisterType((*CreateSpecType)(nil), "ves.io.schema.certificate.CreateSpecType")
 	golang_proto.RegisterType((*CreateSpecType)(nil), "ves.io.schema.certificate.CreateSpecType")
 	proto.RegisterType((*ReplaceSpecType)(nil), "ves.io.schema.certificate.ReplaceSpecType")
@@ -764,70 +1640,162 @@ func init() {
 }
 
 var fileDescriptor_69aed30bcdf1d256 = []byte{
-	// 963 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x57, 0xcd, 0x6f, 0x1b, 0x45,
-	0x14, 0xf7, 0xd4, 0x9f, 0x4c, 0x90, 0xe3, 0xac, 0x43, 0xb5, 0x71, 0xcb, 0x62, 0x59, 0x02, 0x02,
-	0x4a, 0xd6, 0x50, 0xda, 0x1e, 0x7a, 0x40, 0xd4, 0x01, 0x6a, 0x52, 0xa4, 0x4a, 0x6b, 0xca, 0x81,
-	0xcb, 0x6a, 0xbc, 0x7e, 0xf6, 0x2e, 0xdd, 0xf5, 0xac, 0x66, 0x66, 0xdd, 0x5a, 0xc2, 0x52, 0xd4,
-	0x1b, 0x37, 0x54, 0xfe, 0x03, 0x4e, 0x28, 0x7f, 0x02, 0xe6, 0x90, 0x23, 0xe2, 0xe4, 0x0b, 0x52,
-	0xc4, 0x89, 0x38, 0x97, 0x7e, 0x04, 0x94, 0x23, 0xea, 0x09, 0xed, 0xae, 0x1d, 0xed, 0xda, 0x4d,
-	0xd5, 0x48, 0x20, 0xa1, 0xca, 0xb7, 0x9d, 0xf7, 0xde, 0xef, 0xf7, 0x9b, 0x8f, 0x37, 0x6f, 0xdf,
-	0xe0, 0x37, 0x7b, 0xc0, 0x55, 0x8b, 0x56, 0xb9, 0x61, 0x82, 0x43, 0xaa, 0x06, 0x30, 0x61, 0xb5,
-	0x2d, 0x83, 0x08, 0xa8, 0x8a, 0xbe, 0x0b, 0x5c, 0x75, 0x19, 0x15, 0x54, 0x5a, 0x0b, 0xc3, 0xd4,
-	0x30, 0x4c, 0x8d, 0x84, 0x95, 0x36, 0x3b, 0x96, 0x30, 0xbd, 0xa6, 0x6a, 0x50, 0xa7, 0xda, 0xa1,
-	0x1d, 0x5a, 0x0d, 0x10, 0x4d, 0xaf, 0x1d, 0x8c, 0x82, 0x41, 0xf0, 0x15, 0x32, 0x95, 0x94, 0x79,
-	0x41, 0x3d, 0xa2, 0x54, 0xba, 0x10, 0xf7, 0x53, 0x57, 0x58, 0xb4, 0x3b, 0x75, 0xae, 0xc5, 0x9d,
-	0x51, 0xdc, 0xc5, 0xb8, 0xab, 0x47, 0x6c, 0xab, 0x45, 0x04, 0x4c, 0xbc, 0xe5, 0x19, 0xaf, 0x05,
-	0x77, 0xf5, 0x38, 0xf5, 0x1b, 0xf3, 0x11, 0x3c, 0x2a, 0x50, 0xf9, 0x3d, 0x87, 0xf3, 0x37, 0x6c,
-	0xda, 0x24, 0x76, 0xc3, 0x05, 0xe3, 0x8b, 0xbe, 0x0b, 0x52, 0x03, 0x2f, 0x47, 0x76, 0x42, 0xf7,
-	0x98, 0x2d, 0xa3, 0x32, 0x5a, 0x7f, 0xa5, 0xf6, 0xee, 0xdf, 0x43, 0x94, 0xfa, 0xe1, 0x67, 0xb4,
-	0xe4, 0x82, 0xb3, 0x51, 0x6e, 0x12, 0x0e, 0x57, 0x2f, 0xff, 0xf4, 0x68, 0x2f, 0x99, 0x63, 0x99,
-	0x32, 0x5a, 0xdf, 0xd9, 0xc9, 0xf9, 0x83, 0x34, 0x4b, 0xee, 0x24, 0x91, 0x96, 0x8f, 0x50, 0xdc,
-	0x66, 0xb6, 0xf4, 0x11, 0x5e, 0x72, 0x99, 0xd5, 0xf3, 0x09, 0xef, 0x40, 0x5f, 0x3e, 0x57, 0x46,
-	0xeb, 0x4b, 0x97, 0xd6, 0xd4, 0xf8, 0x01, 0x34, 0xc0, 0x60, 0x20, 0xfc, 0x49, 0xd4, 0x52, 0xa3,
-	0x21, 0x42, 0x1a, 0x9e, 0x60, 0x6e, 0x42, 0x5f, 0xfa, 0x14, 0x17, 0x3d, 0x0e, 0x3a, 0xef, 0x73,
-	0x01, 0x8e, 0xde, 0x82, 0x36, 0xf1, 0x6c, 0xc1, 0xe5, 0x54, 0xc0, 0xb4, 0x3a, 0xc3, 0xf4, 0x89,
-	0xe3, 0x8a, 0x7e, 0x3d, 0xa1, 0xad, 0x78, 0x1c, 0x1a, 0x01, 0xe2, 0xe3, 0x09, 0x40, 0xda, 0xc6,
-	0xaf, 0xb5, 0x2c, 0x4e, 0x9a, 0x36, 0xe8, 0xd4, 0xe0, 0xae, 0xce, 0x05, 0x71, 0x6d, 0xab, 0xdb,
-	0x91, 0xd3, 0xcf, 0x65, 0x2a, 0x4e, 0x40, 0xb7, 0x0c, 0xee, 0x36, 0x26, 0x10, 0xe9, 0x36, 0x3e,
-	0x6f, 0x78, 0x5c, 0x50, 0x47, 0x37, 0x09, 0x37, 0x75, 0x62, 0x77, 0x28, 0xb3, 0x84, 0xe9, 0x70,
-	0x39, 0x13, 0x90, 0xbd, 0x3e, 0x43, 0x56, 0x27, 0xdc, 0xbc, 0x7e, 0x12, 0x54, 0x4f, 0x68, 0xab,
-	0x21, 0x3c, 0x6e, 0x97, 0x00, 0xaf, 0x44, 0x4f, 0xc0, 0x30, 0x89, 0xd5, 0x95, 0xb3, 0x01, 0x63,
-	0x65, 0x86, 0x31, 0x38, 0x51, 0xf5, 0x56, 0xf3, 0x6b, 0x30, 0x84, 0x06, 0xed, 0x60, 0xef, 0x56,
-	0x77, 0x07, 0xf3, 0x78, 0xad, 0x10, 0x31, 0x6d, 0xf9, 0x16, 0xc9, 0xc4, 0x92, 0x29, 0x84, 0xab,
-	0xdb, 0x94, 0xb4, 0x9a, 0xc4, 0x26, 0x5d, 0x03, 0x18, 0x97, 0x1f, 0x66, 0xcb, 0xc9, 0x33, 0x08,
-	0xcd, 0x31, 0x68, 0x81, 0xe9, 0xf3, 0x28, 0xa7, 0xbf, 0x20, 0x61, 0xcc, 0x0a, 0x3d, 0x7a, 0x71,
-	0xa1, 0xe2, 0xee, 0xa0, 0x30, 0x4b, 0xa0, 0xf9, 0x96, 0xb8, 0x8c, 0x8d, 0x97, 0x7b, 0x16, 0x13,
-	0x1e, 0xb1, 0x75, 0x0e, 0xac, 0xe7, 0x8b, 0xfc, 0xf5, 0xe2, 0x22, 0xca, 0xee, 0x20, 0x1f, 0x87,
-	0x3f, 0x1e, 0x60, 0x01, 0x5c, 0x6c, 0xb4, 0xc0, 0xa1, 0xef, 0x6b, 0x53, 0x67, 0x23, 0xa4, 0x96,
-	0x2e, 0xe1, 0xb4, 0xd5, 0x6d, 0x53, 0x2e, 0x3f, 0x0e, 0x35, 0x2e, 0xcc, 0x68, 0x6c, 0x01, 0x13,
-	0x9f, 0x75, 0xdb, 0xd4, 0x27, 0xd7, 0xc2, 0x50, 0xa9, 0x8a, 0x33, 0x0e, 0xe9, 0x7a, 0xc4, 0x96,
-	0x8f, 0xb2, 0xcf, 0x49, 0x37, 0xa4, 0x4d, 0xc2, 0xa4, 0x36, 0x3e, 0x3f, 0x9d, 0x93, 0x49, 0xb9,
-	0xd0, 0x89, 0x27, 0xa8, 0xee, 0x9f, 0xa4, 0xfc, 0x67, 0x48, 0xa0, 0xaa, 0xa7, 0x16, 0x31, 0xf5,
-	0xcb, 0x10, 0x59, 0xa7, 0x5c, 0x5c, 0xf7, 0x04, 0xf5, 0x27, 0x54, 0x47, 0x5a, 0xb1, 0x37, 0x6f,
-	0xae, 0xbd, 0x83, 0x57, 0x63, 0xb7, 0x41, 0x37, 0x4c, 0x6a, 0x19, 0x20, 0xad, 0xec, 0x0d, 0x51,
-	0x7a, 0x34, 0x44, 0xc9, 0xf1, 0x10, 0xa5, 0x2f, 0x6f, 0x5c, 0xd9, 0xb8, 0x5a, 0x2b, 0xe1, 0x9c,
-	0xcb, 0x68, 0xcf, 0x6a, 0x01, 0x93, 0xf2, 0x7b, 0x43, 0x74, 0x94, 0x1d, 0x0d, 0xd1, 0x93, 0xec,
-	0xf1, 0x10, 0xa1, 0xed, 0x54, 0x2e, 0x59, 0x48, 0x6d, 0x67, 0x72, 0x4f, 0xb2, 0x85, 0xa3, 0x6c,
-	0xe5, 0x1b, 0x5c, 0x7c, 0xc6, 0x14, 0x24, 0xc0, 0x12, 0xbd, 0xdb, 0x05, 0xa6, 0x47, 0x57, 0x26,
-	0xa3, 0x60, 0x13, 0x2f, 0xce, 0x2c, 0x27, 0x7e, 0x44, 0x6b, 0xbb, 0x83, 0x57, 0xa3, 0xa0, 0xa0,
-	0xe0, 0x3c, 0x40, 0xe7, 0x0a, 0x48, 0x2b, 0x04, 0x94, 0x11, 0xb9, 0xca, 0x83, 0x14, 0xce, 0x6f,
-	0x31, 0x20, 0x02, 0x4e, 0x4a, 0xdb, 0xdb, 0xa7, 0x94, 0xb6, 0xb9, 0x72, 0x75, 0xed, 0x6c, 0xe5,
-	0x6a, 0x51, 0xa8, 0xfe, 0xcb, 0x42, 0x75, 0x6d, 0xe5, 0xd7, 0x0f, 0x67, 0x7e, 0x52, 0xb5, 0xf7,
-	0x4e, 0xc9, 0x57, 0xf9, 0xfe, 0x53, 0xf4, 0x4c, 0x4f, 0x98, 0x9a, 0x95, 0xef, 0x53, 0x78, 0x59,
-	0x03, 0xd7, 0x26, 0xc6, 0x22, 0x2b, 0x16, 0x59, 0x31, 0xcd, 0x8a, 0xdf, 0xb2, 0x78, 0xe9, 0x06,
-	0x88, 0x45, 0x46, 0x2c, 0x1a, 0x9a, 0xff, 0x55, 0x43, 0xf3, 0x32, 0xb5, 0x18, 0xff, 0xca, 0x7d,
-	0xad, 0xbd, 0x15, 0x69, 0x3e, 0x4a, 0xf1, 0xe6, 0xe3, 0xfe, 0x53, 0x74, 0xe2, 0x0b, 0xef, 0x75,
-	0xed, 0x5b, 0x34, 0x3a, 0x50, 0x12, 0xfb, 0x07, 0x4a, 0xe2, 0xf8, 0x40, 0x41, 0x3b, 0x63, 0x05,
-	0xfd, 0x38, 0x56, 0xd0, 0x2f, 0x63, 0x05, 0x8d, 0xc6, 0x0a, 0xda, 0x1f, 0x2b, 0xe8, 0x8f, 0xb1,
-	0x82, 0x1e, 0x8e, 0x95, 0xc4, 0xf1, 0x58, 0x41, 0xdf, 0x1d, 0x2a, 0x89, 0xbd, 0x43, 0x05, 0x8d,
-	0x0e, 0x95, 0xc4, 0xfe, 0xa1, 0x92, 0xf8, 0xea, 0x66, 0x87, 0xba, 0x77, 0x3a, 0x6a, 0x8f, 0xda,
-	0x02, 0x18, 0x23, 0xaa, 0xc7, 0xab, 0xc1, 0x47, 0x9b, 0x32, 0x67, 0x73, 0x2a, 0xb5, 0xd9, 0xbe,
-	0x72, 0xcf, 0xa8, 0xba, 0xcd, 0x0e, 0xad, 0xc2, 0x3d, 0x31, 0x79, 0x68, 0xcd, 0x3f, 0x3c, 0x9b,
-	0x99, 0xe0, 0xc1, 0xf5, 0xc1, 0x3f, 0x01, 0x00, 0x00, 0xff, 0xff, 0xb1, 0xf2, 0xa5, 0xcd, 0x9c,
-	0x0e, 0x00, 0x00,
+	// 2097 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x59, 0xcf, 0x6f, 0x1b, 0xc7,
+	0xf5, 0xe7, 0x88, 0xbf, 0x96, 0x23, 0x8a, 0x5a, 0x8d, 0x18, 0x7d, 0xd7, 0xb2, 0xbf, 0xb4, 0xc0,
+	0xa0, 0x89, 0x6c, 0xd0, 0x14, 0x29, 0xcb, 0x4a, 0x6a, 0xb4, 0x06, 0xc4, 0x1f, 0x16, 0x49, 0xab,
+	0x94, 0x30, 0xa4, 0x95, 0x22, 0x40, 0xb1, 0x58, 0x2e, 0x87, 0xe4, 0xd6, 0x4b, 0x2e, 0xb1, 0xb3,
+	0x94, 0x4d, 0xa0, 0x02, 0x8c, 0x5c, 0xda, 0xde, 0x0a, 0xff, 0x09, 0x45, 0x0f, 0x85, 0xfe, 0x84,
+	0xd2, 0x45, 0x75, 0x0c, 0x7a, 0xd2, 0x51, 0xcd, 0xa9, 0xa6, 0x2f, 0x4e, 0xe2, 0xb6, 0x8e, 0xd1,
+	0x43, 0x11, 0xa0, 0x40, 0xb1, 0xb3, 0x4b, 0x6a, 0x49, 0xca, 0xb4, 0x83, 0x14, 0x28, 0x9a, 0xfa,
+	0xb2, 0xdc, 0x79, 0x3f, 0x3e, 0x6f, 0xf6, 0xbd, 0x37, 0x6f, 0xde, 0x0c, 0xe1, 0xf7, 0x0e, 0x08,
+	0x8d, 0x2b, 0xda, 0x1a, 0x95, 0x1b, 0xa4, 0x29, 0xad, 0xc9, 0x44, 0x37, 0x94, 0x9a, 0x22, 0x4b,
+	0x06, 0x59, 0x33, 0xba, 0x6d, 0x42, 0xe3, 0x6d, 0x5d, 0x33, 0x34, 0x74, 0xc1, 0x12, 0x8b, 0x5b,
+	0x62, 0x71, 0x87, 0xd8, 0xf2, 0xb5, 0xba, 0x62, 0x34, 0x3a, 0x95, 0xb8, 0xac, 0x35, 0xd7, 0xea,
+	0x5a, 0x5d, 0x5b, 0x63, 0x1a, 0x95, 0x4e, 0x8d, 0x8d, 0xd8, 0x80, 0xbd, 0x59, 0x48, 0xcb, 0x97,
+	0xeb, 0x9a, 0x56, 0x57, 0xc9, 0x99, 0x94, 0xa1, 0x34, 0x09, 0x35, 0xa4, 0x66, 0xdb, 0x16, 0x88,
+	0x4c, 0xce, 0x48, 0x74, 0x4c, 0x65, 0xf9, 0xe2, 0x28, 0x5f, 0x6b, 0x1b, 0x8a, 0xd6, 0x1a, 0x30,
+	0x2f, 0x8c, 0x32, 0x9d, 0x7a, 0x97, 0x46, 0x59, 0x07, 0x92, 0xaa, 0x54, 0x25, 0x83, 0xd8, 0xdc,
+	0x95, 0x31, 0xae, 0x42, 0xee, 0x8b, 0xa3, 0xd0, 0x97, 0x27, 0x25, 0xa8, 0xd3, 0x40, 0xf4, 0x53,
+	0x08, 0x43, 0xdb, 0xaa, 0x56, 0x91, 0xd4, 0x52, 0x9b, 0xc8, 0xe5, 0x6e, 0x9b, 0x20, 0x0a, 0xe7,
+	0x1d, 0xae, 0x12, 0x3b, 0xba, 0x2a, 0x80, 0x15, 0xb0, 0x1a, 0x48, 0x15, 0xfe, 0xd1, 0x03, 0x9e,
+	0x5f, 0x3f, 0x06, 0xb3, 0x6d, 0xd2, 0x8c, 0xad, 0x54, 0x24, 0x4a, 0x36, 0x37, 0x8e, 0x1e, 0x83,
+	0xc8, 0xcd, 0x4b, 0x70, 0x19, 0xce, 0xd1, 0x36, 0x91, 0x4d, 0xd0, 0x03, 0xa5, 0x4a, 0x74, 0x14,
+	0x90, 0x3a, 0x86, 0x26, 0x9a, 0x38, 0xbf, 0xfb, 0xfc, 0xd8, 0xed, 0xd3, 0x3d, 0xab, 0x0f, 0x1f,
+	0x72, 0xe6, 0xab, 0x57, 0x77, 0x3f, 0x74, 0x03, 0x1c, 0x72, 0x98, 0xb8, 0xab, 0xab, 0xa8, 0x02,
+	0x67, 0xdb, 0xba, 0x72, 0x60, 0x1a, 0xbc, 0x47, 0xba, 0xc2, 0xcc, 0x0a, 0x58, 0x9d, 0x5d, 0xbf,
+	0x10, 0x1f, 0x8d, 0x60, 0x89, 0xc8, 0x3a, 0x31, 0xcc, 0x49, 0xa6, 0xde, 0x3b, 0xe9, 0x01, 0xf0,
+	0x7a, 0xe3, 0x18, 0xda, 0xa8, 0x77, 0x48, 0x17, 0xdd, 0x86, 0x8b, 0x1d, 0x4a, 0x44, 0xda, 0xa5,
+	0x06, 0x69, 0x8a, 0x55, 0x52, 0x93, 0x3a, 0xaa, 0x41, 0x05, 0x0f, 0xb3, 0x15, 0x1e, 0xb3, 0x95,
+	0x6d, 0xb6, 0x8d, 0x6e, 0xce, 0x85, 0x17, 0x3a, 0x94, 0x94, 0x98, 0x46, 0xc6, 0x56, 0x40, 0x05,
+	0xf8, 0x4e, 0x55, 0xa1, 0x52, 0x45, 0x25, 0xa2, 0x26, 0xd3, 0xb6, 0x48, 0x0d, 0xa9, 0xad, 0x2a,
+	0xad, 0xba, 0xe0, 0x9d, 0x8a, 0xb4, 0x68, 0x2b, 0xed, 0xca, 0xb4, 0x5d, 0xb2, 0x55, 0xd0, 0x5d,
+	0xb8, 0x24, 0x77, 0xa8, 0xa1, 0x35, 0xc5, 0x86, 0x44, 0x1b, 0xa2, 0xa4, 0xd6, 0x35, 0x5d, 0x31,
+	0x1a, 0x4d, 0x2a, 0xf8, 0x18, 0xd8, 0xff, 0x8f, 0x81, 0xe5, 0x24, 0xda, 0xd8, 0x1a, 0x0a, 0xe5,
+	0x5c, 0x38, 0x6c, 0xa9, 0x8f, 0xd2, 0xd1, 0xcf, 0x01, 0x5c, 0x70, 0x06, 0x51, 0x6e, 0x48, 0x4a,
+	0x4b, 0xf0, 0x33, 0xc8, 0xe8, 0x18, 0x24, 0x4b, 0x8a, 0xf8, 0x6e, 0xe5, 0xa7, 0x44, 0x36, 0x30,
+	0xa9, 0x31, 0xf7, 0x6e, 0x1e, 0x1d, 0x4e, 0xea, 0xbf, 0x81, 0xbb, 0x79, 0x87, 0x52, 0xda, 0xd4,
+	0x41, 0x0d, 0x88, 0x1a, 0x86, 0xd1, 0x16, 0x55, 0x4d, 0xaa, 0x56, 0x24, 0x55, 0x6a, 0xc9, 0x44,
+	0xa7, 0xc2, 0x33, 0xff, 0x8a, 0xfb, 0x0d, 0xa7, 0x12, 0x3e, 0x3a, 0x5c, 0x98, 0x40, 0xc0, 0x8c,
+	0xb4, 0xe3, 0xc4, 0x44, 0x04, 0x2e, 0x18, 0xf2, 0xb8, 0xa1, 0xcf, 0xdf, 0xdc, 0xd0, 0xe2, 0xd1,
+	0x21, 0x3f, 0x0e, 0x80, 0x4d, 0xca, 0xa8, 0x19, 0x15, 0xce, 0x1f, 0x28, 0xba, 0xd1, 0x91, 0x54,
+	0x91, 0x12, 0xfd, 0xc0, 0x34, 0xf2, 0xd7, 0x37, 0x37, 0x12, 0x39, 0x3a, 0x0c, 0x8d, 0xaa, 0x7f,
+	0x71, 0x08, 0x0d, 0x42, 0x8d, 0x58, 0x95, 0x34, 0xb5, 0x24, 0x1e, 0x30, 0x4b, 0x16, 0x34, 0x5a,
+	0x87, 0x5e, 0xa5, 0x55, 0xd3, 0xa8, 0xf0, 0x85, 0x65, 0xe3, 0xe2, 0x98, 0x8d, 0x34, 0xd1, 0x8d,
+	0x7c, 0xab, 0xa6, 0x99, 0xe0, 0xd8, 0x12, 0x45, 0x6b, 0xd0, 0xd7, 0x94, 0x5a, 0x1d, 0x49, 0x15,
+	0x9e, 0xfb, 0xa7, 0x64, 0x24, 0xc0, 0xb6, 0x18, 0xba, 0x07, 0x97, 0x06, 0x73, 0x6a, 0x68, 0xd4,
+	0x10, 0x87, 0xf1, 0x14, 0xfe, 0x62, 0x01, 0xc4, 0xe3, 0xaf, 0x2c, 0xa5, 0xf1, 0x7d, 0x4b, 0x33,
+	0xa7, 0x51, 0x63, 0xab, 0x63, 0x68, 0xe6, 0x84, 0x52, 0xee, 0xd3, 0x43, 0x90, 0x03, 0x78, 0xf1,
+	0x60, 0x92, 0x87, 0xf2, 0xf0, 0x2c, 0x5f, 0x84, 0x97, 0x16, 0xfe, 0x95, 0x29, 0xf8, 0x03, 0xc5,
+	0xb4, 0xd6, 0xaa, 0x29, 0xf5, 0x1c, 0xc0, 0x9c, 0x64, 0x53, 0x6e, 0xbe, 0xfb, 0xf2, 0xd6, 0x4a,
+	0x32, 0x91, 0xb8, 0x1e, 0x4b, 0xc6, 0xd6, 0x63, 0xd7, 0x63, 0x1f, 0xc4, 0x92, 0x89, 0x44, 0xc2,
+	0x7c, 0x24, 0xcd, 0xc7, 0xa6, 0xf9, 0x58, 0x4f, 0x5d, 0x81, 0xe1, 0x91, 0x55, 0x2a, 0xca, 0x0d,
+	0x4d, 0x91, 0x09, 0x5a, 0x38, 0xee, 0x01, 0xef, 0x49, 0x0f, 0xb8, 0xfb, 0x3d, 0xe0, 0xdd, 0x88,
+	0xdd, 0x88, 0x6d, 0xa6, 0x96, 0x20, 0x37, 0x4c, 0x6a, 0x78, 0xdc, 0x03, 0xcf, 0xfd, 0x27, 0x3d,
+	0xf0, 0xa5, 0xbf, 0xe0, 0xe1, 0xdc, 0xbc, 0xa7, 0xe0, 0xe3, 0xbe, 0xf4, 0xf3, 0xcf, 0xfd, 0x05,
+	0x1f, 0xf7, 0x37, 0x3f, 0xff, 0xc2, 0xfc, 0x7d, 0xe1, 0xe7, 0xbf, 0x32, 0x7f, 0xbf, 0xf2, 0xf3,
+	0x2f, 0xfd, 0xd1, 0x9f, 0xc1, 0xc5, 0x73, 0x7c, 0x81, 0x08, 0x44, 0xda, 0xfd, 0x16, 0xd1, 0x45,
+	0xa7, 0x8b, 0x05, 0xc0, 0xa2, 0x79, 0x69, 0xec, 0xbb, 0x47, 0x73, 0xe5, 0xc2, 0xd1, 0x61, 0xd0,
+	0xa9, 0xc4, 0xca, 0xe7, 0x23, 0x30, 0xc3, 0x03, 0xcc, 0x33, 0x48, 0x87, 0xb9, 0xe8, 0x1f, 0x00,
+	0x0c, 0x67, 0x8a, 0xa5, 0x44, 0x32, 0xdd, 0x90, 0x54, 0x95, 0xb4, 0xea, 0xc4, 0x72, 0x18, 0xda,
+	0x82, 0xbc, 0xdc, 0x92, 0x9a, 0x44, 0xac, 0x12, 0x95, 0xd4, 0x25, 0x73, 0x77, 0x10, 0xdc, 0x53,
+	0x0b, 0xd5, 0x3c, 0x93, 0xcf, 0x0c, 0xc5, 0xd1, 0x06, 0x0c, 0xd8, 0xca, 0xa4, 0xfa, 0x9a, 0x72,
+	0x79, 0x26, 0x98, 0x8a, 0xc2, 0xc5, 0x6a, 0x8b, 0x8a, 0x03, 0x8f, 0x0e, 0xfc, 0x3e, 0x6b, 0x56,
+	0xee, 0x7e, 0x0f, 0xb8, 0xaf, 0xc7, 0x36, 0x0a, 0x1e, 0x0e, 0xf0, 0x33, 0x05, 0x0f, 0x37, 0xc3,
+	0xbb, 0xa3, 0x07, 0xf0, 0x9d, 0x5c, 0xb9, 0xbc, 0x37, 0xf9, 0x05, 0x3f, 0x81, 0xfc, 0x48, 0x7a,
+	0xea, 0xa4, 0xc6, 0x76, 0xa4, 0x37, 0x5b, 0x71, 0xf3, 0x63, 0x5e, 0x1c, 0x2e, 0x31, 0xd3, 0x6d,
+	0x98, 0xd4, 0xa2, 0x61, 0x88, 0xf6, 0x74, 0xb2, 0x6f, 0x6f, 0xad, 0x55, 0xcb, 0x68, 0xf4, 0xd4,
+	0x0b, 0x43, 0xa3, 0xa9, 0x87, 0x7e, 0x00, 0xfd, 0x55, 0xad, 0x29, 0x29, 0x2d, 0xca, 0xc2, 0x17,
+	0x48, 0x45, 0xcd, 0x88, 0x04, 0x1e, 0x01, 0x1f, 0x07, 0xf8, 0xaa, 0x00, 0xcc, 0xd1, 0xfc, 0x23,
+	0x10, 0x8c, 0x42, 0x9d, 0xe3, 0x81, 0xf0, 0x4f, 0xf0, 0x8b, 0x19, 0x80, 0x07, 0x2a, 0x28, 0x01,
+	0xfd, 0xf6, 0x96, 0x23, 0x84, 0xa6, 0xba, 0x70, 0x20, 0x86, 0x8a, 0x70, 0xce, 0xde, 0x1b, 0x14,
+	0x4a, 0x3b, 0x44, 0x17, 0xe6, 0x99, 0xde, 0xfb, 0x53, 0x16, 0x4b, 0x9a, 0xc9, 0xe7, 0x99, 0x78,
+	0xce, 0x85, 0x83, 0xb2, 0x63, 0x8c, 0x72, 0xd0, 0x67, 0x06, 0x24, 0x91, 0xb4, 0xf7, 0x96, 0xb5,
+	0x29, 0x40, 0xe7, 0xa5, 0x52, 0x0e, 0x60, 0x6f, 0xb5, 0x45, 0x13, 0x49, 0x54, 0x86, 0x73, 0x6d,
+	0x9d, 0x88, 0x83, 0x76, 0xa4, 0x2a, 0xf0, 0x0c, 0xf0, 0xda, 0x14, 0xc0, 0x49, 0x17, 0xe7, 0x00,
+	0x0e, 0xb6, 0x1d, 0x54, 0x54, 0x86, 0x7e, 0x56, 0xe8, 0x13, 0x49, 0x7b, 0xa7, 0x4a, 0x4c, 0xc1,
+	0x3b, 0x37, 0x55, 0x52, 0xfe, 0xd3, 0x43, 0xf0, 0xac, 0x07, 0xcc, 0xe2, 0xe3, 0x33, 0xb1, 0x12,
+	0x49, 0xf4, 0x43, 0xb8, 0xa0, 0x93, 0x16, 0xb9, 0x2f, 0x56, 0x48, 0x4d, 0xd3, 0x89, 0x58, 0x95,
+	0xba, 0x54, 0x08, 0xae, 0x80, 0xd5, 0xb9, 0xd4, 0xc2, 0x67, 0x3d, 0x30, 0x93, 0xbc, 0xc1, 0x3a,
+	0x94, 0xab, 0x1e, 0xe1, 0xe3, 0x55, 0x80, 0xe7, 0x99, 0x6c, 0x8a, 0x89, 0x66, 0xa4, 0x2e, 0x45,
+	0x3b, 0x70, 0xee, 0x1e, 0xe9, 0x9e, 0x6d, 0xcc, 0x02, 0x5c, 0x01, 0xab, 0xa1, 0xa9, 0x41, 0xb8,
+	0x43, 0xba, 0xc3, 0xad, 0x18, 0x07, 0xef, 0x39, 0x46, 0xa9, 0x28, 0x9c, 0xb3, 0x62, 0xe9, 0xac,
+	0x42, 0xa1, 0x93, 0x1e, 0x98, 0x33, 0xab, 0x50, 0x72, 0x23, 0x96, 0xbc, 0x91, 0x7a, 0x0f, 0xf2,
+	0xf2, 0xe0, 0xb3, 0x06, 0x62, 0xe8, 0xb8, 0x07, 0x7c, 0x27, 0x3d, 0xe0, 0xed, 0xf7, 0x80, 0x6f,
+	0x33, 0x96, 0xdc, 0x8c, 0x7d, 0x60, 0xad, 0x1a, 0xbb, 0x36, 0x79, 0x38, 0x0f, 0xef, 0x2d, 0x78,
+	0x38, 0x8e, 0x0f, 0x14, 0x3c, 0x5c, 0x80, 0x87, 0x05, 0x0f, 0x37, 0xcb, 0x07, 0x0b, 0x1e, 0x6e,
+	0x8e, 0x0f, 0x15, 0x3c, 0x9c, 0x97, 0xf7, 0x61, 0x3f, 0xfb, 0x34, 0x49, 0x8d, 0x6a, 0x30, 0xe8,
+	0xcc, 0x13, 0x24, 0x42, 0x68, 0x4f, 0xca, 0x5a, 0x59, 0xaf, 0xaf, 0x4c, 0xd1, 0xa3, 0xc3, 0x59,
+	0x49, 0x6e, 0x12, 0x3b, 0x31, 0xcf, 0x0a, 0xd3, 0xe0, 0x8d, 0x03, 0x38, 0x60, 0xf1, 0xcc, 0x15,
+	0xf6, 0x78, 0x06, 0x2e, 0xa7, 0xcf, 0x1c, 0xb4, 0xa3, 0xd4, 0x88, 0xdc, 0x95, 0x55, 0x52, 0x32,
+	0x24, 0xa3, 0x43, 0x51, 0x1a, 0x7a, 0xa9, 0x21, 0x19, 0x84, 0x2d, 0xea, 0xd0, 0xd4, 0x2c, 0x32,
+	0x51, 0x46, 0xd4, 0x09, 0xb6, 0x74, 0xd1, 0xbb, 0x70, 0x8e, 0xe8, 0xba, 0xa6, 0x8b, 0x4d, 0x42,
+	0xa9, 0x54, 0x27, 0x2c, 0x4e, 0x01, 0x1c, 0x64, 0xc4, 0x1f, 0x59, 0x34, 0x54, 0x86, 0xbc, 0xb9,
+	0x02, 0x94, 0x16, 0x35, 0xf4, 0x8e, 0xcc, 0x1a, 0x65, 0xe1, 0x32, 0xfb, 0xde, 0x2b, 0xd3, 0xd7,
+	0x42, 0xfe, 0x4c, 0x03, 0xcf, 0x57, 0x5b, 0xd4, 0x31, 0xa6, 0xe8, 0x36, 0x5c, 0x68, 0x91, 0x07,
+	0x66, 0x5d, 0x62, 0xfe, 0x15, 0xcd, 0xc3, 0x81, 0x5d, 0x26, 0x97, 0xe3, 0xd6, 0xc9, 0x21, 0x3e,
+	0x38, 0x39, 0xc4, 0xcb, 0x83, 0x93, 0x03, 0x9e, 0x37, 0x95, 0xb0, 0xa5, 0x63, 0x52, 0x87, 0x01,
+	0xb5, 0x02, 0x17, 0xe6, 0xdf, 0x29, 0x78, 0xb8, 0x08, 0x7f, 0x39, 0xfa, 0x1b, 0x00, 0x43, 0xa3,
+	0x73, 0x40, 0x97, 0xe1, 0xac, 0x4e, 0x64, 0x4d, 0xaf, 0xb2, 0x53, 0x86, 0xd5, 0x9f, 0x63, 0x68,
+	0x91, 0x58, 0x13, 0x8f, 0xa0, 0xc7, 0x2c, 0xe2, 0xac, 0x91, 0x0e, 0x60, 0xf6, 0x8e, 0xc2, 0xd0,
+	0x7b, 0x20, 0xa9, 0x1d, 0xc2, 0xca, 0x7f, 0x00, 0x5b, 0x03, 0xb4, 0x0d, 0x7d, 0x94, 0xc5, 0x81,
+	0x4d, 0x39, 0xf4, 0xba, 0xaa, 0xe0, 0x98, 0x85, 0x15, 0x3e, 0x6c, 0xab, 0x47, 0xff, 0xe4, 0x85,
+	0xa1, 0xb4, 0x4e, 0x24, 0x83, 0x0c, 0x8f, 0x12, 0xef, 0xbf, 0xe2, 0x28, 0x31, 0xd1, 0xfe, 0xdf,
+	0xfc, 0x66, 0xed, 0xff, 0xff, 0x6a, 0x5b, 0x4f, 0xbe, 0x5d, 0x57, 0x1f, 0x3e, 0xaf, 0xab, 0x3f,
+	0xa7, 0x67, 0xff, 0xc6, 0x0d, 0xe4, 0xbf, 0xb1, 0xa7, 0x5b, 0xf9, 0xe3, 0xad, 0xb1, 0x03, 0xe9,
+	0xcb, 0x5b, 0x41, 0x67, 0x93, 0x97, 0x4a, 0xbc, 0xa2, 0xa1, 0x13, 0x3e, 0xf9, 0x1a, 0x9c, 0xcb,
+	0x49, 0x45, 0x1d, 0x7d, 0xdd, 0xd2, 0x59, 0x5f, 0xf7, 0xc9, 0xd7, 0x60, 0x48, 0x1f, 0xf6, 0x78,
+	0xe7, 0xf7, 0x76, 0x9f, 0x79, 0xe1, 0x3c, 0x26, 0x6d, 0x55, 0x92, 0xdf, 0x26, 0xf7, 0xdb, 0xe4,
+	0xfe, 0x8e, 0x25, 0xf7, 0xef, 0x03, 0x70, 0x76, 0x9b, 0x18, 0x6f, 0x13, 0xfb, 0xbf, 0x3b, 0xb1,
+	0xbf, 0x73, 0x37, 0x2d, 0x6f, 0xef, 0x3e, 0x5e, 0x5d, 0x4a, 0x90, 0xf8, 0xad, 0xae, 0xa1, 0x16,
+	0x26, 0xae, 0xa1, 0xc6, 0x6f, 0x9e, 0x6e, 0x6e, 0x9c, 0x53, 0xab, 0x5e, 0x7f, 0xdb, 0xf2, 0x1f,
+	0xa8, 0x5f, 0x57, 0xf7, 0x60, 0xd0, 0x79, 0xe4, 0x42, 0x41, 0xc8, 0xe1, 0xd2, 0x96, 0xb8, 0x9e,
+	0xd8, 0xf8, 0x90, 0x77, 0x0d, 0x46, 0x1b, 0x89, 0xef, 0x6f, 0xf2, 0x00, 0x85, 0x20, 0xcc, 0xa6,
+	0x33, 0xa5, 0x2d, 0x71, 0x6f, 0xfd, 0xc6, 0x26, 0x3f, 0x83, 0xc2, 0xc3, 0xf1, 0xf5, 0x0f, 0x37,
+	0x78, 0xf7, 0xb2, 0xe7, 0xb8, 0x07, 0xc0, 0xd5, 0xbf, 0x03, 0x88, 0x26, 0x8f, 0x1a, 0x88, 0x87,
+	0xc1, 0x74, 0x16, 0x97, 0xc5, 0xbd, 0x6c, 0x31, 0x93, 0x2f, 0x6e, 0xf3, 0xae, 0x21, 0x25, 0x5f,
+	0x2a, 0xdd, 0x35, 0x29, 0x00, 0x45, 0xe0, 0x32, 0xa3, 0xa4, 0x73, 0x5b, 0x3b, 0x3b, 0xd9, 0xe2,
+	0x76, 0x56, 0xcc, 0x17, 0xc5, 0x3d, 0xbc, 0xbb, 0x8d, 0xb3, 0xa5, 0x12, 0x3f, 0x63, 0x4e, 0x80,
+	0xf1, 0xf7, 0xb7, 0x76, 0xf2, 0x19, 0xde, 0x8d, 0x16, 0xe0, 0x1c, 0x1b, 0xe3, 0x6c, 0x31, 0xfb,
+	0x91, 0x09, 0xe1, 0x19, 0x82, 0x66, 0x7f, 0xbc, 0x97, 0xc7, 0xd9, 0x0c, 0xef, 0x1d, 0x52, 0x70,
+	0x76, 0x7f, 0xf7, 0x4e, 0x36, 0xc3, 0xfb, 0x86, 0x30, 0x59, 0x8c, 0x77, 0x31, 0xef, 0x77, 0xc0,
+	0xec, 0xef, 0xde, 0x31, 0x61, 0x38, 0x24, 0xc0, 0x30, 0x23, 0x7d, 0xb4, 0x95, 0x2f, 0xe7, 0x8b,
+	0xdb, 0xe2, 0xed, 0x5d, 0x2c, 0x66, 0x8a, 0x25, 0x3e, 0x80, 0x96, 0x20, 0x72, 0xc0, 0x89, 0xb7,
+	0xb7, 0xf2, 0x3b, 0xd9, 0x0c, 0x0f, 0xaf, 0x36, 0xd9, 0x15, 0xd2, 0x44, 0x87, 0x8f, 0x2e, 0xc2,
+	0xff, 0xcb, 0x14, 0x4b, 0x62, 0xbe, 0x58, 0x2a, 0xe3, 0xbb, 0xe9, 0x72, 0x7e, 0xb7, 0xe8, 0x70,
+	0xc1, 0x25, 0x28, 0x8c, 0x33, 0xf7, 0xb3, 0x38, 0x7f, 0x3b, 0x9f, 0xcd, 0xf0, 0x00, 0x2d, 0xc3,
+	0xa5, 0x71, 0xae, 0x6d, 0x6e, 0x26, 0xf5, 0x4b, 0x70, 0xf2, 0x24, 0xe2, 0x3a, 0x7d, 0x12, 0x71,
+	0xbd, 0x78, 0x12, 0x01, 0x0f, 0xfb, 0x11, 0xf0, 0xdb, 0x7e, 0x04, 0x7c, 0xda, 0x8f, 0x80, 0x93,
+	0x7e, 0x04, 0x9c, 0xf6, 0x23, 0xe0, 0xcf, 0xfd, 0x08, 0x78, 0xd6, 0x8f, 0xb8, 0x5e, 0xf4, 0x23,
+	0xe0, 0x57, 0x4f, 0x23, 0xae, 0xe3, 0xa7, 0x11, 0x70, 0xf2, 0x34, 0xe2, 0x3a, 0x7d, 0x1a, 0x71,
+	0x7d, 0x7c, 0xa7, 0xae, 0xb5, 0xef, 0xd5, 0xe3, 0x07, 0x9a, 0x6a, 0x10, 0x5d, 0x97, 0xe2, 0x1d,
+	0xba, 0xc6, 0x5e, 0x6a, 0x9a, 0xde, 0xbc, 0x36, 0x48, 0x9d, 0x6b, 0xb5, 0x1b, 0x0f, 0xe4, 0xb5,
+	0x76, 0xa5, 0xae, 0xad, 0x91, 0x07, 0x86, 0xfd, 0x37, 0xc8, 0xe4, 0xff, 0x46, 0x15, 0x1f, 0x3b,
+	0xa0, 0x5d, 0xff, 0x57, 0x00, 0x00, 0x00, 0xff, 0xff, 0xf9, 0x66, 0x51, 0x9c, 0x5b, 0x1a, 0x00,
+	0x00,
 }
 
+func (x KeyAlgorithm) String() string {
+	s, ok := KeyAlgorithm_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
+func (x CertLifecycleState) String() string {
+	s, ok := CertLifecycleState_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
+func (x DNSInstructionStatus) String() string {
+	s, ok := DNSInstructionStatus_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
 func (this *GlobalSpecType) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -1028,6 +1996,30 @@ func (this *GlobalSpecType_VirtualHostAutoCert) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *GlobalSpecType_AutoCert) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GlobalSpecType_AutoCert)
+	if !ok {
+		that2, ok := that.(GlobalSpecType_AutoCert)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AutoCert.Equal(that1.AutoCert) {
+		return false
+	}
+	return true
+}
 func (this *VirtualHostAutoCert) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -1054,6 +2046,402 @@ func (this *VirtualHostAutoCert) Equal(that interface{}) bool {
 		if !this.OwnerVirtualHost[i].Equal(that1.OwnerVirtualHost[i]) {
 			return false
 		}
+	}
+	return true
+}
+func (this *DNS01ChallengeConfig) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*DNS01ChallengeConfig)
+	if !ok {
+		that2, ok := that.(DNS01ChallengeConfig)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if that1.DnsProviderChoice == nil {
+		if this.DnsProviderChoice != nil {
+			return false
+		}
+	} else if this.DnsProviderChoice == nil {
+		return false
+	} else if !this.DnsProviderChoice.Equal(that1.DnsProviderChoice) {
+		return false
+	}
+	return true
+}
+func (this *DNS01ChallengeConfig_CnameDelegation) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*DNS01ChallengeConfig_CnameDelegation)
+	if !ok {
+		that2, ok := that.(DNS01ChallengeConfig_CnameDelegation)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.CnameDelegation.Equal(that1.CnameDelegation) {
+		return false
+	}
+	return true
+}
+func (this *DNS01ChallengeConfig_Delegated) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*DNS01ChallengeConfig_Delegated)
+	if !ok {
+		that2, ok := that.(DNS01ChallengeConfig_Delegated)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Delegated.Equal(that1.Delegated) {
+		return false
+	}
+	return true
+}
+func (this *HTTP01ChallengeConfig) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*HTTP01ChallengeConfig)
+	if !ok {
+		that2, ok := that.(HTTP01ChallengeConfig)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.VirtualHostRef.Equal(that1.VirtualHostRef) {
+		return false
+	}
+	return true
+}
+func (this *PreValidatedConfig) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*PreValidatedConfig)
+	if !ok {
+		that2, ok := that.(PreValidatedConfig)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	return true
+}
+func (this *AutoCertConfig) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*AutoCertConfig)
+	if !ok {
+		that2, ok := that.(AutoCertConfig)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.Domains) != len(that1.Domains) {
+		return false
+	}
+	for i := range this.Domains {
+		if this.Domains[i] != that1.Domains[i] {
+			return false
+		}
+	}
+	if that1.IssuerChoice == nil {
+		if this.IssuerChoice != nil {
+			return false
+		}
+	} else if this.IssuerChoice == nil {
+		return false
+	} else if !this.IssuerChoice.Equal(that1.IssuerChoice) {
+		return false
+	}
+	if that1.ChallengeChoice == nil {
+		if this.ChallengeChoice != nil {
+			return false
+		}
+	} else if this.ChallengeChoice == nil {
+		return false
+	} else if !this.ChallengeChoice.Equal(that1.ChallengeChoice) {
+		return false
+	}
+	if this.RenewBeforeDays != that1.RenewBeforeDays {
+		return false
+	}
+	if this.KeyAlgorithm != that1.KeyAlgorithm {
+		return false
+	}
+	return true
+}
+func (this *AutoCertConfig_Default) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*AutoCertConfig_Default)
+	if !ok {
+		that2, ok := that.(AutoCertConfig_Default)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Default.Equal(that1.Default) {
+		return false
+	}
+	return true
+}
+func (this *AutoCertConfig_CustomIssuer) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*AutoCertConfig_CustomIssuer)
+	if !ok {
+		that2, ok := that.(AutoCertConfig_CustomIssuer)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.CustomIssuer.Equal(that1.CustomIssuer) {
+		return false
+	}
+	return true
+}
+func (this *AutoCertConfig_Dns_01) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*AutoCertConfig_Dns_01)
+	if !ok {
+		that2, ok := that.(AutoCertConfig_Dns_01)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Dns_01.Equal(that1.Dns_01) {
+		return false
+	}
+	return true
+}
+func (this *AutoCertConfig_PreValidated) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*AutoCertConfig_PreValidated)
+	if !ok {
+		that2, ok := that.(AutoCertConfig_PreValidated)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.PreValidated.Equal(that1.PreValidated) {
+		return false
+	}
+	return true
+}
+func (this *AutoCertConfig_Http_01) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*AutoCertConfig_Http_01)
+	if !ok {
+		that2, ok := that.(AutoCertConfig_Http_01)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Http_01.Equal(that1.Http_01) {
+		return false
+	}
+	return true
+}
+func (this *CustomIssuer) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CustomIssuer)
+	if !ok {
+		that2, ok := that.(CustomIssuer)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.IssuerRef) != len(that1.IssuerRef) {
+		return false
+	}
+	for i := range this.IssuerRef {
+		if !this.IssuerRef[i].Equal(that1.IssuerRef[i]) {
+			return false
+		}
+	}
+	return true
+}
+func (this *CertificateLifecycleStatus) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CertificateLifecycleStatus)
+	if !ok {
+		that2, ok := that.(CertificateLifecycleStatus)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.State != that1.State {
+		return false
+	}
+	if this.ErrorMessage != that1.ErrorMessage {
+		return false
+	}
+	if len(this.DnsInstructions) != len(that1.DnsInstructions) {
+		return false
+	}
+	for i := range this.DnsInstructions {
+		if !this.DnsInstructions[i].Equal(that1.DnsInstructions[i]) {
+			return false
+		}
+	}
+	if !this.NextRenewalTime.Equal(that1.NextRenewalTime) {
+		return false
+	}
+	return true
+}
+func (this *DNSInstruction) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*DNSInstruction)
+	if !ok {
+		that2, ok := that.(DNSInstruction)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.RecordType != that1.RecordType {
+		return false
+	}
+	if this.Name != that1.Name {
+		return false
+	}
+	if this.Value != that1.Value {
+		return false
+	}
+	if this.Status != that1.Status {
+		return false
 	}
 	return true
 }
@@ -1092,6 +2480,15 @@ func (this *CreateSpecType) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.CertificateChain.Equal(that1.CertificateChain) {
+		return false
+	}
+	if that1.Provider == nil {
+		if this.Provider != nil {
+			return false
+		}
+	} else if this.Provider == nil {
+		return false
+	} else if !this.Provider.Equal(that1.Provider) {
 		return false
 	}
 	return true
@@ -1168,6 +2565,54 @@ func (this *CreateSpecType_CustomHashAlgorithms) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *CreateSpecType_Manual) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CreateSpecType_Manual)
+	if !ok {
+		that2, ok := that.(CreateSpecType_Manual)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Manual.Equal(that1.Manual) {
+		return false
+	}
+	return true
+}
+func (this *CreateSpecType_AutoCert) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CreateSpecType_AutoCert)
+	if !ok {
+		that2, ok := that.(CreateSpecType_AutoCert)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AutoCert.Equal(that1.AutoCert) {
+		return false
+	}
+	return true
+}
 func (this *ReplaceSpecType) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -1203,6 +2648,15 @@ func (this *ReplaceSpecType) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.CertificateChain.Equal(that1.CertificateChain) {
+		return false
+	}
+	if that1.Provider == nil {
+		if this.Provider != nil {
+			return false
+		}
+	} else if this.Provider == nil {
+		return false
+	} else if !this.Provider.Equal(that1.Provider) {
 		return false
 	}
 	return true
@@ -1279,6 +2733,54 @@ func (this *ReplaceSpecType_CustomHashAlgorithms) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *ReplaceSpecType_Manual) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplaceSpecType_Manual)
+	if !ok {
+		that2, ok := that.(ReplaceSpecType_Manual)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Manual.Equal(that1.Manual) {
+		return false
+	}
+	return true
+}
+func (this *ReplaceSpecType_AutoCert) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplaceSpecType_AutoCert)
+	if !ok {
+		that2, ok := that.(ReplaceSpecType_AutoCert)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AutoCert.Equal(that1.AutoCert) {
+		return false
+	}
+	return true
+}
 func (this *GetSpecType) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -1348,6 +2850,14 @@ func (this *GetSpecType) Equal(that interface{}) bool {
 		return false
 	} else if !this.Provider.Equal(that1.Provider) {
 		return false
+	}
+	if len(this.VirtualServers) != len(that1.VirtualServers) {
+		return false
+	}
+	for i := range this.VirtualServers {
+		if !this.VirtualServers[i].Equal(that1.VirtualServers[i]) {
+			return false
+		}
 	}
 	return true
 }
@@ -1471,11 +2981,35 @@ func (this *GetSpecType_VirtualHostAutoCert) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *GetSpecType_AutoCert) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetSpecType_AutoCert)
+	if !ok {
+		that2, ok := that.(GetSpecType_AutoCert)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AutoCert.Equal(that1.AutoCert) {
+		return false
+	}
+	return true
+}
 func (this *GlobalSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 16)
+	s := make([]string, 0, 17)
 	s = append(s, "&certificate.GlobalSpecType{")
 	s = append(s, "CertificateUrl: "+fmt.Sprintf("%#v", this.CertificateUrl)+",\n")
 	if this.PrivateKey != nil {
@@ -1545,6 +3079,14 @@ func (this *GlobalSpecType_VirtualHostAutoCert) GoString() string {
 		`VirtualHostAutoCert:` + fmt.Sprintf("%#v", this.VirtualHostAutoCert) + `}`}, ", ")
 	return s
 }
+func (this *GlobalSpecType_AutoCert) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&certificate.GlobalSpecType_AutoCert{` +
+		`AutoCert:` + fmt.Sprintf("%#v", this.AutoCert) + `}`}, ", ")
+	return s
+}
 func (this *VirtualHostAutoCert) GoString() string {
 	if this == nil {
 		return "nil"
@@ -1557,11 +3099,160 @@ func (this *VirtualHostAutoCert) GoString() string {
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
+func (this *DNS01ChallengeConfig) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&certificate.DNS01ChallengeConfig{")
+	if this.DnsProviderChoice != nil {
+		s = append(s, "DnsProviderChoice: "+fmt.Sprintf("%#v", this.DnsProviderChoice)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *DNS01ChallengeConfig_CnameDelegation) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&certificate.DNS01ChallengeConfig_CnameDelegation{` +
+		`CnameDelegation:` + fmt.Sprintf("%#v", this.CnameDelegation) + `}`}, ", ")
+	return s
+}
+func (this *DNS01ChallengeConfig_Delegated) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&certificate.DNS01ChallengeConfig_Delegated{` +
+		`Delegated:` + fmt.Sprintf("%#v", this.Delegated) + `}`}, ", ")
+	return s
+}
+func (this *HTTP01ChallengeConfig) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&certificate.HTTP01ChallengeConfig{")
+	if this.VirtualHostRef != nil {
+		s = append(s, "VirtualHostRef: "+fmt.Sprintf("%#v", this.VirtualHostRef)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *PreValidatedConfig) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 4)
+	s = append(s, "&certificate.PreValidatedConfig{")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *AutoCertConfig) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 12)
+	s = append(s, "&certificate.AutoCertConfig{")
+	s = append(s, "Domains: "+fmt.Sprintf("%#v", this.Domains)+",\n")
+	if this.IssuerChoice != nil {
+		s = append(s, "IssuerChoice: "+fmt.Sprintf("%#v", this.IssuerChoice)+",\n")
+	}
+	if this.ChallengeChoice != nil {
+		s = append(s, "ChallengeChoice: "+fmt.Sprintf("%#v", this.ChallengeChoice)+",\n")
+	}
+	s = append(s, "RenewBeforeDays: "+fmt.Sprintf("%#v", this.RenewBeforeDays)+",\n")
+	s = append(s, "KeyAlgorithm: "+fmt.Sprintf("%#v", this.KeyAlgorithm)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *AutoCertConfig_Default) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&certificate.AutoCertConfig_Default{` +
+		`Default:` + fmt.Sprintf("%#v", this.Default) + `}`}, ", ")
+	return s
+}
+func (this *AutoCertConfig_CustomIssuer) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&certificate.AutoCertConfig_CustomIssuer{` +
+		`CustomIssuer:` + fmt.Sprintf("%#v", this.CustomIssuer) + `}`}, ", ")
+	return s
+}
+func (this *AutoCertConfig_Dns_01) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&certificate.AutoCertConfig_Dns_01{` +
+		`Dns_01:` + fmt.Sprintf("%#v", this.Dns_01) + `}`}, ", ")
+	return s
+}
+func (this *AutoCertConfig_PreValidated) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&certificate.AutoCertConfig_PreValidated{` +
+		`PreValidated:` + fmt.Sprintf("%#v", this.PreValidated) + `}`}, ", ")
+	return s
+}
+func (this *AutoCertConfig_Http_01) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&certificate.AutoCertConfig_Http_01{` +
+		`Http_01:` + fmt.Sprintf("%#v", this.Http_01) + `}`}, ", ")
+	return s
+}
+func (this *CustomIssuer) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&certificate.CustomIssuer{")
+	if this.IssuerRef != nil {
+		s = append(s, "IssuerRef: "+fmt.Sprintf("%#v", this.IssuerRef)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *CertificateLifecycleStatus) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 8)
+	s = append(s, "&certificate.CertificateLifecycleStatus{")
+	s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
+	s = append(s, "ErrorMessage: "+fmt.Sprintf("%#v", this.ErrorMessage)+",\n")
+	if this.DnsInstructions != nil {
+		s = append(s, "DnsInstructions: "+fmt.Sprintf("%#v", this.DnsInstructions)+",\n")
+	}
+	if this.NextRenewalTime != nil {
+		s = append(s, "NextRenewalTime: "+fmt.Sprintf("%#v", this.NextRenewalTime)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *DNSInstruction) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 8)
+	s = append(s, "&certificate.DNSInstruction{")
+	s = append(s, "RecordType: "+fmt.Sprintf("%#v", this.RecordType)+",\n")
+	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
+	s = append(s, "Value: "+fmt.Sprintf("%#v", this.Value)+",\n")
+	s = append(s, "Status: "+fmt.Sprintf("%#v", this.Status)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
 func (this *CreateSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 10)
+	s := make([]string, 0, 12)
 	s = append(s, "&certificate.CreateSpecType{")
 	s = append(s, "CertificateUrl: "+fmt.Sprintf("%#v", this.CertificateUrl)+",\n")
 	if this.PrivateKey != nil {
@@ -1572,6 +3263,9 @@ func (this *CreateSpecType) GoString() string {
 	}
 	if this.CertificateChain != nil {
 		s = append(s, "CertificateChain: "+fmt.Sprintf("%#v", this.CertificateChain)+",\n")
+	}
+	if this.Provider != nil {
+		s = append(s, "Provider: "+fmt.Sprintf("%#v", this.Provider)+",\n")
 	}
 	s = append(s, "}")
 	return strings.Join(s, "")
@@ -1600,11 +3294,27 @@ func (this *CreateSpecType_CustomHashAlgorithms) GoString() string {
 		`CustomHashAlgorithms:` + fmt.Sprintf("%#v", this.CustomHashAlgorithms) + `}`}, ", ")
 	return s
 }
+func (this *CreateSpecType_Manual) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&certificate.CreateSpecType_Manual{` +
+		`Manual:` + fmt.Sprintf("%#v", this.Manual) + `}`}, ", ")
+	return s
+}
+func (this *CreateSpecType_AutoCert) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&certificate.CreateSpecType_AutoCert{` +
+		`AutoCert:` + fmt.Sprintf("%#v", this.AutoCert) + `}`}, ", ")
+	return s
+}
 func (this *ReplaceSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 10)
+	s := make([]string, 0, 12)
 	s = append(s, "&certificate.ReplaceSpecType{")
 	s = append(s, "CertificateUrl: "+fmt.Sprintf("%#v", this.CertificateUrl)+",\n")
 	if this.PrivateKey != nil {
@@ -1615,6 +3325,9 @@ func (this *ReplaceSpecType) GoString() string {
 	}
 	if this.CertificateChain != nil {
 		s = append(s, "CertificateChain: "+fmt.Sprintf("%#v", this.CertificateChain)+",\n")
+	}
+	if this.Provider != nil {
+		s = append(s, "Provider: "+fmt.Sprintf("%#v", this.Provider)+",\n")
 	}
 	s = append(s, "}")
 	return strings.Join(s, "")
@@ -1643,11 +3356,27 @@ func (this *ReplaceSpecType_CustomHashAlgorithms) GoString() string {
 		`CustomHashAlgorithms:` + fmt.Sprintf("%#v", this.CustomHashAlgorithms) + `}`}, ", ")
 	return s
 }
+func (this *ReplaceSpecType_Manual) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&certificate.ReplaceSpecType_Manual{` +
+		`Manual:` + fmt.Sprintf("%#v", this.Manual) + `}`}, ", ")
+	return s
+}
+func (this *ReplaceSpecType_AutoCert) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&certificate.ReplaceSpecType_AutoCert{` +
+		`AutoCert:` + fmt.Sprintf("%#v", this.AutoCert) + `}`}, ", ")
+	return s
+}
 func (this *GetSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 15)
+	s := make([]string, 0, 17)
 	s = append(s, "&certificate.GetSpecType{")
 	s = append(s, "CertificateUrl: "+fmt.Sprintf("%#v", this.CertificateUrl)+",\n")
 	if this.PrivateKey != nil {
@@ -1670,6 +3399,9 @@ func (this *GetSpecType) GoString() string {
 	}
 	if this.Provider != nil {
 		s = append(s, "Provider: "+fmt.Sprintf("%#v", this.Provider)+",\n")
+	}
+	if this.VirtualServers != nil {
+		s = append(s, "VirtualServers: "+fmt.Sprintf("%#v", this.VirtualServers)+",\n")
 	}
 	s = append(s, "}")
 	return strings.Join(s, "")
@@ -1714,6 +3446,14 @@ func (this *GetSpecType_VirtualHostAutoCert) GoString() string {
 		`VirtualHostAutoCert:` + fmt.Sprintf("%#v", this.VirtualHostAutoCert) + `}`}, ", ")
 	return s
 }
+func (this *GetSpecType_AutoCert) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&certificate.GetSpecType_AutoCert{` +
+		`AutoCert:` + fmt.Sprintf("%#v", this.AutoCert) + `}`}, ", ")
+	return s
+}
 func valueToGoStringTypes(v interface{}, typ string) string {
 	rv := reflect.ValueOf(v)
 	if rv.IsNil() {
@@ -1742,6 +3482,15 @@ func (m *GlobalSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.Provider != nil {
+		{
+			size := m.Provider.Size()
+			i -= size
+			if _, err := m.Provider.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
 	if len(m.VirtualServers) > 0 {
 		for iNdEx := len(m.VirtualServers) - 1; iNdEx >= 0; iNdEx-- {
 			{
@@ -1756,15 +3505,6 @@ func (m *GlobalSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			dAtA[i] = 0x3e
 			i--
 			dAtA[i] = 0xf2
-		}
-	}
-	if m.Provider != nil {
-		{
-			size := m.Provider.Size()
-			i -= size
-			if _, err := m.Provider.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
 		}
 	}
 	if len(m.Infos) > 0 {
@@ -1967,6 +3707,29 @@ func (m *GlobalSpecType_VirtualHostAutoCert) MarshalToSizedBuffer(dAtA []byte) (
 	}
 	return len(dAtA) - i, nil
 }
+func (m *GlobalSpecType_AutoCert) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GlobalSpecType_AutoCert) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.AutoCert != nil {
+		{
+			size, err := m.AutoCert.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x3f
+		i--
+		dAtA[i] = 0x92
+	}
+	return len(dAtA) - i, nil
+}
 func (m *VirtualHostAutoCert) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -2004,6 +3767,454 @@ func (m *VirtualHostAutoCert) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *DNS01ChallengeConfig) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *DNS01ChallengeConfig) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *DNS01ChallengeConfig) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.DnsProviderChoice != nil {
+		{
+			size := m.DnsProviderChoice.Size()
+			i -= size
+			if _, err := m.DnsProviderChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *DNS01ChallengeConfig_CnameDelegation) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *DNS01ChallengeConfig_CnameDelegation) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.CnameDelegation != nil {
+		{
+			size, err := m.CnameDelegation.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *DNS01ChallengeConfig_Delegated) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *DNS01ChallengeConfig_Delegated) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Delegated != nil {
+		{
+			size, err := m.Delegated.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x22
+	}
+	return len(dAtA) - i, nil
+}
+func (m *HTTP01ChallengeConfig) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *HTTP01ChallengeConfig) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTP01ChallengeConfig) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.VirtualHostRef != nil {
+		{
+			size, err := m.VirtualHostRef.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *PreValidatedConfig) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *PreValidatedConfig) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *PreValidatedConfig) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *AutoCertConfig) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *AutoCertConfig) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *AutoCertConfig) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.ChallengeChoice != nil {
+		{
+			size := m.ChallengeChoice.Size()
+			i -= size
+			if _, err := m.ChallengeChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	if m.IssuerChoice != nil {
+		{
+			size := m.IssuerChoice.Size()
+			i -= size
+			if _, err := m.IssuerChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	if m.RenewBeforeDays != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.RenewBeforeDays))
+		i--
+		dAtA[i] = 0x60
+	}
+	if m.KeyAlgorithm != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.KeyAlgorithm))
+		i--
+		dAtA[i] = 0x50
+	}
+	if len(m.Domains) > 0 {
+		for iNdEx := len(m.Domains) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.Domains[iNdEx])
+			copy(dAtA[i:], m.Domains[iNdEx])
+			i = encodeVarintTypes(dAtA, i, uint64(len(m.Domains[iNdEx])))
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *AutoCertConfig_Dns_01) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *AutoCertConfig_Dns_01) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Dns_01 != nil {
+		{
+			size, err := m.Dns_01.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x32
+	}
+	return len(dAtA) - i, nil
+}
+func (m *AutoCertConfig_Http_01) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *AutoCertConfig_Http_01) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Http_01 != nil {
+		{
+			size, err := m.Http_01.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x3a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *AutoCertConfig_Default) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *AutoCertConfig_Default) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Default != nil {
+		{
+			size, err := m.Default.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x72
+	}
+	return len(dAtA) - i, nil
+}
+func (m *AutoCertConfig_CustomIssuer) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *AutoCertConfig_CustomIssuer) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.CustomIssuer != nil {
+		{
+			size, err := m.CustomIssuer.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x7a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *AutoCertConfig_PreValidated) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *AutoCertConfig_PreValidated) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.PreValidated != nil {
+		{
+			size, err := m.PreValidated.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0x82
+	}
+	return len(dAtA) - i, nil
+}
+func (m *CustomIssuer) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *CustomIssuer) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CustomIssuer) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.IssuerRef) > 0 {
+		for iNdEx := len(m.IssuerRef) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.IssuerRef[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *CertificateLifecycleStatus) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *CertificateLifecycleStatus) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CertificateLifecycleStatus) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.DnsInstructions) > 0 {
+		for iNdEx := len(m.DnsInstructions) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.DnsInstructions[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x1
+			i--
+			dAtA[i] = 0xfa
+		}
+	}
+	if len(m.ErrorMessage) > 0 {
+		i -= len(m.ErrorMessage)
+		copy(dAtA[i:], m.ErrorMessage)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.ErrorMessage)))
+		i--
+		dAtA[i] = 0x52
+	}
+	if m.NextRenewalTime != nil {
+		{
+			size, err := m.NextRenewalTime.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.State != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.State))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *DNSInstruction) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *DNSInstruction) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *DNSInstruction) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Status != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Status))
+		i--
+		dAtA[i] = 0x20
+	}
+	if len(m.Value) > 0 {
+		i -= len(m.Value)
+		copy(dAtA[i:], m.Value)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Value)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.RecordType) > 0 {
+		i -= len(m.RecordType)
+		copy(dAtA[i:], m.RecordType)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.RecordType)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func (m *CreateSpecType) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -2024,6 +4235,15 @@ func (m *CreateSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.Provider != nil {
+		{
+			size := m.Provider.Size()
+			i -= size
+			if _, err := m.Provider.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
 	if m.CertificateChain != nil {
 		{
 			size, err := m.CertificateChain.MarshalToSizedBuffer(dAtA[:i])
@@ -2130,6 +4350,52 @@ func (m *CreateSpecType_CustomHashAlgorithms) MarshalToSizedBuffer(dAtA []byte) 
 	}
 	return len(dAtA) - i, nil
 }
+func (m *CreateSpecType_Manual) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CreateSpecType_Manual) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Manual != nil {
+		{
+			size, err := m.Manual.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x3e
+		i--
+		dAtA[i] = 0xe2
+	}
+	return len(dAtA) - i, nil
+}
+func (m *CreateSpecType_AutoCert) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CreateSpecType_AutoCert) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.AutoCert != nil {
+		{
+			size, err := m.AutoCert.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x3f
+		i--
+		dAtA[i] = 0x92
+	}
+	return len(dAtA) - i, nil
+}
 func (m *ReplaceSpecType) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -2150,6 +4416,15 @@ func (m *ReplaceSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.Provider != nil {
+		{
+			size := m.Provider.Size()
+			i -= size
+			if _, err := m.Provider.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
 	if m.CertificateChain != nil {
 		{
 			size, err := m.CertificateChain.MarshalToSizedBuffer(dAtA[:i])
@@ -2256,6 +4531,52 @@ func (m *ReplaceSpecType_CustomHashAlgorithms) MarshalToSizedBuffer(dAtA []byte)
 	}
 	return len(dAtA) - i, nil
 }
+func (m *ReplaceSpecType_Manual) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplaceSpecType_Manual) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Manual != nil {
+		{
+			size, err := m.Manual.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x3e
+		i--
+		dAtA[i] = 0xe2
+	}
+	return len(dAtA) - i, nil
+}
+func (m *ReplaceSpecType_AutoCert) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplaceSpecType_AutoCert) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.AutoCert != nil {
+		{
+			size, err := m.AutoCert.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x3f
+		i--
+		dAtA[i] = 0x92
+	}
+	return len(dAtA) - i, nil
+}
 func (m *GetSpecType) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -2283,6 +4604,22 @@ func (m *GetSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			if _, err := m.Provider.MarshalTo(dAtA[i:]); err != nil {
 				return 0, err
 			}
+		}
+	}
+	if len(m.VirtualServers) > 0 {
+		for iNdEx := len(m.VirtualServers) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.VirtualServers[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x3e
+			i--
+			dAtA[i] = 0xf2
 		}
 	}
 	if len(m.Infos) > 0 {
@@ -2485,6 +4822,29 @@ func (m *GetSpecType_VirtualHostAutoCert) MarshalToSizedBuffer(dAtA []byte) (int
 	}
 	return len(dAtA) - i, nil
 }
+func (m *GetSpecType_AutoCert) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetSpecType_AutoCert) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.AutoCert != nil {
+		{
+			size, err := m.AutoCert.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x3f
+		i--
+		dAtA[i] = 0x92
+	}
+	return len(dAtA) - i, nil
+}
 func encodeVarintTypes(dAtA []byte, offset int, v uint64) int {
 	offset -= sovTypes(v)
 	base := offset
@@ -2607,6 +4967,18 @@ func (m *GlobalSpecType_VirtualHostAutoCert) Size() (n int) {
 	}
 	return n
 }
+func (m *GlobalSpecType_AutoCert) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AutoCert != nil {
+		l = m.AutoCert.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
 func (m *VirtualHostAutoCert) Size() (n int) {
 	if m == nil {
 		return 0
@@ -2618,6 +4990,216 @@ func (m *VirtualHostAutoCert) Size() (n int) {
 			l = e.Size()
 			n += 1 + l + sovTypes(uint64(l))
 		}
+	}
+	return n
+}
+
+func (m *DNS01ChallengeConfig) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.DnsProviderChoice != nil {
+		n += m.DnsProviderChoice.Size()
+	}
+	return n
+}
+
+func (m *DNS01ChallengeConfig_CnameDelegation) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.CnameDelegation != nil {
+		l = m.CnameDelegation.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *DNS01ChallengeConfig_Delegated) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Delegated != nil {
+		l = m.Delegated.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *HTTP01ChallengeConfig) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.VirtualHostRef != nil {
+		l = m.VirtualHostRef.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+
+func (m *PreValidatedConfig) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *AutoCertConfig) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Domains) > 0 {
+		for _, s := range m.Domains {
+			l = len(s)
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if m.ChallengeChoice != nil {
+		n += m.ChallengeChoice.Size()
+	}
+	if m.KeyAlgorithm != 0 {
+		n += 1 + sovTypes(uint64(m.KeyAlgorithm))
+	}
+	if m.RenewBeforeDays != 0 {
+		n += 1 + sovTypes(uint64(m.RenewBeforeDays))
+	}
+	if m.IssuerChoice != nil {
+		n += m.IssuerChoice.Size()
+	}
+	return n
+}
+
+func (m *AutoCertConfig_Dns_01) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Dns_01 != nil {
+		l = m.Dns_01.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *AutoCertConfig_Http_01) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Http_01 != nil {
+		l = m.Http_01.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *AutoCertConfig_Default) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Default != nil {
+		l = m.Default.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *AutoCertConfig_CustomIssuer) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.CustomIssuer != nil {
+		l = m.CustomIssuer.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *AutoCertConfig_PreValidated) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.PreValidated != nil {
+		l = m.PreValidated.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *CustomIssuer) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.IssuerRef) > 0 {
+		for _, e := range m.IssuerRef {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *CertificateLifecycleStatus) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.State != 0 {
+		n += 1 + sovTypes(uint64(m.State))
+	}
+	if m.NextRenewalTime != nil {
+		l = m.NextRenewalTime.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	l = len(m.ErrorMessage)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if len(m.DnsInstructions) > 0 {
+		for _, e := range m.DnsInstructions {
+			l = e.Size()
+			n += 2 + l + sovTypes(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *DNSInstruction) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.RecordType)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	l = len(m.Value)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if m.Status != 0 {
+		n += 1 + sovTypes(uint64(m.Status))
 	}
 	return n
 }
@@ -2642,6 +5224,9 @@ func (m *CreateSpecType) Size() (n int) {
 	if m.CertificateChain != nil {
 		l = m.CertificateChain.Size()
 		n += 1 + l + sovTypes(uint64(l))
+	}
+	if m.Provider != nil {
+		n += m.Provider.Size()
 	}
 	return n
 }
@@ -2682,6 +5267,30 @@ func (m *CreateSpecType_CustomHashAlgorithms) Size() (n int) {
 	}
 	return n
 }
+func (m *CreateSpecType_Manual) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Manual != nil {
+		l = m.Manual.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *CreateSpecType_AutoCert) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AutoCert != nil {
+		l = m.AutoCert.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
 func (m *ReplaceSpecType) Size() (n int) {
 	if m == nil {
 		return 0
@@ -2702,6 +5311,9 @@ func (m *ReplaceSpecType) Size() (n int) {
 	if m.CertificateChain != nil {
 		l = m.CertificateChain.Size()
 		n += 1 + l + sovTypes(uint64(l))
+	}
+	if m.Provider != nil {
+		n += m.Provider.Size()
 	}
 	return n
 }
@@ -2739,6 +5351,30 @@ func (m *ReplaceSpecType_CustomHashAlgorithms) Size() (n int) {
 	if m.CustomHashAlgorithms != nil {
 		l = m.CustomHashAlgorithms.Size()
 		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *ReplaceSpecType_Manual) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Manual != nil {
+		l = m.Manual.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *ReplaceSpecType_AutoCert) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AutoCert != nil {
+		l = m.AutoCert.Size()
+		n += 2 + l + sovTypes(uint64(l))
 	}
 	return n
 }
@@ -2783,6 +5419,12 @@ func (m *GetSpecType) Size() (n int) {
 	}
 	if m.Provider != nil {
 		n += m.Provider.Size()
+	}
+	if len(m.VirtualServers) > 0 {
+		for _, e := range m.VirtualServers {
+			l = e.Size()
+			n += 2 + l + sovTypes(uint64(l))
+		}
 	}
 	return n
 }
@@ -2843,6 +5485,18 @@ func (m *GetSpecType_VirtualHostAutoCert) Size() (n int) {
 	_ = l
 	if m.VirtualHostAutoCert != nil {
 		l = m.VirtualHostAutoCert.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *GetSpecType_AutoCert) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AutoCert != nil {
+		l = m.AutoCert.Size()
 		n += 2 + l + sovTypes(uint64(l))
 	}
 	return n
@@ -2942,6 +5596,16 @@ func (this *GlobalSpecType_VirtualHostAutoCert) String() string {
 	}, "")
 	return s
 }
+func (this *GlobalSpecType_AutoCert) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GlobalSpecType_AutoCert{`,
+		`AutoCert:` + strings.Replace(fmt.Sprintf("%v", this.AutoCert), "AutoCertConfig", "AutoCertConfig", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
 func (this *VirtualHostAutoCert) String() string {
 	if this == nil {
 		return "nil"
@@ -2957,6 +5621,165 @@ func (this *VirtualHostAutoCert) String() string {
 	}, "")
 	return s
 }
+func (this *DNS01ChallengeConfig) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&DNS01ChallengeConfig{`,
+		`DnsProviderChoice:` + fmt.Sprintf("%v", this.DnsProviderChoice) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *DNS01ChallengeConfig_CnameDelegation) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&DNS01ChallengeConfig_CnameDelegation{`,
+		`CnameDelegation:` + strings.Replace(fmt.Sprintf("%v", this.CnameDelegation), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *DNS01ChallengeConfig_Delegated) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&DNS01ChallengeConfig_Delegated{`,
+		`Delegated:` + strings.Replace(fmt.Sprintf("%v", this.Delegated), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *HTTP01ChallengeConfig) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&HTTP01ChallengeConfig{`,
+		`VirtualHostRef:` + strings.Replace(fmt.Sprintf("%v", this.VirtualHostRef), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *PreValidatedConfig) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&PreValidatedConfig{`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *AutoCertConfig) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&AutoCertConfig{`,
+		`Domains:` + fmt.Sprintf("%v", this.Domains) + `,`,
+		`ChallengeChoice:` + fmt.Sprintf("%v", this.ChallengeChoice) + `,`,
+		`KeyAlgorithm:` + fmt.Sprintf("%v", this.KeyAlgorithm) + `,`,
+		`RenewBeforeDays:` + fmt.Sprintf("%v", this.RenewBeforeDays) + `,`,
+		`IssuerChoice:` + fmt.Sprintf("%v", this.IssuerChoice) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *AutoCertConfig_Dns_01) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&AutoCertConfig_Dns_01{`,
+		`Dns_01:` + strings.Replace(fmt.Sprintf("%v", this.Dns_01), "DNS01ChallengeConfig", "DNS01ChallengeConfig", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *AutoCertConfig_Http_01) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&AutoCertConfig_Http_01{`,
+		`Http_01:` + strings.Replace(fmt.Sprintf("%v", this.Http_01), "HTTP01ChallengeConfig", "HTTP01ChallengeConfig", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *AutoCertConfig_Default) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&AutoCertConfig_Default{`,
+		`Default:` + strings.Replace(fmt.Sprintf("%v", this.Default), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *AutoCertConfig_CustomIssuer) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&AutoCertConfig_CustomIssuer{`,
+		`CustomIssuer:` + strings.Replace(fmt.Sprintf("%v", this.CustomIssuer), "CustomIssuer", "CustomIssuer", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *AutoCertConfig_PreValidated) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&AutoCertConfig_PreValidated{`,
+		`PreValidated:` + strings.Replace(fmt.Sprintf("%v", this.PreValidated), "PreValidatedConfig", "PreValidatedConfig", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *CustomIssuer) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForIssuerRef := "[]*ObjectRefType{"
+	for _, f := range this.IssuerRef {
+		repeatedStringForIssuerRef += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	}
+	repeatedStringForIssuerRef += "}"
+	s := strings.Join([]string{`&CustomIssuer{`,
+		`IssuerRef:` + repeatedStringForIssuerRef + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *CertificateLifecycleStatus) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForDnsInstructions := "[]*DNSInstruction{"
+	for _, f := range this.DnsInstructions {
+		repeatedStringForDnsInstructions += strings.Replace(f.String(), "DNSInstruction", "DNSInstruction", 1) + ","
+	}
+	repeatedStringForDnsInstructions += "}"
+	s := strings.Join([]string{`&CertificateLifecycleStatus{`,
+		`State:` + fmt.Sprintf("%v", this.State) + `,`,
+		`NextRenewalTime:` + strings.Replace(fmt.Sprintf("%v", this.NextRenewalTime), "Timestamp", "types.Timestamp", 1) + `,`,
+		`ErrorMessage:` + fmt.Sprintf("%v", this.ErrorMessage) + `,`,
+		`DnsInstructions:` + repeatedStringForDnsInstructions + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *DNSInstruction) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&DNSInstruction{`,
+		`RecordType:` + fmt.Sprintf("%v", this.RecordType) + `,`,
+		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
+		`Value:` + fmt.Sprintf("%v", this.Value) + `,`,
+		`Status:` + fmt.Sprintf("%v", this.Status) + `,`,
+		`}`,
+	}, "")
+	return s
+}
 func (this *CreateSpecType) String() string {
 	if this == nil {
 		return "nil"
@@ -2966,6 +5789,7 @@ func (this *CreateSpecType) String() string {
 		`PrivateKey:` + strings.Replace(fmt.Sprintf("%v", this.PrivateKey), "SecretType", "schema.SecretType", 1) + `,`,
 		`OcspStaplingChoice:` + fmt.Sprintf("%v", this.OcspStaplingChoice) + `,`,
 		`CertificateChain:` + strings.Replace(fmt.Sprintf("%v", this.CertificateChain), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`Provider:` + fmt.Sprintf("%v", this.Provider) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -3000,6 +5824,26 @@ func (this *CreateSpecType_CustomHashAlgorithms) String() string {
 	}, "")
 	return s
 }
+func (this *CreateSpecType_Manual) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&CreateSpecType_Manual{`,
+		`Manual:` + strings.Replace(fmt.Sprintf("%v", this.Manual), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *CreateSpecType_AutoCert) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&CreateSpecType_AutoCert{`,
+		`AutoCert:` + strings.Replace(fmt.Sprintf("%v", this.AutoCert), "AutoCertConfig", "AutoCertConfig", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
 func (this *ReplaceSpecType) String() string {
 	if this == nil {
 		return "nil"
@@ -3009,6 +5853,7 @@ func (this *ReplaceSpecType) String() string {
 		`PrivateKey:` + strings.Replace(fmt.Sprintf("%v", this.PrivateKey), "SecretType", "schema.SecretType", 1) + `,`,
 		`OcspStaplingChoice:` + fmt.Sprintf("%v", this.OcspStaplingChoice) + `,`,
 		`CertificateChain:` + strings.Replace(fmt.Sprintf("%v", this.CertificateChain), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`Provider:` + fmt.Sprintf("%v", this.Provider) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -3043,6 +5888,26 @@ func (this *ReplaceSpecType_CustomHashAlgorithms) String() string {
 	}, "")
 	return s
 }
+func (this *ReplaceSpecType_Manual) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ReplaceSpecType_Manual{`,
+		`Manual:` + strings.Replace(fmt.Sprintf("%v", this.Manual), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ReplaceSpecType_AutoCert) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ReplaceSpecType_AutoCert{`,
+		`AutoCert:` + strings.Replace(fmt.Sprintf("%v", this.AutoCert), "AutoCertConfig", "AutoCertConfig", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
 func (this *GetSpecType) String() string {
 	if this == nil {
 		return "nil"
@@ -3062,6 +5927,11 @@ func (this *GetSpecType) String() string {
 		repeatedStringForInfos += strings.Replace(fmt.Sprintf("%v", f), "CertInfoType", "schema.CertInfoType", 1) + ","
 	}
 	repeatedStringForInfos += "}"
+	repeatedStringForVirtualServers := "[]*ObjectRefType{"
+	for _, f := range this.VirtualServers {
+		repeatedStringForVirtualServers += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "views.ObjectRefType", 1) + ","
+	}
+	repeatedStringForVirtualServers += "}"
 	s := strings.Join([]string{`&GetSpecType{`,
 		`CertificateUrl:` + fmt.Sprintf("%v", this.CertificateUrl) + `,`,
 		`PrivateKey:` + strings.Replace(fmt.Sprintf("%v", this.PrivateKey), "SecretType", "schema.SecretType", 1) + `,`,
@@ -3071,6 +5941,7 @@ func (this *GetSpecType) String() string {
 		`TcpLoadbalancers:` + repeatedStringForTcpLoadbalancers + `,`,
 		`Infos:` + repeatedStringForInfos + `,`,
 		`Provider:` + fmt.Sprintf("%v", this.Provider) + `,`,
+		`VirtualServers:` + repeatedStringForVirtualServers + `,`,
 		`}`,
 	}, "")
 	return s
@@ -3121,6 +5992,16 @@ func (this *GetSpecType_VirtualHostAutoCert) String() string {
 	}
 	s := strings.Join([]string{`&GetSpecType_VirtualHostAutoCert{`,
 		`VirtualHostAutoCert:` + strings.Replace(fmt.Sprintf("%v", this.VirtualHostAutoCert), "VirtualHostAutoCert", "VirtualHostAutoCert", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetSpecType_AutoCert) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetSpecType_AutoCert{`,
+		`AutoCert:` + strings.Replace(fmt.Sprintf("%v", this.AutoCert), "AutoCertConfig", "AutoCertConfig", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -3577,6 +6458,41 @@ func (m *GlobalSpecType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 1010:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AutoCert", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &AutoCertConfig{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Provider = &GlobalSpecType_AutoCert{v}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTypes(dAtA[iNdEx:])
@@ -3661,6 +6577,977 @@ func (m *VirtualHostAutoCert) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *DNS01ChallengeConfig) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: DNS01ChallengeConfig: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: DNS01ChallengeConfig: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CnameDelegation", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.DnsProviderChoice = &DNS01ChallengeConfig_CnameDelegation{v}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Delegated", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.DnsProviderChoice = &DNS01ChallengeConfig_Delegated{v}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *HTTP01ChallengeConfig) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: HTTP01ChallengeConfig: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: HTTP01ChallengeConfig: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field VirtualHostRef", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.VirtualHostRef == nil {
+				m.VirtualHostRef = &views.ObjectRefType{}
+			}
+			if err := m.VirtualHostRef.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *PreValidatedConfig) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: PreValidatedConfig: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: PreValidatedConfig: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *AutoCertConfig) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: AutoCertConfig: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: AutoCertConfig: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Domains", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Domains = append(m.Domains, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Dns_01", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &DNS01ChallengeConfig{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.ChallengeChoice = &AutoCertConfig_Dns_01{v}
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Http_01", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &HTTP01ChallengeConfig{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.ChallengeChoice = &AutoCertConfig_Http_01{v}
+			iNdEx = postIndex
+		case 10:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field KeyAlgorithm", wireType)
+			}
+			m.KeyAlgorithm = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.KeyAlgorithm |= KeyAlgorithm(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 12:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RenewBeforeDays", wireType)
+			}
+			m.RenewBeforeDays = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.RenewBeforeDays |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 14:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Default", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.IssuerChoice = &AutoCertConfig_Default{v}
+			iNdEx = postIndex
+		case 15:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CustomIssuer", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &CustomIssuer{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.IssuerChoice = &AutoCertConfig_CustomIssuer{v}
+			iNdEx = postIndex
+		case 16:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PreValidated", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &PreValidatedConfig{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.ChallengeChoice = &AutoCertConfig_PreValidated{v}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *CustomIssuer) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: CustomIssuer: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: CustomIssuer: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IssuerRef", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.IssuerRef = append(m.IssuerRef, &schema.ObjectRefType{})
+			if err := m.IssuerRef[len(m.IssuerRef)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *CertificateLifecycleStatus) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: CertificateLifecycleStatus: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: CertificateLifecycleStatus: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+			}
+			m.State = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.State |= CertLifecycleState(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NextRenewalTime", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.NextRenewalTime == nil {
+				m.NextRenewalTime = &types.Timestamp{}
+			}
+			if err := m.NextRenewalTime.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 10:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ErrorMessage", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ErrorMessage = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 31:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DnsInstructions", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.DnsInstructions = append(m.DnsInstructions, &DNSInstruction{})
+			if err := m.DnsInstructions[len(m.DnsInstructions)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *DNSInstruction) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: DNSInstruction: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: DNSInstruction: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RecordType", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.RecordType = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Value", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Value = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Status", wireType)
+			}
+			m.Status = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Status |= DNSInstructionStatus(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTypes(dAtA[iNdEx:])
@@ -3920,6 +7807,76 @@ func (m *CreateSpecType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 1004:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Manual", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Provider = &CreateSpecType_Manual{v}
+			iNdEx = postIndex
+		case 1010:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AutoCert", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &AutoCertConfig{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Provider = &CreateSpecType_AutoCert{v}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTypes(dAtA[iNdEx:])
@@ -4178,6 +8135,76 @@ func (m *ReplaceSpecType) Unmarshal(dAtA []byte) error {
 			if err := m.CertificateChain.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
+			iNdEx = postIndex
+		case 1004:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Manual", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Provider = &ReplaceSpecType_Manual{v}
+			iNdEx = postIndex
+		case 1010:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AutoCert", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &AutoCertConfig{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Provider = &ReplaceSpecType_AutoCert{v}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -4609,6 +8636,75 @@ func (m *GetSpecType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			m.Provider = &GetSpecType_VirtualHostAutoCert{v}
+			iNdEx = postIndex
+		case 1006:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field VirtualServers", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.VirtualServers = append(m.VirtualServers, &views.ObjectRefType{})
+			if err := m.VirtualServers[len(m.VirtualServers)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 1010:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AutoCert", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &AutoCertConfig{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Provider = &GetSpecType_AutoCert{v}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

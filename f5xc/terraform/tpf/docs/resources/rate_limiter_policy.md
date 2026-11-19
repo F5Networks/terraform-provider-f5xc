@@ -143,18 +143,15 @@ Optional:
 <a id="nestedatt--rules--spec"></a>
 ### Nested Schema for `rules.spec`
 
-Required:
-
-- `action_choice` (Attributes) action choice Specify action for the rule. (see [below for nested schema](#nestedatt--rules--spec--action_choice))
-- `country_choice` (Attributes) country choice Match the country of origin. The country is obtained by performing a lookup for the source IPv4 Address in a GeoIP DB. (see [below for nested schema](#nestedatt--rules--spec--country_choice))
-
 Optional:
 
-- `asn_choice` (Attributes) (see [below for nested schema](#nestedatt--rules--spec--asn_choice))
+- `action_choice` (Attributes) action choice Specify action for the rule.<br>Exactly one of `apply_rate_limiter`, `bypass_rate_limiter`, or `custom_rate_limiter` must be specified when `action_choice` is configured. (see [below for nested schema](#nestedatt--rules--spec--action_choice))
+- `asn_choice` (Attributes) Exactly one of `any_asn`, `asn_list`, or `asn_matcher` must be specified when `asn_choice` is configured. (see [below for nested schema](#nestedatt--rules--spec--asn_choice))
+- `country_choice` (Attributes) country choice Match the country of origin. The country is obtained by performing a lookup for the source IPv4 Address in a GeoIP DB.<br>Exactly one of `any_country` or `country_list` must be specified when `country_choice` is configured. (see [below for nested schema](#nestedatt--rules--spec--country_choice))
 - `domain_matcher` (Attributes) (see [below for nested schema](#nestedatt--rules--spec--domain_matcher))
 - `headers` (Attributes List) (see [below for nested schema](#nestedatt--rules--spec--headers))
 - `http_method` (Attributes) (see [below for nested schema](#nestedatt--rules--spec--http_method))
-- `ip_choice` (Attributes) (see [below for nested schema](#nestedatt--rules--spec--ip_choice))
+- `ip_choice` (Attributes) Exactly one of `any_ip`, `ip_matcher`, or `ip_prefix_list` must be specified when `ip_choice` is configured. (see [below for nested schema](#nestedatt--rules--spec--ip_choice))
 - `path` (Attributes) (see [below for nested schema](#nestedatt--rules--spec--path))
 - `segment_policy` (Attributes) Segments Select source and destination segments where rule is applied Skip the configuration or set option as Any to ignore corresponding segment match (see [below for nested schema](#nestedatt--rules--spec--segment_policy))
 
@@ -163,9 +160,9 @@ Optional:
 
 Optional:
 
-- `apply_rate_limiter` (Boolean) apply_rate_limiter Apply the rate limiter configured on the HTTP loadbalancer.
-- `bypass_rate_limiter` (Boolean) bypass_rate_limiter Bypass the rate limiter configured on the HTTP loadbalancer.
-- `custom_rate_limiter` (Attributes) custom_rate_limiter Apply a custom rate limiter. (see [below for nested schema](#nestedatt--rules--spec--action_choice--custom_rate_limiter))
+- `apply_rate_limiter` (Boolean) apply_rate_limiter Apply the rate limiter configured on the HTTP loadbalancer.<br>Conflicts with `bypass_rate_limiter` and `custom_rate_limiter`.
+- `bypass_rate_limiter` (Boolean) bypass_rate_limiter Bypass the rate limiter configured on the HTTP loadbalancer.<br>Conflicts with `apply_rate_limiter` and `custom_rate_limiter`.
+- `custom_rate_limiter` (Attributes) custom_rate_limiter Apply a custom rate limiter.<br>Conflicts with `apply_rate_limiter` and `bypass_rate_limiter`. (see [below for nested schema](#nestedatt--rules--spec--action_choice--custom_rate_limiter))
 
 <a id="nestedatt--rules--spec--action_choice--custom_rate_limiter"></a>
 ### Nested Schema for `rules.spec.action_choice.custom_rate_limiter`
@@ -181,31 +178,14 @@ Read-Only:
 
 
 
-<a id="nestedatt--rules--spec--country_choice"></a>
-### Nested Schema for `rules.spec.country_choice`
-
-Optional:
-
-- `any_country` (Boolean) any country
-- `country_list` (Attributes) country_list (see [below for nested schema](#nestedatt--rules--spec--country_choice--country_list))
-
-<a id="nestedatt--rules--spec--country_choice--country_list"></a>
-### Nested Schema for `rules.spec.country_choice.country_list`
-
-Required:
-
-- `country_codes` (List of String) country codes List of Country Codes<br>**Valid Options:** `['COUNTRY_AD', 'COUNTRY_AE', 'COUNTRY_AF', 'COUNTRY_AG', 'COUNTRY_AI', 'COUNTRY_AL', 'COUNTRY_AM', 'COUNTRY_AN', 'COUNTRY_AO', 'COUNTRY_AQ', 'COUNTRY_AR', 'COUNTRY_AS', 'COUNTRY_AT', 'COUNTRY_AU', 'COUNTRY_AW', 'COUNTRY_AX', 'COUNTRY_AZ', 'COUNTRY_BA', 'COUNTRY_BB', 'COUNTRY_BD', 'COUNTRY_BE', 'COUNTRY_BF', 'COUNTRY_BG', 'COUNTRY_BH', 'COUNTRY_BI', 'COUNTRY_BJ', 'COUNTRY_BL', 'COUNTRY_BM', 'COUNTRY_BN', 'COUNTRY_BO', 'COUNTRY_BQ', 'COUNTRY_BR', 'COUNTRY_BS', 'COUNTRY_BT', 'COUNTRY_BV', 'COUNTRY_BW', 'COUNTRY_BY', 'COUNTRY_BZ', 'COUNTRY_CA', 'COUNTRY_CC', 'COUNTRY_CD', 'COUNTRY_CF', 'COUNTRY_CG', 'COUNTRY_CH', 'COUNTRY_CI', 'COUNTRY_CK', 'COUNTRY_CL', 'COUNTRY_CM', 'COUNTRY_CN', 'COUNTRY_CO', 'COUNTRY_CR', 'COUNTRY_CS', 'COUNTRY_CU', 'COUNTRY_CV', 'COUNTRY_CW', 'COUNTRY_CX', 'COUNTRY_CY', 'COUNTRY_CZ', 'COUNTRY_DE', 'COUNTRY_DJ', 'COUNTRY_DK', 'COUNTRY_DM', 'COUNTRY_DO', 'COUNTRY_DZ', 'COUNTRY_EC', 'COUNTRY_EE', 'COUNTRY_EG', 'COUNTRY_EH', 'COUNTRY_ER', 'COUNTRY_ES', 'COUNTRY_ET', 'COUNTRY_FI', 'COUNTRY_FJ', 'COUNTRY_FK', 'COUNTRY_FM', 'COUNTRY_FO', 'COUNTRY_FR', 'COUNTRY_GA', 'COUNTRY_GB', 'COUNTRY_GD', 'COUNTRY_GE', 'COUNTRY_GF', 'COUNTRY_GG', 'COUNTRY_GH', 'COUNTRY_GI', 'COUNTRY_GL', 'COUNTRY_GM', 'COUNTRY_GN', 'COUNTRY_GP', 'COUNTRY_GQ', 'COUNTRY_GR', 'COUNTRY_GS', 'COUNTRY_GT', 'COUNTRY_GU', 'COUNTRY_GW', 'COUNTRY_GY', 'COUNTRY_HK', 'COUNTRY_HM', 'COUNTRY_HN', 'COUNTRY_HR', 'COUNTRY_HT', 'COUNTRY_HU', 'COUNTRY_ID', 'COUNTRY_IE', 'COUNTRY_IL', 'COUNTRY_IM', 'COUNTRY_IN', 'COUNTRY_IO', 'COUNTRY_IQ', 'COUNTRY_IR', 'COUNTRY_IS', 'COUNTRY_IT', 'COUNTRY_JE', 'COUNTRY_JM', 'COUNTRY_JO', 'COUNTRY_JP', 'COUNTRY_KE', 'COUNTRY_KG', 'COUNTRY_KH', 'COUNTRY_KI', 'COUNTRY_KM', 'COUNTRY_KN', 'COUNTRY_KP', 'COUNTRY_KR', 'COUNTRY_KW', 'COUNTRY_KY', 'COUNTRY_KZ', 'COUNTRY_LA', 'COUNTRY_LB', 'COUNTRY_LC', 'COUNTRY_LI', 'COUNTRY_LK', 'COUNTRY_LR', 'COUNTRY_LS', 'COUNTRY_LT', 'COUNTRY_LU', 'COUNTRY_LV', 'COUNTRY_LY', 'COUNTRY_MA', 'COUNTRY_MC', 'COUNTRY_MD', 'COUNTRY_ME', 'COUNTRY_MF', 'COUNTRY_MG', 'COUNTRY_MH', 'COUNTRY_MK', 'COUNTRY_ML', 'COUNTRY_MM', 'COUNTRY_MN', 'COUNTRY_MO', 'COUNTRY_MP', 'COUNTRY_MQ', 'COUNTRY_MR', 'COUNTRY_MS', 'COUNTRY_MT', 'COUNTRY_MU', 'COUNTRY_MV', 'COUNTRY_MW', 'COUNTRY_MX', 'COUNTRY_MY', 'COUNTRY_MZ', 'COUNTRY_NA', 'COUNTRY_NC', 'COUNTRY_NE', 'COUNTRY_NF', 'COUNTRY_NG', 'COUNTRY_NI', 'COUNTRY_NL', 'COUNTRY_NO', 'COUNTRY_NONE', 'COUNTRY_NP', 'COUNTRY_NR', 'COUNTRY_NU', 'COUNTRY_NZ', 'COUNTRY_OM', 'COUNTRY_PA', 'COUNTRY_PE', 'COUNTRY_PF', 'COUNTRY_PG', 'COUNTRY_PH', 'COUNTRY_PK', 'COUNTRY_PL', 'COUNTRY_PM', 'COUNTRY_PN', 'COUNTRY_PR', 'COUNTRY_PS', 'COUNTRY_PT', 'COUNTRY_PW', 'COUNTRY_PY', 'COUNTRY_QA', 'COUNTRY_RE', 'COUNTRY_RO', 'COUNTRY_RS', 'COUNTRY_RU', 'COUNTRY_RW', 'COUNTRY_SA', 'COUNTRY_SB', 'COUNTRY_SC', 'COUNTRY_SD', 'COUNTRY_SE', 'COUNTRY_SG', 'COUNTRY_SH', 'COUNTRY_SI', 'COUNTRY_SJ', 'COUNTRY_SK', 'COUNTRY_SL', 'COUNTRY_SM', 'COUNTRY_SN', 'COUNTRY_SO', 'COUNTRY_SR', 'COUNTRY_SS', 'COUNTRY_ST', 'COUNTRY_SV', 'COUNTRY_SX', 'COUNTRY_SY', 'COUNTRY_SZ', 'COUNTRY_TC', 'COUNTRY_TD', 'COUNTRY_TF', 'COUNTRY_TG', 'COUNTRY_TH', 'COUNTRY_TJ', 'COUNTRY_TK', 'COUNTRY_TL', 'COUNTRY_TM', 'COUNTRY_TN', 'COUNTRY_TO', 'COUNTRY_TR', 'COUNTRY_TT', 'COUNTRY_TV', 'COUNTRY_TW', 'COUNTRY_TZ', 'COUNTRY_UA', 'COUNTRY_UG', 'COUNTRY_UM', 'COUNTRY_US', 'COUNTRY_UY', 'COUNTRY_UZ', 'COUNTRY_VA', 'COUNTRY_VC', 'COUNTRY_VE', 'COUNTRY_VG', 'COUNTRY_VI', 'COUNTRY_VN', 'COUNTRY_VU', 'COUNTRY_WF', 'COUNTRY_WS', 'COUNTRY_XK', 'COUNTRY_XT', 'COUNTRY_YE', 'COUNTRY_YT', 'COUNTRY_ZA', 'COUNTRY_ZM', 'COUNTRY_ZW']` (Multiple selection allowed)
-
-
-
 <a id="nestedatt--rules--spec--asn_choice"></a>
 ### Nested Schema for `rules.spec.asn_choice`
 
 Optional:
 
-- `any_asn` (Boolean)
-- `asn_list` (Attributes) (see [below for nested schema](#nestedatt--rules--spec--asn_choice--asn_list))
-- `asn_matcher` (Attributes) (see [below for nested schema](#nestedatt--rules--spec--asn_choice--asn_matcher))
+- `any_asn` (Boolean) Conflicts with `asn_list` and `asn_matcher`.
+- `asn_list` (Attributes) Conflicts with `any_asn` and `asn_matcher`. (see [below for nested schema](#nestedatt--rules--spec--asn_choice--asn_list))
+- `asn_matcher` (Attributes) Conflicts with `any_asn` and `asn_list`. (see [below for nested schema](#nestedatt--rules--spec--asn_choice--asn_matcher))
 
 <a id="nestedatt--rules--spec--asn_choice--asn_list"></a>
 ### Nested Schema for `rules.spec.asn_choice.asn_list`
@@ -237,6 +217,23 @@ Read-Only:
 
 
 
+<a id="nestedatt--rules--spec--country_choice"></a>
+### Nested Schema for `rules.spec.country_choice`
+
+Optional:
+
+- `any_country` (Boolean) any country<br>Conflicts with `country_list`.
+- `country_list` (Attributes) country_list<br>Conflicts with `any_country`. (see [below for nested schema](#nestedatt--rules--spec--country_choice--country_list))
+
+<a id="nestedatt--rules--spec--country_choice--country_list"></a>
+### Nested Schema for `rules.spec.country_choice.country_list`
+
+Required:
+
+- `country_codes` (List of String) country codes List of Country Codes<br>**Valid Options:** `['COUNTRY_AD', 'COUNTRY_AE', 'COUNTRY_AF', 'COUNTRY_AG', 'COUNTRY_AI', 'COUNTRY_AL', 'COUNTRY_AM', 'COUNTRY_AN', 'COUNTRY_AO', 'COUNTRY_AQ', 'COUNTRY_AR', 'COUNTRY_AS', 'COUNTRY_AT', 'COUNTRY_AU', 'COUNTRY_AW', 'COUNTRY_AX', 'COUNTRY_AZ', 'COUNTRY_BA', 'COUNTRY_BB', 'COUNTRY_BD', 'COUNTRY_BE', 'COUNTRY_BF', 'COUNTRY_BG', 'COUNTRY_BH', 'COUNTRY_BI', 'COUNTRY_BJ', 'COUNTRY_BL', 'COUNTRY_BM', 'COUNTRY_BN', 'COUNTRY_BO', 'COUNTRY_BQ', 'COUNTRY_BR', 'COUNTRY_BS', 'COUNTRY_BT', 'COUNTRY_BV', 'COUNTRY_BW', 'COUNTRY_BY', 'COUNTRY_BZ', 'COUNTRY_CA', 'COUNTRY_CC', 'COUNTRY_CD', 'COUNTRY_CF', 'COUNTRY_CG', 'COUNTRY_CH', 'COUNTRY_CI', 'COUNTRY_CK', 'COUNTRY_CL', 'COUNTRY_CM', 'COUNTRY_CN', 'COUNTRY_CO', 'COUNTRY_CR', 'COUNTRY_CS', 'COUNTRY_CU', 'COUNTRY_CV', 'COUNTRY_CW', 'COUNTRY_CX', 'COUNTRY_CY', 'COUNTRY_CZ', 'COUNTRY_DE', 'COUNTRY_DJ', 'COUNTRY_DK', 'COUNTRY_DM', 'COUNTRY_DO', 'COUNTRY_DZ', 'COUNTRY_EC', 'COUNTRY_EE', 'COUNTRY_EG', 'COUNTRY_EH', 'COUNTRY_ER', 'COUNTRY_ES', 'COUNTRY_ET', 'COUNTRY_FI', 'COUNTRY_FJ', 'COUNTRY_FK', 'COUNTRY_FM', 'COUNTRY_FO', 'COUNTRY_FR', 'COUNTRY_GA', 'COUNTRY_GB', 'COUNTRY_GD', 'COUNTRY_GE', 'COUNTRY_GF', 'COUNTRY_GG', 'COUNTRY_GH', 'COUNTRY_GI', 'COUNTRY_GL', 'COUNTRY_GM', 'COUNTRY_GN', 'COUNTRY_GP', 'COUNTRY_GQ', 'COUNTRY_GR', 'COUNTRY_GS', 'COUNTRY_GT', 'COUNTRY_GU', 'COUNTRY_GW', 'COUNTRY_GY', 'COUNTRY_HK', 'COUNTRY_HM', 'COUNTRY_HN', 'COUNTRY_HR', 'COUNTRY_HT', 'COUNTRY_HU', 'COUNTRY_ID', 'COUNTRY_IE', 'COUNTRY_IL', 'COUNTRY_IM', 'COUNTRY_IN', 'COUNTRY_IO', 'COUNTRY_IQ', 'COUNTRY_IR', 'COUNTRY_IS', 'COUNTRY_IT', 'COUNTRY_JE', 'COUNTRY_JM', 'COUNTRY_JO', 'COUNTRY_JP', 'COUNTRY_KE', 'COUNTRY_KG', 'COUNTRY_KH', 'COUNTRY_KI', 'COUNTRY_KM', 'COUNTRY_KN', 'COUNTRY_KP', 'COUNTRY_KR', 'COUNTRY_KW', 'COUNTRY_KY', 'COUNTRY_KZ', 'COUNTRY_LA', 'COUNTRY_LB', 'COUNTRY_LC', 'COUNTRY_LI', 'COUNTRY_LK', 'COUNTRY_LR', 'COUNTRY_LS', 'COUNTRY_LT', 'COUNTRY_LU', 'COUNTRY_LV', 'COUNTRY_LY', 'COUNTRY_MA', 'COUNTRY_MC', 'COUNTRY_MD', 'COUNTRY_ME', 'COUNTRY_MF', 'COUNTRY_MG', 'COUNTRY_MH', 'COUNTRY_MK', 'COUNTRY_ML', 'COUNTRY_MM', 'COUNTRY_MN', 'COUNTRY_MO', 'COUNTRY_MP', 'COUNTRY_MQ', 'COUNTRY_MR', 'COUNTRY_MS', 'COUNTRY_MT', 'COUNTRY_MU', 'COUNTRY_MV', 'COUNTRY_MW', 'COUNTRY_MX', 'COUNTRY_MY', 'COUNTRY_MZ', 'COUNTRY_NA', 'COUNTRY_NC', 'COUNTRY_NE', 'COUNTRY_NF', 'COUNTRY_NG', 'COUNTRY_NI', 'COUNTRY_NL', 'COUNTRY_NO', 'COUNTRY_NONE', 'COUNTRY_NP', 'COUNTRY_NR', 'COUNTRY_NU', 'COUNTRY_NZ', 'COUNTRY_OM', 'COUNTRY_PA', 'COUNTRY_PE', 'COUNTRY_PF', 'COUNTRY_PG', 'COUNTRY_PH', 'COUNTRY_PK', 'COUNTRY_PL', 'COUNTRY_PM', 'COUNTRY_PN', 'COUNTRY_PR', 'COUNTRY_PS', 'COUNTRY_PT', 'COUNTRY_PW', 'COUNTRY_PY', 'COUNTRY_QA', 'COUNTRY_RE', 'COUNTRY_RO', 'COUNTRY_RS', 'COUNTRY_RU', 'COUNTRY_RW', 'COUNTRY_SA', 'COUNTRY_SB', 'COUNTRY_SC', 'COUNTRY_SD', 'COUNTRY_SE', 'COUNTRY_SG', 'COUNTRY_SH', 'COUNTRY_SI', 'COUNTRY_SJ', 'COUNTRY_SK', 'COUNTRY_SL', 'COUNTRY_SM', 'COUNTRY_SN', 'COUNTRY_SO', 'COUNTRY_SR', 'COUNTRY_SS', 'COUNTRY_ST', 'COUNTRY_SV', 'COUNTRY_SX', 'COUNTRY_SY', 'COUNTRY_SZ', 'COUNTRY_TC', 'COUNTRY_TD', 'COUNTRY_TF', 'COUNTRY_TG', 'COUNTRY_TH', 'COUNTRY_TJ', 'COUNTRY_TK', 'COUNTRY_TL', 'COUNTRY_TM', 'COUNTRY_TN', 'COUNTRY_TO', 'COUNTRY_TR', 'COUNTRY_TT', 'COUNTRY_TV', 'COUNTRY_TW', 'COUNTRY_TZ', 'COUNTRY_UA', 'COUNTRY_UG', 'COUNTRY_UM', 'COUNTRY_US', 'COUNTRY_UY', 'COUNTRY_UZ', 'COUNTRY_VA', 'COUNTRY_VC', 'COUNTRY_VE', 'COUNTRY_VG', 'COUNTRY_VI', 'COUNTRY_VN', 'COUNTRY_VU', 'COUNTRY_WF', 'COUNTRY_WS', 'COUNTRY_XK', 'COUNTRY_XT', 'COUNTRY_YE', 'COUNTRY_YT', 'COUNTRY_ZA', 'COUNTRY_ZM', 'COUNTRY_ZW']` (Multiple selection allowed)
+
+
+
 <a id="nestedatt--rules--spec--domain_matcher"></a>
 ### Nested Schema for `rules.spec.domain_matcher`
 
@@ -251,7 +248,7 @@ Optional:
 
 Required:
 
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--rules--spec--headers--match_choice))
+- `match_choice` (Attributes) match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified. (see [below for nested schema](#nestedatt--rules--spec--headers--match_choice))
 - `name` (String) name A case-insensitive HTTP header name.
 
 Optional:
@@ -263,9 +260,9 @@ Optional:
 
 Optional:
 
-- `check_not_present` (Boolean) check_not_present Check that the header is not present.
-- `check_present` (Boolean) check_present Check that the header is present.
-- `item` (Attributes) item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--rules--spec--headers--match_choice--item))
+- `check_not_present` (Boolean) check_not_present Check that the header is not present.<br>Conflicts with `check_present` and `item`.
+- `check_present` (Boolean) check_present Check that the header is present.<br>Conflicts with `check_not_present` and `item`.
+- `item` (Attributes) item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`. (see [below for nested schema](#nestedatt--rules--spec--headers--match_choice--item))
 
 <a id="nestedatt--rules--spec--headers--match_choice--item"></a>
 ### Nested Schema for `rules.spec.headers.match_choice.item`
@@ -293,9 +290,9 @@ Optional:
 
 Optional:
 
-- `any_ip` (Boolean)
-- `ip_matcher` (Attributes) (see [below for nested schema](#nestedatt--rules--spec--ip_choice--ip_matcher))
-- `ip_prefix_list` (Attributes) (see [below for nested schema](#nestedatt--rules--spec--ip_choice--ip_prefix_list))
+- `any_ip` (Boolean) Conflicts with `ip_matcher` and `ip_prefix_list`.
+- `ip_matcher` (Attributes) Conflicts with `any_ip` and `ip_prefix_list`. (see [below for nested schema](#nestedatt--rules--spec--ip_choice--ip_matcher))
+- `ip_prefix_list` (Attributes) Conflicts with `any_ip` and `ip_matcher`. (see [below for nested schema](#nestedatt--rules--spec--ip_choice--ip_prefix_list))
 
 <a id="nestedatt--rules--spec--ip_choice--ip_matcher"></a>
 ### Nested Schema for `rules.spec.ip_choice.ip_matcher`
@@ -352,15 +349,15 @@ Optional:
 
 Optional:
 
-- `src_segment_choice` (Attributes) Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match (see [below for nested schema](#nestedatt--rules--spec--segment_policy--src_segment_choice))
+- `src_segment_choice` (Attributes) Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match<br>Exactly one of `src_any` or `src_segments` must be specified when `src_segment_choice` is configured. (see [below for nested schema](#nestedatt--rules--spec--segment_policy--src_segment_choice))
 
 <a id="nestedatt--rules--spec--segment_policy--src_segment_choice"></a>
 ### Nested Schema for `rules.spec.segment_policy.src_segment_choice`
 
 Optional:
 
-- `src_any` (Boolean) Any segment Traffic is not matched against any segment
-- `src_segments` (Attributes) List of segments Source traffic is matched against selected segments (see [below for nested schema](#nestedatt--rules--spec--segment_policy--src_segment_choice--src_segments))
+- `src_any` (Boolean) Any segment Traffic is not matched against any segment<br>Conflicts with `src_segments`.
+- `src_segments` (Attributes) List of segments Source traffic is matched against selected segments<br>Conflicts with `src_any`. (see [below for nested schema](#nestedatt--rules--spec--segment_policy--src_segment_choice--src_segments))
 
 <a id="nestedatt--rules--spec--segment_policy--src_segment_choice--src_segments"></a>
 ### Nested Schema for `rules.spec.segment_policy.src_segment_choice.src_segments`
@@ -417,6 +414,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_rate_limiter_policy.example"
+	to = f5xc_rate_limiter_policy.example
 }
 ```

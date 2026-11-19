@@ -94,6 +94,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_ike2.example"
+	to = f5xc_ike2.example
 }
 ```

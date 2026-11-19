@@ -70,7 +70,6 @@ resource "f5xc_protected_application" "example" {
 
 ### Required
 
-- `connector_type_choice` (Attributes) connector_type_choice Select the type of connector the application uses to integrate with Integrated Bot Defense. (see [below for nested schema](#nestedatt--connector_type_choice))
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
 - `region` (List of String) Application Region Select the region where the application’s origin server resides.<br>**Allowed Values (choose one):** `['US', 'EU', 'ASIA']`
@@ -78,6 +77,7 @@ resource "f5xc_protected_application" "example" {
 ### Optional
 
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
+- `connector_type_choice` (Attributes) connector_type_choice Select the type of connector the application uses to integrate with Integrated Bot Defense.<br>Exactly one of `adobe_commerce_connector`, `big_ip_iapp`, `cloudflare`, `cloudfront`, `custom_connector`, `f5_big_ip`, or `salesforce_commerce_connector` must be specified when `connector_type_choice` is configured. (see [below for nested schema](#nestedatt--connector_type_choice))
 - `description` (String) description Human readable description for the object
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
@@ -91,27 +91,27 @@ resource "f5xc_protected_application" "example" {
 
 Optional:
 
-- `adobe_commerce_connector` (Boolean) Adobe Commerce template connector Get credentials needed to configure on Adobe(Magento) Commerce.
-- `big_ip_iapp` (Boolean) BIG-IP iApp connector iApp templates simplify the integration and configuration process.
-- `cloudflare` (Attributes) Cloudflare Configure Cloudflare connector properties (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare))
-- `cloudfront` (Attributes) Amazon Cloudfront Configure Amazon CloudFront connector properties (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront))
-- `custom_connector` (Boolean) Custom template connector Get credentials needed to configure on other connectors.
-- `f5_big_ip` (Boolean) F5 BIG-IP(V17.0 or greater) template connector Get credentials needed to configure on BIG-IP.
-- `salesforce_commerce_connector` (Boolean) Salesforce Commerce template connector Get credentials needed to configure on  Salesforce Commerce.
+- `adobe_commerce_connector` (Boolean) Adobe Commerce template connector Get credentials needed to configure on Adobe(Magento) Commerce.<br>Conflicts with `big_ip_iapp`, `cloudflare`, `cloudfront`, `custom_connector`, `f5_big_ip`, and `salesforce_commerce_connector`.
+- `big_ip_iapp` (Boolean) BIG-IP iApp connector iApp templates simplify the integration and configuration process.<br>Conflicts with `adobe_commerce_connector`, `cloudflare`, `cloudfront`, `custom_connector`, `f5_big_ip`, and `salesforce_commerce_connector`.
+- `cloudflare` (Attributes) Cloudflare Configure Cloudflare connector properties<br>Conflicts with `adobe_commerce_connector`, `big_ip_iapp`, `cloudfront`, `custom_connector`, `f5_big_ip`, and `salesforce_commerce_connector`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare))
+- `cloudfront` (Attributes) Amazon Cloudfront Configure Amazon CloudFront connector properties<br>Conflicts with `adobe_commerce_connector`, `big_ip_iapp`, `cloudflare`, `custom_connector`, `f5_big_ip`, and `salesforce_commerce_connector`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront))
+- `custom_connector` (Boolean) Custom template connector Get credentials needed to configure on other connectors.<br>Conflicts with `adobe_commerce_connector`, `big_ip_iapp`, `cloudflare`, `cloudfront`, `f5_big_ip`, and `salesforce_commerce_connector`.
+- `f5_big_ip` (Boolean) F5 BIG-IP(V17.0 or greater) template connector Get credentials needed to configure on BIG-IP.<br>Conflicts with `adobe_commerce_connector`, `big_ip_iapp`, `cloudflare`, `cloudfront`, `custom_connector`, and `salesforce_commerce_connector`.
+- `salesforce_commerce_connector` (Boolean) Salesforce Commerce template connector Get credentials needed to configure on  Salesforce Commerce.<br>Conflicts with `adobe_commerce_connector`, `big_ip_iapp`, `cloudflare`, `cloudfront`, `custom_connector`, and `f5_big_ip`.
 
 <a id="nestedatt--connector_type_choice--cloudflare"></a>
 ### Nested Schema for `connector_type_choice.cloudflare`
 
 Required:
 
-- `java_script_choice` (Attributes) JavaScript Choice For Manual JavaScript Insertion, add the JS tags to one of the recommended locations: Immediately After <Head>, Immediately After </title>, Before <script> (first script tag on the page). JS tags provided in documentation. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--java_script_choice))
-- `mobile_sdk_choice` (Attributes) Mobile SDK Choice Configure Mobile SDK parameters to protect native mobile app endpoints. If you have selected client type as 'Mobile' or 'Web And Mobile' please Enable Mobile SDK. In the event that there is at least one protected endpoint marked with a client type of 'Web And Mobile', then also define Mobile Request Identifier(s) in advanced setting. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--mobile_sdk_choice))
+- `java_script_choice` (Attributes) JavaScript Choice For Manual JavaScript Insertion, add the JS tags to one of the recommended locations: Immediately After <Head>, Immediately After </title>, Before <script> (first script tag on the page). JS tags provided in documentation.<br>Exactly one of `disable_js_insert`, `js_insertion_rules`, or `manual_js_insert` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--java_script_choice))
 - `protected_endpoints` (Attributes List) protected_endpoints List of protected endpoints (max 128 items) (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints))
 
 Optional:
 
 - `continue_mitigation_action_hdr` (String) Continue Header name A case-insensitive HTTP header name for Continue Mitigation Action when add header selected.<br>**Default:** `x-f5-bot-automation`
 - `loglevel` (List of String) loglevel Select the level of logging desired. Levels are cumulative (e.g. Debug includes Error, Warning, and Informational)<br>**Allowed Values (choose one):** `['LOG_DEBUG', 'LOG_ERROR', 'LOG_INFO', 'LOG_WARNING']`<br>**Default:** `LOG_ERROR`
+- `mobile_sdk_choice` (Attributes) Mobile SDK Choice Configure Mobile SDK parameters to protect native mobile app endpoints. If you have selected client type as 'Mobile' or 'Web And Mobile' please Enable Mobile SDK. In the event that there is at least one protected endpoint marked with a client type of 'Web And Mobile', then also define Mobile Request Identifier(s) in advanced setting.<br>Exactly one of `disable_mobile_sdk` or `mobile_sdk_config` must be specified when `mobile_sdk_choice` is configured. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--mobile_sdk_choice))
 - `timeout` (Number) timeout The timeout for the inference check, in milliseconds<br>**Default:** `700`
 - `trusted_clients` (Attributes List) Trusted Client Rules Define your allowlists to skip Bot Defense inference processing (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--trusted_clients))
 
@@ -120,9 +120,9 @@ Optional:
 
 Optional:
 
-- `disable_js_insert` (Boolean) disable_js_insert No web endpoints or to insert JavaScript manually
-- `js_insertion_rules` (Attributes) Specify JavaScript Insertion Rules Specify pages to include or exclude JavaScript (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules))
-- `manual_js_insert` (Attributes) manual_js_insert Insert JavaScript manually (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--java_script_choice--manual_js_insert))
+- `disable_js_insert` (Boolean) disable_js_insert No web endpoints or to insert JavaScript manually<br>Conflicts with `js_insertion_rules` and `manual_js_insert`.
+- `js_insertion_rules` (Attributes) Specify JavaScript Insertion Rules Specify pages to include or exclude JavaScript<br>Conflicts with `disable_js_insert` and `manual_js_insert`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules))
+- `manual_js_insert` (Attributes) manual_js_insert Insert JavaScript manually<br>Conflicts with `disable_js_insert` and `js_insertion_rules`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--java_script_choice--manual_js_insert))
 
 <a id="nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules"></a>
 ### Nested Schema for `connector_type_choice.cloudflare.java_script_choice.js_insertion_rules`
@@ -142,36 +142,12 @@ Optional:
 
 Required:
 
-- `domain_matcher_choice` (Attributes) Domain Matcher This defines domain matcher. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--rules--domain_matcher_choice))
 - `metadata` (Attributes) metadata Common attributes for the rule including name and description. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--rules--metadata))
-- `uri_path_choice` (Attributes) Path URI path matcher. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--rules--uri_path_choice))
-
-<a id="nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--rules--domain_matcher_choice"></a>
-### Nested Schema for `connector_type_choice.cloudflare.java_script_choice.js_insertion_rules.rules.domain_matcher_choice`
+- `uri_path_choice` (Attributes) Path URI path matcher.<br>Exactly one of `exact_path`, `glob`, or `prefix` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--rules--uri_path_choice))
 
 Optional:
 
-- `any_domain` (Boolean) Any domain Any Domain.
-- `domain` (Attributes) Domain Domain matcher. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--rules--domain_matcher_choice--domain))
-
-<a id="nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--rules--domain_matcher_choice--domain"></a>
-### Nested Schema for `connector_type_choice.cloudflare.java_script_choice.js_insertion_rules.rules.domain_matcher_choice.domain`
-
-Required:
-
-- `domain_choice` (Attributes) Domain choice Method to specify domain part (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--rules--domain_matcher_choice--domain--domain_choice))
-
-<a id="nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--rules--domain_matcher_choice--domain--domain_choice"></a>
-### Nested Schema for `connector_type_choice.cloudflare.java_script_choice.js_insertion_rules.rules.domain_matcher_choice.domain.domain_choice`
-
-Optional:
-
-- `exact_value` (String) exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`
-- `regex_value` (String) regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`
-- `suffix_value` (String) suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`
-
-
-
+- `domain_matcher_choice` (Attributes) Domain Matcher This defines domain matcher.<br>Exactly one of `any_domain` or `domain` must be specified when `domain_matcher_choice` is configured. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--rules--domain_matcher_choice))
 
 <a id="nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--rules--metadata"></a>
 ### Nested Schema for `connector_type_choice.cloudflare.java_script_choice.js_insertion_rules.rules.metadata`
@@ -190,9 +166,36 @@ Optional:
 
 Optional:
 
-- `exact_path` (String) path Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`
-- `glob` (String) glob Accepts wildcards * to match multiple characters or ? to match a single character
-- `prefix` (String) prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`
+- `exact_path` (String) path Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `glob` and `prefix`.
+- `glob` (String) glob Accepts wildcards * to match multiple characters or ? to match a single character<br>Conflicts with `exact_path` and `prefix`.
+- `prefix` (String) prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `exact_path` and `glob`.
+
+
+<a id="nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--rules--domain_matcher_choice"></a>
+### Nested Schema for `connector_type_choice.cloudflare.java_script_choice.js_insertion_rules.rules.domain_matcher_choice`
+
+Optional:
+
+- `any_domain` (Boolean) Any domain Any Domain.<br>Conflicts with `domain`.
+- `domain` (Attributes) Domain Domain matcher.<br>Conflicts with `any_domain`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--rules--domain_matcher_choice--domain))
+
+<a id="nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--rules--domain_matcher_choice--domain"></a>
+### Nested Schema for `connector_type_choice.cloudflare.java_script_choice.js_insertion_rules.rules.domain_matcher_choice.domain`
+
+Required:
+
+- `domain_choice` (Attributes) Domain choice Method to specify domain part<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--rules--domain_matcher_choice--domain--domain_choice))
+
+<a id="nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--rules--domain_matcher_choice--domain--domain_choice"></a>
+### Nested Schema for `connector_type_choice.cloudflare.java_script_choice.js_insertion_rules.rules.domain_matcher_choice.domain.domain_choice`
+
+Optional:
+
+- `exact_value` (String) exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.
+- `regex_value` (String) regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.
+- `suffix_value` (String) suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.
+
+
 
 
 
@@ -201,36 +204,12 @@ Optional:
 
 Required:
 
-- `domain_matcher_choice` (Attributes) Domain Matcher This defines domain matcher. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--exclude_list--domain_matcher_choice))
 - `metadata` (Attributes) metadata Common attributes for the rule including name and description. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--exclude_list--metadata))
 - `path` (Attributes) Path URI path matcher. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--exclude_list--path))
 
-<a id="nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--exclude_list--domain_matcher_choice"></a>
-### Nested Schema for `connector_type_choice.cloudflare.java_script_choice.js_insertion_rules.exclude_list.domain_matcher_choice`
-
 Optional:
 
-- `any_domain` (Boolean) Any domain Any Domain.
-- `domain` (Attributes) Domain Domain matcher. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--exclude_list--domain_matcher_choice--domain))
-
-<a id="nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--exclude_list--domain_matcher_choice--domain"></a>
-### Nested Schema for `connector_type_choice.cloudflare.java_script_choice.js_insertion_rules.exclude_list.domain_matcher_choice.domain`
-
-Required:
-
-- `domain_choice` (Attributes) Domain choice Method to specify domain part (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--exclude_list--domain_matcher_choice--domain--domain_choice))
-
-<a id="nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--exclude_list--domain_matcher_choice--domain--domain_choice"></a>
-### Nested Schema for `connector_type_choice.cloudflare.java_script_choice.js_insertion_rules.exclude_list.domain_matcher_choice.domain.domain_choice`
-
-Optional:
-
-- `exact_value` (String) exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`
-- `regex_value` (String) regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`
-- `suffix_value` (String) suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`
-
-
-
+- `domain_matcher_choice` (Attributes) Domain Matcher This defines domain matcher.<br>Exactly one of `any_domain` or `domain` must be specified when `domain_matcher_choice` is configured. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--exclude_list--domain_matcher_choice))
 
 <a id="nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--exclude_list--metadata"></a>
 ### Nested Schema for `connector_type_choice.cloudflare.java_script_choice.js_insertion_rules.exclude_list.metadata`
@@ -249,16 +228,43 @@ Optional:
 
 Required:
 
-- `path_match_choice` (Attributes) path_match A specification of path match (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--exclude_list--path--path_match_choice))
+- `path_match_choice` (Attributes) path_match A specification of path match<br>Exactly one of `path`, `prefix`, or `regex` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--exclude_list--path--path_match_choice))
 
 <a id="nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--exclude_list--path--path_match_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudflare.java_script_choice.js_insertion_rules.exclude_list.path.path_match_choice`
 
 Optional:
 
-- `path` (String) exact Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`
-- `prefix` (String) prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`
-- `regex` (String) regex Regular expression of path match (e.g. the value .* will match on all paths)
+- `path` (String) exact Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `prefix` and `regex`.
+- `prefix` (String) prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `path` and `regex`.
+- `regex` (String) regex Regular expression of path match (e.g. the value .* will match on all paths)<br>Conflicts with `path` and `prefix`.
+
+
+
+<a id="nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--exclude_list--domain_matcher_choice"></a>
+### Nested Schema for `connector_type_choice.cloudflare.java_script_choice.js_insertion_rules.exclude_list.domain_matcher_choice`
+
+Optional:
+
+- `any_domain` (Boolean) Any domain Any Domain.<br>Conflicts with `domain`.
+- `domain` (Attributes) Domain Domain matcher.<br>Conflicts with `any_domain`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--exclude_list--domain_matcher_choice--domain))
+
+<a id="nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--exclude_list--domain_matcher_choice--domain"></a>
+### Nested Schema for `connector_type_choice.cloudflare.java_script_choice.js_insertion_rules.exclude_list.domain_matcher_choice.domain`
+
+Required:
+
+- `domain_choice` (Attributes) Domain choice Method to specify domain part<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--exclude_list--domain_matcher_choice--domain--domain_choice))
+
+<a id="nestedatt--connector_type_choice--cloudflare--java_script_choice--js_insertion_rules--exclude_list--domain_matcher_choice--domain--domain_choice"></a>
+### Nested Schema for `connector_type_choice.cloudflare.java_script_choice.js_insertion_rules.exclude_list.domain_matcher_choice.domain.domain_choice`
+
+Optional:
+
+- `exact_value` (String) exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.
+- `regex_value` (String) regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.
+- `suffix_value` (String) suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.
+
 
 
 
@@ -273,65 +279,19 @@ Optional:
 
 
 
-<a id="nestedatt--connector_type_choice--cloudflare--mobile_sdk_choice"></a>
-### Nested Schema for `connector_type_choice.cloudflare.mobile_sdk_choice`
-
-Optional:
-
-- `disable_mobile_sdk` (Boolean) Disable Mobile SDK
-- `mobile_sdk_config` (Attributes) Mobile SDK configuration (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--mobile_sdk_choice--mobile_sdk_config))
-
-<a id="nestedatt--connector_type_choice--cloudflare--mobile_sdk_choice--mobile_sdk_config"></a>
-### Nested Schema for `connector_type_choice.cloudflare.mobile_sdk_choice.mobile_sdk_config`
-
-Optional:
-
-- `mobile_identifier` (Attributes) Mobile Traffic Identifier Type Provide Header(s) name-value pair to distinguish native mobile app endpoints from web endpoints. To be used if web and native mobile app endpoints share same FQDN and URL path. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--mobile_sdk_choice--mobile_sdk_config--mobile_identifier))
-
-<a id="nestedatt--connector_type_choice--cloudflare--mobile_sdk_choice--mobile_sdk_config--mobile_identifier"></a>
-### Nested Schema for `connector_type_choice.cloudflare.mobile_sdk_choice.mobile_sdk_config.mobile_identifier`
-
-Optional:
-
-- `headers` (Attributes List) Mobile headers A list of headers that can be used to identify mobile traffic. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--mobile_sdk_choice--mobile_sdk_config--mobile_identifier--headers))
-
-<a id="nestedatt--connector_type_choice--cloudflare--mobile_sdk_choice--mobile_sdk_config--mobile_identifier--headers"></a>
-### Nested Schema for `connector_type_choice.cloudflare.mobile_sdk_choice.mobile_sdk_config.mobile_identifier.headers`
-
-Required:
-
-- `name` (String) name Name of the header
-
-Optional:
-
-- `value_match_choice` (Attributes) value_match The variants of matching a header value (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--mobile_sdk_choice--mobile_sdk_config--mobile_identifier--headers--value_match_choice))
-
-<a id="nestedatt--connector_type_choice--cloudflare--mobile_sdk_choice--mobile_sdk_config--mobile_identifier--headers--value_match_choice"></a>
-### Nested Schema for `connector_type_choice.cloudflare.mobile_sdk_choice.mobile_sdk_config.mobile_identifier.headers.value_match_choice`
-
-Optional:
-
-- `exact` (String) exact Header value to match exactly
-- `regex` (String) regex Regex match of the header value in re2 format
-
-
-
-
-
-
 <a id="nestedatt--connector_type_choice--cloudflare--protected_endpoints"></a>
 ### Nested Schema for `connector_type_choice.cloudflare.protected_endpoints`
 
 Required:
 
-- `client_type_choice` (Attributes) Client Type Select type of client(s) that will access this endpoint (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice))
+- `client_type_choice` (Attributes) Client Type Select type of client(s) that will access this endpoint<br>Exactly one of `mobile_client`, `web_client`, or `web_mobile_client` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice))
 - `http_methods` (List of String) HTTP Methods List of HTTP methods.<br>**Valid Options:** `['METHOD_ANY', 'METHOD_DELETE', 'METHOD_GET', 'METHOD_GET_DOCUMENT', 'METHOD_PATCH', 'METHOD_POST', 'METHOD_PUT']` (Multiple selection allowed)
 - `metadata` (Attributes) metadata Add the name and description for the protected endpoint. Name and description are for administrative convenience and do no impact the way the endpoint works (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--metadata))
 - `path` (Attributes) Path Accepts wildcards * to match multiple characters or ? to match a single character (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--path))
 
 Optional:
 
-- `domain_matcher_choice` (Attributes) Domain Matcher This defines domain matcher. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--domain_matcher_choice))
+- `domain_matcher_choice` (Attributes) Domain Matcher This defines domain matcher.<br>Exactly one of `any_domain` or `domain` must be specified when `domain_matcher_choice` is configured. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--domain_matcher_choice))
 - `query` (String) Query Enter a regular expression to match your query parameters of interest
 
 <a id="nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice"></a>
@@ -339,24 +299,24 @@ Optional:
 
 Optional:
 
-- `mobile_client` (Attributes) Mobile Client Mobile traffic channel. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--mobile_client))
-- `web_client` (Attributes) Web Client Web traffic (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_client))
-- `web_mobile_client` (Attributes) WebMobileTrafficChannel Web and mobile traffic channel. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_mobile_client))
+- `mobile_client` (Attributes) Mobile Client Mobile traffic channel.<br>Conflicts with `web_client` and `web_mobile_client`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--mobile_client))
+- `web_client` (Attributes) Web Client Web traffic<br>Conflicts with `mobile_client` and `web_mobile_client`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_client))
+- `web_mobile_client` (Attributes) WebMobileTrafficChannel Web and mobile traffic channel.<br>Conflicts with `mobile_client` and `web_client`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_mobile_client))
 
 <a id="nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--mobile_client"></a>
 ### Nested Schema for `connector_type_choice.cloudflare.protected_endpoints.client_type_choice.mobile_client`
 
 Required:
 
-- `mitigation_choice` (Attributes) Bot Traffic Mitigation This defines mitigation actions to take for bot traffic (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--mobile_client--mitigation_choice))
+- `mitigation_choice` (Attributes) Bot Traffic Mitigation This defines mitigation actions to take for bot traffic<br>Exactly one of `block` or `continue` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--mobile_client--mitigation_choice))
 
 <a id="nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--mobile_client--mitigation_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudflare.protected_endpoints.client_type_choice.mobile_client.mitigation_choice`
 
 Optional:
 
-- `block` (Attributes) Block Respond with a custom block message (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--mobile_client--mitigation_choice--block))
-- `continue` (Attributes) Continue Request is flagged and forwarded to the origin (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--mobile_client--mitigation_choice--continue))
+- `block` (Attributes) Block Respond with a custom block message<br>Conflicts with `continue`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--mobile_client--mitigation_choice--block))
+- `continue` (Attributes) Continue Request is flagged and forwarded to the origin<br>Conflicts with `block`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--mobile_client--mitigation_choice--continue))
 
 <a id="nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--mobile_client--mitigation_choice--block"></a>
 ### Nested Schema for `connector_type_choice.cloudflare.protected_endpoints.client_type_choice.mobile_client.mitigation_choice.block`
@@ -376,15 +336,15 @@ Optional:
 
 Optional:
 
-- `add_header_choice` (Attributes) send_headers_choice Select either to include a header with automation information to the origin (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--mobile_client--mitigation_choice--continue--add_header_choice))
+- `add_header_choice` (Attributes) send_headers_choice Select either to include a header with automation information to the origin<br>Exactly one of `add_header` or `no_header` must be specified when `add_header_choice` is configured. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--mobile_client--mitigation_choice--continue--add_header_choice))
 
 <a id="nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--mobile_client--mitigation_choice--continue--add_header_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudflare.protected_endpoints.client_type_choice.mobile_client.mitigation_choice.continue.add_header_choice`
 
 Optional:
 
-- `add_header` (Boolean) add_header Add a header containing automation information
-- `no_header` (Boolean) no_header Do not add a header containing automation information
+- `add_header` (Boolean) add_header Add a header containing automation information<br>Conflicts with `no_header`.
+- `no_header` (Boolean) no_header Do not add a header containing automation information<br>Conflicts with `add_header`.
 
 
 
@@ -395,16 +355,16 @@ Optional:
 
 Required:
 
-- `mitigation_choice` (Attributes) Bot Traffic Mitigation This defines mitigation actions to take for bot traffic (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_client--mitigation_choice))
+- `mitigation_choice` (Attributes) Bot Traffic Mitigation This defines mitigation actions to take for bot traffic<br>Exactly one of `block`, `continue`, or `redirect` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_client--mitigation_choice))
 
 <a id="nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_client--mitigation_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudflare.protected_endpoints.client_type_choice.web_client.mitigation_choice`
 
 Optional:
 
-- `block` (Attributes) Block Respond with a custom block message (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_client--mitigation_choice--block))
-- `continue` (Attributes) Continue Request is flagged and forwarded to the origin (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_client--mitigation_choice--continue))
-- `redirect` (Attributes) Redirect Respond with a redirect (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_client--mitigation_choice--redirect))
+- `block` (Attributes) Block Respond with a custom block message<br>Conflicts with `continue` and `redirect`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_client--mitigation_choice--block))
+- `continue` (Attributes) Continue Request is flagged and forwarded to the origin<br>Conflicts with `block` and `redirect`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_client--mitigation_choice--continue))
+- `redirect` (Attributes) Redirect Respond with a redirect<br>Conflicts with `block` and `continue`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_client--mitigation_choice--redirect))
 
 <a id="nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_client--mitigation_choice--block"></a>
 ### Nested Schema for `connector_type_choice.cloudflare.protected_endpoints.client_type_choice.web_client.mitigation_choice.block`
@@ -424,15 +384,15 @@ Optional:
 
 Optional:
 
-- `add_header_choice` (Attributes) send_headers_choice Select either to include a header with automation information to the origin (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_client--mitigation_choice--continue--add_header_choice))
+- `add_header_choice` (Attributes) send_headers_choice Select either to include a header with automation information to the origin<br>Exactly one of `add_header` or `no_header` must be specified when `add_header_choice` is configured. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_client--mitigation_choice--continue--add_header_choice))
 
 <a id="nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_client--mitigation_choice--continue--add_header_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudflare.protected_endpoints.client_type_choice.web_client.mitigation_choice.continue.add_header_choice`
 
 Optional:
 
-- `add_header` (Boolean) add_header Add a header containing automation information
-- `no_header` (Boolean) no_header Do not add a header containing automation information
+- `add_header` (Boolean) add_header Add a header containing automation information<br>Conflicts with `no_header`.
+- `no_header` (Boolean) no_header Do not add a header containing automation information<br>Conflicts with `add_header`.
 
 
 
@@ -455,16 +415,16 @@ Optional:
 
 Required:
 
-- `mobile_mitigation_choice` (Attributes) Bot Traffic Mitigation This defines mitigation actions to take for bot traffic (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_mobile_client--mobile_mitigation_choice))
-- `web_mitigation_choice` (Attributes) Bot Traffic Mitigation This defines mitigation actions to take for bot traffic (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_mobile_client--web_mitigation_choice))
+- `mobile_mitigation_choice` (Attributes) Bot Traffic Mitigation This defines mitigation actions to take for bot traffic<br>Exactly one of `block_mobile` or `continue_mobile` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_mobile_client--mobile_mitigation_choice))
+- `web_mitigation_choice` (Attributes) Bot Traffic Mitigation This defines mitigation actions to take for bot traffic<br>Exactly one of `block_web`, `continue_web`, or `redirect_web` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_mobile_client--web_mitigation_choice))
 
 <a id="nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_mobile_client--mobile_mitigation_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudflare.protected_endpoints.client_type_choice.web_mobile_client.mobile_mitigation_choice`
 
 Optional:
 
-- `block_mobile` (Attributes) Block Respond with a custom block message (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_mobile_client--mobile_mitigation_choice--block_mobile))
-- `continue_mobile` (Attributes) Continue Request is flagged and forwarded to the origin (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_mobile_client--mobile_mitigation_choice--continue_mobile))
+- `block_mobile` (Attributes) Block Respond with a custom block message<br>Conflicts with `continue_mobile`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_mobile_client--mobile_mitigation_choice--block_mobile))
+- `continue_mobile` (Attributes) Continue Request is flagged and forwarded to the origin<br>Conflicts with `block_mobile`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_mobile_client--mobile_mitigation_choice--continue_mobile))
 
 <a id="nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_mobile_client--mobile_mitigation_choice--block_mobile"></a>
 ### Nested Schema for `connector_type_choice.cloudflare.protected_endpoints.client_type_choice.web_mobile_client.mobile_mitigation_choice.block_mobile`
@@ -484,15 +444,15 @@ Optional:
 
 Optional:
 
-- `add_header_choice` (Attributes) send_headers_choice Select either to include a header with automation information to the origin (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_mobile_client--mobile_mitigation_choice--continue_mobile--add_header_choice))
+- `add_header_choice` (Attributes) send_headers_choice Select either to include a header with automation information to the origin<br>Exactly one of `add_header` or `no_header` must be specified when `add_header_choice` is configured. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_mobile_client--mobile_mitigation_choice--continue_mobile--add_header_choice))
 
 <a id="nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_mobile_client--mobile_mitigation_choice--continue_mobile--add_header_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudflare.protected_endpoints.client_type_choice.web_mobile_client.mobile_mitigation_choice.continue_mobile.add_header_choice`
 
 Optional:
 
-- `add_header` (Boolean) add_header Add a header containing automation information
-- `no_header` (Boolean) no_header Do not add a header containing automation information
+- `add_header` (Boolean) add_header Add a header containing automation information<br>Conflicts with `no_header`.
+- `no_header` (Boolean) no_header Do not add a header containing automation information<br>Conflicts with `add_header`.
 
 
 
@@ -502,9 +462,9 @@ Optional:
 
 Optional:
 
-- `block_web` (Attributes) Block Respond with a custom block message (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_mobile_client--web_mitigation_choice--block_web))
-- `continue_web` (Attributes) Continue Request is flagged and forwarded to the origin (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_mobile_client--web_mitigation_choice--continue_web))
-- `redirect_web` (Attributes) Redirect Respond with a redirect (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_mobile_client--web_mitigation_choice--redirect_web))
+- `block_web` (Attributes) Block Respond with a custom block message<br>Conflicts with `continue_web` and `redirect_web`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_mobile_client--web_mitigation_choice--block_web))
+- `continue_web` (Attributes) Continue Request is flagged and forwarded to the origin<br>Conflicts with `block_web` and `redirect_web`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_mobile_client--web_mitigation_choice--continue_web))
+- `redirect_web` (Attributes) Redirect Respond with a redirect<br>Conflicts with `block_web` and `continue_web`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_mobile_client--web_mitigation_choice--redirect_web))
 
 <a id="nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_mobile_client--web_mitigation_choice--block_web"></a>
 ### Nested Schema for `connector_type_choice.cloudflare.protected_endpoints.client_type_choice.web_mobile_client.web_mitigation_choice.block_web`
@@ -524,15 +484,15 @@ Optional:
 
 Optional:
 
-- `add_header_choice` (Attributes) send_headers_choice Select either to include a header with automation information to the origin (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_mobile_client--web_mitigation_choice--continue_web--add_header_choice))
+- `add_header_choice` (Attributes) send_headers_choice Select either to include a header with automation information to the origin<br>Exactly one of `add_header` or `no_header` must be specified when `add_header_choice` is configured. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_mobile_client--web_mitigation_choice--continue_web--add_header_choice))
 
 <a id="nestedatt--connector_type_choice--cloudflare--protected_endpoints--client_type_choice--web_mobile_client--web_mitigation_choice--continue_web--add_header_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudflare.protected_endpoints.client_type_choice.web_mobile_client.web_mitigation_choice.continue_web.add_header_choice`
 
 Optional:
 
-- `add_header` (Boolean) add_header Add a header containing automation information
-- `no_header` (Boolean) no_header Do not add a header containing automation information
+- `add_header` (Boolean) add_header Add a header containing automation information<br>Conflicts with `no_header`.
+- `no_header` (Boolean) no_header Do not add a header containing automation information<br>Conflicts with `add_header`.
 
 
 
@@ -580,24 +540,70 @@ Optional:
 
 Optional:
 
-- `any_domain` (Boolean) Any domain Any Domain
-- `domain` (Attributes) Domain Select Domain matcher (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--domain_matcher_choice--domain))
+- `any_domain` (Boolean) Any domain Any Domain<br>Conflicts with `domain`.
+- `domain` (Attributes) Domain Select Domain matcher<br>Conflicts with `any_domain`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--domain_matcher_choice--domain))
 
 <a id="nestedatt--connector_type_choice--cloudflare--protected_endpoints--domain_matcher_choice--domain"></a>
 ### Nested Schema for `connector_type_choice.cloudflare.protected_endpoints.domain_matcher_choice.domain`
 
 Required:
 
-- `domain_choice` (Attributes) Domain choice Method to specify domain part (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--domain_matcher_choice--domain--domain_choice))
+- `domain_choice` (Attributes) Domain choice Method to specify domain part<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--protected_endpoints--domain_matcher_choice--domain--domain_choice))
 
 <a id="nestedatt--connector_type_choice--cloudflare--protected_endpoints--domain_matcher_choice--domain--domain_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudflare.protected_endpoints.domain_matcher_choice.domain.domain_choice`
 
 Optional:
 
-- `exact_value` (String) exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`
-- `regex_value` (String) regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`
-- `suffix_value` (String) suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`
+- `exact_value` (String) exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.
+- `regex_value` (String) regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.
+- `suffix_value` (String) suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.
+
+
+
+
+
+<a id="nestedatt--connector_type_choice--cloudflare--mobile_sdk_choice"></a>
+### Nested Schema for `connector_type_choice.cloudflare.mobile_sdk_choice`
+
+Optional:
+
+- `disable_mobile_sdk` (Boolean) Disable Mobile SDK<br>Conflicts with `mobile_sdk_config`.
+- `mobile_sdk_config` (Attributes) Mobile SDK configuration<br>Conflicts with `disable_mobile_sdk`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--mobile_sdk_choice--mobile_sdk_config))
+
+<a id="nestedatt--connector_type_choice--cloudflare--mobile_sdk_choice--mobile_sdk_config"></a>
+### Nested Schema for `connector_type_choice.cloudflare.mobile_sdk_choice.mobile_sdk_config`
+
+Optional:
+
+- `mobile_identifier` (Attributes) Mobile Traffic Identifier Type Provide Header(s) name-value pair to distinguish native mobile app endpoints from web endpoints. To be used if web and native mobile app endpoints share same FQDN and URL path. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--mobile_sdk_choice--mobile_sdk_config--mobile_identifier))
+
+<a id="nestedatt--connector_type_choice--cloudflare--mobile_sdk_choice--mobile_sdk_config--mobile_identifier"></a>
+### Nested Schema for `connector_type_choice.cloudflare.mobile_sdk_choice.mobile_sdk_config.mobile_identifier`
+
+Optional:
+
+- `headers` (Attributes List) Mobile headers A list of headers that can be used to identify mobile traffic. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--mobile_sdk_choice--mobile_sdk_config--mobile_identifier--headers))
+
+<a id="nestedatt--connector_type_choice--cloudflare--mobile_sdk_choice--mobile_sdk_config--mobile_identifier--headers"></a>
+### Nested Schema for `connector_type_choice.cloudflare.mobile_sdk_choice.mobile_sdk_config.mobile_identifier.headers`
+
+Required:
+
+- `name` (String) name Name of the header
+
+Optional:
+
+- `value_match_choice` (Attributes) value_match The variants of matching a header value<br>Exactly one of `exact` or `regex` must be specified when `value_match_choice` is configured. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--mobile_sdk_choice--mobile_sdk_config--mobile_identifier--headers--value_match_choice))
+
+<a id="nestedatt--connector_type_choice--cloudflare--mobile_sdk_choice--mobile_sdk_config--mobile_identifier--headers--value_match_choice"></a>
+### Nested Schema for `connector_type_choice.cloudflare.mobile_sdk_choice.mobile_sdk_config.mobile_identifier.headers.value_match_choice`
+
+Optional:
+
+- `exact` (String) exact Header value to match exactly<br>Conflicts with `regex`.
+- `regex` (String) regex Regex match of the header value in re2 format<br>Conflicts with `exact`.
+
 
 
 
@@ -608,7 +614,7 @@ Optional:
 
 Required:
 
-- `client_source_choice` (Attributes) Client Identifier Client identifier that should be used for the client rule (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--trusted_clients--client_source_choice))
+- `client_source_choice` (Attributes) Client Identifier Client identifier that should be used for the client rule<br>Exactly one of `http_header` or `ip_prefix` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--trusted_clients--client_source_choice))
 - `metadata` (Attributes) metadata Common attributes for the rule including name and description. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--trusted_clients--metadata))
 
 <a id="nestedatt--connector_type_choice--cloudflare--trusted_clients--client_source_choice"></a>
@@ -616,8 +622,8 @@ Required:
 
 Optional:
 
-- `http_header` (Attributes) HTTP Header Request header name and value pairs (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--trusted_clients--client_source_choice--http_header))
-- `ip_prefix` (String) ip prefix IP prefix string
+- `http_header` (Attributes) HTTP Header Request header name and value pairs<br>Conflicts with `ip_prefix`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--trusted_clients--client_source_choice--http_header))
+- `ip_prefix` (String) ip prefix IP prefix string<br>Conflicts with `http_header`.
 
 <a id="nestedatt--connector_type_choice--cloudflare--trusted_clients--client_source_choice--http_header"></a>
 ### Nested Schema for `connector_type_choice.cloudflare.trusted_clients.client_source_choice.http_header`
@@ -635,15 +641,15 @@ Required:
 
 Optional:
 
-- `value_match_choice` (Attributes) value_match The variants of matching a header value (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--trusted_clients--client_source_choice--http_header--headers--value_match_choice))
+- `value_match_choice` (Attributes) value_match The variants of matching a header value<br>Exactly one of `exact` or `regex` must be specified when `value_match_choice` is configured. (see [below for nested schema](#nestedatt--connector_type_choice--cloudflare--trusted_clients--client_source_choice--http_header--headers--value_match_choice))
 
 <a id="nestedatt--connector_type_choice--cloudflare--trusted_clients--client_source_choice--http_header--headers--value_match_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudflare.trusted_clients.client_source_choice.http_header.headers.value_match_choice`
 
 Optional:
 
-- `exact` (String) exact Header value to match exactly
-- `regex` (String) regex Regex match of the header value in re2 format
+- `exact` (String) exact Header value to match exactly<br>Conflicts with `regex`.
+- `regex` (String) regex Regex match of the header value in re2 format<br>Conflicts with `exact`.
 
 
 
@@ -668,9 +674,8 @@ Optional:
 
 Required:
 
-- `aws_configuration_type_choice` (Attributes) AWS Configuration Choice AWS Configuration options (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--aws_configuration_type_choice))
-- `java_script_choice` (Attributes) JavaScript Choice For Manual JavaScript Insertion, add the JS tags to one of the recommended locations: Immediately After <Head>, Immediately After </title>, Before <script> (first script tag on the page). JS tags provided in documentation. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--java_script_choice))
-- `mobile_sdk_choice` (Attributes) Mobile SDK Choice Configure Mobile SDK parameters to protect native mobile app endpoints. If you have selected client type as 'Mobile' or 'Web And Mobile' please Enable Mobile SDK. In the event that there is at least one protected endpoint marked with a client type of 'Web And Mobile', then also define Mobile Request Identifier(s) in advanced setting. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--mobile_sdk_choice))
+- `aws_configuration_type_choice` (Attributes) AWS Configuration Choice AWS Configuration options<br>Exactly one of `aws_configuration_id_selector`, `aws_configuration_tag_selector`, or `disable_aws_configuration` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--aws_configuration_type_choice))
+- `java_script_choice` (Attributes) JavaScript Choice For Manual JavaScript Insertion, add the JS tags to one of the recommended locations: Immediately After <Head>, Immediately After </title>, Before <script> (first script tag on the page). JS tags provided in documentation.<br>Exactly one of `disable_js_insert`, `js_insertion_rules`, or `manual_js_insert` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--java_script_choice))
 - `protected_endpoints` (Attributes List) protected_endpoints List of protected endpoints (max 128 items) (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints))
 
 Optional:
@@ -678,6 +683,7 @@ Optional:
 - `continue_mitigation_action_hdr` (String) Continue Header name A case-insensitive HTTP header name for Continue Mitigation Action when add header selected.<br>**Default:** `x-f5-bot-automation`
 - `data_sample` (Number) DataSample Limit on amount of request-body data (other than f5 telemetry) to send for analysis (limit 1,048,576 == 1 MiByte)<br>**Default:** `0`
 - `loglevel` (List of String) loglevel Select the level of logging desired. Levels are cumulative (e.g. Debug includes Error, Warning, and Informational)<br>**Allowed Values (choose one):** `['LOG_DEBUG', 'LOG_ERROR', 'LOG_INFO', 'LOG_WARNING']`<br>**Default:** `LOG_ERROR`
+- `mobile_sdk_choice` (Attributes) Mobile SDK Choice Configure Mobile SDK parameters to protect native mobile app endpoints. If you have selected client type as 'Mobile' or 'Web And Mobile' please Enable Mobile SDK. In the event that there is at least one protected endpoint marked with a client type of 'Web And Mobile', then also define Mobile Request Identifier(s) in advanced setting.<br>Exactly one of `disable_mobile_sdk` or `mobile_sdk_config` must be specified when `mobile_sdk_choice` is configured. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--mobile_sdk_choice))
 - `timeout` (Number) timeout The timeout for the inference check, in milliseconds<br>**Default:** `700`
 - `trusted_clients` (Attributes List) Trusted Client Rules Define your allowlists to skip Bot Defense inference processing (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--trusted_clients))
 
@@ -686,9 +692,9 @@ Optional:
 
 Optional:
 
-- `aws_configuration_id_selector` (Attributes) aws_configuration Associate your AWS CloudFront distribution(s) with protected endpoint(s) by specifing IDs (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--aws_configuration_type_choice--aws_configuration_id_selector))
-- `aws_configuration_tag_selector` (Attributes) aws_configuration Associate your AWS CloudFront distribution(s) with protected endpoint(s) by using tag selector (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--aws_configuration_type_choice--aws_configuration_tag_selector))
-- `disable_aws_configuration` (Boolean) Disable AWS Configuration Check this box if you would prefer to manage distribution manaully
+- `aws_configuration_id_selector` (Attributes) aws_configuration Associate your AWS CloudFront distribution(s) with protected endpoint(s) by specifing IDs<br>Conflicts with `aws_configuration_tag_selector` and `disable_aws_configuration`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--aws_configuration_type_choice--aws_configuration_id_selector))
+- `aws_configuration_tag_selector` (Attributes) aws_configuration Associate your AWS CloudFront distribution(s) with protected endpoint(s) by using tag selector<br>Conflicts with `aws_configuration_id_selector` and `disable_aws_configuration`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--aws_configuration_type_choice--aws_configuration_tag_selector))
+- `disable_aws_configuration` (Boolean) Disable AWS Configuration Check this box if you would prefer to manage distribution manaully<br>Conflicts with `aws_configuration_id_selector` and `aws_configuration_tag_selector`.
 
 <a id="nestedatt--connector_type_choice--cloudfront--aws_configuration_type_choice--aws_configuration_id_selector"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.aws_configuration_type_choice.aws_configuration_id_selector`
@@ -712,9 +718,9 @@ Required:
 
 Optional:
 
-- `disable_js_insert` (Boolean) disable_js_insert No web endpoints
-- `js_insertion_rules` (Attributes) Specify JavaScript Insertion Rules Specify pages to include or exclude JavaScript (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules))
-- `manual_js_insert` (Attributes) manual_js_insert Insert JavaScript manually (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--java_script_choice--manual_js_insert))
+- `disable_js_insert` (Boolean) disable_js_insert No web endpoints<br>Conflicts with `js_insertion_rules` and `manual_js_insert`.
+- `js_insertion_rules` (Attributes) Specify JavaScript Insertion Rules Specify pages to include or exclude JavaScript<br>Conflicts with `disable_js_insert` and `manual_js_insert`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules))
+- `manual_js_insert` (Attributes) manual_js_insert Insert JavaScript manually<br>Conflicts with `disable_js_insert` and `js_insertion_rules`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--java_script_choice--manual_js_insert))
 
 <a id="nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.java_script_choice.js_insertion_rules`
@@ -735,36 +741,12 @@ Optional:
 
 Required:
 
-- `domain_matcher_choice` (Attributes) Domain Matcher This defines domain matcher. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--rules--domain_matcher_choice))
 - `metadata` (Attributes) metadata Common attributes for the rule including name and description. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--rules--metadata))
-- `uri_path_choice` (Attributes) Path URI path matcher. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--rules--uri_path_choice))
-
-<a id="nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--rules--domain_matcher_choice"></a>
-### Nested Schema for `connector_type_choice.cloudfront.java_script_choice.js_insertion_rules.rules.domain_matcher_choice`
+- `uri_path_choice` (Attributes) Path URI path matcher.<br>Exactly one of `exact_path`, `glob`, or `prefix` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--rules--uri_path_choice))
 
 Optional:
 
-- `any_domain` (Boolean) Any domain Any Domain.
-- `domain` (Attributes) Domain Domain matcher. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--rules--domain_matcher_choice--domain))
-
-<a id="nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--rules--domain_matcher_choice--domain"></a>
-### Nested Schema for `connector_type_choice.cloudfront.java_script_choice.js_insertion_rules.rules.domain_matcher_choice.domain`
-
-Required:
-
-- `domain_choice` (Attributes) Domain choice Method to specify domain part (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--rules--domain_matcher_choice--domain--domain_choice))
-
-<a id="nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--rules--domain_matcher_choice--domain--domain_choice"></a>
-### Nested Schema for `connector_type_choice.cloudfront.java_script_choice.js_insertion_rules.rules.domain_matcher_choice.domain.domain_choice`
-
-Optional:
-
-- `exact_value` (String) exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`
-- `regex_value` (String) regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`
-- `suffix_value` (String) suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`
-
-
-
+- `domain_matcher_choice` (Attributes) Domain Matcher This defines domain matcher.<br>Exactly one of `any_domain` or `domain` must be specified when `domain_matcher_choice` is configured. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--rules--domain_matcher_choice))
 
 <a id="nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--rules--metadata"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.java_script_choice.js_insertion_rules.rules.metadata`
@@ -783,9 +765,36 @@ Optional:
 
 Optional:
 
-- `exact_path` (String) path Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`
-- `glob` (String) glob Accepts wildcards * to match multiple characters or ? to match a single character
-- `prefix` (String) prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`
+- `exact_path` (String) path Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `glob` and `prefix`.
+- `glob` (String) glob Accepts wildcards * to match multiple characters or ? to match a single character<br>Conflicts with `exact_path` and `prefix`.
+- `prefix` (String) prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `exact_path` and `glob`.
+
+
+<a id="nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--rules--domain_matcher_choice"></a>
+### Nested Schema for `connector_type_choice.cloudfront.java_script_choice.js_insertion_rules.rules.domain_matcher_choice`
+
+Optional:
+
+- `any_domain` (Boolean) Any domain Any Domain.<br>Conflicts with `domain`.
+- `domain` (Attributes) Domain Domain matcher.<br>Conflicts with `any_domain`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--rules--domain_matcher_choice--domain))
+
+<a id="nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--rules--domain_matcher_choice--domain"></a>
+### Nested Schema for `connector_type_choice.cloudfront.java_script_choice.js_insertion_rules.rules.domain_matcher_choice.domain`
+
+Required:
+
+- `domain_choice` (Attributes) Domain choice Method to specify domain part<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--rules--domain_matcher_choice--domain--domain_choice))
+
+<a id="nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--rules--domain_matcher_choice--domain--domain_choice"></a>
+### Nested Schema for `connector_type_choice.cloudfront.java_script_choice.js_insertion_rules.rules.domain_matcher_choice.domain.domain_choice`
+
+Optional:
+
+- `exact_value` (String) exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.
+- `regex_value` (String) regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.
+- `suffix_value` (String) suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.
+
+
 
 
 
@@ -794,36 +803,12 @@ Optional:
 
 Required:
 
-- `domain_matcher_choice` (Attributes) Domain Matcher This defines domain matcher. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--exclude_list--domain_matcher_choice))
 - `metadata` (Attributes) metadata Common attributes for the rule including name and description. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--exclude_list--metadata))
 - `path` (Attributes) Path URI path matcher. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--exclude_list--path))
 
-<a id="nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--exclude_list--domain_matcher_choice"></a>
-### Nested Schema for `connector_type_choice.cloudfront.java_script_choice.js_insertion_rules.exclude_list.domain_matcher_choice`
-
 Optional:
 
-- `any_domain` (Boolean) Any domain Any Domain.
-- `domain` (Attributes) Domain Domain matcher. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--exclude_list--domain_matcher_choice--domain))
-
-<a id="nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--exclude_list--domain_matcher_choice--domain"></a>
-### Nested Schema for `connector_type_choice.cloudfront.java_script_choice.js_insertion_rules.exclude_list.domain_matcher_choice.domain`
-
-Required:
-
-- `domain_choice` (Attributes) Domain choice Method to specify domain part (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--exclude_list--domain_matcher_choice--domain--domain_choice))
-
-<a id="nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--exclude_list--domain_matcher_choice--domain--domain_choice"></a>
-### Nested Schema for `connector_type_choice.cloudfront.java_script_choice.js_insertion_rules.exclude_list.domain_matcher_choice.domain.domain_choice`
-
-Optional:
-
-- `exact_value` (String) exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`
-- `regex_value` (String) regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`
-- `suffix_value` (String) suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`
-
-
-
+- `domain_matcher_choice` (Attributes) Domain Matcher This defines domain matcher.<br>Exactly one of `any_domain` or `domain` must be specified when `domain_matcher_choice` is configured. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--exclude_list--domain_matcher_choice))
 
 <a id="nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--exclude_list--metadata"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.java_script_choice.js_insertion_rules.exclude_list.metadata`
@@ -842,16 +827,43 @@ Optional:
 
 Required:
 
-- `path_match_choice` (Attributes) path_match A specification of path match (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--exclude_list--path--path_match_choice))
+- `path_match_choice` (Attributes) path_match A specification of path match<br>Exactly one of `path`, `prefix`, or `regex` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--exclude_list--path--path_match_choice))
 
 <a id="nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--exclude_list--path--path_match_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.java_script_choice.js_insertion_rules.exclude_list.path.path_match_choice`
 
 Optional:
 
-- `path` (String) exact Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`
-- `prefix` (String) prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`
-- `regex` (String) regex Regular expression of path match (e.g. the value .* will match on all paths)
+- `path` (String) exact Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `prefix` and `regex`.
+- `prefix` (String) prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `path` and `regex`.
+- `regex` (String) regex Regular expression of path match (e.g. the value .* will match on all paths)<br>Conflicts with `path` and `prefix`.
+
+
+
+<a id="nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--exclude_list--domain_matcher_choice"></a>
+### Nested Schema for `connector_type_choice.cloudfront.java_script_choice.js_insertion_rules.exclude_list.domain_matcher_choice`
+
+Optional:
+
+- `any_domain` (Boolean) Any domain Any Domain.<br>Conflicts with `domain`.
+- `domain` (Attributes) Domain Domain matcher.<br>Conflicts with `any_domain`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--exclude_list--domain_matcher_choice--domain))
+
+<a id="nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--exclude_list--domain_matcher_choice--domain"></a>
+### Nested Schema for `connector_type_choice.cloudfront.java_script_choice.js_insertion_rules.exclude_list.domain_matcher_choice.domain`
+
+Required:
+
+- `domain_choice` (Attributes) Domain choice Method to specify domain part<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--exclude_list--domain_matcher_choice--domain--domain_choice))
+
+<a id="nestedatt--connector_type_choice--cloudfront--java_script_choice--js_insertion_rules--exclude_list--domain_matcher_choice--domain--domain_choice"></a>
+### Nested Schema for `connector_type_choice.cloudfront.java_script_choice.js_insertion_rules.exclude_list.domain_matcher_choice.domain.domain_choice`
+
+Optional:
+
+- `exact_value` (String) exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.
+- `regex_value` (String) regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.
+- `suffix_value` (String) suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.
+
 
 
 
@@ -870,66 +882,20 @@ Optional:
 
 
 
-<a id="nestedatt--connector_type_choice--cloudfront--mobile_sdk_choice"></a>
-### Nested Schema for `connector_type_choice.cloudfront.mobile_sdk_choice`
-
-Optional:
-
-- `disable_mobile_sdk` (Boolean) Disable Mobile SDK
-- `mobile_sdk_config` (Attributes) Mobile SDK configuration (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--mobile_sdk_choice--mobile_sdk_config))
-
-<a id="nestedatt--connector_type_choice--cloudfront--mobile_sdk_choice--mobile_sdk_config"></a>
-### Nested Schema for `connector_type_choice.cloudfront.mobile_sdk_choice.mobile_sdk_config`
-
-Optional:
-
-- `mobile_identifier` (Attributes) Mobile Traffic Identifier Type Provide Header(s) name-value pair to distinguish native mobile app endpoints from web endpoints. To be used if web and native mobile app endpoints share same FQDN and URL path. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--mobile_sdk_choice--mobile_sdk_config--mobile_identifier))
-
-<a id="nestedatt--connector_type_choice--cloudfront--mobile_sdk_choice--mobile_sdk_config--mobile_identifier"></a>
-### Nested Schema for `connector_type_choice.cloudfront.mobile_sdk_choice.mobile_sdk_config.mobile_identifier`
-
-Optional:
-
-- `headers` (Attributes List) Mobile headers A list of headers that can be used to identify mobile traffic. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--mobile_sdk_choice--mobile_sdk_config--mobile_identifier--headers))
-
-<a id="nestedatt--connector_type_choice--cloudfront--mobile_sdk_choice--mobile_sdk_config--mobile_identifier--headers"></a>
-### Nested Schema for `connector_type_choice.cloudfront.mobile_sdk_choice.mobile_sdk_config.mobile_identifier.headers`
-
-Required:
-
-- `name` (String) name Name of the header
-
-Optional:
-
-- `value_match_choice` (Attributes) value_match The variants of matching a header value (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--mobile_sdk_choice--mobile_sdk_config--mobile_identifier--headers--value_match_choice))
-
-<a id="nestedatt--connector_type_choice--cloudfront--mobile_sdk_choice--mobile_sdk_config--mobile_identifier--headers--value_match_choice"></a>
-### Nested Schema for `connector_type_choice.cloudfront.mobile_sdk_choice.mobile_sdk_config.mobile_identifier.headers.value_match_choice`
-
-Optional:
-
-- `exact` (String) exact Header value to match exactly
-- `regex` (String) regex Regex match of the header value in re2 format
-
-
-
-
-
-
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.protected_endpoints`
 
 Required:
 
-- `client_type_choice` (Attributes) Client Type Select type of client(s) that will access this endpoint (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice))
+- `client_type_choice` (Attributes) Client Type Select type of client(s) that will access this endpoint<br>Exactly one of `mobile_client`, `web_client`, or `web_mobile_client` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice))
 - `http_methods` (List of String) HTTP Methods List of HTTP methods.<br>**Valid Options:** `['METHOD_ANY', 'METHOD_DELETE', 'METHOD_GET', 'METHOD_GET_DOCUMENT', 'METHOD_PATCH', 'METHOD_POST', 'METHOD_PUT']` (Multiple selection allowed)
 - `metadata` (Attributes) metadata Add the name and description for the protected endpoint. Name and description are for administrative convenience and do no impact the way the endpoint works (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--metadata))
 - `path` (String) Path Accepts wildcards * to match multiple characters or ? to match a single character
 
 Optional:
 
-- `domain_matcher_choice` (Attributes) Domain Matcher This defines domain matcher. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--domain_matcher_choice))
-- `flow_label_choice` (Attributes) Flow label Endpoint label category (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice))
+- `domain_matcher_choice` (Attributes) Domain Matcher This defines domain matcher.<br>Exactly one of `any_domain` or `domain` must be specified when `domain_matcher_choice` is configured. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--domain_matcher_choice))
+- `flow_label_choice` (Attributes) Flow label Endpoint label category<br>Exactly one of `flow_label` or `undefined_flow_label` must be specified when `flow_label_choice` is configured. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice))
 - `query` (String) Query Enter a regular expression to match your query parameters of interest
 
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice"></a>
@@ -937,24 +903,24 @@ Optional:
 
 Optional:
 
-- `mobile_client` (Attributes) Mobile Client Mobile traffic channel. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--mobile_client))
-- `web_client` (Attributes) Web Client Web traffic (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_client))
-- `web_mobile_client` (Attributes) WebMobileTrafficChannel Web and mobile traffic channel. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_mobile_client))
+- `mobile_client` (Attributes) Mobile Client Mobile traffic channel.<br>Conflicts with `web_client` and `web_mobile_client`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--mobile_client))
+- `web_client` (Attributes) Web Client Web traffic<br>Conflicts with `mobile_client` and `web_mobile_client`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_client))
+- `web_mobile_client` (Attributes) WebMobileTrafficChannel Web and mobile traffic channel.<br>Conflicts with `mobile_client` and `web_client`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_mobile_client))
 
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--mobile_client"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.protected_endpoints.client_type_choice.mobile_client`
 
 Required:
 
-- `mitigation_choice` (Attributes) Bot Traffic Mitigation This defines mitigation actions to take for bot traffic (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--mobile_client--mitigation_choice))
+- `mitigation_choice` (Attributes) Bot Traffic Mitigation This defines mitigation actions to take for bot traffic<br>Exactly one of `block` or `continue` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--mobile_client--mitigation_choice))
 
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--mobile_client--mitigation_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.protected_endpoints.client_type_choice.mobile_client.mitigation_choice`
 
 Optional:
 
-- `block` (Attributes) Block Respond with a custom block message (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--mobile_client--mitigation_choice--block))
-- `continue` (Attributes) Continue Request is flagged and forwarded to the origin (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--mobile_client--mitigation_choice--continue))
+- `block` (Attributes) Block Respond with a custom block message<br>Conflicts with `continue`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--mobile_client--mitigation_choice--block))
+- `continue` (Attributes) Continue Request is flagged and forwarded to the origin<br>Conflicts with `block`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--mobile_client--mitigation_choice--continue))
 
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--mobile_client--mitigation_choice--block"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.protected_endpoints.client_type_choice.mobile_client.mitigation_choice.block`
@@ -974,15 +940,15 @@ Optional:
 
 Optional:
 
-- `add_header_choice` (Attributes) send_headers_choice Select either to include a header with automation information to the origin (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--mobile_client--mitigation_choice--continue--add_header_choice))
+- `add_header_choice` (Attributes) send_headers_choice Select either to include a header with automation information to the origin<br>Exactly one of `add_header` or `no_header` must be specified when `add_header_choice` is configured. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--mobile_client--mitigation_choice--continue--add_header_choice))
 
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--mobile_client--mitigation_choice--continue--add_header_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.protected_endpoints.client_type_choice.mobile_client.mitigation_choice.continue.add_header_choice`
 
 Optional:
 
-- `add_header` (Boolean) add_header Add a header containing automation information
-- `no_header` (Boolean) no_header Do not add a header containing automation information
+- `add_header` (Boolean) add_header Add a header containing automation information<br>Conflicts with `no_header`.
+- `no_header` (Boolean) no_header Do not add a header containing automation information<br>Conflicts with `add_header`.
 
 
 
@@ -993,16 +959,16 @@ Optional:
 
 Required:
 
-- `mitigation_choice` (Attributes) Bot Traffic Mitigation This defines mitigation actions to take for bot traffic (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_client--mitigation_choice))
+- `mitigation_choice` (Attributes) Bot Traffic Mitigation This defines mitigation actions to take for bot traffic<br>Exactly one of `block`, `continue`, or `redirect` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_client--mitigation_choice))
 
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_client--mitigation_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.protected_endpoints.client_type_choice.web_client.mitigation_choice`
 
 Optional:
 
-- `block` (Attributes) Block Respond with a custom block message (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_client--mitigation_choice--block))
-- `continue` (Attributes) Continue Request is flagged and forwarded to the origin (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_client--mitigation_choice--continue))
-- `redirect` (Attributes) Redirect Respond with a redirect (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_client--mitigation_choice--redirect))
+- `block` (Attributes) Block Respond with a custom block message<br>Conflicts with `continue` and `redirect`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_client--mitigation_choice--block))
+- `continue` (Attributes) Continue Request is flagged and forwarded to the origin<br>Conflicts with `block` and `redirect`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_client--mitigation_choice--continue))
+- `redirect` (Attributes) Redirect Respond with a redirect<br>Conflicts with `block` and `continue`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_client--mitigation_choice--redirect))
 
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_client--mitigation_choice--block"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.protected_endpoints.client_type_choice.web_client.mitigation_choice.block`
@@ -1022,15 +988,15 @@ Optional:
 
 Optional:
 
-- `add_header_choice` (Attributes) send_headers_choice Select either to include a header with automation information to the origin (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_client--mitigation_choice--continue--add_header_choice))
+- `add_header_choice` (Attributes) send_headers_choice Select either to include a header with automation information to the origin<br>Exactly one of `add_header` or `no_header` must be specified when `add_header_choice` is configured. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_client--mitigation_choice--continue--add_header_choice))
 
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_client--mitigation_choice--continue--add_header_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.protected_endpoints.client_type_choice.web_client.mitigation_choice.continue.add_header_choice`
 
 Optional:
 
-- `add_header` (Boolean) add_header Add a header containing automation information
-- `no_header` (Boolean) no_header Do not add a header containing automation information
+- `add_header` (Boolean) add_header Add a header containing automation information<br>Conflicts with `no_header`.
+- `no_header` (Boolean) no_header Do not add a header containing automation information<br>Conflicts with `add_header`.
 
 
 
@@ -1053,16 +1019,16 @@ Optional:
 
 Required:
 
-- `mobile_mitigation_choice` (Attributes) Bot Traffic Mitigation This defines mitigation actions to take for bot traffic (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_mobile_client--mobile_mitigation_choice))
-- `web_mitigation_choice` (Attributes) Bot Traffic Mitigation This defines mitigation actions to take for bot traffic (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_mobile_client--web_mitigation_choice))
+- `mobile_mitigation_choice` (Attributes) Bot Traffic Mitigation This defines mitigation actions to take for bot traffic<br>Exactly one of `block_mobile` or `continue_mobile` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_mobile_client--mobile_mitigation_choice))
+- `web_mitigation_choice` (Attributes) Bot Traffic Mitigation This defines mitigation actions to take for bot traffic<br>Exactly one of `block_web`, `continue_web`, or `redirect_web` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_mobile_client--web_mitigation_choice))
 
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_mobile_client--mobile_mitigation_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.protected_endpoints.client_type_choice.web_mobile_client.mobile_mitigation_choice`
 
 Optional:
 
-- `block_mobile` (Attributes) Block Respond with a custom block message (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_mobile_client--mobile_mitigation_choice--block_mobile))
-- `continue_mobile` (Attributes) Continue Request is flagged and forwarded to the origin (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_mobile_client--mobile_mitigation_choice--continue_mobile))
+- `block_mobile` (Attributes) Block Respond with a custom block message<br>Conflicts with `continue_mobile`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_mobile_client--mobile_mitigation_choice--block_mobile))
+- `continue_mobile` (Attributes) Continue Request is flagged and forwarded to the origin<br>Conflicts with `block_mobile`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_mobile_client--mobile_mitigation_choice--continue_mobile))
 
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_mobile_client--mobile_mitigation_choice--block_mobile"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.protected_endpoints.client_type_choice.web_mobile_client.mobile_mitigation_choice.block_mobile`
@@ -1082,15 +1048,15 @@ Optional:
 
 Optional:
 
-- `add_header_choice` (Attributes) send_headers_choice Select either to include a header with automation information to the origin (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_mobile_client--mobile_mitigation_choice--continue_mobile--add_header_choice))
+- `add_header_choice` (Attributes) send_headers_choice Select either to include a header with automation information to the origin<br>Exactly one of `add_header` or `no_header` must be specified when `add_header_choice` is configured. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_mobile_client--mobile_mitigation_choice--continue_mobile--add_header_choice))
 
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_mobile_client--mobile_mitigation_choice--continue_mobile--add_header_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.protected_endpoints.client_type_choice.web_mobile_client.mobile_mitigation_choice.continue_mobile.add_header_choice`
 
 Optional:
 
-- `add_header` (Boolean) add_header Add a header containing automation information
-- `no_header` (Boolean) no_header Do not add a header containing automation information
+- `add_header` (Boolean) add_header Add a header containing automation information<br>Conflicts with `no_header`.
+- `no_header` (Boolean) no_header Do not add a header containing automation information<br>Conflicts with `add_header`.
 
 
 
@@ -1100,9 +1066,9 @@ Optional:
 
 Optional:
 
-- `block_web` (Attributes) Block Respond with a custom block message (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_mobile_client--web_mitigation_choice--block_web))
-- `continue_web` (Attributes) Continue Request is flagged and forwarded to the origin (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_mobile_client--web_mitigation_choice--continue_web))
-- `redirect_web` (Attributes) Redirect Respond with a redirect (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_mobile_client--web_mitigation_choice--redirect_web))
+- `block_web` (Attributes) Block Respond with a custom block message<br>Conflicts with `continue_web` and `redirect_web`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_mobile_client--web_mitigation_choice--block_web))
+- `continue_web` (Attributes) Continue Request is flagged and forwarded to the origin<br>Conflicts with `block_web` and `redirect_web`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_mobile_client--web_mitigation_choice--continue_web))
+- `redirect_web` (Attributes) Redirect Respond with a redirect<br>Conflicts with `block_web` and `continue_web`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_mobile_client--web_mitigation_choice--redirect_web))
 
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_mobile_client--web_mitigation_choice--block_web"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.protected_endpoints.client_type_choice.web_mobile_client.web_mitigation_choice.block_web`
@@ -1122,15 +1088,15 @@ Optional:
 
 Optional:
 
-- `add_header_choice` (Attributes) send_headers_choice Select either to include a header with automation information to the origin (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_mobile_client--web_mitigation_choice--continue_web--add_header_choice))
+- `add_header_choice` (Attributes) send_headers_choice Select either to include a header with automation information to the origin<br>Exactly one of `add_header` or `no_header` must be specified when `add_header_choice` is configured. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_mobile_client--web_mitigation_choice--continue_web--add_header_choice))
 
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints--client_type_choice--web_mobile_client--web_mitigation_choice--continue_web--add_header_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.protected_endpoints.client_type_choice.web_mobile_client.web_mitigation_choice.continue_web.add_header_choice`
 
 Optional:
 
-- `add_header` (Boolean) add_header Add a header containing automation information
-- `no_header` (Boolean) no_header Do not add a header containing automation information
+- `add_header` (Boolean) add_header Add a header containing automation information<br>Conflicts with `no_header`.
+- `no_header` (Boolean) no_header Do not add a header containing automation information<br>Conflicts with `add_header`.
 
 
 
@@ -1166,24 +1132,24 @@ Optional:
 
 Optional:
 
-- `any_domain` (Boolean) Any domain Any Domain
-- `domain` (Attributes) Domain Select Domain matcher (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--domain_matcher_choice--domain))
+- `any_domain` (Boolean) Any domain Any Domain<br>Conflicts with `domain`.
+- `domain` (Attributes) Domain Select Domain matcher<br>Conflicts with `any_domain`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--domain_matcher_choice--domain))
 
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints--domain_matcher_choice--domain"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.protected_endpoints.domain_matcher_choice.domain`
 
 Required:
 
-- `domain_choice` (Attributes) Domain choice Method to specify domain part (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--domain_matcher_choice--domain--domain_choice))
+- `domain_choice` (Attributes) Domain choice Method to specify domain part<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--domain_matcher_choice--domain--domain_choice))
 
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints--domain_matcher_choice--domain--domain_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.protected_endpoints.domain_matcher_choice.domain.domain_choice`
 
 Optional:
 
-- `exact_value` (String) exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`
-- `regex_value` (String) regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`
-- `suffix_value` (String) suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`
+- `exact_value` (String) exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.
+- `regex_value` (String) regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.
+- `suffix_value` (String) suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.
 
 
 
@@ -1193,43 +1159,43 @@ Optional:
 
 Optional:
 
-- `flow_label` (Attributes) flow_label (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label))
-- `undefined_flow_label` (Boolean) undefined
+- `flow_label` (Attributes) flow_label<br>Conflicts with `undefined_flow_label`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label))
+- `undefined_flow_label` (Boolean) undefined<br>Conflicts with `flow_label`.
 
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.protected_endpoints.flow_label_choice.flow_label`
 
 Required:
 
-- `flow_label_choice` (Attributes) Flow label category Select flow label category (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice))
+- `flow_label_choice` (Attributes) Flow label category Select flow label category<br>Exactly one of `account_management`, `authentication`, `financial_services`, `flight`, `profile_management`, `search`, or `shopping_gift_cards` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice))
 
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.protected_endpoints.flow_label_choice.flow_label.flow_label_choice`
 
 Optional:
 
-- `account_management` (Attributes) Account Management (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--account_management))
-- `authentication` (Attributes) Authentication (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--authentication))
-- `financial_services` (Attributes) Financial Services (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--financial_services))
-- `flight` (Attributes) Flight (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--flight))
-- `profile_management` (Attributes) Profile Management (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--profile_management))
-- `search` (Attributes) Search (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--search))
-- `shopping_gift_cards` (Attributes) Shopping (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--shopping_gift_cards))
+- `account_management` (Attributes) Account Management<br>Conflicts with `authentication`, `financial_services`, `flight`, `profile_management`, `search`, and `shopping_gift_cards`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--account_management))
+- `authentication` (Attributes) Authentication<br>Conflicts with `account_management`, `financial_services`, `flight`, `profile_management`, `search`, and `shopping_gift_cards`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--authentication))
+- `financial_services` (Attributes) Financial Services<br>Conflicts with `account_management`, `authentication`, `flight`, `profile_management`, `search`, and `shopping_gift_cards`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--financial_services))
+- `flight` (Attributes) Flight<br>Conflicts with `account_management`, `authentication`, `financial_services`, `profile_management`, `search`, and `shopping_gift_cards`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--flight))
+- `profile_management` (Attributes) Profile Management<br>Conflicts with `account_management`, `authentication`, `financial_services`, `flight`, `search`, and `shopping_gift_cards`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--profile_management))
+- `search` (Attributes) Search<br>Conflicts with `account_management`, `authentication`, `financial_services`, `flight`, `profile_management`, and `shopping_gift_cards`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--search))
+- `shopping_gift_cards` (Attributes) Shopping<br>Conflicts with `account_management`, `authentication`, `financial_services`, `flight`, `profile_management`, and `search`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--shopping_gift_cards))
 
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--account_management"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.protected_endpoints.flow_label_choice.flow_label.flow_label_choice.account_management`
 
 Required:
 
-- `label_choice` (Attributes) Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--account_management--label_choice))
+- `label_choice` (Attributes) Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.<br>Exactly one of `create` or `password_reset` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--account_management--label_choice))
 
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--account_management--label_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.protected_endpoints.flow_label_choice.flow_label.flow_label_choice.account_management.label_choice`
 
 Optional:
 
-- `create` (Boolean) Create
-- `password_reset` (Boolean) Password Reset
+- `create` (Boolean) Create<br>Conflicts with `password_reset`.
+- `password_reset` (Boolean) Password Reset<br>Conflicts with `create`.
 
 
 
@@ -1238,18 +1204,18 @@ Optional:
 
 Required:
 
-- `label_choice` (Attributes) Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--authentication--label_choice))
+- `label_choice` (Attributes) Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.<br>Exactly one of `login`, `login_mfa`, `login_partner`, `logout`, or `token_refresh` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--authentication--label_choice))
 
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--authentication--label_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.protected_endpoints.flow_label_choice.flow_label.flow_label_choice.authentication.label_choice`
 
 Optional:
 
-- `login` (Boolean) Login
-- `login_mfa` (Boolean) LoginMFA
-- `login_partner` (Boolean) login_partner
-- `logout` (Boolean) logout
-- `token_refresh` (Boolean) token_refresh
+- `login` (Boolean) Login<br>Conflicts with `login_mfa`, `login_partner`, `logout`, and `token_refresh`.
+- `login_mfa` (Boolean) LoginMFA<br>Conflicts with `login`, `login_partner`, `logout`, and `token_refresh`.
+- `login_partner` (Boolean) login_partner<br>Conflicts with `login`, `login_mfa`, `logout`, and `token_refresh`.
+- `logout` (Boolean) logout<br>Conflicts with `login`, `login_mfa`, `login_partner`, and `token_refresh`.
+- `token_refresh` (Boolean) token_refresh<br>Conflicts with `login`, `login_mfa`, `login_partner`, and `logout`.
 
 
 
@@ -1258,24 +1224,24 @@ Optional:
 
 Required:
 
-- `label_choice` (Attributes) Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--financial_services--label_choice))
+- `label_choice` (Attributes) Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.<br>Exactly one of `apply` or `money_transfer` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--financial_services--label_choice))
 
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--financial_services--label_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.protected_endpoints.flow_label_choice.flow_label.flow_label_choice.financial_services.label_choice`
 
 Optional:
 
-- `apply` (Boolean) apply
-- `money_transfer` (Boolean) money_transfer
+- `apply` (Boolean) apply<br>Conflicts with `money_transfer`.
+- `money_transfer` (Boolean) money_transfer<br>Conflicts with `apply`.
 
 
 
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--flight"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.protected_endpoints.flow_label_choice.flow_label.flow_label_choice.flight`
 
-Required:
+Optional:
 
-- `label_choice` (Attributes) Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--flight--label_choice))
+- `label_choice` (Attributes) Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.<br>`checkin` must be specified when `label_choice` is configured. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--flight--label_choice))
 
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--flight--label_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.protected_endpoints.flow_label_choice.flow_label.flow_label_choice.flight.label_choice`
@@ -1291,16 +1257,16 @@ Optional:
 
 Required:
 
-- `label_choice` (Attributes) Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--profile_management--label_choice))
+- `label_choice` (Attributes) Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.<br>Exactly one of `create`, `update`, or `view` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--profile_management--label_choice))
 
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--profile_management--label_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.protected_endpoints.flow_label_choice.flow_label.flow_label_choice.profile_management.label_choice`
 
 Optional:
 
-- `create` (Boolean) Create
-- `update` (Boolean) update
-- `view` (Boolean) view
+- `create` (Boolean) Create<br>Conflicts with `update` and `view`.
+- `update` (Boolean) update<br>Conflicts with `create` and `view`.
+- `view` (Boolean) view<br>Conflicts with `create` and `update`.
 
 
 
@@ -1309,17 +1275,17 @@ Optional:
 
 Optional:
 
-- `label_choice` (Attributes) Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--search--label_choice))
+- `label_choice` (Attributes) Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.<br>Exactly one of `flight_search`, `product_search`, `reservation_search`, or `room_search` must be specified when `label_choice` is configured. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--search--label_choice))
 
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--search--label_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.protected_endpoints.flow_label_choice.flow_label.flow_label_choice.search.label_choice`
 
 Optional:
 
-- `flight_search` (Boolean) flight_search
-- `product_search` (Boolean) product_search
-- `reservation_search` (Boolean) reservation_search
-- `room_search` (Boolean) room_search
+- `flight_search` (Boolean) flight_search<br>Conflicts with `product_search`, `reservation_search`, and `room_search`.
+- `product_search` (Boolean) product_search<br>Conflicts with `flight_search`, `reservation_search`, and `room_search`.
+- `reservation_search` (Boolean) reservation_search<br>Conflicts with `flight_search`, `product_search`, and `room_search`.
+- `room_search` (Boolean) room_search<br>Conflicts with `flight_search`, `product_search`, and `reservation_search`.
 
 
 
@@ -1328,26 +1294,72 @@ Optional:
 
 Optional:
 
-- `label_choice` (Attributes) Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--shopping_gift_cards--label_choice))
+- `label_choice` (Attributes) Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.<br>Exactly one of `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, or `shop_update_quantity` must be specified when `label_choice` is configured. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--shopping_gift_cards--label_choice))
 
 <a id="nestedatt--connector_type_choice--cloudfront--protected_endpoints--flow_label_choice--flow_label--flow_label_choice--shopping_gift_cards--label_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.protected_endpoints.flow_label_choice.flow_label.flow_label_choice.shopping_gift_cards.label_choice`
 
 Optional:
 
-- `gift_card_make_purchase_with_gift_card` (Boolean) Purchase with Gift Card
-- `gift_card_validation` (Boolean) Gift Card Validation
-- `shop_add_to_cart` (Boolean) add_to_cart
-- `shop_checkout` (Boolean) checkout
-- `shop_choose_seat` (Boolean) Select Seat(s)
-- `shop_enter_drawing_submission` (Boolean) Enter Drawing Submission
-- `shop_make_payment` (Boolean) make_payment
-- `shop_order` (Boolean) order
-- `shop_price_inquiry` (Boolean) price_inquiry
-- `shop_promo_code_validation` (Boolean) promo_code_validation
-- `shop_purchase_gift_card` (Boolean) shop_purchase_gift_card
-- `shop_update_quantity` (Boolean) Update Quantity
+- `gift_card_make_purchase_with_gift_card` (Boolean) Purchase with Gift Card<br>Conflicts with `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.
+- `gift_card_validation` (Boolean) Gift Card Validation<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.
+- `shop_add_to_cart` (Boolean) add_to_cart<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.
+- `shop_checkout` (Boolean) checkout<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.
+- `shop_choose_seat` (Boolean) Select Seat(s)<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.
+- `shop_enter_drawing_submission` (Boolean) Enter Drawing Submission<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.
+- `shop_make_payment` (Boolean) make_payment<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.
+- `shop_order` (Boolean) order<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.
+- `shop_price_inquiry` (Boolean) price_inquiry<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.
+- `shop_promo_code_validation` (Boolean) promo_code_validation<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_purchase_gift_card`, and `shop_update_quantity`.
+- `shop_purchase_gift_card` (Boolean) shop_purchase_gift_card<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, and `shop_update_quantity`.
+- `shop_update_quantity` (Boolean) Update Quantity<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, and `shop_purchase_gift_card`.
 
+
+
+
+
+
+
+<a id="nestedatt--connector_type_choice--cloudfront--mobile_sdk_choice"></a>
+### Nested Schema for `connector_type_choice.cloudfront.mobile_sdk_choice`
+
+Optional:
+
+- `disable_mobile_sdk` (Boolean) Disable Mobile SDK<br>Conflicts with `mobile_sdk_config`.
+- `mobile_sdk_config` (Attributes) Mobile SDK configuration<br>Conflicts with `disable_mobile_sdk`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--mobile_sdk_choice--mobile_sdk_config))
+
+<a id="nestedatt--connector_type_choice--cloudfront--mobile_sdk_choice--mobile_sdk_config"></a>
+### Nested Schema for `connector_type_choice.cloudfront.mobile_sdk_choice.mobile_sdk_config`
+
+Optional:
+
+- `mobile_identifier` (Attributes) Mobile Traffic Identifier Type Provide Header(s) name-value pair to distinguish native mobile app endpoints from web endpoints. To be used if web and native mobile app endpoints share same FQDN and URL path. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--mobile_sdk_choice--mobile_sdk_config--mobile_identifier))
+
+<a id="nestedatt--connector_type_choice--cloudfront--mobile_sdk_choice--mobile_sdk_config--mobile_identifier"></a>
+### Nested Schema for `connector_type_choice.cloudfront.mobile_sdk_choice.mobile_sdk_config.mobile_identifier`
+
+Optional:
+
+- `headers` (Attributes List) Mobile headers A list of headers that can be used to identify mobile traffic. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--mobile_sdk_choice--mobile_sdk_config--mobile_identifier--headers))
+
+<a id="nestedatt--connector_type_choice--cloudfront--mobile_sdk_choice--mobile_sdk_config--mobile_identifier--headers"></a>
+### Nested Schema for `connector_type_choice.cloudfront.mobile_sdk_choice.mobile_sdk_config.mobile_identifier.headers`
+
+Required:
+
+- `name` (String) name Name of the header
+
+Optional:
+
+- `value_match_choice` (Attributes) value_match The variants of matching a header value<br>Exactly one of `exact` or `regex` must be specified when `value_match_choice` is configured. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--mobile_sdk_choice--mobile_sdk_config--mobile_identifier--headers--value_match_choice))
+
+<a id="nestedatt--connector_type_choice--cloudfront--mobile_sdk_choice--mobile_sdk_config--mobile_identifier--headers--value_match_choice"></a>
+### Nested Schema for `connector_type_choice.cloudfront.mobile_sdk_choice.mobile_sdk_config.mobile_identifier.headers.value_match_choice`
+
+Optional:
+
+- `exact` (String) exact Header value to match exactly<br>Conflicts with `regex`.
+- `regex` (String) regex Regex match of the header value in re2 format<br>Conflicts with `exact`.
 
 
 
@@ -1359,7 +1371,7 @@ Optional:
 
 Required:
 
-- `client_source_choice` (Attributes) Client Identifier Client identifier that should be used for the client rule (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--trusted_clients--client_source_choice))
+- `client_source_choice` (Attributes) Client Identifier Client identifier that should be used for the client rule<br>Exactly one of `http_header` or `ip_prefix` must be specified. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--trusted_clients--client_source_choice))
 - `metadata` (Attributes) metadata Common attributes for the rule including name and description. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--trusted_clients--metadata))
 
 <a id="nestedatt--connector_type_choice--cloudfront--trusted_clients--client_source_choice"></a>
@@ -1367,8 +1379,8 @@ Required:
 
 Optional:
 
-- `http_header` (Attributes) HTTP Header Request header name and value pairs (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--trusted_clients--client_source_choice--http_header))
-- `ip_prefix` (String) ip prefix IP prefix string
+- `http_header` (Attributes) HTTP Header Request header name and value pairs<br>Conflicts with `ip_prefix`. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--trusted_clients--client_source_choice--http_header))
+- `ip_prefix` (String) ip prefix IP prefix string<br>Conflicts with `http_header`.
 
 <a id="nestedatt--connector_type_choice--cloudfront--trusted_clients--client_source_choice--http_header"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.trusted_clients.client_source_choice.http_header`
@@ -1386,15 +1398,15 @@ Required:
 
 Optional:
 
-- `value_match_choice` (Attributes) value_match The variants of matching a header value (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--trusted_clients--client_source_choice--http_header--headers--value_match_choice))
+- `value_match_choice` (Attributes) value_match The variants of matching a header value<br>Exactly one of `exact` or `regex` must be specified when `value_match_choice` is configured. (see [below for nested schema](#nestedatt--connector_type_choice--cloudfront--trusted_clients--client_source_choice--http_header--headers--value_match_choice))
 
 <a id="nestedatt--connector_type_choice--cloudfront--trusted_clients--client_source_choice--http_header--headers--value_match_choice"></a>
 ### Nested Schema for `connector_type_choice.cloudfront.trusted_clients.client_source_choice.http_header.headers.value_match_choice`
 
 Optional:
 
-- `exact` (String) exact Header value to match exactly
-- `regex` (String) regex Regex match of the header value in re2 format
+- `exact` (String) exact Header value to match exactly<br>Conflicts with `regex`.
+- `regex` (String) regex Regex match of the header value in re2 format<br>Conflicts with `exact`.
 
 
 
@@ -1445,6 +1457,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_protected_application.example"
+	to = f5xc_protected_application.example
 }
 ```

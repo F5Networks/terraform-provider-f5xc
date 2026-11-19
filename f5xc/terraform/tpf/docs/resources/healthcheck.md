@@ -71,7 +71,7 @@ resource "f5xc_healthcheck" "example" {
 
 ### Required
 
-- `health_check_choice` (Attributes) health_check Specifies whether to perform HTTP Health Check or TCP Health check (see [below for nested schema](#nestedatt--health_check_choice))
+- `health_check_choice` (Attributes) health_check Specifies whether to perform HTTP Health Check or TCP Health check<br>Exactly one of `http_health_check`, `tcp_health_check`, or `udp_icmp_health_check` must be specified. (see [below for nested schema](#nestedatt--health_check_choice))
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
 
@@ -81,7 +81,7 @@ resource "f5xc_healthcheck" "example" {
 - `description` (String) description Human readable description for the object
 - `healthy_threshold` (Number) healthy threshold Number of successful responses before declaring healthy. In other words, this is the number of healthy health checks required before a host is marked healthy. Note that during startup, only a single successful health check is required to mark a host healthy.<br>**Default:** `3`
 - `interval` (Number) interval Time interval in seconds between two healthcheck requests.<br>**Default:** `15`
-- `jitter_choice` (Attributes) jitter_choice Configure jitter as a percentage of the health check interval to add random variation between successive requests. (see [below for nested schema](#nestedatt--jitter_choice))
+- `jitter_choice` (Attributes) jitter_choice Configure jitter as a percentage of the health check interval to add random variation between successive requests.<br>Exactly one of `default_jitter` or `jitter_percent` must be specified when `jitter_choice` is configured. (see [below for nested schema](#nestedatt--jitter_choice))
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `timeout` (Number) timeout Timeout in seconds to wait for successful response. In other words, it is the time to wait for a health check response. If the timeout is reached the health check attempt will be considered a failure.<br>**Default:** `3`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
@@ -96,22 +96,19 @@ resource "f5xc_healthcheck" "example" {
 
 Optional:
 
-- `http_health_check` (Attributes) http_health_check Specifies the following details for HTTP health check requests 1. Host header 2. Path 3. Request headers to add 4. Request headers to remove (see [below for nested schema](#nestedatt--health_check_choice--http_health_check))
-- `tcp_health_check` (Attributes) tcp_health_check Specifies send payload and expected response payload (see [below for nested schema](#nestedatt--health_check_choice--tcp_health_check))
-- `udp_icmp_health_check` (Boolean) udp_icmp_health_check Specifies ICMP HealthCheck for UDP Loadbalancer
+- `http_health_check` (Attributes) http_health_check Specifies the following details for HTTP health check requests 1. Host header 2. Path 3. Request headers to add 4. Request headers to remove<br>Conflicts with `tcp_health_check` and `udp_icmp_health_check`. (see [below for nested schema](#nestedatt--health_check_choice--http_health_check))
+- `tcp_health_check` (Attributes) tcp_health_check Specifies send payload and expected response payload<br>Conflicts with `http_health_check` and `udp_icmp_health_check`. (see [below for nested schema](#nestedatt--health_check_choice--tcp_health_check))
+- `udp_icmp_health_check` (Boolean) udp_icmp_health_check Specifies ICMP HealthCheck for UDP Loadbalancer<br>Conflicts with `http_health_check` and `tcp_health_check`.
 
 <a id="nestedatt--health_check_choice--http_health_check"></a>
 ### Nested Schema for `health_check_choice.http_health_check`
-
-Required:
-
-- `host_header_choice` (Attributes) host header choice Specify the value of host header in the HTTP health check request. (see [below for nested schema](#nestedatt--health_check_choice--http_health_check--host_header_choice))
 
 Optional:
 
 - `expected_response` (String) Expected response Raw bytes expected in the response of http health check. Input is to be given in Hex encoded format. If left empty, then response body is not considered for evaluating health check status.<br>**Validation:** `Length LengthAtMost(2048)`
 - `expected_status_codes` (List of String) Expected Status Codes Specifies a list of HTTP response status codes considered healthy. To treat default HTTP expected status code 200 as healthy, user has to configure it explicitly. This is a list of strings, each of which is single HTTP status code or a range with start and end values separated by '-'.
 - `headers` (Map of String) Headers to add in health check request Specifies a list of HTTP headers that should be added to each request that is sent to the health checked cluster. This is a list of key-value pairs.
+- `host_header_choice` (Attributes) host header choice Specify the value of host header in the HTTP health check request.<br>Exactly one of `host_header` or `use_origin_server_name` must be specified when `host_header_choice` is configured. (see [below for nested schema](#nestedatt--health_check_choice--http_health_check--host_header_choice))
 - `path` (String) path Specifies the HTTP path that will be requested during health checking.<br>**Default:** `/`<br>**Validation:** `Length LengthAtMost(2048)`
 - `request_headers_to_remove` (List of String) Headers to be removed from health check request Specifies a list of HTTP headers that should be removed from each request that is sent to the health checked cluster. This is a list of keys of headers.
 - `use_http2` (Boolean) Use HTTP2 If set, health checks will be made using http/2.<br>**Default:** `false`
@@ -121,8 +118,8 @@ Optional:
 
 Optional:
 
-- `host_header` (String) host_header The value of the host header.<br>**Validation:** `Length LengthAtMost(262)`
-- `use_origin_server_name` (Boolean) use origin server name Use the origin server name.
+- `host_header` (String) host_header The value of the host header.<br>**Validation:** `Length LengthAtMost(262)`<br>Conflicts with `use_origin_server_name`.
+- `use_origin_server_name` (Boolean) use origin server name Use the origin server name.<br>Conflicts with `host_header`.
 
 
 
@@ -141,8 +138,8 @@ Optional:
 
 Optional:
 
-- `default_jitter` (Boolean) default_jitter Use the default jitter value of 30 percent of the health check interval.
-- `jitter_percent` (Number) jitter_percent Specify a custom jitter value as a percentage of the health check interval. Valid values are 0 (to disable jitter) and 10 to 50.
+- `default_jitter` (Boolean) default_jitter Use the default jitter value of 30 percent of the health check interval.<br>Conflicts with `jitter_percent`.
+- `jitter_percent` (Number) jitter_percent Specify a custom jitter value as a percentage of the health check interval. Valid values are 0 (to disable jitter) and 10 to 50.<br>Conflicts with `default_jitter`.
 
 
 <a id="nestedatt--timeouts"></a>
@@ -175,6 +172,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_healthcheck.example"
+	to = f5xc_healthcheck.example
 }
 ```

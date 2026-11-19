@@ -7799,7 +7799,6 @@ Read-Only:
 
 Read-Only:
 
-- `response_body` (String, Deprecated) response_body response body to send
 - `response_body_encoded` (String) response_body Response body to send. Currently supported URL schemes is string:/// for which message should be encoded in Base64 format. The message can be either plain text or html. E.g. '<p> Access Denied </p>'. Base64 encoded string url for this is string:///PHA+IEFjY2VzcyBEZW5pZWQgPC9wPg==
 - `response_code` (Number) response_code response code to send
 

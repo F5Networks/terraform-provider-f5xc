@@ -83,20 +83,20 @@ resource "f5xc_code_base_integration" "example" {
 
 Required:
 
-- `type_choice` (Attributes) Code Base Select the type of code base you want to integrate with such as GitHub, GitLab, Bitbucket or Azure. (see [below for nested schema](#nestedatt--code_base_integration--type_choice))
+- `type_choice` (Attributes) Code Base Select the type of code base you want to integrate with such as GitHub, GitLab, Bitbucket or Azure.<br>Exactly one of `azure_repos`, `bitbucket`, `bitbucket_server`, `github`, `github_enterprise`, `gitlab`, or `gitlab_enterprise` must be specified. (see [below for nested schema](#nestedatt--code_base_integration--type_choice))
 
 <a id="nestedatt--code_base_integration--type_choice"></a>
 ### Nested Schema for `code_base_integration.type_choice`
 
 Optional:
 
-- `azure_repos` (Attributes) Azure Repos Integration (see [below for nested schema](#nestedatt--code_base_integration--type_choice--azure_repos))
-- `bitbucket` (Attributes) BitBucket Cloud Integration (see [below for nested schema](#nestedatt--code_base_integration--type_choice--bitbucket))
-- `bitbucket_server` (Attributes) BitBucket Server Integration (see [below for nested schema](#nestedatt--code_base_integration--type_choice--bitbucket_server))
-- `github` (Attributes) Github Integration (see [below for nested schema](#nestedatt--code_base_integration--type_choice--github))
-- `github_enterprise` (Attributes) Github Enterprise Integration (see [below for nested schema](#nestedatt--code_base_integration--type_choice--github_enterprise))
-- `gitlab` (Attributes) GitLab Cloud Integration (see [below for nested schema](#nestedatt--code_base_integration--type_choice--gitlab))
-- `gitlab_enterprise` (Attributes) GitLab Enterprise Integration (see [below for nested schema](#nestedatt--code_base_integration--type_choice--gitlab_enterprise))
+- `azure_repos` (Attributes) Azure Repos Integration<br>Conflicts with `bitbucket`, `bitbucket_server`, `github`, `github_enterprise`, `gitlab`, and `gitlab_enterprise`. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--azure_repos))
+- `bitbucket` (Attributes) BitBucket Cloud Integration<br>Conflicts with `azure_repos`, `bitbucket_server`, `github`, `github_enterprise`, `gitlab`, and `gitlab_enterprise`. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--bitbucket))
+- `bitbucket_server` (Attributes) BitBucket Server Integration<br>Conflicts with `azure_repos`, `bitbucket`, `github`, `github_enterprise`, `gitlab`, and `gitlab_enterprise`. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--bitbucket_server))
+- `github` (Attributes) Github Integration<br>Conflicts with `azure_repos`, `bitbucket`, `bitbucket_server`, `github_enterprise`, `gitlab`, and `gitlab_enterprise`. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--github))
+- `github_enterprise` (Attributes) Github Enterprise Integration<br>Conflicts with `azure_repos`, `bitbucket`, `bitbucket_server`, `github`, `gitlab`, and `gitlab_enterprise`. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--github_enterprise))
+- `gitlab` (Attributes) GitLab Cloud Integration<br>Conflicts with `azure_repos`, `bitbucket`, `bitbucket_server`, `github`, `github_enterprise`, and `gitlab_enterprise`. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--gitlab))
+- `gitlab_enterprise` (Attributes) GitLab Enterprise Integration<br>Conflicts with `azure_repos`, `bitbucket`, `bitbucket_server`, `github`, `github_enterprise`, and `gitlab`. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--gitlab_enterprise))
 
 <a id="nestedatt--code_base_integration--type_choice--azure_repos"></a>
 ### Nested Schema for `code_base_integration.type_choice.azure_repos`
@@ -110,16 +110,16 @@ Required:
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--code_base_integration--type_choice--azure_repos--access_token--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--azure_repos--access_token--secret_info_choice))
 
 <a id="nestedatt--code_base_integration--type_choice--azure_repos--access_token--secret_info_choice"></a>
 ### Nested Schema for `code_base_integration.type_choice.azure_repos.access_token.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--code_base_integration--type_choice--azure_repos--access_token--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--code_base_integration--type_choice--azure_repos--access_token--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--azure_repos--access_token--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--azure_repos--access_token--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--code_base_integration--type_choice--azure_repos--access_token--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `code_base_integration.type_choice.azure_repos.access_token.secret_info_choice.blindfold_secret_info`
@@ -162,16 +162,16 @@ Required:
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--code_base_integration--type_choice--bitbucket--passwd--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--bitbucket--passwd--secret_info_choice))
 
 <a id="nestedatt--code_base_integration--type_choice--bitbucket--passwd--secret_info_choice"></a>
 ### Nested Schema for `code_base_integration.type_choice.bitbucket.passwd.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--code_base_integration--type_choice--bitbucket--passwd--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--code_base_integration--type_choice--bitbucket--passwd--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--bitbucket--passwd--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--bitbucket--passwd--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--code_base_integration--type_choice--bitbucket--passwd--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `code_base_integration.type_choice.bitbucket.passwd.secret_info_choice.blindfold_secret_info`
@@ -219,16 +219,16 @@ Optional:
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--code_base_integration--type_choice--bitbucket_server--passwd--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--bitbucket_server--passwd--secret_info_choice))
 
 <a id="nestedatt--code_base_integration--type_choice--bitbucket_server--passwd--secret_info_choice"></a>
 ### Nested Schema for `code_base_integration.type_choice.bitbucket_server.passwd.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--code_base_integration--type_choice--bitbucket_server--passwd--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--code_base_integration--type_choice--bitbucket_server--passwd--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--bitbucket_server--passwd--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--bitbucket_server--passwd--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--code_base_integration--type_choice--bitbucket_server--passwd--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `code_base_integration.type_choice.bitbucket_server.passwd.secret_info_choice.blindfold_secret_info`
@@ -275,16 +275,16 @@ Optional:
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--code_base_integration--type_choice--github--access_token--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--github--access_token--secret_info_choice))
 
 <a id="nestedatt--code_base_integration--type_choice--github--access_token--secret_info_choice"></a>
 ### Nested Schema for `code_base_integration.type_choice.github.access_token.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--code_base_integration--type_choice--github--access_token--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--code_base_integration--type_choice--github--access_token--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--github--access_token--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--github--access_token--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--code_base_integration--type_choice--github--access_token--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `code_base_integration.type_choice.github.access_token.secret_info_choice.blindfold_secret_info`
@@ -328,16 +328,16 @@ Required:
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--code_base_integration--type_choice--github_enterprise--access_token--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--github_enterprise--access_token--secret_info_choice))
 
 <a id="nestedatt--code_base_integration--type_choice--github_enterprise--access_token--secret_info_choice"></a>
 ### Nested Schema for `code_base_integration.type_choice.github_enterprise.access_token.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--code_base_integration--type_choice--github_enterprise--access_token--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--code_base_integration--type_choice--github_enterprise--access_token--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--github_enterprise--access_token--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--github_enterprise--access_token--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--code_base_integration--type_choice--github_enterprise--access_token--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `code_base_integration.type_choice.github_enterprise.access_token.secret_info_choice.blindfold_secret_info`
@@ -379,16 +379,16 @@ Required:
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--code_base_integration--type_choice--gitlab--access_token--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--gitlab--access_token--secret_info_choice))
 
 <a id="nestedatt--code_base_integration--type_choice--gitlab--access_token--secret_info_choice"></a>
 ### Nested Schema for `code_base_integration.type_choice.gitlab.access_token.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--code_base_integration--type_choice--gitlab--access_token--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--code_base_integration--type_choice--gitlab--access_token--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--gitlab--access_token--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--gitlab--access_token--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--code_base_integration--type_choice--gitlab--access_token--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `code_base_integration.type_choice.gitlab.access_token.secret_info_choice.blindfold_secret_info`
@@ -431,16 +431,16 @@ Required:
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--code_base_integration--type_choice--gitlab_enterprise--access_token--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--gitlab_enterprise--access_token--secret_info_choice))
 
 <a id="nestedatt--code_base_integration--type_choice--gitlab_enterprise--access_token--secret_info_choice"></a>
 ### Nested Schema for `code_base_integration.type_choice.gitlab_enterprise.access_token.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--code_base_integration--type_choice--gitlab_enterprise--access_token--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--code_base_integration--type_choice--gitlab_enterprise--access_token--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--gitlab_enterprise--access_token--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--code_base_integration--type_choice--gitlab_enterprise--access_token--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--code_base_integration--type_choice--gitlab_enterprise--access_token--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `code_base_integration.type_choice.gitlab_enterprise.access_token.secret_info_choice.blindfold_secret_info`
@@ -511,6 +511,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_code_base_integration.example"
+	to = f5xc_code_base_integration.example
 }
 ```

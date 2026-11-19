@@ -65,8 +65,7 @@ resource "f5xc_network_connector" "example" {
 
 ### Required
 
-- `connector_choice` (Attributes) Connector Choice Select the networks and method in which they are connected. (see [below for nested schema](#nestedatt--connector_choice))
-- `forward_proxy_choice` (Attributes) Select Forward Proxy Select to enable forward proxy (see [below for nested schema](#nestedatt--forward_proxy_choice))
+- `connector_choice` (Attributes) Connector Choice Select the networks and method in which they are connected.<br>Exactly one of `sli_to_global_dr`, `sli_to_slo_snat`, or `slo_to_global_dr` must be specified. (see [below for nested schema](#nestedatt--connector_choice))
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
 
@@ -74,6 +73,7 @@ resource "f5xc_network_connector" "example" {
 
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `description` (String) description Human readable description for the object
+- `forward_proxy_choice` (Attributes) Select Forward Proxy Select to enable forward proxy<br>Exactly one of `disable_forward_proxy` or `enable_forward_proxy` must be specified when `forward_proxy_choice` is configured. (see [below for nested schema](#nestedatt--forward_proxy_choice))
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -86,9 +86,9 @@ resource "f5xc_network_connector" "example" {
 
 Optional:
 
-- `sli_to_global_dr` (Attributes) Site Local Inside to a Global Network' Site local inside is connected directly to a given global network (see [below for nested schema](#nestedatt--connector_choice--sli_to_global_dr))
-- `sli_to_slo_snat` (Attributes) Site Local Inside to Site Local Outside SNAT' Site local inside is connected to site local outside, using SNAT (see [below for nested schema](#nestedatt--connector_choice--sli_to_slo_snat))
-- `slo_to_global_dr` (Attributes) Site Local Outside to a Global Network' Site local outside is connected directly to a given global network (see [below for nested schema](#nestedatt--connector_choice--slo_to_global_dr))
+- `sli_to_global_dr` (Attributes) Site Local Inside to a Global Network' Site local inside is connected directly to a given global network<br>Conflicts with `sli_to_slo_snat` and `slo_to_global_dr`. (see [below for nested schema](#nestedatt--connector_choice--sli_to_global_dr))
+- `sli_to_slo_snat` (Attributes) Site Local Inside to Site Local Outside SNAT' Site local inside is connected to site local outside, using SNAT<br>Conflicts with `sli_to_global_dr` and `slo_to_global_dr`. (see [below for nested schema](#nestedatt--connector_choice--sli_to_slo_snat))
+- `slo_to_global_dr` (Attributes) Site Local Outside to a Global Network' Site local outside is connected directly to a given global network<br>Conflicts with `sli_to_global_dr` and `sli_to_slo_snat`. (see [below for nested schema](#nestedatt--connector_choice--slo_to_global_dr))
 
 <a id="nestedatt--connector_choice--sli_to_global_dr"></a>
 ### Nested Schema for `connector_choice.sli_to_global_dr`
@@ -114,10 +114,10 @@ Optional:
 <a id="nestedatt--connector_choice--sli_to_slo_snat"></a>
 ### Nested Schema for `connector_choice.sli_to_slo_snat`
 
-Required:
+Optional:
 
-- `pool_choice` (Attributes) SNAT SIP Selection Select ip will be used for SNAT from SNATed Network (see [below for nested schema](#nestedatt--connector_choice--sli_to_slo_snat--pool_choice))
-- `routing_choice` (Attributes) Routing mode Select how is the traffic sent to SNATed network (see [below for nested schema](#nestedatt--connector_choice--sli_to_slo_snat--routing_choice))
+- `pool_choice` (Attributes) SNAT SIP Selection Select ip will be used for SNAT from SNATed Network<br>`interface_ip` must be specified when `pool_choice` is configured. (see [below for nested schema](#nestedatt--connector_choice--sli_to_slo_snat--pool_choice))
+- `routing_choice` (Attributes) Routing mode Select how is the traffic sent to SNATed network<br>`default_gw_snat` must be specified when `routing_choice` is configured. (see [below for nested schema](#nestedatt--connector_choice--sli_to_slo_snat--routing_choice))
 
 <a id="nestedatt--connector_choice--sli_to_slo_snat--pool_choice"></a>
 ### Nested Schema for `connector_choice.sli_to_slo_snat.pool_choice`
@@ -163,8 +163,8 @@ Optional:
 
 Optional:
 
-- `disable_forward_proxy` (Boolean) Disable Forward Proxy Forward Proxy is disabled for this connector
-- `enable_forward_proxy` (Attributes) Enable Forward Proxy Forward Proxy is enabled for this connector (see [below for nested schema](#nestedatt--forward_proxy_choice--enable_forward_proxy))
+- `disable_forward_proxy` (Boolean) Disable Forward Proxy Forward Proxy is disabled for this connector<br>Conflicts with `enable_forward_proxy`.
+- `enable_forward_proxy` (Attributes) Enable Forward Proxy Forward Proxy is enabled for this connector<br>Conflicts with `disable_forward_proxy`. (see [below for nested schema](#nestedatt--forward_proxy_choice--enable_forward_proxy))
 
 <a id="nestedatt--forward_proxy_choice--enable_forward_proxy"></a>
 ### Nested Schema for `forward_proxy_choice.enable_forward_proxy`
@@ -208,6 +208,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_network_connector.example"
+	to = f5xc_network_connector.example
 }
 ```

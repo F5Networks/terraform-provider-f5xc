@@ -27,6 +27,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -348,7 +349,7 @@ var RateLimiterPolicyRulesSpecModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> ActionChoice
+// Attribute map for OneOfField --> ActionChoice
 var RateLimiterPolicyRulesSpecActionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"apply_rate_limiter":  types.BoolType,
@@ -409,7 +410,7 @@ var RateLimiterPolicyAsnSetsObjectRefModelAttributeMap = map[string]attr.Type{
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> CountryChoice
+// Attribute map for OneOfField --> CountryChoice
 var RateLimiterPolicyRulesSpecCountryChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_country": types.BoolType,
@@ -724,21 +725,24 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 							Attributes: map[string]schema.Attribute{
 								"action_choice": schema.SingleNestedAttribute{
 									Description:         "action choice Specify action for the rule.",
-									MarkdownDescription: "action choice Specify action for the rule.",
-									Required:            true,
-									Optional:            false,
-									Computed:            false,
+									MarkdownDescription: "action choice Specify action for the rule.<br>Exactly one of `apply_rate_limiter`, `bypass_rate_limiter`, or `custom_rate_limiter` must be specified when `action_choice` is configured.",
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
 									Validators: []validator.Object{
-										exactlyoneofvalidator.RequiredExactlyOneOf(
+										exactlyoneofvalidator.ExactlyOneOf(
 											"apply_rate_limiter",
 											"bypass_rate_limiter",
 											"custom_rate_limiter",
 										),
 									},
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.UseNonNullStateForUnknown(),
+									},
 									Attributes: map[string]schema.Attribute{
 										"apply_rate_limiter": schema.BoolAttribute{
 											Description:         "apply_rate_limiter Apply the rate limiter configured on the HTTP loadbalancer.",
-											MarkdownDescription: "apply_rate_limiter Apply the rate limiter configured on the HTTP loadbalancer.",
+											MarkdownDescription: "apply_rate_limiter Apply the rate limiter configured on the HTTP loadbalancer.<br>Conflicts with `bypass_rate_limiter` and `custom_rate_limiter`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -748,7 +752,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 										},
 										"bypass_rate_limiter": schema.BoolAttribute{
 											Description:         "bypass_rate_limiter Bypass the rate limiter configured on the HTTP loadbalancer.",
-											MarkdownDescription: "bypass_rate_limiter Bypass the rate limiter configured on the HTTP loadbalancer.",
+											MarkdownDescription: "bypass_rate_limiter Bypass the rate limiter configured on the HTTP loadbalancer.<br>Conflicts with `apply_rate_limiter` and `custom_rate_limiter`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -758,7 +762,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 										},
 										"custom_rate_limiter": schema.SingleNestedAttribute{
 											Description:         "custom_rate_limiter Apply a custom rate limiter.",
-											MarkdownDescription: "custom_rate_limiter Apply a custom rate limiter.",
+											MarkdownDescription: "custom_rate_limiter Apply a custom rate limiter.<br>Conflicts with `apply_rate_limiter` and `bypass_rate_limiter`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -793,7 +797,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 								},
 								"asn_choice": schema.SingleNestedAttribute{
 									Description:         "",
-									MarkdownDescription: "",
+									MarkdownDescription: "Exactly one of `any_asn`, `asn_list`, or `asn_matcher` must be specified when `asn_choice` is configured.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -807,7 +811,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 									Attributes: map[string]schema.Attribute{
 										"any_asn": schema.BoolAttribute{
 											Description:         "",
-											MarkdownDescription: "",
+											MarkdownDescription: "Conflicts with `asn_list` and `asn_matcher`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -817,7 +821,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 										},
 										"asn_list": schema.SingleNestedAttribute{
 											Description:         "",
-											MarkdownDescription: "",
+											MarkdownDescription: "Conflicts with `any_asn` and `asn_matcher`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -838,7 +842,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 										},
 										"asn_matcher": schema.SingleNestedAttribute{
 											Description:         "",
-											MarkdownDescription: "",
+											MarkdownDescription: "Conflicts with `any_asn` and `asn_list`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -887,20 +891,23 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 								},
 								"country_choice": schema.SingleNestedAttribute{
 									Description:         "country choice Match the country of origin. The country is obtained by performing a lookup for the source IPv4 Address in a GeoIP DB.",
-									MarkdownDescription: "country choice Match the country of origin. The country is obtained by performing a lookup for the source IPv4 Address in a GeoIP DB.",
-									Required:            true,
-									Optional:            false,
-									Computed:            false,
+									MarkdownDescription: "country choice Match the country of origin. The country is obtained by performing a lookup for the source IPv4 Address in a GeoIP DB.<br>Exactly one of `any_country` or `country_list` must be specified when `country_choice` is configured.",
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
 									Validators: []validator.Object{
-										exactlyoneofvalidator.RequiredExactlyOneOf(
+										exactlyoneofvalidator.ExactlyOneOf(
 											"any_country",
 											"country_list",
 										),
 									},
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.UseNonNullStateForUnknown(),
+									},
 									Attributes: map[string]schema.Attribute{
 										"any_country": schema.BoolAttribute{
 											Description:         "any country",
-											MarkdownDescription: "any country",
+											MarkdownDescription: "any country<br>Conflicts with `country_list`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -910,7 +917,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 										},
 										"country_list": schema.SingleNestedAttribute{
 											Description:         "country_list",
-											MarkdownDescription: "country_list",
+											MarkdownDescription: "country_list<br>Conflicts with `any_country`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -991,7 +998,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 											},
 											"match_choice": schema.SingleNestedAttribute{
 												Description:         "match Select Match Options.",
-												MarkdownDescription: "match Select Match Options.",
+												MarkdownDescription: "match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -1005,7 +1012,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 												Attributes: map[string]schema.Attribute{
 													"check_not_present": schema.BoolAttribute{
 														Description:         "check_not_present Check that the header is not present.",
-														MarkdownDescription: "check_not_present Check that the header is not present.",
+														MarkdownDescription: "check_not_present Check that the header is not present.<br>Conflicts with `check_present` and `item`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1015,7 +1022,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 													},
 													"check_present": schema.BoolAttribute{
 														Description:         "check_present Check that the header is present.",
-														MarkdownDescription: "check_present Check that the header is present.",
+														MarkdownDescription: "check_present Check that the header is present.<br>Conflicts with `check_not_present` and `item`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1025,7 +1032,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 													},
 													"item": schema.SingleNestedAttribute{
 														Description:         "item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
-														MarkdownDescription: "item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
+														MarkdownDescription: "item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1124,7 +1131,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 								},
 								"ip_choice": schema.SingleNestedAttribute{
 									Description:         "",
-									MarkdownDescription: "",
+									MarkdownDescription: "Exactly one of `any_ip`, `ip_matcher`, or `ip_prefix_list` must be specified when `ip_choice` is configured.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1138,7 +1145,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 									Attributes: map[string]schema.Attribute{
 										"any_ip": schema.BoolAttribute{
 											Description:         "",
-											MarkdownDescription: "",
+											MarkdownDescription: "Conflicts with `ip_matcher` and `ip_prefix_list`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -1148,7 +1155,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 										},
 										"ip_matcher": schema.SingleNestedAttribute{
 											Description:         "",
-											MarkdownDescription: "",
+											MarkdownDescription: "Conflicts with `any_ip` and `ip_prefix_list`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -1203,7 +1210,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 										},
 										"ip_prefix_list": schema.SingleNestedAttribute{
 											Description:         "",
-											MarkdownDescription: "",
+											MarkdownDescription: "Conflicts with `any_ip` and `ip_matcher`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -1365,7 +1372,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 									Attributes: map[string]schema.Attribute{
 										"src_segment_choice": schema.SingleNestedAttribute{
 											Description:         "Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match",
-											MarkdownDescription: "Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match",
+											MarkdownDescription: "Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match<br>Exactly one of `src_any` or `src_segments` must be specified when `src_segment_choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -1378,7 +1385,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 											Attributes: map[string]schema.Attribute{
 												"src_any": schema.BoolAttribute{
 													Description:         "Any segment Traffic is not matched against any segment",
-													MarkdownDescription: "Any segment Traffic is not matched against any segment",
+													MarkdownDescription: "Any segment Traffic is not matched against any segment<br>Conflicts with `src_segments`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1388,7 +1395,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Schema(ctx context.Context, request reso
 												},
 												"src_segments": schema.SingleNestedAttribute{
 													Description:         "List of segments Source traffic is matched against selected segments",
-													MarkdownDescription: "List of segments Source traffic is matched against selected segments",
+													MarkdownDescription: "List of segments Source traffic is matched against selected segments<br>Conflicts with `src_any`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1639,9 +1646,15 @@ func (r *ResourceF5XCRateLimiterPolicy) Create(ctx context.Context, request reso
 					}
 
 					specSpec := &ves_io_schema_service_policy_rule.RateLimiterRuleSpec{}
+					specSpec.ActionChoice = &ves_io_schema_service_policy_rule.RateLimiterRuleSpec_BypassRateLimiter{
+						BypassRateLimiter: &ves_io_schema.Empty{},
+					}
+					specSpec.CountryChoice = &ves_io_schema_service_policy_rule.RateLimiterRuleSpec_AnyCountry{
+						AnyCountry: &ves_io_schema.Empty{},
+					}
 					rulesSpec[i].Spec = specSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> ActionChoice
+					// resource modelToSpecNested OneOfField --> ActionChoice
 					if !specModel.ActionChoice.IsNull() && !specModel.ActionChoice.IsUnknown() {
 						specActionChoiceModel := RateLimiterPolicyActionChoice{}
 						response.Diagnostics.Append(specModel.ActionChoice.As(ctx, &specActionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1774,7 +1787,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Create(ctx context.Context, request reso
 
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> CountryChoice
+					// resource modelToSpecNested OneOfField --> CountryChoice
 					if !specModel.CountryChoice.IsNull() && !specModel.CountryChoice.IsUnknown() {
 						specCountryChoiceModel := RateLimiterPolicyCountryChoice{}
 						response.Diagnostics.Append(specModel.CountryChoice.As(ctx, &specCountryChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2542,8 +2555,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Create(ctx context.Context, request reso
 
 				// Recursively populate the nested struct
 
-				// resource specToModelNested RequiredOneOfField --> ActionChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> ActionChoice
 				if specElement.GetActionChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					specactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -2780,8 +2792,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Create(ctx context.Context, request reso
 					rateLimiterPolicyRateLimiterRuleSpecModel.AsnChoice = types.ObjectNull(RateLimiterPolicyRulesSpecAsnChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> CountryChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> CountryChoice
 				if specElement.GetCountryChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					speccountryChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3660,11 +3671,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Read(ctx context.Context, request resour
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_rate_limiter_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_rate_limiter_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "rate_limiter_policy", err),
@@ -3842,8 +3849,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Read(ctx context.Context, request resour
 
 				// Recursively populate the nested struct
 
-				// resource specToModelNested RequiredOneOfField --> ActionChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> ActionChoice
 				if specElement.GetActionChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					specactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -4084,8 +4090,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Read(ctx context.Context, request resour
 					rateLimiterPolicyRateLimiterRuleSpecModel.AsnChoice = types.ObjectNull(RateLimiterPolicyRulesSpecAsnChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> CountryChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> CountryChoice
 				if specElement.GetCountryChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					speccountryChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5102,9 +5107,15 @@ func (r *ResourceF5XCRateLimiterPolicy) Update(ctx context.Context, request reso
 					}
 
 					specSpec := &ves_io_schema_service_policy_rule.RateLimiterRuleSpec{}
+					specSpec.ActionChoice = &ves_io_schema_service_policy_rule.RateLimiterRuleSpec_BypassRateLimiter{
+						BypassRateLimiter: &ves_io_schema.Empty{},
+					}
+					specSpec.CountryChoice = &ves_io_schema_service_policy_rule.RateLimiterRuleSpec_AnyCountry{
+						AnyCountry: &ves_io_schema.Empty{},
+					}
 					rulesSpec[i].Spec = specSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> ActionChoice
+					// resource modelToSpecNested OneOfField --> ActionChoice
 					if !specModel.ActionChoice.IsNull() && !specModel.ActionChoice.IsUnknown() {
 						specActionChoiceModel := RateLimiterPolicyActionChoice{}
 						response.Diagnostics.Append(specModel.ActionChoice.As(ctx, &specActionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5237,7 +5248,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Update(ctx context.Context, request reso
 
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> CountryChoice
+					// resource modelToSpecNested OneOfField --> CountryChoice
 					if !specModel.CountryChoice.IsNull() && !specModel.CountryChoice.IsUnknown() {
 						specCountryChoiceModel := RateLimiterPolicyCountryChoice{}
 						response.Diagnostics.Append(specModel.CountryChoice.As(ctx, &specCountryChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5815,12 +5826,8 @@ func (r *ResourceF5XCRateLimiterPolicy) Update(ctx context.Context, request reso
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_views_rate_limiter_policy.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_views_rate_limiter_policy.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "rate_limiter_policy", err),
@@ -5829,7 +5836,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Update(ctx context.Context, request reso
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_rate_limiter_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_rate_limiter_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "rate_limiter_policy", err),
@@ -6006,8 +6013,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Update(ctx context.Context, request reso
 
 				// Recursively populate the nested struct
 
-				// resource specToModelNested RequiredOneOfField --> ActionChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> ActionChoice
 				if specElement.GetActionChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					specactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -6244,8 +6250,7 @@ func (r *ResourceF5XCRateLimiterPolicy) Update(ctx context.Context, request reso
 					rateLimiterPolicyRateLimiterRuleSpecModel.AsnChoice = types.ObjectNull(RateLimiterPolicyRulesSpecAsnChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> CountryChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> CountryChoice
 				if specElement.GetCountryChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					speccountryChoiceChoicesAttributeMap := make(map[string]attr.Value)

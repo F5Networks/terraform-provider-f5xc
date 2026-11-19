@@ -26,6 +26,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -38,6 +39,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/requiredifvalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -130,7 +132,7 @@ var ProtocolInspectionEnableDisableSignaturesModelAttributeMap = map[string]attr
 	},
 }
 
-// Attribute map for RequiredOneOfField --> SignatureChoice
+// Attribute map for OneOfField --> SignatureChoice
 var ProtocolInspectionEnableDisableSignaturesSignatureChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disable_signature": types.BoolType,
@@ -237,7 +239,7 @@ func (r *ResourceF5XCProtocolInspection) Schema(ctx context.Context, request res
 				Attributes: map[string]schema.Attribute{
 					"compliance_check_choice": schema.SingleNestedAttribute{
 						Description:         "Enable Compliance Check",
-						MarkdownDescription: "Enable Compliance Check",
+						MarkdownDescription: "Enable Compliance Check<br>Exactly one of `disable_compliance_checks` or `enable_compliance_checks` must be specified.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -250,7 +252,7 @@ func (r *ResourceF5XCProtocolInspection) Schema(ctx context.Context, request res
 						Attributes: map[string]schema.Attribute{
 							"disable_compliance_checks": schema.BoolAttribute{
 								Description:         "Disable Compliance Check",
-								MarkdownDescription: "Disable Compliance Check",
+								MarkdownDescription: "Disable Compliance Check<br>Conflicts with `enable_compliance_checks`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -260,7 +262,7 @@ func (r *ResourceF5XCProtocolInspection) Schema(ctx context.Context, request res
 							},
 							"enable_compliance_checks": schema.SingleNestedAttribute{
 								Description:         "Enable Compliance Check Enabling compliance checks and selecting a type by default (right now this enables dns_compliance_checks)",
-								MarkdownDescription: "Enable Compliance Check Enabling compliance checks and selecting a type by default (right now this enables dns_compliance_checks)",
+								MarkdownDescription: "Enable Compliance Check Enabling compliance checks and selecting a type by default (right now this enables dns_compliance_checks)<br>Conflicts with `disable_compliance_checks`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -285,8 +287,12 @@ func (r *ResourceF5XCProtocolInspection) Schema(ctx context.Context, request res
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
+										Validators: []validator.String{
+											requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+										},
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseNonNullStateForUnknown(),
+											requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 										},
 									},
 								},
@@ -304,20 +310,23 @@ func (r *ResourceF5XCProtocolInspection) Schema(ctx context.Context, request res
 				Attributes: map[string]schema.Attribute{
 					"signature_choice": schema.SingleNestedAttribute{
 						Description:         "Enable Signature",
-						MarkdownDescription: "Enable Signature",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "Enable Signature<br>Exactly one of `disable_signature` or `enable_signature` must be specified when `signature_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"disable_signature",
 								"enable_signature",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"disable_signature": schema.BoolAttribute{
 								Description:         "Disable Signature",
-								MarkdownDescription: "Disable Signature",
+								MarkdownDescription: "Disable Signature<br>Conflicts with `enable_signature`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -327,7 +336,7 @@ func (r *ResourceF5XCProtocolInspection) Schema(ctx context.Context, request res
 							},
 							"enable_signature": schema.BoolAttribute{
 								Description:         "Enable Signature",
-								MarkdownDescription: "Enable Signature",
+								MarkdownDescription: "Enable Signature<br>Conflicts with `disable_signature`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -583,6 +592,9 @@ func (r *ResourceF5XCProtocolInspection) Create(ctx context.Context, request res
 		// resource modelToSpecRoot RequiredPointerField --> EnableDisableSignatures
 		if !data.EnableDisableSignatures.IsNull() && !data.EnableDisableSignatures.IsUnknown() {
 			enableDisableSignaturesSpec := &ves_io_schema_protocol_inspection.EnableDisableSignatures{}
+			enableDisableSignaturesSpec.SignatureChoice = &ves_io_schema_protocol_inspection.EnableDisableSignatures_EnableSignature{
+				EnableSignature: &ves_io_schema.Empty{},
+			}
 			spec.EnableDisableSignatures = enableDisableSignaturesSpec
 			var enableDisableSignaturesModel ProtoInspectionEnableDisableSignatures
 
@@ -593,7 +605,7 @@ func (r *ResourceF5XCProtocolInspection) Create(ctx context.Context, request res
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SignatureChoice
+			// resource modelToSpecNested OneOfField --> SignatureChoice
 			if !enableDisableSignaturesModel.SignatureChoice.IsNull() && !enableDisableSignaturesModel.SignatureChoice.IsUnknown() {
 				enableDisableSignaturesSignatureChoiceModel := ProtoInspectionSignatureChoice{}
 				response.Diagnostics.Append(enableDisableSignaturesModel.SignatureChoice.As(ctx, &enableDisableSignaturesSignatureChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -889,8 +901,7 @@ func (r *ResourceF5XCProtocolInspection) Create(ctx context.Context, request res
 		var protoInspectionEnableDisableSignaturesModel = &ProtoInspectionEnableDisableSignatures{}
 		enableDisableSignaturesElement := specData.GetEnableDisableSignatures()
 
-		// resource specToModelNested RequiredOneOfField --> SignatureChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> SignatureChoice
 		if enableDisableSignaturesElement.GetSignatureChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			enableDisableSignaturessignatureChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -994,11 +1005,7 @@ func (r *ResourceF5XCProtocolInspection) Read(ctx context.Context, request resou
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_protocol_inspection.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_protocol_inspection.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "protocol_inspection", err),
@@ -1244,8 +1251,7 @@ func (r *ResourceF5XCProtocolInspection) Read(ctx context.Context, request resou
 		var protoInspectionEnableDisableSignaturesModel = &ProtoInspectionEnableDisableSignatures{}
 		enableDisableSignaturesElement := specData.GetEnableDisableSignatures()
 
-		// resource specToModelNested RequiredOneOfField --> SignatureChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> SignatureChoice
 		if enableDisableSignaturesElement.GetSignatureChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			enableDisableSignaturessignatureChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -1523,6 +1529,9 @@ func (r *ResourceF5XCProtocolInspection) Update(ctx context.Context, request res
 		// resource modelToSpecRoot RequiredPointerField --> EnableDisableSignatures
 		if !data.EnableDisableSignatures.IsNull() && !data.EnableDisableSignatures.IsUnknown() {
 			enableDisableSignaturesSpec := &ves_io_schema_protocol_inspection.EnableDisableSignatures{}
+			enableDisableSignaturesSpec.SignatureChoice = &ves_io_schema_protocol_inspection.EnableDisableSignatures_EnableSignature{
+				EnableSignature: &ves_io_schema.Empty{},
+			}
 			spec.EnableDisableSignatures = enableDisableSignaturesSpec
 			var enableDisableSignaturesModel ProtoInspectionEnableDisableSignatures
 
@@ -1533,7 +1542,7 @@ func (r *ResourceF5XCProtocolInspection) Update(ctx context.Context, request res
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SignatureChoice
+			// resource modelToSpecNested OneOfField --> SignatureChoice
 			if !enableDisableSignaturesModel.SignatureChoice.IsNull() && !enableDisableSignaturesModel.SignatureChoice.IsUnknown() {
 				enableDisableSignaturesSignatureChoiceModel := ProtoInspectionSignatureChoice{}
 				response.Diagnostics.Append(enableDisableSignaturesModel.SignatureChoice.As(ctx, &enableDisableSignaturesSignatureChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1571,12 +1580,8 @@ func (r *ResourceF5XCProtocolInspection) Update(ctx context.Context, request res
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_protocol_inspection.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_protocol_inspection.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "protocol_inspection", err),
@@ -1585,7 +1590,7 @@ func (r *ResourceF5XCProtocolInspection) Update(ctx context.Context, request res
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_protocol_inspection.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_protocol_inspection.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "protocol_inspection", err),
@@ -1830,8 +1835,7 @@ func (r *ResourceF5XCProtocolInspection) Update(ctx context.Context, request res
 		var protoInspectionEnableDisableSignaturesModel = &ProtoInspectionEnableDisableSignatures{}
 		enableDisableSignaturesElement := specData.GetEnableDisableSignatures()
 
-		// resource specToModelNested RequiredOneOfField --> SignatureChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> SignatureChoice
 		if enableDisableSignaturesElement.GetSignatureChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			enableDisableSignaturessignatureChoiceChoicesAttributeMap := make(map[string]attr.Value)

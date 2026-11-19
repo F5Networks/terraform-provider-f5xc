@@ -131,19 +131,19 @@ resource "f5xc_app_firewall" "example" {
 
 ### Required
 
-- `allowed_response_codes_choice` (Attributes) Allowed Response Status Codes HTTP response status codes which are allowed to pass through the platform to the client. All response codes other than the allowed ones are blocked by the platform. (see [below for nested schema](#nestedatt--allowed_response_codes_choice))
-- `anonymization_setting_choice` (Attributes) Anonymization Settings Replaces sensitive data in the logs (as defined in the context) with a string of asterisks (*) (see [below for nested schema](#nestedatt--anonymization_setting_choice))
-- `blocking_page_choice` (Attributes) Blocking Page Blocking response page that should be returned to the client when the client request, or the web server response, is blocked by the App Firewall (see [below for nested schema](#nestedatt--blocking_page_choice))
-- `detection_setting_choice` (Attributes) Security Policy Settings used by WAF to detect malicious requests. These settings can be used to tune WAF operations for optimum detection with minimal false positives. (see [below for nested schema](#nestedatt--detection_setting_choice))
-- `enforcement_mode_choice` (Attributes) Enforcement Mode Monitoring mode will identify and log threats, whereas Blocking mode will both log and block threats (see [below for nested schema](#nestedatt--enforcement_mode_choice))
-- `enhance_with_ai_choice` (Attributes) Enhance with AI This setting controls whether enforcement decisions consider AI-powered risk evaluations. When activated, machine learning models provide additional context to improve detection accuracy and help prioritize responses based on the assessed threat level. When inactive, enforcement relies solely on traditional, signature-based policy evaluations. (see [below for nested schema](#nestedatt--enhance_with_ai_choice))
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
 
 ### Optional
 
+- `allowed_response_codes_choice` (Attributes) Allowed Response Status Codes HTTP response status codes which are allowed to pass through the platform to the client. All response codes other than the allowed ones are blocked by the platform.<br>Exactly one of `allow_all_response_codes` or `allowed_response_codes` must be specified when `allowed_response_codes_choice` is configured. (see [below for nested schema](#nestedatt--allowed_response_codes_choice))
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
+- `anonymization_setting_choice` (Attributes) Anonymization Settings Replaces sensitive data in the logs (as defined in the context) with a string of asterisks (*)<br>Exactly one of `custom_anonymization`, `default_anonymization`, or `disable_anonymization` must be specified when `anonymization_setting_choice` is configured. (see [below for nested schema](#nestedatt--anonymization_setting_choice))
+- `blocking_page_choice` (Attributes) Blocking Page Blocking response page that should be returned to the client when the client request, or the web server response, is blocked by the App Firewall<br>Exactly one of `blocking_page` or `use_default_blocking_page` must be specified when `blocking_page_choice` is configured. (see [below for nested schema](#nestedatt--blocking_page_choice))
 - `description` (String) description Human readable description for the object
+- `detection_setting_choice` (Attributes) Security Policy Settings used by WAF to detect malicious requests. These settings can be used to tune WAF operations for optimum detection with minimal false positives.<br>Exactly one of `default_detection_settings` or `detection_settings` must be specified when `detection_setting_choice` is configured. (see [below for nested schema](#nestedatt--detection_setting_choice))
+- `enforcement_mode_choice` (Attributes) Enforcement Mode Monitoring mode will identify and log threats, whereas Blocking mode will both log and block threats<br>Exactly one of `blocking` or `monitoring` must be specified when `enforcement_mode_choice` is configured. (see [below for nested schema](#nestedatt--enforcement_mode_choice))
+- `enhance_with_ai_choice` (Attributes) Enhance with AI This setting controls whether enforcement decisions consider AI-powered risk evaluations. When activated, machine learning models provide additional context to improve detection accuracy and help prioritize responses based on the assessed threat level. When inactive, enforcement relies solely on traditional, signature-based policy evaluations.<br>Exactly one of `disable_ai_enhancements` or `enable_ai_enhancements` must be specified when `enhance_with_ai_choice` is configured. (see [below for nested schema](#nestedatt--enhance_with_ai_choice))
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -156,8 +156,8 @@ resource "f5xc_app_firewall" "example" {
 
 Optional:
 
-- `allow_all_response_codes` (Boolean) Default All HTTP response status codes are allowed
-- `allowed_response_codes` (Attributes) Custom Define list of HTTP response status codes that are allowed (see [below for nested schema](#nestedatt--allowed_response_codes_choice--allowed_response_codes))
+- `allow_all_response_codes` (Boolean) Default All HTTP response status codes are allowed<br>Conflicts with `allowed_response_codes`.
+- `allowed_response_codes` (Attributes) Custom Define list of HTTP response status codes that are allowed<br>Conflicts with `allow_all_response_codes`. (see [below for nested schema](#nestedatt--allowed_response_codes_choice--allowed_response_codes))
 
 <a id="nestedatt--allowed_response_codes_choice--allowed_response_codes"></a>
 ### Nested Schema for `allowed_response_codes_choice.allowed_response_codes`
@@ -173,9 +173,9 @@ Required:
 
 Optional:
 
-- `custom_anonymization` (Attributes) CustomAnonymization Define HTTP headers, query parameters, or cookies whose values should be masked (see [below for nested schema](#nestedatt--anonymization_setting_choice--custom_anonymization))
-- `default_anonymization` (Boolean) DefaultAnonymization Default settings will be applied. Values of query parameters 'card', 'pass', 'pwd' and 'password' will be masked.
-- `disable_anonymization` (Boolean) DisableAnonymization Disable masking of sensitive parameters in logs
+- `custom_anonymization` (Attributes) CustomAnonymization Define HTTP headers, query parameters, or cookies whose values should be masked<br>Conflicts with `default_anonymization` and `disable_anonymization`. (see [below for nested schema](#nestedatt--anonymization_setting_choice--custom_anonymization))
+- `default_anonymization` (Boolean) DefaultAnonymization Default settings will be applied. Values of query parameters 'card', 'pass', 'pwd' and 'password' will be masked.<br>Conflicts with `custom_anonymization` and `disable_anonymization`.
+- `disable_anonymization` (Boolean) DisableAnonymization Disable masking of sensitive parameters in logs<br>Conflicts with `custom_anonymization` and `default_anonymization`.
 
 <a id="nestedatt--anonymization_setting_choice--custom_anonymization"></a>
 ### Nested Schema for `anonymization_setting_choice.custom_anonymization`
@@ -189,16 +189,16 @@ Required:
 
 Required:
 
-- `anonymization_choice` (Attributes) Anonymization Choice Define HTTP headers, query parameters or cookie names whose values should be masked (see [below for nested schema](#nestedatt--anonymization_setting_choice--custom_anonymization--anonymization_config--anonymization_choice))
+- `anonymization_choice` (Attributes) Anonymization Choice Define HTTP headers, query parameters or cookie names whose values should be masked<br>Exactly one of `cookie`, `http_header`, or `query_parameter` must be specified. (see [below for nested schema](#nestedatt--anonymization_setting_choice--custom_anonymization--anonymization_config--anonymization_choice))
 
 <a id="nestedatt--anonymization_setting_choice--custom_anonymization--anonymization_config--anonymization_choice"></a>
 ### Nested Schema for `anonymization_setting_choice.custom_anonymization.anonymization_config.anonymization_choice`
 
 Optional:
 
-- `cookie` (Attributes) AnonymizeCookie (see [below for nested schema](#nestedatt--anonymization_setting_choice--custom_anonymization--anonymization_config--anonymization_choice--cookie))
-- `http_header` (Attributes) http_header (see [below for nested schema](#nestedatt--anonymization_setting_choice--custom_anonymization--anonymization_config--anonymization_choice--http_header))
-- `query_parameter` (Attributes) AnonymizeParameter (see [below for nested schema](#nestedatt--anonymization_setting_choice--custom_anonymization--anonymization_config--anonymization_choice--query_parameter))
+- `cookie` (Attributes) AnonymizeCookie<br>Conflicts with `http_header` and `query_parameter`. (see [below for nested schema](#nestedatt--anonymization_setting_choice--custom_anonymization--anonymization_config--anonymization_choice--cookie))
+- `http_header` (Attributes) http_header<br>Conflicts with `cookie` and `query_parameter`. (see [below for nested schema](#nestedatt--anonymization_setting_choice--custom_anonymization--anonymization_config--anonymization_choice--http_header))
+- `query_parameter` (Attributes) AnonymizeParameter<br>Conflicts with `cookie` and `http_header`. (see [below for nested schema](#nestedatt--anonymization_setting_choice--custom_anonymization--anonymization_config--anonymization_choice--query_parameter))
 
 <a id="nestedatt--anonymization_setting_choice--custom_anonymization--anonymization_config--anonymization_choice--cookie"></a>
 ### Nested Schema for `anonymization_setting_choice.custom_anonymization.anonymization_config.anonymization_choice.cookie`
@@ -233,8 +233,8 @@ Required:
 
 Optional:
 
-- `blocking_page` (Attributes) Custom Blocking Page The system returns a response page with HTML code that you define (see [below for nested schema](#nestedatt--blocking_page_choice--blocking_page))
-- `use_default_blocking_page` (Boolean) Default Blocking Page The system returns the system-supplied response page in HTML. No further configuration is needed.
+- `blocking_page` (Attributes) Custom Blocking Page The system returns a response page with HTML code that you define<br>Conflicts with `use_default_blocking_page`. (see [below for nested schema](#nestedatt--blocking_page_choice--blocking_page))
+- `use_default_blocking_page` (Boolean) Default Blocking Page The system returns the system-supplied response page in HTML. No further configuration is needed.<br>Conflicts with `blocking_page`.
 
 <a id="nestedatt--blocking_page_choice--blocking_page"></a>
 ### Nested Schema for `blocking_page_choice.blocking_page`
@@ -251,31 +251,28 @@ Optional:
 
 Optional:
 
-- `default_detection_settings` (Boolean) Default Detection Settings Default policy settings will be applied. All Attack Types, high and medium accuracy signatures, automatic Attack Signatures tuning, Threat Campaigns and all Violations will be enabled.
-- `detection_settings` (Attributes) Custom Detection Settings Define Custom Security Policy settings (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings))
+- `default_detection_settings` (Boolean) Default Detection Settings Default policy settings will be applied. All Attack Types, high and medium accuracy signatures, automatic Attack Signatures tuning, Threat Campaigns and all Violations will be enabled.<br>Conflicts with `detection_settings`.
+- `detection_settings` (Attributes) Custom Detection Settings Define Custom Security Policy settings<br>Conflicts with `default_detection_settings`. (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings))
 
 <a id="nestedatt--detection_setting_choice--detection_settings"></a>
 ### Nested Schema for `detection_setting_choice.detection_settings`
 
-Required:
-
-- `bot_protection_choice` (Attributes) Signature-based Bot Protection Settings to manage and mitigate bot traffic. These settings work in tandem with the appfirewall enforcement mode i.e, block setting for bot protection is enforced if both bot and appfirewall enforcement modes are in block. In all other scenarios, bots will only be reported. Behavior based bot protection, which prevents large-scale fraud with account takeover protection and much more, is available as F5 Distributed Cloud Bot Defense and is an add-on subscription service. (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--bot_protection_choice))
-- `false_positive_suppression_choice` (Attributes) Automatic Attack Signatures Tuning Self-learning probabilistic machine learning model that suppresses false positive triggers (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--false_positive_suppression_choice))
-- `threat_campaign_choice` (Attributes) Threat Campaigns Threat Campaigns provide targeted signatures to protect organizations from sophisticated attacks (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--threat_campaign_choice))
-
 Optional:
 
+- `bot_protection_choice` (Attributes) Signature-based Bot Protection Settings to manage and mitigate bot traffic. These settings work in tandem with the appfirewall enforcement mode i.e, block setting for bot protection is enforced if both bot and appfirewall enforcement modes are in block. In all other scenarios, bots will only be reported. Behavior based bot protection, which prevents large-scale fraud with account takeover protection and much more, is available as F5 Distributed Cloud Bot Defense and is an add-on subscription service.<br>Exactly one of `bot_protection_setting` or `default_bot_setting` must be specified when `bot_protection_choice` is configured. (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--bot_protection_choice))
+- `false_positive_suppression_choice` (Attributes) Automatic Attack Signatures Tuning Self-learning probabilistic machine learning model that suppresses false positive triggers<br>Exactly one of `disable_suppression` or `enable_suppression` must be specified when `false_positive_suppression_choice` is configured. (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--false_positive_suppression_choice))
 - `signature_selection_setting` (Attributes) Signature Selection Setting Attack Signatures are patterns that identify attacks on a web application and its components (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--signature_selection_setting))
-- `signatures_staging_settings_choice` (Attributes) Attack Signatures Staging Settings Attack signatures are added/updated on the Distributed cloud platform on a regular cadence. This setting enables/disables staging process for new and modified attack signatures. Staging means that, when new signatures are added or existing signatures are updated on the platform, WAF applies the attack signature to web application traffic, but does not block an incoming request if it triggers this attack signature. The default staging period is 14 days (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--signatures_staging_settings_choice))
-- `violation_detection_setting_choice` (Attributes, Deprecated) Violations Lists of validation checks that are performed on HTTP requests to ensure the requests are properly formatted, detection of evasion techniques and other violations (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--violation_detection_setting_choice))
+- `signatures_staging_settings_choice` (Attributes) Attack Signatures Staging Settings Attack signatures are added/updated on the Distributed cloud platform on a regular cadence. This setting enables/disables staging process for new and modified attack signatures. Staging means that, when new signatures are added or existing signatures are updated on the platform, WAF applies the attack signature to web application traffic, but does not block an incoming request if it triggers this attack signature. The default staging period is 14 days<br>Exactly one of `disable_staging`, `stage_new_and_updated_signatures`, or `stage_new_signatures` must be specified when `signatures_staging_settings_choice` is configured. (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--signatures_staging_settings_choice))
+- `threat_campaign_choice` (Attributes) Threat Campaigns Threat Campaigns provide targeted signatures to protect organizations from sophisticated attacks<br>Exactly one of `disable_threat_campaigns` or `enable_threat_campaigns` must be specified when `threat_campaign_choice` is configured. (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--threat_campaign_choice))
+- `violation_detection_setting_choice` (Attributes, Deprecated) Violations Lists of validation checks that are performed on HTTP requests to ensure the requests are properly formatted, detection of evasion techniques and other violations<br>Exactly one of `default_violation_settings` or `violation_settings` must be specified when `violation_detection_setting_choice` is configured. (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--violation_detection_setting_choice))
 
 <a id="nestedatt--detection_setting_choice--detection_settings--bot_protection_choice"></a>
 ### Nested Schema for `detection_setting_choice.detection_settings.bot_protection_choice`
 
 Optional:
 
-- `bot_protection_setting` (Attributes) Custom Settings Define custom Bot Protection settings (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--bot_protection_choice--bot_protection_setting))
-- `default_bot_setting` (Boolean) Default Bot Settings Default Bot Protection settings will be applied. Malicious bots will be blocked, Suspicious and Good bots will be ignored.
+- `bot_protection_setting` (Attributes) Custom Settings Define custom Bot Protection settings<br>Conflicts with `default_bot_setting`. (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--bot_protection_choice--bot_protection_setting))
+- `default_bot_setting` (Boolean) Default Bot Settings Default Bot Protection settings will be applied. Malicious bots will be blocked, Suspicious and Good bots will be ignored.<br>Conflicts with `bot_protection_setting`.
 
 <a id="nestedatt--detection_setting_choice--detection_settings--bot_protection_choice--bot_protection_setting"></a>
 ### Nested Schema for `detection_setting_choice.detection_settings.bot_protection_choice.bot_protection_setting`
@@ -293,38 +290,26 @@ Optional:
 
 Optional:
 
-- `disable_suppression` (Boolean) Disable Suppression
-- `enable_suppression` (Boolean) Enable Suppression
-
-
-<a id="nestedatt--detection_setting_choice--detection_settings--threat_campaign_choice"></a>
-### Nested Schema for `detection_setting_choice.detection_settings.threat_campaign_choice`
-
-Optional:
-
-- `disable_threat_campaigns` (Boolean) disable_threat_campaigns
-- `enable_threat_campaigns` (Boolean) enable_threat_campaigns
+- `disable_suppression` (Boolean) Disable Suppression<br>Conflicts with `enable_suppression`.
+- `enable_suppression` (Boolean) Enable Suppression<br>Conflicts with `disable_suppression`.
 
 
 <a id="nestedatt--detection_setting_choice--detection_settings--signature_selection_setting"></a>
 ### Nested Schema for `detection_setting_choice.detection_settings.signature_selection_setting`
 
-Required:
-
-- `attack_type_setting_choice` (Attributes) Attack Types The types of attacks that Attack Signatures can detect (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--signature_selection_setting--attack_type_setting_choice))
-
 Optional:
 
-- `signature_protection_choice` (Attributes) Signature Settings by Accuracy Accuracy indicates the ability of the Attack Signatures to identify the attack including susceptibility to false-positive alarms. Low: Indicates a high likelihood of false positives. Medium: Indicates some likelihood of false positives. High: Indicates a low likelihood of false positives. (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--signature_selection_setting--signature_protection_choice))
-- `signature_selection_by_accuracy_choice` (Attributes, Deprecated) Signature selection by accuracy Accuracy indicates the ability of the Attack Signatures to identify the attack including susceptibility to false-positive alarms. Low: Indicates a high likelihood of false positives. Medium: Indicates some likelihood of false positives. High: Indicates a low likelihood of false positives. (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--signature_selection_setting--signature_selection_by_accuracy_choice))
+- `attack_type_setting_choice` (Attributes) Attack Types The types of attacks that Attack Signatures can detect<br>Exactly one of `attack_type_settings` or `default_attack_type_settings` must be specified when `attack_type_setting_choice` is configured. (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--signature_selection_setting--attack_type_setting_choice))
+- `signature_protection_choice` (Attributes) Signature Settings by Accuracy Accuracy indicates the ability of the Attack Signatures to identify the attack including susceptibility to false-positive alarms. Low: Indicates a high likelihood of false positives. Medium: Indicates some likelihood of false positives. High: Indicates a low likelihood of false positives.<br>Exactly one of `default_signature_setting` or `signature_settings_by_accuracy` must be specified when `signature_protection_choice` is configured. (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--signature_selection_setting--signature_protection_choice))
+- `signature_selection_by_accuracy_choice` (Attributes, Deprecated) Signature selection by accuracy Accuracy indicates the ability of the Attack Signatures to identify the attack including susceptibility to false-positive alarms. Low: Indicates a high likelihood of false positives. Medium: Indicates some likelihood of false positives. High: Indicates a low likelihood of false positives.<br>Exactly one of `high_medium_accuracy_signatures`, `high_medium_low_accuracy_signatures`, or `only_high_accuracy_signatures` must be specified when `signature_selection_by_accuracy_choice` is configured. (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--signature_selection_setting--signature_selection_by_accuracy_choice))
 
 <a id="nestedatt--detection_setting_choice--detection_settings--signature_selection_setting--attack_type_setting_choice"></a>
 ### Nested Schema for `detection_setting_choice.detection_settings.signature_selection_setting.attack_type_setting_choice`
 
 Optional:
 
-- `attack_type_settings` (Attributes) Custom Attack Type Settings Define Attack Types to be disabled for detection (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--signature_selection_setting--attack_type_setting_choice--attack_type_settings))
-- `default_attack_type_settings` (Boolean) Default Attack Type settings All Attack Types are enabled for detection
+- `attack_type_settings` (Attributes) Custom Attack Type Settings Define Attack Types to be disabled for detection<br>Conflicts with `default_attack_type_settings`. (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--signature_selection_setting--attack_type_setting_choice--attack_type_settings))
+- `default_attack_type_settings` (Boolean) Default Attack Type settings All Attack Types are enabled for detection<br>Conflicts with `attack_type_settings`.
 
 <a id="nestedatt--detection_setting_choice--detection_settings--signature_selection_setting--attack_type_setting_choice--attack_type_settings"></a>
 ### Nested Schema for `detection_setting_choice.detection_settings.signature_selection_setting.attack_type_setting_choice.attack_type_settings`
@@ -340,8 +325,8 @@ Required:
 
 Optional:
 
-- `default_signature_setting` (Boolean) Default Signature Settings Default Signature Protection settings will be applied. High and Medium accuracy signatures will be blocked, Low accuracy signatures will be ignored.
-- `signature_settings_by_accuracy` (Attributes) Custom Signature Settings Define Custom Signature Protection settings by accuracy level. (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--signature_selection_setting--signature_protection_choice--signature_settings_by_accuracy))
+- `default_signature_setting` (Boolean) Default Signature Settings Default Signature Protection settings will be applied. High and Medium accuracy signatures will be blocked, Low accuracy signatures will be ignored.<br>Conflicts with `signature_settings_by_accuracy`.
+- `signature_settings_by_accuracy` (Attributes) Custom Signature Settings Define Custom Signature Protection settings by accuracy level.<br>Conflicts with `default_signature_setting`. (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--signature_selection_setting--signature_protection_choice--signature_settings_by_accuracy))
 
 <a id="nestedatt--detection_setting_choice--detection_settings--signature_selection_setting--signature_protection_choice--signature_settings_by_accuracy"></a>
 ### Nested Schema for `detection_setting_choice.detection_settings.signature_selection_setting.signature_protection_choice.signature_settings_by_accuracy`
@@ -359,9 +344,9 @@ Optional:
 
 Optional:
 
-- `high_medium_accuracy_signatures` (Boolean, Deprecated) High/Medium Accuracy Signatures Enables high and medium accuracy signatures
-- `high_medium_low_accuracy_signatures` (Boolean, Deprecated) High/Medium/Low Accuracy Signatures Enables high, medium and low accuracy signatures
-- `only_high_accuracy_signatures` (Boolean, Deprecated) Only High Accuracy Signatures Enables only high accuracy signatures
+- `high_medium_accuracy_signatures` (Boolean, Deprecated) High/Medium Accuracy Signatures Enables high and medium accuracy signatures<br>Conflicts with `high_medium_low_accuracy_signatures` and `only_high_accuracy_signatures`.
+- `high_medium_low_accuracy_signatures` (Boolean, Deprecated) High/Medium/Low Accuracy Signatures Enables high, medium and low accuracy signatures<br>Conflicts with `high_medium_accuracy_signatures` and `only_high_accuracy_signatures`.
+- `only_high_accuracy_signatures` (Boolean, Deprecated) Only High Accuracy Signatures Enables only high accuracy signatures<br>Conflicts with `high_medium_accuracy_signatures` and `high_medium_low_accuracy_signatures`.
 
 
 
@@ -370,9 +355,9 @@ Optional:
 
 Optional:
 
-- `disable_staging` (Boolean) Disable Attack Signatures Staging Enforce new and updated attack signatures
-- `stage_new_and_updated_signatures` (Attributes) New and Updated Signatures Staging Settings Stage both new and updated attack signatures. Note: Staging updated signatures may lead to change in behaviour of those signatures and reduce the protection level of the App firewall policy. For example, if AppFirewall was in blocking mode and a signature was updated in a recent release, staging this signature would not enforce it i.e signature would be in monitoring mode for staging period (instead of blocking mode) (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--signatures_staging_settings_choice--stage_new_and_updated_signatures))
-- `stage_new_signatures` (Attributes) New Signatures Staging Settings Stage new attack signatures only. Updated signatures will be enforced (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--signatures_staging_settings_choice--stage_new_signatures))
+- `disable_staging` (Boolean) Disable Attack Signatures Staging Enforce new and updated attack signatures<br>Conflicts with `stage_new_and_updated_signatures` and `stage_new_signatures`.
+- `stage_new_and_updated_signatures` (Attributes) New and Updated Signatures Staging Settings Stage both new and updated attack signatures. Note: Staging updated signatures may lead to change in behaviour of those signatures and reduce the protection level of the App firewall policy. For example, if AppFirewall was in blocking mode and a signature was updated in a recent release, staging this signature would not enforce it i.e signature would be in monitoring mode for staging period (instead of blocking mode)<br>Conflicts with `disable_staging` and `stage_new_signatures`. (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--signatures_staging_settings_choice--stage_new_and_updated_signatures))
+- `stage_new_signatures` (Attributes) New Signatures Staging Settings Stage new attack signatures only. Updated signatures will be enforced<br>Conflicts with `disable_staging` and `stage_new_and_updated_signatures`. (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--signatures_staging_settings_choice--stage_new_signatures))
 
 <a id="nestedatt--detection_setting_choice--detection_settings--signatures_staging_settings_choice--stage_new_and_updated_signatures"></a>
 ### Nested Schema for `detection_setting_choice.detection_settings.signatures_staging_settings_choice.stage_new_and_updated_signatures`
@@ -391,13 +376,22 @@ Optional:
 
 
 
+<a id="nestedatt--detection_setting_choice--detection_settings--threat_campaign_choice"></a>
+### Nested Schema for `detection_setting_choice.detection_settings.threat_campaign_choice`
+
+Optional:
+
+- `disable_threat_campaigns` (Boolean) disable_threat_campaigns<br>Conflicts with `enable_threat_campaigns`.
+- `enable_threat_campaigns` (Boolean) enable_threat_campaigns<br>Conflicts with `disable_threat_campaigns`.
+
+
 <a id="nestedatt--detection_setting_choice--detection_settings--violation_detection_setting_choice"></a>
 ### Nested Schema for `detection_setting_choice.detection_settings.violation_detection_setting_choice`
 
 Optional:
 
-- `default_violation_settings` (Boolean, Deprecated) Default Violation Settings All violations are enabled for detection
-- `violation_settings` (Attributes, Deprecated) Custom Violation Settings Define violations to be disabled for detection (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--violation_detection_setting_choice--violation_settings))
+- `default_violation_settings` (Boolean, Deprecated) Default Violation Settings All violations are enabled for detection<br>Conflicts with `violation_settings`.
+- `violation_settings` (Attributes, Deprecated) Custom Violation Settings Define violations to be disabled for detection<br>Conflicts with `default_violation_settings`. (see [below for nested schema](#nestedatt--detection_setting_choice--detection_settings--violation_detection_setting_choice--violation_settings))
 
 <a id="nestedatt--detection_setting_choice--detection_settings--violation_detection_setting_choice--violation_settings"></a>
 ### Nested Schema for `detection_setting_choice.detection_settings.violation_detection_setting_choice.violation_settings`
@@ -415,8 +409,8 @@ Required:
 
 Optional:
 
-- `blocking` (Boolean) Blocking Log and block threats
-- `monitoring` (Boolean) Monitoring Log threats
+- `blocking` (Boolean) Blocking Log and block threats<br>Conflicts with `monitoring`.
+- `monitoring` (Boolean) Monitoring Log threats<br>Conflicts with `blocking`.
 
 
 <a id="nestedatt--enhance_with_ai_choice"></a>
@@ -424,23 +418,23 @@ Optional:
 
 Optional:
 
-- `disable_ai_enhancements` (Boolean) Disable AI Enhancements Risk-base AI evaluations will not factor into enforcement actions
-- `enable_ai_enhancements` (Attributes) Enable AI Enhancements Evaluations for enforcement actions will be complimented by the additional intelligence of the F5 AI Powered Risk-based analysis (see [below for nested schema](#nestedatt--enhance_with_ai_choice--enable_ai_enhancements))
+- `disable_ai_enhancements` (Boolean) Disable AI Enhancements Risk-base AI evaluations will not factor into enforcement actions<br>Conflicts with `enable_ai_enhancements`.
+- `enable_ai_enhancements` (Attributes) Enable AI Enhancements Evaluations for enforcement actions will be complimented by the additional intelligence of the F5 AI Powered Risk-based analysis<br>Conflicts with `disable_ai_enhancements`. (see [below for nested schema](#nestedatt--enhance_with_ai_choice--enable_ai_enhancements))
 
 <a id="nestedatt--enhance_with_ai_choice--enable_ai_enhancements"></a>
 ### Nested Schema for `enhance_with_ai_choice.enable_ai_enhancements`
 
-Required:
+Optional:
 
-- `risk_score_action_choice` (Attributes) Action By Risk Score Determines which risk levels will trigger mitigation when AI-based risk evaluation is enabled (see [below for nested schema](#nestedatt--enhance_with_ai_choice--enable_ai_enhancements--risk_score_action_choice))
+- `risk_score_action_choice` (Attributes) Action By Risk Score Determines which risk levels will trigger mitigation when AI-based risk evaluation is enabled<br>Exactly one of `mitigate_high_medium_risk_action` or `mitigate_high_risk_action` must be specified when `risk_score_action_choice` is configured. (see [below for nested schema](#nestedatt--enhance_with_ai_choice--enable_ai_enhancements--risk_score_action_choice))
 
 <a id="nestedatt--enhance_with_ai_choice--enable_ai_enhancements--risk_score_action_choice"></a>
 ### Nested Schema for `enhance_with_ai_choice.enable_ai_enhancements.risk_score_action_choice`
 
 Optional:
 
-- `mitigate_high_medium_risk_action` (Boolean) Mitigate High and Medium Risk Mitigate requests if the risk score is High or Medium
-- `mitigate_high_risk_action` (Boolean) Mitigate High Risk Only Mitigate requests only if the risk score is classified as High
+- `mitigate_high_medium_risk_action` (Boolean) Mitigate High and Medium Risk Mitigate requests if the risk score is High or Medium<br>Conflicts with `mitigate_high_risk_action`.
+- `mitigate_high_risk_action` (Boolean) Mitigate High Risk Only Mitigate requests only if the risk score is classified as High<br>Conflicts with `mitigate_high_medium_risk_action`.
 
 
 
@@ -475,6 +469,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_app_firewall.example"
+	to = f5xc_app_firewall.example
 }
 ```

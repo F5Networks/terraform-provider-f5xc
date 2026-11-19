@@ -31,6 +31,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -500,7 +501,7 @@ var ServicePolicyRuleArgMatchersMatchItemModelAttributeMap = map[string]attr.Typ
 	},
 }
 
-// Attribute map for RequiredOneOfField --> AsnChoice
+// Attribute map for OneOfField --> AsnChoice
 var ServicePolicyRuleAsnChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_asn": types.BoolType,
@@ -565,14 +566,14 @@ var ServicePolicyRuleBotActionModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> ActionType
+// Attribute map for OneOfField --> ActionType
 var ServicePolicyRuleBotActionActionTypeModelAttributeMap = map[string]attr.Type{
 
 	"bot_skip_processing": types.BoolType,
 	"none":                types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> ClientChoice
+// Attribute map for OneOfField --> ClientChoice
 var ServicePolicyRuleClientChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_client":  types.BoolType,
@@ -703,7 +704,7 @@ var ServicePolicyRuleHttpMethodModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> IpChoice
+// Attribute map for OneOfField --> IpChoice
 var ServicePolicyRuleIpChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_ip": types.BoolType,
@@ -801,7 +802,7 @@ var ServicePolicyRuleMumActionModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> ActionType
+// Attribute map for OneOfField --> ActionType
 var ServicePolicyRuleMumActionActionTypeModelAttributeMap = map[string]attr.Type{
 
 	"default":         types.BoolType,
@@ -917,91 +918,91 @@ var ServicePolicyRuleRequestConstraintsModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> MaxCookieCountChoice
+// Attribute map for OneOfField --> MaxCookieCountChoice
 var ServicePolicyRuleRequestConstraintsMaxCookieCountChoiceModelAttributeMap = map[string]attr.Type{
 
 	"max_cookie_count_exceeds": types.Int64Type,
 	"max_cookie_count_none":    types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> MaxCookieKeySizeChoice
+// Attribute map for OneOfField --> MaxCookieKeySizeChoice
 var ServicePolicyRuleRequestConstraintsMaxCookieKeySizeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"max_cookie_key_size_exceeds": types.Int64Type,
 	"max_cookie_key_size_none":    types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> MaxCookieValueSizeChoice
+// Attribute map for OneOfField --> MaxCookieValueSizeChoice
 var ServicePolicyRuleRequestConstraintsMaxCookieValueSizeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"max_cookie_value_size_exceeds": types.Int64Type,
 	"max_cookie_value_size_none":    types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> MaxHeaderCountChoice
+// Attribute map for OneOfField --> MaxHeaderCountChoice
 var ServicePolicyRuleRequestConstraintsMaxHeaderCountChoiceModelAttributeMap = map[string]attr.Type{
 
 	"max_header_count_exceeds": types.Int64Type,
 	"max_header_count_none":    types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> MaxHeaderKeySizeChoice
+// Attribute map for OneOfField --> MaxHeaderKeySizeChoice
 var ServicePolicyRuleRequestConstraintsMaxHeaderKeySizeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"max_header_key_size_exceeds": types.Int64Type,
 	"max_header_key_size_none":    types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> MaxHeaderValueSizeChoice
+// Attribute map for OneOfField --> MaxHeaderValueSizeChoice
 var ServicePolicyRuleRequestConstraintsMaxHeaderValueSizeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"max_header_value_size_exceeds": types.Int64Type,
 	"max_header_value_size_none":    types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> MaxParameterCountChoice
+// Attribute map for OneOfField --> MaxParameterCountChoice
 var ServicePolicyRuleRequestConstraintsMaxParameterCountChoiceModelAttributeMap = map[string]attr.Type{
 
 	"max_parameter_count_exceeds": types.Int64Type,
 	"max_parameter_count_none":    types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> MaxParameterNameSizeChoice
+// Attribute map for OneOfField --> MaxParameterNameSizeChoice
 var ServicePolicyRuleRequestConstraintsMaxParameterNameSizeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"max_parameter_name_size_exceeds": types.Int64Type,
 	"max_parameter_name_size_none":    types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> MaxParameterValueSizeChoice
+// Attribute map for OneOfField --> MaxParameterValueSizeChoice
 var ServicePolicyRuleRequestConstraintsMaxParameterValueSizeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"max_parameter_value_size_exceeds": types.Int64Type,
 	"max_parameter_value_size_none":    types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> MaxQuerySizeChoice
+// Attribute map for OneOfField --> MaxQuerySizeChoice
 var ServicePolicyRuleRequestConstraintsMaxQuerySizeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"max_query_size_exceeds": types.Int64Type,
 	"max_query_size_none":    types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> MaxRequestLineSizeChoice
+// Attribute map for OneOfField --> MaxRequestLineSizeChoice
 var ServicePolicyRuleRequestConstraintsMaxRequestLineSizeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"max_request_line_size_exceeds": types.Int64Type,
 	"max_request_line_size_none":    types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> MaxRequestSizeChoice
+// Attribute map for OneOfField --> MaxRequestSizeChoice
 var ServicePolicyRuleRequestConstraintsMaxRequestSizeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"max_request_size_exceeds": types.Int64Type,
 	"max_request_size_none":    types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> MaxUrlSizeChoice
+// Attribute map for OneOfField --> MaxUrlSizeChoice
 var ServicePolicyRuleRequestConstraintsMaxUrlSizeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"max_url_size_exceeds": types.Int64Type,
@@ -1089,7 +1090,7 @@ var ServicePolicyRuleWafActionModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> ActionType
+// Attribute map for OneOfField --> ActionType
 var ServicePolicyRuleWafActionActionTypeModelAttributeMap = map[string]attr.Type{
 
 	"app_firewall_detection_control": types.ObjectType{
@@ -1333,7 +1334,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 						},
 						"match_choice": schema.SingleNestedAttribute{
 							Description:         "match Select Match Options.",
-							MarkdownDescription: "match Select Match Options.",
+							MarkdownDescription: "match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified.",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
@@ -1347,7 +1348,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 							Attributes: map[string]schema.Attribute{
 								"check_not_present": schema.BoolAttribute{
 									Description:         "check_not_present Check that the argument is not present.",
-									MarkdownDescription: "check_not_present Check that the argument is not present.",
+									MarkdownDescription: "check_not_present Check that the argument is not present.<br>Conflicts with `check_present` and `item`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1357,7 +1358,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 								},
 								"check_present": schema.BoolAttribute{
 									Description:         "check_present Check that the argument is present.",
-									MarkdownDescription: "check_present Check that the argument is present.",
+									MarkdownDescription: "check_present Check that the argument is present.<br>Conflicts with `check_not_present` and `item`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1367,7 +1368,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 								},
 								"item": schema.SingleNestedAttribute{
 									Description:         "item Criteria for matching the values for the Arg. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
-									MarkdownDescription: "item Criteria for matching the values for the Arg. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
+									MarkdownDescription: "item Criteria for matching the values for the Arg. The match is successful if any of the values in the input satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1432,21 +1433,24 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 			},
 			"asn_choice": schema.SingleNestedAttribute{
 				Description:         "asn choice Match the 4-byte origin Autonomous System Number for the source IPv4 address of the request. The origin ASN for the request is obtained by performing a lookup for the source IPv4 Address in a GeoIP DB.",
-				MarkdownDescription: "asn choice Match the 4-byte origin Autonomous System Number for the source IPv4 address of the request. The origin ASN for the request is obtained by performing a lookup for the source IPv4 Address in a GeoIP DB.",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "asn choice Match the 4-byte origin Autonomous System Number for the source IPv4 address of the request. The origin ASN for the request is obtained by performing a lookup for the source IPv4 Address in a GeoIP DB.<br>Exactly one of `any_asn`, `asn_list`, or `asn_matcher` must be specified when `asn_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"any_asn",
 						"asn_list",
 						"asn_matcher",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"any_asn": schema.BoolAttribute{
 						Description:         "any asn Any origin ASN.",
-						MarkdownDescription: "any asn Any origin ASN.",
+						MarkdownDescription: "any asn Any origin ASN.<br>Conflicts with `asn_list` and `asn_matcher`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1456,7 +1460,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 					},
 					"asn_list": schema.SingleNestedAttribute{
 						Description:         "asn list List of 4-byte ASN values. The predicate evaluates to true if the origin ASN is present in the ASN list.",
-						MarkdownDescription: "asn list List of 4-byte ASN values. The predicate evaluates to true if the origin ASN is present in the ASN list.",
+						MarkdownDescription: "asn list List of 4-byte ASN values. The predicate evaluates to true if the origin ASN is present in the ASN list.<br>Conflicts with `any_asn` and `asn_matcher`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1477,7 +1481,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 					},
 					"asn_matcher": schema.SingleNestedAttribute{
 						Description:         "asn matcher List of references to BGP ASN Set objects. The predicate evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.",
-						MarkdownDescription: "asn matcher List of references to BGP ASN Set objects. The predicate evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.",
+						MarkdownDescription: "asn matcher List of references to BGP ASN Set objects. The predicate evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.<br>Conflicts with `any_asn` and `asn_list`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1583,20 +1587,23 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 				Attributes: map[string]schema.Attribute{
 					"action_type_choice": schema.SingleNestedAttribute{
 						Description:         "Select Bot Action Type",
-						MarkdownDescription: "Select Bot Action Type",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "Select Bot Action Type<br>Exactly one of `bot_skip_processing` or `none` must be specified when `action_type_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"bot_skip_processing",
 								"none",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"bot_skip_processing": schema.BoolAttribute{
 								Description:         "Skip Bot Processing Skip all Bot processing for this request",
-								MarkdownDescription: "Skip Bot Processing Skip all Bot processing for this request",
+								MarkdownDescription: "Skip Bot Processing Skip all Bot processing for this request<br>Conflicts with `none`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1606,7 +1613,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 							},
 							"none": schema.BoolAttribute{
 								Description:         "Normal Bot Processing Perform normal Bot processing for this request",
-								MarkdownDescription: "Normal Bot Processing Perform normal Bot processing for this request",
+								MarkdownDescription: "Normal Bot Processing Perform normal Bot processing for this request<br>Conflicts with `bot_skip_processing`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1620,12 +1627,12 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 			},
 			"client_choice": schema.SingleNestedAttribute{
 				Description:         "client choice Select clients for which the rule will be applied.",
-				MarkdownDescription: "client choice Select clients for which the rule will be applied.",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "client choice Select clients for which the rule will be applied.<br>Exactly one of `any_client`, `client_name`, `client_name_matcher`, `client_selector`, or `ip_threat_category_list` must be specified when `client_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"any_client",
 						"client_name",
 						"client_name_matcher",
@@ -1633,10 +1640,13 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 						"ip_threat_category_list",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"any_client": schema.BoolAttribute{
 						Description:         "any ip Any Client",
-						MarkdownDescription: "any ip Any Client",
+						MarkdownDescription: "any ip Any Client<br>Conflicts with `client_name`, `client_name_matcher`, `client_selector`, and `ip_threat_category_list`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1646,7 +1656,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 					},
 					"client_name": schema.StringAttribute{
 						Description:         "client name The expected name of the client invoking the request API. The predicate evaluates to true if any of the actual names is the same as the expected client name.",
-						MarkdownDescription: "client name The expected name of the client invoking the request API. The predicate evaluates to true if any of the actual names is the same as the expected client name.",
+						MarkdownDescription: "client name The expected name of the client invoking the request API. The predicate evaluates to true if any of the actual names is the same as the expected client name.<br>Conflicts with `any_client`, `client_name_matcher`, `client_selector`, and `ip_threat_category_list`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1656,7 +1666,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 					},
 					"client_name_matcher": schema.SingleNestedAttribute{
 						Description:         "client name matcher A list of exact values and/or regular expressions for the expected name of the client. This is a generalized version of the client name predicate that allows the same rule to be applicable to a set of clients rather than a single client. The predicate evaluates to true if any of the client's actual names match any of the exact values or regular expressions in the client name matcher.",
-						MarkdownDescription: "client name matcher A list of exact values and/or regular expressions for the expected name of the client. This is a generalized version of the client name predicate that allows the same rule to be applicable to a set of clients rather than a single client. The predicate evaluates to true if any of the client's actual names match any of the exact values or regular expressions in the client name matcher.",
+						MarkdownDescription: "client name matcher A list of exact values and/or regular expressions for the expected name of the client. This is a generalized version of the client name predicate that allows the same rule to be applicable to a set of clients rather than a single client. The predicate evaluates to true if any of the client's actual names match any of the exact values or regular expressions in the client name matcher.<br>Conflicts with `any_client`, `client_name`, `client_selector`, and `ip_threat_category_list`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1693,7 +1703,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 					},
 					"client_selector": schema.SingleNestedAttribute{
 						Description:         "client selector A label selector that describes the expected set of clients. The labels associated with the client making the API request are used to evaluate the label expressions in the selector. These labels can be derived from the client TLS certificate or from the volterra internal control plane. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.",
-						MarkdownDescription: "client selector A label selector that describes the expected set of clients. The labels associated with the client making the API request are used to evaluate the label expressions in the selector. These labels can be derived from the client TLS certificate or from the volterra internal control plane. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.",
+						MarkdownDescription: "client selector A label selector that describes the expected set of clients. The labels associated with the client making the API request are used to evaluate the label expressions in the selector. These labels can be derived from the client TLS certificate or from the volterra internal control plane. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.<br>Conflicts with `any_client`, `client_name`, `client_name_matcher`, and `ip_threat_category_list`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1714,7 +1724,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 					},
 					"ip_threat_category_list": schema.SingleNestedAttribute{
 						Description:         "IP Threat Category List IP threat categories to choose from",
-						MarkdownDescription: "IP Threat Category List IP threat categories to choose from",
+						MarkdownDescription: "IP Threat Category List IP threat categories to choose from<br>Conflicts with `any_client`, `client_name`, `client_name_matcher`, and `client_selector`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1757,7 +1767,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 						},
 						"match_choice": schema.SingleNestedAttribute{
 							Description:         "match Select Match Options.",
-							MarkdownDescription: "match Select Match Options.",
+							MarkdownDescription: "match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified.",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
@@ -1771,7 +1781,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 							Attributes: map[string]schema.Attribute{
 								"check_not_present": schema.BoolAttribute{
 									Description:         "check_not_present Check that the cookie is not present.",
-									MarkdownDescription: "check_not_present Check that the cookie is not present.",
+									MarkdownDescription: "check_not_present Check that the cookie is not present.<br>Conflicts with `check_present` and `item`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1781,7 +1791,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 								},
 								"check_present": schema.BoolAttribute{
 									Description:         "check_present Check that the cookie is present.",
-									MarkdownDescription: "check_present Check that the cookie is present.",
+									MarkdownDescription: "check_present Check that the cookie is present.<br>Conflicts with `check_not_present` and `item`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1791,7 +1801,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 								},
 								"item": schema.SingleNestedAttribute{
 									Description:         "item Criteria for matching the values for the cookie. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
-									MarkdownDescription: "item Criteria for matching the values for the cookie. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
+									MarkdownDescription: "item Criteria for matching the values for the cookie. The match is successful if any of the values in the input satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1920,7 +1930,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 						},
 						"match_choice": schema.SingleNestedAttribute{
 							Description:         "match Select Match Options.",
-							MarkdownDescription: "match Select Match Options.",
+							MarkdownDescription: "match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified.",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
@@ -1934,7 +1944,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 							Attributes: map[string]schema.Attribute{
 								"check_not_present": schema.BoolAttribute{
 									Description:         "check_not_present Check that the header is not present.",
-									MarkdownDescription: "check_not_present Check that the header is not present.",
+									MarkdownDescription: "check_not_present Check that the header is not present.<br>Conflicts with `check_present` and `item`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1944,7 +1954,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 								},
 								"check_present": schema.BoolAttribute{
 									Description:         "check_present Check that the header is present.",
-									MarkdownDescription: "check_present Check that the header is present.",
+									MarkdownDescription: "check_present Check that the header is present.<br>Conflicts with `check_not_present` and `item`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1954,7 +1964,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 								},
 								"item": schema.SingleNestedAttribute{
 									Description:         "item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
-									MarkdownDescription: "item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
+									MarkdownDescription: "item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -2053,21 +2063,24 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 			},
 			"ip_choice": schema.SingleNestedAttribute{
 				Description:         "ip choice Match source IP address of the request",
-				MarkdownDescription: "ip choice Match source IP address of the request",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "ip choice Match source IP address of the request<br>Exactly one of `any_ip`, `ip_matcher`, or `ip_prefix_list` must be specified when `ip_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"any_ip",
 						"ip_matcher",
 						"ip_prefix_list",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"any_ip": schema.BoolAttribute{
 						Description:         "any ip Any Source IP",
-						MarkdownDescription: "any ip Any Source IP",
+						MarkdownDescription: "any ip Any Source IP<br>Conflicts with `ip_matcher` and `ip_prefix_list`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2077,7 +2090,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 					},
 					"ip_matcher": schema.SingleNestedAttribute{
 						Description:         "ip matcher List of references to IP Prefix Set objects. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes in the IP Prefix Sets.",
-						MarkdownDescription: "ip matcher List of references to IP Prefix Set objects. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes in the IP Prefix Sets.",
+						MarkdownDescription: "ip matcher List of references to IP Prefix Set objects. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes in the IP Prefix Sets.<br>Conflicts with `any_ip` and `ip_prefix_list`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2132,7 +2145,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 					},
 					"ip_prefix_list": schema.SingleNestedAttribute{
 						Description:         "ip prefix list List of IP Prefixes values. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes from the list.",
-						MarkdownDescription: "ip prefix list List of IP Prefixes values. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes from the list.",
+						MarkdownDescription: "ip prefix list List of IP Prefixes values. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes from the list.<br>Conflicts with `any_ip` and `ip_matcher`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2204,7 +2217,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 						},
 						"match_choice": schema.SingleNestedAttribute{
 							Description:         "match Select Match Options.",
-							MarkdownDescription: "match Select Match Options.",
+							MarkdownDescription: "match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified.",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
@@ -2218,7 +2231,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 							Attributes: map[string]schema.Attribute{
 								"check_not_present": schema.BoolAttribute{
 									Description:         "check_not_present Check that the JWT Claim is not present.",
-									MarkdownDescription: "check_not_present Check that the JWT Claim is not present.",
+									MarkdownDescription: "check_not_present Check that the JWT Claim is not present.<br>Conflicts with `check_present` and `item`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -2228,7 +2241,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 								},
 								"check_present": schema.BoolAttribute{
 									Description:         "check_present Check that the JWT Claim is present.",
-									MarkdownDescription: "check_present Check that the JWT Claim is present.",
+									MarkdownDescription: "check_present Check that the JWT Claim is present.<br>Conflicts with `check_not_present` and `item`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -2238,7 +2251,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 								},
 								"item": schema.SingleNestedAttribute{
 									Description:         "item Criteria for matching the values for the JWT Claim. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
-									MarkdownDescription: "item Criteria for matching the values for the JWT Claim. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
+									MarkdownDescription: "item Criteria for matching the values for the JWT Claim. The match is successful if any of the values in the input satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -2340,20 +2353,23 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 				Attributes: map[string]schema.Attribute{
 					"action_type_choice": schema.SingleNestedAttribute{
 						Description:         "Select Action Type Select whether to modify the action for the matching request",
-						MarkdownDescription: "Select Action Type Select whether to modify the action for the matching request",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "Select Action Type Select whether to modify the action for the matching request<br>Exactly one of `default` or `skip_processing` must be specified when `action_type_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"default",
 								"skip_processing",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"default": schema.BoolAttribute{
 								Description:         "Do not modify Perform the default enforcement for this request",
-								MarkdownDescription: "Do not modify Perform the default enforcement for this request",
+								MarkdownDescription: "Do not modify Perform the default enforcement for this request<br>Conflicts with `skip_processing`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2363,7 +2379,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 							},
 							"skip_processing": schema.BoolAttribute{
 								Description:         "Skip Processing Do not perform enforcement for this request",
-								MarkdownDescription: "Skip Processing Do not perform enforcement for this request",
+								MarkdownDescription: "Skip Processing Do not perform enforcement for this request<br>Conflicts with `default`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2541,7 +2557,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 						},
 						"match_choice": schema.SingleNestedAttribute{
 							Description:         "match Select Match Options.",
-							MarkdownDescription: "match Select Match Options.",
+							MarkdownDescription: "match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified.",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
@@ -2555,7 +2571,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 							Attributes: map[string]schema.Attribute{
 								"check_not_present": schema.BoolAttribute{
 									Description:         "check_not_present Check that the query parameter is not present.",
-									MarkdownDescription: "check_not_present Check that the query parameter is not present.",
+									MarkdownDescription: "check_not_present Check that the query parameter is not present.<br>Conflicts with `check_present` and `item`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -2565,7 +2581,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 								},
 								"check_present": schema.BoolAttribute{
 									Description:         "check_present Check that the query parameter is present.",
-									MarkdownDescription: "check_present Check that the query parameter is present.",
+									MarkdownDescription: "check_present Check that the query parameter is present.<br>Conflicts with `check_not_present` and `item`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -2575,7 +2591,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 								},
 								"item": schema.SingleNestedAttribute{
 									Description:         "item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher.",
-									MarkdownDescription: "item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher.",
+									MarkdownDescription: "item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -2637,20 +2653,23 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 				Attributes: map[string]schema.Attribute{
 					"max_cookie_count_choice": schema.SingleNestedAttribute{
 						Description:         "max_cookie_count_choice Match on the number of cookies the request contains",
-						MarkdownDescription: "max_cookie_count_choice Match on the number of cookies the request contains",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "max_cookie_count_choice Match on the number of cookies the request contains<br>Exactly one of `max_cookie_count_exceeds` or `max_cookie_count_none` must be specified when `max_cookie_count_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"max_cookie_count_exceeds",
 								"max_cookie_count_none",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"max_cookie_count_exceeds": schema.Int64Attribute{
 								Description:         "max_cookie_count_exceeds",
-								MarkdownDescription: "max_cookie_count_exceeds",
+								MarkdownDescription: "max_cookie_count_exceeds<br>Conflicts with `max_cookie_count_none`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2660,7 +2679,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 							},
 							"max_cookie_count_none": schema.BoolAttribute{
 								Description:         "max_cookie_count_none",
-								MarkdownDescription: "max_cookie_count_none",
+								MarkdownDescription: "max_cookie_count_none<br>Conflicts with `max_cookie_count_exceeds`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2672,20 +2691,23 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 					},
 					"max_cookie_key_size_choice": schema.SingleNestedAttribute{
 						Description:         "max_cookie_key_size_choice Match on the size of the cookie name. Should be defined in bytes.",
-						MarkdownDescription: "max_cookie_key_size_choice Match on the size of the cookie name. Should be defined in bytes.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "max_cookie_key_size_choice Match on the size of the cookie name. Should be defined in bytes.<br>Exactly one of `max_cookie_key_size_exceeds` or `max_cookie_key_size_none` must be specified when `max_cookie_key_size_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"max_cookie_key_size_exceeds",
 								"max_cookie_key_size_none",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"max_cookie_key_size_exceeds": schema.Int64Attribute{
 								Description:         "max_cookie_key_size_exceeds",
-								MarkdownDescription: "max_cookie_key_size_exceeds",
+								MarkdownDescription: "max_cookie_key_size_exceeds<br>Conflicts with `max_cookie_key_size_none`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2695,7 +2717,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 							},
 							"max_cookie_key_size_none": schema.BoolAttribute{
 								Description:         "max_cookie_key_size_none",
-								MarkdownDescription: "max_cookie_key_size_none",
+								MarkdownDescription: "max_cookie_key_size_none<br>Conflicts with `max_cookie_key_size_exceeds`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2707,20 +2729,23 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 					},
 					"max_cookie_value_size_choice": schema.SingleNestedAttribute{
 						Description:         "max_cookie_value_size_choice Match on the size of the cookie value. Should be defined in bytes.",
-						MarkdownDescription: "max_cookie_value_size_choice Match on the size of the cookie value. Should be defined in bytes.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "max_cookie_value_size_choice Match on the size of the cookie value. Should be defined in bytes.<br>Exactly one of `max_cookie_value_size_exceeds` or `max_cookie_value_size_none` must be specified when `max_cookie_value_size_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"max_cookie_value_size_exceeds",
 								"max_cookie_value_size_none",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"max_cookie_value_size_exceeds": schema.Int64Attribute{
 								Description:         "max_cookie_value_size_exceeds",
-								MarkdownDescription: "max_cookie_value_size_exceeds",
+								MarkdownDescription: "max_cookie_value_size_exceeds<br>Conflicts with `max_cookie_value_size_none`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2730,7 +2755,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 							},
 							"max_cookie_value_size_none": schema.BoolAttribute{
 								Description:         "max_cookie_value_size_none",
-								MarkdownDescription: "max_cookie_value_size_none",
+								MarkdownDescription: "max_cookie_value_size_none<br>Conflicts with `max_cookie_value_size_exceeds`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2742,20 +2767,23 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 					},
 					"max_header_count_choice": schema.SingleNestedAttribute{
 						Description:         "max_header_count_choice Match on the number of headers the request contains",
-						MarkdownDescription: "max_header_count_choice Match on the number of headers the request contains",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "max_header_count_choice Match on the number of headers the request contains<br>Exactly one of `max_header_count_exceeds` or `max_header_count_none` must be specified when `max_header_count_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"max_header_count_exceeds",
 								"max_header_count_none",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"max_header_count_exceeds": schema.Int64Attribute{
 								Description:         "max_header_count_exceeds",
-								MarkdownDescription: "max_header_count_exceeds",
+								MarkdownDescription: "max_header_count_exceeds<br>Conflicts with `max_header_count_none`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2765,7 +2793,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 							},
 							"max_header_count_none": schema.BoolAttribute{
 								Description:         "max_header_count_none",
-								MarkdownDescription: "max_header_count_none",
+								MarkdownDescription: "max_header_count_none<br>Conflicts with `max_header_count_exceeds`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2777,20 +2805,23 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 					},
 					"max_header_key_size_choice": schema.SingleNestedAttribute{
 						Description:         "max_header_key_size_choice Match on the size of the header name. Should be defined in bytes.",
-						MarkdownDescription: "max_header_key_size_choice Match on the size of the header name. Should be defined in bytes.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "max_header_key_size_choice Match on the size of the header name. Should be defined in bytes.<br>Exactly one of `max_header_key_size_exceeds` or `max_header_key_size_none` must be specified when `max_header_key_size_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"max_header_key_size_exceeds",
 								"max_header_key_size_none",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"max_header_key_size_exceeds": schema.Int64Attribute{
 								Description:         "max_header_key_size_exceeds",
-								MarkdownDescription: "max_header_key_size_exceeds",
+								MarkdownDescription: "max_header_key_size_exceeds<br>Conflicts with `max_header_key_size_none`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2800,7 +2831,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 							},
 							"max_header_key_size_none": schema.BoolAttribute{
 								Description:         "max_header_key_size_none",
-								MarkdownDescription: "max_header_key_size_none",
+								MarkdownDescription: "max_header_key_size_none<br>Conflicts with `max_header_key_size_exceeds`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2812,20 +2843,23 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 					},
 					"max_header_value_size_choice": schema.SingleNestedAttribute{
 						Description:         "max_header_value_size_choice Match on the size of the header value. Should be defined in bytes.",
-						MarkdownDescription: "max_header_value_size_choice Match on the size of the header value. Should be defined in bytes.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "max_header_value_size_choice Match on the size of the header value. Should be defined in bytes.<br>Exactly one of `max_header_value_size_exceeds` or `max_header_value_size_none` must be specified when `max_header_value_size_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"max_header_value_size_exceeds",
 								"max_header_value_size_none",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"max_header_value_size_exceeds": schema.Int64Attribute{
 								Description:         "max_header_value_size_exceeds",
-								MarkdownDescription: "max_header_value_size_exceeds",
+								MarkdownDescription: "max_header_value_size_exceeds<br>Conflicts with `max_header_value_size_none`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2835,7 +2869,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 							},
 							"max_header_value_size_none": schema.BoolAttribute{
 								Description:         "max_header_value_size_none",
-								MarkdownDescription: "max_header_value_size_none",
+								MarkdownDescription: "max_header_value_size_none<br>Conflicts with `max_header_value_size_exceeds`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2847,20 +2881,23 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 					},
 					"max_parameter_count_choice": schema.SingleNestedAttribute{
 						Description:         "max_parameter_count_choice",
-						MarkdownDescription: "max_parameter_count_choice",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "max_parameter_count_choice<br>Exactly one of `max_parameter_count_exceeds` or `max_parameter_count_none` must be specified when `max_parameter_count_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"max_parameter_count_exceeds",
 								"max_parameter_count_none",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"max_parameter_count_exceeds": schema.Int64Attribute{
 								Description:         "max_parameter_count_exceeds",
-								MarkdownDescription: "max_parameter_count_exceeds",
+								MarkdownDescription: "max_parameter_count_exceeds<br>Conflicts with `max_parameter_count_none`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2870,7 +2907,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 							},
 							"max_parameter_count_none": schema.BoolAttribute{
 								Description:         "max_parameter_count_none",
-								MarkdownDescription: "max_parameter_count_none",
+								MarkdownDescription: "max_parameter_count_none<br>Conflicts with `max_parameter_count_exceeds`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2882,20 +2919,23 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 					},
 					"max_parameter_name_size_choice": schema.SingleNestedAttribute{
 						Description:         "max_parameter_name_size_choice",
-						MarkdownDescription: "max_parameter_name_size_choice",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "max_parameter_name_size_choice<br>Exactly one of `max_parameter_name_size_exceeds` or `max_parameter_name_size_none` must be specified when `max_parameter_name_size_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"max_parameter_name_size_exceeds",
 								"max_parameter_name_size_none",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"max_parameter_name_size_exceeds": schema.Int64Attribute{
 								Description:         "max_parameter_name_size_exceeds",
-								MarkdownDescription: "max_parameter_name_size_exceeds",
+								MarkdownDescription: "max_parameter_name_size_exceeds<br>Conflicts with `max_parameter_name_size_none`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2905,7 +2945,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 							},
 							"max_parameter_name_size_none": schema.BoolAttribute{
 								Description:         "max_parameter_name_size_none",
-								MarkdownDescription: "max_parameter_name_size_none",
+								MarkdownDescription: "max_parameter_name_size_none<br>Conflicts with `max_parameter_name_size_exceeds`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2917,20 +2957,23 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 					},
 					"max_parameter_value_size_choice": schema.SingleNestedAttribute{
 						Description:         "max_parameter_value_size_choice",
-						MarkdownDescription: "max_parameter_value_size_choice",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "max_parameter_value_size_choice<br>Exactly one of `max_parameter_value_size_exceeds` or `max_parameter_value_size_none` must be specified when `max_parameter_value_size_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"max_parameter_value_size_exceeds",
 								"max_parameter_value_size_none",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"max_parameter_value_size_exceeds": schema.Int64Attribute{
 								Description:         "max_parameter_value_size_exceeds",
-								MarkdownDescription: "max_parameter_value_size_exceeds",
+								MarkdownDescription: "max_parameter_value_size_exceeds<br>Conflicts with `max_parameter_value_size_none`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2940,7 +2983,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 							},
 							"max_parameter_value_size_none": schema.BoolAttribute{
 								Description:         "max_parameter_value_size_none",
-								MarkdownDescription: "max_parameter_value_size_none",
+								MarkdownDescription: "max_parameter_value_size_none<br>Conflicts with `max_parameter_value_size_exceeds`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2952,20 +2995,23 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 					},
 					"max_query_size_choice": schema.SingleNestedAttribute{
 						Description:         "max_query_size_choice Match on the size of the query string of the URL. Should be defined in bytes.",
-						MarkdownDescription: "max_query_size_choice Match on the size of the query string of the URL. Should be defined in bytes.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "max_query_size_choice Match on the size of the query string of the URL. Should be defined in bytes.<br>Exactly one of `max_query_size_exceeds` or `max_query_size_none` must be specified when `max_query_size_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"max_query_size_exceeds",
 								"max_query_size_none",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"max_query_size_exceeds": schema.Int64Attribute{
 								Description:         "max_query_size_exceeds",
-								MarkdownDescription: "max_query_size_exceeds",
+								MarkdownDescription: "max_query_size_exceeds<br>Conflicts with `max_query_size_none`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2975,7 +3021,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 							},
 							"max_query_size_none": schema.BoolAttribute{
 								Description:         "max_query_size_none",
-								MarkdownDescription: "max_query_size_none",
+								MarkdownDescription: "max_query_size_none<br>Conflicts with `max_query_size_exceeds`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2987,20 +3033,23 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 					},
 					"max_request_line_size_choice": schema.SingleNestedAttribute{
 						Description:         "max_request_line_size_choice Match on the size of the Request Line. Should be defined in bytes.",
-						MarkdownDescription: "max_request_line_size_choice Match on the size of the Request Line. Should be defined in bytes.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "max_request_line_size_choice Match on the size of the Request Line. Should be defined in bytes.<br>Exactly one of `max_request_line_size_exceeds` or `max_request_line_size_none` must be specified when `max_request_line_size_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"max_request_line_size_exceeds",
 								"max_request_line_size_none",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"max_request_line_size_exceeds": schema.Int64Attribute{
 								Description:         "max_query_size_exceeds",
-								MarkdownDescription: "max_query_size_exceeds",
+								MarkdownDescription: "max_query_size_exceeds<br>Conflicts with `max_request_line_size_none`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -3010,7 +3059,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 							},
 							"max_request_line_size_none": schema.BoolAttribute{
 								Description:         "max_request_line_size_none",
-								MarkdownDescription: "max_request_line_size_none",
+								MarkdownDescription: "max_request_line_size_none<br>Conflicts with `max_request_line_size_exceeds`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -3022,20 +3071,23 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 					},
 					"max_request_size_choice": schema.SingleNestedAttribute{
 						Description:         "max_request_size_choice Match on the size of the Request (Request Line + HTTP Request Headers). It doesn't include the request body. Should be defined in bytes.",
-						MarkdownDescription: "max_request_size_choice Match on the size of the Request (Request Line + HTTP Request Headers). It doesn't include the request body. Should be defined in bytes.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "max_request_size_choice Match on the size of the Request (Request Line + HTTP Request Headers). It doesn't include the request body. Should be defined in bytes.<br>Exactly one of `max_request_size_exceeds` or `max_request_size_none` must be specified when `max_request_size_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"max_request_size_exceeds",
 								"max_request_size_none",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"max_request_size_exceeds": schema.Int64Attribute{
 								Description:         "max_request_size_exceeds",
-								MarkdownDescription: "max_request_size_exceeds",
+								MarkdownDescription: "max_request_size_exceeds<br>Conflicts with `max_request_size_none`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -3045,7 +3097,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 							},
 							"max_request_size_none": schema.BoolAttribute{
 								Description:         "max_request_size_none",
-								MarkdownDescription: "max_request_size_none",
+								MarkdownDescription: "max_request_size_none<br>Conflicts with `max_request_size_exceeds`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -3057,20 +3109,23 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 					},
 					"max_url_size_choice": schema.SingleNestedAttribute{
 						Description:         "max_url_size_choice Match on the size of the URL. Should be defined in bytes.",
-						MarkdownDescription: "max_url_size_choice Match on the size of the URL. Should be defined in bytes.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "max_url_size_choice Match on the size of the URL. Should be defined in bytes.<br>Exactly one of `max_url_size_exceeds` or `max_url_size_none` must be specified when `max_url_size_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"max_url_size_exceeds",
 								"max_url_size_none",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"max_url_size_exceeds": schema.Int64Attribute{
 								Description:         "max_url_size_exceeds",
-								MarkdownDescription: "max_url_size_exceeds",
+								MarkdownDescription: "max_url_size_exceeds<br>Conflicts with `max_url_size_none`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -3080,7 +3135,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 							},
 							"max_url_size_none": schema.BoolAttribute{
 								Description:         "max_url_size_none",
-								MarkdownDescription: "max_url_size_none",
+								MarkdownDescription: "max_url_size_none<br>Conflicts with `max_url_size_exceeds`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -3101,7 +3156,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 				Attributes: map[string]schema.Attribute{
 					"src_segment_choice": schema.SingleNestedAttribute{
 						Description:         "Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match",
-						MarkdownDescription: "Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match",
+						MarkdownDescription: "Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match<br>Exactly one of `src_any` or `src_segments` must be specified when `src_segment_choice` is configured.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -3114,7 +3169,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 						Attributes: map[string]schema.Attribute{
 							"src_any": schema.BoolAttribute{
 								Description:         "Any segment Traffic is not matched against any segment",
-								MarkdownDescription: "Any segment Traffic is not matched against any segment",
+								MarkdownDescription: "Any segment Traffic is not matched against any segment<br>Conflicts with `src_segments`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -3124,7 +3179,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 							},
 							"src_segments": schema.SingleNestedAttribute{
 								Description:         "List of segments Source traffic is matched against selected segments",
-								MarkdownDescription: "List of segments Source traffic is matched against selected segments",
+								MarkdownDescription: "List of segments Source traffic is matched against selected segments<br>Conflicts with `src_any`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -3172,7 +3227,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 			},
 			"tls_fingerprint_choice": schema.SingleNestedAttribute{
 				Description:         "tls_fingerprint TLS fingerprints to be matches. The predicate evaluates to true. If the TLS fingerprint matches any of the exact values or classes of known TLS fingerprints.",
-				MarkdownDescription: "tls_fingerprint TLS fingerprints to be matches. The predicate evaluates to true. If the TLS fingerprint matches any of the exact values or classes of known TLS fingerprints.",
+				MarkdownDescription: "tls_fingerprint TLS fingerprints to be matches. The predicate evaluates to true. If the TLS fingerprint matches any of the exact values or classes of known TLS fingerprints.<br>Exactly one of `ja4_tls_fingerprint` or `tls_fingerprint_matcher` must be specified when `tls_fingerprint_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -3185,7 +3240,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 				Attributes: map[string]schema.Attribute{
 					"ja4_tls_fingerprint": schema.SingleNestedAttribute{
 						Description:         "ja4 tls fingerprint An extended version of JA3 that includes additional fields for more comprehensive fingerprinting of SSL/TLS clients and potentially has a different structure and length.",
-						MarkdownDescription: "ja4 tls fingerprint An extended version of JA3 that includes additional fields for more comprehensive fingerprinting of SSL/TLS clients and potentially has a different structure and length.",
+						MarkdownDescription: "ja4 tls fingerprint An extended version of JA3 that includes additional fields for more comprehensive fingerprinting of SSL/TLS clients and potentially has a different structure and length.<br>Conflicts with `tls_fingerprint_matcher`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -3207,7 +3262,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 					},
 					"tls_fingerprint_matcher": schema.SingleNestedAttribute{
 						Description:         "TLS JA3 fingerprint matcher A method for uniquely identifying SSL/TLS clients by creating a 32-character MD5 hash based on the parameters of the Client Hello packet during the handshake.",
-						MarkdownDescription: "TLS JA3 fingerprint matcher A method for uniquely identifying SSL/TLS clients by creating a 32-character MD5 hash based on the parameters of the Client Hello packet during the handshake.",
+						MarkdownDescription: "TLS JA3 fingerprint matcher A method for uniquely identifying SSL/TLS clients by creating a 32-character MD5 hash based on the parameters of the Client Hello packet during the handshake.<br>Conflicts with `ja4_tls_fingerprint`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -3264,21 +3319,24 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 				Attributes: map[string]schema.Attribute{
 					"action_type_choice": schema.SingleNestedAttribute{
 						Description:         "Select WAF Action Type Select Application Firewall action, skip WAF processing or skip rules",
-						MarkdownDescription: "Select WAF Action Type Select Application Firewall action, skip WAF processing or skip rules",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "Select WAF Action Type Select Application Firewall action, skip WAF processing or skip rules<br>Exactly one of `app_firewall_detection_control`, `none`, or `waf_skip_processing` must be specified when `action_type_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"app_firewall_detection_control",
 								"none",
 								"waf_skip_processing",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"app_firewall_detection_control": schema.SingleNestedAttribute{
 								Description:         "App Firewall Detection control Define the list of Signature IDs, Violations, Attack Types and Bot Names that should be excluded from triggering on the defined match criteria.",
-								MarkdownDescription: "App Firewall Detection control Define the list of Signature IDs, Violations, Attack Types and Bot Names that should be excluded from triggering on the defined match criteria.",
+								MarkdownDescription: "App Firewall Detection control Define the list of Signature IDs, Violations, Attack Types and Bot Names that should be excluded from triggering on the defined match criteria.<br>Conflicts with `none` and `waf_skip_processing`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -3454,7 +3512,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 							},
 							"none": schema.BoolAttribute{
 								Description:         "Normal App Firewall Processing Perform normal App Firewall processing for this request",
-								MarkdownDescription: "Normal App Firewall Processing Perform normal App Firewall processing for this request",
+								MarkdownDescription: "Normal App Firewall Processing Perform normal App Firewall processing for this request<br>Conflicts with `app_firewall_detection_control` and `waf_skip_processing`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -3464,7 +3522,7 @@ func (r *ResourceF5XCServicePolicyRule) Schema(ctx context.Context, request reso
 							},
 							"waf_skip_processing": schema.BoolAttribute{
 								Description:         "Skip App Firewall Processing Skip all App Firewall processing for this request",
-								MarkdownDescription: "Skip App Firewall Processing Skip all App Firewall processing for this request",
+								MarkdownDescription: "Skip App Firewall Processing Skip all App Firewall processing for this request<br>Conflicts with `app_firewall_detection_control` and `none`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -3810,7 +3868,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> AsnChoice
+	// resource modelToSpecRoot OneOfField --> AsnChoice
 	if !data.AsnChoice.IsNull() && !data.AsnChoice.IsUnknown() {
 		asnChoiceModel := SvcPolicyRuleAsnChoice{}
 		response.Diagnostics.Append(data.AsnChoice.As(ctx, &asnChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3894,6 +3952,10 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 
 		}
 
+	} else {
+		spec.AsnChoice = &ves_io_schema_service_policy_rule.CreateSpecType_AnyAsn{
+			AnyAsn: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -3968,6 +4030,9 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 		// resource modelToSpecRoot PointerField --> BotAction
 		if !data.BotAction.IsNull() && !data.BotAction.IsUnknown() {
 			botActionSpec := &ves_io_schema_policy.BotAction{}
+			botActionSpec.ActionType = &ves_io_schema_policy.BotAction_None{
+				None: &ves_io_schema.Empty{},
+			}
 			spec.BotAction = botActionSpec
 			var botActionModel SvcPolicyRuleBotAction
 
@@ -3978,7 +4043,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ActionType
+			// resource modelToSpecNested OneOfField --> ActionType
 			if !botActionModel.ActionTypeChoice.IsNull() && !botActionModel.ActionTypeChoice.IsUnknown() {
 				botActionActionTypeChoiceModel := SvcPolicyRuleActionTypeChoice{}
 				response.Diagnostics.Append(botActionModel.ActionTypeChoice.As(ctx, &botActionActionTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4005,7 +4070,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> ClientChoice
+	// resource modelToSpecRoot OneOfField --> ClientChoice
 	if !data.ClientChoice.IsNull() && !data.ClientChoice.IsUnknown() {
 		clientChoiceModel := SvcPolicyRuleClientChoice{}
 		response.Diagnostics.Append(data.ClientChoice.As(ctx, &clientChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4126,6 +4191,10 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 
 		}
 
+	} else {
+		spec.ClientChoice = &ves_io_schema_service_policy_rule.CreateSpecType_AnyClient{
+			AnyClient: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -4477,7 +4546,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> IpChoice
+	// resource modelToSpecRoot OneOfField --> IpChoice
 	if !data.IpChoice.IsNull() && !data.IpChoice.IsUnknown() {
 		ipChoiceModel := SvcPolicyRuleIpChoice{}
 		response.Diagnostics.Append(data.IpChoice.As(ctx, &ipChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4591,6 +4660,10 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 
 		}
 
+	} else {
+		spec.IpChoice = &ves_io_schema_service_policy_rule.CreateSpecType_AnyIp{
+			AnyIp: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -4753,6 +4826,9 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 		// resource modelToSpecRoot PointerField --> MumAction
 		if !data.MumAction.IsNull() && !data.MumAction.IsUnknown() {
 			mumActionSpec := &ves_io_schema_policy.ModifyAction{}
+			mumActionSpec.ActionType = &ves_io_schema_policy.ModifyAction_Default{
+				Default: &ves_io_schema.Empty{},
+			}
 			spec.MumAction = mumActionSpec
 			var mumActionModel SvcPolicyRuleModifyAction
 
@@ -4763,7 +4839,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ActionType
+			// resource modelToSpecNested OneOfField --> ActionType
 			if !mumActionModel.ActionTypeChoice.IsNull() && !mumActionModel.ActionTypeChoice.IsUnknown() {
 				mumActionActionTypeChoiceModel := SvcPolicyRuleModifyActionActionTypeChoice{}
 				response.Diagnostics.Append(mumActionModel.ActionTypeChoice.As(ctx, &mumActionActionTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5058,6 +5134,45 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 		// resource modelToSpecRoot PointerField --> RequestConstraints
 		if !data.RequestConstraints.IsNull() && !data.RequestConstraints.IsUnknown() {
 			requestConstraintsSpec := &ves_io_schema_policy.RequestConstraintType{}
+			requestConstraintsSpec.MaxCookieCountChoice = &ves_io_schema_policy.RequestConstraintType_MaxCookieCountNone{
+				MaxCookieCountNone: &ves_io_schema.Empty{},
+			}
+			requestConstraintsSpec.MaxCookieKeySizeChoice = &ves_io_schema_policy.RequestConstraintType_MaxCookieKeySizeNone{
+				MaxCookieKeySizeNone: &ves_io_schema.Empty{},
+			}
+			requestConstraintsSpec.MaxCookieValueSizeChoice = &ves_io_schema_policy.RequestConstraintType_MaxCookieValueSizeNone{
+				MaxCookieValueSizeNone: &ves_io_schema.Empty{},
+			}
+			requestConstraintsSpec.MaxHeaderCountChoice = &ves_io_schema_policy.RequestConstraintType_MaxHeaderCountNone{
+				MaxHeaderCountNone: &ves_io_schema.Empty{},
+			}
+			requestConstraintsSpec.MaxHeaderKeySizeChoice = &ves_io_schema_policy.RequestConstraintType_MaxHeaderKeySizeNone{
+				MaxHeaderKeySizeNone: &ves_io_schema.Empty{},
+			}
+			requestConstraintsSpec.MaxHeaderValueSizeChoice = &ves_io_schema_policy.RequestConstraintType_MaxHeaderValueSizeNone{
+				MaxHeaderValueSizeNone: &ves_io_schema.Empty{},
+			}
+			requestConstraintsSpec.MaxParameterCountChoice = &ves_io_schema_policy.RequestConstraintType_MaxParameterCountNone{
+				MaxParameterCountNone: &ves_io_schema.Empty{},
+			}
+			requestConstraintsSpec.MaxParameterNameSizeChoice = &ves_io_schema_policy.RequestConstraintType_MaxParameterNameSizeNone{
+				MaxParameterNameSizeNone: &ves_io_schema.Empty{},
+			}
+			requestConstraintsSpec.MaxParameterValueSizeChoice = &ves_io_schema_policy.RequestConstraintType_MaxParameterValueSizeNone{
+				MaxParameterValueSizeNone: &ves_io_schema.Empty{},
+			}
+			requestConstraintsSpec.MaxQuerySizeChoice = &ves_io_schema_policy.RequestConstraintType_MaxQuerySizeNone{
+				MaxQuerySizeNone: &ves_io_schema.Empty{},
+			}
+			requestConstraintsSpec.MaxRequestLineSizeChoice = &ves_io_schema_policy.RequestConstraintType_MaxRequestLineSizeNone{
+				MaxRequestLineSizeNone: &ves_io_schema.Empty{},
+			}
+			requestConstraintsSpec.MaxRequestSizeChoice = &ves_io_schema_policy.RequestConstraintType_MaxRequestSizeNone{
+				MaxRequestSizeNone: &ves_io_schema.Empty{},
+			}
+			requestConstraintsSpec.MaxUrlSizeChoice = &ves_io_schema_policy.RequestConstraintType_MaxUrlSizeNone{
+				MaxUrlSizeNone: &ves_io_schema.Empty{},
+			}
 			spec.RequestConstraints = requestConstraintsSpec
 			var requestConstraintsModel SvcPolicyRuleReqConstraintType
 
@@ -5068,7 +5183,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxCookieCountChoice
+			// resource modelToSpecNested OneOfField --> MaxCookieCountChoice
 			if !requestConstraintsModel.MaxCookieCountChoice.IsNull() && !requestConstraintsModel.MaxCookieCountChoice.IsUnknown() {
 				requestConstraintsMaxCookieCountChoiceModel := SvcPolicyRuleMaxCookieCountChoice{}
 				response.Diagnostics.Append(requestConstraintsModel.MaxCookieCountChoice.As(ctx, &requestConstraintsMaxCookieCountChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5092,7 +5207,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxCookieKeySizeChoice
+			// resource modelToSpecNested OneOfField --> MaxCookieKeySizeChoice
 			if !requestConstraintsModel.MaxCookieKeySizeChoice.IsNull() && !requestConstraintsModel.MaxCookieKeySizeChoice.IsUnknown() {
 				requestConstraintsMaxCookieKeySizeChoiceModel := SvcPolicyRuleMaxCookieKeySizeChoice{}
 				response.Diagnostics.Append(requestConstraintsModel.MaxCookieKeySizeChoice.As(ctx, &requestConstraintsMaxCookieKeySizeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5116,7 +5231,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxCookieValueSizeChoice
+			// resource modelToSpecNested OneOfField --> MaxCookieValueSizeChoice
 			if !requestConstraintsModel.MaxCookieValueSizeChoice.IsNull() && !requestConstraintsModel.MaxCookieValueSizeChoice.IsUnknown() {
 				requestConstraintsMaxCookieValueSizeChoiceModel := SvcPolicyRuleMaxCookieValueSizeChoice{}
 				response.Diagnostics.Append(requestConstraintsModel.MaxCookieValueSizeChoice.As(ctx, &requestConstraintsMaxCookieValueSizeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5140,7 +5255,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxHeaderCountChoice
+			// resource modelToSpecNested OneOfField --> MaxHeaderCountChoice
 			if !requestConstraintsModel.MaxHeaderCountChoice.IsNull() && !requestConstraintsModel.MaxHeaderCountChoice.IsUnknown() {
 				requestConstraintsMaxHeaderCountChoiceModel := SvcPolicyRuleMaxHeaderCountChoice{}
 				response.Diagnostics.Append(requestConstraintsModel.MaxHeaderCountChoice.As(ctx, &requestConstraintsMaxHeaderCountChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5164,7 +5279,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxHeaderKeySizeChoice
+			// resource modelToSpecNested OneOfField --> MaxHeaderKeySizeChoice
 			if !requestConstraintsModel.MaxHeaderKeySizeChoice.IsNull() && !requestConstraintsModel.MaxHeaderKeySizeChoice.IsUnknown() {
 				requestConstraintsMaxHeaderKeySizeChoiceModel := SvcPolicyRuleMaxHeaderKeySizeChoice{}
 				response.Diagnostics.Append(requestConstraintsModel.MaxHeaderKeySizeChoice.As(ctx, &requestConstraintsMaxHeaderKeySizeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5188,7 +5303,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxHeaderValueSizeChoice
+			// resource modelToSpecNested OneOfField --> MaxHeaderValueSizeChoice
 			if !requestConstraintsModel.MaxHeaderValueSizeChoice.IsNull() && !requestConstraintsModel.MaxHeaderValueSizeChoice.IsUnknown() {
 				requestConstraintsMaxHeaderValueSizeChoiceModel := SvcPolicyRuleMaxHeaderValueSizeChoice{}
 				response.Diagnostics.Append(requestConstraintsModel.MaxHeaderValueSizeChoice.As(ctx, &requestConstraintsMaxHeaderValueSizeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5212,7 +5327,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxParameterCountChoice
+			// resource modelToSpecNested OneOfField --> MaxParameterCountChoice
 			if !requestConstraintsModel.MaxParameterCountChoice.IsNull() && !requestConstraintsModel.MaxParameterCountChoice.IsUnknown() {
 				requestConstraintsMaxParameterCountChoiceModel := SvcPolicyRuleMaxParamCountChoice{}
 				response.Diagnostics.Append(requestConstraintsModel.MaxParameterCountChoice.As(ctx, &requestConstraintsMaxParameterCountChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5236,7 +5351,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxParameterNameSizeChoice
+			// resource modelToSpecNested OneOfField --> MaxParameterNameSizeChoice
 			if !requestConstraintsModel.MaxParameterNameSizeChoice.IsNull() && !requestConstraintsModel.MaxParameterNameSizeChoice.IsUnknown() {
 				requestConstraintsMaxParameterNameSizeChoiceModel := SvcPolicyRuleMaxParamNameSizeChoice{}
 				response.Diagnostics.Append(requestConstraintsModel.MaxParameterNameSizeChoice.As(ctx, &requestConstraintsMaxParameterNameSizeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5260,7 +5375,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxParameterValueSizeChoice
+			// resource modelToSpecNested OneOfField --> MaxParameterValueSizeChoice
 			if !requestConstraintsModel.MaxParameterValueSizeChoice.IsNull() && !requestConstraintsModel.MaxParameterValueSizeChoice.IsUnknown() {
 				requestConstraintsMaxParameterValueSizeChoiceModel := SvcPolicyRuleMaxParamValueSizeChoice{}
 				response.Diagnostics.Append(requestConstraintsModel.MaxParameterValueSizeChoice.As(ctx, &requestConstraintsMaxParameterValueSizeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5284,7 +5399,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxQuerySizeChoice
+			// resource modelToSpecNested OneOfField --> MaxQuerySizeChoice
 			if !requestConstraintsModel.MaxQuerySizeChoice.IsNull() && !requestConstraintsModel.MaxQuerySizeChoice.IsUnknown() {
 				requestConstraintsMaxQuerySizeChoiceModel := SvcPolicyRuleMaxQuerySizeChoice{}
 				response.Diagnostics.Append(requestConstraintsModel.MaxQuerySizeChoice.As(ctx, &requestConstraintsMaxQuerySizeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5308,7 +5423,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxRequestLineSizeChoice
+			// resource modelToSpecNested OneOfField --> MaxRequestLineSizeChoice
 			if !requestConstraintsModel.MaxRequestLineSizeChoice.IsNull() && !requestConstraintsModel.MaxRequestLineSizeChoice.IsUnknown() {
 				requestConstraintsMaxRequestLineSizeChoiceModel := SvcPolicyRuleMaxReqLineSizeChoice{}
 				response.Diagnostics.Append(requestConstraintsModel.MaxRequestLineSizeChoice.As(ctx, &requestConstraintsMaxRequestLineSizeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5332,7 +5447,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxRequestSizeChoice
+			// resource modelToSpecNested OneOfField --> MaxRequestSizeChoice
 			if !requestConstraintsModel.MaxRequestSizeChoice.IsNull() && !requestConstraintsModel.MaxRequestSizeChoice.IsUnknown() {
 				requestConstraintsMaxRequestSizeChoiceModel := SvcPolicyRuleMaxReqSizeChoice{}
 				response.Diagnostics.Append(requestConstraintsModel.MaxRequestSizeChoice.As(ctx, &requestConstraintsMaxRequestSizeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5356,7 +5471,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxUrlSizeChoice
+			// resource modelToSpecNested OneOfField --> MaxUrlSizeChoice
 			if !requestConstraintsModel.MaxUrlSizeChoice.IsNull() && !requestConstraintsModel.MaxUrlSizeChoice.IsUnknown() {
 				requestConstraintsMaxUrlSizeChoiceModel := SvcPolicyRuleMaxUrlSizeChoice{}
 				response.Diagnostics.Append(requestConstraintsModel.MaxUrlSizeChoice.As(ctx, &requestConstraintsMaxUrlSizeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5570,6 +5685,9 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 		// resource modelToSpecRoot RequiredPointerField --> WafAction
 		if !data.WafAction.IsNull() && !data.WafAction.IsUnknown() {
 			wafActionSpec := &ves_io_schema_policy.WafAction{}
+			wafActionSpec.ActionType = &ves_io_schema_policy.WafAction_None{
+				None: &ves_io_schema.Empty{},
+			}
 			spec.WafAction = wafActionSpec
 			var wafActionModel SvcPolicyRuleWafAction
 
@@ -5580,7 +5698,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ActionType
+			// resource modelToSpecNested OneOfField --> ActionType
 			if !wafActionModel.ActionTypeChoice.IsNull() && !wafActionModel.ActionTypeChoice.IsUnknown() {
 				wafActionActionTypeChoiceModel := SvcPolicyRuleWafActionActionTypeChoice{}
 				response.Diagnostics.Append(wafActionModel.ActionTypeChoice.As(ctx, &wafActionActionTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6316,7 +6434,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> AsnChoice
+	// resource SpecToModelRoot OneOfField --> AsnChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -6352,8 +6470,8 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var asnChoiceChoices interface{}
 		if v := rawSpecMap["asn_choice"]; v != nil {
 			asnChoiceChoices = v
@@ -6587,8 +6705,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 		var svcPolicyRuleBotActionModel = &SvcPolicyRuleBotAction{}
 		botActionElement := specData.GetBotAction()
 
-		// resource specToModelNested RequiredOneOfField --> ActionType
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> ActionType
 		// CreateSpecType: GetActionType() returns the oneof interface value.
 		if botActionElement.GetActionType() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -6677,7 +6794,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 		data.BotAction = types.ObjectNull(ServicePolicyRuleBotActionModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> ClientChoice
+	// resource SpecToModelRoot OneOfField --> ClientChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -6721,8 +6838,8 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var clientChoiceChoices interface{}
 		if v := rawSpecMap["client_choice"]; v != nil {
 			clientChoiceChoices = v
@@ -7388,7 +7505,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 		data.HttpMethod = types.ObjectNull(ServicePolicyRuleHttpMethodModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> IpChoice
+	// resource SpecToModelRoot OneOfField --> IpChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -7424,8 +7541,8 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var ipChoiceChoices interface{}
 		if v := rawSpecMap["ip_choice"]; v != nil {
 			ipChoiceChoices = v
@@ -7883,8 +8000,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 		var svcPolicyRuleModifyActionModel = &SvcPolicyRuleModifyAction{}
 		mumActionElement := specData.GetMumAction()
 
-		// resource specToModelNested RequiredOneOfField --> ActionType
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> ActionType
 		// CreateSpecType: GetActionType() returns the oneof interface value.
 		if mumActionElement.GetActionType() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -8307,8 +8423,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 		var svcPolicyRuleReqConstraintTypeModel = &SvcPolicyRuleReqConstraintType{}
 		requestConstraintsElement := specData.GetRequestConstraints()
 
-		// resource specToModelNested RequiredOneOfField --> MaxCookieCountChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxCookieCountChoice
 		// CreateSpecType: GetMaxCookieCountChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxCookieCountChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -8371,8 +8486,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			svcPolicyRuleReqConstraintTypeModel.MaxCookieCountChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxCookieCountChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxCookieKeySizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxCookieKeySizeChoice
 		// CreateSpecType: GetMaxCookieKeySizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxCookieKeySizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -8435,8 +8549,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			svcPolicyRuleReqConstraintTypeModel.MaxCookieKeySizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxCookieKeySizeChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxCookieValueSizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxCookieValueSizeChoice
 		// CreateSpecType: GetMaxCookieValueSizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxCookieValueSizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -8499,8 +8612,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			svcPolicyRuleReqConstraintTypeModel.MaxCookieValueSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxCookieValueSizeChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxHeaderCountChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxHeaderCountChoice
 		// CreateSpecType: GetMaxHeaderCountChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxHeaderCountChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -8563,8 +8675,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			svcPolicyRuleReqConstraintTypeModel.MaxHeaderCountChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxHeaderCountChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxHeaderKeySizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxHeaderKeySizeChoice
 		// CreateSpecType: GetMaxHeaderKeySizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxHeaderKeySizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -8627,8 +8738,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			svcPolicyRuleReqConstraintTypeModel.MaxHeaderKeySizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxHeaderKeySizeChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxHeaderValueSizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxHeaderValueSizeChoice
 		// CreateSpecType: GetMaxHeaderValueSizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxHeaderValueSizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -8691,8 +8801,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			svcPolicyRuleReqConstraintTypeModel.MaxHeaderValueSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxHeaderValueSizeChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxParameterCountChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxParameterCountChoice
 		// CreateSpecType: GetMaxParameterCountChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxParameterCountChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -8755,8 +8864,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			svcPolicyRuleReqConstraintTypeModel.MaxParameterCountChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxParameterCountChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxParameterNameSizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxParameterNameSizeChoice
 		// CreateSpecType: GetMaxParameterNameSizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxParameterNameSizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -8819,8 +8927,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			svcPolicyRuleReqConstraintTypeModel.MaxParameterNameSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxParameterNameSizeChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxParameterValueSizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxParameterValueSizeChoice
 		// CreateSpecType: GetMaxParameterValueSizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxParameterValueSizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -8883,8 +8990,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			svcPolicyRuleReqConstraintTypeModel.MaxParameterValueSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxParameterValueSizeChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxQuerySizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxQuerySizeChoice
 		// CreateSpecType: GetMaxQuerySizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxQuerySizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -8947,8 +9053,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			svcPolicyRuleReqConstraintTypeModel.MaxQuerySizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxQuerySizeChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxRequestLineSizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxRequestLineSizeChoice
 		// CreateSpecType: GetMaxRequestLineSizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxRequestLineSizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -9011,8 +9116,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			svcPolicyRuleReqConstraintTypeModel.MaxRequestLineSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxRequestLineSizeChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxRequestSizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxRequestSizeChoice
 		// CreateSpecType: GetMaxRequestSizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxRequestSizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -9075,8 +9179,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 			svcPolicyRuleReqConstraintTypeModel.MaxRequestSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxRequestSizeChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxUrlSizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxUrlSizeChoice
 		// CreateSpecType: GetMaxUrlSizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxUrlSizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -9471,8 +9574,7 @@ func (r *ResourceF5XCServicePolicyRule) Create(ctx context.Context, request reso
 		var svcPolicyRuleWafActionModel = &SvcPolicyRuleWafAction{}
 		wafActionElement := specData.GetWafAction()
 
-		// resource specToModelNested RequiredOneOfField --> ActionType
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> ActionType
 		// CreateSpecType: GetActionType() returns the oneof interface value.
 		if wafActionElement.GetActionType() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -9844,15 +9946,14 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
 	readGetRspType := strings.Replace(ves_io_schema_service_policy_rule.ObjectType, "Object", "GetResponse", 1)
 	readGetProtoMsgType := proto.MessageType(readGetRspType).Elem()
 	readCallRsp := &server.CallResponse{
 		ProtoMsg: reflect.New(readGetProtoMsgType).Interface().(proto.Message),
 	}
-	opts = append(opts, vesapi.WithOutCallResponse(readCallRsp))
+	opts := []vesapi.CallOpt{
+		vesapi.WithOutCallResponse(readCallRsp),
+	}
 
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_service_policy_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
@@ -10286,7 +10387,7 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> AsnChoice
+	// resource SpecToModelRoot OneOfField --> AsnChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -10322,8 +10423,8 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var asnChoiceChoices interface{}
 		if v := rawSpecMap["asn_choice"]; v != nil {
 			asnChoiceChoices = v
@@ -10564,8 +10665,7 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 		var svcPolicyRuleBotActionModel = &SvcPolicyRuleBotAction{}
 		botActionElement := specData.GetBotAction()
 
-		// resource specToModelNested RequiredOneOfField --> ActionType
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> ActionType
 		// CreateSpecType: GetActionType() returns the oneof interface value.
 		if botActionElement.GetActionType() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -10657,7 +10757,7 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 		data.BotAction = types.ObjectNull(ServicePolicyRuleBotActionModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> ClientChoice
+	// resource SpecToModelRoot OneOfField --> ClientChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -10701,8 +10801,8 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var clientChoiceChoices interface{}
 		if v := rawSpecMap["client_choice"]; v != nil {
 			clientChoiceChoices = v
@@ -11377,7 +11477,7 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 		data.HttpMethod = types.ObjectNull(ServicePolicyRuleHttpMethodModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> IpChoice
+	// resource SpecToModelRoot OneOfField --> IpChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -11413,8 +11513,8 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var ipChoiceChoices interface{}
 		if v := rawSpecMap["ip_choice"]; v != nil {
 			ipChoiceChoices = v
@@ -11879,8 +11979,7 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 		var svcPolicyRuleModifyActionModel = &SvcPolicyRuleModifyAction{}
 		mumActionElement := specData.GetMumAction()
 
-		// resource specToModelNested RequiredOneOfField --> ActionType
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> ActionType
 		// CreateSpecType: GetActionType() returns the oneof interface value.
 		if mumActionElement.GetActionType() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -12306,8 +12405,7 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 		var svcPolicyRuleReqConstraintTypeModel = &SvcPolicyRuleReqConstraintType{}
 		requestConstraintsElement := specData.GetRequestConstraints()
 
-		// resource specToModelNested RequiredOneOfField --> MaxCookieCountChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxCookieCountChoice
 		// CreateSpecType: GetMaxCookieCountChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxCookieCountChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -12373,8 +12471,7 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			})
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxCookieKeySizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxCookieKeySizeChoice
 		// CreateSpecType: GetMaxCookieKeySizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxCookieKeySizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -12440,8 +12537,7 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			})
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxCookieValueSizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxCookieValueSizeChoice
 		// CreateSpecType: GetMaxCookieValueSizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxCookieValueSizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -12507,8 +12603,7 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			})
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxHeaderCountChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxHeaderCountChoice
 		// CreateSpecType: GetMaxHeaderCountChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxHeaderCountChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -12574,8 +12669,7 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			})
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxHeaderKeySizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxHeaderKeySizeChoice
 		// CreateSpecType: GetMaxHeaderKeySizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxHeaderKeySizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -12641,8 +12735,7 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			})
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxHeaderValueSizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxHeaderValueSizeChoice
 		// CreateSpecType: GetMaxHeaderValueSizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxHeaderValueSizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -12708,8 +12801,7 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			})
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxParameterCountChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxParameterCountChoice
 		// CreateSpecType: GetMaxParameterCountChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxParameterCountChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -12775,8 +12867,7 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			})
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxParameterNameSizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxParameterNameSizeChoice
 		// CreateSpecType: GetMaxParameterNameSizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxParameterNameSizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -12842,8 +12933,7 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			})
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxParameterValueSizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxParameterValueSizeChoice
 		// CreateSpecType: GetMaxParameterValueSizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxParameterValueSizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -12909,8 +12999,7 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			})
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxQuerySizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxQuerySizeChoice
 		// CreateSpecType: GetMaxQuerySizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxQuerySizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -12976,8 +13065,7 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			})
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxRequestLineSizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxRequestLineSizeChoice
 		// CreateSpecType: GetMaxRequestLineSizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxRequestLineSizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -13043,8 +13131,7 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			})
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxRequestSizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxRequestSizeChoice
 		// CreateSpecType: GetMaxRequestSizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxRequestSizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -13110,8 +13197,7 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 			})
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxUrlSizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxUrlSizeChoice
 		// CreateSpecType: GetMaxUrlSizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxUrlSizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -13509,8 +13595,7 @@ func (r *ResourceF5XCServicePolicyRule) Read(ctx context.Context, request resour
 		var svcPolicyRuleWafActionModel = &SvcPolicyRuleWafAction{}
 		wafActionElement := specData.GetWafAction()
 
-		// resource specToModelNested RequiredOneOfField --> ActionType
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> ActionType
 		// CreateSpecType: GetActionType() returns the oneof interface value.
 		if wafActionElement.GetActionType() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -14148,7 +14233,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> AsnChoice
+	// resource modelToSpecRoot OneOfField --> AsnChoice
 	if !data.AsnChoice.IsNull() && !data.AsnChoice.IsUnknown() {
 		asnChoiceModel := SvcPolicyRuleAsnChoice{}
 		response.Diagnostics.Append(data.AsnChoice.As(ctx, &asnChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -14232,6 +14317,10 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 
 		}
 
+	} else {
+		spec.AsnChoice = &ves_io_schema_service_policy_rule.ReplaceSpecType_AnyAsn{
+			AnyAsn: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -14306,6 +14395,9 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 		// resource modelToSpecRoot PointerField --> BotAction
 		if !data.BotAction.IsNull() && !data.BotAction.IsUnknown() {
 			botActionSpec := &ves_io_schema_policy.BotAction{}
+			botActionSpec.ActionType = &ves_io_schema_policy.BotAction_None{
+				None: &ves_io_schema.Empty{},
+			}
 			spec.BotAction = botActionSpec
 			var botActionModel SvcPolicyRuleBotAction
 
@@ -14316,7 +14408,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ActionType
+			// resource modelToSpecNested OneOfField --> ActionType
 			if !botActionModel.ActionTypeChoice.IsNull() && !botActionModel.ActionTypeChoice.IsUnknown() {
 				botActionActionTypeChoiceModel := SvcPolicyRuleActionTypeChoice{}
 				response.Diagnostics.Append(botActionModel.ActionTypeChoice.As(ctx, &botActionActionTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -14343,7 +14435,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> ClientChoice
+	// resource modelToSpecRoot OneOfField --> ClientChoice
 	if !data.ClientChoice.IsNull() && !data.ClientChoice.IsUnknown() {
 		clientChoiceModel := SvcPolicyRuleClientChoice{}
 		response.Diagnostics.Append(data.ClientChoice.As(ctx, &clientChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -14464,6 +14556,10 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 
 		}
 
+	} else {
+		spec.ClientChoice = &ves_io_schema_service_policy_rule.ReplaceSpecType_AnyClient{
+			AnyClient: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -14815,7 +14911,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> IpChoice
+	// resource modelToSpecRoot OneOfField --> IpChoice
 	if !data.IpChoice.IsNull() && !data.IpChoice.IsUnknown() {
 		ipChoiceModel := SvcPolicyRuleIpChoice{}
 		response.Diagnostics.Append(data.IpChoice.As(ctx, &ipChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -14929,6 +15025,10 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 
 		}
 
+	} else {
+		spec.IpChoice = &ves_io_schema_service_policy_rule.ReplaceSpecType_AnyIp{
+			AnyIp: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -15091,6 +15191,9 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 		// resource modelToSpecRoot PointerField --> MumAction
 		if !data.MumAction.IsNull() && !data.MumAction.IsUnknown() {
 			mumActionSpec := &ves_io_schema_policy.ModifyAction{}
+			mumActionSpec.ActionType = &ves_io_schema_policy.ModifyAction_Default{
+				Default: &ves_io_schema.Empty{},
+			}
 			spec.MumAction = mumActionSpec
 			var mumActionModel SvcPolicyRuleModifyAction
 
@@ -15101,7 +15204,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ActionType
+			// resource modelToSpecNested OneOfField --> ActionType
 			if !mumActionModel.ActionTypeChoice.IsNull() && !mumActionModel.ActionTypeChoice.IsUnknown() {
 				mumActionActionTypeChoiceModel := SvcPolicyRuleModifyActionActionTypeChoice{}
 				response.Diagnostics.Append(mumActionModel.ActionTypeChoice.As(ctx, &mumActionActionTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15396,6 +15499,45 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 		// resource modelToSpecRoot PointerField --> RequestConstraints
 		if !data.RequestConstraints.IsNull() && !data.RequestConstraints.IsUnknown() {
 			requestConstraintsSpec := &ves_io_schema_policy.RequestConstraintType{}
+			requestConstraintsSpec.MaxCookieCountChoice = &ves_io_schema_policy.RequestConstraintType_MaxCookieCountNone{
+				MaxCookieCountNone: &ves_io_schema.Empty{},
+			}
+			requestConstraintsSpec.MaxCookieKeySizeChoice = &ves_io_schema_policy.RequestConstraintType_MaxCookieKeySizeNone{
+				MaxCookieKeySizeNone: &ves_io_schema.Empty{},
+			}
+			requestConstraintsSpec.MaxCookieValueSizeChoice = &ves_io_schema_policy.RequestConstraintType_MaxCookieValueSizeNone{
+				MaxCookieValueSizeNone: &ves_io_schema.Empty{},
+			}
+			requestConstraintsSpec.MaxHeaderCountChoice = &ves_io_schema_policy.RequestConstraintType_MaxHeaderCountNone{
+				MaxHeaderCountNone: &ves_io_schema.Empty{},
+			}
+			requestConstraintsSpec.MaxHeaderKeySizeChoice = &ves_io_schema_policy.RequestConstraintType_MaxHeaderKeySizeNone{
+				MaxHeaderKeySizeNone: &ves_io_schema.Empty{},
+			}
+			requestConstraintsSpec.MaxHeaderValueSizeChoice = &ves_io_schema_policy.RequestConstraintType_MaxHeaderValueSizeNone{
+				MaxHeaderValueSizeNone: &ves_io_schema.Empty{},
+			}
+			requestConstraintsSpec.MaxParameterCountChoice = &ves_io_schema_policy.RequestConstraintType_MaxParameterCountNone{
+				MaxParameterCountNone: &ves_io_schema.Empty{},
+			}
+			requestConstraintsSpec.MaxParameterNameSizeChoice = &ves_io_schema_policy.RequestConstraintType_MaxParameterNameSizeNone{
+				MaxParameterNameSizeNone: &ves_io_schema.Empty{},
+			}
+			requestConstraintsSpec.MaxParameterValueSizeChoice = &ves_io_schema_policy.RequestConstraintType_MaxParameterValueSizeNone{
+				MaxParameterValueSizeNone: &ves_io_schema.Empty{},
+			}
+			requestConstraintsSpec.MaxQuerySizeChoice = &ves_io_schema_policy.RequestConstraintType_MaxQuerySizeNone{
+				MaxQuerySizeNone: &ves_io_schema.Empty{},
+			}
+			requestConstraintsSpec.MaxRequestLineSizeChoice = &ves_io_schema_policy.RequestConstraintType_MaxRequestLineSizeNone{
+				MaxRequestLineSizeNone: &ves_io_schema.Empty{},
+			}
+			requestConstraintsSpec.MaxRequestSizeChoice = &ves_io_schema_policy.RequestConstraintType_MaxRequestSizeNone{
+				MaxRequestSizeNone: &ves_io_schema.Empty{},
+			}
+			requestConstraintsSpec.MaxUrlSizeChoice = &ves_io_schema_policy.RequestConstraintType_MaxUrlSizeNone{
+				MaxUrlSizeNone: &ves_io_schema.Empty{},
+			}
 			spec.RequestConstraints = requestConstraintsSpec
 			var requestConstraintsModel SvcPolicyRuleReqConstraintType
 
@@ -15406,7 +15548,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxCookieCountChoice
+			// resource modelToSpecNested OneOfField --> MaxCookieCountChoice
 			if !requestConstraintsModel.MaxCookieCountChoice.IsNull() && !requestConstraintsModel.MaxCookieCountChoice.IsUnknown() {
 				requestConstraintsMaxCookieCountChoiceModel := SvcPolicyRuleMaxCookieCountChoice{}
 				response.Diagnostics.Append(requestConstraintsModel.MaxCookieCountChoice.As(ctx, &requestConstraintsMaxCookieCountChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15430,7 +15572,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxCookieKeySizeChoice
+			// resource modelToSpecNested OneOfField --> MaxCookieKeySizeChoice
 			if !requestConstraintsModel.MaxCookieKeySizeChoice.IsNull() && !requestConstraintsModel.MaxCookieKeySizeChoice.IsUnknown() {
 				requestConstraintsMaxCookieKeySizeChoiceModel := SvcPolicyRuleMaxCookieKeySizeChoice{}
 				response.Diagnostics.Append(requestConstraintsModel.MaxCookieKeySizeChoice.As(ctx, &requestConstraintsMaxCookieKeySizeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15454,7 +15596,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxCookieValueSizeChoice
+			// resource modelToSpecNested OneOfField --> MaxCookieValueSizeChoice
 			if !requestConstraintsModel.MaxCookieValueSizeChoice.IsNull() && !requestConstraintsModel.MaxCookieValueSizeChoice.IsUnknown() {
 				requestConstraintsMaxCookieValueSizeChoiceModel := SvcPolicyRuleMaxCookieValueSizeChoice{}
 				response.Diagnostics.Append(requestConstraintsModel.MaxCookieValueSizeChoice.As(ctx, &requestConstraintsMaxCookieValueSizeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15478,7 +15620,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxHeaderCountChoice
+			// resource modelToSpecNested OneOfField --> MaxHeaderCountChoice
 			if !requestConstraintsModel.MaxHeaderCountChoice.IsNull() && !requestConstraintsModel.MaxHeaderCountChoice.IsUnknown() {
 				requestConstraintsMaxHeaderCountChoiceModel := SvcPolicyRuleMaxHeaderCountChoice{}
 				response.Diagnostics.Append(requestConstraintsModel.MaxHeaderCountChoice.As(ctx, &requestConstraintsMaxHeaderCountChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15502,7 +15644,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxHeaderKeySizeChoice
+			// resource modelToSpecNested OneOfField --> MaxHeaderKeySizeChoice
 			if !requestConstraintsModel.MaxHeaderKeySizeChoice.IsNull() && !requestConstraintsModel.MaxHeaderKeySizeChoice.IsUnknown() {
 				requestConstraintsMaxHeaderKeySizeChoiceModel := SvcPolicyRuleMaxHeaderKeySizeChoice{}
 				response.Diagnostics.Append(requestConstraintsModel.MaxHeaderKeySizeChoice.As(ctx, &requestConstraintsMaxHeaderKeySizeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15526,7 +15668,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxHeaderValueSizeChoice
+			// resource modelToSpecNested OneOfField --> MaxHeaderValueSizeChoice
 			if !requestConstraintsModel.MaxHeaderValueSizeChoice.IsNull() && !requestConstraintsModel.MaxHeaderValueSizeChoice.IsUnknown() {
 				requestConstraintsMaxHeaderValueSizeChoiceModel := SvcPolicyRuleMaxHeaderValueSizeChoice{}
 				response.Diagnostics.Append(requestConstraintsModel.MaxHeaderValueSizeChoice.As(ctx, &requestConstraintsMaxHeaderValueSizeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15550,7 +15692,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxParameterCountChoice
+			// resource modelToSpecNested OneOfField --> MaxParameterCountChoice
 			if !requestConstraintsModel.MaxParameterCountChoice.IsNull() && !requestConstraintsModel.MaxParameterCountChoice.IsUnknown() {
 				requestConstraintsMaxParameterCountChoiceModel := SvcPolicyRuleMaxParamCountChoice{}
 				response.Diagnostics.Append(requestConstraintsModel.MaxParameterCountChoice.As(ctx, &requestConstraintsMaxParameterCountChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15574,7 +15716,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxParameterNameSizeChoice
+			// resource modelToSpecNested OneOfField --> MaxParameterNameSizeChoice
 			if !requestConstraintsModel.MaxParameterNameSizeChoice.IsNull() && !requestConstraintsModel.MaxParameterNameSizeChoice.IsUnknown() {
 				requestConstraintsMaxParameterNameSizeChoiceModel := SvcPolicyRuleMaxParamNameSizeChoice{}
 				response.Diagnostics.Append(requestConstraintsModel.MaxParameterNameSizeChoice.As(ctx, &requestConstraintsMaxParameterNameSizeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15598,7 +15740,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxParameterValueSizeChoice
+			// resource modelToSpecNested OneOfField --> MaxParameterValueSizeChoice
 			if !requestConstraintsModel.MaxParameterValueSizeChoice.IsNull() && !requestConstraintsModel.MaxParameterValueSizeChoice.IsUnknown() {
 				requestConstraintsMaxParameterValueSizeChoiceModel := SvcPolicyRuleMaxParamValueSizeChoice{}
 				response.Diagnostics.Append(requestConstraintsModel.MaxParameterValueSizeChoice.As(ctx, &requestConstraintsMaxParameterValueSizeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15622,7 +15764,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxQuerySizeChoice
+			// resource modelToSpecNested OneOfField --> MaxQuerySizeChoice
 			if !requestConstraintsModel.MaxQuerySizeChoice.IsNull() && !requestConstraintsModel.MaxQuerySizeChoice.IsUnknown() {
 				requestConstraintsMaxQuerySizeChoiceModel := SvcPolicyRuleMaxQuerySizeChoice{}
 				response.Diagnostics.Append(requestConstraintsModel.MaxQuerySizeChoice.As(ctx, &requestConstraintsMaxQuerySizeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15646,7 +15788,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxRequestLineSizeChoice
+			// resource modelToSpecNested OneOfField --> MaxRequestLineSizeChoice
 			if !requestConstraintsModel.MaxRequestLineSizeChoice.IsNull() && !requestConstraintsModel.MaxRequestLineSizeChoice.IsUnknown() {
 				requestConstraintsMaxRequestLineSizeChoiceModel := SvcPolicyRuleMaxReqLineSizeChoice{}
 				response.Diagnostics.Append(requestConstraintsModel.MaxRequestLineSizeChoice.As(ctx, &requestConstraintsMaxRequestLineSizeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15670,7 +15812,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxRequestSizeChoice
+			// resource modelToSpecNested OneOfField --> MaxRequestSizeChoice
 			if !requestConstraintsModel.MaxRequestSizeChoice.IsNull() && !requestConstraintsModel.MaxRequestSizeChoice.IsUnknown() {
 				requestConstraintsMaxRequestSizeChoiceModel := SvcPolicyRuleMaxReqSizeChoice{}
 				response.Diagnostics.Append(requestConstraintsModel.MaxRequestSizeChoice.As(ctx, &requestConstraintsMaxRequestSizeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15694,7 +15836,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MaxUrlSizeChoice
+			// resource modelToSpecNested OneOfField --> MaxUrlSizeChoice
 			if !requestConstraintsModel.MaxUrlSizeChoice.IsNull() && !requestConstraintsModel.MaxUrlSizeChoice.IsUnknown() {
 				requestConstraintsMaxUrlSizeChoiceModel := SvcPolicyRuleMaxUrlSizeChoice{}
 				response.Diagnostics.Append(requestConstraintsModel.MaxUrlSizeChoice.As(ctx, &requestConstraintsMaxUrlSizeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15908,6 +16050,9 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 		// resource modelToSpecRoot RequiredPointerField --> WafAction
 		if !data.WafAction.IsNull() && !data.WafAction.IsUnknown() {
 			wafActionSpec := &ves_io_schema_policy.WafAction{}
+			wafActionSpec.ActionType = &ves_io_schema_policy.WafAction_None{
+				None: &ves_io_schema.Empty{},
+			}
 			spec.WafAction = wafActionSpec
 			var wafActionModel SvcPolicyRuleWafAction
 
@@ -15918,7 +16063,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ActionType
+			// resource modelToSpecNested OneOfField --> ActionType
 			if !wafActionModel.ActionTypeChoice.IsNull() && !wafActionModel.ActionTypeChoice.IsUnknown() {
 				wafActionActionTypeChoiceModel := SvcPolicyRuleWafActionActionTypeChoice{}
 				response.Diagnostics.Append(wafActionModel.ActionTypeChoice.As(ctx, &wafActionActionTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16204,12 +16349,8 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_service_policy_rule.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_service_policy_rule.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "service_policy_rule", err),
@@ -16221,7 +16362,9 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 	updateCallRsp := &server.CallResponse{
 		ProtoMsg: reflect.New(updateGetProtoMsgType).Interface().(proto.Message),
 	}
-	opts = append(opts, vesapi.WithOutCallResponse(updateCallRsp))
+	opts := []vesapi.CallOpt{
+		vesapi.WithOutCallResponse(updateCallRsp),
+	}
 
 	// Read the replaced object
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_service_policy_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
@@ -16655,7 +16798,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> AsnChoice
+	// resource SpecToModelRoot OneOfField --> AsnChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -16691,8 +16834,8 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var asnChoiceChoices interface{}
 		if v := rawSpecMap["asn_choice"]; v != nil {
 			asnChoiceChoices = v
@@ -16926,8 +17069,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 		var svcPolicyRuleBotActionModel = &SvcPolicyRuleBotAction{}
 		botActionElement := specData.GetBotAction()
 
-		// resource specToModelNested RequiredOneOfField --> ActionType
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> ActionType
 		// CreateSpecType: GetActionType() returns the oneof interface value.
 		if botActionElement.GetActionType() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -17016,7 +17158,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 		data.BotAction = types.ObjectNull(ServicePolicyRuleBotActionModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> ClientChoice
+	// resource SpecToModelRoot OneOfField --> ClientChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -17060,8 +17202,8 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var clientChoiceChoices interface{}
 		if v := rawSpecMap["client_choice"]; v != nil {
 			clientChoiceChoices = v
@@ -17727,7 +17869,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 		data.HttpMethod = types.ObjectNull(ServicePolicyRuleHttpMethodModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> IpChoice
+	// resource SpecToModelRoot OneOfField --> IpChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -17763,8 +17905,8 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var ipChoiceChoices interface{}
 		if v := rawSpecMap["ip_choice"]; v != nil {
 			ipChoiceChoices = v
@@ -18222,8 +18364,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 		var svcPolicyRuleModifyActionModel = &SvcPolicyRuleModifyAction{}
 		mumActionElement := specData.GetMumAction()
 
-		// resource specToModelNested RequiredOneOfField --> ActionType
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> ActionType
 		// CreateSpecType: GetActionType() returns the oneof interface value.
 		if mumActionElement.GetActionType() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -18646,8 +18787,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 		var svcPolicyRuleReqConstraintTypeModel = &SvcPolicyRuleReqConstraintType{}
 		requestConstraintsElement := specData.GetRequestConstraints()
 
-		// resource specToModelNested RequiredOneOfField --> MaxCookieCountChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxCookieCountChoice
 		// CreateSpecType: GetMaxCookieCountChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxCookieCountChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -18710,8 +18850,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			svcPolicyRuleReqConstraintTypeModel.MaxCookieCountChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxCookieCountChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxCookieKeySizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxCookieKeySizeChoice
 		// CreateSpecType: GetMaxCookieKeySizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxCookieKeySizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -18774,8 +18913,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			svcPolicyRuleReqConstraintTypeModel.MaxCookieKeySizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxCookieKeySizeChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxCookieValueSizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxCookieValueSizeChoice
 		// CreateSpecType: GetMaxCookieValueSizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxCookieValueSizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -18838,8 +18976,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			svcPolicyRuleReqConstraintTypeModel.MaxCookieValueSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxCookieValueSizeChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxHeaderCountChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxHeaderCountChoice
 		// CreateSpecType: GetMaxHeaderCountChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxHeaderCountChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -18902,8 +19039,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			svcPolicyRuleReqConstraintTypeModel.MaxHeaderCountChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxHeaderCountChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxHeaderKeySizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxHeaderKeySizeChoice
 		// CreateSpecType: GetMaxHeaderKeySizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxHeaderKeySizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -18966,8 +19102,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			svcPolicyRuleReqConstraintTypeModel.MaxHeaderKeySizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxHeaderKeySizeChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxHeaderValueSizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxHeaderValueSizeChoice
 		// CreateSpecType: GetMaxHeaderValueSizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxHeaderValueSizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -19030,8 +19165,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			svcPolicyRuleReqConstraintTypeModel.MaxHeaderValueSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxHeaderValueSizeChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxParameterCountChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxParameterCountChoice
 		// CreateSpecType: GetMaxParameterCountChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxParameterCountChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -19094,8 +19228,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			svcPolicyRuleReqConstraintTypeModel.MaxParameterCountChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxParameterCountChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxParameterNameSizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxParameterNameSizeChoice
 		// CreateSpecType: GetMaxParameterNameSizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxParameterNameSizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -19158,8 +19291,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			svcPolicyRuleReqConstraintTypeModel.MaxParameterNameSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxParameterNameSizeChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxParameterValueSizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxParameterValueSizeChoice
 		// CreateSpecType: GetMaxParameterValueSizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxParameterValueSizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -19222,8 +19354,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			svcPolicyRuleReqConstraintTypeModel.MaxParameterValueSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxParameterValueSizeChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxQuerySizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxQuerySizeChoice
 		// CreateSpecType: GetMaxQuerySizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxQuerySizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -19286,8 +19417,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			svcPolicyRuleReqConstraintTypeModel.MaxQuerySizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxQuerySizeChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxRequestLineSizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxRequestLineSizeChoice
 		// CreateSpecType: GetMaxRequestLineSizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxRequestLineSizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -19350,8 +19480,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			svcPolicyRuleReqConstraintTypeModel.MaxRequestLineSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxRequestLineSizeChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxRequestSizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxRequestSizeChoice
 		// CreateSpecType: GetMaxRequestSizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxRequestSizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -19414,8 +19543,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 			svcPolicyRuleReqConstraintTypeModel.MaxRequestSizeChoice = types.ObjectNull(ServicePolicyRuleRequestConstraintsMaxRequestSizeChoiceModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> MaxUrlSizeChoice
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> MaxUrlSizeChoice
 		// CreateSpecType: GetMaxUrlSizeChoice() returns the oneof interface value.
 		if requestConstraintsElement.GetMaxUrlSizeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -19810,8 +19938,7 @@ func (r *ResourceF5XCServicePolicyRule) Update(ctx context.Context, request reso
 		var svcPolicyRuleWafActionModel = &SvcPolicyRuleWafAction{}
 		wafActionElement := specData.GetWafAction()
 
-		// resource specToModelNested RequiredOneOfField --> ActionType
-		// CreateSpecType
+		// resource specToModelNested OneOfField --> ActionType
 		// CreateSpecType: GetActionType() returns the oneof interface value.
 		if wafActionElement.GetActionType() != nil {
 			// Create a temporary attribute map for the choices within this OneOf

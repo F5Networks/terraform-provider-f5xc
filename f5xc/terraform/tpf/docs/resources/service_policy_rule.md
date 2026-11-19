@@ -81,9 +81,6 @@ resource "f5xc_service_policy_rule" "example" {
 ### Required
 
 - `action` (List of String) action Action to be enforced if the input request matches the rule.<br>**Allowed Values (choose one):** `['ALLOW', 'DENY', 'GOTO_POLICY', 'LAST_POLICY', 'NEXT_POLICY', 'NEXT_POLICY_SET']`
-- `asn_choice` (Attributes) asn choice Match the 4-byte origin Autonomous System Number for the source IPv4 address of the request. The origin ASN for the request is obtained by performing a lookup for the source IPv4 Address in a GeoIP DB. (see [below for nested schema](#nestedatt--asn_choice))
-- `client_choice` (Attributes) client choice Select clients for which the rule will be applied. (see [below for nested schema](#nestedatt--client_choice))
-- `ip_choice` (Attributes) ip choice Match source IP address of the request (see [below for nested schema](#nestedatt--ip_choice))
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
 - `waf_action` (Attributes) App Firewall Action App Firewall action to be enforced if the input request matches the rule. (see [below for nested schema](#nestedatt--waf_action))
@@ -93,14 +90,17 @@ resource "f5xc_service_policy_rule" "example" {
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `api_group_matcher` (Attributes) api group matcher The list of expected API group names to which the request API belongs. The actual list of API group names for the request API is determined from the api group and api group element configuration objects using the HTTP method and the HTTP path as inputs. The predicate evaluates to true if any of the actual API group names for the request is equal to any of the values in the api group matcher. (see [below for nested schema](#nestedatt--api_group_matcher))
 - `arg_matchers` (Attributes List) arg matchers A list of predicates for all POST args that need to be matched. The criteria for matching each arg are described in individual instances of ArgMatcherType. The actual arg values are extracted from the request API as a list of strings for each arg selector name. Note that all specified arg matcher predicates must evaluate to true. A request body greater than 64KB will not be evaluated. (see [below for nested schema](#nestedatt--arg_matchers))
+- `asn_choice` (Attributes) asn choice Match the 4-byte origin Autonomous System Number for the source IPv4 address of the request. The origin ASN for the request is obtained by performing a lookup for the source IPv4 Address in a GeoIP DB.<br>Exactly one of `any_asn`, `asn_list`, or `asn_matcher` must be specified when `asn_choice` is configured. (see [below for nested schema](#nestedatt--asn_choice))
 - `body_matcher` (Attributes) request body matcher Predicate for matching the request body string. The criteria for matching the request body is described in MatcherType. The actual request body value is extracted from the request API as a string. A request body greater than 64KB will not be evaluated. (see [below for nested schema](#nestedatt--body_matcher))
 - `bot_action` (Attributes) Bot Action Bot action to be enforced if the input request matches the rule. (see [below for nested schema](#nestedatt--bot_action))
+- `client_choice` (Attributes) client choice Select clients for which the rule will be applied.<br>Exactly one of `any_client`, `client_name`, `client_name_matcher`, `client_selector`, or `ip_threat_category_list` must be specified when `client_choice` is configured. (see [below for nested schema](#nestedatt--client_choice))
 - `cookie_matchers` (Attributes List) cookie matchers A list of predicates for all cookies that need to be matched. The criteria for matching each cookie is described in individual instances of CookieMatcherType. The actual cookie values are extracted from the request API as a list of strings for each cookie name. Note that all specified cookie matcher predicates must evaluate to true. (see [below for nested schema](#nestedatt--cookie_matchers))
 - `description` (String) description Human readable description for the object
 - `domain_matcher` (Attributes) domain matcher A list of exact values and/or regular expressions for the expected name of the domain. The actual value of domain is the host component from the URL. The predicate evaluates to true if the domain value matches any of the exact values or regular expressions in the domain matcher. (see [below for nested schema](#nestedatt--domain_matcher))
 - `expiration_timestamp` (String) expiration timestamp The expiration_timestamp is the RFC 3339 format timestamp at which the containing rule is considered to be logically expired. The rule continues to exist in the configuration but is not applied anymore.
 - `headers` (Attributes List) headers A list of predicates for various HTTP headers that need to match. The criteria for matching each HTTP header are described in individual HeaderMatcherType instances. The actual HTTP header values are extracted from the request API as a list of strings for each HTTP header type. Note that all specified header predicates must evaluate to true. (see [below for nested schema](#nestedatt--headers))
 - `http_method` (Attributes) method The list of expected values for the HTTP method in the request API. The actual value of the HTTP method is extracted from the HTTP request. The predicate evaluates to true if the actual HTTP method belongs is present in the list of expected values. (see [below for nested schema](#nestedatt--http_method))
+- `ip_choice` (Attributes) ip choice Match source IP address of the request<br>Exactly one of `any_ip`, `ip_matcher`, or `ip_prefix_list` must be specified when `ip_choice` is configured. (see [below for nested schema](#nestedatt--ip_choice))
 - `jwt_claims` (Attributes List) JWT claims A list of predicates for various JWT claims that need to match. The criteria for matching each JWT claim are described in individual JWTClaimMatcherType instances. The actual JWT claims values are extracted from the JWT payload as a list of strings. Note that all specified JWT claim predicates must evaluate to true. (see [below for nested schema](#nestedatt--jwt_claims))
 - `label_matcher` (Attributes) label matcher A list of label keys that identify the label values that need to be the same for the client and server. Note that the actual label values are not specified here, just the label keys. This predicate facilitates reuse of rules and policies across multiple dimensions such as deployment, environment, and location. The predicate evaluates to true if the values of the client and server labels for all the keys specified in the label matcher are equal. The values of any other labels do not matter. (see [below for nested schema](#nestedatt--label_matcher))
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
@@ -112,148 +112,27 @@ resource "f5xc_service_policy_rule" "example" {
 - `request_constraints` (Attributes) request constraints Place limits on request based on the request attributes. The request matches if any of the attribute sizes exceed the corresponding maximum value. (see [below for nested schema](#nestedatt--request_constraints))
 - `segment_policy` (Attributes) Segments Select source and destination segments where rule is applied Skip the configuration or set option as Any to ignore corresponding segment match (see [below for nested schema](#nestedatt--segment_policy))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
-- `tls_fingerprint_choice` (Attributes) tls_fingerprint TLS fingerprints to be matches. The predicate evaluates to true. If the TLS fingerprint matches any of the exact values or classes of known TLS fingerprints. (see [below for nested schema](#nestedatt--tls_fingerprint_choice))
+- `tls_fingerprint_choice` (Attributes) tls_fingerprint TLS fingerprints to be matches. The predicate evaluates to true. If the TLS fingerprint matches any of the exact values or classes of known TLS fingerprints.<br>Exactly one of `ja4_tls_fingerprint` or `tls_fingerprint_matcher` must be specified when `tls_fingerprint_choice` is configured. (see [below for nested schema](#nestedatt--tls_fingerprint_choice))
 
 ### Read-Only
 
 - `uid` (String) uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.
 
-<a id="nestedatt--asn_choice"></a>
-### Nested Schema for `asn_choice`
-
-Optional:
-
-- `any_asn` (Boolean) any asn Any origin ASN.
-- `asn_list` (Attributes) asn list List of 4-byte ASN values. The predicate evaluates to true if the origin ASN is present in the ASN list. (see [below for nested schema](#nestedatt--asn_choice--asn_list))
-- `asn_matcher` (Attributes) asn matcher List of references to BGP ASN Set objects. The predicate evaluates to true if the origin ASN is present in one of the BGP ASN Set objects. (see [below for nested schema](#nestedatt--asn_choice--asn_matcher))
-
-<a id="nestedatt--asn_choice--asn_list"></a>
-### Nested Schema for `asn_choice.asn_list`
-
-Required:
-
-- `as_numbers` (List of Number) as numbers An unordered set of RFC 6793 defined 4-byte AS numbers that can be used to create allow or deny lists for use in network policy or service policy. It can be used to create the allow list only for DNS Load Balancer.
-
-
-<a id="nestedatt--asn_choice--asn_matcher"></a>
-### Nested Schema for `asn_choice.asn_matcher`
-
-Required:
-
-- `asn_sets` (Attributes List) asn_sets A list of references to bgp_asn_set objects. (see [below for nested schema](#nestedatt--asn_choice--asn_matcher--asn_sets))
-
-<a id="nestedatt--asn_choice--asn_matcher--asn_sets"></a>
-### Nested Schema for `asn_choice.asn_matcher.asn_sets`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-
-
-<a id="nestedatt--client_choice"></a>
-### Nested Schema for `client_choice`
-
-Optional:
-
-- `any_client` (Boolean) any ip Any Client
-- `client_name` (String) client name The expected name of the client invoking the request API. The predicate evaluates to true if any of the actual names is the same as the expected client name.
-- `client_name_matcher` (Attributes) client name matcher A list of exact values and/or regular expressions for the expected name of the client. This is a generalized version of the client name predicate that allows the same rule to be applicable to a set of clients rather than a single client. The predicate evaluates to true if any of the client's actual names match any of the exact values or regular expressions in the client name matcher. (see [below for nested schema](#nestedatt--client_choice--client_name_matcher))
-- `client_selector` (Attributes) client selector A label selector that describes the expected set of clients. The labels associated with the client making the API request are used to evaluate the label expressions in the selector. These labels can be derived from the client TLS certificate or from the volterra internal control plane. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels. (see [below for nested schema](#nestedatt--client_choice--client_selector))
-- `ip_threat_category_list` (Attributes) IP Threat Category List IP threat categories to choose from (see [below for nested schema](#nestedatt--client_choice--ip_threat_category_list))
-
-<a id="nestedatt--client_choice--client_name_matcher"></a>
-### Nested Schema for `client_choice.client_name_matcher`
-
-Optional:
-
-- `exact_values` (List of String) exact values A list of exact values to match the input against.
-- `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-
-
-<a id="nestedatt--client_choice--client_selector"></a>
-### Nested Schema for `client_choice.client_selector`
-
-Required:
-
-- `expressions` (List of String) expressions expressions contains the kubernetes style label expression for selections.
-
-
-<a id="nestedatt--client_choice--ip_threat_category_list"></a>
-### Nested Schema for `client_choice.ip_threat_category_list`
-
-Required:
-
-- `ip_threat_categories` (List of String) IP Threat Categories The IP threat categories is obtained from the list and is used to auto-generate equivalent label selection expressions<br>**Valid Options:** `['BOTNETS', 'DENIAL_OF_SERVICE', 'MOBILE_THREATS', 'NETWORK', 'PHISHING', 'PROXY', 'REPUTATION', 'SCANNERS', 'SPAM_SOURCES', 'TOR_PROXY', 'WEB_ATTACKS', 'WINDOWS_EXPLOITS']` (Multiple selection allowed)
-
-
-
-<a id="nestedatt--ip_choice"></a>
-### Nested Schema for `ip_choice`
-
-Optional:
-
-- `any_ip` (Boolean) any ip Any Source IP
-- `ip_matcher` (Attributes) ip matcher List of references to IP Prefix Set objects. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes in the IP Prefix Sets. (see [below for nested schema](#nestedatt--ip_choice--ip_matcher))
-- `ip_prefix_list` (Attributes) ip prefix list List of IP Prefixes values. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes from the list. (see [below for nested schema](#nestedatt--ip_choice--ip_prefix_list))
-
-<a id="nestedatt--ip_choice--ip_matcher"></a>
-### Nested Schema for `ip_choice.ip_matcher`
-
-Required:
-
-- `prefix_sets` (Attributes List) prefix_sets A list of references to ip_prefix_set objects. (see [below for nested schema](#nestedatt--ip_choice--ip_matcher--prefix_sets))
-
-Optional:
-
-- `invert_matcher` (Boolean) invert_matcher Invert the match result.<br>**Default:** `false`
-
-<a id="nestedatt--ip_choice--ip_matcher--prefix_sets"></a>
-### Nested Schema for `ip_choice.ip_matcher.prefix_sets`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-
-<a id="nestedatt--ip_choice--ip_prefix_list"></a>
-### Nested Schema for `ip_choice.ip_prefix_list`
-
-Optional:
-
-- `invert_match` (Boolean) invert_matcher Invert the match result.<br>**Default:** `false`
-- `ip_prefixes` (List of String) ip prefixes List of IPv4 prefix strings.
-- `ipv6_prefixes` (List of String) ipv6 prefixes List of IPv6 prefix strings.
-
-
-
 <a id="nestedatt--waf_action"></a>
 ### Nested Schema for `waf_action`
 
-Required:
+Optional:
 
-- `action_type_choice` (Attributes) Select WAF Action Type Select Application Firewall action, skip WAF processing or skip rules (see [below for nested schema](#nestedatt--waf_action--action_type_choice))
+- `action_type_choice` (Attributes) Select WAF Action Type Select Application Firewall action, skip WAF processing or skip rules<br>Exactly one of `app_firewall_detection_control`, `none`, or `waf_skip_processing` must be specified when `action_type_choice` is configured. (see [below for nested schema](#nestedatt--waf_action--action_type_choice))
 
 <a id="nestedatt--waf_action--action_type_choice"></a>
 ### Nested Schema for `waf_action.action_type_choice`
 
 Optional:
 
-- `app_firewall_detection_control` (Attributes) App Firewall Detection control Define the list of Signature IDs, Violations, Attack Types and Bot Names that should be excluded from triggering on the defined match criteria. (see [below for nested schema](#nestedatt--waf_action--action_type_choice--app_firewall_detection_control))
-- `none` (Boolean) Normal App Firewall Processing Perform normal App Firewall processing for this request
-- `waf_skip_processing` (Boolean) Skip App Firewall Processing Skip all App Firewall processing for this request
+- `app_firewall_detection_control` (Attributes) App Firewall Detection control Define the list of Signature IDs, Violations, Attack Types and Bot Names that should be excluded from triggering on the defined match criteria.<br>Conflicts with `none` and `waf_skip_processing`. (see [below for nested schema](#nestedatt--waf_action--action_type_choice--app_firewall_detection_control))
+- `none` (Boolean) Normal App Firewall Processing Perform normal App Firewall processing for this request<br>Conflicts with `app_firewall_detection_control` and `waf_skip_processing`.
+- `waf_skip_processing` (Boolean) Skip App Firewall Processing Skip all App Firewall processing for this request<br>Conflicts with `app_firewall_detection_control` and `none`.
 
 <a id="nestedatt--waf_action--action_type_choice--app_firewall_detection_control"></a>
 ### Nested Schema for `waf_action.action_type_choice.app_firewall_detection_control`
@@ -332,7 +211,7 @@ Optional:
 
 Required:
 
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--arg_matchers--match_choice))
+- `match_choice` (Attributes) match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified. (see [below for nested schema](#nestedatt--arg_matchers--match_choice))
 - `name` (String) name A case-sensitive JSON path in the HTTP request body.
 
 Optional:
@@ -344,9 +223,9 @@ Optional:
 
 Optional:
 
-- `check_not_present` (Boolean) check_not_present Check that the argument is not present.
-- `check_present` (Boolean) check_present Check that the argument is present.
-- `item` (Attributes) item Criteria for matching the values for the Arg. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--arg_matchers--match_choice--item))
+- `check_not_present` (Boolean) check_not_present Check that the argument is not present.<br>Conflicts with `check_present` and `item`.
+- `check_present` (Boolean) check_present Check that the argument is present.<br>Conflicts with `check_not_present` and `item`.
+- `item` (Attributes) item Criteria for matching the values for the Arg. The match is successful if any of the values in the input satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`. (see [below for nested schema](#nestedatt--arg_matchers--match_choice--item))
 
 <a id="nestedatt--arg_matchers--match_choice--item"></a>
 ### Nested Schema for `arg_matchers.match_choice.item`
@@ -356,6 +235,45 @@ Optional:
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
 - `transformers` (List of String) transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.<br>**Valid Options:** `['BASE64_DECODE', 'LOWER_CASE', 'NORMALIZE_PATH', 'REMOVE_WHITESPACE', 'TRANSFORMER_NONE', 'TRIM', 'TRIM_LEFT', 'TRIM_RIGHT', 'UPPER_CASE', 'URL_DECODE']` (Multiple selection allowed)
+
+
+
+
+<a id="nestedatt--asn_choice"></a>
+### Nested Schema for `asn_choice`
+
+Optional:
+
+- `any_asn` (Boolean) any asn Any origin ASN.<br>Conflicts with `asn_list` and `asn_matcher`.
+- `asn_list` (Attributes) asn list List of 4-byte ASN values. The predicate evaluates to true if the origin ASN is present in the ASN list.<br>Conflicts with `any_asn` and `asn_matcher`. (see [below for nested schema](#nestedatt--asn_choice--asn_list))
+- `asn_matcher` (Attributes) asn matcher List of references to BGP ASN Set objects. The predicate evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.<br>Conflicts with `any_asn` and `asn_list`. (see [below for nested schema](#nestedatt--asn_choice--asn_matcher))
+
+<a id="nestedatt--asn_choice--asn_list"></a>
+### Nested Schema for `asn_choice.asn_list`
+
+Required:
+
+- `as_numbers` (List of Number) as numbers An unordered set of RFC 6793 defined 4-byte AS numbers that can be used to create allow or deny lists for use in network policy or service policy. It can be used to create the allow list only for DNS Load Balancer.
+
+
+<a id="nestedatt--asn_choice--asn_matcher"></a>
+### Nested Schema for `asn_choice.asn_matcher`
+
+Required:
+
+- `asn_sets` (Attributes List) asn_sets A list of references to bgp_asn_set objects. (see [below for nested schema](#nestedatt--asn_choice--asn_matcher--asn_sets))
+
+<a id="nestedatt--asn_choice--asn_matcher--asn_sets"></a>
+### Nested Schema for `asn_choice.asn_matcher.asn_sets`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
 
 
 
@@ -373,17 +291,54 @@ Optional:
 <a id="nestedatt--bot_action"></a>
 ### Nested Schema for `bot_action`
 
-Required:
+Optional:
 
-- `action_type_choice` (Attributes) Select Bot Action Type (see [below for nested schema](#nestedatt--bot_action--action_type_choice))
+- `action_type_choice` (Attributes) Select Bot Action Type<br>Exactly one of `bot_skip_processing` or `none` must be specified when `action_type_choice` is configured. (see [below for nested schema](#nestedatt--bot_action--action_type_choice))
 
 <a id="nestedatt--bot_action--action_type_choice"></a>
 ### Nested Schema for `bot_action.action_type_choice`
 
 Optional:
 
-- `bot_skip_processing` (Boolean) Skip Bot Processing Skip all Bot processing for this request
-- `none` (Boolean) Normal Bot Processing Perform normal Bot processing for this request
+- `bot_skip_processing` (Boolean) Skip Bot Processing Skip all Bot processing for this request<br>Conflicts with `none`.
+- `none` (Boolean) Normal Bot Processing Perform normal Bot processing for this request<br>Conflicts with `bot_skip_processing`.
+
+
+
+<a id="nestedatt--client_choice"></a>
+### Nested Schema for `client_choice`
+
+Optional:
+
+- `any_client` (Boolean) any ip Any Client<br>Conflicts with `client_name`, `client_name_matcher`, `client_selector`, and `ip_threat_category_list`.
+- `client_name` (String) client name The expected name of the client invoking the request API. The predicate evaluates to true if any of the actual names is the same as the expected client name.<br>Conflicts with `any_client`, `client_name_matcher`, `client_selector`, and `ip_threat_category_list`.
+- `client_name_matcher` (Attributes) client name matcher A list of exact values and/or regular expressions for the expected name of the client. This is a generalized version of the client name predicate that allows the same rule to be applicable to a set of clients rather than a single client. The predicate evaluates to true if any of the client's actual names match any of the exact values or regular expressions in the client name matcher.<br>Conflicts with `any_client`, `client_name`, `client_selector`, and `ip_threat_category_list`. (see [below for nested schema](#nestedatt--client_choice--client_name_matcher))
+- `client_selector` (Attributes) client selector A label selector that describes the expected set of clients. The labels associated with the client making the API request are used to evaluate the label expressions in the selector. These labels can be derived from the client TLS certificate or from the volterra internal control plane. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.<br>Conflicts with `any_client`, `client_name`, `client_name_matcher`, and `ip_threat_category_list`. (see [below for nested schema](#nestedatt--client_choice--client_selector))
+- `ip_threat_category_list` (Attributes) IP Threat Category List IP threat categories to choose from<br>Conflicts with `any_client`, `client_name`, `client_name_matcher`, and `client_selector`. (see [below for nested schema](#nestedatt--client_choice--ip_threat_category_list))
+
+<a id="nestedatt--client_choice--client_name_matcher"></a>
+### Nested Schema for `client_choice.client_name_matcher`
+
+Optional:
+
+- `exact_values` (List of String) exact values A list of exact values to match the input against.
+- `regex_values` (List of String) regex values A list of regular expressions to match the input against.
+
+
+<a id="nestedatt--client_choice--client_selector"></a>
+### Nested Schema for `client_choice.client_selector`
+
+Required:
+
+- `expressions` (List of String) expressions expressions contains the kubernetes style label expression for selections.
+
+
+<a id="nestedatt--client_choice--ip_threat_category_list"></a>
+### Nested Schema for `client_choice.ip_threat_category_list`
+
+Required:
+
+- `ip_threat_categories` (List of String) IP Threat Categories The IP threat categories is obtained from the list and is used to auto-generate equivalent label selection expressions<br>**Valid Options:** `['BOTNETS', 'DENIAL_OF_SERVICE', 'MOBILE_THREATS', 'NETWORK', 'PHISHING', 'PROXY', 'REPUTATION', 'SCANNERS', 'SPAM_SOURCES', 'TOR_PROXY', 'WEB_ATTACKS', 'WINDOWS_EXPLOITS']` (Multiple selection allowed)
 
 
 
@@ -392,7 +347,7 @@ Optional:
 
 Required:
 
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--cookie_matchers--match_choice))
+- `match_choice` (Attributes) match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified. (see [below for nested schema](#nestedatt--cookie_matchers--match_choice))
 - `name` (String) name A case-sensitive cookie name.
 
 Optional:
@@ -404,9 +359,9 @@ Optional:
 
 Optional:
 
-- `check_not_present` (Boolean) check_not_present Check that the cookie is not present.
-- `check_present` (Boolean) check_present Check that the cookie is present.
-- `item` (Attributes) item Criteria for matching the values for the cookie. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--cookie_matchers--match_choice--item))
+- `check_not_present` (Boolean) check_not_present Check that the cookie is not present.<br>Conflicts with `check_present` and `item`.
+- `check_present` (Boolean) check_present Check that the cookie is present.<br>Conflicts with `check_not_present` and `item`.
+- `item` (Attributes) item Criteria for matching the values for the cookie. The match is successful if any of the values in the input satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`. (see [below for nested schema](#nestedatt--cookie_matchers--match_choice--item))
 
 <a id="nestedatt--cookie_matchers--match_choice--item"></a>
 ### Nested Schema for `cookie_matchers.match_choice.item`
@@ -434,7 +389,7 @@ Optional:
 
 Required:
 
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--headers--match_choice))
+- `match_choice` (Attributes) match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified. (see [below for nested schema](#nestedatt--headers--match_choice))
 - `name` (String) name A case-insensitive HTTP header name.
 
 Optional:
@@ -446,9 +401,9 @@ Optional:
 
 Optional:
 
-- `check_not_present` (Boolean) check_not_present Check that the header is not present.
-- `check_present` (Boolean) check_present Check that the header is present.
-- `item` (Attributes) item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--headers--match_choice--item))
+- `check_not_present` (Boolean) check_not_present Check that the header is not present.<br>Conflicts with `check_present` and `item`.
+- `check_present` (Boolean) check_present Check that the header is present.<br>Conflicts with `check_not_present` and `item`.
+- `item` (Attributes) item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`. (see [below for nested schema](#nestedatt--headers--match_choice--item))
 
 <a id="nestedatt--headers--match_choice--item"></a>
 ### Nested Schema for `headers.match_choice.item`
@@ -471,12 +426,57 @@ Optional:
 - `methods` (List of String) methods List of methods values to match against.<br>**Valid Options:** `['ANY', 'CONNECT', 'COPY', 'DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT', 'TRACE']` (Multiple selection allowed)
 
 
+<a id="nestedatt--ip_choice"></a>
+### Nested Schema for `ip_choice`
+
+Optional:
+
+- `any_ip` (Boolean) any ip Any Source IP<br>Conflicts with `ip_matcher` and `ip_prefix_list`.
+- `ip_matcher` (Attributes) ip matcher List of references to IP Prefix Set objects. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes in the IP Prefix Sets.<br>Conflicts with `any_ip` and `ip_prefix_list`. (see [below for nested schema](#nestedatt--ip_choice--ip_matcher))
+- `ip_prefix_list` (Attributes) ip prefix list List of IP Prefixes values. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes from the list.<br>Conflicts with `any_ip` and `ip_matcher`. (see [below for nested schema](#nestedatt--ip_choice--ip_prefix_list))
+
+<a id="nestedatt--ip_choice--ip_matcher"></a>
+### Nested Schema for `ip_choice.ip_matcher`
+
+Required:
+
+- `prefix_sets` (Attributes List) prefix_sets A list of references to ip_prefix_set objects. (see [below for nested schema](#nestedatt--ip_choice--ip_matcher--prefix_sets))
+
+Optional:
+
+- `invert_matcher` (Boolean) invert_matcher Invert the match result.<br>**Default:** `false`
+
+<a id="nestedatt--ip_choice--ip_matcher--prefix_sets"></a>
+### Nested Schema for `ip_choice.ip_matcher.prefix_sets`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+
+<a id="nestedatt--ip_choice--ip_prefix_list"></a>
+### Nested Schema for `ip_choice.ip_prefix_list`
+
+Optional:
+
+- `invert_match` (Boolean) invert_matcher Invert the match result.<br>**Default:** `false`
+- `ip_prefixes` (List of String) ip prefixes List of IPv4 prefix strings.
+- `ipv6_prefixes` (List of String) ipv6 prefixes List of IPv6 prefix strings.
+
+
+
 <a id="nestedatt--jwt_claims"></a>
 ### Nested Schema for `jwt_claims`
 
 Required:
 
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--jwt_claims--match_choice))
+- `match_choice` (Attributes) match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified. (see [below for nested schema](#nestedatt--jwt_claims--match_choice))
 - `name` (String) name JWT claim name.
 
 Optional:
@@ -488,9 +488,9 @@ Optional:
 
 Optional:
 
-- `check_not_present` (Boolean) check_not_present Check that the JWT Claim is not present.
-- `check_present` (Boolean) check_present Check that the JWT Claim is present.
-- `item` (Attributes) item Criteria for matching the values for the JWT Claim. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--jwt_claims--match_choice--item))
+- `check_not_present` (Boolean) check_not_present Check that the JWT Claim is not present.<br>Conflicts with `check_present` and `item`.
+- `check_present` (Boolean) check_present Check that the JWT Claim is present.<br>Conflicts with `check_not_present` and `item`.
+- `item` (Attributes) item Criteria for matching the values for the JWT Claim. The match is successful if any of the values in the input satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`. (see [below for nested schema](#nestedatt--jwt_claims--match_choice--item))
 
 <a id="nestedatt--jwt_claims--match_choice--item"></a>
 ### Nested Schema for `jwt_claims.match_choice.item`
@@ -515,17 +515,17 @@ Optional:
 <a id="nestedatt--mum_action"></a>
 ### Nested Schema for `mum_action`
 
-Required:
+Optional:
 
-- `action_type_choice` (Attributes) Select Action Type Select whether to modify the action for the matching request (see [below for nested schema](#nestedatt--mum_action--action_type_choice))
+- `action_type_choice` (Attributes) Select Action Type Select whether to modify the action for the matching request<br>Exactly one of `default` or `skip_processing` must be specified when `action_type_choice` is configured. (see [below for nested schema](#nestedatt--mum_action--action_type_choice))
 
 <a id="nestedatt--mum_action--action_type_choice"></a>
 ### Nested Schema for `mum_action.action_type_choice`
 
 Optional:
 
-- `default` (Boolean) Do not modify Perform the default enforcement for this request
-- `skip_processing` (Boolean) Skip Processing Do not perform enforcement for this request
+- `default` (Boolean) Do not modify Perform the default enforcement for this request<br>Conflicts with `skip_processing`.
+- `skip_processing` (Boolean) Skip Processing Do not perform enforcement for this request<br>Conflicts with `default`.
 
 
 
@@ -561,7 +561,7 @@ Optional:
 Required:
 
 - `key` (String) key A case-sensitive HTTP query parameter name.
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--query_params--match_choice))
+- `match_choice` (Attributes) match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified. (see [below for nested schema](#nestedatt--query_params--match_choice))
 
 Optional:
 
@@ -572,9 +572,9 @@ Optional:
 
 Optional:
 
-- `check_not_present` (Boolean) check_not_present Check that the query parameter is not present.
-- `check_present` (Boolean) check_present Check that the query parameter is present.
-- `item` (Attributes) item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--query_params--match_choice--item))
+- `check_not_present` (Boolean) check_not_present Check that the query parameter is not present.<br>Conflicts with `check_present` and `item`.
+- `check_present` (Boolean) check_present Check that the query parameter is present.<br>Conflicts with `check_not_present` and `item`.
+- `item` (Attributes) item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`. (see [below for nested schema](#nestedatt--query_params--match_choice--item))
 
 <a id="nestedatt--query_params--match_choice--item"></a>
 ### Nested Schema for `query_params.match_choice.item`
@@ -591,29 +591,29 @@ Optional:
 <a id="nestedatt--request_constraints"></a>
 ### Nested Schema for `request_constraints`
 
-Required:
+Optional:
 
-- `max_cookie_count_choice` (Attributes) max_cookie_count_choice Match on the number of cookies the request contains (see [below for nested schema](#nestedatt--request_constraints--max_cookie_count_choice))
-- `max_cookie_key_size_choice` (Attributes) max_cookie_key_size_choice Match on the size of the cookie name. Should be defined in bytes. (see [below for nested schema](#nestedatt--request_constraints--max_cookie_key_size_choice))
-- `max_cookie_value_size_choice` (Attributes) max_cookie_value_size_choice Match on the size of the cookie value. Should be defined in bytes. (see [below for nested schema](#nestedatt--request_constraints--max_cookie_value_size_choice))
-- `max_header_count_choice` (Attributes) max_header_count_choice Match on the number of headers the request contains (see [below for nested schema](#nestedatt--request_constraints--max_header_count_choice))
-- `max_header_key_size_choice` (Attributes) max_header_key_size_choice Match on the size of the header name. Should be defined in bytes. (see [below for nested schema](#nestedatt--request_constraints--max_header_key_size_choice))
-- `max_header_value_size_choice` (Attributes) max_header_value_size_choice Match on the size of the header value. Should be defined in bytes. (see [below for nested schema](#nestedatt--request_constraints--max_header_value_size_choice))
-- `max_parameter_count_choice` (Attributes) max_parameter_count_choice (see [below for nested schema](#nestedatt--request_constraints--max_parameter_count_choice))
-- `max_parameter_name_size_choice` (Attributes) max_parameter_name_size_choice (see [below for nested schema](#nestedatt--request_constraints--max_parameter_name_size_choice))
-- `max_parameter_value_size_choice` (Attributes) max_parameter_value_size_choice (see [below for nested schema](#nestedatt--request_constraints--max_parameter_value_size_choice))
-- `max_query_size_choice` (Attributes) max_query_size_choice Match on the size of the query string of the URL. Should be defined in bytes. (see [below for nested schema](#nestedatt--request_constraints--max_query_size_choice))
-- `max_request_line_size_choice` (Attributes) max_request_line_size_choice Match on the size of the Request Line. Should be defined in bytes. (see [below for nested schema](#nestedatt--request_constraints--max_request_line_size_choice))
-- `max_request_size_choice` (Attributes) max_request_size_choice Match on the size of the Request (Request Line + HTTP Request Headers). It doesn't include the request body. Should be defined in bytes. (see [below for nested schema](#nestedatt--request_constraints--max_request_size_choice))
-- `max_url_size_choice` (Attributes) max_url_size_choice Match on the size of the URL. Should be defined in bytes. (see [below for nested schema](#nestedatt--request_constraints--max_url_size_choice))
+- `max_cookie_count_choice` (Attributes) max_cookie_count_choice Match on the number of cookies the request contains<br>Exactly one of `max_cookie_count_exceeds` or `max_cookie_count_none` must be specified when `max_cookie_count_choice` is configured. (see [below for nested schema](#nestedatt--request_constraints--max_cookie_count_choice))
+- `max_cookie_key_size_choice` (Attributes) max_cookie_key_size_choice Match on the size of the cookie name. Should be defined in bytes.<br>Exactly one of `max_cookie_key_size_exceeds` or `max_cookie_key_size_none` must be specified when `max_cookie_key_size_choice` is configured. (see [below for nested schema](#nestedatt--request_constraints--max_cookie_key_size_choice))
+- `max_cookie_value_size_choice` (Attributes) max_cookie_value_size_choice Match on the size of the cookie value. Should be defined in bytes.<br>Exactly one of `max_cookie_value_size_exceeds` or `max_cookie_value_size_none` must be specified when `max_cookie_value_size_choice` is configured. (see [below for nested schema](#nestedatt--request_constraints--max_cookie_value_size_choice))
+- `max_header_count_choice` (Attributes) max_header_count_choice Match on the number of headers the request contains<br>Exactly one of `max_header_count_exceeds` or `max_header_count_none` must be specified when `max_header_count_choice` is configured. (see [below for nested schema](#nestedatt--request_constraints--max_header_count_choice))
+- `max_header_key_size_choice` (Attributes) max_header_key_size_choice Match on the size of the header name. Should be defined in bytes.<br>Exactly one of `max_header_key_size_exceeds` or `max_header_key_size_none` must be specified when `max_header_key_size_choice` is configured. (see [below for nested schema](#nestedatt--request_constraints--max_header_key_size_choice))
+- `max_header_value_size_choice` (Attributes) max_header_value_size_choice Match on the size of the header value. Should be defined in bytes.<br>Exactly one of `max_header_value_size_exceeds` or `max_header_value_size_none` must be specified when `max_header_value_size_choice` is configured. (see [below for nested schema](#nestedatt--request_constraints--max_header_value_size_choice))
+- `max_parameter_count_choice` (Attributes) max_parameter_count_choice<br>Exactly one of `max_parameter_count_exceeds` or `max_parameter_count_none` must be specified when `max_parameter_count_choice` is configured. (see [below for nested schema](#nestedatt--request_constraints--max_parameter_count_choice))
+- `max_parameter_name_size_choice` (Attributes) max_parameter_name_size_choice<br>Exactly one of `max_parameter_name_size_exceeds` or `max_parameter_name_size_none` must be specified when `max_parameter_name_size_choice` is configured. (see [below for nested schema](#nestedatt--request_constraints--max_parameter_name_size_choice))
+- `max_parameter_value_size_choice` (Attributes) max_parameter_value_size_choice<br>Exactly one of `max_parameter_value_size_exceeds` or `max_parameter_value_size_none` must be specified when `max_parameter_value_size_choice` is configured. (see [below for nested schema](#nestedatt--request_constraints--max_parameter_value_size_choice))
+- `max_query_size_choice` (Attributes) max_query_size_choice Match on the size of the query string of the URL. Should be defined in bytes.<br>Exactly one of `max_query_size_exceeds` or `max_query_size_none` must be specified when `max_query_size_choice` is configured. (see [below for nested schema](#nestedatt--request_constraints--max_query_size_choice))
+- `max_request_line_size_choice` (Attributes) max_request_line_size_choice Match on the size of the Request Line. Should be defined in bytes.<br>Exactly one of `max_request_line_size_exceeds` or `max_request_line_size_none` must be specified when `max_request_line_size_choice` is configured. (see [below for nested schema](#nestedatt--request_constraints--max_request_line_size_choice))
+- `max_request_size_choice` (Attributes) max_request_size_choice Match on the size of the Request (Request Line + HTTP Request Headers). It doesn't include the request body. Should be defined in bytes.<br>Exactly one of `max_request_size_exceeds` or `max_request_size_none` must be specified when `max_request_size_choice` is configured. (see [below for nested schema](#nestedatt--request_constraints--max_request_size_choice))
+- `max_url_size_choice` (Attributes) max_url_size_choice Match on the size of the URL. Should be defined in bytes.<br>Exactly one of `max_url_size_exceeds` or `max_url_size_none` must be specified when `max_url_size_choice` is configured. (see [below for nested schema](#nestedatt--request_constraints--max_url_size_choice))
 
 <a id="nestedatt--request_constraints--max_cookie_count_choice"></a>
 ### Nested Schema for `request_constraints.max_cookie_count_choice`
 
 Optional:
 
-- `max_cookie_count_exceeds` (Number) max_cookie_count_exceeds
-- `max_cookie_count_none` (Boolean) max_cookie_count_none
+- `max_cookie_count_exceeds` (Number) max_cookie_count_exceeds<br>Conflicts with `max_cookie_count_none`.
+- `max_cookie_count_none` (Boolean) max_cookie_count_none<br>Conflicts with `max_cookie_count_exceeds`.
 
 
 <a id="nestedatt--request_constraints--max_cookie_key_size_choice"></a>
@@ -621,8 +621,8 @@ Optional:
 
 Optional:
 
-- `max_cookie_key_size_exceeds` (Number) max_cookie_key_size_exceeds
-- `max_cookie_key_size_none` (Boolean) max_cookie_key_size_none
+- `max_cookie_key_size_exceeds` (Number) max_cookie_key_size_exceeds<br>Conflicts with `max_cookie_key_size_none`.
+- `max_cookie_key_size_none` (Boolean) max_cookie_key_size_none<br>Conflicts with `max_cookie_key_size_exceeds`.
 
 
 <a id="nestedatt--request_constraints--max_cookie_value_size_choice"></a>
@@ -630,8 +630,8 @@ Optional:
 
 Optional:
 
-- `max_cookie_value_size_exceeds` (Number) max_cookie_value_size_exceeds
-- `max_cookie_value_size_none` (Boolean) max_cookie_value_size_none
+- `max_cookie_value_size_exceeds` (Number) max_cookie_value_size_exceeds<br>Conflicts with `max_cookie_value_size_none`.
+- `max_cookie_value_size_none` (Boolean) max_cookie_value_size_none<br>Conflicts with `max_cookie_value_size_exceeds`.
 
 
 <a id="nestedatt--request_constraints--max_header_count_choice"></a>
@@ -639,8 +639,8 @@ Optional:
 
 Optional:
 
-- `max_header_count_exceeds` (Number) max_header_count_exceeds
-- `max_header_count_none` (Boolean) max_header_count_none
+- `max_header_count_exceeds` (Number) max_header_count_exceeds<br>Conflicts with `max_header_count_none`.
+- `max_header_count_none` (Boolean) max_header_count_none<br>Conflicts with `max_header_count_exceeds`.
 
 
 <a id="nestedatt--request_constraints--max_header_key_size_choice"></a>
@@ -648,8 +648,8 @@ Optional:
 
 Optional:
 
-- `max_header_key_size_exceeds` (Number) max_header_key_size_exceeds
-- `max_header_key_size_none` (Boolean) max_header_key_size_none
+- `max_header_key_size_exceeds` (Number) max_header_key_size_exceeds<br>Conflicts with `max_header_key_size_none`.
+- `max_header_key_size_none` (Boolean) max_header_key_size_none<br>Conflicts with `max_header_key_size_exceeds`.
 
 
 <a id="nestedatt--request_constraints--max_header_value_size_choice"></a>
@@ -657,8 +657,8 @@ Optional:
 
 Optional:
 
-- `max_header_value_size_exceeds` (Number) max_header_value_size_exceeds
-- `max_header_value_size_none` (Boolean) max_header_value_size_none
+- `max_header_value_size_exceeds` (Number) max_header_value_size_exceeds<br>Conflicts with `max_header_value_size_none`.
+- `max_header_value_size_none` (Boolean) max_header_value_size_none<br>Conflicts with `max_header_value_size_exceeds`.
 
 
 <a id="nestedatt--request_constraints--max_parameter_count_choice"></a>
@@ -666,8 +666,8 @@ Optional:
 
 Optional:
 
-- `max_parameter_count_exceeds` (Number) max_parameter_count_exceeds
-- `max_parameter_count_none` (Boolean) max_parameter_count_none
+- `max_parameter_count_exceeds` (Number) max_parameter_count_exceeds<br>Conflicts with `max_parameter_count_none`.
+- `max_parameter_count_none` (Boolean) max_parameter_count_none<br>Conflicts with `max_parameter_count_exceeds`.
 
 
 <a id="nestedatt--request_constraints--max_parameter_name_size_choice"></a>
@@ -675,8 +675,8 @@ Optional:
 
 Optional:
 
-- `max_parameter_name_size_exceeds` (Number) max_parameter_name_size_exceeds
-- `max_parameter_name_size_none` (Boolean) max_parameter_name_size_none
+- `max_parameter_name_size_exceeds` (Number) max_parameter_name_size_exceeds<br>Conflicts with `max_parameter_name_size_none`.
+- `max_parameter_name_size_none` (Boolean) max_parameter_name_size_none<br>Conflicts with `max_parameter_name_size_exceeds`.
 
 
 <a id="nestedatt--request_constraints--max_parameter_value_size_choice"></a>
@@ -684,8 +684,8 @@ Optional:
 
 Optional:
 
-- `max_parameter_value_size_exceeds` (Number) max_parameter_value_size_exceeds
-- `max_parameter_value_size_none` (Boolean) max_parameter_value_size_none
+- `max_parameter_value_size_exceeds` (Number) max_parameter_value_size_exceeds<br>Conflicts with `max_parameter_value_size_none`.
+- `max_parameter_value_size_none` (Boolean) max_parameter_value_size_none<br>Conflicts with `max_parameter_value_size_exceeds`.
 
 
 <a id="nestedatt--request_constraints--max_query_size_choice"></a>
@@ -693,8 +693,8 @@ Optional:
 
 Optional:
 
-- `max_query_size_exceeds` (Number) max_query_size_exceeds
-- `max_query_size_none` (Boolean) max_query_size_none
+- `max_query_size_exceeds` (Number) max_query_size_exceeds<br>Conflicts with `max_query_size_none`.
+- `max_query_size_none` (Boolean) max_query_size_none<br>Conflicts with `max_query_size_exceeds`.
 
 
 <a id="nestedatt--request_constraints--max_request_line_size_choice"></a>
@@ -702,8 +702,8 @@ Optional:
 
 Optional:
 
-- `max_request_line_size_exceeds` (Number) max_query_size_exceeds
-- `max_request_line_size_none` (Boolean) max_request_line_size_none
+- `max_request_line_size_exceeds` (Number) max_query_size_exceeds<br>Conflicts with `max_request_line_size_none`.
+- `max_request_line_size_none` (Boolean) max_request_line_size_none<br>Conflicts with `max_request_line_size_exceeds`.
 
 
 <a id="nestedatt--request_constraints--max_request_size_choice"></a>
@@ -711,8 +711,8 @@ Optional:
 
 Optional:
 
-- `max_request_size_exceeds` (Number) max_request_size_exceeds
-- `max_request_size_none` (Boolean) max_request_size_none
+- `max_request_size_exceeds` (Number) max_request_size_exceeds<br>Conflicts with `max_request_size_none`.
+- `max_request_size_none` (Boolean) max_request_size_none<br>Conflicts with `max_request_size_exceeds`.
 
 
 <a id="nestedatt--request_constraints--max_url_size_choice"></a>
@@ -720,8 +720,8 @@ Optional:
 
 Optional:
 
-- `max_url_size_exceeds` (Number) max_url_size_exceeds
-- `max_url_size_none` (Boolean) max_url_size_none
+- `max_url_size_exceeds` (Number) max_url_size_exceeds<br>Conflicts with `max_url_size_none`.
+- `max_url_size_none` (Boolean) max_url_size_none<br>Conflicts with `max_url_size_exceeds`.
 
 
 
@@ -730,15 +730,15 @@ Optional:
 
 Optional:
 
-- `src_segment_choice` (Attributes) Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match (see [below for nested schema](#nestedatt--segment_policy--src_segment_choice))
+- `src_segment_choice` (Attributes) Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match<br>Exactly one of `src_any` or `src_segments` must be specified when `src_segment_choice` is configured. (see [below for nested schema](#nestedatt--segment_policy--src_segment_choice))
 
 <a id="nestedatt--segment_policy--src_segment_choice"></a>
 ### Nested Schema for `segment_policy.src_segment_choice`
 
 Optional:
 
-- `src_any` (Boolean) Any segment Traffic is not matched against any segment
-- `src_segments` (Attributes) List of segments Source traffic is matched against selected segments (see [below for nested schema](#nestedatt--segment_policy--src_segment_choice--src_segments))
+- `src_any` (Boolean) Any segment Traffic is not matched against any segment<br>Conflicts with `src_segments`.
+- `src_segments` (Attributes) List of segments Source traffic is matched against selected segments<br>Conflicts with `src_any`. (see [below for nested schema](#nestedatt--segment_policy--src_segment_choice--src_segments))
 
 <a id="nestedatt--segment_policy--src_segment_choice--src_segments"></a>
 ### Nested Schema for `segment_policy.src_segment_choice.src_segments`
@@ -779,8 +779,8 @@ Optional:
 
 Optional:
 
-- `ja4_tls_fingerprint` (Attributes) ja4 tls fingerprint An extended version of JA3 that includes additional fields for more comprehensive fingerprinting of SSL/TLS clients and potentially has a different structure and length. (see [below for nested schema](#nestedatt--tls_fingerprint_choice--ja4_tls_fingerprint))
-- `tls_fingerprint_matcher` (Attributes) TLS JA3 fingerprint matcher A method for uniquely identifying SSL/TLS clients by creating a 32-character MD5 hash based on the parameters of the Client Hello packet during the handshake. (see [below for nested schema](#nestedatt--tls_fingerprint_choice--tls_fingerprint_matcher))
+- `ja4_tls_fingerprint` (Attributes) ja4 tls fingerprint An extended version of JA3 that includes additional fields for more comprehensive fingerprinting of SSL/TLS clients and potentially has a different structure and length.<br>Conflicts with `tls_fingerprint_matcher`. (see [below for nested schema](#nestedatt--tls_fingerprint_choice--ja4_tls_fingerprint))
+- `tls_fingerprint_matcher` (Attributes) TLS JA3 fingerprint matcher A method for uniquely identifying SSL/TLS clients by creating a 32-character MD5 hash based on the parameters of the Client Hello packet during the handshake.<br>Conflicts with `ja4_tls_fingerprint`. (see [below for nested schema](#nestedatt--tls_fingerprint_choice--tls_fingerprint_matcher))
 
 <a id="nestedatt--tls_fingerprint_choice--ja4_tls_fingerprint"></a>
 ### Nested Schema for `tls_fingerprint_choice.ja4_tls_fingerprint`
@@ -819,6 +819,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_service_policy_rule.example"
+	to = f5xc_service_policy_rule.example
 }
 ```

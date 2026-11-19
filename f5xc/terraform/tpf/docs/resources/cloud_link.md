@@ -101,8 +101,7 @@ resource "f5xc_cloud_link" "example" {
 
 ### Required
 
-- `cloud_provider_choice` (Attributes) Type Select the cloud provider type where CloudLink needs to be deployed (see [below for nested schema](#nestedatt--cloud_provider_choice))
-- `enable_connection_to_re_choice` (Attributes) Private Connectivity via Regional Edge (RE) Private Connectivity via Regional Edge (RE) (see [below for nested schema](#nestedatt--enable_connection_to_re_choice))
+- `cloud_provider_choice` (Attributes) Type Select the cloud provider type where CloudLink needs to be deployed<br>Exactly one of `aws` or `gcp` must be specified. (see [below for nested schema](#nestedatt--cloud_provider_choice))
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
 
@@ -110,6 +109,7 @@ resource "f5xc_cloud_link" "example" {
 
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `description` (String) description Human readable description for the object
+- `enable_connection_to_re_choice` (Attributes) Private Connectivity via Regional Edge (RE) Private Connectivity via Regional Edge (RE)<br>Exactly one of `disabled` or `enabled` must be specified when `enable_connection_to_re_choice` is configured. (see [below for nested schema](#nestedatt--enable_connection_to_re_choice))
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -125,8 +125,8 @@ resource "f5xc_cloud_link" "example" {
 
 Optional:
 
-- `aws` (Attributes) Amazon Web Services(AWS) CloudLink for AWS Cloud (see [below for nested schema](#nestedatt--cloud_provider_choice--aws))
-- `gcp` (Attributes) Google Cloud Platform CloudLink for Google Cloud Platform (see [below for nested schema](#nestedatt--cloud_provider_choice--gcp))
+- `aws` (Attributes) Amazon Web Services(AWS) CloudLink for AWS Cloud<br>Conflicts with `gcp`. (see [below for nested schema](#nestedatt--cloud_provider_choice--aws))
+- `gcp` (Attributes) Google Cloud Platform CloudLink for Google Cloud Platform<br>Conflicts with `aws`. (see [below for nested schema](#nestedatt--cloud_provider_choice--gcp))
 
 <a id="nestedatt--cloud_provider_choice--aws"></a>
 ### Nested Schema for `cloud_provider_choice.aws`
@@ -134,8 +134,8 @@ Optional:
 Required:
 
 - `aws_cred` (Attributes) Account Credential Reference to AWS cloud account credential object used to deploy CloudLink specific object (see [below for nested schema](#nestedatt--cloud_provider_choice--aws--aws_cred))
-- `cloud_link_type_choice` (Attributes) CloudLink Type of CloudLink which needs to be created (see [below for nested schema](#nestedatt--cloud_provider_choice--aws--cloud_link_type_choice))
-- `direct_connect_gateway_asn_choice` (Attributes) Direct Connect Gateway ASN Option to provide ASN for Direct Connect Gateway. AWS Direct Connect Gateway will be created automatically by F5XC. (see [below for nested schema](#nestedatt--cloud_provider_choice--aws--direct_connect_gateway_asn_choice))
+- `cloud_link_type_choice` (Attributes) CloudLink Type of CloudLink which needs to be created<br>`byoc` must be specified. (see [below for nested schema](#nestedatt--cloud_provider_choice--aws--cloud_link_type_choice))
+- `direct_connect_gateway_asn_choice` (Attributes) Direct Connect Gateway ASN Option to provide ASN for Direct Connect Gateway. AWS Direct Connect Gateway will be created automatically by F5XC.<br>`custom_asn` must be specified. (see [below for nested schema](#nestedatt--cloud_provider_choice--aws--direct_connect_gateway_asn_choice))
 
 <a id="nestedatt--cloud_provider_choice--aws--aws_cred"></a>
 ### Nested Schema for `cloud_provider_choice.aws.aws_cred`
@@ -172,7 +172,7 @@ Required:
 - `auth_key` (Attributes) BGP Authorization Key The authentication key for BGP configuration. This string has a minimum length of 6 characters and and a maximum length of 80 characters. (see [below for nested schema](#nestedatt--cloud_provider_choice--aws--cloud_link_type_choice--byoc--connections--auth_key))
 - `bgp_asn` (Number) BGP ASN The Border Gateway Protocol (BGP) Autonomous System Number (ASN) of your on-premises router for the new virtual interface to be configured on AWS.
 - `connection_id` (String) Direct Connect Connection Id Id of the existing AWS Direct Connect Connection<br>**Validation:** `Length LengthAtMost(64)`
-- `ip_type_choice` (Attributes) Address family Configure BGP IP peering for endpoints (see [below for nested schema](#nestedatt--cloud_provider_choice--aws--cloud_link_type_choice--byoc--connections--ip_type_choice))
+- `ip_type_choice` (Attributes) Address family Configure BGP IP peering for endpoints<br>`ipv4` must be specified. (see [below for nested schema](#nestedatt--cloud_provider_choice--aws--cloud_link_type_choice--byoc--connections--ip_type_choice))
 - `metadata` (Attributes) metadata Specify attributes for the connection including name and description. (see [below for nested schema](#nestedatt--cloud_provider_choice--aws--cloud_link_type_choice--byoc--connections--metadata))
 - `region` (String) Region Region where the connection is setup<br>**Allowed Values (choose one):** `['ap-northeast-1', 'ap-southeast-1', 'eu-central-1', 'eu-west-1', 'eu-west-3', 'sa-east-1', 'us-east-1', 'us-east-2', 'us-west-2', 'ca-central-1', 'af-south-1', 'ap-east-1', 'ap-south-1', 'ap-northeast-2', 'ap-southeast-2', 'eu-south-1', 'eu-north-1', 'eu-west-2', 'me-south-1', 'us-west-1', 'ap-southeast-3']`
 - `vlan` (Number) Virtual Local Area Network (VLAN) Virtual Local Area Network number for the new virtual interface to be configured on the AWS. This tag is required for any traffic traversing the AWS Direct Connect connection
@@ -187,16 +187,16 @@ Optional:
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--cloud_provider_choice--aws--cloud_link_type_choice--byoc--connections--auth_key--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--cloud_provider_choice--aws--cloud_link_type_choice--byoc--connections--auth_key--secret_info_choice))
 
 <a id="nestedatt--cloud_provider_choice--aws--cloud_link_type_choice--byoc--connections--auth_key--secret_info_choice"></a>
 ### Nested Schema for `cloud_provider_choice.aws.cloud_link_type_choice.byoc.connections.auth_key.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--cloud_provider_choice--aws--cloud_link_type_choice--byoc--connections--auth_key--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--cloud_provider_choice--aws--cloud_link_type_choice--byoc--connections--auth_key--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--cloud_provider_choice--aws--cloud_link_type_choice--byoc--connections--auth_key--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--cloud_provider_choice--aws--cloud_link_type_choice--byoc--connections--auth_key--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--cloud_provider_choice--aws--cloud_link_type_choice--byoc--connections--auth_key--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `cloud_provider_choice.aws.cloud_link_type_choice.byoc.connections.auth_key.secret_info_choice.blindfold_secret_info`
@@ -271,7 +271,7 @@ Optional:
 
 Required:
 
-- `cloud_link_type_choice` (Attributes) CloudLink Type of CloudLink which needs to be created (see [below for nested schema](#nestedatt--cloud_provider_choice--gcp--cloud_link_type_choice))
+- `cloud_link_type_choice` (Attributes) CloudLink Type of CloudLink which needs to be created<br>`byoc` must be specified. (see [below for nested schema](#nestedatt--cloud_provider_choice--gcp--cloud_link_type_choice))
 - `gcp_cred` (Attributes) Account Credential Reference to GCP cloud account credential object used to deploy CloudLink specific object (see [below for nested schema](#nestedatt--cloud_provider_choice--gcp--gcp_cred))
 
 <a id="nestedatt--cloud_provider_choice--gcp--cloud_link_type_choice"></a>
@@ -295,8 +295,11 @@ Required:
 
 - `interconnect_attachment_name` (String) Interconnect Attachment Name Name of already-existing GCP Cloud Interconnect Attachment<br>**Validation:** `Length LengthBetween(1, 63)`
 - `metadata` (Attributes) metadata Specify attributes for the connection including name and description. (see [below for nested schema](#nestedatt--cloud_provider_choice--gcp--cloud_link_type_choice--byoc--connections--metadata))
-- `project_choice` (Attributes) Project GCP Project in which the GCP Interconnect Attachment is configured (see [below for nested schema](#nestedatt--cloud_provider_choice--gcp--cloud_link_type_choice--byoc--connections--project_choice))
 - `region` (String) Region GCP Region in which the GCP Cloud Interconnect attachment is configured<br>**Allowed Values (choose one):** `['asia-east1', 'asia-east2', 'asia-northeast1', 'asia-northeast2', 'asia-northeast3', 'asia-southeast1', 'asia-southeast2', 'europe-central2', 'europe-north1', 'europe-west1', 'europe-west2', 'europe-west3', 'europe-west4', 'europe-west6', 'europe-west8', 'europe-west9', 'europe-west10', 'europe-west12', 'europe-southwest1', 'me-west1', 'me-central1', 'me-central2', 'northamerica-northeast1', 'northamerica-northeast2', 'us-central1', 'us-east1', 'us-east4', 'us-east5', 'us-south1', 'us-west1', 'us-west2', 'us-west3', 'us-west4', 'southamerica-east1', 'southamerica-west1', 'australia-southeast1', 'australia-southeast2', 'asia-south1', 'asia-south2']`
+
+Optional:
+
+- `project_choice` (Attributes) Project GCP Project in which the GCP Interconnect Attachment is configured<br>Exactly one of `project` or `same_as_credential` must be specified when `project_choice` is configured. (see [below for nested schema](#nestedatt--cloud_provider_choice--gcp--cloud_link_type_choice--byoc--connections--project_choice))
 
 <a id="nestedatt--cloud_provider_choice--gcp--cloud_link_type_choice--byoc--connections--metadata"></a>
 ### Nested Schema for `cloud_provider_choice.gcp.cloud_link_type_choice.byoc.connections.metadata`
@@ -315,8 +318,8 @@ Optional:
 
 Optional:
 
-- `project` (String) Project ID Specify a GCP Project for the interconnect attachment<br>**Validation:** `Length LengthBetween(4, 30)`
-- `same_as_credential` (Boolean) Same As Credential GCP Project for the interconnect is the same as the project specified in the credential
+- `project` (String) Project ID Specify a GCP Project for the interconnect attachment<br>**Validation:** `Length LengthBetween(4, 30)`<br>Conflicts with `same_as_credential`.
+- `same_as_credential` (Boolean) Same As Credential GCP Project for the interconnect is the same as the project specified in the credential<br>Conflicts with `project`.
 
 
 
@@ -342,8 +345,8 @@ Read-Only:
 
 Optional:
 
-- `disabled` (Boolean) Disabled Connection to RE CloudLink connection to RE Site is disabled
-- `enabled` (Attributes) Enable Connection to RE CloudLink connection to RE Site is enabled (see [below for nested schema](#nestedatt--enable_connection_to_re_choice--enabled))
+- `disabled` (Boolean) Disabled Connection to RE CloudLink connection to RE Site is disabled<br>Conflicts with `enabled`.
+- `enabled` (Attributes) Enable Connection to RE CloudLink connection to RE Site is enabled<br>Conflicts with `disabled`. (see [below for nested schema](#nestedatt--enable_connection_to_re_choice--enabled))
 
 <a id="nestedatt--enable_connection_to_re_choice--enabled"></a>
 ### Nested Schema for `enable_connection_to_re_choice.enabled`
@@ -384,6 +387,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_cloud_link.example"
+	to = f5xc_cloud_link.example
 }
 ```

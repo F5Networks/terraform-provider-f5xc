@@ -84,6 +84,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<key>"
-	to = "f5xc_known_label.example"
+	to = f5xc_known_label.example
 }
 ```

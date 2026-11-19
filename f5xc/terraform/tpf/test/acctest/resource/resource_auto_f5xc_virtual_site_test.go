@@ -98,6 +98,33 @@ func TestAccResourceAutoF5XCVirtualSite_full(t *testing.T) {
 		})
 }
 
+func TestAccResourceAutoF5XCVirtualSite_withFailIfReferred(t *testing.T) {
+	t.Parallel()
+
+	namespace := acctest.DefaultNamespace()
+	name := "example-virtual-site-" + acctest.RandString(t, 8)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckVirtualSiteDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAutoF5XCVirtualSiteConfig_withFailIfReferred(name, namespace, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("f5xc_virtual_site.example", "fail_if_referred", "true"),
+				),
+			},
+			{
+				Config: testAccResourceAutoF5XCVirtualSiteConfig_withFailIfReferred(name, namespace, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("f5xc_virtual_site.example", "fail_if_referred", "false"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckVirtualSiteDestroyProducer(t *testing.T) func(*terraform.State) error {
 	return acctest.CheckDestroyProducerReplayAware(t, "f5xc_virtual_site", virtualSiteSchema.ObjectType, "virtual site")
 }
@@ -185,4 +212,20 @@ resource "f5xc_virtual_site" "example" {
   site_type = [%q]
 }
 `, name, namespace, owner, siteType)
+}
+
+func testAccResourceAutoF5XCVirtualSiteConfig_withFailIfReferred(name, namespace string, failIfReferred bool) string {
+	return fmt.Sprintf(`
+resource "f5xc_virtual_site" "example" {
+  name             = %q
+  namespace        = %q
+  fail_if_referred = %t
+
+  site_selector = {
+    expressions = ["environment in (example)"]
+  }
+
+  site_type = ["REGIONAL_EDGE"]
+}
+`, name, namespace, failIfReferred)
 }

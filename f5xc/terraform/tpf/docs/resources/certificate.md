@@ -62,9 +62,9 @@ resource "f5xc_certificate" "example" {
 - `certificate_url` (String) certificate_url Certificate. Certificate or certificate chain in PEM format including the PEM headers. Required unless this is an Automatic type certificate (certificate URL will be added once provisioned).<br>**Default:** ``
 - `description` (String) description Human readable description for the object
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
-- `ocsp_stapling_choice` (Attributes) OCSP Response choice OCSP Stapling choice (see [below for nested schema](#nestedatt--ocsp_stapling_choice))
+- `ocsp_stapling_choice` (Attributes) OCSP Response choice OCSP Stapling choice<br>Exactly one of `custom_hash_algorithms`, `disable_ocsp_stapling`, or `use_system_defaults` must be specified when `ocsp_stapling_choice` is configured. (see [below for nested schema](#nestedatt--ocsp_stapling_choice))
 - `private_key` (Attributes) private_key Private Key data in unencrypted PEM format including the PEM headers. The data may be optionally secured using BlindFold. Key has to match the accompanying certificate. Required unless this is an Automatic type certificate (private key will be generated). (see [below for nested schema](#nestedatt--private_key))
-- `provider_choice` (Attributes) Provider How this certificate is provisioned and managed. (see [below for nested schema](#nestedatt--provider_choice))
+- `provider_choice` (Attributes) Provider How this certificate is provisioned and managed.<br>Exactly one of `auto_cert` or `manual` must be specified when `provider_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
@@ -92,9 +92,9 @@ Read-Only:
 
 Optional:
 
-- `custom_hash_algorithms` (Attributes) Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. (see [below for nested schema](#nestedatt--ocsp_stapling_choice--custom_hash_algorithms))
-- `disable_ocsp_stapling` (Boolean) Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.
-- `use_system_defaults` (Boolean) Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.
+- `custom_hash_algorithms` (Attributes) Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.<br>Conflicts with `disable_ocsp_stapling` and `use_system_defaults`. (see [below for nested schema](#nestedatt--ocsp_stapling_choice--custom_hash_algorithms))
+- `disable_ocsp_stapling` (Boolean) Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.<br>Conflicts with `custom_hash_algorithms` and `use_system_defaults`.
+- `use_system_defaults` (Boolean) Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.<br>Conflicts with `custom_hash_algorithms` and `disable_ocsp_stapling`.
 
 <a id="nestedatt--ocsp_stapling_choice--custom_hash_algorithms"></a>
 ### Nested Schema for `ocsp_stapling_choice.custom_hash_algorithms`
@@ -110,16 +110,16 @@ Required:
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--private_key--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--private_key--secret_info_choice))
 
 <a id="nestedatt--private_key--secret_info_choice"></a>
 ### Nested Schema for `private_key.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--private_key--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--private_key--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--private_key--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--private_key--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--private_key--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `private_key.secret_info_choice.blindfold_secret_info`
@@ -153,8 +153,8 @@ Optional:
 
 Optional:
 
-- `auto_cert` (Attributes) Automatic Automated certificate issuance and renewal using the ACME protocol. (see [below for nested schema](#nestedatt--provider_choice--auto_cert))
-- `manual` (Boolean) Custom Certificate PEM and private key are uploaded by the user.
+- `auto_cert` (Attributes) Automatic Automated certificate issuance and renewal using the ACME protocol.<br>Conflicts with `manual`. (see [below for nested schema](#nestedatt--provider_choice--auto_cert))
+- `manual` (Boolean) Custom Certificate PEM and private key are uploaded by the user.<br>Conflicts with `auto_cert`.
 
 <a id="nestedatt--provider_choice--auto_cert"></a>
 ### Nested Schema for `provider_choice.auto_cert`
@@ -165,8 +165,8 @@ Required:
 
 Optional:
 
-- `challenge_choice` (Attributes) Challenge Method Selected ACME challenge method for domain validation. No challenge is performed for a domain that the certificate authority reports as already validated. (see [below for nested schema](#nestedatt--provider_choice--auto_cert--challenge_choice))
-- `issuer_choice` (Attributes) Select Issuer Select the ACME issuer used to issue and renew this certificate. (see [below for nested schema](#nestedatt--provider_choice--auto_cert--issuer_choice))
+- `challenge_choice` (Attributes) Challenge Method Selected ACME challenge method for domain validation. No challenge is performed for a domain that the certificate authority reports as already validated.<br>Exactly one of `dns_01` or `pre_validated` must be specified when `challenge_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--auto_cert--challenge_choice))
+- `issuer_choice` (Attributes) Select Issuer Select the ACME issuer used to issue and renew this certificate.<br>Exactly one of `custom_issuer` or `default` must be specified when `issuer_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--auto_cert--issuer_choice))
 - `key_algorithm` (List of String) Key Algorithm Preferred key algorithm for certificate key pair generation.<br>**Allowed Values (choose one):** `['ECDSA_P256', 'ECDSA_P384', 'RSA_2048', 'RSA_4096']`<br>**Default:** `RSA_2048`
 - `renew_before_days` (Number) Renew Before Days Days before certificate expiration to trigger renewal. Recommended: two-thirds of the certificate lifespan. If this value is greater than or nearly equal to the certificate's actual lifetime, such that renewal would occur less than 24 hours after its validity begins, renewal will default to two-thirds through its actual lifetime.<br>**Default:** `15`
 
@@ -175,23 +175,23 @@ Optional:
 
 Optional:
 
-- `dns_01` (Attributes) DNS-01 Challenge DNS-01 challenge validation is performed when required to prove domain control. A TXT record is created at _acme-challenge.<domain>. This method works for all domain types. Domains reported as already validated are skipped. (see [below for nested schema](#nestedatt--provider_choice--auto_cert--challenge_choice--dns_01))
-- `pre_validated` (Boolean) Pre-Validated Domains Domains are validated directly with the certificate authority. No challenge method is configured. All domains must remain validated for initial issuance and renewal. If any domain requires validation, issuance cannot continue.
+- `dns_01` (Attributes) DNS-01 Challenge DNS-01 challenge validation is performed when required to prove domain control. A TXT record is created at _acme-challenge.<domain>. This method works for all domain types. Domains reported as already validated are skipped.<br>Conflicts with `pre_validated`. (see [below for nested schema](#nestedatt--provider_choice--auto_cert--challenge_choice--dns_01))
+- `pre_validated` (Boolean) Pre-Validated Domains Domains are validated directly with the certificate authority. No challenge method is configured. All domains must remain validated for initial issuance and renewal. If any domain requires validation, issuance cannot continue.<br>Conflicts with `dns_01`.
 
 <a id="nestedatt--provider_choice--auto_cert--challenge_choice--dns_01"></a>
 ### Nested Schema for `provider_choice.auto_cert.challenge_choice.dns_01`
 
 Required:
 
-- `dns_provider_choice` (Attributes) DNS Provider Choice Method used to manage DNS-01 challenge TXT records. (see [below for nested schema](#nestedatt--provider_choice--auto_cert--challenge_choice--dns_01--dns_provider_choice))
+- `dns_provider_choice` (Attributes) DNS Provider Choice Method used to manage DNS-01 challenge TXT records.<br>Exactly one of `cname_delegation` or `delegated` must be specified. (see [below for nested schema](#nestedatt--provider_choice--auto_cert--challenge_choice--dns_01--dns_provider_choice))
 
 <a id="nestedatt--provider_choice--auto_cert--challenge_choice--dns_01--dns_provider_choice"></a>
 ### Nested Schema for `provider_choice.auto_cert.challenge_choice.dns_01.dns_provider_choice`
 
 Optional:
 
-- `cname_delegation` (Boolean) Non-Managed DNS (CNAME Delegation) DNS-01 validation for domains not managed by F5 Distributed Cloud is performed through CNAME delegation. When validation is required, _acme-challenge.<domain> must point to the target provided in the certificate status. Challenge TXT records are created automatically at the CNAME target.
-- `delegated` (Boolean) Managed DNS F5 Distributed Cloud managed DNS zones provide DNS-01 challenge validation. The system automatically resolves which dns_zone(s) cover domains that require validation. Each zone must have 'Allow Application Managed Records' enabled.
+- `cname_delegation` (Boolean) Non-Managed DNS (CNAME Delegation) DNS-01 validation for domains not managed by F5 Distributed Cloud is performed through CNAME delegation. When validation is required, _acme-challenge.<domain> must point to the target provided in the certificate status. Challenge TXT records are created automatically at the CNAME target.<br>Conflicts with `delegated`.
+- `delegated` (Boolean) Managed DNS F5 Distributed Cloud managed DNS zones provide DNS-01 challenge validation. The system automatically resolves which dns_zone(s) cover domains that require validation. Each zone must have 'Allow Application Managed Records' enabled.<br>Conflicts with `cname_delegation`.
 
 
 
@@ -201,8 +201,8 @@ Optional:
 
 Optional:
 
-- `custom_issuer` (Attributes) Custom Issuer Use a custom ACME issuer. (see [below for nested schema](#nestedatt--provider_choice--auto_cert--issuer_choice--custom_issuer))
-- `default` (Boolean) Default Use the built-in Let's Encrypt issuer managed by F5 Distributed Cloud.
+- `custom_issuer` (Attributes) Custom Issuer Use a custom ACME issuer.<br>Conflicts with `default`. (see [below for nested schema](#nestedatt--provider_choice--auto_cert--issuer_choice--custom_issuer))
+- `default` (Boolean) Default Use the built-in Let's Encrypt issuer managed by F5 Distributed Cloud.<br>Conflicts with `custom_issuer`.
 
 <a id="nestedatt--provider_choice--auto_cert--issuer_choice--custom_issuer"></a>
 ### Nested Schema for `provider_choice.auto_cert.issuer_choice.custom_issuer`
@@ -291,6 +291,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_certificate.example"
+	to = f5xc_certificate.example
 }
 ```

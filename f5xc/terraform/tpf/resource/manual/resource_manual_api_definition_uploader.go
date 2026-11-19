@@ -8,15 +8,19 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
@@ -25,6 +29,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
@@ -53,6 +58,7 @@ type ResourceF5XCApiDefinitionUploaderModel struct {
 	Status             types.String                                   `tfsdk:"status"`
 	Metadata           ResourceF5XCApiDefinitionUploaderMetadataModel `tfsdk:"metadata"`
 	StringValue        types.String                                   `tfsdk:"string_value"`
+	BytesValue         types.String                                   `tfsdk:"bytes_value"`
 	ContentHash        types.String                                   `tfsdk:"content_hash"`
 	RetainVersions     types.Int64                                    `tfsdk:"retain_versions"`
 	PreviousVersionUrl types.String                                   `tfsdk:"previous_version_url"`
@@ -75,15 +81,42 @@ type apiDefinitionUploaderResponse struct {
 	Status      string                                `json:"status"`
 	Metadata    apiDefinitionUploaderMetadataResponse `json:"metadata"`
 	StringValue string                                `json:"string_value"`
+	BytesValue  string                                `json:"bytes_value"`
 }
 
 // storedObjectVersionItem represents an item in the ListObjects API response.
 type storedObjectVersionItem struct {
-	Version           string `json:"version"`
-	Url               string `json:"url"`
-	Description       string `json:"description"`
-	CreationTimestamp string `json:"creationTimestamp"`
-	LatestVersion     bool   `json:"latestVersion"`
+	Version                string `json:"version"`
+	Url                    string `json:"url"`
+	Description            string `json:"description"`
+	CreationTimestamp      string `json:"creationTimestamp"`
+	CreationTimestampSnake string `json:"creation_timestamp"`
+	LatestVersion          bool   `json:"latestVersion"`
+	LatestVersionSnake     bool   `json:"latest_version"`
+}
+
+// effectiveCreationTimestamp returns the non-empty creation timestamp across camelCase and snake_case JSON fields.
+//
+// Why: F5 XC Object Store endpoints serialize creation timestamps as "creation_timestamp" (snake_case)
+// on list responses, whereas other responses or mocks may use "creationTimestamp" (camelCase).
+// Supporting both ensures reliable chronological sorting during version retention pruning.
+//
+// How: Checks CreationTimestamp first and falls back to CreationTimestampSnake when empty.
+//
+// Parameters:
+//   - None (receiver method on storedObjectVersionItem)
+//
+// Returns:
+//   - string: the timestamp string if present in either field, otherwise empty string
+//
+// Example:
+//
+//	ts := item.effectiveCreationTimestamp()
+func (v storedObjectVersionItem) effectiveCreationTimestamp() string {
+	if v.CreationTimestamp != "" {
+		return v.CreationTimestamp
+	}
+	return v.CreationTimestampSnake
 }
 
 // storedObjectListItem represents an entry in the ListObjects response list.
@@ -97,18 +130,54 @@ type storedObjectListResponse struct {
 	Items []storedObjectListItem `json:"items"`
 }
 
+// maxStoredObjectSpecBytes defines the maximum OpenAPI specification payload size (5 MiB)
+// enforced by F5 XC stored_object schema constraints.
+const maxStoredObjectSpecBytes = 5242880
+
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &ResourceF5XCApiDefinitionUploader{}
 var _ resource.ResourceWithConfigure = &ResourceF5XCApiDefinitionUploader{}
 var _ resource.ResourceWithModifyPlan = &ResourceF5XCApiDefinitionUploader{}
 var _ resource.ResourceWithValidateConfig = &ResourceF5XCApiDefinitionUploader{}
 
+// resolvedSpecContent holds the normalized API specification payload and derived
+// metadata resolved from one of the write-only content attributes.
+type resolvedSpecContent struct {
+	attrName     string
+	isBytes      bool
+	stringValue  string
+	bytesValue   string
+	computedHash string
+	present      bool
+}
+
+// computeSHA256Bytes calculates the lowercase hex-encoded SHA-256 digest of a byte slice.
+//
+// Why: Provides a uniform digest calculation for both plain-text string_value specs and
+// Base64-decoded bytes_value specs so identical specifications yield identical digests.
+//
+// How: Computes the sha256 checksum of content and formats it as a lowercase hex string.
+//
+// Parameters:
+//   - content: raw byte slice to hash.
+//
+// Returns:
+//   - string: lowercase hex-encoded SHA-256 digest.
+//
+// Example:
+//
+//	h := computeSHA256Bytes([]byte(`{"openapi":"3.0.0"}`))
+func computeSHA256Bytes(content []byte) string {
+	sum := sha256.Sum256(content)
+	return hex.EncodeToString(sum[:])
+}
+
 // computeSHA256 calculates the lowercase hex-encoded SHA-256 digest of an input string.
 //
 // Why: Used to track content changes and prevent unnecessary version churn when
 // uploading OpenAPI specifications to the F5 XC Object Store.
 //
-// How: Computes the sha256 checksum of the input byte slice and formats it as a hex string.
+// How: Delegates to computeSHA256Bytes on the UTF-8 byte representation of content.
 //
 // Parameters:
 //   - content: string content to hash.
@@ -120,33 +189,325 @@ var _ resource.ResourceWithValidateConfig = &ResourceF5XCApiDefinitionUploader{}
 //
 //	h := computeSHA256("{\"openapi\":\"3.0.0\"}")
 func computeSHA256(content string) string {
-	sum := sha256.Sum256([]byte(content))
-	return hex.EncodeToString(sum[:])
+	return computeSHA256Bytes([]byte(content))
 }
 
-// resolveAbsoluteURL ensures that a URL returned from the F5 XC API has an absolute http/https scheme
-// and host, prefixing the client base URL if the returned URL is a relative path.
+// decodeBase64Spec decodes a standard Base64-encoded OpenAPI specification string.
 //
-// Why: The F5 XC Object Store API can return either full URLs or relative paths in metadata.url.
-// To reliably execute HTTP requests, the URL must be absolute.
+// Why: The write-only bytes_value attribute must be validated for syntactic correctness and
+// decoded byte length (<= 5 MiB) as well as hashed over the raw specification bytes.
 //
-// How: Checks if targetURL has an http:// or https:// prefix. If not, combines baseURL with targetURL.
+// How: Decodes encoded using base64.StdEncoding. Returns an error without echoing large input strings.
 //
 // Parameters:
-//   - baseURL: the configured REST client base URL (e.g. "https://tenant.console.ves.volterra.io/api")
-//   - targetURL: the URL to check and possibly prefix
+//   - encoded: Base64-encoded specification string.
 //
 // Returns:
-//   - string: the resolved absolute URL.
+//   - []byte: decoded raw specification bytes.
+//   - error: non-nil if encoded is not valid Base64.
 //
 // Example:
 //
-//	abs := resolveAbsoluteURL("https://tenant.console.ves.volterra.io/api", "/object_store/...")
+//	raw, err := decodeBase64Spec("eyJvcGVuYXBpIjoiMy4wLjAifQ==")
+func decodeBase64Spec(encoded string) ([]byte, error) {
+	decoded, err := base64.StdEncoding.DecodeString(encoded)
+	if err != nil {
+		return nil, fmt.Errorf("value is not valid Base64 encoding: %w", err)
+	}
+	return decoded, nil
+}
+
+// applyWriteOnlyConfigOverlay copies configured write-only attributes from req.Config into target.
+//
+// Why: Terraform Plugin Framework guarantees that write-only attributes are stripped (null) in
+// req.Plan and req.State, so Create, Update, and ModifyPlan must read them from req.Config.
+//
+// How: Returns early when cfg.Raw is null (preserving compatibility with unit tests that omit
+// req.Config); otherwise reads the config model and overlays string_value and bytes_value onto
+// target, returning whether content_hash was explicitly configured.
+//
+// Parameters:
+//   - ctx: execution context.
+//   - cfg: Terraform configuration object from request.Config.
+//   - target: destination model receiving write-only attribute values.
+//
+// Returns:
+//   - bool: true when content_hash is explicitly set (non-null) in cfg.
+//   - diag.Diagnostics: any diagnostics encountered while decoding cfg.
+//
+// Example:
+//
+//	hasHash, diags := applyWriteOnlyConfigOverlay(ctx, req.Config, &plan)
+func applyWriteOnlyConfigOverlay(ctx context.Context, cfg tfsdk.Config, target *ResourceF5XCApiDefinitionUploaderModel) (bool, diag.Diagnostics) {
+	if cfg.Raw.IsNull() {
+		return false, nil
+	}
+
+	var configModel ResourceF5XCApiDefinitionUploaderModel
+	diags := cfg.Get(ctx, &configModel)
+	if diags.HasError() {
+		return false, diags
+	}
+
+	if !configModel.StringValue.IsNull() {
+		target.StringValue = configModel.StringValue
+	}
+	if !configModel.BytesValue.IsNull() {
+		target.BytesValue = configModel.BytesValue
+	}
+
+	return !configModel.ContentHash.IsNull(), diags
+}
+
+// clearWriteOnlyFields resets write-only attributes on model to null before persisting state or plan.
+//
+// Why: Ensures write-only OpenAPI specifications are never persisted in Terraform state or plan snapshots.
+//
+// How: Assigns types.StringNull() to StringValue and BytesValue.
+//
+// Parameters:
+//   - model: state or plan model to sanitize.
+//
+// Returns:
+//   - None
+//
+// Example:
+//
+//	clearWriteOnlyFields(&data)
+func clearWriteOnlyFields(model *ResourceF5XCApiDefinitionUploaderModel) {
+	model.StringValue = types.StringNull()
+	model.BytesValue = types.StringNull()
+}
+
+// resolveSpecContent extracts the active API specification content and SHA-256 digest from model.
+//
+// Why: Centralizes handling across string_value and bytes_value so Create, Update, and ModifyPlan
+// apply consistent encoding, size checking, and hashing rules.
+//
+// How: Checks StringValue and BytesValue, validates the 5 MiB limit for both string_value and
+// decoded bytes_value (plus Base64 decoding for bytes_value), and returns a normalized
+// resolvedSpecContent descriptor.
+//
+// Parameters:
+//   - model: resource model populated from Config (or Plan in unit tests without Config).
+//
+// Returns:
+//   - resolvedSpecContent: normalized content, wire mode, and computed SHA-256 digest.
+//   - diag.Diagnostics: attribute errors if Base64 decoding fails or size exceeds 5 MiB.
+//
+// Example:
+//
+//	spec, diags := resolveSpecContent(&data)
+func resolveSpecContent(model *ResourceF5XCApiDefinitionUploaderModel) (resolvedSpecContent, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if !model.StringValue.IsNull() && !model.StringValue.IsUnknown() {
+		val := model.StringValue.ValueString()
+		if len(val) > maxStoredObjectSpecBytes {
+			diags.AddAttributeError(
+				path.Root("string_value"),
+				"Specification Exceeds Maximum Size",
+				fmt.Sprintf("string_value size (%d bytes) exceeds maximum allowed size of %d bytes (5 MiB).", len(val), maxStoredObjectSpecBytes),
+			)
+			return resolvedSpecContent{}, diags
+		}
+		return resolvedSpecContent{
+			attrName:     "string_value",
+			stringValue:  val,
+			computedHash: computeSHA256(val),
+			present:      true,
+		}, diags
+	}
+
+	if !model.BytesValue.IsNull() && !model.BytesValue.IsUnknown() {
+		val := model.BytesValue.ValueString()
+		decoded, err := decodeBase64Spec(val)
+		if err != nil {
+			diags.AddAttributeError(path.Root("bytes_value"), "Invalid Base64 Value", err.Error())
+			return resolvedSpecContent{}, diags
+		}
+		if len(decoded) > maxStoredObjectSpecBytes {
+			diags.AddAttributeError(
+				path.Root("bytes_value"),
+				"Specification Exceeds Maximum Size",
+				fmt.Sprintf("Decoded bytes_value size (%d bytes) exceeds maximum allowed size of %d bytes (5 MiB).", len(decoded), maxStoredObjectSpecBytes),
+			)
+			return resolvedSpecContent{}, diags
+		}
+		return resolvedSpecContent{
+			attrName:     "bytes_value",
+			isBytes:      true,
+			bytesValue:   val,
+			computedHash: computeSHA256Bytes(decoded),
+			present:      true,
+		}, diags
+	}
+
+	return resolvedSpecContent{}, diags
+}
+
+// buildUploaderRequest constructs the F5 XC CreateObjectRequest payload for PUT operations.
+//
+// Why: Ensures only the selected oneof content field (string_value or bytes_value) is serialized
+// on the wire when uploading or updating a stored OpenAPI specification.
+//
+// How: Sets Description and routes either bytesValue or stringValue based on spec.isBytes.
+//
+// Parameters:
+//   - desc: object description string from metadata.description.
+//   - spec: resolved API specification content from resolveSpecContent.
+//
+// Returns:
+//   - client.ResourceF5XCApiDefinitionUploaderCreateRequest: payload ready for JSON marshaling.
+//
+// Example:
+//
+//	payload := buildUploaderRequest(desc, spec)
+func buildUploaderRequest(desc string, spec resolvedSpecContent) client.ResourceF5XCApiDefinitionUploaderCreateRequest {
+	req := client.ResourceF5XCApiDefinitionUploaderCreateRequest{
+		Description: desc,
+	}
+	if spec.isBytes {
+		req.BytesValue = spec.bytesValue
+	} else {
+		req.StringValue = spec.stringValue
+	}
+	return req
+}
+
+// resolveAbsoluteURL resolves a target API path against baseURL without duplicating an "/api" path prefix.
+//
+// Why: RestClient.URL typically includes a trailing "/api" segment (e.g. "https://tenant.console.ves.volterra.io/api"),
+// while F5 XC stored object version metadata URLs already begin with "/api/object_store/...". Naive concatenation
+// produced invalid "/api/api/object_store/..." URLs that failed DELETE requests silently.
+//
+// How: Returns targetURL unchanged if it already carries an HTTP(S) scheme. Otherwise normalizes slashes and,
+// when trimmedBase ends with "/api" and targetURL is "/api" or starts with "/api/", strips the redundant "/api"
+// prefix from targetURL before joining.
+//
+// Parameters:
+//   - baseURL: base API URL configured on the REST client (e.g. "https://tenant.console.ves.volterra.io/api")
+//   - targetURL: relative path or absolute URL returned by the API or constructed locally
+//
+// Returns:
+//   - string: properly joined absolute URL without duplicate "/api" segments
+//
+// Example:
+//
+//	u := resolveAbsoluteURL("https://tenant.example.com/api", "/api/object_store/namespaces/shared/stored_objects/swagger/foo/v1")
+//	// u == "https://tenant.example.com/api/object_store/namespaces/shared/stored_objects/swagger/foo/v1"
 func resolveAbsoluteURL(baseURL, targetURL string) string {
 	if strings.HasPrefix(targetURL, "http://") || strings.HasPrefix(targetURL, "https://") {
 		return targetURL
 	}
-	return strings.TrimRight(baseURL, "/") + "/" + strings.TrimLeft(targetURL, "/")
+
+	trimmedBase := strings.TrimRight(baseURL, "/")
+	normalizedTarget := "/" + strings.TrimLeft(targetURL, "/")
+
+	if strings.HasSuffix(trimmedBase, "/api") {
+		if normalizedTarget == "/api" {
+			return trimmedBase
+		}
+		if strings.HasPrefix(normalizedTarget, "/api/") {
+			normalizedTarget = strings.TrimPrefix(normalizedTarget, "/api")
+		}
+	}
+
+	return trimmedBase + normalizedTarget
+}
+
+// matchesStoredObjectName checks whether a ListObjects item name refers to the target object in namespace.
+//
+// Why: F5 XC Object Store list responses format item.Name as "<namespace>/<name>" (e.g. "shared/my-api"),
+// whereas some fixtures or endpoints return the bare "<name>". Matching both forms prevents silent
+// pruning skips while isolating identically named objects across namespaces.
+//
+// How: Compares itemName against bare name first and, when namespace is non-empty, against "namespace/name".
+//
+// Parameters:
+//   - itemName: the item.Name value returned by the stored objects list API
+//   - namespace: target F5 XC namespace of the resource
+//   - name: target stored object name (without namespace prefix)
+//
+// Returns:
+//   - bool: true when itemName matches either exact "name" or "namespace/name", false otherwise
+//
+// Example:
+//
+//	ok := matchesStoredObjectName("shared/my-api", "shared", "my-api") // true
+func matchesStoredObjectName(itemName, namespace, name string) bool {
+	if itemName == name {
+		return true
+	}
+	if namespace != "" && itemName == namespace+"/"+name {
+		return true
+	}
+	return false
+}
+
+// parseStoredObjectVersionNumber extracts the leading numeric version component from an F5 XC stored object version tag.
+//
+// Why: Stored object versions follow formats like "v10-26-11-18" and "v2-26-11-18". When creation timestamps
+// are absent or identical, plain lexicographical sorting orders "v9-..." after "v10-...", causing newer versions
+// to be pruned instead of older ones.
+//
+// How: Strips a leading "v", splits on "-" to isolate the numeric counter token, and parses it with strconv.Atoi.
+//
+// Parameters:
+//   - version: version identifier string (e.g. "v4-26-11-18" or "v12")
+//
+// Returns:
+//   - int: parsed version counter when valid, otherwise 0
+//   - bool: true if the version string matched the "v<digits>..." format and parsed cleanly, false otherwise
+//
+// Example:
+//
+//	n, ok := parseStoredObjectVersionNumber("v12-26-11-18") // n == 12, ok == true
+func parseStoredObjectVersionNumber(version string) (int, bool) {
+	if !strings.HasPrefix(version, "v") {
+		return 0, false
+	}
+	rest := strings.TrimPrefix(version, "v")
+	if idx := strings.IndexByte(rest, '-'); idx >= 0 {
+		rest = rest[:idx]
+	}
+	if rest == "" {
+		return 0, false
+	}
+	num, err := strconv.Atoi(rest)
+	if err != nil {
+		return 0, false
+	}
+	return num, true
+}
+
+// parseStoredObjectTimestamp parses an RFC3339 or RFC3339Nano timestamp string.
+//
+// Why: Keeps timestamp parsing consistent and avoids duplicating format fallback logic inside sort comparators.
+//
+// How: Attempts time.Parse with time.RFC3339Nano first, falling back to time.RFC3339 on failure.
+//
+// Parameters:
+//   - ts: raw timestamp string from the API version item
+//
+// Returns:
+//   - time.Time: parsed timestamp when valid, zero Time otherwise
+//   - bool: true if parsing succeeded, false if empty or unparseable
+//
+// Example:
+//
+//	parsed, ok := parseStoredObjectTimestamp("2026-11-18T10:00:01Z")
+func parseStoredObjectTimestamp(ts string) (time.Time, bool) {
+	if ts == "" {
+		return time.Time{}, false
+	}
+	if t, err := time.Parse(time.RFC3339Nano, ts); err == nil {
+		return t, true
+	}
+	if t, err := time.Parse(time.RFC3339, ts); err == nil {
+		return t, true
+	}
+	return time.Time{}, false
 }
 
 // NewResourceF5XCApiDefinitionUploader creates a new instance of the ResourceF5XCApiDefinitionUploader.
@@ -193,8 +554,9 @@ func (r *ResourceF5XCApiDefinitionUploader) Metadata(ctx context.Context, reques
 //
 // Why: Defines all attributes, types, defaults, plan modifiers, and validators for Terraform.
 //
-// How: Constructs a framework schema.Schema mapping out metadata, string_value, content_hash,
-// retain_versions, previous_version_url, force_delete, and timeout settings.
+// How: Constructs a framework schema.Schema mapping out metadata, write-only string_value and
+// bytes_value inputs, content_hash, retain_versions, previous_version_url, force_delete, and
+// timeout settings.
 //
 // Parameters:
 //   - ctx: execution context.
@@ -212,11 +574,11 @@ func (r *ResourceF5XCApiDefinitionUploader) Schema(ctx context.Context, request 
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: `# F5 XC API Definition Uploader
 
-The f5xc_api_definition_uploader resource uploads raw OpenAPI or Swagger specifications to the F5 Distributed Cloud (F5 XC) Object Store. It exports the backend-generated versioned URL in metadata.url, which can be passed to f5xc_api_definition for API Discovery, API Inventory, and API Protection policies.
+The ` + "`f5xc_api_definition_uploader`" + ` resource uploads raw or Base64-encoded OpenAPI or Swagger specifications to the F5 Distributed Cloud (F5 XC) Object Store. It exports the backend-generated versioned URL in ` + "`metadata.url`" + `, which can be passed to ` + "`f5xc_api_definition`" + ` for API Discovery, API Inventory, and API Protection policies.
 
-## Declarative Upload
+## Declarative Upload & State Hygiene
 
-Takes the raw specification through the string_value attribute. The value can come from a local file, a rendered template, decoded Base64 input, a remote HTTP response, cloud storage, or jsonencode(...).
+Both ` + "`string_value`" + ` and ` + "`bytes_value`" + ` are write-only attributes (requires Terraform >= 1.11). Multi-megabyte OpenAPI payloads are sent only during ` + "`Create`" + ` and ` + "`Update`" + ` and are never persisted in Terraform state or plan files. Change detection is driven by ` + "`content_hash`" + ` (automatically computed as the SHA-256 digest when omitted, or explicitly set via e.g. ` + "`filesha256(...)`" + `).
 
 ## Object Store Integration
 
@@ -229,16 +591,14 @@ Uploads the specification with a PUT request to the F5 XC Object Store REST API:
 The resource manages the object lifecycle:
 
 - Create uploads the specification.
-- Read retrieves the stored object through metadata.url.
-- Update replaces the stored specification.
+- Read retrieves the stored object metadata through ` + "`metadata.url`" + `.
+- Update replaces the stored specification only when content or description changes.
 - Delete removes the stored object.
 
 ## Computed URL Export
 
-Captures the backend-generated versioned URL in metadata.url for use by dependent f5xc_api_definition resources.`,
-		Description: `f5xc_api_definition_uploader uploads raw OpenAPI or Swagger specifications to the F5 Distributed Cloud Object Store. It accepts the specification through string_value, manages create, read, update, and delete operations, and exports the backend-generated versioned URL in metadata.url for use by f5xc_api_definition.
-
-Supported input sources include local files, rendered templates, decoded Base64 values, remote HTTP responses, cloud storage objects, and jsonencode(...).`,
+Captures the backend-generated versioned URL in ` + "`metadata.url`" + ` for use by dependent ` + "`f5xc_api_definition`" + ` resources.`,
+		Description: `f5xc_api_definition_uploader uploads raw or Base64-encoded OpenAPI or Swagger specifications to the F5 Distributed Cloud Object Store using write-only attributes (string_value, bytes_value) alongside content_hash change detection (requires Terraform >= 1.11), manages create, read, update, and delete operations, and exports the backend-generated versioned URL in metadata.url for use by f5xc_api_definition.`,
 
 		Attributes: map[string]schema.Attribute{
 			"metadata": schema.SingleNestedAttribute{
@@ -302,15 +662,26 @@ Supported input sources include local files, rendered templates, decoded Base64 
 				Computed:    true,
 			},
 			"string_value": schema.StringAttribute{
-				Description: "string_value Raw OpenAPI specification content (JSON or YAML).",
-				Required:    true,
-				Optional:    false,
+				Description: "string_value Write-only raw OpenAPI specification content (JSON or YAML). Sent only during Create and Update operations and never stored in Terraform state or plans (requires Terraform >= 1.11).",
+				Required:    false,
+				Optional:    true,
 				Computed:    false,
+				WriteOnly:   true,
+				Validators: []validator.String{
+					bytesvalidator.BytesAtMost(maxStoredObjectSpecBytes),
+				},
+			},
+			"bytes_value": schema.StringAttribute{
+				Description: "bytes_value Write-only Base64-encoded OpenAPI specification content (e.g. filebase64(...)). Sent only during Create and Update operations and never stored in Terraform state or plans (requires Terraform >= 1.11).",
+				Required:    false,
+				Optional:    true,
+				Computed:    false,
+				WriteOnly:   true,
 			},
 			"content_hash": schema.StringAttribute{
-				Description: "content_hash SHA-256 hash of string_value used to detect content modifications and prevent version churn.",
+				Description: "content_hash SHA-256 hex digest or user-supplied version trigger used to detect API specification modifications and prevent version churn. Computed automatically from the specification when omitted.",
 				Required:    false,
-				Optional:    false,
+				Optional:    true,
 				Computed:    true,
 			},
 			"retain_versions": schema.Int64Attribute{
@@ -381,9 +752,11 @@ func (r *ResourceF5XCApiDefinitionUploader) Configure(ctx context.Context, reque
 
 // ValidateConfig implements resource.ResourceWithValidateConfig.
 //
-// Why: Validates the configuration model before planning.
+// Why: Validates mutual exclusivity between string_value and bytes_value, as well as Base64
+// encoding and 5 MiB payload limits, before planning.
 //
-// How: Reads the config model and ensures no structural errors exist.
+// How: Reads the configuration model, verifies that exactly one of string_value or bytes_value
+// is configured, and validates Base64 decoding and byte size for bytes_value.
 //
 // Parameters:
 //   - ctx: execution context.
@@ -402,19 +775,60 @@ func (r *ResourceF5XCApiDefinitionUploader) ValidateConfig(ctx context.Context, 
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	// Delay mutual-exclusivity and presence checks if either write-only attribute is unknown
+	// (e.g., when passed via module variables or computed expressions during static terraform validate),
+	// while still validating any known payload attribute against encoding and 5 MiB size limits.
+	if data.StringValue.IsUnknown() || data.BytesValue.IsUnknown() {
+		if (!data.StringValue.IsNull() && !data.StringValue.IsUnknown()) || (!data.BytesValue.IsNull() && !data.BytesValue.IsUnknown()) {
+			_, specDiags := resolveSpecContent(&data)
+			resp.Diagnostics.Append(specDiags...)
+		}
+		return
+	}
+
+	configured := make([]string, 0, 2)
+	if !data.StringValue.IsNull() {
+		configured = append(configured, `"string_value"`)
+	}
+	if !data.BytesValue.IsNull() {
+		configured = append(configured, `"bytes_value"`)
+	}
+
+	if len(configured) == 0 {
+		resp.Diagnostics.AddError(
+			"Missing API Specification Content",
+			`Exactly one of "string_value" or "bytes_value" must be configured.`,
+		)
+		return
+	}
+
+	if len(configured) > 1 {
+		resp.Diagnostics.AddError(
+			"Conflicting API Specification Content",
+			fmt.Sprintf(`Exactly one of "string_value" or "bytes_value" may be configured; found %s.`, strings.Join(configured, ", ")),
+		)
+		return
+	}
+
+	// Validate string_value size and bytes_value Base64 encoding and decoded size against the 5 MiB API limit.
+	_, specDiags := resolveSpecContent(&data)
+	resp.Diagnostics.Append(specDiags...)
 }
 
 // ModifyPlan implements resource.ResourceWithModifyPlan.
 //
-// Why: Dynamically marks versioned attributes as unknown during an update plan when string_value changes,
-// ensuring downstream resources (like f5xc_api_definition) accurately plan their updates.
+// Why: Dynamically marks versioned attributes as unknown during an update plan when content or
+// description changes, preserves computed content_hash across no-op plans for write-only inputs,
+// and ensures downstream resources (such as f5xc_api_definition) plan their updates accurately.
 //
-// How: Inspects plan vs state; if string_value changes, sets metadata.url, metadata.version,
-// metadata.creation_timestamp, content_hash, and status to unknown.
+// How: Overlays write-only values from req.Config, evaluates changes via content_hash (user-supplied
+// or computed SHA-256), marks metadata.url, metadata.version, metadata.creation_timestamp, and status
+// as unknown when changed, and keeps write-only attributes null in the planned state.
 //
 // Parameters:
 //   - ctx: execution context.
-//   - req: modify plan request containing prior state and proposed plan.
+//   - req: modify plan request containing prior state, config, and proposed plan.
 //   - resp: modify plan response where adjusted plan values are written.
 //
 // Returns:
@@ -456,13 +870,57 @@ func (r *ResourceF5XCApiDefinitionUploader) ModifyPlan(ctx context.Context, req 
 		return
 	}
 
-	// If string_value is changing, mark versioned attributes as unknown so dependents plan for update
-	if !plan.StringValue.IsUnknown() && !state.StringValue.IsNull() && plan.StringValue.ValueString() != state.StringValue.ValueString() {
+	effectivePlan := plan
+	hasConfigContentHash, cfgDiags := applyWriteOnlyConfigOverlay(ctx, req.Config, &effectivePlan)
+	resp.Diagnostics.Append(cfgDiags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	contentUnknown := effectivePlan.StringValue.IsUnknown() || effectivePlan.BytesValue.IsUnknown()
+
+	var contentChanged bool
+	if hasConfigContentHash {
+		if plan.ContentHash.IsUnknown() {
+			contentChanged = true
+		} else {
+			contentChanged = state.ContentHash.IsNull() || plan.ContentHash.ValueString() != state.ContentHash.ValueString()
+		}
+	} else if contentUnknown {
+		contentChanged = true
+	} else {
+		spec, specDiags := resolveSpecContent(&effectivePlan)
+		resp.Diagnostics.Append(specDiags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		if spec.present {
+			contentChanged = state.ContentHash.IsNull() || spec.computedHash != state.ContentHash.ValueString()
+		}
+	}
+
+	descChanged := !plan.Metadata.Description.IsUnknown() && !state.Metadata.Description.IsNull() && plan.Metadata.Description.ValueString() != state.Metadata.Description.ValueString()
+
+	planModified := false
+	// If content or metadata.description is changing, mark versioned attributes as unknown so dependents plan for update.
+	if contentChanged || descChanged {
 		plan.Metadata.Url = types.StringUnknown()
 		plan.Metadata.Version = types.StringUnknown()
 		plan.Metadata.CreationTimestamp = types.StringUnknown()
-		plan.ContentHash = types.StringUnknown()
+		plan.PreviousVersionUrl = types.StringUnknown()
+		if contentChanged && !hasConfigContentHash {
+			plan.ContentHash = types.StringUnknown()
+		}
 		plan.Status = types.StringUnknown()
+		planModified = true
+	} else if !hasConfigContentHash && plan.ContentHash.IsUnknown() && !state.ContentHash.IsNull() {
+		// Preserve state content_hash on unchanged write-only plans when content_hash is omitted from HCL.
+		plan.ContentHash = state.ContentHash
+		planModified = true
+	}
+
+	clearWriteOnlyFields(&plan)
+	if planModified {
 		resp.Diagnostics.Append(resp.Plan.Set(ctx, &plan)...)
 	}
 }
@@ -471,12 +929,13 @@ func (r *ResourceF5XCApiDefinitionUploader) ModifyPlan(ctx context.Context, req 
 //
 // Why: Initial creation of the stored object version in F5 XC.
 //
-// How: Computes SHA-256 of string_value, builds the JSON payload, executes HTTP PUT,
-// decodes the response, and sets state attributes including url, version, and content_hash.
+// How: Overlays write-only attributes from req.Config, resolves the active specification payload
+// (string_value or bytes_value), executes HTTP PUT, decodes the response, and sets state attributes
+// while keeping write-only attributes null in state.
 //
 // Parameters:
 //   - ctx: execution context.
-//   - request: create request with plan data.
+//   - request: create request with plan and config data.
 //   - response: create response where state is set or diagnostics reported.
 //
 // Returns:
@@ -490,6 +949,12 @@ func (r *ResourceF5XCApiDefinitionUploader) Create(ctx context.Context, request 
 
 	diags := request.Plan.Get(ctx, &data)
 	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+
+	_, cfgDiags := applyWriteOnlyConfigOverlay(ctx, request.Config, &data)
+	response.Diagnostics.Append(cfgDiags...)
 	if response.Diagnostics.HasError() {
 		return
 	}
@@ -512,19 +977,26 @@ func (r *ResourceF5XCApiDefinitionUploader) Create(ctx context.Context, request 
 	ctx, cancel := context.WithTimeout(ctx, createTimeout)
 	defer cancel()
 
-	hash := computeSHA256(data.StringValue.ValueString())
+	spec, specDiags := resolveSpecContent(&data)
+	response.Diagnostics.Append(specDiags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !spec.present {
+		response.Diagnostics.AddError(
+			"Missing API Specification Content",
+			`Exactly one of "string_value" or "bytes_value" must be provided.`,
+		)
+		return
+	}
+
+	effectiveHash := spec.computedHash
+	if !data.ContentHash.IsNull() && !data.ContentHash.IsUnknown() {
+		effectiveHash = data.ContentHash.ValueString()
+	}
+
 	desc := data.Metadata.Description.ValueString()
-
-	createReqMetadata := client.ResourceF5XCApiDefinitionUploaderMetadataApiResponse{
-		Name:        data.Metadata.Name.ValueString(),
-		Namespace:   data.Metadata.Namespace.ValueString(),
-		Description: desc,
-	}
-
-	createReq := client.ResourceF5XCApiDefinitionUploaderApiModel{
-		Metadata:    createReqMetadata,
-		StringValue: data.StringValue.ValueString(),
-	}
+	createReq := buildUploaderRequest(desc, spec)
 
 	httpReqBody, err := json.Marshal(createReq)
 	if err != nil {
@@ -567,8 +1039,9 @@ func (r *ResourceF5XCApiDefinitionUploader) Create(ctx context.Context, request 
 	data.Metadata.Namespace = types.StringValue(createResp.Metadata.Namespace)
 	data.Metadata.Description = types.StringValue(createResp.Metadata.Description)
 	data.Metadata.CreationTimestamp = types.StringValue(createResp.Metadata.CreationTimestamp)
-	data.ContentHash = types.StringValue(hash)
+	data.ContentHash = types.StringValue(effectiveHash)
 	data.PreviousVersionUrl = types.StringNull()
+	clearWriteOnlyFields(&data)
 
 	tflog.Info(ctx, fmt.Sprintf("Created Api definition uploader resource: %s version: %s", data.Metadata.Name.ValueString(), data.Metadata.Version.ValueString()))
 
@@ -578,10 +1051,11 @@ func (r *ResourceF5XCApiDefinitionUploader) Create(ctx context.Context, request 
 
 // Read refreshes the resource state by querying the F5 XC Object Store.
 //
-// Why: Detects configuration drift and external deletion.
+// Why: Detects configuration drift and external deletion without persisting write-only specs in state.
 //
-// How: Executes HTTP GET against metadata.url. If HTTP 404 is encountered, cleanly removes
-// the resource from state. Otherwise, refreshes metadata, string_value, and content_hash.
+// How: Executes HTTP GET against metadata.url. If HTTP 404 is encountered, cleanly removes the
+// resource from state. Otherwise, refreshes metadata, leaves string_value and bytes_value null, and
+// preserves existing content_hash (computing it from the response only if absent, e.g. on import).
 //
 // Parameters:
 //   - ctx: execution context.
@@ -653,23 +1127,36 @@ func (r *ResourceF5XCApiDefinitionUploader) Read(ctx context.Context, request re
 	data.Metadata.Namespace = types.StringValue(readResp.Metadata.Namespace)
 	data.Metadata.Description = types.StringValue(readResp.Metadata.Description)
 	data.Metadata.CreationTimestamp = types.StringValue(readResp.Metadata.CreationTimestamp)
-	data.StringValue = types.StringValue(readResp.StringValue)
-	data.ContentHash = types.StringValue(computeSHA256(readResp.StringValue))
+	clearWriteOnlyFields(&data)
+
+	if data.ContentHash.IsNull() || data.ContentHash.ValueString() == "" {
+		if readResp.BytesValue != "" {
+			if decoded, decErr := decodeBase64Spec(readResp.BytesValue); decErr == nil {
+				data.ContentHash = types.StringValue(computeSHA256Bytes(decoded))
+			} else {
+				data.ContentHash = types.StringValue(computeSHA256(readResp.BytesValue))
+			}
+		} else if readResp.StringValue != "" {
+			data.ContentHash = types.StringValue(computeSHA256(readResp.StringValue))
+		}
+	}
 
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
 }
 
-// Update uploads a new version of the OpenAPI spec when content changes, and triggers retention pruning.
+// Update uploads a new version of the OpenAPI spec when content or description changes, and triggers retention pruning.
 //
 // Why: Enables automated rollout of new API definitions while avoiding version churn on unchanged specs
 // and pruning stale historical versions.
 //
-// How: Compares SHA-256 hashes. If unchanged, skips upload. If changed, PUTs new version,
-// captures new URL and version, sets previous_version_url, and calls pruneHistoricalVersions.
+// How: Overlays write-only values from req.Config, resolves the active payload and effective hash, and
+// compares against prior state. If unchanged, skips HTTP PUT and updates non-content state fields.
+// If changed, PUTs the new version, captures the new URL and version, sets previous_version_url,
+// keeps write-only attributes null, and calls pruneHistoricalVersions.
 //
 // Parameters:
 //   - ctx: execution context.
-//   - request: update request containing plan and prior state.
+//   - request: update request containing plan, config, and prior state.
 //   - response: update response where state is persisted.
 //
 // Returns:
@@ -684,6 +1171,13 @@ func (r *ResourceF5XCApiDefinitionUploader) Update(ctx context.Context, request 
 
 	response.Diagnostics.Append(request.Plan.Get(ctx, &plan)...)
 	response.Diagnostics.Append(request.State.Get(ctx, &state)...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+
+	effectivePlan := plan
+	_, cfgDiags := applyWriteOnlyConfigOverlay(ctx, request.Config, &effectivePlan)
+	response.Diagnostics.Append(cfgDiags...)
 	if response.Diagnostics.HasError() {
 		return
 	}
@@ -706,23 +1200,37 @@ func (r *ResourceF5XCApiDefinitionUploader) Update(ctx context.Context, request 
 	ctx, cancel := context.WithTimeout(ctx, updateTimeout)
 	defer cancel()
 
-	newHash := computeSHA256(plan.StringValue.ValueString())
-	contentChanged := state.ContentHash.IsNull() ||
-		state.ContentHash.ValueString() != newHash ||
-		state.StringValue.ValueString() != plan.StringValue.ValueString()
+	spec, specDiags := resolveSpecContent(&effectivePlan)
+	response.Diagnostics.Append(specDiags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !spec.present {
+		response.Diagnostics.AddError(
+			"Missing API Specification Content",
+			`Exactly one of "string_value" or "bytes_value" must be provided.`,
+		)
+		return
+	}
 
+	effectiveHash := spec.computedHash
+	if !plan.ContentHash.IsNull() && !plan.ContentHash.IsUnknown() {
+		effectiveHash = plan.ContentHash.ValueString()
+	}
+
+	contentChanged := state.ContentHash.IsNull() || state.ContentHash.ValueString() != effectiveHash
 	descChanged := plan.Metadata.Description.ValueString() != state.Metadata.Description.ValueString()
 
 	// If neither content nor description changed, preserve current backend version and avoid version churn.
-	// However, update configuration attributes (ForceDelete, RetainVersions, Timeouts) in state from plan.
 	if !contentChanged && !descChanged {
 		tflog.Debug(ctx, "Api definition uploader content unchanged; skipping upload to prevent version churn")
 		state.ForceDelete = plan.ForceDelete
 		state.RetainVersions = plan.RetainVersions
 		state.Timeouts = plan.Timeouts
+		clearWriteOnlyFields(&state)
 
 		if !plan.RetainVersions.IsNull() && !plan.RetainVersions.IsUnknown() && plan.RetainVersions.ValueInt64() > 0 {
-			r.pruneHistoricalVersions(ctx, state.Metadata.Namespace.ValueString(), state.Metadata.Name.ValueString(), plan.RetainVersions.ValueInt64(), state.Metadata.Version.ValueString())
+			response.Diagnostics.Append(r.pruneHistoricalVersions(ctx, state.Metadata.Namespace.ValueString(), state.Metadata.Name.ValueString(), plan.RetainVersions.ValueInt64(), state.Metadata.Version.ValueString())...)
 		}
 
 		response.Diagnostics.Append(response.State.Set(ctx, &state)...)
@@ -730,17 +1238,7 @@ func (r *ResourceF5XCApiDefinitionUploader) Update(ctx context.Context, request 
 	}
 
 	desc := plan.Metadata.Description.ValueString()
-
-	updateReqMetadata := client.ResourceF5XCApiDefinitionUploaderMetadataApiResponse{
-		Name:        plan.Metadata.Name.ValueString(),
-		Namespace:   plan.Metadata.Namespace.ValueString(),
-		Description: desc,
-	}
-
-	updateReq := client.ResourceF5XCApiDefinitionUploaderApiModel{
-		Metadata:    updateReqMetadata,
-		StringValue: plan.StringValue.ValueString(),
-	}
+	updateReq := buildUploaderRequest(desc, spec)
 
 	httpReqBody, err := json.Marshal(updateReq)
 	if err != nil {
@@ -785,7 +1283,8 @@ func (r *ResourceF5XCApiDefinitionUploader) Update(ctx context.Context, request 
 	plan.Metadata.Namespace = types.StringValue(updateResp.Metadata.Namespace)
 	plan.Metadata.Description = types.StringValue(updateResp.Metadata.Description)
 	plan.Metadata.CreationTimestamp = types.StringValue(updateResp.Metadata.CreationTimestamp)
-	plan.ContentHash = types.StringValue(newHash)
+	plan.ContentHash = types.StringValue(effectiveHash)
+	clearWriteOnlyFields(&plan)
 
 	tflog.Info(ctx, fmt.Sprintf("Updated Api definition uploader resource: %s new version: %s (previous: %s)",
 		plan.Metadata.Name.ValueString(), plan.Metadata.Version.ValueString(), state.Metadata.Version.ValueString()))
@@ -795,7 +1294,7 @@ func (r *ResourceF5XCApiDefinitionUploader) Update(ctx context.Context, request 
 	if !plan.RetainVersions.IsNull() && !plan.RetainVersions.IsUnknown() {
 		retainCount = plan.RetainVersions.ValueInt64()
 	}
-	r.pruneHistoricalVersions(ctx, plan.Metadata.Namespace.ValueString(), plan.Metadata.Name.ValueString(), retainCount, plan.Metadata.Version.ValueString())
+	response.Diagnostics.Append(r.pruneHistoricalVersions(ctx, plan.Metadata.Namespace.ValueString(), plan.Metadata.Name.ValueString(), retainCount, plan.Metadata.Version.ValueString())...)
 
 	response.Diagnostics.Append(response.State.Set(ctx, &plan)...)
 }
@@ -875,62 +1374,67 @@ func (r *ResourceF5XCApiDefinitionUploader) Delete(ctx context.Context, request 
 	}
 }
 
-// pruneHistoricalVersions prunes older versions of the stored object so that at most retainCount
-// versions are preserved in the F5 XC Object Store.
+// pruneHistoricalVersions lists stored versions for the object and deletes historical versions beyond retainCount.
 //
-// Why: Prevents unbounded accumulation of historical OpenAPI spec versions (garbage collection)
-// while retaining recent versions (default 2) for rollback safety.
+// Why: Repeated updates to an f5xc_api_definition_uploader resource accumulate immutable object versions on the
+// F5 XC Object Store backend. When retain_versions is positive, automated pruning prevents unbounded version growth
+// while preserving the active currentVersion and the newest retainCount versions.
 //
-// How: Fetches the list of all versions via the ListObjects API, sorts them from newest to oldest
-// based on creation timestamp and version sequence, and executes HTTP DELETE calls for any
-// version beyond the retainCount threshold. Deletion failures are logged as warnings and do
-// not fail the main operation.
+// How: Queries the namespace's stored swagger objects without the broken ?name= query parameter, matches the target
+// object by bare or namespace-prefixed name, sorts versions newest-first (by creation timestamp, then currentVersion
+// priority, then parsed numeric version counter, then string order), and sends DELETE requests for versions past
+// retainCount using properly resolved URLs. Failures are logged and surfaced as non-fatal warning diagnostics.
 //
 // Parameters:
-//   - ctx: context for HTTP execution and logging.
-//   - namespace: namespace containing the stored object.
-//   - name: name of the stored object.
-//   - retainCount: maximum number of versions to keep (0 disables pruning).
-//   - currentVersion: the active version just created, which must never be deleted.
+//   - ctx: context used for API requests and Terraform logging
+//   - namespace: F5 XC namespace containing the stored object
+//   - name: stored object name (without namespace prefix)
+//   - retainCount: maximum number of newest versions to keep (<= 0 disables pruning)
+//   - currentVersion: version identifier currently active in state so it is never deleted
 //
 // Returns:
-//   - None
+//   - diag.Diagnostics: warning diagnostics if listing, decoding, or deleting historical versions fails
 //
 // Example:
 //
-//	r.pruneHistoricalVersions(ctx, "shared", "my-spec", 2, "v2-26-09-24")
+//	diags := r.pruneHistoricalVersions(ctx, "shared", "my-api", 2, "v4-26-11-18")
 func (r *ResourceF5XCApiDefinitionUploader) pruneHistoricalVersions(
 	ctx context.Context,
 	namespace, name string,
 	retainCount int64,
 	currentVersion string,
-) {
+) diag.Diagnostics {
+	var diags diag.Diagnostics
 	if retainCount <= 0 {
-		return
+		return diags
 	}
 
-	listURL := fmt.Sprintf("%s/object_store/namespaces/%s/stored_objects/swagger?name=%s",
-		r.client.RestClient.URL, namespace, name)
+	listURL := fmt.Sprintf("%s/object_store/namespaces/%s/stored_objects/swagger",
+		r.client.RestClient.URL, namespace)
 
 	respBytes, err := r.client.RestClient.Execute(ctx, http.MethodGet, listURL, nil)
 	if err != nil {
-		tflog.Warn(ctx, fmt.Sprintf("Failed to list stored object versions for pruning: %s", err))
-		return
+		msg := fmt.Sprintf("Failed to list stored object versions for pruning: %s", err)
+		tflog.Warn(ctx, msg)
+		diags.AddWarning("Failed to List Historical API Definition Versions", msg)
+		return diags
 	}
 
 	var listResp storedObjectListResponse
-	if err := json.Unmarshal(respBytes, &listResp); err != nil {
-		tflog.Warn(ctx, fmt.Sprintf("Failed to decode stored object versions for pruning: %s", err))
-		return
+	if unmarshalErr := json.Unmarshal(respBytes, &listResp); unmarshalErr != nil {
+		msg := fmt.Sprintf("Failed to decode stored object versions for pruning: %s", unmarshalErr)
+		tflog.Warn(ctx, msg)
+		diags.AddWarning("Failed to Decode Historical API Definition Versions", msg)
+		return diags
 	}
 
 	for _, item := range listResp.Items {
-		if item.Name != name {
+		if !matchesStoredObjectName(item.Name, namespace, name) {
 			continue
 		}
 
 		if int64(len(item.Versions)) <= retainCount {
-			return
+			return diags
 		}
 
 		// Sort newest first
@@ -938,16 +1442,23 @@ func (r *ResourceF5XCApiDefinitionUploader) pruneHistoricalVersions(
 		copy(versions, item.Versions)
 
 		sort.Slice(versions, func(i, j int) bool {
-			t1, err1 := time.Parse(time.RFC3339Nano, versions[i].CreationTimestamp)
-			if err1 != nil {
-				t1, err1 = time.Parse(time.RFC3339, versions[i].CreationTimestamp)
-			}
-			t2, err2 := time.Parse(time.RFC3339Nano, versions[j].CreationTimestamp)
-			if err2 != nil {
-				t2, err2 = time.Parse(time.RFC3339, versions[j].CreationTimestamp)
-			}
-			if err1 == nil && err2 == nil && !t1.Equal(t2) {
+			t1, ok1 := parseStoredObjectTimestamp(versions[i].effectiveCreationTimestamp())
+			t2, ok2 := parseStoredObjectTimestamp(versions[j].effectiveCreationTimestamp())
+			if ok1 && ok2 && !t1.Equal(t2) {
 				return t1.After(t2)
+			}
+			if currentVersion != "" && versions[i].Version != versions[j].Version {
+				if versions[i].Version == currentVersion {
+					return true
+				}
+				if versions[j].Version == currentVersion {
+					return false
+				}
+			}
+			n1, tok1 := parseStoredObjectVersionNumber(versions[i].Version)
+			n2, tok2 := parseStoredObjectVersionNumber(versions[j].Version)
+			if tok1 && tok2 && n1 != n2 {
+				return n1 > n2
 			}
 			return versions[i].Version > versions[j].Version
 		})
@@ -971,8 +1482,14 @@ func (r *ResourceF5XCApiDefinitionUploader) pruneHistoricalVersions(
 				v.Version, delURL, name))
 
 			if _, delErr := r.client.RestClient.Execute(ctx, http.MethodDelete, delURL, nil); delErr != nil {
-				tflog.Warn(ctx, fmt.Sprintf("Failed to prune old version %s: %s", v.Version, delErr))
+				msg := fmt.Sprintf("Failed to prune historical version %s of %s/%s: %s", v.Version, namespace, name, delErr)
+				tflog.Warn(ctx, msg)
+				diags.AddWarning("Failed to Prune Historical API Definition Version", msg)
 			}
 		}
+
+		return diags
 	}
+
+	return diags
 }

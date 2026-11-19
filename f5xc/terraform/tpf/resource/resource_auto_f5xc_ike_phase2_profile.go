@@ -27,6 +27,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -104,7 +105,7 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for RequiredOneOfField --> IkeKeyLifetime
+// Attribute map for OneOfField --> IkeKeyLifetime
 var IkePhase2ProfileIkeKeyLifetimeModelAttributeMap = map[string]attr.Type{
 
 	"ike_keylifetime_hours": types.ObjectType{
@@ -249,21 +250,24 @@ func (r *ResourceF5XCIkePhase2Profile) Schema(ctx context.Context, request resou
 			},
 			"ike_key_lifetime_choice": schema.SingleNestedAttribute{
 				Description:         "Key LifeTime Amount of time before the IKE Security Association (SA) key needs to be renegotiated",
-				MarkdownDescription: "Key LifeTime Amount of time before the IKE Security Association (SA) key needs to be renegotiated",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Key LifeTime Amount of time before the IKE Security Association (SA) key needs to be renegotiated<br>Exactly one of `ike_keylifetime_hours`, `ike_keylifetime_minutes`, or `use_default_keylifetime` must be specified when `ike_key_lifetime_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"ike_keylifetime_hours",
 						"ike_keylifetime_minutes",
 						"use_default_keylifetime",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"ike_keylifetime_hours": schema.SingleNestedAttribute{
 						Description:         "Hours Set IKE Key Lifetime in Hours",
-						MarkdownDescription: "Hours Set IKE Key Lifetime in Hours",
+						MarkdownDescription: "Hours Set IKE Key Lifetime in Hours<br>Conflicts with `ike_keylifetime_minutes` and `use_default_keylifetime`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -282,7 +286,7 @@ func (r *ResourceF5XCIkePhase2Profile) Schema(ctx context.Context, request resou
 					},
 					"ike_keylifetime_minutes": schema.SingleNestedAttribute{
 						Description:         "Minutes Set IKE Key Lifetime in minutes",
-						MarkdownDescription: "Minutes Set IKE Key Lifetime in minutes",
+						MarkdownDescription: "Minutes Set IKE Key Lifetime in minutes<br>Conflicts with `ike_keylifetime_hours` and `use_default_keylifetime`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -301,7 +305,7 @@ func (r *ResourceF5XCIkePhase2Profile) Schema(ctx context.Context, request resou
 					},
 					"use_default_keylifetime": schema.BoolAttribute{
 						Description:         "Default Use default key lifetime (4Hrs)",
-						MarkdownDescription: "Default Use default key lifetime (4Hrs)",
+						MarkdownDescription: "Default Use default key lifetime (4Hrs)<br>Conflicts with `ike_keylifetime_hours` and `ike_keylifetime_minutes`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -313,7 +317,7 @@ func (r *ResourceF5XCIkePhase2Profile) Schema(ctx context.Context, request resou
 			},
 			"pfs_mode_choice": schema.SingleNestedAttribute{
 				Description:         "Perfect Forward Secrecy (PFS) Configure Perfect Forward Secrecy for this tunnel",
-				MarkdownDescription: "Perfect Forward Secrecy (PFS) Configure Perfect Forward Secrecy for this tunnel",
+				MarkdownDescription: "Perfect Forward Secrecy (PFS) Configure Perfect Forward Secrecy for this tunnel<br>Exactly one of `dh_group_set` or `disable_pfs` must be specified when `pfs_mode_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -326,7 +330,7 @@ func (r *ResourceF5XCIkePhase2Profile) Schema(ctx context.Context, request resou
 				Attributes: map[string]schema.Attribute{
 					"dh_group_set": schema.SingleNestedAttribute{
 						Description:         "Enabled Choose the acceptable Diffie Hellman(DH) Group or Groups that you are willing to accept as part of this profile.",
-						MarkdownDescription: "Enabled Choose the acceptable Diffie Hellman(DH) Group or Groups that you are willing to accept as part of this profile.",
+						MarkdownDescription: "Enabled Choose the acceptable Diffie Hellman(DH) Group or Groups that you are willing to accept as part of this profile.<br>Conflicts with `disable_pfs`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -347,7 +351,7 @@ func (r *ResourceF5XCIkePhase2Profile) Schema(ctx context.Context, request resou
 					},
 					"disable_pfs": schema.BoolAttribute{
 						Description:         "Disabled Disable PFS for this tunnel",
-						MarkdownDescription: "Disabled Disable PFS for this tunnel",
+						MarkdownDescription: "Disabled Disable PFS for this tunnel<br>Conflicts with `dh_group_set`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -560,7 +564,7 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 		spec.EncryptionAlgos = encryptionAlgosSpec
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> IkeKeyLifetime
+	// resource modelToSpecRoot OneOfField --> IkeKeyLifetime
 	if !data.IkeKeyLifetimeChoice.IsNull() && !data.IkeKeyLifetimeChoice.IsUnknown() {
 		ikeKeyLifetimeChoiceModel := IkePhase2ProfileIkeKeyLifetimeChoice{}
 		response.Diagnostics.Append(data.IkeKeyLifetimeChoice.As(ctx, &ikeKeyLifetimeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -611,6 +615,10 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 			spec.IkeKeyLifetime = useDefaultKeylifetimeSpecBool
 		}
 
+	} else {
+		spec.IkeKeyLifetime = &ves_io_schema_views_ike_phase2_profile.CreateSpecType_UseDefaultKeylifetime{
+			UseDefaultKeylifetime: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot OneOfField --> PfsMode
@@ -856,7 +864,7 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> IkeKeyLifetime
+	// resource SpecToModelRoot OneOfField --> IkeKeyLifetime
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -943,8 +951,6 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.IkeKeyLifetimeChoice = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeModelAttributeMap)
 	}
 
@@ -1074,11 +1080,7 @@ func (r *ResourceF5XCIkePhase2Profile) Read(ctx context.Context, request resourc
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_ike_phase2_profile.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_ike_phase2_profile.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "ike_phase2_profile", err),
@@ -1245,7 +1247,7 @@ func (r *ResourceF5XCIkePhase2Profile) Read(ctx context.Context, request resourc
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> IkeKeyLifetime
+	// resource SpecToModelRoot OneOfField --> IkeKeyLifetime
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -1332,8 +1334,6 @@ func (r *ResourceF5XCIkePhase2Profile) Read(ctx context.Context, request resourc
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.IkeKeyLifetimeChoice.IsNull() || data.IkeKeyLifetimeChoice.IsUnknown() || ((data.IkeKeyLifetimeChoice.Attributes()["ike_keylifetime_hours"].(types.Object).IsNull() || data.IkeKeyLifetimeChoice.Attributes()["ike_keylifetime_hours"].(types.Object).IsUnknown() || (data.IkeKeyLifetimeChoice.Attributes()["ike_keylifetime_hours"].(types.Object).Attributes()["duration"].IsNull() || data.IkeKeyLifetimeChoice.Attributes()["ike_keylifetime_hours"].(types.Object).Attributes()["duration"].IsUnknown())) && (data.IkeKeyLifetimeChoice.Attributes()["ike_keylifetime_minutes"].(types.Object).IsNull() || data.IkeKeyLifetimeChoice.Attributes()["ike_keylifetime_minutes"].(types.Object).IsUnknown() || (data.IkeKeyLifetimeChoice.Attributes()["ike_keylifetime_minutes"].(types.Object).Attributes()["duration"].IsNull() || data.IkeKeyLifetimeChoice.Attributes()["ike_keylifetime_minutes"].(types.Object).Attributes()["duration"].IsUnknown())) && (data.IkeKeyLifetimeChoice.Attributes()["use_default_keylifetime"].IsNull() || data.IkeKeyLifetimeChoice.Attributes()["use_default_keylifetime"].IsUnknown())) {
 			data.IkeKeyLifetimeChoice = types.ObjectValueMust(IkePhase2ProfileIkeKeyLifetimeModelAttributeMap, map[string]attr.Value{
@@ -1592,7 +1592,7 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 		spec.EncryptionAlgos = encryptionAlgosSpec
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> IkeKeyLifetime
+	// resource modelToSpecRoot OneOfField --> IkeKeyLifetime
 	if !data.IkeKeyLifetimeChoice.IsNull() && !data.IkeKeyLifetimeChoice.IsUnknown() {
 		ikeKeyLifetimeChoiceModel := IkePhase2ProfileIkeKeyLifetimeChoice{}
 		response.Diagnostics.Append(data.IkeKeyLifetimeChoice.As(ctx, &ikeKeyLifetimeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1643,6 +1643,10 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 			spec.IkeKeyLifetime = useDefaultKeylifetimeSpecBool
 		}
 
+	} else {
+		spec.IkeKeyLifetime = &ves_io_schema_views_ike_phase2_profile.ReplaceSpecType_UseDefaultKeylifetime{
+			UseDefaultKeylifetime: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot OneOfField --> PfsMode
@@ -1709,12 +1713,8 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_views_ike_phase2_profile.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_views_ike_phase2_profile.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "ike_phase2_profile", err),
@@ -1723,7 +1723,7 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_ike_phase2_profile.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_ike_phase2_profile.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "ike_phase2_profile", err),
@@ -1889,7 +1889,7 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> IkeKeyLifetime
+	// resource SpecToModelRoot OneOfField --> IkeKeyLifetime
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -1976,8 +1976,6 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.IkeKeyLifetimeChoice = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeModelAttributeMap)
 	}
 

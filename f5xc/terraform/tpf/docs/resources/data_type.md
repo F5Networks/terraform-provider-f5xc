@@ -95,32 +95,32 @@ resource "f5xc_data_type" "example" {
 
 Required:
 
-- `pattern_choice` (Attributes) pattern choice Search the data type in the key, value or both (see [below for nested schema](#nestedatt--rules--pattern_choice))
+- `pattern_choice` (Attributes) pattern choice Search the data type in the key, value or both<br>Exactly one of `key_pattern`, `key_value_pattern`, or `value_pattern` must be specified. (see [below for nested schema](#nestedatt--rules--pattern_choice))
 
 <a id="nestedatt--rules--pattern_choice"></a>
 ### Nested Schema for `rules.pattern_choice`
 
 Optional:
 
-- `key_pattern` (Attributes) key pattern Search for pattern across all field names in the specified sections. (see [below for nested schema](#nestedatt--rules--pattern_choice--key_pattern))
-- `key_value_pattern` (Attributes) key-value pattern Search for specific field and value patterns in the specified sections. (see [below for nested schema](#nestedatt--rules--pattern_choice--key_value_pattern))
-- `value_pattern` (Attributes) value pattern Search for pattern across all field values in the specified sections. (see [below for nested schema](#nestedatt--rules--pattern_choice--value_pattern))
+- `key_pattern` (Attributes) key pattern Search for pattern across all field names in the specified sections.<br>Conflicts with `key_value_pattern` and `value_pattern`. (see [below for nested schema](#nestedatt--rules--pattern_choice--key_pattern))
+- `key_value_pattern` (Attributes) key-value pattern Search for specific field and value patterns in the specified sections.<br>Conflicts with `key_pattern` and `value_pattern`. (see [below for nested schema](#nestedatt--rules--pattern_choice--key_value_pattern))
+- `value_pattern` (Attributes) value pattern Search for pattern across all field values in the specified sections.<br>Conflicts with `key_pattern` and `key_value_pattern`. (see [below for nested schema](#nestedatt--rules--pattern_choice--value_pattern))
 
 <a id="nestedatt--rules--pattern_choice--key_pattern"></a>
 ### Nested Schema for `rules.pattern_choice.key_pattern`
 
 Required:
 
-- `type_choice` (Attributes) type_choice How to detect the current rule. by regex/exact value or substring (see [below for nested schema](#nestedatt--rules--pattern_choice--key_pattern--type_choice))
+- `type_choice` (Attributes) type_choice How to detect the current rule. by regex/exact value or substring<br>Exactly one of `exact_values`, `regex_value`, or `substring_value` must be specified. (see [below for nested schema](#nestedatt--rules--pattern_choice--key_pattern--type_choice))
 
 <a id="nestedatt--rules--pattern_choice--key_pattern--type_choice"></a>
 ### Nested Schema for `rules.pattern_choice.key_pattern.type_choice`
 
 Optional:
 
-- `exact_values` (Attributes) exact values Search for values that are exact match to at least one item of the list (see [below for nested schema](#nestedatt--rules--pattern_choice--key_pattern--type_choice--exact_values))
-- `regex_value` (String) regex value Search for values matching this regular expression
-- `substring_value` (String) subtstring Search for values that include this substring
+- `exact_values` (Attributes) exact values Search for values that are exact match to at least one item of the list<br>Conflicts with `regex_value` and `substring_value`. (see [below for nested schema](#nestedatt--rules--pattern_choice--key_pattern--type_choice--exact_values))
+- `regex_value` (String) regex value Search for values matching this regular expression<br>Conflicts with `exact_values` and `substring_value`.
+- `substring_value` (String) subtstring Search for values that include this substring<br>Conflicts with `exact_values` and `regex_value`.
 
 <a id="nestedatt--rules--pattern_choice--key_pattern--type_choice--exact_values"></a>
 ### Nested Schema for `rules.pattern_choice.key_pattern.type_choice.exact_values`
@@ -145,16 +145,16 @@ Required:
 
 Required:
 
-- `type_choice` (Attributes) type_choice How to detect the current rule. by regex/exact value or substring (see [below for nested schema](#nestedatt--rules--pattern_choice--key_value_pattern--key_pattern--type_choice))
+- `type_choice` (Attributes) type_choice How to detect the current rule. by regex/exact value or substring<br>Exactly one of `exact_values`, `regex_value`, or `substring_value` must be specified. (see [below for nested schema](#nestedatt--rules--pattern_choice--key_value_pattern--key_pattern--type_choice))
 
 <a id="nestedatt--rules--pattern_choice--key_value_pattern--key_pattern--type_choice"></a>
 ### Nested Schema for `rules.pattern_choice.key_value_pattern.key_pattern.type_choice`
 
 Optional:
 
-- `exact_values` (Attributes) exact values Search for values that are exact match to at least one item of the list (see [below for nested schema](#nestedatt--rules--pattern_choice--key_value_pattern--key_pattern--type_choice--exact_values))
-- `regex_value` (String) regex value Search for values matching this regular expression
-- `substring_value` (String) subtstring Search for values that include this substring
+- `exact_values` (Attributes) exact values Search for values that are exact match to at least one item of the list<br>Conflicts with `regex_value` and `substring_value`. (see [below for nested schema](#nestedatt--rules--pattern_choice--key_value_pattern--key_pattern--type_choice--exact_values))
+- `regex_value` (String) regex value Search for values matching this regular expression<br>Conflicts with `exact_values` and `substring_value`.
+- `substring_value` (String) subtstring Search for values that include this substring<br>Conflicts with `exact_values` and `regex_value`.
 
 <a id="nestedatt--rules--pattern_choice--key_value_pattern--key_pattern--type_choice--exact_values"></a>
 ### Nested Schema for `rules.pattern_choice.key_value_pattern.key_pattern.type_choice.exact_values`
@@ -171,16 +171,16 @@ Required:
 
 Required:
 
-- `type_choice` (Attributes) type_choice How to detect the current rule. by regex/exact value or substring (see [below for nested schema](#nestedatt--rules--pattern_choice--key_value_pattern--value_pattern--type_choice))
+- `type_choice` (Attributes) type_choice How to detect the current rule. by regex/exact value or substring<br>Exactly one of `exact_values`, `regex_value`, or `substring_value` must be specified. (see [below for nested schema](#nestedatt--rules--pattern_choice--key_value_pattern--value_pattern--type_choice))
 
 <a id="nestedatt--rules--pattern_choice--key_value_pattern--value_pattern--type_choice"></a>
 ### Nested Schema for `rules.pattern_choice.key_value_pattern.value_pattern.type_choice`
 
 Optional:
 
-- `exact_values` (Attributes) exact values Search for values that are exact match to at least one item of the list (see [below for nested schema](#nestedatt--rules--pattern_choice--key_value_pattern--value_pattern--type_choice--exact_values))
-- `regex_value` (String) regex value Search for values matching this regular expression
-- `substring_value` (String) subtstring Search for values that include this substring
+- `exact_values` (Attributes) exact values Search for values that are exact match to at least one item of the list<br>Conflicts with `regex_value` and `substring_value`. (see [below for nested schema](#nestedatt--rules--pattern_choice--key_value_pattern--value_pattern--type_choice--exact_values))
+- `regex_value` (String) regex value Search for values matching this regular expression<br>Conflicts with `exact_values` and `substring_value`.
+- `substring_value` (String) subtstring Search for values that include this substring<br>Conflicts with `exact_values` and `regex_value`.
 
 <a id="nestedatt--rules--pattern_choice--key_value_pattern--value_pattern--type_choice--exact_values"></a>
 ### Nested Schema for `rules.pattern_choice.key_value_pattern.value_pattern.type_choice.exact_values`
@@ -198,16 +198,16 @@ Required:
 
 Required:
 
-- `type_choice` (Attributes) type_choice How to detect the current rule. by regex/exact value or substring (see [below for nested schema](#nestedatt--rules--pattern_choice--value_pattern--type_choice))
+- `type_choice` (Attributes) type_choice How to detect the current rule. by regex/exact value or substring<br>Exactly one of `exact_values`, `regex_value`, or `substring_value` must be specified. (see [below for nested schema](#nestedatt--rules--pattern_choice--value_pattern--type_choice))
 
 <a id="nestedatt--rules--pattern_choice--value_pattern--type_choice"></a>
 ### Nested Schema for `rules.pattern_choice.value_pattern.type_choice`
 
 Optional:
 
-- `exact_values` (Attributes) exact values Search for values that are exact match to at least one item of the list (see [below for nested schema](#nestedatt--rules--pattern_choice--value_pattern--type_choice--exact_values))
-- `regex_value` (String) regex value Search for values matching this regular expression
-- `substring_value` (String) subtstring Search for values that include this substring
+- `exact_values` (Attributes) exact values Search for values that are exact match to at least one item of the list<br>Conflicts with `regex_value` and `substring_value`. (see [below for nested schema](#nestedatt--rules--pattern_choice--value_pattern--type_choice--exact_values))
+- `regex_value` (String) regex value Search for values matching this regular expression<br>Conflicts with `exact_values` and `substring_value`.
+- `substring_value` (String) subtstring Search for values that include this substring<br>Conflicts with `exact_values` and `regex_value`.
 
 <a id="nestedatt--rules--pattern_choice--value_pattern--type_choice--exact_values"></a>
 ### Nested Schema for `rules.pattern_choice.value_pattern.type_choice.exact_values`
@@ -235,17 +235,17 @@ Optional:
 <a id="nestedatt--type"></a>
 ### Nested Schema for `type`
 
-Required:
+Optional:
 
-- `type_choice` (Attributes) OriginType Where should the pattern be searched (see [below for nested schema](#nestedatt--type--type_choice))
+- `type_choice` (Attributes) OriginType Where should the pattern be searched<br>Exactly one of `custom` or `predefined` must be specified when `type_choice` is configured. (see [below for nested schema](#nestedatt--type--type_choice))
 
 <a id="nestedatt--type--type_choice"></a>
 ### Nested Schema for `type.type_choice`
 
 Optional:
 
-- `custom` (Boolean) Custom
-- `predefined` (Boolean) Predefined
+- `custom` (Boolean) Custom<br>Conflicts with `predefined`.
+- `predefined` (Boolean) Predefined<br>Conflicts with `custom`.
 ## Import
 
 In Terraform v1.5.0 and later, use an `import` block to import this resource by ID.
@@ -267,6 +267,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_data_type.example"
+	to = f5xc_data_type.example
 }
 ```

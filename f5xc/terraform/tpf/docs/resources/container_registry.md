@@ -86,16 +86,16 @@ resource "f5xc_container_registry" "example" {
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--password--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--password--secret_info_choice))
 
 <a id="nestedatt--password--secret_info_choice"></a>
 ### Nested Schema for `password.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--password--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--password--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--password--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--password--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--password--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `password.secret_info_choice.blindfold_secret_info`
@@ -154,6 +154,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_container_registry.example"
+	to = f5xc_container_registry.example
 }
 ```

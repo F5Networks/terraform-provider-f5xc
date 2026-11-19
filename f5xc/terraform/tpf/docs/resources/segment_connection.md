@@ -106,7 +106,7 @@ Required:
 
 Optional:
 
-- `connection_choice` (Attributes) Connector Type Choose how source Segments are connected to destination Segments. Choose ‘Direct’ to connect without using NAT, which will allow traffic to flow bi-directionally. Choose ‘SNAT’ options to connect using Source NAT, which will allow traffic to flow when initiated by source Segments (see [below for nested schema](#nestedatt--connections--connection_choice))
+- `connection_choice` (Attributes) Connector Type Choose how source Segments are connected to destination Segments. Choose ‘Direct’ to connect without using NAT, which will allow traffic to flow bi-directionally. Choose ‘SNAT’ options to connect using Source NAT, which will allow traffic to flow when initiated by source Segments<br>`direct` must be specified when `connection_choice` is configured. (see [below for nested schema](#nestedatt--connections--connection_choice))
 
 <a id="nestedatt--connections--destination_segments"></a>
 ### Nested Schema for `connections.destination_segments`
@@ -173,6 +173,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_segment_connection.example"
+	to = f5xc_segment_connection.example
 }
 ```

@@ -775,7 +775,7 @@ func (r *ResourceF5XCBotInfrastructure) Schema(ctx context.Context, request reso
 			},
 			"bot_infra_choice": schema.SingleNestedAttribute{
 				Description:         "choice Identifies if this is an F5 Cloud Hosted, F5 Hosted, Kubernetes or On-Premises infrastructure.",
-				MarkdownDescription: "choice Identifies if this is an F5 Cloud Hosted, F5 Hosted, Kubernetes or On-Premises infrastructure.",
+				MarkdownDescription: "choice Identifies if this is an F5 Cloud Hosted, F5 Hosted, Kubernetes or On-Premises infrastructure.<br>Exactly one of `cloud_hosted`, `kubernetes`, `on_prem`, or `physical_hosted` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -790,7 +790,7 @@ func (r *ResourceF5XCBotInfrastructure) Schema(ctx context.Context, request reso
 				Attributes: map[string]schema.Attribute{
 					"cloud_hosted": schema.SingleNestedAttribute{
 						Description:         "F5 Cloud Hosted Associates an F5 Cloud Hosted service node to the Bot Defense infrastructure",
-						MarkdownDescription: "F5 Cloud Hosted Associates an F5 Cloud Hosted service node to the Bot Defense infrastructure",
+						MarkdownDescription: "F5 Cloud Hosted Associates an F5 Cloud Hosted service node to the Bot Defense infrastructure<br>Conflicts with `kubernetes`, `on_prem`, and `physical_hosted`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -921,7 +921,7 @@ func (r *ResourceF5XCBotInfrastructure) Schema(ctx context.Context, request reso
 										},
 										"type_choice": schema.SingleNestedAttribute{
 											Description:         "Type Choice Hostname or IP",
-											MarkdownDescription: "Type Choice Hostname or IP",
+											MarkdownDescription: "Type Choice Hostname or IP<br>Exactly one of `host_name` or `ip_address` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -934,7 +934,7 @@ func (r *ResourceF5XCBotInfrastructure) Schema(ctx context.Context, request reso
 											Attributes: map[string]schema.Attribute{
 												"host_name": schema.StringAttribute{
 													Description:         "Host Name",
-													MarkdownDescription: "Host Name",
+													MarkdownDescription: "Host Name<br>Conflicts with `ip_address`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -947,7 +947,7 @@ func (r *ResourceF5XCBotInfrastructure) Schema(ctx context.Context, request reso
 												},
 												"ip_address": schema.StringAttribute{
 													Description:         "IP Address Ingress IP Address",
-													MarkdownDescription: "IP Address Ingress IP Address",
+													MarkdownDescription: "IP Address Ingress IP Address<br>Conflicts with `host_name`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -983,7 +983,7 @@ func (r *ResourceF5XCBotInfrastructure) Schema(ctx context.Context, request reso
 					},
 					"kubernetes": schema.SingleNestedAttribute{
 						Description:         "Containerized Hosted Kubernetes is coSSE automated deploying, scaling and managing containers.",
-						MarkdownDescription: "Containerized Hosted Kubernetes is coSSE automated deploying, scaling and managing containers.",
+						MarkdownDescription: "Containerized Hosted Kubernetes is coSSE automated deploying, scaling and managing containers.<br>Conflicts with `cloud_hosted`, `on_prem`, and `physical_hosted`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1141,7 +1141,7 @@ func (r *ResourceF5XCBotInfrastructure) Schema(ctx context.Context, request reso
 					},
 					"on_prem": schema.SingleNestedAttribute{
 						Description:         "F5 On Premises",
-						MarkdownDescription: "F5 On Premises",
+						MarkdownDescription: "F5 On Premises<br>Conflicts with `cloud_hosted`, `kubernetes`, and `physical_hosted`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1244,7 +1244,7 @@ func (r *ResourceF5XCBotInfrastructure) Schema(ctx context.Context, request reso
 					},
 					"physical_hosted": schema.SingleNestedAttribute{
 						Description:         "F5 Hosted",
-						MarkdownDescription: "F5 Hosted",
+						MarkdownDescription: "F5 Hosted<br>Conflicts with `cloud_hosted`, `kubernetes`, and `on_prem`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1407,7 +1407,7 @@ func (r *ResourceF5XCBotInfrastructure) Schema(ctx context.Context, request reso
 			},
 			"create_bot_infra_choice": schema.SingleNestedAttribute{
 				Description:         "choice Identifies if this is an F5 Cloud Hosted infrastructure.",
-				MarkdownDescription: "choice Identifies if this is an F5 Cloud Hosted infrastructure.",
+				MarkdownDescription: "choice Identifies if this is an F5 Cloud Hosted infrastructure.<br>`create_cloud_hosted` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -1466,7 +1466,7 @@ func (r *ResourceF5XCBotInfrastructure) Schema(ctx context.Context, request reso
 							},
 							"type_choice": schema.SingleNestedAttribute{
 								Description:         "Type Choice Identifies the environment as either Production or Testing. Production environments have two infrastructure regions in an Active-Active configuration where traffic is routed equally between the two regions. Test environments have a single infrastructure region.",
-								MarkdownDescription: "Type Choice Identifies the environment as either Production or Testing. Production environments have two infrastructure regions in an Active-Active configuration where traffic is routed equally between the two regions. Test environments have a single infrastructure region.",
+								MarkdownDescription: "Type Choice Identifies the environment as either Production or Testing. Production environments have two infrastructure regions in an Active-Active configuration where traffic is routed equally between the two regions. Test environments have a single infrastructure region.<br>Exactly one of `production_v2` or `testing_v2` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -1479,14 +1479,14 @@ func (r *ResourceF5XCBotInfrastructure) Schema(ctx context.Context, request reso
 								Attributes: map[string]schema.Attribute{
 									"production_v2": schema.SingleNestedAttribute{
 										Description:         "Production Production Protect live production applications and services from automated attacks.",
-										MarkdownDescription: "Production Production Protect live production applications and services from automated attacks.",
+										MarkdownDescription: "Production Production Protect live production applications and services from automated attacks.<br>Conflicts with `testing_v2`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
 										Attributes: map[string]schema.Attribute{
 											"type_choice_production_choice": schema.SingleNestedAttribute{
 												Description:         "Type Choice Select the desired disaster recovery  configuration mode for your Bot Defense Infrastructure.",
-												MarkdownDescription: "Type Choice Select the desired disaster recovery  configuration mode for your Bot Defense Infrastructure.",
+												MarkdownDescription: "Type Choice Select the desired disaster recovery  configuration mode for your Bot Defense Infrastructure.<br>Exactly one of `active_active_region`, `active_passive_region`, or `single_active_region` must be specified when `type_choice_production_choice` is configured.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1500,7 +1500,7 @@ func (r *ResourceF5XCBotInfrastructure) Schema(ctx context.Context, request reso
 												Attributes: map[string]schema.Attribute{
 													"active_active_region": schema.SingleNestedAttribute{
 														Description:         "Active - Active Traffic routed equally to both regions.",
-														MarkdownDescription: "Active - Active Traffic routed equally to both regions.",
+														MarkdownDescription: "Active - Active Traffic routed equally to both regions.<br>Conflicts with `active_passive_region` and `single_active_region`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1523,7 +1523,7 @@ func (r *ResourceF5XCBotInfrastructure) Schema(ctx context.Context, request reso
 													},
 													"active_passive_region": schema.SingleNestedAttribute{
 														Description:         "Active - Passive Traffic routed to Active region with failover to Passive on health failure.",
-														MarkdownDescription: "Active - Passive Traffic routed to Active region with failover to Passive on health failure.",
+														MarkdownDescription: "Active - Passive Traffic routed to Active region with failover to Passive on health failure.<br>Conflicts with `active_active_region` and `single_active_region`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1546,7 +1546,7 @@ func (r *ResourceF5XCBotInfrastructure) Schema(ctx context.Context, request reso
 													},
 													"single_active_region": schema.SingleNestedAttribute{
 														Description:         "Single Active Only one region serves traffic.",
-														MarkdownDescription: "Single Active Only one region serves traffic.",
+														MarkdownDescription: "Single Active Only one region serves traffic.<br>Conflicts with `active_active_region` and `active_passive_region`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1566,14 +1566,14 @@ func (r *ResourceF5XCBotInfrastructure) Schema(ctx context.Context, request reso
 									},
 									"testing_v2": schema.SingleNestedAttribute{
 										Description:         "Testing Test Evaluate new features, settings, and system performance.",
-										MarkdownDescription: "Testing Test Evaluate new features, settings, and system performance.",
+										MarkdownDescription: "Testing Test Evaluate new features, settings, and system performance.<br>Conflicts with `production_v2`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
 										Attributes: map[string]schema.Attribute{
 											"type_choice_testing_choice": schema.SingleNestedAttribute{
 												Description:         "Type Choice Select the desired disaster recovery  configuration mode for your Bot Defense Infrastructure.",
-												MarkdownDescription: "Type Choice Select the desired disaster recovery  configuration mode for your Bot Defense Infrastructure.",
+												MarkdownDescription: "Type Choice Select the desired disaster recovery  configuration mode for your Bot Defense Infrastructure.<br>`single_active_region` must be specified when `type_choice_testing_choice` is configured.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3714,11 +3714,7 @@ func (r *ResourceF5XCBotInfrastructure) Read(ctx context.Context, request resour
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_shape_bot_defense_bot_infrastructure.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_shape_bot_defense_bot_infrastructure.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "bot_infrastructure", err),
@@ -5967,12 +5963,8 @@ func (r *ResourceF5XCBotInfrastructure) Update(ctx context.Context, request reso
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_shape_bot_defense_bot_infrastructure.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_shape_bot_defense_bot_infrastructure.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "bot_infrastructure", err),
@@ -5981,7 +5973,7 @@ func (r *ResourceF5XCBotInfrastructure) Update(ctx context.Context, request reso
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_shape_bot_defense_bot_infrastructure.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_shape_bot_defense_bot_infrastructure.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "bot_infrastructure", err),

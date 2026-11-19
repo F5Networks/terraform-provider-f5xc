@@ -530,11 +530,7 @@ func (r *ResourceF5XCBgpAsnSet) Read(ctx context.Context, request resource.ReadR
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_bgp_asn_set.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_bgp_asn_set.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "bgp_asn_set", err),
@@ -810,12 +806,8 @@ func (r *ResourceF5XCBgpAsnSet) Update(ctx context.Context, request resource.Upd
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_bgp_asn_set.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_bgp_asn_set.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "bgp_asn_set", err),
@@ -824,7 +816,7 @@ func (r *ResourceF5XCBgpAsnSet) Update(ctx context.Context, request resource.Upd
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_bgp_asn_set.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_bgp_asn_set.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "bgp_asn_set", err),

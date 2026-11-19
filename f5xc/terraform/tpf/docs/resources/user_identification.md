@@ -79,30 +79,30 @@ resource "f5xc_user_identification" "example" {
 <a id="nestedatt--rules"></a>
 ### Nested Schema for `rules`
 
-Required:
+Optional:
 
-- `identifier_choice` (Attributes) identifier Type of identifier to be used in rule. (see [below for nested schema](#nestedatt--rules--identifier_choice))
+- `identifier_choice` (Attributes) identifier Type of identifier to be used in rule.<br>Exactly one of `client_asn`, `client_city`, `client_country`, `client_ip`, `client_region`, `cookie_name`, `http_header_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `none`, `query_param_key`, or `tls_fingerprint` must be specified when `identifier_choice` is configured. (see [below for nested schema](#nestedatt--rules--identifier_choice))
 
 <a id="nestedatt--rules--identifier_choice"></a>
 ### Nested Schema for `rules.identifier_choice`
 
 Optional:
 
-- `client_asn` (Boolean) client asn Use client ASN as user identifier. The client ASN is obtained by performing a lookup for the client IP Address in a GeoIP DB.
-- `client_city` (Boolean) client city Use client city as user identifier. The client city is obtained by performing a lookup for the client IP Address in a GeoIP DB.
-- `client_country` (Boolean) client country Use client country as user identifier. The client country is obtained by performing a lookup for the client IP Address in a GeoIP DB.
-- `client_ip` (Boolean) client ip address Use client IP address as user identifier.
-- `client_region` (Boolean) client region Use client region as user identifier. The client region is obtained by performing a lookup for the client IP Address in a GeoIP DB.
-- `cookie_name` (String) Cookie Name Use the HTTP cookie value for the given name as user identifier.
-- `http_header_name` (String) HTTP header name Use the HTTP header value for the given name as user identifier.
-- `ip_and_http_header_name` (String) HTTP header name Name of HTTP header from which the value should be extracted.
-- `ip_and_ja4_tls_fingerprint` (Boolean) ip_and_ja4_tls_fingerprint Use the combination of Client IP and JA4 TLS Fingerprint as user identifier
-- `ip_and_tls_fingerprint` (Boolean) tls_fingerprint Use the combination of Client IP and JA3 TLS Fingerprint as user identifier
-- `ja4_tls_fingerprint` (Boolean) ja4_tls_fingerprint Use JA4 TLS Fingerprint as user identifier
-- `jwt_claim_name` (String) JWT claim name Use the JWT claim value as user identifier.
-- `none` (Boolean) none Do not use any user identifier.
-- `query_param_key` (String) query param key Use the query parameter value for the given key as user identifier.
-- `tls_fingerprint` (Boolean) tls_fingerprint User JA3 TLS Fingerprint as user identifier
+- `client_asn` (Boolean) client asn Use client ASN as user identifier. The client ASN is obtained by performing a lookup for the client IP Address in a GeoIP DB.<br>Conflicts with `client_city`, `client_country`, `client_ip`, `client_region`, `cookie_name`, `http_header_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `none`, `query_param_key`, and `tls_fingerprint`.
+- `client_city` (Boolean) client city Use client city as user identifier. The client city is obtained by performing a lookup for the client IP Address in a GeoIP DB.<br>Conflicts with `client_asn`, `client_country`, `client_ip`, `client_region`, `cookie_name`, `http_header_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `none`, `query_param_key`, and `tls_fingerprint`.
+- `client_country` (Boolean) client country Use client country as user identifier. The client country is obtained by performing a lookup for the client IP Address in a GeoIP DB.<br>Conflicts with `client_asn`, `client_city`, `client_ip`, `client_region`, `cookie_name`, `http_header_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `none`, `query_param_key`, and `tls_fingerprint`.
+- `client_ip` (Boolean) client ip address Use client IP address as user identifier.<br>Conflicts with `client_asn`, `client_city`, `client_country`, `client_region`, `cookie_name`, `http_header_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `none`, `query_param_key`, and `tls_fingerprint`.
+- `client_region` (Boolean) client region Use client region as user identifier. The client region is obtained by performing a lookup for the client IP Address in a GeoIP DB.<br>Conflicts with `client_asn`, `client_city`, `client_country`, `client_ip`, `cookie_name`, `http_header_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `none`, `query_param_key`, and `tls_fingerprint`.
+- `cookie_name` (String) Cookie Name Use the HTTP cookie value for the given name as user identifier.<br>Conflicts with `client_asn`, `client_city`, `client_country`, `client_ip`, `client_region`, `http_header_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `none`, `query_param_key`, and `tls_fingerprint`.
+- `http_header_name` (String) HTTP header name Use the HTTP header value for the given name as user identifier.<br>Conflicts with `client_asn`, `client_city`, `client_country`, `client_ip`, `client_region`, `cookie_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `none`, `query_param_key`, and `tls_fingerprint`.
+- `ip_and_http_header_name` (String) HTTP header name Name of HTTP header from which the value should be extracted.<br>Conflicts with `client_asn`, `client_city`, `client_country`, `client_ip`, `client_region`, `cookie_name`, `http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `none`, `query_param_key`, and `tls_fingerprint`.
+- `ip_and_ja4_tls_fingerprint` (Boolean) ip_and_ja4_tls_fingerprint Use the combination of Client IP and JA4 TLS Fingerprint as user identifier<br>Conflicts with `client_asn`, `client_city`, `client_country`, `client_ip`, `client_region`, `cookie_name`, `http_header_name`, `ip_and_http_header_name`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `none`, `query_param_key`, and `tls_fingerprint`.
+- `ip_and_tls_fingerprint` (Boolean) tls_fingerprint Use the combination of Client IP and JA3 TLS Fingerprint as user identifier<br>Conflicts with `client_asn`, `client_city`, `client_country`, `client_ip`, `client_region`, `cookie_name`, `http_header_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `none`, `query_param_key`, and `tls_fingerprint`.
+- `ja4_tls_fingerprint` (Boolean) ja4_tls_fingerprint Use JA4 TLS Fingerprint as user identifier<br>Conflicts with `client_asn`, `client_city`, `client_country`, `client_ip`, `client_region`, `cookie_name`, `http_header_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `jwt_claim_name`, `none`, `query_param_key`, and `tls_fingerprint`.
+- `jwt_claim_name` (String) JWT claim name Use the JWT claim value as user identifier.<br>Conflicts with `client_asn`, `client_city`, `client_country`, `client_ip`, `client_region`, `cookie_name`, `http_header_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `none`, `query_param_key`, and `tls_fingerprint`.
+- `none` (Boolean) none Do not use any user identifier.<br>Conflicts with `client_asn`, `client_city`, `client_country`, `client_ip`, `client_region`, `cookie_name`, `http_header_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `query_param_key`, and `tls_fingerprint`.
+- `query_param_key` (String) query param key Use the query parameter value for the given key as user identifier.<br>Conflicts with `client_asn`, `client_city`, `client_country`, `client_ip`, `client_region`, `cookie_name`, `http_header_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `none`, and `tls_fingerprint`.
+- `tls_fingerprint` (Boolean) tls_fingerprint User JA3 TLS Fingerprint as user identifier<br>Conflicts with `client_asn`, `client_city`, `client_country`, `client_ip`, `client_region`, `cookie_name`, `http_header_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `none`, and `query_param_key`.
 
 
 
@@ -136,6 +136,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_user_identification.example"
+	to = f5xc_user_identification.example
 }
 ```

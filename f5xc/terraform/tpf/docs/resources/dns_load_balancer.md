@@ -156,8 +156,8 @@ Required:
 
 Required:
 
-- `action_choice` (Attributes) action choice Action for the DNS Load Balancing Rule (see [below for nested schema](#nestedatt--rule_list--rules--action_choice))
-- `client_choice` (Attributes) client_choice Selects the clients for which the DNS Load Balancing Rule will be applied. The conditions are limited to the geo location, ASN, and IP prefix from where the client DNS request originates. This geo location, ASN, and IP prefix is derived from the EDNS0 client subnet. (see [below for nested schema](#nestedatt--rule_list--rules--client_choice))
+- `action_choice` (Attributes) action choice Action for the DNS Load Balancing Rule<br>`pool` must be specified. (see [below for nested schema](#nestedatt--rule_list--rules--action_choice))
+- `client_choice` (Attributes) client_choice Selects the clients for which the DNS Load Balancing Rule will be applied. The conditions are limited to the geo location, ASN, and IP prefix from where the client DNS request originates. This geo location, ASN, and IP prefix is derived from the EDNS0 client subnet.<br>Exactly one of `asn_list`, `asn_matcher`, `geo_location_label_selector`, `geo_location_set`, `ip_prefix_list`, or `ip_prefix_set` must be specified. (see [below for nested schema](#nestedatt--rule_list--rules--client_choice))
 
 Optional:
 
@@ -186,12 +186,12 @@ Required:
 
 Optional:
 
-- `asn_list` (Attributes) asn list List of 4-byte ASN values. The rule evaluates to true if the origin ASN is present in the ASN list. (see [below for nested schema](#nestedatt--rule_list--rules--client_choice--asn_list))
-- `asn_matcher` (Attributes) asn matcher List of references to BGP ASN Set objects. The rule evaluates to true if the origin ASN is present in one of the BGP ASN Set objects. (see [below for nested schema](#nestedatt--rule_list--rules--client_choice--asn_matcher))
-- `geo_location_label_selector` (Attributes) geo_location label selector A label selector that describes the expected set of geo locations for the clients. The selected geo locations are matched with the translated geo locations derived from incoming EDNS0 client-subnet in the DNS request. (see [below for nested schema](#nestedatt--rule_list--rules--client_choice--geo_location_label_selector))
-- `geo_location_set` (Attributes) geo_location selector Select the pre-defined geo location set. The selected locations in the geo location set are matched with the translated geo locations derived from incoming EDNS0 client-subnet in the DNS request. (see [below for nested schema](#nestedatt--rule_list--rules--client_choice--geo_location_set))
-- `ip_prefix_list` (Attributes) IP prefix list List of IP Prefix values. The rule evaluates to true if the EDNS0 client subnet is covered by one or more of the IP prefixes in the IP Prefix list. (see [below for nested schema](#nestedatt--rule_list--rules--client_choice--ip_prefix_list))
-- `ip_prefix_set` (Attributes) IP prefix set List of references to IP Prefix Set objects. The rule evaluates to true if the EDNS0 client subnet is covered by one or more of the IP prefixes in the IP Prefix set. (see [below for nested schema](#nestedatt--rule_list--rules--client_choice--ip_prefix_set))
+- `asn_list` (Attributes) asn list List of 4-byte ASN values. The rule evaluates to true if the origin ASN is present in the ASN list.<br>Conflicts with `asn_matcher`, `geo_location_label_selector`, `geo_location_set`, `ip_prefix_list`, and `ip_prefix_set`. (see [below for nested schema](#nestedatt--rule_list--rules--client_choice--asn_list))
+- `asn_matcher` (Attributes) asn matcher List of references to BGP ASN Set objects. The rule evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.<br>Conflicts with `asn_list`, `geo_location_label_selector`, `geo_location_set`, `ip_prefix_list`, and `ip_prefix_set`. (see [below for nested schema](#nestedatt--rule_list--rules--client_choice--asn_matcher))
+- `geo_location_label_selector` (Attributes) geo_location label selector A label selector that describes the expected set of geo locations for the clients. The selected geo locations are matched with the translated geo locations derived from incoming EDNS0 client-subnet in the DNS request.<br>Conflicts with `asn_list`, `asn_matcher`, `geo_location_set`, `ip_prefix_list`, and `ip_prefix_set`. (see [below for nested schema](#nestedatt--rule_list--rules--client_choice--geo_location_label_selector))
+- `geo_location_set` (Attributes) geo_location selector Select the pre-defined geo location set. The selected locations in the geo location set are matched with the translated geo locations derived from incoming EDNS0 client-subnet in the DNS request.<br>Conflicts with `asn_list`, `asn_matcher`, `geo_location_label_selector`, `ip_prefix_list`, and `ip_prefix_set`. (see [below for nested schema](#nestedatt--rule_list--rules--client_choice--geo_location_set))
+- `ip_prefix_list` (Attributes) IP prefix list List of IP Prefix values. The rule evaluates to true if the EDNS0 client subnet is covered by one or more of the IP prefixes in the IP Prefix list.<br>Conflicts with `asn_list`, `asn_matcher`, `geo_location_label_selector`, `geo_location_set`, and `ip_prefix_set`. (see [below for nested schema](#nestedatt--rule_list--rules--client_choice--ip_prefix_list))
+- `ip_prefix_set` (Attributes) IP prefix set List of references to IP Prefix Set objects. The rule evaluates to true if the EDNS0 client subnet is covered by one or more of the IP prefixes in the IP Prefix set.<br>Conflicts with `asn_list`, `asn_matcher`, `geo_location_label_selector`, `geo_location_set`, and `ip_prefix_list`. (see [below for nested schema](#nestedatt--rule_list--rules--client_choice--ip_prefix_set))
 
 <a id="nestedatt--rule_list--rules--client_choice--asn_list"></a>
 ### Nested Schema for `rule_list.rules.client_choice.asn_list`
@@ -286,18 +286,18 @@ Required:
 <a id="nestedatt--response_cache"></a>
 ### Nested Schema for `response_cache`
 
-Required:
+Optional:
 
-- `response_cache_parameters_choice` (Attributes) Response Cache Parameters Choice When Response Cache is enabled, clients will receive persistent answers (see [below for nested schema](#nestedatt--response_cache--response_cache_parameters_choice))
+- `response_cache_parameters_choice` (Attributes) Response Cache Parameters Choice When Response Cache is enabled, clients will receive persistent answers<br>Exactly one of `default_response_cache_parameters`, `disable`, or `response_cache_parameters` must be specified when `response_cache_parameters_choice` is configured. (see [below for nested schema](#nestedatt--response_cache--response_cache_parameters_choice))
 
 <a id="nestedatt--response_cache--response_cache_parameters_choice"></a>
 ### Nested Schema for `response_cache.response_cache_parameters_choice`
 
 Optional:
 
-- `default_response_cache_parameters` (Boolean) Default Response Cache Parameters Default Parameters for caching the DNS responses
-- `disable` (Boolean) Disable Response Cache When Response Cache is disabled, responses will be computed for each request
-- `response_cache_parameters` (Attributes) Response Cache Parameters Customize the parameters for Response cache (see [below for nested schema](#nestedatt--response_cache--response_cache_parameters_choice--response_cache_parameters))
+- `default_response_cache_parameters` (Boolean) Default Response Cache Parameters Default Parameters for caching the DNS responses<br>Conflicts with `disable` and `response_cache_parameters`.
+- `disable` (Boolean) Disable Response Cache When Response Cache is disabled, responses will be computed for each request<br>Conflicts with `default_response_cache_parameters` and `response_cache_parameters`.
+- `response_cache_parameters` (Attributes) Response Cache Parameters Customize the parameters for Response cache<br>Conflicts with `default_response_cache_parameters` and `disable`. (see [below for nested schema](#nestedatt--response_cache--response_cache_parameters_choice--response_cache_parameters))
 
 <a id="nestedatt--response_cache--response_cache_parameters_choice--response_cache_parameters"></a>
 ### Nested Schema for `response_cache.response_cache_parameters_choice.response_cache_parameters`
@@ -351,6 +351,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_dns_load_balancer.example"
+	to = f5xc_dns_load_balancer.example
 }
 ```

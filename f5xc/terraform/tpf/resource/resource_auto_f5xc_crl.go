@@ -182,7 +182,7 @@ func (r *ResourceF5XCCrl) Schema(ctx context.Context, request resource.SchemaReq
 			},
 			"access_info_choice": schema.SingleNestedAttribute{
 				Description:         "CRL Access information",
-				MarkdownDescription: "CRL Access information",
+				MarkdownDescription: "CRL Access information<br>`http_access` must be specified when `access_info_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -744,11 +744,7 @@ func (r *ResourceF5XCCrl) Read(ctx context.Context, request resource.ReadRequest
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_crl.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_crl.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "crl", err),
@@ -1135,12 +1131,8 @@ func (r *ResourceF5XCCrl) Update(ctx context.Context, request resource.UpdateReq
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_crl.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_crl.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "crl", err),
@@ -1149,7 +1141,7 @@ func (r *ResourceF5XCCrl) Update(ctx context.Context, request resource.UpdateReq
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_crl.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_crl.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "crl", err),

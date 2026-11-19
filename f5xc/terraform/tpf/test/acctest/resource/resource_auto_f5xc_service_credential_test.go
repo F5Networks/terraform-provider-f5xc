@@ -212,6 +212,54 @@ func TestAccResourceAutoF5XCServiceCredential_withUserGroups(t *testing.T) {
 	})
 }
 
+// TestAccResourceAutoF5XCServiceCredential_withKubeConfig exercises the
+// vk8s_kubeconfig service_credential_choice variant by supplying vk8s_namespace
+// and vk8s_cluster_name (routing Create/Get/Delete through vk8s_namespace).
+// Step 3 re-applies the same configuration to verify that Read against the vK8s
+// namespace produces no diff, followed by a second import.
+//
+// In-place Update is intentionally not exercised: the backend rejects
+// ReplaceServiceCredentials for vK8s kubeconfig (SERVICE_KUBE_CONFIG) credentials
+// with HTTP 400 "wrong type of service credentials".
+//
+// Prerequisite: the target tenant must already contain the namespace
+// "terraform-acceptance-test" with a virtual_k8s named "test-vk8s"; the test does not
+// create them. Re-record VCR cassettes against a tenant that has both objects.
+func TestAccResourceAutoF5XCServiceCredential_withKubeConfig(t *testing.T) {
+	t.Parallel()
+
+	name := "example-sc-" + acctest.RandString(t, 8)
+	namespace := "system"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckServiceCredentialDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceAutoF5XCServiceCredentialConfig_withKubeConfig(name, namespace, "terraform-acceptance-test", "test-vk8s", 30),
+				Check:  testAccCheckServiceCredentialVK8sState("terraform-acceptance-test", "30"),
+			},
+			{
+				ResourceName:      "f5xc_service_credential.example",
+				ImportState:       true,
+				ImportStateVerify: false,
+				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_service_credential.example", "service_credential_choice.vk8s_kubeconfig.vk8s_namespace", "credential_name"),
+			},
+			{
+				Config: testAccResourceAutoF5XCServiceCredentialConfig_withKubeConfig(name, namespace, "terraform-acceptance-test", "test-vk8s", 30),
+				Check:  testAccCheckServiceCredentialVK8sState("terraform-acceptance-test", "30"),
+			},
+			{
+				ResourceName:      "f5xc_service_credential.example",
+				ImportState:       true,
+				ImportStateVerify: false,
+				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_service_credential.example", "service_credential_choice.vk8s_kubeconfig.vk8s_namespace", "credential_name"),
+			},
+		},
+	})
+}
+
 // TestAccResourceAutoF5XCServiceCredential_full tests all major fields populated
 // including optional ones: namespace_roles, user_group_names, renew_trigger.
 func TestAccResourceAutoF5XCServiceCredential_full(t *testing.T) {
@@ -382,6 +430,44 @@ resource "f5xc_service_credential" "example" {
   ]
 }
 `, name, namespace)
+}
+
+// testAccCheckServiceCredentialVK8sState verifies the state of a vk8s_kubeconfig
+// f5xc_service_credential after apply: the root namespace stays "system" while the
+// credential lives in the vK8s namespace, and the backend credential_name is set.
+func testAccCheckServiceCredentialVK8sState(vk8sNamespace, expirationDays string) resource.TestCheckFunc {
+	const addr = "f5xc_service_credential.example"
+	return resource.ComposeAggregateTestCheckFunc(
+		resource.TestCheckResourceAttr(addr, "namespace", "system"),
+		resource.TestCheckResourceAttrSet(addr, "credential_name"),
+		resource.TestCheckResourceAttr(addr, "service_credential_choice.vk8s_kubeconfig.vk8s_namespace", vk8sNamespace),
+		resource.TestCheckResourceAttr(addr, "expiration_days", expirationDays),
+	)
+}
+
+func testAccResourceAutoF5XCServiceCredentialConfig_withKubeConfig(name, namespace, vk8sNamespace, vk8sClusterName string, expirationDays int) string {
+	return fmt.Sprintf(`
+resource "f5xc_service_credential" "example" {
+  name            = %q
+  namespace       = %q
+  expiration_days = %d
+  renew_trigger   = false
+
+  service_credential_choice = {
+    vk8s_kubeconfig = {
+      vk8s_namespace    = %q
+      vk8s_cluster_name = %q
+    }
+  }
+
+  namespace_roles = [
+    {
+      namespace = %q
+      role      = "ves-io-admin-role"
+    }
+  ]
+}
+`, name, namespace, expirationDays, vk8sNamespace, vk8sClusterName, vk8sNamespace)
 }
 
 func testAccResourceAutoF5XCServiceCredentialConfig_full(name, namespace string) string {

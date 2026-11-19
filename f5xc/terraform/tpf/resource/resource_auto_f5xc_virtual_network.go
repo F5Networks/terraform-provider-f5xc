@@ -29,6 +29,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -127,7 +128,7 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for RequiredOneOfField --> NetworkChoice
+// Attribute map for OneOfField --> NetworkChoice
 var VirtualNetworkNetworkChoiceModelAttributeMap = map[string]attr.Type{
 
 	"global_network": types.BoolType,
@@ -355,22 +356,25 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 			},
 			"network_choice": schema.SingleNestedAttribute{
 				Description:         "Network Type Choice Select network type, Global, inside or outside",
-				MarkdownDescription: "Network Type Choice Select network type, Global, inside or outside",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Network Type Choice Select network type, Global, inside or outside<br>Exactly one of `global_network`, `legacy_type`, `site_local_inside_network`, or `site_local_network` must be specified when `network_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"global_network",
 						"legacy_type",
 						"site_local_inside_network",
 						"site_local_network",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"global_network": schema.BoolAttribute{
 						Description:         "Global Network Global network can extend to multiple sites.",
-						MarkdownDescription: "Global Network Global network can extend to multiple sites.",
+						MarkdownDescription: "Global Network Global network can extend to multiple sites.<br>Conflicts with `legacy_type`, `site_local_inside_network`, and `site_local_network`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -380,7 +384,7 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 					},
 					"legacy_type": schema.ListAttribute{
 						Description:         "Legacy Network config Type of virtual network",
-						MarkdownDescription: "Legacy Network config Type of virtual network<br>**Allowed Values (choose one):** `['VIRTUAL_NETWORK_GLOBAL', 'VIRTUAL_NETWORK_MANAGEMENT', 'VIRTUAL_NETWORK_PER_SITE', 'VIRTUAL_NETWORK_SEGMENT', 'VIRTUAL_NETWORK_SITE_LOCAL', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE', 'VIRTUAL_NETWORK_SITE_SERVICE']`",
+						MarkdownDescription: "Legacy Network config Type of virtual network<br>**Allowed Values (choose one):** `['VIRTUAL_NETWORK_GLOBAL', 'VIRTUAL_NETWORK_MANAGEMENT', 'VIRTUAL_NETWORK_PER_SITE', 'VIRTUAL_NETWORK_SEGMENT', 'VIRTUAL_NETWORK_SITE_LOCAL', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE', 'VIRTUAL_NETWORK_SITE_SERVICE']`<br>Conflicts with `global_network`, `site_local_inside_network`, and `site_local_network`.",
 						ElementType:         types.StringType,
 						Required:            false,
 						Optional:            true,
@@ -392,7 +396,7 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 					},
 					"site_local_inside_network": schema.BoolAttribute{
 						Description:         "Site Local Inside Network Site local Inside network, also known as inside network",
-						MarkdownDescription: "Site Local Inside Network Site local Inside network, also known as inside network",
+						MarkdownDescription: "Site Local Inside Network Site local Inside network, also known as inside network<br>Conflicts with `global_network`, `legacy_type`, and `site_local_network`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -402,7 +406,7 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 					},
 					"site_local_network": schema.BoolAttribute{
 						Description:         "Site Local Network (outside) Site local network, also known as outside network",
-						MarkdownDescription: "Site Local Network (outside) Site local network, also known as outside network",
+						MarkdownDescription: "Site Local Network (outside) Site local network, also known as outside network<br>Conflicts with `global_network`, `legacy_type`, and `site_local_inside_network`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -455,7 +459,7 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 						},
 						"next_hop_choice": schema.SingleNestedAttribute{
 							Description:         "Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface.",
-							MarkdownDescription: "Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface.",
+							MarkdownDescription: "Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface.<br>Exactly one of `default_gateway`, `ip_address`, or `node_interface` must be specified.",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
@@ -469,7 +473,7 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 							Attributes: map[string]schema.Attribute{
 								"default_gateway": schema.BoolAttribute{
 									Description:         "Default Gateway Traffic matching the ip prefixes is sent to the default gateway",
-									MarkdownDescription: "Default Gateway Traffic matching the ip prefixes is sent to the default gateway",
+									MarkdownDescription: "Default Gateway Traffic matching the ip prefixes is sent to the default gateway<br>Conflicts with `ip_address` and `node_interface`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -479,7 +483,7 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 								},
 								"ip_address": schema.StringAttribute{
 									Description:         "IP Address Traffic matching the ip prefixes is sent to this IP Address",
-									MarkdownDescription: "IP Address Traffic matching the ip prefixes is sent to this IP Address",
+									MarkdownDescription: "IP Address Traffic matching the ip prefixes is sent to this IP Address<br>Conflicts with `default_gateway` and `node_interface`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -492,7 +496,7 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 								},
 								"node_interface": schema.SingleNestedAttribute{
 									Description:         "Node Interface Traffic matching the ip prefixes is sent to this interface",
-									MarkdownDescription: "Node Interface Traffic matching the ip prefixes is sent to this interface",
+									MarkdownDescription: "Node Interface Traffic matching the ip prefixes is sent to this interface<br>Conflicts with `default_gateway` and `ip_address`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -606,7 +610,7 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 						},
 						"next_hop_choice": schema.SingleNestedAttribute{
 							Description:         "Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface.",
-							MarkdownDescription: "Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface.",
+							MarkdownDescription: "Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface.<br>Exactly one of `default_gateway`, `ip_address`, or `node_interface` must be specified.",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
@@ -620,7 +624,7 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 							Attributes: map[string]schema.Attribute{
 								"default_gateway": schema.BoolAttribute{
 									Description:         "Default Gateway Traffic matching the ip prefixes is sent to the default gateway",
-									MarkdownDescription: "Default Gateway Traffic matching the ip prefixes is sent to the default gateway",
+									MarkdownDescription: "Default Gateway Traffic matching the ip prefixes is sent to the default gateway<br>Conflicts with `ip_address` and `node_interface`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -630,7 +634,7 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 								},
 								"ip_address": schema.StringAttribute{
 									Description:         "IP Address Traffic matching the ip prefixes is sent to this IP Address",
-									MarkdownDescription: "IP Address Traffic matching the ip prefixes is sent to this IP Address",
+									MarkdownDescription: "IP Address Traffic matching the ip prefixes is sent to this IP Address<br>Conflicts with `default_gateway` and `node_interface`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -643,7 +647,7 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 								},
 								"node_interface": schema.SingleNestedAttribute{
 									Description:         "Node Interface Traffic matching the ip prefixes is sent to this interface",
-									MarkdownDescription: "Node Interface Traffic matching the ip prefixes is sent to this interface",
+									MarkdownDescription: "Node Interface Traffic matching the ip prefixes is sent to this interface<br>Conflicts with `default_gateway` and `ip_address`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -867,7 +871,7 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> NetworkChoice
+	// resource modelToSpecRoot OneOfField --> NetworkChoice
 	if !data.NetworkChoice.IsNull() && !data.NetworkChoice.IsUnknown() {
 		networkChoiceModel := VirtualNetNetChoice{}
 		response.Diagnostics.Append(data.NetworkChoice.As(ctx, &networkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -918,6 +922,10 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 			spec.NetworkChoice = siteLocalNetworkSpecBool
 		}
 
+	} else {
+		spec.NetworkChoice = &ves_io_schema_virtual_network.CreateSpecType_GlobalNetwork{
+			GlobalNetwork: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -1446,7 +1454,7 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> NetworkChoice
+	// resource SpecToModelRoot OneOfField --> NetworkChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -1486,8 +1494,8 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var networkChoiceChoices interface{}
 		if v := rawSpecMap["network_choice"]; v != nil {
 			networkChoiceChoices = v
@@ -2174,15 +2182,14 @@ func (r *ResourceF5XCVirtualNetwork) Read(ctx context.Context, request resource.
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
 	readGetRspType := strings.Replace(ves_io_schema_virtual_network.ObjectType, "Object", "GetResponse", 1)
 	readGetProtoMsgType := proto.MessageType(readGetRspType).Elem()
 	readCallRsp := &server.CallResponse{
 		ProtoMsg: reflect.New(readGetProtoMsgType).Interface().(proto.Message),
 	}
-	opts = append(opts, vesapi.WithOutCallResponse(readCallRsp))
+	opts := []vesapi.CallOpt{
+		vesapi.WithOutCallResponse(readCallRsp),
+	}
 
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_virtual_network.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
@@ -2371,7 +2378,7 @@ func (r *ResourceF5XCVirtualNetwork) Read(ctx context.Context, request resource.
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> NetworkChoice
+	// resource SpecToModelRoot OneOfField --> NetworkChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -2411,8 +2418,8 @@ func (r *ResourceF5XCVirtualNetwork) Read(ctx context.Context, request resource.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var networkChoiceChoices interface{}
 		if v := rawSpecMap["network_choice"]; v != nil {
 			networkChoiceChoices = v
@@ -3179,7 +3186,7 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> NetworkChoice
+	// resource modelToSpecRoot OneOfField --> NetworkChoice
 	if !data.NetworkChoice.IsNull() && !data.NetworkChoice.IsUnknown() {
 		networkChoiceModel := VirtualNetNetChoice{}
 		response.Diagnostics.Append(data.NetworkChoice.As(ctx, &networkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3230,6 +3237,10 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 			spec.NetworkChoice = siteLocalNetworkSpecBool
 		}
 
+	} else {
+		spec.NetworkChoice = &ves_io_schema_virtual_network.ReplaceSpecType_GlobalNetwork{
+			GlobalNetwork: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -3553,12 +3564,8 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_virtual_network.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_virtual_network.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "virtual_network", err),
@@ -3570,7 +3577,9 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 	updateCallRsp := &server.CallResponse{
 		ProtoMsg: reflect.New(updateGetProtoMsgType).Interface().(proto.Message),
 	}
-	opts = append(opts, vesapi.WithOutCallResponse(updateCallRsp))
+	opts := []vesapi.CallOpt{
+		vesapi.WithOutCallResponse(updateCallRsp),
+	}
 
 	// Read the replaced object
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_virtual_network.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
@@ -3759,7 +3768,7 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> NetworkChoice
+	// resource SpecToModelRoot OneOfField --> NetworkChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -3799,8 +3808,8 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var networkChoiceChoices interface{}
 		if v := rawSpecMap["network_choice"]; v != nil {
 			networkChoiceChoices = v

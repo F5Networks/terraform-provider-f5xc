@@ -219,7 +219,7 @@ func (r *ResourceF5XCVirtualK8S) Schema(ctx context.Context, request resource.Sc
 			},
 			"service_isolation_choice": schema.SingleNestedAttribute{
 				Description:         "service_isolation_choice Service isolation choice",
-				MarkdownDescription: "service_isolation_choice Service isolation choice",
+				MarkdownDescription: "service_isolation_choice Service isolation choice<br>Exactly one of `disabled` or `isolated` must be specified when `service_isolation_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -232,7 +232,7 @@ func (r *ResourceF5XCVirtualK8S) Schema(ctx context.Context, request resource.Sc
 				Attributes: map[string]schema.Attribute{
 					"disabled": schema.BoolAttribute{
 						Description:         "Disabled K8s services are not restricted and communcation can happen across namespaces unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to true",
-						MarkdownDescription: "Disabled K8s services are not restricted and communcation can happen across namespaces unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to true",
+						MarkdownDescription: "Disabled K8s services are not restricted and communcation can happen across namespaces unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to true<br>Conflicts with `isolated`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -242,7 +242,7 @@ func (r *ResourceF5XCVirtualK8S) Schema(ctx context.Context, request resource.Sc
 					},
 					"isolated": schema.BoolAttribute{
 						Description:         "Isolated Isolated K8s services restrict any K8s services created in the Virtual K8s from communicating outside the namespace unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to false",
-						MarkdownDescription: "Isolated Isolated K8s services restrict any K8s services created in the Virtual K8s from communicating outside the namespace unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to false",
+						MarkdownDescription: "Isolated Isolated K8s services restrict any K8s services created in the Virtual K8s from communicating outside the namespace unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to false<br>Conflicts with `disabled`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -894,11 +894,7 @@ func (r *ResourceF5XCVirtualK8S) Read(ctx context.Context, request resource.Read
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_virtual_k8s.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_virtual_k8s.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "virtual_k8s", err),
@@ -1381,12 +1377,8 @@ func (r *ResourceF5XCVirtualK8S) Update(ctx context.Context, request resource.Up
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_virtual_k8s.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_virtual_k8s.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "virtual_k8s", err),
@@ -1395,7 +1387,7 @@ func (r *ResourceF5XCVirtualK8S) Update(ctx context.Context, request resource.Up
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_virtual_k8s.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_virtual_k8s.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "virtual_k8s", err),

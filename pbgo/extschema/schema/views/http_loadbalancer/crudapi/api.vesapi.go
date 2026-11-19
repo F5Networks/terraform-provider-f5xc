@@ -2643,11 +2643,9 @@ var APISwaggerJSON string = `{
             "description": "List of all supported Violation Types\n\nVIOL_NONE\nVIOL_FILETYPE\nVIOL_METHOD\nVIOL_MANDATORY_HEADER\nVIOL_HTTP_RESPONSE_STATUS\nVIOL_REQUEST_MAX_LENGTH\nVIOL_FILE_UPLOAD\nVIOL_FILE_UPLOAD_IN_BODY\nVIOL_XML_MALFORMED\nVIOL_JSON_MALFORMED\nVIOL_ASM_COOKIE_MODIFIED\nVIOL_HTTP_PROTOCOL_MULTIPLE_HOST_HEADERS\nVIOL_HTTP_PROTOCOL_BAD_HOST_HEADER_VALUE\nVIOL_HTTP_PROTOCOL_UNPARSABLE_REQUEST_CONTENT\nVIOL_HTTP_PROTOCOL_NULL_IN_REQUEST\nVIOL_HTTP_PROTOCOL_BAD_HTTP_VERSION\nVIOL_HTTP_PROTOCOL_CRLF_CHARACTERS_BEFORE_REQUEST_START\nVIOL_HTTP_PROTOCOL_NO_HOST_HEADER_IN_HTTP_1_1_REQUEST\nVIOL_HTTP_PROTOCOL_BAD_MULTIPART_PARAMETERS_PARSING\nVIOL_HTTP_PROTOCOL_SEVERAL_CONTENT_LENGTH_HEADERS\nVIOL_HTTP_PROTOCOL_CONTENT_LENGTH_SHOULD_BE_A_POSITIVE_NUMBER\nVIOL_EVASION_DIRECTORY_TRAVERSALS\nVIOL_MALFORMED_REQUEST\nVIOL_EVASION_MULTIPLE_DECODING\nVIOL_DATA_GUARD\nVIOL_EVASION_APACHE_WHITESPACE\nVIOL_COOKIE_MODIFIED\nVIOL_EVASION_IIS_UNICODE_CODEPOINTS\nVIOL_EVASION_IIS_BACKSLASHES\nVIOL_EVASION_PERCENT_U_DECODING\nVIOL_EVASION_BARE_BYTE_DECODING\nVIOL_EVASION_BAD_UNESCAPE\nVIOL_HTTP_PROTOCOL_BAD_MULTIPART_FORMDATA_REQUEST_PARSING\nVIOL_HTTP_PROTOCOL_BODY_IN_GET_OR_HEAD_REQUEST\nVIOL_HTTP_PROTOCOL_HIGH_ASCII_CHARACTERS_IN_HEADERS\nVIOL_ENCODING\nVIOL_COOKIE_MALFORMED\nVIOL_GRAPHQL_FORMAT\nVIOL_GRAPHQL_MALFORMED\nVIOL_GRAPHQL_INTROSPECTION_QUERY",
             "title": "App Firewall Violation Type",
             "enum": [
-                "VIOL_NONE",
                 "VIOL_FILETYPE",
                 "VIOL_METHOD",
                 "VIOL_MANDATORY_HEADER",
-                "VIOL_HTTP_RESPONSE_STATUS",
                 "VIOL_REQUEST_MAX_LENGTH",
                 "VIOL_FILE_UPLOAD",
                 "VIOL_FILE_UPLOAD_IN_BODY",
@@ -2667,7 +2665,6 @@ var APISwaggerJSON string = `{
                 "VIOL_EVASION_DIRECTORY_TRAVERSALS",
                 "VIOL_MALFORMED_REQUEST",
                 "VIOL_EVASION_MULTIPLE_DECODING",
-                "VIOL_DATA_GUARD",
                 "VIOL_EVASION_APACHE_WHITESPACE",
                 "VIOL_COOKIE_MODIFIED",
                 "VIOL_EVASION_IIS_UNICODE_CODEPOINTS",
@@ -2679,10 +2676,7 @@ var APISwaggerJSON string = `{
                 "VIOL_HTTP_PROTOCOL_BODY_IN_GET_OR_HEAD_REQUEST",
                 "VIOL_HTTP_PROTOCOL_HIGH_ASCII_CHARACTERS_IN_HEADERS",
                 "VIOL_ENCODING",
-                "VIOL_COOKIE_MALFORMED",
-                "VIOL_GRAPHQL_FORMAT",
-                "VIOL_GRAPHQL_MALFORMED",
-                "VIOL_GRAPHQL_INTROSPECTION_QUERY"
+                "VIOL_COOKIE_MALFORMED"
             ],
             "default": "VIOL_NONE",
             "x-displayname": "App Firewall Violation Type",
@@ -2693,7 +2687,6 @@ var APISwaggerJSON string = `{
             "description": "List of all Attack Types\n\nATTACK_TYPE_NONE\nATTACK_TYPE_NON_BROWSER_CLIENT\nATTACK_TYPE_OTHER_APPLICATION_ATTACKS\nATTACK_TYPE_TROJAN_BACKDOOR_SPYWARE\nATTACK_TYPE_DETECTION_EVASION\nATTACK_TYPE_VULNERABILITY_SCAN\nATTACK_TYPE_ABUSE_OF_FUNCTIONALITY\nATTACK_TYPE_AUTHENTICATION_AUTHORIZATION_ATTACKS\nATTACK_TYPE_BUFFER_OVERFLOW\nATTACK_TYPE_PREDICTABLE_RESOURCE_LOCATION\nATTACK_TYPE_INFORMATION_LEAKAGE\nATTACK_TYPE_DIRECTORY_INDEXING\nATTACK_TYPE_PATH_TRAVERSAL\nATTACK_TYPE_XPATH_INJECTION\nATTACK_TYPE_LDAP_INJECTION\nATTACK_TYPE_SERVER_SIDE_CODE_INJECTION\nATTACK_TYPE_COMMAND_EXECUTION\nATTACK_TYPE_SQL_INJECTION\nATTACK_TYPE_CROSS_SITE_SCRIPTING\nATTACK_TYPE_DENIAL_OF_SERVICE\nATTACK_TYPE_HTTP_PARSER_ATTACK\nATTACK_TYPE_SESSION_HIJACKING\nATTACK_TYPE_HTTP_RESPONSE_SPLITTING\nATTACK_TYPE_FORCEFUL_BROWSING\nATTACK_TYPE_REMOTE_FILE_INCLUDE\nATTACK_TYPE_MALICIOUS_FILE_UPLOAD\nATTACK_TYPE_GRAPHQL_PARSER_ATTACK",
             "title": "AttackType",
             "enum": [
-                "ATTACK_TYPE_NONE",
                 "ATTACK_TYPE_NON_BROWSER_CLIENT",
                 "ATTACK_TYPE_OTHER_APPLICATION_ATTACKS",
                 "ATTACK_TYPE_TROJAN_BACKDOOR_SPYWARE",
@@ -2718,8 +2711,7 @@ var APISwaggerJSON string = `{
                 "ATTACK_TYPE_HTTP_RESPONSE_SPLITTING",
                 "ATTACK_TYPE_FORCEFUL_BROWSING",
                 "ATTACK_TYPE_REMOTE_FILE_INCLUDE",
-                "ATTACK_TYPE_MALICIOUS_FILE_UPLOAD",
-                "ATTACK_TYPE_GRAPHQL_PARSER_ATTACK"
+                "ATTACK_TYPE_MALICIOUS_FILE_UPLOAD"
             ],
             "default": "ATTACK_TYPE_NONE",
             "x-displayname": "Attack Types",
@@ -3524,6 +3516,50 @@ var APISwaggerJSON string = `{
                     "description": "x-displayName: \"Infrastructure For Web\"\nSelect an infrastructure to process web traffic. Be sure to add your web app FQDN to the Bot Network Policy, and the infrastructure domain to the infrastructure ACL.",
                     "title": "Web",
                     "$ref": "#/definitions/schemaviewsObjectRefType"
+                }
+            }
+        },
+        "common_securityBotDefenseBasicType": {
+            "type": "object",
+            "description": "Bot Protection",
+            "title": "BotDefenseBasicType",
+            "x-displayname": "Bot Protection",
+            "x-ves-oneof-field-java_script_choice": "[\"disable_js_insert\",\"js_insert_all_pages\",\"js_insert_all_pages_except\",\"js_insertion_rules\"]",
+            "x-ves-proto-message": "ves.io.schema.views.common_security.BotDefenseBasicType",
+            "properties": {
+                "disable_js_insert": {
+                    "description": "Exclusive with [js_insert_all_pages js_insert_all_pages_except js_insertion_rules]\n Disable JavaScript insertion.",
+                    "title": "Disable JavaScript Insertion",
+                    "$ref": "#/definitions/schemaEmpty",
+                    "x-displayname": "Disable JavaScript Insertion"
+                },
+                "js_insert_all_pages": {
+                    "description": "Exclusive with [disable_js_insert js_insert_all_pages_except js_insertion_rules]\n Insert Bot Defense JavaScript in all pages.",
+                    "title": "Insert JavaScript in All Pages",
+                    "$ref": "#/definitions/common_securityShapeJavaScriptInsertAllType",
+                    "x-displayname": "Insert JavaScript in All Pages"
+                },
+                "js_insert_all_pages_except": {
+                    "description": "Exclusive with [disable_js_insert js_insert_all_pages js_insertion_rules]\n Insert Bot Defense JavaScript in all pages with the exceptions.",
+                    "title": "Insert JavaScript in All Pages with the Exceptions",
+                    "$ref": "#/definitions/common_securityShapeJavaScriptInsertAllWithExceptionsType",
+                    "x-displayname": "Insert JavaScript in All Pages with the Exceptions"
+                },
+                "js_insertion_rules": {
+                    "description": "Exclusive with [disable_js_insert js_insert_all_pages js_insert_all_pages_except]\n Specify custom JavaScript insertion rules.",
+                    "title": "Custom JavaScript Insertion Rules",
+                    "$ref": "#/definitions/common_securityShapeJavaScriptInsertType",
+                    "x-displayname": "Custom JavaScript Insertion Rules"
+                },
+                "policy": {
+                    "description": " The default policy settings will be applied, with all bot detection types configured under the low-risk criteria. The domain is derived from the HTTP Load Balancer, and the path is set to include everything.\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n",
+                    "title": "Web",
+                    "$ref": "#/definitions/schemaviewsObjectRefType",
+                    "x-displayname": "Bot Protection Policy",
+                    "x-ves-required": "true",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.message.required": "true"
+                    }
                 }
             }
         },
@@ -6064,9 +6100,14 @@ var APISwaggerJSON string = `{
                 },
                 "issuer": {
                     "type": "string",
-                    "description": "Exclusive with [issuer_disable]\n",
+                    "description": "Exclusive with [issuer_disable]\n\n\nValidation Rules:\n  ves.io.schema.rules.string.max_len: 512\n  ves.io.schema.rules.string.not_empty: true\n",
                     "title": "issuer",
-                    "x-displayname": "Exact Match"
+                    "maxLength": 512,
+                    "x-displayname": "Exact Match",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.string.max_len": "512",
+                        "ves.io.schema.rules.string.not_empty": "true"
+                    }
                 },
                 "issuer_disable": {
                     "description": "Exclusive with [issuer]\n",
@@ -6706,6 +6747,7 @@ var APISwaggerJSON string = `{
             "description": "This defines various options to define a route",
             "title": "Advanced options",
             "x-displayname": "Advanced Options",
+            "x-ves-oneof-field-http10_choice": "[\"disable_http10\",\"enable_http10\"]",
             "x-ves-oneof-field-max_requests_per_connection_choice": "[\"max_requests_per_connection\",\"no_request_limit_per_connection\"]",
             "x-ves-oneof-field-path_normalize_choice": "[\"disable_path_normalize\",\"enable_path_normalize\"]",
             "x-ves-oneof-field-strict_sni_host_header_check_choice": "[]",
@@ -6742,11 +6784,23 @@ var APISwaggerJSON string = `{
                     "title": "Disable the use of default F5XC error pages",
                     "x-displayname": "Disable Default Error Pages"
                 },
+                "disable_http10": {
+                    "description": "Exclusive with [enable_http10]\n Reject HTTP/1.0 and HTTP/0.9 traffic on this LB.",
+                    "title": "Disable HTTP/1.0",
+                    "$ref": "#/definitions/schemaEmpty",
+                    "x-displayname": "Disable"
+                },
                 "disable_path_normalize": {
                     "description": "Exclusive with [enable_path_normalize]\n",
                     "title": "Disable Path normalization",
                     "$ref": "#/definitions/schemaEmpty",
                     "x-displayname": "Disable"
+                },
+                "enable_http10": {
+                    "description": "Exclusive with [disable_http10]\n Allow HTTP/1.0 and HTTP/0.9 traffic on this LB.",
+                    "title": "Enable HTTP/1.0",
+                    "$ref": "#/definitions/schemaEmpty",
+                    "x-displayname": "Enable"
                 },
                 "enable_path_normalize": {
                     "description": "Exclusive with [disable_path_normalize]\n",
@@ -7095,6 +7149,37 @@ var APISwaggerJSON string = `{
                 }
             }
         },
+        "http_loadbalancerCDNConfig": {
+            "type": "object",
+            "title": "Enable CDN Config",
+            "x-displayname": "Enable",
+            "x-ves-displayorder": "1,2",
+            "x-ves-proto-message": "ves.io.schema.views.http_loadbalancer.CDNConfig",
+            "properties": {
+                "caching_policy": {
+                    "description": "\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n",
+                    "title": "Caching Policies",
+                    "$ref": "#/definitions/http_loadbalancerCachingPolicy",
+                    "x-displayname": "Caching Policies",
+                    "x-ves-required": "true",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.message.required": "true"
+                    }
+                },
+                "compression_params": {
+                    "description": " Enables load balancer to compress dispatched data from an upstream service upon client request.\n Only GZIP compression is supported",
+                    "title": "Text Compression Parameters",
+                    "$ref": "#/definitions/virtual_hostCompressionType",
+                    "x-displayname": "Textual Compression"
+                },
+                "image_optimization_config": {
+                    "description": " Automatically translates images into the most compatible format (WebP/AVIF)",
+                    "title": "Image Optimizations",
+                    "$ref": "#/definitions/http_loadbalancerImageOptimizationConfig",
+                    "x-displayname": "Image Optimizations (EA)"
+                }
+            }
+        },
         "http_loadbalancerCachingPolicy": {
             "type": "object",
             "description": "x-required\nCaching Policies for the CDN",
@@ -7196,6 +7281,29 @@ var APISwaggerJSON string = `{
                         "ves.io.schema.rules.message.required": "true",
                         "ves.io.schema.rules.repeated.max_items": "8",
                         "ves.io.schema.rules.repeated.unique": "true"
+                    }
+                }
+            }
+        },
+        "http_loadbalancerImageOptimizationConfig": {
+            "type": "object",
+            "title": "Image Optimization Config",
+            "x-displayname": "Image Optimizations",
+            "x-ves-proto-message": "ves.io.schema.views.http_loadbalancer.ImageOptimizationConfig",
+            "properties": {
+                "image_optimizations": {
+                    "type": "array",
+                    "description": "\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.max_items: 64\n",
+                    "title": "Image Optimizations",
+                    "maxItems": 64,
+                    "items": {
+                        "$ref": "#/definitions/virtual_hostVHImageOptimizationSettings"
+                    },
+                    "x-displayname": "Image Optimizations",
+                    "x-ves-required": "true",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.message.required": "true",
+                        "ves.io.schema.rules.repeated.max_items": "64"
                     }
                 }
             }
@@ -7420,7 +7528,7 @@ var APISwaggerJSON string = `{
                 },
                 "append_server_name": {
                     "type": "string",
-                    "description": "Exclusive with [default_header pass_through server_name]\n Define the header value for the header name “server”.\n If header value is already present, it is not overwritten and passed as-is.\n\nValidation Rules:\n  ves.io.schema.rules.string.max_len: 8096\n",
+                    "description": "Exclusive with [default_header pass_through server_name]\n Define the header value for the header name \"server\".\n If header value is already present, it is not overwritten and passed as-is.\n\nValidation Rules:\n  ves.io.schema.rules.string.max_len: 8096\n",
                     "title": "append_server_name",
                     "maxLength": 8096,
                     "x-displayname": "Append header value",
@@ -7446,7 +7554,7 @@ var APISwaggerJSON string = `{
                     }
                 },
                 "default_header": {
-                    "description": "Exclusive with [append_server_name pass_through server_name]\n Response header name is “server” and value is “volt-adc”",
+                    "description": "Exclusive with [append_server_name pass_through server_name]\n Response header name is \"server\" and value is \"volt-adc\"",
                     "title": "default_header",
                     "$ref": "#/definitions/schemaEmpty",
                     "x-displayname": "Default"
@@ -7521,7 +7629,7 @@ var APISwaggerJSON string = `{
                 },
                 "server_name": {
                     "type": "string",
-                    "description": "Exclusive with [append_server_name default_header pass_through]\n Define the header value for the header name “server”.\n This will overwrite existing values, if any, for the server header.\n\nValidation Rules:\n  ves.io.schema.rules.string.max_len: 8096\n",
+                    "description": "Exclusive with [append_server_name default_header pass_through]\n Define the header value for the header name \"server\".\n This will overwrite existing values, if any, for the server header.\n\nValidation Rules:\n  ves.io.schema.rules.string.max_len: 8096\n",
                     "title": "server_name",
                     "maxLength": 8096,
                     "x-displayname": "Modify header value",
@@ -7564,7 +7672,7 @@ var APISwaggerJSON string = `{
                 },
                 "append_server_name": {
                     "type": "string",
-                    "description": "Exclusive with [default_header pass_through server_name]\n Define the header value for the header name “server”.\n If header value is already present, it is not overwritten and passed as-is.\n\nValidation Rules:\n  ves.io.schema.rules.string.max_len: 8096\n",
+                    "description": "Exclusive with [default_header pass_through server_name]\n Define the header value for the header name \"server\".\n If header value is already present, it is not overwritten and passed as-is.\n\nValidation Rules:\n  ves.io.schema.rules.string.max_len: 8096\n",
                     "title": "append_server_name",
                     "maxLength": 8096,
                     "x-displayname": "Append header value",
@@ -7590,7 +7698,7 @@ var APISwaggerJSON string = `{
                     }
                 },
                 "default_header": {
-                    "description": "Exclusive with [append_server_name pass_through server_name]\n Response header name is “server” and value is “volt-adc”",
+                    "description": "Exclusive with [append_server_name pass_through server_name]\n Response header name is \"server\" and value is \"volt-adc\"",
                     "title": "default_header",
                     "$ref": "#/definitions/schemaEmpty",
                     "x-displayname": "Default"
@@ -7670,7 +7778,7 @@ var APISwaggerJSON string = `{
                 },
                 "server_name": {
                     "type": "string",
-                    "description": "Exclusive with [append_server_name default_header pass_through]\n Define the header value for the header name “server”.\n This will overwrite existing values, if any, for the server header.\n\nValidation Rules:\n  ves.io.schema.rules.string.max_len: 8096\n",
+                    "description": "Exclusive with [append_server_name default_header pass_through]\n Define the header value for the header name \"server\".\n This will overwrite existing values, if any, for the server header.\n\nValidation Rules:\n  ves.io.schema.rules.string.max_len: 8096\n",
                     "title": "server_name",
                     "maxLength": 8096,
                     "x-displayname": "Modify header value",
@@ -10612,7 +10720,6 @@ var APISwaggerJSON string = `{
             "description": "Specifies known TLS fingerprint classes\n\n - TLS_FINGERPRINT_NONE: TLS_FINGERPRINT_NONE\n\nNo TLS fingerprint\n - ANY_MALICIOUS_FINGERPRINT: ANY_MALICIOUS_FINGERPRINT\n\nTLS fingerprints known to be associated with malicious clients\n - ADWARE: ADWARE\n\nTLS fingerprints known to be associated with adware\n - ADWIND: ADWIND\n\nTLS fingerprints known to be associated with adwind\n - DRIDEX: DRIDEX\n\nTLS fingerprints known to be associated with dridex\n - GOOTKIT: GOOTKIT\n\nTLS fingerprints known to be associated with gootkit\n - GOZI: GOZI\n\nTLS fingerprints known to be associated with gozi\n - JBIFROST: JBIFROST\n\nTLS fingerprints known to be associated with jbifrost\n - QUAKBOT: QUAKBOT\n\nTLS fingerprints known to be associated with quakbot\n - RANSOMWARE: RANSOMWARE\n\nTLS fingerprints known to be associated with ransomware\n - TROLDESH: TROLDESH\n\nTLS fingerprints known to be associated with troldesh\n - TOFSEE: TOFSEE\n\nTLS fingerprints known to be associated with tofsee\n - TORRENTLOCKER: TORRENTLOCKER\n\nTLS fingerprints known to be associated with torrentlocker\n - TRICKBOT: TRICKBOT\n\nTLS fingerprints known to be associated with trickbot",
             "title": "TLS known fingerprint class",
             "enum": [
-                "TLS_FINGERPRINT_NONE",
                 "ANY_MALICIOUS_FINGERPRINT",
                 "ADWARE",
                 "ADWIND",
@@ -12679,12 +12786,12 @@ var APISwaggerJSON string = `{
                 },
                 "status": {
                     "type": "string",
-                    "description": " Status of the condition\n \"Success\" Validtion has succeded. Requested operation was successful.\n \"Failed\"  Validation has failed.\n \"Incomplete\" Validation of configuration has failed due to missing configuration.\n \"Installed\" Validation has passed and configuration has been installed in data path or K8s\n \"Down\" Configuration is operationally down. e.g. down interface\n \"Disabled\" Configuration is administratively disabled i.e. ObjectMetaType.Disable = true.\n \"NotApplicable\" Configuration is not applicable e.g. tenant service_policy_set(s) in system namespace are not applicable on REs\n\nExample: - \"Failed\"-\n\nValidation Rules:\n  ves.io.schema.rules.string.in: [\\\"Success\\\",\\\"Failed\\\",\\\"Incomplete\\\",\\\"Installed\\\",\\\"Down\\\",\\\"Disabled\\\",\\\"NotApplicable\\\"]\n",
+                    "description": " Status of the condition\n \"Success\" Validation has succeeded. Requested operation was successful.\n \"Failed\"  Validation or operation has failed.\n \"Incomplete\" Validation of configuration has failed due to missing configuration.\n \"Installed\" Validation has passed and configuration has been installed in data path or K8s.\n \"Down\" Configuration is operationally down. e.g. down interface.\n \"Disabled\" Configuration is administratively disabled i.e. ObjectMetaType.Disable = true.\n \"NotApplicable\" Configuration is not applicable e.g. tenant service_policy_set(s) in system namespace are not applicable on REs.\n \"InProgress\" Operation is in progress.\n\nExample: - \"Failed\"-\n\nValidation Rules:\n  ves.io.schema.rules.string.in: [\\\"Success\\\",\\\"Failed\\\",\\\"Incomplete\\\",\\\"Installed\\\",\\\"Down\\\",\\\"Disabled\\\",\\\"NotApplicable\\\",\\\"InProgress\\\"]\n",
                     "title": "status",
                     "x-displayname": "Status",
                     "x-ves-example": "Failed",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.string.in": "[\\\"Success\\\",\\\"Failed\\\",\\\"Incomplete\\\",\\\"Installed\\\",\\\"Down\\\",\\\"Disabled\\\",\\\"NotApplicable\\\"]"
+                        "ves.io.schema.rules.string.in": "[\\\"Success\\\",\\\"Failed\\\",\\\"Incomplete\\\",\\\"Installed\\\",\\\"Down\\\",\\\"Disabled\\\",\\\"NotApplicable\\\",\\\"InProgress\\\"]"
                     }
                 },
                 "type": {
@@ -13139,7 +13246,6 @@ var APISwaggerJSON string = `{
             "description": "Specifies the Hash Algorithm to be used\n\nInvalid hash algorithm\nsha256 hash algorithm\nsha1 hash algorithm",
             "title": "HashAlgoritm",
             "enum": [
-                "INVALID_HASH_ALGORITHM",
                 "SHA256",
                 "SHA1"
             ],
@@ -13734,20 +13840,26 @@ var APISwaggerJSON string = `{
             "description": "SecretType is used in an object to indicate a sensitive/confidential field",
             "title": "SecretType",
             "x-displayname": "Secret",
-            "x-ves-oneof-field-secret_info_oneof": "[\"blindfold_secret_info\",\"clear_secret_info\"]",
+            "x-ves-oneof-field-secret_info_oneof": "[\"blindfold_secret_info\",\"clear_secret_info\",\"none\"]",
             "x-ves-proto-message": "ves.io.schema.SecretType",
             "properties": {
                 "blindfold_secret_info": {
-                    "description": "Exclusive with [clear_secret_info]\n Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+                    "description": "Exclusive with [clear_secret_info none]\n Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
                     "title": "Blindfold Secret",
                     "$ref": "#/definitions/schemaBlindfoldSecretInfoType",
                     "x-displayname": "Blindfold Secret"
                 },
                 "clear_secret_info": {
-                    "description": "Exclusive with [blindfold_secret_info]\n Clear Secret is used for the secrets that are not encrypted",
+                    "description": "Exclusive with [blindfold_secret_info none]\n Clear Secret is used for the secrets that are not encrypted",
                     "title": "Clear Secret",
                     "$ref": "#/definitions/schemaClearSecretInfoType",
                     "x-displayname": "Clear Secret"
+                },
+                "none": {
+                    "description": "Exclusive with [blindfold_secret_info clear_secret_info]\n No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+                    "title": "None",
+                    "$ref": "#/definitions/schemaEmpty",
+                    "x-displayname": "None"
                 }
             }
         },
@@ -16271,7 +16383,8 @@ var APISwaggerJSON string = `{
             "x-ves-oneof-field-api_discovery_choice": "[\"disable_api_discovery\",\"enable_api_discovery\"]",
             "x-ves-oneof-field-api_testing_choice": "[\"api_testing\",\"disable_api_testing\"]",
             "x-ves-oneof-field-bot_defense_choice": "[\"bot_defense\",\"bot_defense_advanced_protection\",\"disable_bot_defense\"]",
-            "x-ves-oneof-field-cache_options": "[\"caching_policy\",\"disable_caching\"]",
+            "x-ves-oneof-field-bot_protection_choice": "[\"bot_protection\",\"disable_bot_protection\"]",
+            "x-ves-oneof-field-cache_options": "[\"disable_caching\",\"enable_cdn\"]",
             "x-ves-oneof-field-challenge_type": "[\"captcha_challenge\",\"enable_challenge\",\"js_challenge\",\"no_challenge\",\"policy_based_challenge\"]",
             "x-ves-oneof-field-client_side_defense_choice": "[\"client_side_defense\",\"disable_client_side_defense\"]",
             "x-ves-oneof-field-hash_policy_choice": "[\"cookie_stickiness\",\"least_active\",\"random\",\"ring_hash\",\"round_robin\",\"source_ip_stickiness\"]",
@@ -16411,20 +16524,16 @@ var APISwaggerJSON string = `{
                     "x-displayname": "Enable Bot Defense Standard"
                 },
                 "bot_defense_advanced_protection": {
-                    "description": "Exclusive with [bot_defense disable_bot_defense]\n Select Bot Defense",
+                    "description": "Exclusive with [bot_defense disable_bot_defense]\n",
                     "title": "Bot Defense Advanced Protection",
                     "$ref": "#/definitions/common_securityBotDefenseAdvancedProtection",
-                    "x-displayname": "Enable Bot Defense"
+                    "x-displayname": "Enable Bot Defense Advanced"
                 },
-                "caching_policy": {
-                    "description": "Exclusive with [disable_caching]\n Caching Policies for the CDN.\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n",
-                    "title": "Enable CDN",
-                    "$ref": "#/definitions/http_loadbalancerCachingPolicy",
-                    "x-displayname": "Caching Policies",
-                    "x-ves-required": "true",
-                    "x-ves-validation-rules": {
-                        "ves.io.schema.rules.message.required": "true"
-                    }
+                "bot_protection": {
+                    "description": "Exclusive with [disable_bot_protection]\n Application-wide protection for web applications against automated threats and unwanted bot activity.",
+                    "title": "Enable Bot Protection for Distributed Cloud",
+                    "$ref": "#/definitions/common_securityBotDefenseBasicType",
+                    "x-displayname": "Enable Bot Protection for Distributed Cloud"
                 },
                 "captcha_challenge": {
                     "description": "Exclusive with [enable_challenge js_challenge no_challenge policy_based_challenge]\n Configure Captcha challenge on this load balancer",
@@ -16546,8 +16655,14 @@ var APISwaggerJSON string = `{
                     "$ref": "#/definitions/schemaEmpty",
                     "x-displayname": "Disable"
                 },
+                "disable_bot_protection": {
+                    "description": "Exclusive with [bot_protection]\n No Bot Protection configuration for this load balancer",
+                    "title": "Disable Bot Protection",
+                    "$ref": "#/definitions/schemaEmpty",
+                    "x-displayname": "Disable"
+                },
                 "disable_caching": {
-                    "description": "Exclusive with [caching_policy]\n",
+                    "description": "Exclusive with [enable_cdn]\n",
                     "title": "Disable CDN",
                     "$ref": "#/definitions/schemaEmpty",
                     "x-displayname": "Disable"
@@ -16650,6 +16765,16 @@ var APISwaggerJSON string = `{
                     "title": "Enable API discovery",
                     "$ref": "#/definitions/common_wafApiDiscoverySetting",
                     "x-displayname": "Enable"
+                },
+                "enable_cdn": {
+                    "description": "Exclusive with [disable_caching]\n CDN caching and image optimization configuration.\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n",
+                    "title": "Enable CDN",
+                    "$ref": "#/definitions/http_loadbalancerCDNConfig",
+                    "x-displayname": "Enable",
+                    "x-ves-required": "true",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.message.required": "true"
+                    }
                 },
                 "enable_challenge": {
                     "description": "Exclusive with [captcha_challenge js_challenge no_challenge policy_based_challenge]\n Configure auto mitigation i.e risk based challenges for malicious users",
@@ -17217,6 +17342,19 @@ var APISwaggerJSON string = `{
                         "$ref": "#/definitions/virtual_hostDNSRecord"
                     },
                     "x-displayname": "DNS Records"
+                },
+                "dns_zones": {
+                    "type": "array",
+                    "description": " DNS Zone references in use by this object\n\nValidation Rules:\n  ves.io.schema.rules.repeated.max_items: 256\n",
+                    "title": "DNS Zone References",
+                    "maxItems": 256,
+                    "items": {
+                        "$ref": "#/definitions/ioschemaObjectRefType"
+                    },
+                    "x-displayname": "DNS Zone References",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.repeated.max_items": "256"
+                    }
                 }
             }
         },
@@ -17286,11 +17424,13 @@ var APISwaggerJSON string = `{
             "description": "List of Client IP Headers",
             "title": "Trust Client IP Headers List Type",
             "x-displayname": "Trust Client IP Headers List",
+            "x-ves-displayorder": "1,2",
+            "x-ves-oneof-field-xff_num_trusted_hops_choice": "[\"xff_num_trusted_hops_custom\",\"xff_num_trusted_hops_default\"]",
             "x-ves-proto-message": "ves.io.schema.virtual_host.ClientIPHeaders",
             "properties": {
                 "client_ip_headers": {
                     "type": "array",
-                    "description": " Define the list of one or more Client IP Headers.  Headers will be used in order from top to bottom, meaning\n if the first header is not present in the request, the system will proceed to check for the second header,\n and so on, until one of the listed headers is found. If none of the defined headers exist, or the value\n is not an IP address, then the system will use the source IP of the packet. If multiple defined headers with\n different names are present in the request, the value of the first header name in the configuration will be used.\n If multiple defined headers with the same name are present in the request, values of all those headers will be combined.\n The system will read the right-most IP address from header, if there are multiple ip addresses in the header value.\n For X-Forwarded-For header, the system will read the IP address(rightmost - 1), as the client ip\n\nExample: - \"Client-IP-Header\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.items.string.max_bytes: 256\n  ves.io.schema.rules.repeated.items.string.min_bytes: 1\n  ves.io.schema.rules.repeated.max_items: 5\n  ves.io.schema.rules.repeated.min_items: 1\n  ves.io.schema.rules.repeated.unique: true\n",
+                    "description": " Specify one or more HTTP header names that can contain the client IP address. The system\n evaluates the headers in the configured order and uses the first header that is present in\n the request. If multiple configured headers are present, the configured order determines\n which header takes precedence.\n\n If the request contains multiple instances of the selected header, the system concatenates\n their values in the order they appear (comma-separated) before evaluating them. For headers\n other than X-Forwarded-For, the system uses the rightmost IP address when the header\n contains multiple IP addresses.\n\n For X-Forwarded-For, the system skips IP addresses from the right according to the\n \"Trusted Proxy Hops for X-Forwarded-For setting\" and uses the next IP address as the client IP.\n\n If none of the configured headers are present, if the selected value is not a valid IP\n address, or if the X-Forwarded-For header contains fewer IPs than the configured trusted\n hops, the system uses the source IP address of the incoming connection. Configure only\n headers that are inserted or overwritten by trusted proxies.\n\nExample: - \"Client-IP-Header\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.items.string.max_bytes: 256\n  ves.io.schema.rules.repeated.items.string.min_bytes: 1\n  ves.io.schema.rules.repeated.max_items: 5\n  ves.io.schema.rules.repeated.min_items: 1\n  ves.io.schema.rules.repeated.unique: true\n",
                     "title": "Client IP Headers",
                     "minItems": 1,
                     "maxItems": 5,
@@ -17310,6 +17450,24 @@ var APISwaggerJSON string = `{
                         "ves.io.schema.rules.repeated.min_items": "1",
                         "ves.io.schema.rules.repeated.unique": "true"
                     }
+                },
+                "xff_num_trusted_hops_custom": {
+                    "type": "integer",
+                    "description": "Exclusive with [xff_num_trusted_hops_default]\n Specify the number of IP addresses to skip from the right in the X-Forwarded-For header\n before selecting the client IP address. The minimum value is 1.\n\nExample: - \"2\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.gte: 1\n  ves.io.schema.rules.uint32.lte: 255\n",
+                    "title": "Custom Trusted Hops",
+                    "format": "int64",
+                    "x-displayname": "Custom Number of Trusted Proxy Hops",
+                    "x-ves-example": "2",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.uint32.gte": "1",
+                        "ves.io.schema.rules.uint32.lte": "255"
+                    }
+                },
+                "xff_num_trusted_hops_default": {
+                    "description": "Exclusive with [xff_num_trusted_hops_custom]\n Use one trusted proxy hop. The system skips the rightmost IP address in the\n X-Forwarded-For header.",
+                    "title": "Default Trusted Hops",
+                    "$ref": "#/definitions/schemaEmpty",
+                    "x-displayname": "Default"
                 }
             }
         },
@@ -17589,6 +17747,82 @@ var APISwaggerJSON string = `{
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.string.max_len": "65536",
                         "ves.io.schema.rules.string.uri_ref": "true"
+                    }
+                }
+            }
+        },
+        "virtual_hostVHImageOptimizationSettings": {
+            "type": "object",
+            "description": "Configuration for image optimization per domain and path",
+            "title": "VHImageOptimizationSettings",
+            "x-displayname": "Image Optimization Settings",
+            "x-ves-oneof-field-applied_domains_choice": "[\"all_domains\",\"select_domains\"]",
+            "x-ves-oneof-field-image_optimization_method": "[\"express\"]",
+            "x-ves-proto-message": "ves.io.schema.virtual_host.VHImageOptimizationSettings",
+            "properties": {
+                "all_domains": {
+                    "description": "Exclusive with [select_domains]\n",
+                    "title": "All Domains",
+                    "$ref": "#/definitions/schemaEmpty",
+                    "x-displayname": "All Domains"
+                },
+                "express": {
+                    "description": "Exclusive with []\n",
+                    "title": "Express",
+                    "$ref": "#/definitions/schemaEmpty",
+                    "x-displayname": "Express"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "\nExample: - \"my-image-optimization\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.string.max_len: 128\n",
+                    "title": "Name",
+                    "maxLength": 128,
+                    "x-displayname": "Name",
+                    "x-ves-example": "my-image-optimization",
+                    "x-ves-required": "true",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.message.required": "true",
+                        "ves.io.schema.rules.string.max_len": "128"
+                    }
+                },
+                "path": {
+                    "description": "\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n",
+                    "title": "Path Match",
+                    "$ref": "#/definitions/ioschemaPathMatcherType",
+                    "x-displayname": "Path Match",
+                    "x-ves-required": "true",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.message.required": "true"
+                    }
+                },
+                "select_domains": {
+                    "description": "Exclusive with [all_domains]\n",
+                    "title": "Select Domains",
+                    "$ref": "#/definitions/virtual_hostVHSelectDomainsType",
+                    "x-displayname": "Select Domains"
+                }
+            }
+        },
+        "virtual_hostVHSelectDomainsType": {
+            "type": "object",
+            "title": "VHSelectDomainsType",
+            "x-displayname": "Select Domains",
+            "x-ves-proto-message": "ves.io.schema.virtual_host.VHSelectDomainsType",
+            "properties": {
+                "domains": {
+                    "type": "array",
+                    "description": "\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.max_items: 32\n  ves.io.schema.rules.repeated.unique: true\n",
+                    "title": "Domains",
+                    "maxItems": 32,
+                    "items": {
+                        "type": "string"
+                    },
+                    "x-displayname": "Domains",
+                    "x-ves-required": "true",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.message.required": "true",
+                        "ves.io.schema.rules.repeated.max_items": "32",
+                        "ves.io.schema.rules.repeated.unique": "true"
                     }
                 }
             }

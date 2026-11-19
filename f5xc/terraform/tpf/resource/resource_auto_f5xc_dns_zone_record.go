@@ -983,7 +983,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 					},
 					"type_record_set_choice": schema.SingleNestedAttribute{
 						Description:         "Record Set",
-						MarkdownDescription: "Record Set",
+						MarkdownDescription: "Record Set<br>Exactly one of `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, or `txt_record` must be specified.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -1018,7 +1018,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 						Attributes: map[string]schema.Attribute{
 							"a_record": schema.SingleNestedAttribute{
 								Description:         "A Record",
-								MarkdownDescription: "A Record",
+								MarkdownDescription: "A Record<br>Conflicts with `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1056,7 +1056,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 							},
 							"aaaa_record": schema.SingleNestedAttribute{
 								Description:         "AAAA Record",
-								MarkdownDescription: "AAAA Record",
+								MarkdownDescription: "AAAA Record<br>Conflicts with `a_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1094,7 +1094,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 							},
 							"afsdb_record": schema.SingleNestedAttribute{
 								Description:         "AFSDB Record",
-								MarkdownDescription: "AFSDB Record",
+								MarkdownDescription: "AFSDB Record<br>Conflicts with `a_record`, `aaaa_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1155,7 +1155,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 							},
 							"alias_record": schema.SingleNestedAttribute{
 								Description:         "ALIAS Record",
-								MarkdownDescription: "ALIAS Record",
+								MarkdownDescription: "ALIAS Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1178,7 +1178,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 							},
 							"caa_record": schema.SingleNestedAttribute{
 								Description:         "CAA Record",
-								MarkdownDescription: "CAA Record",
+								MarkdownDescription: "CAA Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1245,7 +1245,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 							},
 							"cds_record": schema.SingleNestedAttribute{
 								Description:         "CDS Record",
-								MarkdownDescription: "CDS Record",
+								MarkdownDescription: "CDS Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1276,7 +1276,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 											Attributes: map[string]schema.Attribute{
 												"digest_choice": schema.SingleNestedAttribute{
 													Description:         "Digest",
-													MarkdownDescription: "Digest",
+													MarkdownDescription: "Digest<br>Exactly one of `sha1_digest`, `sha256_digest`, or `sha384_digest` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -1290,7 +1290,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 													Attributes: map[string]schema.Attribute{
 														"sha1_digest": schema.SingleNestedAttribute{
 															Description:         "SHA1 Digest",
-															MarkdownDescription: "SHA1 Digest",
+															MarkdownDescription: "SHA1 Digest<br>Conflicts with `sha256_digest` and `sha384_digest`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1309,7 +1309,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 														},
 														"sha256_digest": schema.SingleNestedAttribute{
 															Description:         "SHA256 Digest",
-															MarkdownDescription: "SHA256 Digest",
+															MarkdownDescription: "SHA256 Digest<br>Conflicts with `sha1_digest` and `sha384_digest`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1328,7 +1328,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 														},
 														"sha384_digest": schema.SingleNestedAttribute{
 															Description:         "SHA384 Digest",
-															MarkdownDescription: "SHA384 Digest",
+															MarkdownDescription: "SHA384 Digest<br>Conflicts with `sha1_digest` and `sha256_digest`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1376,7 +1376,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 							},
 							"cert_record": schema.SingleNestedAttribute{
 								Description:         "CERT Record",
-								MarkdownDescription: "CERT Record",
+								MarkdownDescription: "CERT Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1456,7 +1456,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 							},
 							"cname_record": schema.SingleNestedAttribute{
 								Description:         "CNAME Record",
-								MarkdownDescription: "CNAME Record",
+								MarkdownDescription: "CNAME Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1492,7 +1492,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 							},
 							"ds_record": schema.SingleNestedAttribute{
 								Description:         "DS Record",
-								MarkdownDescription: "DS Record",
+								MarkdownDescription: "DS Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1523,7 +1523,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 											Attributes: map[string]schema.Attribute{
 												"digest_choice": schema.SingleNestedAttribute{
 													Description:         "Digest",
-													MarkdownDescription: "Digest",
+													MarkdownDescription: "Digest<br>Exactly one of `sha1_digest`, `sha256_digest`, or `sha384_digest` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -1537,7 +1537,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 													Attributes: map[string]schema.Attribute{
 														"sha1_digest": schema.SingleNestedAttribute{
 															Description:         "SHA1 Digest",
-															MarkdownDescription: "SHA1 Digest",
+															MarkdownDescription: "SHA1 Digest<br>Conflicts with `sha256_digest` and `sha384_digest`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1556,7 +1556,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 														},
 														"sha256_digest": schema.SingleNestedAttribute{
 															Description:         "SHA256 Digest",
-															MarkdownDescription: "SHA256 Digest",
+															MarkdownDescription: "SHA256 Digest<br>Conflicts with `sha1_digest` and `sha384_digest`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1575,7 +1575,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 														},
 														"sha384_digest": schema.SingleNestedAttribute{
 															Description:         "SHA384 Digest",
-															MarkdownDescription: "SHA384 Digest",
+															MarkdownDescription: "SHA384 Digest<br>Conflicts with `sha1_digest` and `sha256_digest`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1623,7 +1623,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 							},
 							"eui48_record": schema.SingleNestedAttribute{
 								Description:         "EUI48 Record",
-								MarkdownDescription: "EUI48 Record",
+								MarkdownDescription: "EUI48 Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1659,7 +1659,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 							},
 							"eui64_record": schema.SingleNestedAttribute{
 								Description:         "EUI64 Record",
-								MarkdownDescription: "EUI64 Record",
+								MarkdownDescription: "EUI64 Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1695,7 +1695,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 							},
 							"lb_record": schema.SingleNestedAttribute{
 								Description:         "DNS LB Record",
-								MarkdownDescription: "DNS LB Record",
+								MarkdownDescription: "DNS LB Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1747,7 +1747,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 							},
 							"loc_record": schema.SingleNestedAttribute{
 								Description:         "LOC Record",
-								MarkdownDescription: "LOC Record",
+								MarkdownDescription: "LOC Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1889,7 +1889,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 							},
 							"mx_record": schema.SingleNestedAttribute{
 								Description:         "MX Record",
-								MarkdownDescription: "MX Record",
+								MarkdownDescription: "MX Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1949,7 +1949,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 							},
 							"naptr_record": schema.SingleNestedAttribute{
 								Description:         "NAPTR Record",
-								MarkdownDescription: "NAPTR Record",
+								MarkdownDescription: "NAPTR Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2056,7 +2056,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 							},
 							"ns_record": schema.SingleNestedAttribute{
 								Description:         "NS Record",
-								MarkdownDescription: "NS Record",
+								MarkdownDescription: "NS Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2094,7 +2094,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 							},
 							"ptr_record": schema.SingleNestedAttribute{
 								Description:         "PTR Record",
-								MarkdownDescription: "PTR Record",
+								MarkdownDescription: "PTR Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2132,7 +2132,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 							},
 							"srv_record": schema.SingleNestedAttribute{
 								Description:         "SRV Record",
-								MarkdownDescription: "SRV Record",
+								MarkdownDescription: "SRV Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `sshfp_record`, `tlsa_record`, and `txt_record`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2214,7 +2214,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 							},
 							"sshfp_record": schema.SingleNestedAttribute{
 								Description:         "SSHFP Record",
-								MarkdownDescription: "SSHFP Record",
+								MarkdownDescription: "SSHFP Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `tlsa_record`, and `txt_record`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2257,7 +2257,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 												},
 												"fingerprint_type_choice": schema.SingleNestedAttribute{
 													Description:         "Fingerprint Type Algorithm used to calculate the fingerprint of the public key and the hexadecimal representation of the hash result of the SSH key as text.",
-													MarkdownDescription: "Fingerprint Type Algorithm used to calculate the fingerprint of the public key and the hexadecimal representation of the hash result of the SSH key as text.",
+													MarkdownDescription: "Fingerprint Type Algorithm used to calculate the fingerprint of the public key and the hexadecimal representation of the hash result of the SSH key as text.<br>Exactly one of `sha1_fingerprint` or `sha256_fingerprint` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -2270,7 +2270,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 													Attributes: map[string]schema.Attribute{
 														"sha1_fingerprint": schema.SingleNestedAttribute{
 															Description:         "SHA1 Fingerprint",
-															MarkdownDescription: "SHA1 Fingerprint",
+															MarkdownDescription: "SHA1 Fingerprint<br>Conflicts with `sha256_fingerprint`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -2289,7 +2289,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 														},
 														"sha256_fingerprint": schema.SingleNestedAttribute{
 															Description:         "SHA256 Digest",
-															MarkdownDescription: "SHA256 Digest",
+															MarkdownDescription: "SHA256 Digest<br>Conflicts with `sha1_fingerprint`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -2315,7 +2315,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 							},
 							"tlsa_record": schema.SingleNestedAttribute{
 								Description:         "TLSA Record",
-								MarkdownDescription: "TLSA Record",
+								MarkdownDescription: "TLSA Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, and `txt_record`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2401,7 +2401,7 @@ func (r *ResourceF5XCDnsZoneRecord) Schema(ctx context.Context, request resource
 							},
 							"txt_record": schema.SingleNestedAttribute{
 								Description:         "TXT Record",
-								MarkdownDescription: "TXT Record",
+								MarkdownDescription: "TXT Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, and `tlsa_record`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,

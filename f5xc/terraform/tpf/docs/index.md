@@ -217,53 +217,44 @@ Each resource documentation page will specify:
 - Which fields (if any) are redacted in API responses
 - Recommended import/creation workflows
 
-### Secrets Persistence in SetNestedAttributes (HTTP Load Balancer Routes)
+### Secrets Persistence in Set-Based Attributes
 
 #### Background & Plugin Framework Constraint
 
-By default, the F5 XC provider implements zero-storage ephemerality (`WriteOnly: true`) for sensitive credentials and ciphertexts, ensuring they are never persisted to the Terraform state file (`terraform.tfstate`).
+By default, the F5 XC provider implements zero-storage ephemerality (`WriteOnly: true`) for Blindfold secret ciphertexts and write-only credentials, ensuring they are never persisted to the Terraform state file (`terraform.tfstate`).
 
-However, in `f5xc_http_loadbalancer`, the `routes` attribute is defined as a `schema.SetNestedAttribute` (an unordered set) to prevent spurious plan diffs caused by backend route reordering. The HashiCorp Terraform Plugin Framework computes deterministic hashes over all attributes of each set element. Because attributes marked as `WriteOnly: true` evaluate to `null` in plan and state, the framework strictly prohibits `WriteOnly` attributes inside `schema.SetNestedAttribute` (which would trigger a provider panic).
+However, the HashiCorp Terraform Plugin Framework computes deterministic element hashes over all attributes of each set element in `schema.SetNestedAttribute` and `schema.SetAttribute`. Because attributes marked as `WriteOnly: true` evaluate to `null` in plan and state, the framework strictly prohibits `WriteOnly` attributes inside set-based collections (which would trigger a provider error/panic).
 
-To maintain schema compatibility and prevent provider crashes, Omnigen automatically downgrades these nested secret fields from write-only to `Sensitive: true` (`WriteOnly: false`).
+If a schema models a collection containing secret fields as a set, Omnigen automatically falls back from `WriteOnly: true` to `Sensitive: true` (`WriteOnly: false`) to maintain schema compatibility and prevent provider crashes.
 
-#### Affected Field Paths
-
-This behavior applies exclusively to the following 4 header and cookie manipulation paths nested inside `f5xc_http_loadbalancer.routes`:
-
-1. `routes.choice.simple_route.advanced_options.request_headers_to_add.value_choice.secret_value`
-2. `routes.choice.simple_route.advanced_options.response_headers_to_add.value_choice.secret_value`
-3. `routes.choice.simple_route.advanced_options.request_cookies_to_add.value_choice.secret_value`
-4. `routes.choice.simple_route.advanced_options.response_cookies_to_add.value_choice.secret_value`
+> [!NOTE]
+> `f5xc_http_loadbalancer.routes` is modeled as a `schema.ListNestedAttribute` rather than a set, so its Blindfold secret fields (`blindfold_secret_info.location`) enforce `WriteOnly: true` and are not persisted in state. Note that `clear_secret_info.url` continues to use `Sensitive: true` and is stored in state if configured.
 
 #### Security Implications
 
 > [!WARNING]
-> Because these 4 paths cannot use `WriteOnly: true`, their configured values **are persisted directly into the `terraform.tfstate` file**. While Terraform masks them as `(sensitive value)` in CLI outputs and console logs, they are physically present in the state JSON.
+> Whenever an attribute cannot use `WriteOnly: true` (such as secrets nested inside a set-based attribute, or `clear_secret_info.url` fields), configured values **are persisted directly into the `terraform.tfstate` file**. While Terraform masks them as `(sensitive value)` in CLI outputs and console logs, they are physically present in the state JSON.
 
 - **Blindfold Secrets (`blindfold_secret_info.location`)**:
-  - The stored value is an **asymmetrically encrypted ciphertext** (e.g., `string:///...`).
-  - The cleartext secret cannot be decrypted without the tenant's private key hosted inside the F5 XC security enclave.
-  - While protected against cleartext exposure, the ciphertext blob is persistently stored in the state file (no zero-storage).
+  - Outside set-based collections, `WriteOnly: true` enforces zero-storage ephemerality.
+  - Where a `Sensitive: true` fallback is required inside a set, the stored value is an **asymmetrically encrypted ciphertext** (e.g., `string:///...`) that cannot be decrypted without the tenant's private key hosted inside the F5 XC security enclave, though the ciphertext blob remains in the state file.
 
 - **Cleartext Secrets (`clear_secret_info.url`) — CRITICAL SECURITY RISK**:
-  - If configured using `clear_secret_info`, the secret URL or base64 plaintext is **written unencrypted into the `terraform.tfstate` file**.
+  - `clear_secret_info.url` uses `Sensitive: true` (not `WriteOnly: true`), so the secret URL or base64 plaintext is **written unencrypted into the `terraform.tfstate` file**.
   - Anyone with read access to the state file (or underlying remote backend storage) can view the secret in plain text.
 
 #### Recommended Mitigations & Best Practices
 
-1. **Always Use Blindfold Secrets**: Never use `clear_secret_info` inside `routes`. Always encrypt headers and cookies using F5 XC Blindfold before configuring them in Terraform.
-2. **Leverage Global Header Manipulation When Feasible**: If header/cookie additions do not strictly depend on a specific route match and can apply globally to the load balancer, declare them under `more_option` instead of `routes` (e.g., `more_option.request_headers_to_add`). Under `more_option` (which is not a Set), `WriteOnly: true` is fully enforced and zero-storage is guaranteed.
-3. **Enforce State File Encryption at Rest**: Ensure your remote backend (AWS S3 + KMS, Azure Blob Storage, Google Cloud Storage) enforces encryption at rest and restricts read access via strict IAM policies.
+1. **Always Use Blindfold Secrets**: Prefer F5 XC Blindfold (`blindfold_secret_info`) over `clear_secret_info` whenever configuring secrets in Terraform.
+2. **Enforce State File Encryption at Rest**: Ensure your remote backend (AWS S3 + KMS, Azure Blob Storage, Google Cloud Storage) enforces encryption at rest and restricts read access via strict IAM policies.
 
 ### Set-Based Attributes (Unordered Collections)
 
-Some collection attributes are modeled as sets (`schema.SetNestedAttribute`) because the API may return their elements in a different order: `f5xc_http_loadbalancer.routes`, `f5xc_user.namespace_roles`, `f5xc_user_group.namespace_roles`, `f5xc_api_discovery.custom_auth_types` and `f5xc_bgp_asn_set.as_numbers`.
+Some collection attributes are modeled as sets (`schema.SetNestedAttribute` or `schema.SetAttribute`) because the API may return their elements in a different order: `f5xc_user.namespace_roles`, `f5xc_user_group.namespace_roles`, `f5xc_api_discovery.custom_auth_types`, and `f5xc_bgp_asn_set.as_numbers`.
 Terraform identifies set elements by the values of all their fields, which has these effects:
 
-- **Object references inside `f5xc_http_loadbalancer.routes` require `tenant`.** Elsewhere, `tenant` in an object reference (`name` / `namespace` / `tenant`) is computed by the provider. Inside a route it must be set explicitly: your tenant ID, or the owning tenant for shared objects. A value filled in by the API would change the element's identity and cause a permanent diff. This applies to `origin_pool`, `pool`, `cluster`, `route_ref`, `app_firewall` and `waf_exclusion_policy` references within routes.
 - **Element changes are shown as remove plus add.** Changing any field of a set element is displayed as one element removed and another added, not as an in-place update.
-- **Computed values inside routes** cannot be matched to prior state. After an update elsewhere in the load balancer, they may be shown as `(known after apply)`.
+- **Computed fields in set elements** cannot be matched to prior state across element changes and may be shown as `(known after apply)`.
 
 ## Resources
 

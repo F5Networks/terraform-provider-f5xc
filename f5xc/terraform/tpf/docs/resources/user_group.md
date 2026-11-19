@@ -106,6 +106,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<name>"
-	to = "f5xc_user_group.example"
+	to = f5xc_user_group.example
 }
 ```

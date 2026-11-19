@@ -94,25 +94,15 @@ resource "f5xc_waf_exclusion_policy" "example" {
 
 Required:
 
-- `domain_choice` (Attributes) Domain Domain to be matched (see [below for nested schema](#nestedatt--waf_exclusion_rules--domain_choice))
 - `metadata` (Attributes) metadata Common attributes for the rule including name and description. (see [below for nested schema](#nestedatt--waf_exclusion_rules--metadata))
-- `path_choice` (Attributes) Path Path to be matched (see [below for nested schema](#nestedatt--waf_exclusion_rules--path_choice))
 
 Optional:
 
+- `domain_choice` (Attributes) Domain Domain to be matched<br>Exactly one of `any_domain`, `exact_value`, or `suffix_value` must be specified when `domain_choice` is configured. (see [below for nested schema](#nestedatt--waf_exclusion_rules--domain_choice))
 - `expiration_timestamp` (String) expiration timestamp The expiration_timestamp is the RFC 3339 format timestamp at which the containing rule is considered to be logically expired. The rule continues to exist in the configuration but is not applied anymore.
 - `methods` (List of String) Methods methods to be matched<br>**Valid Options:** `['ANY', 'CONNECT', 'COPY', 'DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT', 'TRACE']` (Multiple selection allowed)
-- `waf_advanced_configuration_choice` (Attributes) WAF Exclusion Rule Action WAF Exclusion Rule action to be enforced if the input request matches the rule. (see [below for nested schema](#nestedatt--waf_exclusion_rules--waf_advanced_configuration_choice))
-
-<a id="nestedatt--waf_exclusion_rules--domain_choice"></a>
-### Nested Schema for `waf_exclusion_rules.domain_choice`
-
-Optional:
-
-- `any_domain` (Boolean) Any domain Apply this WAF exclusion rule for any domain
-- `exact_value` (String) exact value Exact domain name<br>**Validation:** `Length LengthBetween(1, 256)`
-- `suffix_value` (String) suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`
-
+- `path_choice` (Attributes) Path Path to be matched<br>Exactly one of `any_path`, `path_prefix`, or `path_regex` must be specified when `path_choice` is configured. (see [below for nested schema](#nestedatt--waf_exclusion_rules--path_choice))
+- `waf_advanced_configuration_choice` (Attributes) WAF Exclusion Rule Action WAF Exclusion Rule action to be enforced if the input request matches the rule.<br>Exactly one of `app_firewall_detection_control` or `waf_skip_processing` must be specified when `waf_advanced_configuration_choice` is configured. (see [below for nested schema](#nestedatt--waf_exclusion_rules--waf_advanced_configuration_choice))
 
 <a id="nestedatt--waf_exclusion_rules--metadata"></a>
 ### Nested Schema for `waf_exclusion_rules.metadata`
@@ -126,14 +116,24 @@ Optional:
 - `description` (String) description Human readable description.<br>**Validation:** `Length LengthAtMost(256)`
 
 
+<a id="nestedatt--waf_exclusion_rules--domain_choice"></a>
+### Nested Schema for `waf_exclusion_rules.domain_choice`
+
+Optional:
+
+- `any_domain` (Boolean) Any domain Apply this WAF exclusion rule for any domain<br>Conflicts with `exact_value` and `suffix_value`.
+- `exact_value` (String) exact value Exact domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_domain` and `suffix_value`.
+- `suffix_value` (String) suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_domain` and `exact_value`.
+
+
 <a id="nestedatt--waf_exclusion_rules--path_choice"></a>
 ### Nested Schema for `waf_exclusion_rules.path_choice`
 
 Optional:
 
-- `any_path` (Boolean) Any path Match all paths
-- `path_prefix` (String) prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`
-- `path_regex` (String) Path Regex Define the regex for the path. For example, the regex ^/.*$ will match on all paths
+- `any_path` (Boolean) Any path Match all paths<br>Conflicts with `path_prefix` and `path_regex`.
+- `path_prefix` (String) prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `any_path` and `path_regex`.
+- `path_regex` (String) Path Regex Define the regex for the path. For example, the regex ^/.*$ will match on all paths<br>Conflicts with `any_path` and `path_prefix`.
 
 
 <a id="nestedatt--waf_exclusion_rules--waf_advanced_configuration_choice"></a>
@@ -141,8 +141,8 @@ Optional:
 
 Optional:
 
-- `app_firewall_detection_control` (Attributes) App Firewall Detection control Define the list of Signature IDs, Violations, Attack Types and Bot Names that should be excluded from triggering on the defined match criteria. (see [below for nested schema](#nestedatt--waf_exclusion_rules--waf_advanced_configuration_choice--app_firewall_detection_control))
-- `waf_skip_processing` (Boolean) Skip App Firewall Processing Skip all App Firewall processing for this request
+- `app_firewall_detection_control` (Attributes) App Firewall Detection control Define the list of Signature IDs, Violations, Attack Types and Bot Names that should be excluded from triggering on the defined match criteria.<br>Conflicts with `waf_skip_processing`. (see [below for nested schema](#nestedatt--waf_exclusion_rules--waf_advanced_configuration_choice--app_firewall_detection_control))
+- `waf_skip_processing` (Boolean) Skip App Firewall Processing Skip all App Firewall processing for this request<br>Conflicts with `app_firewall_detection_control`.
 
 <a id="nestedatt--waf_exclusion_rules--waf_advanced_configuration_choice--app_firewall_detection_control"></a>
 ### Nested Schema for `waf_exclusion_rules.waf_advanced_configuration_choice.app_firewall_detection_control`
@@ -234,6 +234,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_waf_exclusion_policy.example"
+	to = f5xc_waf_exclusion_policy.example
 }
 ```

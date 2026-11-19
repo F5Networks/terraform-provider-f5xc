@@ -275,7 +275,7 @@ func (r *ResourceF5XCRateLimiter) Schema(ctx context.Context, request resource.S
 					Attributes: map[string]schema.Attribute{
 						"action_choice": schema.SingleNestedAttribute{
 							Description:         "Rate Limiter Action Applies the specified action to the user after threshold is reached.",
-							MarkdownDescription: "Rate Limiter Action Applies the specified action to the user after threshold is reached.",
+							MarkdownDescription: "Rate Limiter Action Applies the specified action to the user after threshold is reached.<br>Exactly one of `action_block` or `disabled` must be specified when `action_choice` is configured.",
 							Required:            false,
 							Optional:            true,
 							Computed:            false,
@@ -288,14 +288,14 @@ func (r *ResourceF5XCRateLimiter) Schema(ctx context.Context, request resource.S
 							Attributes: map[string]schema.Attribute{
 								"action_block": schema.SingleNestedAttribute{
 									Description:         "Block Action Blocks the user for a specified duration of time",
-									MarkdownDescription: "Block Action Blocks the user for a specified duration of time",
+									MarkdownDescription: "Block Action Blocks the user for a specified duration of time<br>Conflicts with `disabled`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
 									Attributes: map[string]schema.Attribute{
 										"block_duration_choice": schema.SingleNestedAttribute{
 											Description:         "block_duration_choice Period of time after rate limit threshold is exceeded where a user is blocked from making further requests.",
-											MarkdownDescription: "block_duration_choice Period of time after rate limit threshold is exceeded where a user is blocked from making further requests.",
+											MarkdownDescription: "block_duration_choice Period of time after rate limit threshold is exceeded where a user is blocked from making further requests.<br>Exactly one of `hours`, `minutes`, or `seconds` must be specified when `block_duration_choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -309,7 +309,7 @@ func (r *ResourceF5XCRateLimiter) Schema(ctx context.Context, request resource.S
 											Attributes: map[string]schema.Attribute{
 												"hours": schema.SingleNestedAttribute{
 													Description:         "Hours User block mitigation time in Hours",
-													MarkdownDescription: "Hours User block mitigation time in Hours",
+													MarkdownDescription: "Hours User block mitigation time in Hours<br>Conflicts with `minutes` and `seconds`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -330,7 +330,7 @@ func (r *ResourceF5XCRateLimiter) Schema(ctx context.Context, request resource.S
 												},
 												"minutes": schema.SingleNestedAttribute{
 													Description:         "Minutes User block mitigation time in Minutes",
-													MarkdownDescription: "Minutes User block mitigation time in Minutes",
+													MarkdownDescription: "Minutes User block mitigation time in Minutes<br>Conflicts with `hours` and `seconds`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -351,7 +351,7 @@ func (r *ResourceF5XCRateLimiter) Schema(ctx context.Context, request resource.S
 												},
 												"seconds": schema.SingleNestedAttribute{
 													Description:         "Seconds User block mitigation time in Seconds",
-													MarkdownDescription: "Seconds User block mitigation time in Seconds",
+													MarkdownDescription: "Seconds User block mitigation time in Seconds<br>Conflicts with `hours` and `minutes`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -376,7 +376,7 @@ func (r *ResourceF5XCRateLimiter) Schema(ctx context.Context, request resource.S
 								},
 								"disabled": schema.BoolAttribute{
 									Description:         "Disabled",
-									MarkdownDescription: "Disabled",
+									MarkdownDescription: "Disabled<br>Conflicts with `action_block`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1275,11 +1275,7 @@ func (r *ResourceF5XCRateLimiter) Read(ctx context.Context, request resource.Rea
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_rate_limiter.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_rate_limiter.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "rate_limiter", err),
@@ -1987,12 +1983,8 @@ func (r *ResourceF5XCRateLimiter) Update(ctx context.Context, request resource.U
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_rate_limiter.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_rate_limiter.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "rate_limiter", err),
@@ -2001,7 +1993,7 @@ func (r *ResourceF5XCRateLimiter) Update(ctx context.Context, request resource.U
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_rate_limiter.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_rate_limiter.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "rate_limiter", err),

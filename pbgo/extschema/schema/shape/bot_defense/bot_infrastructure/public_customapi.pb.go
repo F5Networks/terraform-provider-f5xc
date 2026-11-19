@@ -11,24 +11,24 @@ package bot_infrastructure
 import (
 	context "context"
 	fmt "fmt"
+	_ "github.com/gogo/googleapis/google/api"
+	_ "github.com/gogo/protobuf/gogoproto"
+	proto "github.com/gogo/protobuf/proto"
+	github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
+	types "github.com/gogo/protobuf/types"
+	golang_proto "github.com/golang/protobuf/proto"
+	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
+	schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
+	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/vesenv"
+	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
 	strconv "strconv"
 	strings "strings"
-
-	_ "github.com/gogo/googleapis/google/api"
-	_ "github.com/gogo/protobuf/gogoproto"
-	proto "github.com/gogo/protobuf/proto"
-	types "github.com/gogo/protobuf/types"
-	golang_proto "github.com/golang/protobuf/proto"
-	grpc "google.golang.org/grpc"
-	codes "google.golang.org/grpc/codes"
-	status "google.golang.org/grpc/status"
-	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
-	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/vesenv"
-	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -142,18 +142,25 @@ const (
 	//
 	// x-displayName: "Failed"
 	FAILED DepolyStatus = 2
+	// Not Found
+	//
+	// x-displayName: "Not Found"
+	// The bot infrastructure does not exist in the requested namespace.
+	NOT_FOUND DepolyStatus = 3
 )
 
 var DepolyStatus_name = map[int32]string{
 	0: "IN_PROGRESS",
 	1: "FINISHED",
 	2: "FAILED",
+	3: "NOT_FOUND",
 }
 
 var DepolyStatus_value = map[string]int32{
 	"IN_PROGRESS": 0,
 	"FINISHED":    1,
 	"FAILED":      2,
+	"NOT_FOUND":   3,
 }
 
 func (DepolyStatus) EnumDescriptor() ([]byte, []int) {
@@ -1411,6 +1418,550 @@ func (m *CertificateOperationRegion) GetCertStatus() CertificateStatus {
 	return CERT_STATUS_UNDEFINED
 }
 
+// CustomListBotInfrastructures is used to get a collection of bot_infrastructure
+//
+// x-displayName: "Custom List Request"
+// This is the input message of the 'CustomListBotInfrastructures' RPC. Fields can be used to control
+// scope and filtering of collection.
+type CustomListBotInfrastructuresRequest struct {
+	// namespace
+	//
+	// x-displayName: "Namespace"
+	// x-example: "ns1"
+	// Namespace to scope the listing of bot_infrastructure
+	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	// label_filter
+	//
+	// x-displayName: "Label Filter"
+	// x-example: "env in (staging, testing), tier in (web, db)"
+	// A LabelSelectorType expression that every item in list response will satisfy
+	LabelFilter string `protobuf:"bytes,2,opt,name=label_filter,json=labelFilter,proto3" json:"label_filter,omitempty"`
+	// report_fields
+	//
+	// x-displayName: "Report Fields"
+	// x-example: ""
+	// Extra fields to return along with summary fields
+	ReportFields []string `protobuf:"bytes,3,rep,name=report_fields,json=reportFields,proto3" json:"report_fields,omitempty"`
+	// report_status_fields
+	//
+	// x-displayName: "Report Status Fields"
+	// x-example: ""
+	// Extra status fields to return along with summary fields
+	ReportStatusFields []string `protobuf:"bytes,4,rep,name=report_status_fields,json=reportStatusFields,proto3" json:"report_status_fields,omitempty"`
+}
+
+func (m *CustomListBotInfrastructuresRequest) Reset()      { *m = CustomListBotInfrastructuresRequest{} }
+func (*CustomListBotInfrastructuresRequest) ProtoMessage() {}
+func (*CustomListBotInfrastructuresRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_14a6612667caec9f, []int{15}
+}
+func (m *CustomListBotInfrastructuresRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *CustomListBotInfrastructuresRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_CustomListBotInfrastructuresRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *CustomListBotInfrastructuresRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CustomListBotInfrastructuresRequest.Merge(m, src)
+}
+func (m *CustomListBotInfrastructuresRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *CustomListBotInfrastructuresRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_CustomListBotInfrastructuresRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CustomListBotInfrastructuresRequest proto.InternalMessageInfo
+
+func (m *CustomListBotInfrastructuresRequest) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+func (m *CustomListBotInfrastructuresRequest) GetLabelFilter() string {
+	if m != nil {
+		return m.LabelFilter
+	}
+	return ""
+}
+
+func (m *CustomListBotInfrastructuresRequest) GetReportFields() []string {
+	if m != nil {
+		return m.ReportFields
+	}
+	return nil
+}
+
+func (m *CustomListBotInfrastructuresRequest) GetReportStatusFields() []string {
+	if m != nil {
+		return m.ReportStatusFields
+	}
+	return nil
+}
+
+// CustomListBotInfrastructuresResponseItem is an individual item in a collection of bot_infrastructure
+//
+// x-displayName: "Custom List Bot Infrastructures Item"
+// By default a summary of bot_infrastructure is returned in 'CustomListBotInfrastructures'. By setting
+// 'report_fields' in the CustomListBotInfrastructuresRequest more details of each item can be got.
+type CustomListBotInfrastructuresResponseItem struct {
+	// tenant
+	//
+	// x-displayName: "Tenant"
+	// x-example: "acmecorp"
+	// The tenant this item belongs to
+	Tenant string `protobuf:"bytes,1,opt,name=tenant,proto3" json:"tenant,omitempty"`
+	// namespace
+	//
+	// x-displayName: "Namespace"
+	// x-example: "ns1"
+	// The namespace this item belongs to
+	Namespace string `protobuf:"bytes,2,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	// name
+	//
+	// x-displayName: "Name"
+	// x-example: "name"
+	// The name of this bot_infrastructure
+	Name string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	// uid
+	//
+	// x-displayName: "UID"
+	// x-example: "d27938ba-967e-40a7-9709-57b8627f9f75"
+	// The unique uid of this bot_infrastructure
+	Uid string `protobuf:"bytes,4,opt,name=uid,proto3" json:"uid,omitempty"`
+	// description
+	//
+	// x-displayName: "Description"
+	// The description set for this bot_infrastructure
+	Description string `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
+	// disabled
+	//
+	// x-displayName: "Disabled"
+	// A value of true indicates bot_infrastructure is administratively disabled
+	Disabled bool `protobuf:"varint,6,opt,name=disabled,proto3" json:"disabled,omitempty"`
+	// labels
+	//
+	// x-displayName: "Labels"
+	// The set of labels present on this bot_infrastructure
+	Labels map[string]string `protobuf:"bytes,7,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	// annotations
+	//
+	// x-displayName: "Annotations"
+	// The set of annotations present on this bot_infrastructure
+	Annotations map[string]string `protobuf:"bytes,8,rep,name=annotations,proto3" json:"annotations,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	// owner_view
+	//
+	// x-displayName: "Owner View"
+	// Reference to the view object that owns this object.
+	// If there is no view owner, this field will be nil.
+	// If not nil, this object can only be edited/deleted through the view
+	OwnerView *schema.ViewRefType `protobuf:"bytes,9,opt,name=owner_view,json=ownerView,proto3" json:"owner_view,omitempty"`
+	// metadata
+	//
+	// x-displayName: "Metadata"
+	// If list request has report_fields set then metadata will
+	// contain all the metadata associated with the object.
+	Metadata *schema.ObjectGetMetaType `protobuf:"bytes,10,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	// system_metadata
+	//
+	// x-displayName: "System Metadata"
+	// If list request has report_fields set then system_metadata will
+	// contain all the system generated details of this object.
+	SystemMetadata *schema.SystemObjectGetMetaType `protobuf:"bytes,11,opt,name=system_metadata,json=systemMetadata,proto3" json:"system_metadata,omitempty"`
+	// get_spec
+	//
+	// x-displayName: "Get Specification"
+	// If ListRequest has any specified report_fields, it will appear in object
+	GetSpec *GetSpecType `protobuf:"bytes,12,opt,name=get_spec,json=getSpec,proto3" json:"get_spec,omitempty"`
+	// status
+	//
+	// x-displayName: "Status"
+	// The status reported by different services for this configuration object
+	StatusSet []*StatusObject `protobuf:"bytes,13,rep,name=status_set,json=statusSet,proto3" json:"status_set,omitempty"`
+}
+
+func (m *CustomListBotInfrastructuresResponseItem) Reset() {
+	*m = CustomListBotInfrastructuresResponseItem{}
+}
+func (*CustomListBotInfrastructuresResponseItem) ProtoMessage() {}
+func (*CustomListBotInfrastructuresResponseItem) Descriptor() ([]byte, []int) {
+	return fileDescriptor_14a6612667caec9f, []int{16}
+}
+func (m *CustomListBotInfrastructuresResponseItem) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *CustomListBotInfrastructuresResponseItem) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_CustomListBotInfrastructuresResponseItem.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *CustomListBotInfrastructuresResponseItem) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CustomListBotInfrastructuresResponseItem.Merge(m, src)
+}
+func (m *CustomListBotInfrastructuresResponseItem) XXX_Size() int {
+	return m.Size()
+}
+func (m *CustomListBotInfrastructuresResponseItem) XXX_DiscardUnknown() {
+	xxx_messageInfo_CustomListBotInfrastructuresResponseItem.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CustomListBotInfrastructuresResponseItem proto.InternalMessageInfo
+
+func (m *CustomListBotInfrastructuresResponseItem) GetTenant() string {
+	if m != nil {
+		return m.Tenant
+	}
+	return ""
+}
+
+func (m *CustomListBotInfrastructuresResponseItem) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+func (m *CustomListBotInfrastructuresResponseItem) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *CustomListBotInfrastructuresResponseItem) GetUid() string {
+	if m != nil {
+		return m.Uid
+	}
+	return ""
+}
+
+func (m *CustomListBotInfrastructuresResponseItem) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
+
+func (m *CustomListBotInfrastructuresResponseItem) GetDisabled() bool {
+	if m != nil {
+		return m.Disabled
+	}
+	return false
+}
+
+func (m *CustomListBotInfrastructuresResponseItem) GetLabels() map[string]string {
+	if m != nil {
+		return m.Labels
+	}
+	return nil
+}
+
+func (m *CustomListBotInfrastructuresResponseItem) GetAnnotations() map[string]string {
+	if m != nil {
+		return m.Annotations
+	}
+	return nil
+}
+
+func (m *CustomListBotInfrastructuresResponseItem) GetOwnerView() *schema.ViewRefType {
+	if m != nil {
+		return m.OwnerView
+	}
+	return nil
+}
+
+func (m *CustomListBotInfrastructuresResponseItem) GetMetadata() *schema.ObjectGetMetaType {
+	if m != nil {
+		return m.Metadata
+	}
+	return nil
+}
+
+func (m *CustomListBotInfrastructuresResponseItem) GetSystemMetadata() *schema.SystemObjectGetMetaType {
+	if m != nil {
+		return m.SystemMetadata
+	}
+	return nil
+}
+
+func (m *CustomListBotInfrastructuresResponseItem) GetGetSpec() *GetSpecType {
+	if m != nil {
+		return m.GetSpec
+	}
+	return nil
+}
+
+func (m *CustomListBotInfrastructuresResponseItem) GetStatusSet() []*StatusObject {
+	if m != nil {
+		return m.StatusSet
+	}
+	return nil
+}
+
+// CustomListBotInfrastructuresResponse is the collection of bot_infrastructure
+//
+// x-displayName: "Custom List Bot Infrastructures Response"
+// This is the output message of 'CustomListBotInfrastructures' RPC.
+type CustomListBotInfrastructuresResponse struct {
+	// items
+	//
+	// x-displayName: "Items"
+	// items represents the collection in response
+	Items []*CustomListBotInfrastructuresResponseItem `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	// errors
+	//
+	// x-displayName: "Errors"
+	// Errors(if any) while listing items from collection
+	Errors []*schema.ErrorType `protobuf:"bytes,2,rep,name=errors,proto3" json:"errors,omitempty"`
+}
+
+func (m *CustomListBotInfrastructuresResponse) Reset()      { *m = CustomListBotInfrastructuresResponse{} }
+func (*CustomListBotInfrastructuresResponse) ProtoMessage() {}
+func (*CustomListBotInfrastructuresResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_14a6612667caec9f, []int{17}
+}
+func (m *CustomListBotInfrastructuresResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *CustomListBotInfrastructuresResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_CustomListBotInfrastructuresResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *CustomListBotInfrastructuresResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CustomListBotInfrastructuresResponse.Merge(m, src)
+}
+func (m *CustomListBotInfrastructuresResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *CustomListBotInfrastructuresResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_CustomListBotInfrastructuresResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CustomListBotInfrastructuresResponse proto.InternalMessageInfo
+
+func (m *CustomListBotInfrastructuresResponse) GetItems() []*CustomListBotInfrastructuresResponseItem {
+	if m != nil {
+		return m.Items
+	}
+	return nil
+}
+
+func (m *CustomListBotInfrastructuresResponse) GetErrors() []*schema.ErrorType {
+	if m != nil {
+		return m.Errors
+	}
+	return nil
+}
+
+// GetInfraDeploymentStatusRequest
+//
+// x-displayName: "Get Infra Deployment Status Request"
+// Request to get the current policy deployment status for the specified bot infrastructures.
+type GetInfraDeploymentStatusRequest struct {
+	// Namespace
+	//
+	// x-displayName: "Namespace"
+	// x-example: "default"
+	// x-required
+	// Namespace that the bot infrastructures belong to.
+	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	// Bot Infrastructure Names
+	//
+	// x-displayName: "Bot Infrastructure Names"
+	// x-example: ["cluster-a", "cluster-b"]
+	// x-required
+	// List of bot infrastructure names to check for in-progress deployments.
+	BotInfraNames []string `protobuf:"bytes,2,rep,name=bot_infra_names,json=botInfraNames,proto3" json:"bot_infra_names,omitempty"`
+}
+
+func (m *GetInfraDeploymentStatusRequest) Reset()      { *m = GetInfraDeploymentStatusRequest{} }
+func (*GetInfraDeploymentStatusRequest) ProtoMessage() {}
+func (*GetInfraDeploymentStatusRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_14a6612667caec9f, []int{18}
+}
+func (m *GetInfraDeploymentStatusRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetInfraDeploymentStatusRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetInfraDeploymentStatusRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetInfraDeploymentStatusRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetInfraDeploymentStatusRequest.Merge(m, src)
+}
+func (m *GetInfraDeploymentStatusRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetInfraDeploymentStatusRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetInfraDeploymentStatusRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetInfraDeploymentStatusRequest proto.InternalMessageInfo
+
+func (m *GetInfraDeploymentStatusRequest) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+func (m *GetInfraDeploymentStatusRequest) GetBotInfraNames() []string {
+	if m != nil {
+		return m.BotInfraNames
+	}
+	return nil
+}
+
+// BotInfraDeploymentStatus
+//
+// x-displayName: "Bot Infrastructure Deployment Status"
+// Deployment status for a single bot infrastructure.
+type BotInfraDeploymentStatus struct {
+	// Name
+	//
+	// x-displayName: "Name"
+	// x-example: "cluster-a"
+	// Name of the bot infrastructure.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Deploy Status
+	//
+	// x-displayName: "Deploy Status"
+	// x-example: "IN_PROGRESS"
+	// Current policy deployment status of the bot infrastructure.
+	DeployStatus DepolyStatus `protobuf:"varint,2,opt,name=deploy_status,json=deployStatus,proto3,enum=ves.io.schema.shape.bot_defense.bot_infrastructure.DepolyStatus" json:"deploy_status,omitempty"`
+}
+
+func (m *BotInfraDeploymentStatus) Reset()      { *m = BotInfraDeploymentStatus{} }
+func (*BotInfraDeploymentStatus) ProtoMessage() {}
+func (*BotInfraDeploymentStatus) Descriptor() ([]byte, []int) {
+	return fileDescriptor_14a6612667caec9f, []int{19}
+}
+func (m *BotInfraDeploymentStatus) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *BotInfraDeploymentStatus) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_BotInfraDeploymentStatus.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *BotInfraDeploymentStatus) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BotInfraDeploymentStatus.Merge(m, src)
+}
+func (m *BotInfraDeploymentStatus) XXX_Size() int {
+	return m.Size()
+}
+func (m *BotInfraDeploymentStatus) XXX_DiscardUnknown() {
+	xxx_messageInfo_BotInfraDeploymentStatus.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_BotInfraDeploymentStatus proto.InternalMessageInfo
+
+func (m *BotInfraDeploymentStatus) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *BotInfraDeploymentStatus) GetDeployStatus() DepolyStatus {
+	if m != nil {
+		return m.DeployStatus
+	}
+	return IN_PROGRESS
+}
+
+// GetInfraDeploymentStatusResponse
+//
+// x-displayName: "Get Infra Deployment Status Response"
+// Response containing all requested bot infrastructures together with their current deployment status.
+type GetInfraDeploymentStatusResponse struct {
+	// Bot Infrastructure Statuses
+	//
+	// x-displayName: "Bot Infrastructure Statuses"
+	// Deployment status for each bot infrastructure in the request.
+	BotInfraStatuses []*BotInfraDeploymentStatus `protobuf:"bytes,1,rep,name=bot_infra_statuses,json=botInfraStatuses,proto3" json:"bot_infra_statuses,omitempty"`
+}
+
+func (m *GetInfraDeploymentStatusResponse) Reset()      { *m = GetInfraDeploymentStatusResponse{} }
+func (*GetInfraDeploymentStatusResponse) ProtoMessage() {}
+func (*GetInfraDeploymentStatusResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_14a6612667caec9f, []int{20}
+}
+func (m *GetInfraDeploymentStatusResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetInfraDeploymentStatusResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetInfraDeploymentStatusResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetInfraDeploymentStatusResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetInfraDeploymentStatusResponse.Merge(m, src)
+}
+func (m *GetInfraDeploymentStatusResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetInfraDeploymentStatusResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetInfraDeploymentStatusResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetInfraDeploymentStatusResponse proto.InternalMessageInfo
+
+func (m *GetInfraDeploymentStatusResponse) GetBotInfraStatuses() []*BotInfraDeploymentStatus {
+	if m != nil {
+		return m.BotInfraStatuses
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterEnum("ves.io.schema.shape.bot_defense.bot_infrastructure.DeploymentType", DeploymentType_name, DeploymentType_value)
 	golang_proto.RegisterEnum("ves.io.schema.shape.bot_defense.bot_infrastructure.DeploymentType", DeploymentType_name, DeploymentType_value)
@@ -1448,6 +1999,22 @@ func init() {
 	golang_proto.RegisterType((*CertificateOperationResponse)(nil), "ves.io.schema.shape.bot_defense.bot_infrastructure.CertificateOperationResponse")
 	proto.RegisterType((*CertificateOperationRegion)(nil), "ves.io.schema.shape.bot_defense.bot_infrastructure.CertificateOperationRegion")
 	golang_proto.RegisterType((*CertificateOperationRegion)(nil), "ves.io.schema.shape.bot_defense.bot_infrastructure.CertificateOperationRegion")
+	proto.RegisterType((*CustomListBotInfrastructuresRequest)(nil), "ves.io.schema.shape.bot_defense.bot_infrastructure.CustomListBotInfrastructuresRequest")
+	golang_proto.RegisterType((*CustomListBotInfrastructuresRequest)(nil), "ves.io.schema.shape.bot_defense.bot_infrastructure.CustomListBotInfrastructuresRequest")
+	proto.RegisterType((*CustomListBotInfrastructuresResponseItem)(nil), "ves.io.schema.shape.bot_defense.bot_infrastructure.CustomListBotInfrastructuresResponseItem")
+	golang_proto.RegisterType((*CustomListBotInfrastructuresResponseItem)(nil), "ves.io.schema.shape.bot_defense.bot_infrastructure.CustomListBotInfrastructuresResponseItem")
+	proto.RegisterMapType((map[string]string)(nil), "ves.io.schema.shape.bot_defense.bot_infrastructure.CustomListBotInfrastructuresResponseItem.AnnotationsEntry")
+	golang_proto.RegisterMapType((map[string]string)(nil), "ves.io.schema.shape.bot_defense.bot_infrastructure.CustomListBotInfrastructuresResponseItem.AnnotationsEntry")
+	proto.RegisterMapType((map[string]string)(nil), "ves.io.schema.shape.bot_defense.bot_infrastructure.CustomListBotInfrastructuresResponseItem.LabelsEntry")
+	golang_proto.RegisterMapType((map[string]string)(nil), "ves.io.schema.shape.bot_defense.bot_infrastructure.CustomListBotInfrastructuresResponseItem.LabelsEntry")
+	proto.RegisterType((*CustomListBotInfrastructuresResponse)(nil), "ves.io.schema.shape.bot_defense.bot_infrastructure.CustomListBotInfrastructuresResponse")
+	golang_proto.RegisterType((*CustomListBotInfrastructuresResponse)(nil), "ves.io.schema.shape.bot_defense.bot_infrastructure.CustomListBotInfrastructuresResponse")
+	proto.RegisterType((*GetInfraDeploymentStatusRequest)(nil), "ves.io.schema.shape.bot_defense.bot_infrastructure.GetInfraDeploymentStatusRequest")
+	golang_proto.RegisterType((*GetInfraDeploymentStatusRequest)(nil), "ves.io.schema.shape.bot_defense.bot_infrastructure.GetInfraDeploymentStatusRequest")
+	proto.RegisterType((*BotInfraDeploymentStatus)(nil), "ves.io.schema.shape.bot_defense.bot_infrastructure.BotInfraDeploymentStatus")
+	golang_proto.RegisterType((*BotInfraDeploymentStatus)(nil), "ves.io.schema.shape.bot_defense.bot_infrastructure.BotInfraDeploymentStatus")
+	proto.RegisterType((*GetInfraDeploymentStatusResponse)(nil), "ves.io.schema.shape.bot_defense.bot_infrastructure.GetInfraDeploymentStatusResponse")
+	golang_proto.RegisterType((*GetInfraDeploymentStatusResponse)(nil), "ves.io.schema.shape.bot_defense.bot_infrastructure.GetInfraDeploymentStatusResponse")
 }
 
 func init() {
@@ -1458,117 +2025,156 @@ func init() {
 }
 
 var fileDescriptor_14a6612667caec9f = []byte{
-	// 1751 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x58, 0x4d, 0x8c, 0x23, 0x47,
-	0x15, 0x76, 0xb5, 0x67, 0xe7, 0xa7, 0x3c, 0xf1, 0x78, 0x6b, 0xff, 0x7a, 0xcd, 0xe0, 0x58, 0x06,
-	0x76, 0x47, 0x13, 0xd9, 0x16, 0x03, 0x48, 0x80, 0x50, 0xc4, 0x7a, 0xed, 0x64, 0xbc, 0xe3, 0xb5,
-	0x47, 0x3d, 0x8e, 0x56, 0xe1, 0x80, 0x55, 0xee, 0x2e, 0x7b, 0x4a, 0xd3, 0xee, 0xea, 0x74, 0x97,
-	0x27, 0x31, 0x68, 0x45, 0x58, 0x09, 0x11, 0x24, 0x0e, 0x28, 0x7b, 0x07, 0x24, 0x0e, 0xe4, 0xcc,
-	0x09, 0x08, 0x87, 0x45, 0x42, 0x4a, 0x4e, 0x68, 0x25, 0x2e, 0xb9, 0x20, 0x58, 0x2f, 0x42, 0x70,
-	0x40, 0xca, 0x95, 0x1b, 0xaa, 0xea, 0x72, 0xbb, 0x6d, 0xcf, 0xae, 0x86, 0x9e, 0xd9, 0xdc, 0xea,
-	0xe7, 0xf5, 0x7b, 0xf5, 0x7d, 0xef, 0xa7, 0xea, 0x35, 0xac, 0x1f, 0x13, 0xbf, 0x44, 0x59, 0xd9,
-	0x37, 0x0f, 0xc9, 0x00, 0x97, 0xfd, 0x43, 0xec, 0x92, 0x72, 0x97, 0xf1, 0x8e, 0x45, 0x7a, 0xc4,
-	0xf1, 0x83, 0x31, 0x75, 0x7a, 0x1e, 0xf6, 0xb9, 0x37, 0x34, 0xf9, 0xd0, 0x23, 0x65, 0x77, 0xd8,
-	0xb5, 0xa9, 0xd9, 0x31, 0x87, 0x3e, 0x67, 0x03, 0xec, 0xd2, 0x92, 0xeb, 0x31, 0xce, 0xd0, 0x4e,
-	0xa0, 0xaa, 0x14, 0xa8, 0x2a, 0x49, 0x55, 0xa5, 0x88, 0xaa, 0xd2, 0xa2, 0xaa, 0x6c, 0xb1, 0x4f,
-	0xf9, 0xe1, 0xb0, 0x5b, 0x32, 0xd9, 0xa0, 0xdc, 0x67, 0x7d, 0x56, 0x96, 0xaa, 0xba, 0xc3, 0x9e,
-	0x9c, 0xc9, 0x89, 0x1c, 0x05, 0x26, 0xb2, 0x9b, 0x7d, 0xc6, 0xfa, 0x36, 0x29, 0x63, 0x97, 0x96,
-	0xb1, 0xe3, 0x30, 0x8e, 0x39, 0x65, 0x8e, 0xaf, 0x76, 0xaf, 0xab, 0xdd, 0x50, 0x07, 0x76, 0x46,
-	0x6a, 0xeb, 0xe5, 0xf9, 0x2d, 0x4e, 0x07, 0xc4, 0xe7, 0x78, 0xe0, 0x2a, 0x81, 0xcf, 0xcd, 0xf2,
-	0xc0, 0xdc, 0xa8, 0xe2, 0x57, 0x63, 0x90, 0xc4, 0x47, 0x2e, 0x99, 0x7c, 0xbf, 0x39, 0xfb, 0xfd,
-	0x31, 0xb6, 0xa9, 0x85, 0x39, 0x51, 0xbb, 0x85, 0xb9, 0x5d, 0xe2, 0x13, 0xe7, 0x78, 0xee, 0x04,
-	0xf9, 0x39, 0x19, 0x4a, 0xde, 0xee, 0xcc, 0x4a, 0xbc, 0xbc, 0x28, 0xe1, 0x47, 0x0f, 0x51, 0xd8,
-	0x83, 0xd7, 0xaa, 0xc4, 0xb5, 0xd9, 0x68, 0x40, 0x1c, 0x7e, 0xc0, 0x31, 0x1f, 0xfa, 0x06, 0x79,
-	0x6b, 0x48, 0x7c, 0x8e, 0x36, 0xe1, 0x9a, 0x83, 0x07, 0xc4, 0x77, 0xb1, 0x49, 0x74, 0x90, 0x07,
-	0x5b, 0x6b, 0xc6, 0x74, 0x01, 0x21, 0xb8, 0x24, 0x26, 0xba, 0x26, 0x37, 0xe4, 0xb8, 0xf0, 0x63,
-	0x00, 0xf5, 0x45, 0x6d, 0xbe, 0xcb, 0x1c, 0x9f, 0xa0, 0x23, 0xb8, 0x61, 0x85, 0x7b, 0x1d, 0x0b,
-	0x73, 0xac, 0x83, 0x7c, 0x72, 0x2b, 0xb5, 0x53, 0x29, 0xfd, 0xff, 0x21, 0x52, 0x9a, 0x9a, 0xa9,
-	0x62, 0x8e, 0x8d, 0xb4, 0x35, 0x33, 0x2f, 0x3c, 0x4c, 0xc2, 0xf4, 0xac, 0x08, 0x7a, 0x05, 0x5e,
-	0x8c, 0xd8, 0xf7, 0xe5, 0xe1, 0x14, 0xac, 0x8c, 0x35, 0x77, 0x68, 0x94, 0x85, 0xab, 0x2e, 0xb3,
-	0xa9, 0x49, 0x89, 0xaf, 0x6b, 0xf9, 0xe4, 0xd6, 0x9a, 0x11, 0xce, 0x51, 0x11, 0x2e, 0x7b, 0xa4,
-	0x4f, 0x99, 0xa3, 0x27, 0xc5, 0xd7, 0x95, 0x2b, 0xe3, 0xfb, 0xc8, 0x20, 0xae, 0x8d, 0x4d, 0x62,
-	0xe5, 0xbb, 0xa3, 0xfc, 0x4d, 0xc1, 0xc5, 0x4d, 0x43, 0x09, 0x21, 0x1d, 0xae, 0x58, 0x84, 0x63,
-	0x6a, 0xfb, 0xfa, 0x92, 0xb4, 0x36, 0x99, 0xa2, 0x2d, 0x98, 0xb1, 0xb1, 0x2f, 0x60, 0x0a, 0xeb,
-	0xc4, 0xea, 0x74, 0x47, 0xfa, 0x05, 0x29, 0x92, 0x16, 0xeb, 0x55, 0xb5, 0x5c, 0x19, 0xa1, 0xea,
-	0xbc, 0x24, 0x73, 0xf4, 0xe5, 0x3c, 0xd8, 0x4a, 0xed, 0x64, 0x4b, 0x41, 0x0c, 0x97, 0x26, 0x31,
-	0x5c, 0x6a, 0x4f, 0x62, 0x78, 0x56, 0x4b, 0xcb, 0x99, 0xf3, 0x80, 0x88, 0x02, 0x7d, 0x25, 0x0f,
-	0xb6, 0xd2, 0x67, 0xf5, 0x40, 0x7b, 0xe4, 0x92, 0xa8, 0x07, 0xc4, 0x3c, 0x8c, 0x8f, 0xd5, 0x48,
-	0x7c, 0x7c, 0x04, 0xe0, 0xe5, 0xe0, 0xb3, 0x7d, 0x41, 0xe6, 0xe8, 0x2e, 0xe1, 0x58, 0x04, 0x02,
-	0xfa, 0x2a, 0x4c, 0x49, 0x7a, 0x47, 0x1d, 0xf9, 0x8d, 0xf4, 0x4a, 0xe5, 0xd2, 0xef, 0xff, 0xfd,
-	0x28, 0xb9, 0xe4, 0x69, 0x19, 0x20, 0x06, 0x17, 0xbc, 0xe4, 0x2f, 0x35, 0x60, 0xc0, 0x40, 0xae,
-	0x89, 0x07, 0x44, 0x30, 0x7b, 0x4c, 0x3c, 0x5f, 0x78, 0x22, 0x88, 0xc2, 0xc9, 0x14, 0x75, 0x42,
-	0x7d, 0x12, 0x65, 0x52, 0xa2, 0x7c, 0x35, 0x0e, 0xca, 0xe0, 0xa0, 0x12, 0xa1, 0x32, 0x2d, 0xc6,
-	0x85, 0xff, 0x6a, 0xf0, 0x4a, 0x04, 0x09, 0x25, 0x61, 0xd6, 0x7c, 0x79, 0x21, 0x6b, 0x4e, 0x06,
-	0x12, 0x49, 0xa5, 0x9b, 0xd1, 0x54, 0x3a, 0x59, 0x5a, 0x0a, 0xa0, 0xb7, 0xe0, 0x86, 0x82, 0x35,
-	0x50, 0xcc, 0xe9, 0x49, 0x99, 0x42, 0xbb, 0xf1, 0x1d, 0x38, 0xeb, 0x09, 0x23, 0xed, 0xce, 0x7a,
-	0x66, 0x08, 0x2f, 0x71, 0xda, 0x71, 0xb1, 0x79, 0x84, 0xfb, 0x64, 0x6a, 0xf6, 0x82, 0x0c, 0xbe,
-	0x5a, 0x1c, 0xb3, 0xed, 0xfa, 0x7e, 0xa0, 0x2d, 0xb4, 0x79, 0x91, 0xd3, 0xb9, 0x25, 0x91, 0x7f,
-	0x26, 0x1b, 0x88, 0x60, 0x9a, 0x64, 0x4d, 0x38, 0x2f, 0xf4, 0xe1, 0xc5, 0x05, 0x1d, 0xe8, 0xf3,
-	0x8a, 0xc3, 0x80, 0xf1, 0xb5, 0x90, 0x43, 0xc5, 0xdc, 0xb3, 0x43, 0xe5, 0x3a, 0xd4, 0xa8, 0xa5,
-	0x32, 0x39, 0xf2, 0x99, 0x46, 0xad, 0xc2, 0x07, 0x00, 0x5e, 0x9d, 0x77, 0xb2, 0x2a, 0x66, 0x37,
-	0x67, 0xcc, 0x3d, 0xc7, 0x65, 0x04, 0xbe, 0x14, 0x24, 0xc6, 0xa4, 0xe2, 0x68, 0x32, 0x16, 0xbf,
-	0x1d, 0xd3, 0x61, 0xcc, 0x1e, 0xa9, 0xb2, 0xba, 0x1e, 0xa8, 0x0d, 0x66, 0x85, 0x46, 0xb4, 0xf0,
-	0xee, 0x52, 0x9f, 0x33, 0x6f, 0x14, 0xbf, 0x8e, 0xff, 0x02, 0xc0, 0xeb, 0x27, 0xa8, 0x53, 0xd8,
-	0x7f, 0x08, 0xe0, 0xb5, 0x48, 0x1d, 0x39, 0x0c, 0xb6, 0xa3, 0x15, 0xbd, 0x7e, 0xb6, 0x7a, 0xa2,
-	0x0c, 0xca, 0xc2, 0x7e, 0xc5, 0x3a, 0x69, 0xb9, 0xf0, 0xd7, 0xe4, 0x24, 0xff, 0xe6, 0x76, 0xd0,
-	0x65, 0xb8, 0x34, 0xf4, 0x89, 0x17, 0xe0, 0xd9, 0x4d, 0x18, 0x72, 0x86, 0xbe, 0x08, 0xd7, 0x99,
-	0xd7, 0xc7, 0x0e, 0xfd, 0x9e, 0x7c, 0x1b, 0x04, 0xfe, 0xde, 0x4d, 0x18, 0x33, 0xab, 0xe8, 0xeb,
-	0x70, 0x2d, 0x7c, 0x01, 0xc8, 0xb0, 0x7b, 0x7e, 0x7d, 0x9d, 0x0a, 0xa3, 0xab, 0x70, 0x59, 0xf9,
-	0x37, 0x28, 0xe0, 0x6a, 0x86, 0x6e, 0x44, 0xe2, 0x78, 0x59, 0xc6, 0x0a, 0x54, 0x21, 0xa2, 0xbf,
-	0x9b, 0x99, 0xc6, 0xf4, 0x49, 0x99, 0xbd, 0xf2, 0x82, 0x33, 0xfb, 0x06, 0x5c, 0x53, 0x26, 0xa9,
-	0x15, 0x54, 0xe9, 0x68, 0xfc, 0x07, 0xd7, 0xdd, 0xa8, 0x6e, 0xa1, 0x2f, 0xc1, 0x74, 0x9f, 0x38,
-	0xc4, 0xc3, 0x9c, 0x58, 0x1d, 0x9b, 0x3a, 0x47, 0xfa, 0x9a, 0x84, 0xf8, 0x52, 0xb8, 0xda, 0xa0,
-	0xce, 0x11, 0xba, 0x01, 0x37, 0x22, 0x85, 0x42, 0x86, 0x14, 0x0c, 0xe4, 0xc2, 0xec, 0x16, 0x45,
-	0xbb, 0x92, 0x83, 0x28, 0x72, 0xdf, 0x75, 0xcc, 0x43, 0x46, 0x4d, 0x82, 0x56, 0x1f, 0x7d, 0x08,
-	0x92, 0x8f, 0x3f, 0x04, 0xe0, 0xce, 0xd2, 0x2a, 0xc8, 0x68, 0x85, 0x5f, 0x03, 0x78, 0xf5, 0x96,
-	0xeb, 0xda, 0xa3, 0xdb, 0xc4, 0xe3, 0xb4, 0x47, 0x4d, 0xcc, 0x89, 0x11, 0xdc, 0xa7, 0x14, 0xa6,
-	0x82, 0x9b, 0x75, 0x7a, 0x57, 0xa4, 0x77, 0xbe, 0x15, 0x87, 0xa6, 0x06, 0x33, 0xa5, 0xdf, 0x95,
-	0x4f, 0x1e, 0x00, 0x01, 0x1c, 0x06, 0xca, 0xe5, 0x05, 0x53, 0x80, 0x2b, 0x26, 0xf1, 0xb8, 0x20,
-	0x48, 0x9b, 0x27, 0x68, 0x59, 0xec, 0xd4, 0xad, 0xc2, 0x3f, 0x01, 0xfc, 0x82, 0xc1, 0x6c, 0xbb,
-	0x8b, 0xcd, 0xa3, 0xc8, 0x61, 0xdb, 0xac, 0x4a, 0x7a, 0x78, 0x68, 0xf3, 0xd8, 0x59, 0x88, 0x7e,
-	0x0a, 0x42, 0xa4, 0x36, 0xf5, 0xb9, 0x2c, 0xf5, 0x67, 0x45, 0x5a, 0x14, 0x00, 0xe0, 0xfb, 0x60,
-	0xa5, 0x10, 0xc0, 0x95, 0xc0, 0xdf, 0x07, 0x5a, 0x26, 0x3f, 0x19, 0xad, 0x86, 0x6b, 0x7a, 0x48,
-	0x46, 0x83, 0xfa, 0xbc, 0xf0, 0x27, 0x00, 0xaf, 0x2d, 0xba, 0x24, 0x2e, 0xb8, 0xb7, 0x17, 0xb1,
-	0xa5, 0x76, 0xee, 0xc4, 0xc1, 0x76, 0x72, 0x98, 0x28, 0x9f, 0x4a, 0x40, 0x33, 0x30, 0x7e, 0x05,
-	0xe0, 0x66, 0x44, 0xba, 0xe5, 0x8a, 0x18, 0xa6, 0xcc, 0x09, 0xcb, 0x1b, 0x8a, 0x96, 0x76, 0x75,
-	0x5a, 0x36, 0x7b, 0x5a, 0x4d, 0x9e, 0xb6, 0x19, 0xe7, 0xb4, 0x27, 0x9b, 0x16, 0xaa, 0x67, 0x4e,
-	0xf9, 0x47, 0x0d, 0x66, 0x9f, 0x2d, 0x8a, 0xda, 0xe1, 0x13, 0xf4, 0x1c, 0xc2, 0x3f, 0x7c, 0xa9,
-	0x7e, 0x36, 0x77, 0x15, 0xea, 0xc1, 0x94, 0xcc, 0x2a, 0x65, 0x24, 0x78, 0x9c, 0xd5, 0xce, 0x48,
-	0xa6, 0xb2, 0x04, 0x85, 0xe6, 0x60, 0xbc, 0xbd, 0x17, 0x6d, 0x01, 0xe4, 0x9b, 0x34, 0x03, 0xd7,
-	0x6f, 0x37, 0x5a, 0x6f, 0x54, 0x3b, 0xbb, 0xad, 0x83, 0x76, 0xad, 0x9a, 0x49, 0x20, 0x08, 0x97,
-	0xd5, 0x18, 0xa0, 0x14, 0x5c, 0x69, 0x35, 0x3b, 0xfb, 0x46, 0xed, 0x6e, 0x46, 0x43, 0x69, 0x08,
-	0xf7, 0xde, 0xa8, 0xd4, 0x8c, 0x66, 0xad, 0x5d, 0x3b, 0xc8, 0x24, 0xb7, 0xf7, 0x20, 0x9c, 0x3e,
-	0x05, 0xd1, 0x25, 0xb8, 0x51, 0x6b, 0x56, 0xf7, 0x5b, 0xf5, 0x66, 0xbb, 0xb3, 0xdf, 0x6a, 0xd4,
-	0x6f, 0xbf, 0x99, 0x49, 0x20, 0x04, 0xd3, 0xcd, 0x5a, 0xfb, 0x5e, 0xcb, 0xd8, 0x9b, 0xac, 0x01,
-	0x74, 0x19, 0x66, 0x6e, 0x35, 0x1a, 0xad, 0x7b, 0x8d, 0xfa, 0x41, 0x28, 0xa9, 0x6d, 0x7f, 0x03,
-	0xae, 0x47, 0xf9, 0x41, 0x1b, 0x30, 0x55, 0x17, 0x96, 0x5b, 0xaf, 0x1b, 0xb5, 0x83, 0x83, 0x4c,
-	0x02, 0xad, 0xc3, 0xd5, 0xd7, 0xea, 0xcd, 0xfa, 0xc1, 0xae, 0x3c, 0x18, 0x84, 0xcb, 0xaf, 0xdd,
-	0xaa, 0x37, 0x6a, 0xd5, 0x8c, 0xb6, 0xf3, 0x9f, 0x75, 0xb8, 0x76, 0x5b, 0xb6, 0xd8, 0xb7, 0xf6,
-	0xeb, 0xe8, 0x91, 0xb6, 0xd8, 0x70, 0xb5, 0x8e, 0x89, 0x27, 0xfa, 0x3c, 0xb4, 0x77, 0xb6, 0x5b,
-	0x78, 0xa6, 0x19, 0xcc, 0x36, 0xce, 0x47, 0x59, 0x90, 0x63, 0x85, 0xf7, 0xc0, 0xc7, 0xbf, 0xd5,
-	0xc0, 0xf8, 0x23, 0xbd, 0xd8, 0xfb, 0xda, 0x3b, 0x66, 0xb1, 0xcb, 0x78, 0x51, 0xa9, 0x29, 0x62,
-	0xeb, 0x18, 0x3b, 0x26, 0xb1, 0x8a, 0x3e, 0xb1, 0x7b, 0xbe, 0x80, 0x62, 0x92, 0xe2, 0x80, 0x39,
-	0x94, 0x33, 0xef, 0xc1, 0x5f, 0xfe, 0xf1, 0x50, 0xbb, 0x8b, 0xf6, 0xd4, 0xbf, 0x86, 0x72, 0x58,
-	0x62, 0xfc, 0xf2, 0xf7, 0xc3, 0xf1, 0xfd, 0x13, 0xfa, 0x6e, 0xb5, 0x7f, 0xbf, 0xbc, 0xd0, 0x01,
-	0xa2, 0xdf, 0x84, 0x14, 0x4e, 0x1e, 0x79, 0x6d, 0x56, 0x61, 0xbc, 0x2e, 0xbe, 0x47, 0xf5, 0x33,
-	0xde, 0xbe, 0xd3, 0xbe, 0x20, 0x7b, 0xe7, 0x3c, 0x54, 0x29, 0xfa, 0x7e, 0xa0, 0xd8, 0xdb, 0x3e,
-	0x1d, 0x7b, 0xe2, 0x05, 0x24, 0xa9, 0x7b, 0xbd, 0x50, 0x89, 0x4f, 0xdd, 0xa4, 0xff, 0xfd, 0x26,
-	0xd8, 0x46, 0x7f, 0xd3, 0xe0, 0xe6, 0xf3, 0x2e, 0x3d, 0x74, 0x2f, 0x0e, 0xda, 0x53, 0x5c, 0xa3,
-	0xd9, 0xfd, 0xf3, 0x2b, 0xba, 0x8a, 0xcc, 0x87, 0x82, 0xc9, 0x57, 0x4e, 0xc7, 0x24, 0xb6, 0x06,
-	0xd4, 0x91, 0x54, 0x7e, 0x37, 0xfb, 0x66, 0x7c, 0x2a, 0x3d, 0x05, 0xb4, 0x68, 0x4e, 0x0f, 0x56,
-	0xe4, 0x4c, 0xd8, 0x16, 0x58, 0x05, 0xc3, 0xbf, 0xd3, 0x60, 0x66, 0xfe, 0x66, 0x8b, 0x97, 0xd1,
-	0xcf, 0xb8, 0xb3, 0x5f, 0x00, 0x93, 0x3f, 0x8a, 0xc5, 0xe4, 0x7e, 0xf6, 0x0c, 0xf9, 0x8c, 0x05,
-	0xb8, 0x28, 0x8d, 0x82, 0xbb, 0x3f, 0x68, 0xf0, 0xe2, 0x42, 0x73, 0x80, 0x1a, 0xe7, 0xd2, 0x94,
-	0x4c, 0xd8, 0xbb, 0x7b, 0x4e, 0xda, 0x14, 0x75, 0x3f, 0x39, 0x43, 0x41, 0x6c, 0xa2, 0xc6, 0xb9,
-	0x14, 0x44, 0xd5, 0xc8, 0x65, 0x53, 0xe2, 0x2d, 0xfe, 0xe0, 0xcf, 0x7a, 0xf2, 0x3d, 0x00, 0x2a,
-	0x3f, 0x07, 0x8f, 0x9f, 0xe4, 0x12, 0x9f, 0x3c, 0xc9, 0x25, 0x3e, 0x7d, 0x92, 0x03, 0xef, 0x8e,
-	0x73, 0xe0, 0x83, 0x71, 0x0e, 0x7c, 0x3c, 0xce, 0x81, 0xc7, 0xe3, 0x1c, 0xf8, 0xfb, 0x38, 0x07,
-	0xfe, 0x35, 0xce, 0x25, 0x3e, 0x1d, 0xe7, 0xc0, 0xcf, 0x9e, 0xe6, 0x12, 0x8f, 0x9e, 0xe6, 0xc0,
-	0xe3, 0xa7, 0xb9, 0xc4, 0x27, 0x4f, 0x73, 0x89, 0xef, 0x58, 0x7d, 0xe6, 0x1e, 0xf5, 0x4b, 0xc7,
-	0xcc, 0xe6, 0xc4, 0xf3, 0x70, 0x69, 0xe8, 0x97, 0xe5, 0xa0, 0xc7, 0xbc, 0x41, 0xd1, 0xf5, 0xd8,
-	0x31, 0xb5, 0x88, 0x27, 0xf1, 0x96, 0xdd, 0x6e, 0x9f, 0x95, 0xc9, 0x3b, 0x7c, 0xf2, 0x2b, 0xf5,
-	0xf4, 0x7f, 0x54, 0xbb, 0xcb, 0xb2, 0x31, 0xfb, 0xca, 0xff, 0x02, 0x00, 0x00, 0xff, 0xff, 0xaa,
-	0x96, 0x1b, 0x94, 0xb3, 0x16, 0x00, 0x00,
+	// 2373 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x59, 0x5f, 0x6c, 0x23, 0x47,
+	0x19, 0xcf, 0xac, 0x73, 0x4e, 0xfc, 0x39, 0x7f, 0x7c, 0xd3, 0x6b, 0xeb, 0x9a, 0xe0, 0x1a, 0xb7,
+	0xdc, 0x45, 0xa9, 0x6c, 0x97, 0x00, 0x52, 0x5b, 0xaa, 0x96, 0xcb, 0xc5, 0x77, 0x71, 0xe3, 0xb3,
+	0xa3, 0xb5, 0xcb, 0xd1, 0x0a, 0x61, 0xad, 0x77, 0xc7, 0xce, 0x12, 0x7b, 0x77, 0xbb, 0x3b, 0xce,
+	0xd5, 0x45, 0x27, 0x8e, 0x93, 0x10, 0x45, 0x42, 0x80, 0xee, 0xc4, 0x6b, 0x41, 0x42, 0x88, 0x3e,
+	0xf3, 0x04, 0x1c, 0x48, 0x41, 0x42, 0x6a, 0x91, 0x10, 0x3a, 0x09, 0x09, 0xf5, 0x05, 0xd1, 0xcb,
+	0x21, 0x04, 0x6f, 0x7d, 0xe5, 0x0d, 0xcd, 0x1f, 0xaf, 0xd7, 0x76, 0x12, 0xe5, 0x36, 0xb9, 0xbe,
+	0xed, 0xcc, 0x7c, 0xf3, 0xfd, 0xf9, 0x7d, 0x7f, 0xe6, 0x9b, 0x59, 0x28, 0xed, 0x12, 0x2f, 0x6f,
+	0xda, 0x05, 0x4f, 0xdf, 0x26, 0x5d, 0xad, 0xe0, 0x6d, 0x6b, 0x0e, 0x29, 0x34, 0x6d, 0xda, 0x30,
+	0x48, 0x8b, 0x58, 0x9e, 0xf8, 0x36, 0xad, 0x96, 0xab, 0x79, 0xd4, 0xed, 0xe9, 0xb4, 0xe7, 0x92,
+	0x82, 0xd3, 0x6b, 0x76, 0x4c, 0xbd, 0xa1, 0xf7, 0x3c, 0x6a, 0x77, 0x35, 0xc7, 0xcc, 0x3b, 0xae,
+	0x4d, 0x6d, 0xbc, 0x2a, 0x58, 0xe5, 0x05, 0xab, 0x3c, 0x67, 0x95, 0x0f, 0xb0, 0xca, 0x4f, 0xb2,
+	0x4a, 0xe5, 0xda, 0x26, 0xdd, 0xee, 0x35, 0xf3, 0xba, 0xdd, 0x2d, 0xb4, 0xed, 0xb6, 0x5d, 0xe0,
+	0xac, 0x9a, 0xbd, 0x16, 0x1f, 0xf1, 0x01, 0xff, 0x12, 0x22, 0x52, 0x4b, 0x6d, 0xdb, 0x6e, 0x77,
+	0x48, 0x41, 0x73, 0xcc, 0x82, 0x66, 0x59, 0x36, 0xd5, 0xa8, 0x69, 0x5b, 0x9e, 0x5c, 0x7d, 0x4a,
+	0xae, 0xfa, 0x3c, 0x34, 0xab, 0x2f, 0x97, 0x9e, 0x1e, 0x5f, 0xa2, 0x66, 0x97, 0x78, 0x54, 0xeb,
+	0x3a, 0x92, 0x20, 0x35, 0x8a, 0x03, 0x71, 0x5d, 0xdb, 0x1d, 0xf0, 0xfd, 0xcc, 0xe8, 0x9a, 0xed,
+	0x04, 0x85, 0xbe, 0x1a, 0x02, 0x40, 0xbb, 0xf9, 0x2d, 0xa2, 0x53, 0xc9, 0xe0, 0x95, 0x10, 0x0c,
+	0x68, 0xdf, 0x21, 0xbe, 0xd5, 0xa3, 0xfb, 0x83, 0x4b, 0x4b, 0xa3, 0x4b, 0xbb, 0x5a, 0xc7, 0x34,
+	0x34, 0x4a, 0xe4, 0x6a, 0x76, 0x6c, 0x95, 0x78, 0xc4, 0xda, 0x1d, 0xb3, 0x2e, 0x33, 0x46, 0x63,
+	0x92, 0xeb, 0x8d, 0x51, 0x8a, 0xa7, 0x27, 0x29, 0xbc, 0xa0, 0x12, 0xd9, 0x4d, 0x78, 0x72, 0x9d,
+	0x38, 0x1d, 0xbb, 0xdf, 0x25, 0x16, 0xad, 0x51, 0x8d, 0xf6, 0x3c, 0x95, 0xbc, 0xd5, 0x23, 0x1e,
+	0xc5, 0x4b, 0x10, 0xb3, 0xb4, 0x2e, 0xf1, 0x1c, 0x4d, 0x27, 0x49, 0x94, 0x41, 0xcb, 0x31, 0x75,
+	0x38, 0x81, 0x31, 0x4c, 0xb3, 0x41, 0x52, 0xe1, 0x0b, 0xfc, 0x3b, 0xfb, 0x7d, 0x04, 0xc9, 0x49,
+	0x6e, 0x9e, 0x63, 0x5b, 0x1e, 0xc1, 0x3b, 0xb0, 0x68, 0xf8, 0x6b, 0x0d, 0x43, 0xa3, 0x5a, 0x12,
+	0x65, 0x22, 0xcb, 0xf1, 0xd5, 0xb5, 0xfc, 0xc3, 0x87, 0x66, 0x7e, 0x28, 0x66, 0x5d, 0xa3, 0x9a,
+	0xba, 0x60, 0x8c, 0x8c, 0xb3, 0x77, 0x22, 0xb0, 0x30, 0x4a, 0x82, 0x9f, 0x83, 0xb3, 0x01, 0xf9,
+	0x1e, 0x57, 0x4e, 0x9a, 0x95, 0x30, 0xc6, 0x94, 0xc6, 0x29, 0x98, 0x75, 0xec, 0x8e, 0xa9, 0x9b,
+	0xc4, 0x4b, 0x2a, 0x99, 0xc8, 0x72, 0x4c, 0xf5, 0xc7, 0x38, 0x07, 0x51, 0x97, 0xb4, 0x4d, 0xdb,
+	0x4a, 0x46, 0xd8, 0xee, 0xb5, 0xc7, 0xf7, 0x6f, 0x60, 0x95, 0x38, 0x1d, 0x4d, 0x27, 0x46, 0xa6,
+	0xd9, 0xcf, 0x5c, 0x60, 0x58, 0x5c, 0x50, 0x25, 0x11, 0x4e, 0xc2, 0x8c, 0x41, 0xa8, 0x66, 0x76,
+	0xbc, 0xe4, 0x34, 0x97, 0x36, 0x18, 0xe2, 0x65, 0x48, 0x74, 0x34, 0x8f, 0x99, 0xc9, 0xa4, 0x13,
+	0xa3, 0xd1, 0xec, 0x27, 0xcf, 0x70, 0x92, 0x05, 0x36, 0xbf, 0x2e, 0xa7, 0xd7, 0xfa, 0x78, 0x7d,
+	0x9c, 0xd2, 0xb6, 0x92, 0xd1, 0x0c, 0x5a, 0x8e, 0xaf, 0xa6, 0xf2, 0x22, 0x77, 0xf2, 0x83, 0xdc,
+	0xc9, 0xd7, 0x07, 0xb9, 0x33, 0xca, 0xa5, 0x6a, 0x8d, 0x79, 0x80, 0x45, 0x41, 0x72, 0x26, 0x83,
+	0x96, 0x17, 0x4e, 0xea, 0x81, 0x7a, 0xdf, 0x21, 0x41, 0x0f, 0xb0, 0xb1, 0x1f, 0x1f, 0xb3, 0x81,
+	0xf8, 0xf8, 0x00, 0xc1, 0x39, 0xb1, 0x6d, 0x8b, 0x81, 0xd9, 0xbf, 0x4a, 0xa8, 0xc6, 0x02, 0x01,
+	0x7f, 0x09, 0xe2, 0x1c, 0xde, 0x7e, 0x83, 0xef, 0xe1, 0x5e, 0x59, 0x7b, 0xec, 0x77, 0xff, 0xdd,
+	0x8b, 0x4c, 0xbb, 0x4a, 0x02, 0xb1, 0x8f, 0x33, 0x6e, 0xe4, 0xe7, 0x0a, 0x52, 0x41, 0xd0, 0x55,
+	0xb4, 0x2e, 0x61, 0xc8, 0xee, 0x12, 0xd7, 0x63, 0x9e, 0x10, 0x51, 0x38, 0x18, 0xe2, 0x86, 0xcf,
+	0x8f, 0x5b, 0x19, 0xe1, 0x56, 0xbe, 0x12, 0xc6, 0x4a, 0xa1, 0x28, 0xb7, 0x50, 0x8a, 0x66, 0xdf,
+	0xd9, 0xff, 0x29, 0xf0, 0x78, 0xc0, 0x12, 0x93, 0xf8, 0x59, 0xf3, 0x85, 0x89, 0xac, 0x39, 0xd8,
+	0x90, 0x40, 0x2a, 0x5d, 0x08, 0xa6, 0xd2, 0xc1, 0xd4, 0x9c, 0x00, 0xbf, 0x05, 0x8b, 0xd2, 0xac,
+	0xae, 0x44, 0x2e, 0x19, 0xe1, 0x29, 0xb4, 0x11, 0xde, 0x81, 0xa3, 0x9e, 0x50, 0x17, 0x9c, 0x51,
+	0xcf, 0xf4, 0xe0, 0x31, 0x6a, 0x36, 0x1c, 0x4d, 0xdf, 0xd1, 0xda, 0x64, 0x28, 0xf6, 0x0c, 0x0f,
+	0xbe, 0x62, 0x18, 0xb1, 0xf5, 0xd2, 0x96, 0xe0, 0xe6, 0xcb, 0x3c, 0x4b, 0xcd, 0xb1, 0x29, 0x96,
+	0x7f, 0xba, 0xdd, 0x65, 0xc1, 0x34, 0xc8, 0x1a, 0x7f, 0x9c, 0x6d, 0xc3, 0xd9, 0x09, 0x1e, 0xf8,
+	0xb3, 0x12, 0x43, 0x81, 0x78, 0xcc, 0xc7, 0x50, 0x22, 0x77, 0x78, 0xa8, 0x3c, 0x05, 0x8a, 0x69,
+	0xc8, 0x4c, 0x0e, 0x6c, 0x53, 0x4c, 0x23, 0xfb, 0x3e, 0x82, 0x27, 0xc6, 0x9d, 0x2c, 0x8b, 0xd9,
+	0x85, 0x11, 0x71, 0x47, 0xb8, 0x8c, 0xc0, 0xbc, 0x48, 0x8c, 0x41, 0xc5, 0x51, 0x78, 0x2c, 0x7e,
+	0x35, 0xa4, 0xc3, 0xec, 0x4e, 0x5f, 0x96, 0xd5, 0x39, 0xc1, 0x56, 0x8c, 0xb2, 0xe5, 0x60, 0xe1,
+	0xdd, 0x30, 0x3d, 0x6a, 0xbb, 0xfd, 0xf0, 0x75, 0xfc, 0x67, 0x08, 0x9e, 0x3a, 0x80, 0x9d, 0xb4,
+	0xfd, 0xbb, 0x08, 0x9e, 0x0c, 0xd4, 0x91, 0x6d, 0xb1, 0x1c, 0xac, 0xe8, 0xa5, 0x93, 0xd5, 0x13,
+	0x29, 0x90, 0x17, 0xf6, 0xc7, 0x8d, 0x83, 0xa6, 0xb3, 0xff, 0x88, 0x0c, 0xf2, 0x6f, 0x6c, 0x05,
+	0x9f, 0x83, 0xe9, 0x9e, 0x47, 0x5c, 0x61, 0xcf, 0xc6, 0x94, 0xca, 0x47, 0xf8, 0x59, 0x98, 0xb3,
+	0xdd, 0xb6, 0x66, 0x99, 0xef, 0xf0, 0x9e, 0x44, 0xf8, 0x7b, 0x63, 0x4a, 0x1d, 0x99, 0xc5, 0x2f,
+	0x40, 0xcc, 0xef, 0x3c, 0x78, 0xd8, 0x1d, 0x5d, 0x5f, 0x87, 0xc4, 0xf8, 0x09, 0x88, 0x4a, 0xff,
+	0x8a, 0x02, 0x2e, 0x47, 0xf8, 0x7c, 0x20, 0x8e, 0xa3, 0x3c, 0x56, 0x40, 0x86, 0x48, 0xf2, 0x66,
+	0x62, 0x18, 0xd3, 0x07, 0x65, 0xf6, 0xcc, 0x23, 0xce, 0xec, 0xf3, 0x10, 0x93, 0x22, 0x4d, 0x43,
+	0x54, 0xe9, 0x60, 0xfc, 0x8b, 0xe3, 0xae, 0x5f, 0x32, 0xf0, 0xe7, 0x61, 0xa1, 0x4d, 0x2c, 0xe2,
+	0x6a, 0x94, 0x18, 0x8d, 0x8e, 0x69, 0xed, 0x24, 0x63, 0xdc, 0xc4, 0x79, 0x7f, 0xb6, 0x6c, 0x5a,
+	0x3b, 0xf8, 0x3c, 0x2c, 0x06, 0x0a, 0x05, 0x0f, 0x29, 0x10, 0x74, 0x7e, 0x76, 0xb3, 0xa2, 0xbd,
+	0x96, 0x06, 0x1c, 0x38, 0xef, 0x1a, 0xfa, 0xb6, 0x6d, 0xea, 0x04, 0xcf, 0xee, 0xdd, 0x45, 0x91,
+	0x7b, 0x77, 0x11, 0x7a, 0x6d, 0x7a, 0x16, 0x25, 0x94, 0xec, 0xaf, 0x10, 0x3c, 0x71, 0xd1, 0x71,
+	0x3a, 0xfd, 0x4b, 0xc4, 0xa5, 0x66, 0xcb, 0xd4, 0x35, 0x4a, 0x54, 0x71, 0x9e, 0x9a, 0x10, 0x17,
+	0x27, 0xeb, 0xf0, 0xac, 0x58, 0x58, 0x7d, 0x39, 0x0c, 0x4c, 0x65, 0x5b, 0xe7, 0x7e, 0x97, 0x3e,
+	0xb9, 0x85, 0x98, 0xe1, 0x20, 0x98, 0xf3, 0x03, 0x26, 0x0b, 0x33, 0x3a, 0x71, 0x29, 0x03, 0x48,
+	0x19, 0x07, 0x28, 0xca, 0x56, 0x4a, 0x46, 0xf6, 0xdf, 0x08, 0x9e, 0x51, 0xed, 0x4e, 0xa7, 0xa9,
+	0xe9, 0x3b, 0x01, 0x65, 0xeb, 0xf6, 0x3a, 0x69, 0x69, 0xbd, 0x0e, 0x0d, 0x9d, 0x85, 0xf8, 0x87,
+	0xc8, 0xb7, 0xb4, 0x63, 0x7a, 0x94, 0x97, 0xfa, 0x93, 0x5a, 0x9a, 0x63, 0x06, 0xc0, 0x6d, 0x34,
+	0x93, 0x15, 0xe6, 0x72, 0xc3, 0x6f, 0x23, 0x25, 0x91, 0x19, 0x7c, 0xcd, 0xfa, 0x73, 0x49, 0x1f,
+	0x8c, 0xb2, 0xe9, 0xd1, 0xec, 0x9f, 0x10, 0x3c, 0x39, 0xe9, 0x92, 0xb0, 0xc6, 0x5d, 0x9f, 0xb4,
+	0x2d, 0xbe, 0xfa, 0x5a, 0x18, 0xdb, 0x0e, 0x0e, 0x13, 0xe9, 0x53, 0x6e, 0xd0, 0x88, 0x19, 0xbf,
+	0x40, 0xb0, 0x14, 0xa0, 0xae, 0x3a, 0x2c, 0x86, 0x4d, 0xdb, 0xf2, 0xcb, 0x1b, 0x0e, 0x96, 0x76,
+	0xa9, 0xad, 0x3d, 0xaa, 0xad, 0xc2, 0xb5, 0xad, 0x84, 0xd1, 0xf6, 0x60, 0xd1, 0x8c, 0xf5, 0x88,
+	0x96, 0x7f, 0x54, 0x20, 0x75, 0x38, 0x29, 0xae, 0xfb, 0x2d, 0xe8, 0x29, 0x84, 0xbf, 0xdf, 0xa9,
+	0x7e, 0x3a, 0x67, 0x15, 0x6e, 0x41, 0x9c, 0x67, 0x95, 0x14, 0x22, 0x9a, 0xb3, 0xe2, 0x09, 0xc1,
+	0x94, 0x92, 0x80, 0x71, 0x96, 0x67, 0xe2, 0x1f, 0x10, 0x3c, 0x73, 0x89, 0xdf, 0x82, 0x19, 0xa4,
+	0x6b, 0x36, 0x2d, 0x8d, 0xec, 0x3e, 0xe6, 0x3d, 0xe7, 0x73, 0x30, 0xd7, 0xd1, 0x9a, 0xa4, 0xd3,
+	0x68, 0x99, 0x1d, 0x3a, 0x38, 0x57, 0xd4, 0x38, 0x9f, 0xbb, 0xcc, 0xa7, 0xf0, 0x33, 0x30, 0xef,
+	0x12, 0xc7, 0x76, 0x69, 0xa3, 0x65, 0x92, 0x8e, 0xe1, 0xf1, 0x68, 0x8e, 0xa9, 0x73, 0x62, 0xf2,
+	0x32, 0x9f, 0xc3, 0xcf, 0xc3, 0x39, 0x49, 0x24, 0xec, 0x1e, 0xd0, 0x4e, 0x73, 0x5a, 0x2c, 0xd6,
+	0x84, 0xe6, 0x62, 0x47, 0xf6, 0xe3, 0x19, 0x58, 0x3e, 0x5a, 0x7f, 0x11, 0xb1, 0x25, 0x4a, 0xba,
+	0xec, 0x00, 0xa2, 0xc4, 0xd2, 0x2c, 0x2a, 0x2d, 0x90, 0xa3, 0x51, 0xe3, 0x94, 0xc3, 0x32, 0x33,
+	0x12, 0x88, 0xf5, 0x04, 0x44, 0x7a, 0xa6, 0x21, 0xbb, 0x2e, 0xf6, 0x89, 0x33, 0x10, 0x37, 0x88,
+	0xa7, 0xbb, 0x26, 0xbf, 0x5a, 0xca, 0x13, 0x2e, 0x38, 0xc5, 0xda, 0x35, 0xc3, 0xf4, 0xb4, 0x66,
+	0x87, 0x18, 0xfc, 0x98, 0x9b, 0x55, 0xfd, 0x31, 0xbe, 0x89, 0x20, 0xca, 0xd1, 0xf2, 0xe4, 0x91,
+	0xb6, 0x1d, 0xca, 0xd5, 0xc7, 0x04, 0x22, 0x5f, 0xe6, 0xa2, 0x8a, 0x16, 0x75, 0xfb, 0xaa, 0x94,
+	0x8b, 0x7f, 0x8c, 0x20, 0x1e, 0x78, 0x90, 0x48, 0xce, 0x72, 0x3d, 0xba, 0x8f, 0x54, 0x8f, 0x8b,
+	0x43, 0x79, 0x42, 0x99, 0xa0, 0x06, 0xf8, 0x45, 0x00, 0xfb, 0xba, 0x45, 0xdc, 0x06, 0xbb, 0x91,
+	0xf3, 0x03, 0x95, 0xb5, 0x1a, 0xa3, 0xfa, 0x7c, 0xcd, 0x24, 0xd7, 0x55, 0xd2, 0xe2, 0x77, 0x8f,
+	0x18, 0xa7, 0x66, 0x33, 0xf8, 0x65, 0x98, 0xf5, 0x7b, 0x04, 0xe0, 0x1b, 0x33, 0x63, 0x1b, 0xab,
+	0xfc, 0x01, 0xe3, 0x0a, 0xa1, 0xec, 0xac, 0xe7, 0xdb, 0xfd, 0x1d, 0xb8, 0x0a, 0x8b, 0x5e, 0xdf,
+	0xa3, 0xa4, 0x3b, 0x6c, 0x34, 0xe2, 0x9c, 0xc9, 0xf9, 0x31, 0x26, 0x35, 0x4e, 0x35, 0xc9, 0x6a,
+	0x41, 0x6c, 0xf7, 0xdb, 0x88, 0x37, 0x61, 0xb6, 0x4d, 0x68, 0xc3, 0x73, 0x88, 0x9e, 0x9c, 0xe3,
+	0x9c, 0x5e, 0x0d, 0x83, 0xeb, 0x15, 0x42, 0x6b, 0x0e, 0xd1, 0xb9, 0x88, 0x99, 0xb6, 0x18, 0x60,
+	0x03, 0x40, 0x26, 0x8b, 0x47, 0x68, 0x72, 0x9e, 0x7b, 0x2d, 0x54, 0x35, 0x12, 0x79, 0x25, 0x8c,
+	0x59, 0x8b, 0xec, 0xdd, 0x40, 0x6a, 0x4c, 0x30, 0xae, 0x11, 0x9a, 0x7a, 0x11, 0xe2, 0x81, 0xa0,
+	0x61, 0xf1, 0xbf, 0x43, 0xfa, 0x32, 0x8d, 0xd8, 0x27, 0x3e, 0x07, 0x67, 0x76, 0xb5, 0x4e, 0x6f,
+	0x90, 0x3f, 0x62, 0xf0, 0x92, 0xf2, 0x02, 0x4a, 0xbd, 0x02, 0x89, 0x71, 0x3f, 0x3f, 0xcc, 0xfe,
+	0xec, 0x5f, 0x10, 0x3c, 0x7b, 0x9c, 0x88, 0xc2, 0x2e, 0x9c, 0x31, 0x29, 0xe9, 0x7a, 0xb2, 0xc1,
+	0xfe, 0xc6, 0xa3, 0x0c, 0x5d, 0x55, 0x88, 0xc2, 0xcf, 0x43, 0x54, 0x3c, 0xb4, 0xc9, 0xf3, 0x2e,
+	0x39, 0x26, 0xb4, 0xc8, 0x16, 0xb9, 0xc3, 0x24, 0x5d, 0xf6, 0x97, 0x08, 0x9e, 0xbe, 0x42, 0x04,
+	0xef, 0x70, 0xaf, 0x4a, 0x06, 0x2c, 0xfa, 0x9a, 0xf3, 0xfe, 0x4e, 0x3e, 0xbf, 0xac, 0xbd, 0xcc,
+	0x8e, 0xf3, 0xd8, 0x6d, 0x14, 0xcd, 0xfa, 0xf7, 0x2c, 0xd1, 0xc6, 0xf0, 0xcb, 0x16, 0x1b, 0x46,
+	0x6f, 0xa3, 0x48, 0xe2, 0x26, 0x3a, 0xb0, 0x8f, 0x99, 0x6f, 0x4a, 0x8b, 0x59, 0x5b, 0xe7, 0x65,
+	0x7f, 0x8a, 0x20, 0x39, 0xc0, 0x60, 0x5c, 0xcf, 0x03, 0xcf, 0xff, 0x4f, 0xe9, 0x16, 0xf7, 0x1e,
+	0x82, 0xcc, 0xe1, 0xf8, 0xc9, 0x50, 0x78, 0x07, 0xf0, 0x10, 0x22, 0xa1, 0x0e, 0x19, 0xc4, 0x45,
+	0x39, 0x8c, 0x42, 0x87, 0x21, 0xa1, 0x26, 0x06, 0xa8, 0xd5, 0xa4, 0x94, 0x95, 0xcd, 0xe0, 0xab,
+	0x1a, 0x7f, 0xe6, 0x49, 0xc0, 0xdc, 0xa5, 0x72, 0xf5, 0xf5, 0xf5, 0xc6, 0x46, 0xb5, 0x56, 0x2f,
+	0xae, 0x27, 0xa6, 0x30, 0x40, 0x54, 0x7e, 0x23, 0x1c, 0x87, 0x99, 0x6a, 0xa5, 0xb1, 0xa5, 0x16,
+	0xaf, 0x26, 0x14, 0xbc, 0x00, 0xb0, 0xf9, 0xfa, 0x5a, 0x51, 0xad, 0x14, 0xeb, 0xc5, 0x5a, 0x22,
+	0xb2, 0xb2, 0x09, 0x30, 0x7c, 0x5d, 0xc1, 0x8f, 0xc1, 0x62, 0xb1, 0xb2, 0xbe, 0x55, 0x2d, 0x55,
+	0xea, 0x8d, 0xad, 0x6a, 0xb9, 0x74, 0xe9, 0x8d, 0xc4, 0x14, 0xc6, 0xb0, 0x50, 0x29, 0xd6, 0xaf,
+	0x55, 0xd5, 0xcd, 0xc1, 0x1c, 0xc2, 0xe7, 0x20, 0x71, 0xb1, 0x5c, 0xae, 0x5e, 0x2b, 0x97, 0x6a,
+	0x3e, 0xa5, 0xb2, 0xb2, 0x01, 0x73, 0x41, 0x60, 0xf1, 0x22, 0xc4, 0x4b, 0x4c, 0x72, 0xf5, 0x8a,
+	0x5a, 0xac, 0xd5, 0x12, 0x53, 0x78, 0x0e, 0x66, 0x2f, 0x97, 0x2a, 0xa5, 0xda, 0x06, 0x57, 0x0c,
+	0x20, 0x7a, 0xf9, 0x62, 0xa9, 0x5c, 0x5c, 0x4f, 0x28, 0x78, 0x1e, 0x62, 0x95, 0x6a, 0xbd, 0x71,
+	0xb9, 0xfa, 0x7a, 0x65, 0x3d, 0x11, 0x59, 0xbd, 0x8d, 0x21, 0x26, 0x52, 0xe5, 0xe2, 0x56, 0x09,
+	0xef, 0x29, 0x93, 0x4f, 0x9a, 0xd5, 0x5d, 0xe2, 0xb2, 0xba, 0x8d, 0x37, 0x4f, 0x76, 0xcf, 0x1d,
+	0x49, 0x8c, 0x54, 0xf9, 0x74, 0x98, 0x89, 0x28, 0xc9, 0xbe, 0x8b, 0x3e, 0xfc, 0x8d, 0x82, 0xf6,
+	0x3f, 0x48, 0xe6, 0x5a, 0x5f, 0x7e, 0x5b, 0xcf, 0x35, 0x6d, 0x9a, 0x93, 0x6c, 0x72, 0x9a, 0xb1,
+	0xab, 0x59, 0x3a, 0x31, 0x72, 0x1e, 0xe9, 0xb4, 0x3c, 0x66, 0x8a, 0x4e, 0x72, 0x5d, 0xdb, 0x32,
+	0xa9, 0xed, 0xde, 0xfa, 0xdb, 0xbf, 0xee, 0x28, 0x57, 0xf1, 0xa6, 0xfc, 0x8b, 0x50, 0xf0, 0x33,
+	0xd3, 0x2b, 0x7c, 0xdb, 0xff, 0xbe, 0x71, 0xc0, 0xa3, 0xb7, 0x5c, 0xbf, 0x51, 0x98, 0x78, 0x63,
+	0xc5, 0xbf, 0xf6, 0x21, 0x1c, 0x3c, 0xa3, 0xd4, 0xed, 0x41, 0xcc, 0xe1, 0xd2, 0x09, 0xef, 0xb7,
+	0xc3, 0x97, 0xb7, 0xd4, 0x6b, 0xa7, 0xc1, 0x4a, 0xc2, 0xf7, 0x1d, 0x89, 0xde, 0xca, 0xf1, 0xd0,
+	0xeb, 0x79, 0x44, 0x40, 0x77, 0x25, 0xbb, 0x16, 0x1e, 0xba, 0xc1, 0x0b, 0xf3, 0x4b, 0x68, 0x05,
+	0xff, 0x53, 0x81, 0xa5, 0xa3, 0xae, 0x95, 0xf8, 0x5a, 0x18, 0x6b, 0x8f, 0x71, 0x51, 0x4d, 0x6d,
+	0x9d, 0xde, 0xb5, 0x46, 0x82, 0x79, 0x87, 0x21, 0xf9, 0xdc, 0xf1, 0x90, 0xd4, 0x8c, 0xae, 0x69,
+	0x71, 0x28, 0xbf, 0x99, 0x7a, 0x23, 0x3c, 0x94, 0xae, 0x34, 0x34, 0xa7, 0x0f, 0x15, 0xcb, 0x51,
+	0x9b, 0xc9, 0x66, 0xb6, 0x32, 0x84, 0x7f, 0xab, 0x40, 0x62, 0xfc, 0xee, 0x18, 0x2e, 0xa3, 0x0f,
+	0xb9, 0x15, 0x3f, 0x02, 0x24, 0xbf, 0x17, 0x0a, 0xc9, 0xad, 0xd4, 0x09, 0xf2, 0x59, 0x63, 0xc6,
+	0x05, 0x61, 0x64, 0xd8, 0xfd, 0x5e, 0x81, 0xb3, 0x13, 0xcf, 0x6f, 0xb8, 0x7c, 0x2a, 0xcf, 0x7e,
+	0x03, 0xf4, 0xae, 0x9e, 0x12, 0x37, 0x09, 0xdd, 0x0f, 0x4e, 0x50, 0x10, 0x2b, 0xb8, 0x7c, 0x2a,
+	0x05, 0x51, 0x3e, 0x95, 0xe2, 0x3f, 0x2b, 0xb0, 0x74, 0x54, 0x37, 0x16, 0x2e, 0xb9, 0x8f, 0x71,
+	0xd7, 0x4d, 0x7d, 0xfd, 0x51, 0x35, 0x8e, 0xd9, 0xdd, 0xf0, 0xf0, 0x7e, 0x05, 0xbf, 0x38, 0x80,
+	0x57, 0xfc, 0xb5, 0x7e, 0x08, 0x94, 0xf1, 0xdf, 0x15, 0x48, 0x1e, 0xd6, 0x33, 0xe1, 0x5a, 0xc8,
+	0xab, 0xc8, 0x51, 0x1d, 0x6c, 0xaa, 0x7e, 0xba, 0x4c, 0x25, 0x7e, 0x3f, 0x3a, 0x41, 0x7c, 0xd6,
+	0xb2, 0x95, 0x10, 0xf1, 0xc9, 0xae, 0x6d, 0xa2, 0x8b, 0x9c, 0x38, 0xb3, 0x5f, 0x42, 0x2b, 0xa9,
+	0xf8, 0xde, 0x5d, 0x14, 0xb9, 0xf5, 0xd7, 0x64, 0xe4, 0x5d, 0x84, 0xd6, 0xde, 0x43, 0xf7, 0xee,
+	0xa7, 0xa7, 0x3e, 0xba, 0x9f, 0x9e, 0xfa, 0xe4, 0x7e, 0x1a, 0xdd, 0xdc, 0x4f, 0xa3, 0xf7, 0xf7,
+	0xd3, 0xe8, 0xc3, 0xfd, 0x34, 0xba, 0xb7, 0x9f, 0x46, 0x1f, 0xef, 0xa7, 0xd1, 0x7f, 0xf6, 0xd3,
+	0x53, 0x9f, 0xec, 0xa7, 0xd1, 0x4f, 0x1e, 0xa4, 0xa7, 0xf6, 0x1e, 0xa4, 0xd1, 0xbd, 0x07, 0xe9,
+	0xa9, 0x8f, 0x1e, 0xa4, 0xa7, 0xde, 0x34, 0xda, 0xb6, 0xb3, 0xd3, 0xce, 0xef, 0xda, 0x1d, 0x4a,
+	0x5c, 0x57, 0xcb, 0xf7, 0xbc, 0x02, 0xff, 0x68, 0xd9, 0x6e, 0x37, 0xe7, 0xb8, 0xf6, 0xae, 0x69,
+	0x10, 0x97, 0x1b, 0x5d, 0x70, 0x9a, 0x6d, 0xbb, 0x40, 0xde, 0xa6, 0x83, 0x9f, 0xed, 0xc7, 0xff,
+	0xe7, 0xde, 0x8c, 0xf2, 0xf7, 0xf9, 0x2f, 0xfe, 0x3f, 0x00, 0x00, 0xff, 0xff, 0x3b, 0xa0, 0xd4,
+	0x63, 0x32, 0x21, 0x00, 0x00,
 }
 
 func (x DeploymentType) String() string {
@@ -2145,6 +2751,249 @@ func (this *CertificateOperationRegion) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *CustomListBotInfrastructuresRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CustomListBotInfrastructuresRequest)
+	if !ok {
+		that2, ok := that.(CustomListBotInfrastructuresRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if this.LabelFilter != that1.LabelFilter {
+		return false
+	}
+	if len(this.ReportFields) != len(that1.ReportFields) {
+		return false
+	}
+	for i := range this.ReportFields {
+		if this.ReportFields[i] != that1.ReportFields[i] {
+			return false
+		}
+	}
+	if len(this.ReportStatusFields) != len(that1.ReportStatusFields) {
+		return false
+	}
+	for i := range this.ReportStatusFields {
+		if this.ReportStatusFields[i] != that1.ReportStatusFields[i] {
+			return false
+		}
+	}
+	return true
+}
+func (this *CustomListBotInfrastructuresResponseItem) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CustomListBotInfrastructuresResponseItem)
+	if !ok {
+		that2, ok := that.(CustomListBotInfrastructuresResponseItem)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Tenant != that1.Tenant {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if this.Name != that1.Name {
+		return false
+	}
+	if this.Uid != that1.Uid {
+		return false
+	}
+	if this.Description != that1.Description {
+		return false
+	}
+	if this.Disabled != that1.Disabled {
+		return false
+	}
+	if len(this.Labels) != len(that1.Labels) {
+		return false
+	}
+	for i := range this.Labels {
+		if this.Labels[i] != that1.Labels[i] {
+			return false
+		}
+	}
+	if len(this.Annotations) != len(that1.Annotations) {
+		return false
+	}
+	for i := range this.Annotations {
+		if this.Annotations[i] != that1.Annotations[i] {
+			return false
+		}
+	}
+	if !this.OwnerView.Equal(that1.OwnerView) {
+		return false
+	}
+	if !this.Metadata.Equal(that1.Metadata) {
+		return false
+	}
+	if !this.SystemMetadata.Equal(that1.SystemMetadata) {
+		return false
+	}
+	if !this.GetSpec.Equal(that1.GetSpec) {
+		return false
+	}
+	if len(this.StatusSet) != len(that1.StatusSet) {
+		return false
+	}
+	for i := range this.StatusSet {
+		if !this.StatusSet[i].Equal(that1.StatusSet[i]) {
+			return false
+		}
+	}
+	return true
+}
+func (this *CustomListBotInfrastructuresResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CustomListBotInfrastructuresResponse)
+	if !ok {
+		that2, ok := that.(CustomListBotInfrastructuresResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.Items) != len(that1.Items) {
+		return false
+	}
+	for i := range this.Items {
+		if !this.Items[i].Equal(that1.Items[i]) {
+			return false
+		}
+	}
+	if len(this.Errors) != len(that1.Errors) {
+		return false
+	}
+	for i := range this.Errors {
+		if !this.Errors[i].Equal(that1.Errors[i]) {
+			return false
+		}
+	}
+	return true
+}
+func (this *GetInfraDeploymentStatusRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetInfraDeploymentStatusRequest)
+	if !ok {
+		that2, ok := that.(GetInfraDeploymentStatusRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if len(this.BotInfraNames) != len(that1.BotInfraNames) {
+		return false
+	}
+	for i := range this.BotInfraNames {
+		if this.BotInfraNames[i] != that1.BotInfraNames[i] {
+			return false
+		}
+	}
+	return true
+}
+func (this *BotInfraDeploymentStatus) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*BotInfraDeploymentStatus)
+	if !ok {
+		that2, ok := that.(BotInfraDeploymentStatus)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Name != that1.Name {
+		return false
+	}
+	if this.DeployStatus != that1.DeployStatus {
+		return false
+	}
+	return true
+}
+func (this *GetInfraDeploymentStatusResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetInfraDeploymentStatusResponse)
+	if !ok {
+		that2, ok := that.(GetInfraDeploymentStatusResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.BotInfraStatuses) != len(that1.BotInfraStatuses) {
+		return false
+	}
+	for i := range this.BotInfraStatuses {
+		if !this.BotInfraStatuses[i].Equal(that1.BotInfraStatuses[i]) {
+			return false
+		}
+	}
+	return true
+}
 func (this *DeploymentStatusRequest) GoString() string {
 	if this == nil {
 		return "nil"
@@ -2364,6 +3213,124 @@ func (this *CertificateOperationRegion) GoString() string {
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
+func (this *CustomListBotInfrastructuresRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 8)
+	s = append(s, "&bot_infrastructure.CustomListBotInfrastructuresRequest{")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	s = append(s, "LabelFilter: "+fmt.Sprintf("%#v", this.LabelFilter)+",\n")
+	s = append(s, "ReportFields: "+fmt.Sprintf("%#v", this.ReportFields)+",\n")
+	s = append(s, "ReportStatusFields: "+fmt.Sprintf("%#v", this.ReportStatusFields)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *CustomListBotInfrastructuresResponseItem) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 17)
+	s = append(s, "&bot_infrastructure.CustomListBotInfrastructuresResponseItem{")
+	s = append(s, "Tenant: "+fmt.Sprintf("%#v", this.Tenant)+",\n")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
+	s = append(s, "Uid: "+fmt.Sprintf("%#v", this.Uid)+",\n")
+	s = append(s, "Description: "+fmt.Sprintf("%#v", this.Description)+",\n")
+	s = append(s, "Disabled: "+fmt.Sprintf("%#v", this.Disabled)+",\n")
+	keysForLabels := make([]string, 0, len(this.Labels))
+	for k, _ := range this.Labels {
+		keysForLabels = append(keysForLabels, k)
+	}
+	github_com_gogo_protobuf_sortkeys.Strings(keysForLabels)
+	mapStringForLabels := "map[string]string{"
+	for _, k := range keysForLabels {
+		mapStringForLabels += fmt.Sprintf("%#v: %#v,", k, this.Labels[k])
+	}
+	mapStringForLabels += "}"
+	if this.Labels != nil {
+		s = append(s, "Labels: "+mapStringForLabels+",\n")
+	}
+	keysForAnnotations := make([]string, 0, len(this.Annotations))
+	for k, _ := range this.Annotations {
+		keysForAnnotations = append(keysForAnnotations, k)
+	}
+	github_com_gogo_protobuf_sortkeys.Strings(keysForAnnotations)
+	mapStringForAnnotations := "map[string]string{"
+	for _, k := range keysForAnnotations {
+		mapStringForAnnotations += fmt.Sprintf("%#v: %#v,", k, this.Annotations[k])
+	}
+	mapStringForAnnotations += "}"
+	if this.Annotations != nil {
+		s = append(s, "Annotations: "+mapStringForAnnotations+",\n")
+	}
+	if this.OwnerView != nil {
+		s = append(s, "OwnerView: "+fmt.Sprintf("%#v", this.OwnerView)+",\n")
+	}
+	if this.Metadata != nil {
+		s = append(s, "Metadata: "+fmt.Sprintf("%#v", this.Metadata)+",\n")
+	}
+	if this.SystemMetadata != nil {
+		s = append(s, "SystemMetadata: "+fmt.Sprintf("%#v", this.SystemMetadata)+",\n")
+	}
+	if this.GetSpec != nil {
+		s = append(s, "GetSpec: "+fmt.Sprintf("%#v", this.GetSpec)+",\n")
+	}
+	if this.StatusSet != nil {
+		s = append(s, "StatusSet: "+fmt.Sprintf("%#v", this.StatusSet)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *CustomListBotInfrastructuresResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&bot_infrastructure.CustomListBotInfrastructuresResponse{")
+	if this.Items != nil {
+		s = append(s, "Items: "+fmt.Sprintf("%#v", this.Items)+",\n")
+	}
+	if this.Errors != nil {
+		s = append(s, "Errors: "+fmt.Sprintf("%#v", this.Errors)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetInfraDeploymentStatusRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&bot_infrastructure.GetInfraDeploymentStatusRequest{")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	s = append(s, "BotInfraNames: "+fmt.Sprintf("%#v", this.BotInfraNames)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *BotInfraDeploymentStatus) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&bot_infrastructure.BotInfraDeploymentStatus{")
+	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
+	s = append(s, "DeployStatus: "+fmt.Sprintf("%#v", this.DeployStatus)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetInfraDeploymentStatusResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&bot_infrastructure.GetInfraDeploymentStatusResponse{")
+	if this.BotInfraStatuses != nil {
+		s = append(s, "BotInfraStatuses: "+fmt.Sprintf("%#v", this.BotInfraStatuses)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
 func valueToGoStringPublicCustomapi(v interface{}, typ string) string {
 	rv := reflect.ValueOf(v)
 	if rv.IsNil() {
@@ -2410,6 +3377,17 @@ type CustomAPIClient interface {
 	// x-displayName: "Deployment History"
 	// Get deployment history
 	DeploymentHistory(ctx context.Context, in *DeploymentHistoryRequest, opts ...grpc.CallOption) (*DeploymentHistoryResponse, error)
+	// Custom List Bot Infrastructures
+	//
+	// x-displayName: "Custom List Bot Infrastructures"
+	// List the bot_infrastructure objects from the current namespace
+	CustomListBotInfrastructures(ctx context.Context, in *CustomListBotInfrastructuresRequest, opts ...grpc.CallOption) (*CustomListBotInfrastructuresResponse, error)
+	// GetInfraDeploymentStatus
+	//
+	// x-displayName: "Get Infra Deployment Status"
+	// Get the current policy deployment status for the given bot infrastructures.
+	// Returns all requested infrastructures together with their deployment status.
+	GetInfraDeploymentStatus(ctx context.Context, in *GetInfraDeploymentStatusRequest, opts ...grpc.CallOption) (*GetInfraDeploymentStatusResponse, error)
 }
 
 type customAPIClient struct {
@@ -2465,6 +3443,24 @@ func (c *customAPIClient) DeploymentHistory(ctx context.Context, in *DeploymentH
 	return out, nil
 }
 
+func (c *customAPIClient) CustomListBotInfrastructures(ctx context.Context, in *CustomListBotInfrastructuresRequest, opts ...grpc.CallOption) (*CustomListBotInfrastructuresResponse, error) {
+	out := new(CustomListBotInfrastructuresResponse)
+	err := c.cc.Invoke(ctx, "/ves.io.schema.shape.bot_defense.bot_infrastructure.CustomAPI/CustomListBotInfrastructures", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *customAPIClient) GetInfraDeploymentStatus(ctx context.Context, in *GetInfraDeploymentStatusRequest, opts ...grpc.CallOption) (*GetInfraDeploymentStatusResponse, error) {
+	out := new(GetInfraDeploymentStatusResponse)
+	err := c.cc.Invoke(ctx, "/ves.io.schema.shape.bot_defense.bot_infrastructure.CustomAPI/GetInfraDeploymentStatus", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CustomAPIServer is the server API for CustomAPI service.
 type CustomAPIServer interface {
 	// DeploymentStatus
@@ -2492,6 +3488,17 @@ type CustomAPIServer interface {
 	// x-displayName: "Deployment History"
 	// Get deployment history
 	DeploymentHistory(context.Context, *DeploymentHistoryRequest) (*DeploymentHistoryResponse, error)
+	// Custom List Bot Infrastructures
+	//
+	// x-displayName: "Custom List Bot Infrastructures"
+	// List the bot_infrastructure objects from the current namespace
+	CustomListBotInfrastructures(context.Context, *CustomListBotInfrastructuresRequest) (*CustomListBotInfrastructuresResponse, error)
+	// GetInfraDeploymentStatus
+	//
+	// x-displayName: "Get Infra Deployment Status"
+	// Get the current policy deployment status for the given bot infrastructures.
+	// Returns all requested infrastructures together with their deployment status.
+	GetInfraDeploymentStatus(context.Context, *GetInfraDeploymentStatusRequest) (*GetInfraDeploymentStatusResponse, error)
 }
 
 // UnimplementedCustomAPIServer can be embedded to have forward compatible implementations.
@@ -2512,6 +3519,12 @@ func (*UnimplementedCustomAPIServer) ApplyCertificate(ctx context.Context, req *
 }
 func (*UnimplementedCustomAPIServer) DeploymentHistory(ctx context.Context, req *DeploymentHistoryRequest) (*DeploymentHistoryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeploymentHistory not implemented")
+}
+func (*UnimplementedCustomAPIServer) CustomListBotInfrastructures(ctx context.Context, req *CustomListBotInfrastructuresRequest) (*CustomListBotInfrastructuresResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CustomListBotInfrastructures not implemented")
+}
+func (*UnimplementedCustomAPIServer) GetInfraDeploymentStatus(ctx context.Context, req *GetInfraDeploymentStatusRequest) (*GetInfraDeploymentStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetInfraDeploymentStatus not implemented")
 }
 
 func RegisterCustomAPIServer(s *grpc.Server, srv CustomAPIServer) {
@@ -2608,6 +3621,42 @@ func _CustomAPI_DeploymentHistory_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CustomAPI_CustomListBotInfrastructures_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CustomListBotInfrastructuresRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CustomAPIServer).CustomListBotInfrastructures(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ves.io.schema.shape.bot_defense.bot_infrastructure.CustomAPI/CustomListBotInfrastructures",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CustomAPIServer).CustomListBotInfrastructures(ctx, req.(*CustomListBotInfrastructuresRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CustomAPI_GetInfraDeploymentStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetInfraDeploymentStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CustomAPIServer).GetInfraDeploymentStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ves.io.schema.shape.bot_defense.bot_infrastructure.CustomAPI/GetInfraDeploymentStatus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CustomAPIServer).GetInfraDeploymentStatus(ctx, req.(*GetInfraDeploymentStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _CustomAPI_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "ves.io.schema.shape.bot_defense.bot_infrastructure.CustomAPI",
 	HandlerType: (*CustomAPIServer)(nil),
@@ -2631,6 +3680,14 @@ var _CustomAPI_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeploymentHistory",
 			Handler:    _CustomAPI_DeploymentHistory_Handler,
+		},
+		{
+			MethodName: "CustomListBotInfrastructures",
+			Handler:    _CustomAPI_CustomListBotInfrastructures_Handler,
+		},
+		{
+			MethodName: "GetInfraDeploymentStatus",
+			Handler:    _CustomAPI_GetInfraDeploymentStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -3404,6 +4461,391 @@ func (m *CertificateOperationRegion) MarshalToSizedBuffer(dAtA []byte) (int, err
 	return len(dAtA) - i, nil
 }
 
+func (m *CustomListBotInfrastructuresRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *CustomListBotInfrastructuresRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CustomListBotInfrastructuresRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.ReportStatusFields) > 0 {
+		for iNdEx := len(m.ReportStatusFields) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.ReportStatusFields[iNdEx])
+			copy(dAtA[i:], m.ReportStatusFields[iNdEx])
+			i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.ReportStatusFields[iNdEx])))
+			i--
+			dAtA[i] = 0x22
+		}
+	}
+	if len(m.ReportFields) > 0 {
+		for iNdEx := len(m.ReportFields) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.ReportFields[iNdEx])
+			copy(dAtA[i:], m.ReportFields[iNdEx])
+			i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.ReportFields[iNdEx])))
+			i--
+			dAtA[i] = 0x1a
+		}
+	}
+	if len(m.LabelFilter) > 0 {
+		i -= len(m.LabelFilter)
+		copy(dAtA[i:], m.LabelFilter)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.LabelFilter)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *CustomListBotInfrastructuresResponseItem) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *CustomListBotInfrastructuresResponseItem) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CustomListBotInfrastructuresResponseItem) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.StatusSet) > 0 {
+		for iNdEx := len(m.StatusSet) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.StatusSet[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x6a
+		}
+	}
+	if m.GetSpec != nil {
+		{
+			size, err := m.GetSpec.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x62
+	}
+	if m.SystemMetadata != nil {
+		{
+			size, err := m.SystemMetadata.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x5a
+	}
+	if m.Metadata != nil {
+		{
+			size, err := m.Metadata.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x52
+	}
+	if m.OwnerView != nil {
+		{
+			size, err := m.OwnerView.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x4a
+	}
+	if len(m.Annotations) > 0 {
+		for k := range m.Annotations {
+			v := m.Annotations[k]
+			baseI := i
+			i -= len(v)
+			copy(dAtA[i:], v)
+			i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(v)))
+			i--
+			dAtA[i] = 0x12
+			i -= len(k)
+			copy(dAtA[i:], k)
+			i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(k)))
+			i--
+			dAtA[i] = 0xa
+			i = encodeVarintPublicCustomapi(dAtA, i, uint64(baseI-i))
+			i--
+			dAtA[i] = 0x42
+		}
+	}
+	if len(m.Labels) > 0 {
+		for k := range m.Labels {
+			v := m.Labels[k]
+			baseI := i
+			i -= len(v)
+			copy(dAtA[i:], v)
+			i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(v)))
+			i--
+			dAtA[i] = 0x12
+			i -= len(k)
+			copy(dAtA[i:], k)
+			i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(k)))
+			i--
+			dAtA[i] = 0xa
+			i = encodeVarintPublicCustomapi(dAtA, i, uint64(baseI-i))
+			i--
+			dAtA[i] = 0x3a
+		}
+	}
+	if m.Disabled {
+		i--
+		if m.Disabled {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x30
+	}
+	if len(m.Description) > 0 {
+		i -= len(m.Description)
+		copy(dAtA[i:], m.Description)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.Description)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if len(m.Uid) > 0 {
+		i -= len(m.Uid)
+		copy(dAtA[i:], m.Uid)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.Uid)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Tenant) > 0 {
+		i -= len(m.Tenant)
+		copy(dAtA[i:], m.Tenant)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.Tenant)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *CustomListBotInfrastructuresResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *CustomListBotInfrastructuresResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CustomListBotInfrastructuresResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Errors) > 0 {
+		for iNdEx := len(m.Errors) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Errors[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	if len(m.Items) > 0 {
+		for iNdEx := len(m.Items) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Items[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetInfraDeploymentStatusRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetInfraDeploymentStatusRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetInfraDeploymentStatusRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.BotInfraNames) > 0 {
+		for iNdEx := len(m.BotInfraNames) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.BotInfraNames[iNdEx])
+			copy(dAtA[i:], m.BotInfraNames[iNdEx])
+			i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.BotInfraNames[iNdEx])))
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *BotInfraDeploymentStatus) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *BotInfraDeploymentStatus) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *BotInfraDeploymentStatus) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.DeployStatus != 0 {
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(m.DeployStatus))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetInfraDeploymentStatusResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetInfraDeploymentStatusResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetInfraDeploymentStatusResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.BotInfraStatuses) > 0 {
+		for iNdEx := len(m.BotInfraStatuses) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.BotInfraStatuses[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintPublicCustomapi(dAtA []byte, offset int, v uint64) int {
 	offset -= sovPublicCustomapi(v)
 	base := offset
@@ -3771,6 +5213,176 @@ func (m *CertificateOperationRegion) Size() (n int) {
 	return n
 }
 
+func (m *CustomListBotInfrastructuresRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	l = len(m.LabelFilter)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	if len(m.ReportFields) > 0 {
+		for _, s := range m.ReportFields {
+			l = len(s)
+			n += 1 + l + sovPublicCustomapi(uint64(l))
+		}
+	}
+	if len(m.ReportStatusFields) > 0 {
+		for _, s := range m.ReportStatusFields {
+			l = len(s)
+			n += 1 + l + sovPublicCustomapi(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *CustomListBotInfrastructuresResponseItem) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Tenant)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	l = len(m.Uid)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	l = len(m.Description)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	if m.Disabled {
+		n += 2
+	}
+	if len(m.Labels) > 0 {
+		for k, v := range m.Labels {
+			_ = k
+			_ = v
+			mapEntrySize := 1 + len(k) + sovPublicCustomapi(uint64(len(k))) + 1 + len(v) + sovPublicCustomapi(uint64(len(v)))
+			n += mapEntrySize + 1 + sovPublicCustomapi(uint64(mapEntrySize))
+		}
+	}
+	if len(m.Annotations) > 0 {
+		for k, v := range m.Annotations {
+			_ = k
+			_ = v
+			mapEntrySize := 1 + len(k) + sovPublicCustomapi(uint64(len(k))) + 1 + len(v) + sovPublicCustomapi(uint64(len(v)))
+			n += mapEntrySize + 1 + sovPublicCustomapi(uint64(mapEntrySize))
+		}
+	}
+	if m.OwnerView != nil {
+		l = m.OwnerView.Size()
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	if m.Metadata != nil {
+		l = m.Metadata.Size()
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	if m.SystemMetadata != nil {
+		l = m.SystemMetadata.Size()
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	if m.GetSpec != nil {
+		l = m.GetSpec.Size()
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	if len(m.StatusSet) > 0 {
+		for _, e := range m.StatusSet {
+			l = e.Size()
+			n += 1 + l + sovPublicCustomapi(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *CustomListBotInfrastructuresResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Items) > 0 {
+		for _, e := range m.Items {
+			l = e.Size()
+			n += 1 + l + sovPublicCustomapi(uint64(l))
+		}
+	}
+	if len(m.Errors) > 0 {
+		for _, e := range m.Errors {
+			l = e.Size()
+			n += 1 + l + sovPublicCustomapi(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *GetInfraDeploymentStatusRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	if len(m.BotInfraNames) > 0 {
+		for _, s := range m.BotInfraNames {
+			l = len(s)
+			n += 1 + l + sovPublicCustomapi(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *BotInfraDeploymentStatus) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	if m.DeployStatus != 0 {
+		n += 1 + sovPublicCustomapi(uint64(m.DeployStatus))
+	}
+	return n
+}
+
+func (m *GetInfraDeploymentStatusResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.BotInfraStatuses) > 0 {
+		for _, e := range m.BotInfraStatuses {
+			l = e.Size()
+			n += 1 + l + sovPublicCustomapi(uint64(l))
+		}
+	}
+	return n
+}
+
 func sovPublicCustomapi(x uint64) (n int) {
 	return (math_bits.Len64(x|1) + 6) / 7
 }
@@ -4006,6 +5618,124 @@ func (this *CertificateOperationRegion) String() string {
 		`Region:` + fmt.Sprintf("%v", this.Region) + `,`,
 		`DeployStatus:` + fmt.Sprintf("%v", this.DeployStatus) + `,`,
 		`CertStatus:` + fmt.Sprintf("%v", this.CertStatus) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *CustomListBotInfrastructuresRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&CustomListBotInfrastructuresRequest{`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`LabelFilter:` + fmt.Sprintf("%v", this.LabelFilter) + `,`,
+		`ReportFields:` + fmt.Sprintf("%v", this.ReportFields) + `,`,
+		`ReportStatusFields:` + fmt.Sprintf("%v", this.ReportStatusFields) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *CustomListBotInfrastructuresResponseItem) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForStatusSet := "[]*StatusObject{"
+	for _, f := range this.StatusSet {
+		repeatedStringForStatusSet += strings.Replace(fmt.Sprintf("%v", f), "StatusObject", "StatusObject", 1) + ","
+	}
+	repeatedStringForStatusSet += "}"
+	keysForLabels := make([]string, 0, len(this.Labels))
+	for k, _ := range this.Labels {
+		keysForLabels = append(keysForLabels, k)
+	}
+	github_com_gogo_protobuf_sortkeys.Strings(keysForLabels)
+	mapStringForLabels := "map[string]string{"
+	for _, k := range keysForLabels {
+		mapStringForLabels += fmt.Sprintf("%v: %v,", k, this.Labels[k])
+	}
+	mapStringForLabels += "}"
+	keysForAnnotations := make([]string, 0, len(this.Annotations))
+	for k, _ := range this.Annotations {
+		keysForAnnotations = append(keysForAnnotations, k)
+	}
+	github_com_gogo_protobuf_sortkeys.Strings(keysForAnnotations)
+	mapStringForAnnotations := "map[string]string{"
+	for _, k := range keysForAnnotations {
+		mapStringForAnnotations += fmt.Sprintf("%v: %v,", k, this.Annotations[k])
+	}
+	mapStringForAnnotations += "}"
+	s := strings.Join([]string{`&CustomListBotInfrastructuresResponseItem{`,
+		`Tenant:` + fmt.Sprintf("%v", this.Tenant) + `,`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
+		`Uid:` + fmt.Sprintf("%v", this.Uid) + `,`,
+		`Description:` + fmt.Sprintf("%v", this.Description) + `,`,
+		`Disabled:` + fmt.Sprintf("%v", this.Disabled) + `,`,
+		`Labels:` + mapStringForLabels + `,`,
+		`Annotations:` + mapStringForAnnotations + `,`,
+		`OwnerView:` + strings.Replace(fmt.Sprintf("%v", this.OwnerView), "ViewRefType", "schema.ViewRefType", 1) + `,`,
+		`Metadata:` + strings.Replace(fmt.Sprintf("%v", this.Metadata), "ObjectGetMetaType", "schema.ObjectGetMetaType", 1) + `,`,
+		`SystemMetadata:` + strings.Replace(fmt.Sprintf("%v", this.SystemMetadata), "SystemObjectGetMetaType", "schema.SystemObjectGetMetaType", 1) + `,`,
+		`GetSpec:` + strings.Replace(fmt.Sprintf("%v", this.GetSpec), "GetSpecType", "GetSpecType", 1) + `,`,
+		`StatusSet:` + repeatedStringForStatusSet + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *CustomListBotInfrastructuresResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForItems := "[]*CustomListBotInfrastructuresResponseItem{"
+	for _, f := range this.Items {
+		repeatedStringForItems += strings.Replace(f.String(), "CustomListBotInfrastructuresResponseItem", "CustomListBotInfrastructuresResponseItem", 1) + ","
+	}
+	repeatedStringForItems += "}"
+	repeatedStringForErrors := "[]*ErrorType{"
+	for _, f := range this.Errors {
+		repeatedStringForErrors += strings.Replace(fmt.Sprintf("%v", f), "ErrorType", "schema.ErrorType", 1) + ","
+	}
+	repeatedStringForErrors += "}"
+	s := strings.Join([]string{`&CustomListBotInfrastructuresResponse{`,
+		`Items:` + repeatedStringForItems + `,`,
+		`Errors:` + repeatedStringForErrors + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetInfraDeploymentStatusRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetInfraDeploymentStatusRequest{`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`BotInfraNames:` + fmt.Sprintf("%v", this.BotInfraNames) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *BotInfraDeploymentStatus) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&BotInfraDeploymentStatus{`,
+		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
+		`DeployStatus:` + fmt.Sprintf("%v", this.DeployStatus) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetInfraDeploymentStatusResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForBotInfraStatuses := "[]*BotInfraDeploymentStatus{"
+	for _, f := range this.BotInfraStatuses {
+		repeatedStringForBotInfraStatuses += strings.Replace(f.String(), "BotInfraDeploymentStatus", "BotInfraDeploymentStatus", 1) + ","
+	}
+	repeatedStringForBotInfraStatuses += "}"
+	s := strings.Join([]string{`&GetInfraDeploymentStatusResponse{`,
+		`BotInfraStatuses:` + repeatedStringForBotInfraStatuses + `,`,
 		`}`,
 	}, "")
 	return s
@@ -6285,6 +8015,1263 @@ func (m *CertificateOperationRegion) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *CustomListBotInfrastructuresRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: CustomListBotInfrastructuresRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: CustomListBotInfrastructuresRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LabelFilter", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.LabelFilter = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReportFields", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ReportFields = append(m.ReportFields, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReportStatusFields", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ReportStatusFields = append(m.ReportStatusFields, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *CustomListBotInfrastructuresResponseItem) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: CustomListBotInfrastructuresResponseItem: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: CustomListBotInfrastructuresResponseItem: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Tenant", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Tenant = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Uid", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Uid = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Description", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Description = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 6:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Disabled", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Disabled = bool(v != 0)
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Labels", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Labels == nil {
+				m.Labels = make(map[string]string)
+			}
+			var mapkey string
+			var mapvalue string
+			for iNdEx < postIndex {
+				entryPreIndex := iNdEx
+				var wire uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowPublicCustomapi
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					wire |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				fieldNum := int32(wire >> 3)
+				if fieldNum == 1 {
+					var stringLenmapkey uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowPublicCustomapi
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapkey |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapkey := int(stringLenmapkey)
+					if intStringLenmapkey < 0 {
+						return ErrInvalidLengthPublicCustomapi
+					}
+					postStringIndexmapkey := iNdEx + intStringLenmapkey
+					if postStringIndexmapkey < 0 {
+						return ErrInvalidLengthPublicCustomapi
+					}
+					if postStringIndexmapkey > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapkey = string(dAtA[iNdEx:postStringIndexmapkey])
+					iNdEx = postStringIndexmapkey
+				} else if fieldNum == 2 {
+					var stringLenmapvalue uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowPublicCustomapi
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapvalue |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapvalue := int(stringLenmapvalue)
+					if intStringLenmapvalue < 0 {
+						return ErrInvalidLengthPublicCustomapi
+					}
+					postStringIndexmapvalue := iNdEx + intStringLenmapvalue
+					if postStringIndexmapvalue < 0 {
+						return ErrInvalidLengthPublicCustomapi
+					}
+					if postStringIndexmapvalue > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapvalue = string(dAtA[iNdEx:postStringIndexmapvalue])
+					iNdEx = postStringIndexmapvalue
+				} else {
+					iNdEx = entryPreIndex
+					skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+					if err != nil {
+						return err
+					}
+					if (skippy < 0) || (iNdEx+skippy) < 0 {
+						return ErrInvalidLengthPublicCustomapi
+					}
+					if (iNdEx + skippy) > postIndex {
+						return io.ErrUnexpectedEOF
+					}
+					iNdEx += skippy
+				}
+			}
+			m.Labels[mapkey] = mapvalue
+			iNdEx = postIndex
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Annotations", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Annotations == nil {
+				m.Annotations = make(map[string]string)
+			}
+			var mapkey string
+			var mapvalue string
+			for iNdEx < postIndex {
+				entryPreIndex := iNdEx
+				var wire uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowPublicCustomapi
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					wire |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				fieldNum := int32(wire >> 3)
+				if fieldNum == 1 {
+					var stringLenmapkey uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowPublicCustomapi
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapkey |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapkey := int(stringLenmapkey)
+					if intStringLenmapkey < 0 {
+						return ErrInvalidLengthPublicCustomapi
+					}
+					postStringIndexmapkey := iNdEx + intStringLenmapkey
+					if postStringIndexmapkey < 0 {
+						return ErrInvalidLengthPublicCustomapi
+					}
+					if postStringIndexmapkey > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapkey = string(dAtA[iNdEx:postStringIndexmapkey])
+					iNdEx = postStringIndexmapkey
+				} else if fieldNum == 2 {
+					var stringLenmapvalue uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowPublicCustomapi
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapvalue |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapvalue := int(stringLenmapvalue)
+					if intStringLenmapvalue < 0 {
+						return ErrInvalidLengthPublicCustomapi
+					}
+					postStringIndexmapvalue := iNdEx + intStringLenmapvalue
+					if postStringIndexmapvalue < 0 {
+						return ErrInvalidLengthPublicCustomapi
+					}
+					if postStringIndexmapvalue > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapvalue = string(dAtA[iNdEx:postStringIndexmapvalue])
+					iNdEx = postStringIndexmapvalue
+				} else {
+					iNdEx = entryPreIndex
+					skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+					if err != nil {
+						return err
+					}
+					if (skippy < 0) || (iNdEx+skippy) < 0 {
+						return ErrInvalidLengthPublicCustomapi
+					}
+					if (iNdEx + skippy) > postIndex {
+						return io.ErrUnexpectedEOF
+					}
+					iNdEx += skippy
+				}
+			}
+			m.Annotations[mapkey] = mapvalue
+			iNdEx = postIndex
+		case 9:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field OwnerView", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.OwnerView == nil {
+				m.OwnerView = &schema.ViewRefType{}
+			}
+			if err := m.OwnerView.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 10:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Metadata", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Metadata == nil {
+				m.Metadata = &schema.ObjectGetMetaType{}
+			}
+			if err := m.Metadata.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 11:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SystemMetadata", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.SystemMetadata == nil {
+				m.SystemMetadata = &schema.SystemObjectGetMetaType{}
+			}
+			if err := m.SystemMetadata.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 12:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field GetSpec", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.GetSpec == nil {
+				m.GetSpec = &GetSpecType{}
+			}
+			if err := m.GetSpec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 13:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field StatusSet", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.StatusSet = append(m.StatusSet, &StatusObject{})
+			if err := m.StatusSet[len(m.StatusSet)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *CustomListBotInfrastructuresResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: CustomListBotInfrastructuresResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: CustomListBotInfrastructuresResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Items", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Items = append(m.Items, &CustomListBotInfrastructuresResponseItem{})
+			if err := m.Items[len(m.Items)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Errors", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Errors = append(m.Errors, &schema.ErrorType{})
+			if err := m.Errors[len(m.Errors)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetInfraDeploymentStatusRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetInfraDeploymentStatusRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetInfraDeploymentStatusRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field BotInfraNames", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.BotInfraNames = append(m.BotInfraNames, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *BotInfraDeploymentStatus) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: BotInfraDeploymentStatus: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: BotInfraDeploymentStatus: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DeployStatus", wireType)
+			}
+			m.DeployStatus = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.DeployStatus |= DepolyStatus(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetInfraDeploymentStatusResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetInfraDeploymentStatusResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetInfraDeploymentStatusResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field BotInfraStatuses", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.BotInfraStatuses = append(m.BotInfraStatuses, &BotInfraDeploymentStatus{})
+			if err := m.BotInfraStatuses[len(m.BotInfraStatuses)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])

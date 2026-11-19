@@ -59,7 +59,7 @@ resource "f5xc_authorization_server" "example" {
 
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `description` (String) description Human readable description for the object
-- `issuer_validation_choice` (Attributes) issuer_validation Configure issuer validation for tokens issued by this Authorization Server. (see [below for nested schema](#nestedatt--issuer_validation_choice))
+- `issuer_validation_choice` (Attributes) issuer_validation Configure issuer validation for tokens issued by this Authorization Server.<br>Exactly one of `issuer` or `issuer_disable` must be specified when `issuer_validation_choice` is configured. (see [below for nested schema](#nestedatt--issuer_validation_choice))
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -74,8 +74,8 @@ resource "f5xc_authorization_server" "example" {
 
 Optional:
 
-- `issuer` (String) issuer<br>**Validation:** `Length LengthAtMost(512)`
-- `issuer_disable` (Boolean) issuer_disable
+- `issuer` (String) issuer<br>**Validation:** `Length LengthAtMost(512)`<br>Conflicts with `issuer_disable`.
+- `issuer_disable` (Boolean) issuer_disable<br>Conflicts with `issuer`.
 
 
 <a id="nestedatt--timeouts"></a>
@@ -108,6 +108,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_authorization_server.example"
+	to = f5xc_authorization_server.example
 }
 ```

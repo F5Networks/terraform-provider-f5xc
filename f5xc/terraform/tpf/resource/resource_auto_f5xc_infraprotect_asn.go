@@ -90,7 +90,7 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for RequiredOneOfField --> BgpSession
+// Attribute map for OneOfField --> BgpSession
 var InfraprotectAsnBgpSessionModelAttributeMap = map[string]attr.Type{
 
 	"bgp_session_disabled": types.BoolType,
@@ -198,20 +198,23 @@ func (r *ResourceF5XCInfraprotectAsn) Schema(ctx context.Context, request resour
 			},
 			"bgp_session_choice": schema.SingleNestedAttribute{
 				Description:         "Use as BGP Neighbor When enabled it will allow you to use this AS number to establish BGP sessions between F5 and your devices. Downstream AS numbers (your customers' AS numbers for instance) must have this option disabled.",
-				MarkdownDescription: "Use as BGP Neighbor When enabled it will allow you to use this AS number to establish BGP sessions between F5 and your devices. Downstream AS numbers (your customers' AS numbers for instance) must have this option disabled.",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Use as BGP Neighbor When enabled it will allow you to use this AS number to establish BGP sessions between F5 and your devices. Downstream AS numbers (your customers' AS numbers for instance) must have this option disabled.<br>Exactly one of `bgp_session_disabled` or `bgp_session_enabled` must be specified when `bgp_session_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"bgp_session_disabled",
 						"bgp_session_enabled",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"bgp_session_disabled": schema.BoolAttribute{
 						Description:         "BGP Sessions Not Enabled BGP Sessions Not Enabled",
-						MarkdownDescription: "BGP Sessions Not Enabled BGP Sessions Not Enabled",
+						MarkdownDescription: "BGP Sessions Not Enabled BGP Sessions Not Enabled<br>Conflicts with `bgp_session_enabled`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -221,7 +224,7 @@ func (r *ResourceF5XCInfraprotectAsn) Schema(ctx context.Context, request resour
 					},
 					"bgp_session_enabled": schema.BoolAttribute{
 						Description:         "BGP Sessions Enabled BGP Sessions Enabled",
-						MarkdownDescription: "BGP Sessions Enabled BGP Sessions Enabled",
+						MarkdownDescription: "BGP Sessions Enabled BGP Sessions Enabled<br>Conflicts with `bgp_session_disabled`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -420,7 +423,7 @@ func (r *ResourceF5XCInfraprotectAsn) Create(ctx context.Context, request resour
 	// resource modelToSpecRoot RequiredUintField --> Asn
 	spec.Asn = uint32(data.Asn.ValueInt64())
 
-	// resource modelToSpecRoot RequiredOneOfField --> BgpSession
+	// resource modelToSpecRoot OneOfField --> BgpSession
 	if !data.BgpSessionChoice.IsNull() && !data.BgpSessionChoice.IsUnknown() {
 		bgpSessionChoiceModel := InfraprotectAsnBgpSessionChoice{}
 		response.Diagnostics.Append(data.BgpSessionChoice.As(ctx, &bgpSessionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -442,6 +445,10 @@ func (r *ResourceF5XCInfraprotectAsn) Create(ctx context.Context, request resour
 			spec.BgpSession = bgpSessionEnabledSpecBool
 		}
 
+	} else {
+		spec.BgpSession = &ves_io_schema_infraprotect_asn.CreateSpecType_BgpSessionEnabled{
+			BgpSessionEnabled: &ves_io_schema.Empty{},
+		}
 	}
 
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
@@ -594,7 +601,7 @@ func (r *ResourceF5XCInfraprotectAsn) Create(ctx context.Context, request resour
 		data.Asn = types.Int64Value(int64(asnValue))
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> BgpSession
+	// resource SpecToModelRoot OneOfField --> BgpSession
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -642,8 +649,6 @@ func (r *ResourceF5XCInfraprotectAsn) Create(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.BgpSessionChoice = types.ObjectNull(InfraprotectAsnBgpSessionModelAttributeMap)
 	}
 
@@ -752,11 +757,7 @@ func (r *ResourceF5XCInfraprotectAsn) Read(ctx context.Context, request resource
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_infraprotect_asn.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_infraprotect_asn.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "infraprotect_asn", err),
@@ -883,7 +884,7 @@ func (r *ResourceF5XCInfraprotectAsn) Read(ctx context.Context, request resource
 		data.Asn = types.Int64Value(int64(asnValue))
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> BgpSession
+	// resource SpecToModelRoot OneOfField --> BgpSession
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -931,8 +932,6 @@ func (r *ResourceF5XCInfraprotectAsn) Read(ctx context.Context, request resource
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.BgpSessionChoice.IsNull() || data.BgpSessionChoice.IsUnknown() || ((data.BgpSessionChoice.Attributes()["bgp_session_disabled"].IsNull() || data.BgpSessionChoice.Attributes()["bgp_session_disabled"].IsUnknown()) && (data.BgpSessionChoice.Attributes()["bgp_session_enabled"].IsNull() || data.BgpSessionChoice.Attributes()["bgp_session_enabled"].IsUnknown())) {
 			data.BgpSessionChoice = types.ObjectValueMust(InfraprotectAsnBgpSessionModelAttributeMap, map[string]attr.Value{
@@ -1130,12 +1129,8 @@ func (r *ResourceF5XCInfraprotectAsn) Update(ctx context.Context, request resour
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_infraprotect_asn.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_infraprotect_asn.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "infraprotect_asn", err),
@@ -1144,7 +1139,7 @@ func (r *ResourceF5XCInfraprotectAsn) Update(ctx context.Context, request resour
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_infraprotect_asn.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_infraprotect_asn.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "infraprotect_asn", err),
@@ -1270,7 +1265,7 @@ func (r *ResourceF5XCInfraprotectAsn) Update(ctx context.Context, request resour
 		data.Asn = types.Int64Value(int64(asnValue))
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> BgpSession
+	// resource SpecToModelRoot OneOfField --> BgpSession
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -1318,8 +1313,6 @@ func (r *ResourceF5XCInfraprotectAsn) Update(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.BgpSessionChoice = types.ObjectNull(InfraprotectAsnBgpSessionModelAttributeMap)
 	}
 

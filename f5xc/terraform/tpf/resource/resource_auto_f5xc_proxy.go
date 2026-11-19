@@ -30,6 +30,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -43,6 +44,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/listuniquevalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/requiredifvalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -460,7 +462,7 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for RequiredOneOfField --> NetworkChoice
+// Attribute map for OneOfField --> NetworkChoice
 var ProxyNetworkChoiceModelAttributeMap = map[string]attr.Type{
 
 	"site_local_inside_network": types.BoolType,
@@ -492,7 +494,7 @@ var ProxyProxyChoiceDynamicProxyModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DnsChoice
+// Attribute map for OneOfField --> DnsChoice
 var ProxyProxyChoiceDynamicProxyDnsChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disable_dns_masquerade": types.BoolType,
@@ -759,14 +761,14 @@ var ProxyProxyChoiceDynamicProxyProxyChoiceHttpProxyMoreOptionCompressionParamsM
 	"remove_accept_encoding_header": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> Http10Choice
+// Attribute map for OneOfField --> Http10Choice
 var ProxyProxyChoiceDynamicProxyProxyChoiceHttpProxyMoreOptionHttp10ChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disable_http10": types.BoolType,
 	"enable_http10":  types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> MaxRequestsPerConnectionChoice
+// Attribute map for OneOfField --> MaxRequestsPerConnectionChoice
 var ProxyProxyChoiceDynamicProxyProxyChoiceHttpProxyMoreOptionMaxRequestsPerConnectionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"max_requests_per_connection":     types.Int64Type,
@@ -1345,14 +1347,14 @@ var ProxyProxyChoiceDynamicProxyProxyChoiceHttpsProxyMoreOptionCompressionParams
 	"remove_accept_encoding_header": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> Http10Choice
+// Attribute map for OneOfField --> Http10Choice
 var ProxyProxyChoiceDynamicProxyProxyChoiceHttpsProxyMoreOptionHttp10ChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disable_http10": types.BoolType,
 	"enable_http10":  types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> MaxRequestsPerConnectionChoice
+// Attribute map for OneOfField --> MaxRequestsPerConnectionChoice
 var ProxyProxyChoiceDynamicProxyProxyChoiceHttpsProxyMoreOptionMaxRequestsPerConnectionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"max_requests_per_connection":     types.Int64Type,
@@ -1688,7 +1690,7 @@ var ProxyProxyChoiceDynamicProxyProxyChoiceHttpsProxyTlsParamsModelAttributeMap 
 	},
 }
 
-// Attribute map for RequiredOneOfField --> MtlsChoice
+// Attribute map for OneOfField --> MtlsChoice
 var ProxyProxyChoiceDynamicProxyProxyChoiceHttpsProxyTlsParamsMtlsChoiceModelAttributeMap = map[string]attr.Type{
 
 	"no_mtls": types.BoolType,
@@ -1819,7 +1821,7 @@ var ProxyProxyChoiceDynamicProxyProxyChoiceHttpsProxyTlsParamsTlsConfigModelAttr
 	},
 }
 
-// Attribute map for RequiredOneOfField --> Choice
+// Attribute map for OneOfField --> Choice
 var ProxyProxyChoiceDynamicProxyProxyChoiceHttpsProxyTlsParamsTlsConfigChoiceModelAttributeMap = map[string]attr.Type{
 
 	"custom_security": types.ObjectType{
@@ -1968,7 +1970,7 @@ var ProxyProxyChoiceHttpProxyModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> HttpHttpsChoice
+// Attribute map for OneOfField --> HttpHttpsChoice
 var ProxyProxyChoiceHttpProxyHttpHttpsChoiceModelAttributeMap = map[string]attr.Type{
 
 	"enable_http": types.BoolType,
@@ -2105,14 +2107,14 @@ var ProxyProxyChoiceHttpProxyMoreOptionCompressionParamsModelAttributeMap = map[
 	"remove_accept_encoding_header": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> Http10Choice
+// Attribute map for OneOfField --> Http10Choice
 var ProxyProxyChoiceHttpProxyMoreOptionHttp10ChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disable_http10": types.BoolType,
 	"enable_http10":  types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> MaxRequestsPerConnectionChoice
+// Attribute map for OneOfField --> MaxRequestsPerConnectionChoice
 var ProxyProxyChoiceHttpProxyMoreOptionMaxRequestsPerConnectionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"max_requests_per_connection":     types.Int64Type,
@@ -2418,7 +2420,7 @@ var ProxyProxyChoiceHttpProxyMoreOptionResponseHeadersToAddValueChoiceSecretValu
 	"url":      types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> ProxyPolicyChoice
+// Attribute map for OneOfField --> ProxyPolicyChoice
 var ProxyProxyPolicyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"active_forward_proxy_policies": types.ObjectType{
@@ -2573,7 +2575,7 @@ var ProxyTlsInterceptionChoiceTlsInterceptModelAttributeMap = map[string]attr.Ty
 	},
 }
 
-// Attribute map for RequiredOneOfField --> InterceptionPolicyChoice
+// Attribute map for OneOfField --> InterceptionPolicyChoice
 var ProxyTlsInterceptionChoiceTlsInterceptInterceptionPolicyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"enable_for_all_domains": types.BoolType,
@@ -2631,7 +2633,7 @@ var ProxyTlsInterceptionChoiceTlsInterceptInterceptionPolicyChoicePolicyIntercep
 	"suffix_value": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> EnableDisableChoice
+// Attribute map for OneOfField --> EnableDisableChoice
 var ProxyTlsInterceptionChoiceTlsInterceptInterceptionPolicyChoicePolicyInterceptionRulesEnableDisableChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disable_interception": types.BoolType,
@@ -2715,7 +2717,7 @@ var ProxyTlsInterceptionChoiceTlsInterceptSigningCertChoiceCustomCertificatePriv
 	"url":      types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> TrustedCaChoice
+// Attribute map for OneOfField --> TrustedCaChoice
 var ProxyTlsInterceptionChoiceTlsInterceptTrustedCaChoiceModelAttributeMap = map[string]attr.Type{
 
 	"trusted_ca_url":      types.StringType,
@@ -2813,20 +2815,23 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 			},
 			"network_choice": schema.SingleNestedAttribute{
 				Description:         "Upstream Selection on instantiated sites Select network on given sites where upstream connections are originated",
-				MarkdownDescription: "Upstream Selection on instantiated sites Select network on given sites where upstream connections are originated",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Upstream Selection on instantiated sites Select network on given sites where upstream connections are originated<br>Exactly one of `site_local_inside_network` or `site_local_network` must be specified when `network_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"site_local_inside_network",
 						"site_local_network",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"site_local_inside_network": schema.BoolAttribute{
 						Description:         "Site Local Network Inside Interface belongs to site local network inside",
-						MarkdownDescription: "Site Local Network Inside Interface belongs to site local network inside",
+						MarkdownDescription: "Site Local Network Inside Interface belongs to site local network inside<br>Conflicts with `site_local_network`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2836,7 +2841,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 					},
 					"site_local_network": schema.BoolAttribute{
 						Description:         "Site Local Network Interface belongs to site local network (outside)",
-						MarkdownDescription: "Site Local Network Interface belongs to site local network (outside)",
+						MarkdownDescription: "Site Local Network Interface belongs to site local network (outside)<br>Conflicts with `site_local_inside_network`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2848,7 +2853,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 			},
 			"proxy_choice": schema.SingleNestedAttribute{
 				Description:         "HTTP Connect Proxy or Dynamic Reverse Proxy Select HTTP connect proxy or dynamic reverse proxy",
-				MarkdownDescription: "HTTP Connect Proxy or Dynamic Reverse Proxy Select HTTP connect proxy or dynamic reverse proxy",
+				MarkdownDescription: "HTTP Connect Proxy or Dynamic Reverse Proxy Select HTTP connect proxy or dynamic reverse proxy<br>Exactly one of `dynamic_proxy` or `http_proxy` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -2861,27 +2866,30 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 				Attributes: map[string]schema.Attribute{
 					"dynamic_proxy": schema.SingleNestedAttribute{
 						Description:         "Dynamic  Proxy This is dynamic reverse proxy, Upstream connection will be determined based on Host header or SNI header",
-						MarkdownDescription: "Dynamic  Proxy This is dynamic reverse proxy, Upstream connection will be determined based on Host header or SNI header",
+						MarkdownDescription: "Dynamic  Proxy This is dynamic reverse proxy, Upstream connection will be determined based on Host header or SNI header<br>Conflicts with `http_proxy`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"dns_choice": schema.SingleNestedAttribute{
 								Description:         "DNS Masquerade If DNS masquerade is enabled, Site will respond to DNS queries of configured domains with proxy's VIP.",
-								MarkdownDescription: "DNS Masquerade If DNS masquerade is enabled, Site will respond to DNS queries of configured domains with proxy's VIP.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "DNS Masquerade If DNS masquerade is enabled, Site will respond to DNS queries of configured domains with proxy's VIP.<br>Exactly one of `disable_dns_masquerade` or `enable_dns_masquerade` must be specified when `dns_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"disable_dns_masquerade",
 										"enable_dns_masquerade",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"disable_dns_masquerade": schema.BoolAttribute{
 										Description:         "Disable DNS Masquerade DNS queries for proxy domains will not be resolved to proxy VIP.",
-										MarkdownDescription: "Disable DNS Masquerade DNS queries for proxy domains will not be resolved to proxy VIP.",
+										MarkdownDescription: "Disable DNS Masquerade DNS queries for proxy domains will not be resolved to proxy VIP.<br>Conflicts with `enable_dns_masquerade`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2891,7 +2899,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 									},
 									"enable_dns_masquerade": schema.BoolAttribute{
 										Description:         "Enable DNS Masquerade DNS queries for proxy domains will be resolved to proxy VIP.",
-										MarkdownDescription: "Enable DNS Masquerade DNS queries for proxy domains will be resolved to proxy VIP.",
+										MarkdownDescription: "Enable DNS Masquerade DNS queries for proxy domains will be resolved to proxy VIP.<br>Conflicts with `disable_dns_masquerade`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2920,7 +2928,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 							},
 							"proxy_choice": schema.SingleNestedAttribute{
 								Description:         "Destination Destination is selected based on SNI or HOST Header",
-								MarkdownDescription: "Destination Destination is selected based on SNI or HOST Header",
+								MarkdownDescription: "Destination Destination is selected based on SNI or HOST Header<br>Exactly one of `http_proxy`, `https_proxy`, or `sni_proxy` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -2934,7 +2942,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 								Attributes: map[string]schema.Attribute{
 									"http_proxy": schema.SingleNestedAttribute{
 										Description:         "HTTP proxy Destination is determined based on Host header in HTTP connections",
-										MarkdownDescription: "HTTP proxy Destination is determined based on Host header in HTTP connections",
+										MarkdownDescription: "HTTP proxy Destination is determined based on Host header in HTTP connections<br>Conflicts with `https_proxy` and `sni_proxy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3044,20 +3052,23 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 													},
 													"http10_choice": schema.SingleNestedAttribute{
 														Description:         "Allow HTTP/1.0 Control whether HTTP/1.0 and HTTP/0.9 requests are accepted or rejected on this load balancer.",
-														MarkdownDescription: "Allow HTTP/1.0 Control whether HTTP/1.0 and HTTP/0.9 requests are accepted or rejected on this load balancer.",
-														Required:            true,
-														Optional:            false,
-														Computed:            false,
+														MarkdownDescription: "Allow HTTP/1.0 Control whether HTTP/1.0 and HTTP/0.9 requests are accepted or rejected on this load balancer.<br>Exactly one of `disable_http10` or `enable_http10` must be specified when `http10_choice` is configured.",
+														Required:            false,
+														Optional:            true,
+														Computed:            true,
 														Validators: []validator.Object{
-															exactlyoneofvalidator.RequiredExactlyOneOf(
+															exactlyoneofvalidator.ExactlyOneOf(
 																"disable_http10",
 																"enable_http10",
 															),
 														},
+														PlanModifiers: []planmodifier.Object{
+															objectplanmodifier.UseNonNullStateForUnknown(),
+														},
 														Attributes: map[string]schema.Attribute{
 															"disable_http10": schema.BoolAttribute{
 																Description:         "Disable HTTP/1.0 Reject HTTP/1.0 and HTTP/0.9 traffic on this LB.",
-																MarkdownDescription: "Disable HTTP/1.0 Reject HTTP/1.0 and HTTP/0.9 traffic on this LB.",
+																MarkdownDescription: "Disable HTTP/1.0 Reject HTTP/1.0 and HTTP/0.9 traffic on this LB.<br>Conflicts with `enable_http10`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -3067,7 +3078,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 															},
 															"enable_http10": schema.BoolAttribute{
 																Description:         "Enable HTTP/1.0 Allow HTTP/1.0 and HTTP/0.9 traffic on this LB.",
-																MarkdownDescription: "Enable HTTP/1.0 Allow HTTP/1.0 and HTTP/0.9 traffic on this LB.",
+																MarkdownDescription: "Enable HTTP/1.0 Allow HTTP/1.0 and HTTP/0.9 traffic on this LB.<br>Conflicts with `disable_http10`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -3101,20 +3112,23 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 													},
 													"max_requests_per_connection_choice": schema.SingleNestedAttribute{
 														Description:         "max_requests_per_connection Sets the maximum number of requests a downstream client can send over a single connection to Envoy.",
-														MarkdownDescription: "max_requests_per_connection Sets the maximum number of requests a downstream client can send over a single connection to Envoy.",
-														Required:            true,
-														Optional:            false,
-														Computed:            false,
+														MarkdownDescription: "max_requests_per_connection Sets the maximum number of requests a downstream client can send over a single connection to Envoy.<br>Exactly one of `max_requests_per_connection` or `no_request_limit_per_connection` must be specified when `max_requests_per_connection_choice` is configured.",
+														Required:            false,
+														Optional:            true,
+														Computed:            true,
 														Validators: []validator.Object{
-															exactlyoneofvalidator.RequiredExactlyOneOf(
+															exactlyoneofvalidator.ExactlyOneOf(
 																"max_requests_per_connection",
 																"no_request_limit_per_connection",
 															),
 														},
+														PlanModifiers: []planmodifier.Object{
+															objectplanmodifier.UseNonNullStateForUnknown(),
+														},
 														Attributes: map[string]schema.Attribute{
 															"max_requests_per_connection": schema.Int64Attribute{
 																Description:         "Maximum Requests Per Connection Sets the maximum number of requests a downstream client can send over a single connection to Envoy. Enter a value >=1 to define the request limit per connection.",
-																MarkdownDescription: "Maximum Requests Per Connection Sets the maximum number of requests a downstream client can send over a single connection to Envoy. Enter a value >=1 to define the request limit per connection.",
+																MarkdownDescription: "Maximum Requests Per Connection Sets the maximum number of requests a downstream client can send over a single connection to Envoy. Enter a value >=1 to define the request limit per connection.<br>Conflicts with `no_request_limit_per_connection`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -3124,7 +3138,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 															},
 															"no_request_limit_per_connection": schema.BoolAttribute{
 																Description:         "Disable the max requests per connection option This option disables the maximum requests per connection limit. When selected, no limit is enforced, and connections can handle unlimited requests.",
-																MarkdownDescription: "Disable the max requests per connection option This option disables the maximum requests per connection limit. When selected, no limit is enforced, and connections can handle unlimited requests.",
+																MarkdownDescription: "Disable the max requests per connection option This option disables the maximum requests per connection limit. When selected, no limit is enforced, and connections can handle unlimited requests.<br>Conflicts with `max_requests_per_connection`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -3166,7 +3180,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"value_choice": schema.SingleNestedAttribute{
 																	Description:         "value Enter Cookie value as string or blindfolded secret.",
-																	MarkdownDescription: "value Enter Cookie value as string or blindfolded secret.",
+																	MarkdownDescription: "value Enter Cookie value as string or blindfolded secret.<br>Exactly one of `secret_value` or `value` must be specified.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
@@ -3179,14 +3193,14 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"secret_value": schema.SingleNestedAttribute{
 																			Description:         "Secret Value Secret Value of the Cookie header",
-																			MarkdownDescription: "Secret Value Secret Value of the Cookie header",
+																			MarkdownDescription: "Secret Value Secret Value of the Cookie header<br>Conflicts with `value`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																			Attributes: map[string]schema.Attribute{
 																				"secret_info_choice": schema.SingleNestedAttribute{
 																					Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																					Required:            true,
 																					Optional:            false,
 																					Computed:            false,
@@ -3200,7 +3214,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																					Attributes: map[string]schema.Attribute{
 																						"blindfold_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -3240,7 +3254,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"clear_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -3275,7 +3289,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"none": schema.BoolAttribute{
 																							Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -3289,7 +3303,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"value": schema.StringAttribute{
 																			Description:         "value Value of the Cookie header.",
-																			MarkdownDescription: "value Value of the Cookie header.<br>**Validation:** `Length LengthAtMost(8096)`",
+																			MarkdownDescription: "value Value of the Cookie header.<br>**Validation:** `Length LengthAtMost(8096)`<br>Conflicts with `secret_value`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3347,7 +3361,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"value_choice": schema.SingleNestedAttribute{
 																	Description:         "value Enter Header value as string or blindfolded secret.",
-																	MarkdownDescription: "value Enter Header value as string or blindfolded secret.",
+																	MarkdownDescription: "value Enter Header value as string or blindfolded secret.<br>Exactly one of `secret_value` or `value` must be specified.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
@@ -3360,14 +3374,14 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"secret_value": schema.SingleNestedAttribute{
 																			Description:         "Secret Value Secret Value of the HTTP header.",
-																			MarkdownDescription: "Secret Value Secret Value of the HTTP header.",
+																			MarkdownDescription: "Secret Value Secret Value of the HTTP header.<br>Conflicts with `value`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																			Attributes: map[string]schema.Attribute{
 																				"secret_info_choice": schema.SingleNestedAttribute{
 																					Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																					Required:            true,
 																					Optional:            false,
 																					Computed:            false,
@@ -3381,7 +3395,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																					Attributes: map[string]schema.Attribute{
 																						"blindfold_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -3421,7 +3435,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"clear_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -3456,7 +3470,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"none": schema.BoolAttribute{
 																							Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -3470,7 +3484,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"value": schema.StringAttribute{
 																			Description:         "value Value of the HTTP header.",
-																			MarkdownDescription: "value Value of the HTTP header.<br>**Validation:** `Length LengthAtMost(8096)`",
+																			MarkdownDescription: "value Value of the HTTP header.<br>**Validation:** `Length LengthAtMost(8096)`<br>Conflicts with `secret_value`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3510,7 +3524,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 															Attributes: map[string]schema.Attribute{
 																"domain_choice": schema.SingleNestedAttribute{
 																	Description:         "domain Domain to which cookie will be sent during request",
-																	MarkdownDescription: "domain Domain to which cookie will be sent during request",
+																	MarkdownDescription: "domain Domain to which cookie will be sent during request<br>Exactly one of `add_domain` or `ignore_domain` must be specified when `domain_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3523,7 +3537,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"add_domain": schema.StringAttribute{
 																			Description:         "add_domain Add domain attribute",
-																			MarkdownDescription: "add_domain Add domain attribute<br>**Validation:** `Length LengthBetween(1, 256)`",
+																			MarkdownDescription: "add_domain Add domain attribute<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `ignore_domain`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3537,7 +3551,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"ignore_domain": schema.BoolAttribute{
 																			Description:         "ignore_domain Ignore max age attribute",
-																			MarkdownDescription: "ignore_domain Ignore max age attribute",
+																			MarkdownDescription: "ignore_domain Ignore max age attribute<br>Conflicts with `add_domain`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3549,7 +3563,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"expiry_choice": schema.SingleNestedAttribute{
 																	Description:         "Expiry Indicates the maximum lifetime of the cookie as an HTTP-date timestamp. Eg. Mon, 01 Dec 2008 00:23:53 GMT",
-																	MarkdownDescription: "Expiry Indicates the maximum lifetime of the cookie as an HTTP-date timestamp. Eg. Mon, 01 Dec 2008 00:23:53 GMT",
+																	MarkdownDescription: "Expiry Indicates the maximum lifetime of the cookie as an HTTP-date timestamp. Eg. Mon, 01 Dec 2008 00:23:53 GMT<br>Exactly one of `add_expiry` or `ignore_expiry` must be specified when `expiry_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3562,7 +3576,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"add_expiry": schema.StringAttribute{
 																			Description:         "add_expiry Add expiry attribute",
-																			MarkdownDescription: "add_expiry Add expiry attribute<br>**Validation:** `Length LengthAtMost(256)`",
+																			MarkdownDescription: "add_expiry Add expiry attribute<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `ignore_expiry`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3572,7 +3586,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"ignore_expiry": schema.BoolAttribute{
 																			Description:         "ignore_expiry Ignore expiry attribute",
-																			MarkdownDescription: "ignore_expiry Ignore expiry attribute",
+																			MarkdownDescription: "ignore_expiry Ignore expiry attribute<br>Conflicts with `add_expiry`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3584,7 +3598,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"httponly_choice": schema.SingleNestedAttribute{
 																	Description:         "httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript.",
-																	MarkdownDescription: "httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript.",
+																	MarkdownDescription: "httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript.<br>Exactly one of `add_httponly` or `ignore_httponly` must be specified when `httponly_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3597,7 +3611,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"add_httponly": schema.BoolAttribute{
 																			Description:         "add_httponly",
-																			MarkdownDescription: "add_httponly",
+																			MarkdownDescription: "add_httponly<br>Conflicts with `ignore_httponly`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3607,7 +3621,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"ignore_httponly": schema.BoolAttribute{
 																			Description:         "ignore_httponly",
-																			MarkdownDescription: "ignore_httponly",
+																			MarkdownDescription: "ignore_httponly<br>Conflicts with `add_httponly`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3619,7 +3633,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"max_age_choice": schema.SingleNestedAttribute{
 																	Description:         "max_age Enter the maximum age in minutes for session cookies after which cookies are automatically expired",
-																	MarkdownDescription: "max_age Enter the maximum age in minutes for session cookies after which cookies are automatically expired",
+																	MarkdownDescription: "max_age Enter the maximum age in minutes for session cookies after which cookies are automatically expired<br>Exactly one of `ignore_max_age` or `max_age_value` must be specified when `max_age_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3632,7 +3646,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"ignore_max_age": schema.BoolAttribute{
 																			Description:         "ignore_max_age Ignore max age attribute",
-																			MarkdownDescription: "ignore_max_age Ignore max age attribute",
+																			MarkdownDescription: "ignore_max_age Ignore max age attribute<br>Conflicts with `max_age_value`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3642,7 +3656,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"max_age_value": schema.Int32Attribute{
 																			Description:         "add_max_age Add max age attribute",
-																			MarkdownDescription: "add_max_age Add max age attribute",
+																			MarkdownDescription: "add_max_age Add max age attribute<br>Conflicts with `ignore_max_age`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3669,7 +3683,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"partitioned_choice": schema.SingleNestedAttribute{
 																	Description:         "Partitioned A cookie with the Partitioned attribute is stored using partitioned storage.",
-																	MarkdownDescription: "Partitioned A cookie with the Partitioned attribute is stored using partitioned storage.",
+																	MarkdownDescription: "Partitioned A cookie with the Partitioned attribute is stored using partitioned storage.<br>Exactly one of `add_partitioned` or `ignore_partitioned` must be specified when `partitioned_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3682,7 +3696,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"add_partitioned": schema.BoolAttribute{
 																			Description:         "add_partitioned",
-																			MarkdownDescription: "add_partitioned",
+																			MarkdownDescription: "add_partitioned<br>Conflicts with `ignore_partitioned`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3692,7 +3706,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"ignore_partitioned": schema.BoolAttribute{
 																			Description:         "ignore_partitioned",
-																			MarkdownDescription: "ignore_partitioned",
+																			MarkdownDescription: "ignore_partitioned<br>Conflicts with `add_partitioned`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3704,7 +3718,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"path_choice": schema.SingleNestedAttribute{
 																	Description:         "path The path that must exist in the requested URL for the browser to send the Cookie header.",
-																	MarkdownDescription: "path The path that must exist in the requested URL for the browser to send the Cookie header.",
+																	MarkdownDescription: "path The path that must exist in the requested URL for the browser to send the Cookie header.<br>Exactly one of `add_path` or `ignore_path` must be specified when `path_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3717,7 +3731,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"add_path": schema.StringAttribute{
 																			Description:         "add_path Add path attribute",
-																			MarkdownDescription: "add_path Add path attribute<br>**Validation:** `Length LengthAtMost(256)`",
+																			MarkdownDescription: "add_path Add path attribute<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `ignore_path`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3731,7 +3745,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"ignore_path": schema.BoolAttribute{
 																			Description:         "ignore_domain Ignore path attribute",
-																			MarkdownDescription: "ignore_domain Ignore path attribute",
+																			MarkdownDescription: "ignore_domain Ignore path attribute<br>Conflicts with `add_path`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3743,7 +3757,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"samesite_choice": schema.SingleNestedAttribute{
 																	Description:         "samesite Controls whether or not a cookie is sent with cross-site requests",
-																	MarkdownDescription: "samesite Controls whether or not a cookie is sent with cross-site requests",
+																	MarkdownDescription: "samesite Controls whether or not a cookie is sent with cross-site requests<br>Exactly one of `ignore_samesite`, `samesite_lax`, `samesite_none`, or `samesite_strict` must be specified when `samesite_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3758,7 +3772,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"ignore_samesite": schema.BoolAttribute{
 																			Description:         "ignore_samesite Ignore Samesite attribute",
-																			MarkdownDescription: "ignore_samesite Ignore Samesite attribute",
+																			MarkdownDescription: "ignore_samesite Ignore Samesite attribute<br>Conflicts with `samesite_lax`, `samesite_none`, and `samesite_strict`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3768,7 +3782,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"samesite_lax": schema.BoolAttribute{
 																			Description:         "lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests",
-																			MarkdownDescription: "lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests",
+																			MarkdownDescription: "lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests<br>Conflicts with `ignore_samesite`, `samesite_none`, and `samesite_strict`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3778,7 +3792,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"samesite_none": schema.BoolAttribute{
 																			Description:         "none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests",
-																			MarkdownDescription: "none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests",
+																			MarkdownDescription: "none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests<br>Conflicts with `ignore_samesite`, `samesite_lax`, and `samesite_strict`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3788,7 +3802,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"samesite_strict": schema.BoolAttribute{
 																			Description:         "strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests",
-																			MarkdownDescription: "strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests",
+																			MarkdownDescription: "strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests<br>Conflicts with `ignore_samesite`, `samesite_lax`, and `samesite_none`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3800,7 +3814,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"secure_choice": schema.SingleNestedAttribute{
 																	Description:         "secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks.",
-																	MarkdownDescription: "secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks.",
+																	MarkdownDescription: "secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks.<br>Exactly one of `add_secure` or `ignore_secure` must be specified when `secure_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3813,7 +3827,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"add_secure": schema.BoolAttribute{
 																			Description:         "add_secure",
-																			MarkdownDescription: "add_secure",
+																			MarkdownDescription: "add_secure<br>Conflicts with `ignore_secure`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3823,7 +3837,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"ignore_secure": schema.BoolAttribute{
 																			Description:         "ignore_secure",
-																			MarkdownDescription: "ignore_secure",
+																			MarkdownDescription: "ignore_secure<br>Conflicts with `add_secure`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3835,7 +3849,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"value_choice": schema.SingleNestedAttribute{
 																	Description:         "value Enter Cookie value as string or blindfolded secret.",
-																	MarkdownDescription: "value Enter Cookie value as string or blindfolded secret.",
+																	MarkdownDescription: "value Enter Cookie value as string or blindfolded secret.<br>Exactly one of `ignore_value`, `secret_value`, or `value` must be specified when `value_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3849,7 +3863,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"ignore_value": schema.BoolAttribute{
 																			Description:         "ignore_value Ignore value of cookie",
-																			MarkdownDescription: "ignore_value Ignore value of cookie",
+																			MarkdownDescription: "ignore_value Ignore value of cookie<br>Conflicts with `secret_value` and `value`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3859,14 +3873,14 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"secret_value": schema.SingleNestedAttribute{
 																			Description:         "Secret Value Secret Value of the Cookie header",
-																			MarkdownDescription: "Secret Value Secret Value of the Cookie header",
+																			MarkdownDescription: "Secret Value Secret Value of the Cookie header<br>Conflicts with `ignore_value` and `value`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																			Attributes: map[string]schema.Attribute{
 																				"secret_info_choice": schema.SingleNestedAttribute{
 																					Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																					Required:            true,
 																					Optional:            false,
 																					Computed:            false,
@@ -3880,7 +3894,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																					Attributes: map[string]schema.Attribute{
 																						"blindfold_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -3920,7 +3934,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"clear_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -3955,7 +3969,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"none": schema.BoolAttribute{
 																							Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -3969,7 +3983,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"value": schema.StringAttribute{
 																			Description:         "value Value of the Cookie header.",
-																			MarkdownDescription: "value Value of the Cookie header.<br>**Validation:** `Length LengthAtMost(8096)`",
+																			MarkdownDescription: "value Value of the Cookie header.<br>**Validation:** `Length LengthAtMost(8096)`<br>Conflicts with `ignore_value` and `secret_value`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4027,7 +4041,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"value_choice": schema.SingleNestedAttribute{
 																	Description:         "value Enter Header value as string or blindfolded secret.",
-																	MarkdownDescription: "value Enter Header value as string or blindfolded secret.",
+																	MarkdownDescription: "value Enter Header value as string or blindfolded secret.<br>Exactly one of `secret_value` or `value` must be specified.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
@@ -4040,14 +4054,14 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"secret_value": schema.SingleNestedAttribute{
 																			Description:         "Secret Value Secret Value of the HTTP header.",
-																			MarkdownDescription: "Secret Value Secret Value of the HTTP header.",
+																			MarkdownDescription: "Secret Value Secret Value of the HTTP header.<br>Conflicts with `value`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																			Attributes: map[string]schema.Attribute{
 																				"secret_info_choice": schema.SingleNestedAttribute{
 																					Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																					Required:            true,
 																					Optional:            false,
 																					Computed:            false,
@@ -4061,7 +4075,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																					Attributes: map[string]schema.Attribute{
 																						"blindfold_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -4101,7 +4115,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"clear_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -4136,7 +4150,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"none": schema.BoolAttribute{
 																							Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -4150,7 +4164,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"value": schema.StringAttribute{
 																			Description:         "value Value of the HTTP header.",
-																			MarkdownDescription: "value Value of the HTTP header.<br>**Validation:** `Length LengthAtMost(8096)`",
+																			MarkdownDescription: "value Value of the HTTP header.<br>**Validation:** `Length LengthAtMost(8096)`<br>Conflicts with `secret_value`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4182,7 +4196,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 									},
 									"https_proxy": schema.SingleNestedAttribute{
 										Description:         "HTTPS proxy Connections are selected based on SNI and destination is determined based on Host header in HTTP connections",
-										MarkdownDescription: "HTTPS proxy Connections are selected based on SNI and destination is determined based on Host header in HTTP connections",
+										MarkdownDescription: "HTTPS proxy Connections are selected based on SNI and destination is determined based on Host header in HTTP connections<br>Conflicts with `http_proxy` and `sni_proxy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4292,20 +4306,23 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 													},
 													"http10_choice": schema.SingleNestedAttribute{
 														Description:         "Allow HTTP/1.0 Control whether HTTP/1.0 and HTTP/0.9 requests are accepted or rejected on this load balancer.",
-														MarkdownDescription: "Allow HTTP/1.0 Control whether HTTP/1.0 and HTTP/0.9 requests are accepted or rejected on this load balancer.",
-														Required:            true,
-														Optional:            false,
-														Computed:            false,
+														MarkdownDescription: "Allow HTTP/1.0 Control whether HTTP/1.0 and HTTP/0.9 requests are accepted or rejected on this load balancer.<br>Exactly one of `disable_http10` or `enable_http10` must be specified when `http10_choice` is configured.",
+														Required:            false,
+														Optional:            true,
+														Computed:            true,
 														Validators: []validator.Object{
-															exactlyoneofvalidator.RequiredExactlyOneOf(
+															exactlyoneofvalidator.ExactlyOneOf(
 																"disable_http10",
 																"enable_http10",
 															),
 														},
+														PlanModifiers: []planmodifier.Object{
+															objectplanmodifier.UseNonNullStateForUnknown(),
+														},
 														Attributes: map[string]schema.Attribute{
 															"disable_http10": schema.BoolAttribute{
 																Description:         "Disable HTTP/1.0 Reject HTTP/1.0 and HTTP/0.9 traffic on this LB.",
-																MarkdownDescription: "Disable HTTP/1.0 Reject HTTP/1.0 and HTTP/0.9 traffic on this LB.",
+																MarkdownDescription: "Disable HTTP/1.0 Reject HTTP/1.0 and HTTP/0.9 traffic on this LB.<br>Conflicts with `enable_http10`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -4315,7 +4332,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 															},
 															"enable_http10": schema.BoolAttribute{
 																Description:         "Enable HTTP/1.0 Allow HTTP/1.0 and HTTP/0.9 traffic on this LB.",
-																MarkdownDescription: "Enable HTTP/1.0 Allow HTTP/1.0 and HTTP/0.9 traffic on this LB.",
+																MarkdownDescription: "Enable HTTP/1.0 Allow HTTP/1.0 and HTTP/0.9 traffic on this LB.<br>Conflicts with `disable_http10`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -4349,20 +4366,23 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 													},
 													"max_requests_per_connection_choice": schema.SingleNestedAttribute{
 														Description:         "max_requests_per_connection Sets the maximum number of requests a downstream client can send over a single connection to Envoy.",
-														MarkdownDescription: "max_requests_per_connection Sets the maximum number of requests a downstream client can send over a single connection to Envoy.",
-														Required:            true,
-														Optional:            false,
-														Computed:            false,
+														MarkdownDescription: "max_requests_per_connection Sets the maximum number of requests a downstream client can send over a single connection to Envoy.<br>Exactly one of `max_requests_per_connection` or `no_request_limit_per_connection` must be specified when `max_requests_per_connection_choice` is configured.",
+														Required:            false,
+														Optional:            true,
+														Computed:            true,
 														Validators: []validator.Object{
-															exactlyoneofvalidator.RequiredExactlyOneOf(
+															exactlyoneofvalidator.ExactlyOneOf(
 																"max_requests_per_connection",
 																"no_request_limit_per_connection",
 															),
 														},
+														PlanModifiers: []planmodifier.Object{
+															objectplanmodifier.UseNonNullStateForUnknown(),
+														},
 														Attributes: map[string]schema.Attribute{
 															"max_requests_per_connection": schema.Int64Attribute{
 																Description:         "Maximum Requests Per Connection Sets the maximum number of requests a downstream client can send over a single connection to Envoy. Enter a value >=1 to define the request limit per connection.",
-																MarkdownDescription: "Maximum Requests Per Connection Sets the maximum number of requests a downstream client can send over a single connection to Envoy. Enter a value >=1 to define the request limit per connection.",
+																MarkdownDescription: "Maximum Requests Per Connection Sets the maximum number of requests a downstream client can send over a single connection to Envoy. Enter a value >=1 to define the request limit per connection.<br>Conflicts with `no_request_limit_per_connection`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -4372,7 +4392,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 															},
 															"no_request_limit_per_connection": schema.BoolAttribute{
 																Description:         "Disable the max requests per connection option This option disables the maximum requests per connection limit. When selected, no limit is enforced, and connections can handle unlimited requests.",
-																MarkdownDescription: "Disable the max requests per connection option This option disables the maximum requests per connection limit. When selected, no limit is enforced, and connections can handle unlimited requests.",
+																MarkdownDescription: "Disable the max requests per connection option This option disables the maximum requests per connection limit. When selected, no limit is enforced, and connections can handle unlimited requests.<br>Conflicts with `max_requests_per_connection`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -4414,7 +4434,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"value_choice": schema.SingleNestedAttribute{
 																	Description:         "value Enter Cookie value as string or blindfolded secret.",
-																	MarkdownDescription: "value Enter Cookie value as string or blindfolded secret.",
+																	MarkdownDescription: "value Enter Cookie value as string or blindfolded secret.<br>Exactly one of `secret_value` or `value` must be specified.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
@@ -4427,14 +4447,14 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"secret_value": schema.SingleNestedAttribute{
 																			Description:         "Secret Value Secret Value of the Cookie header",
-																			MarkdownDescription: "Secret Value Secret Value of the Cookie header",
+																			MarkdownDescription: "Secret Value Secret Value of the Cookie header<br>Conflicts with `value`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																			Attributes: map[string]schema.Attribute{
 																				"secret_info_choice": schema.SingleNestedAttribute{
 																					Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																					Required:            true,
 																					Optional:            false,
 																					Computed:            false,
@@ -4448,7 +4468,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																					Attributes: map[string]schema.Attribute{
 																						"blindfold_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -4488,7 +4508,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"clear_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -4523,7 +4543,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"none": schema.BoolAttribute{
 																							Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -4537,7 +4557,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"value": schema.StringAttribute{
 																			Description:         "value Value of the Cookie header.",
-																			MarkdownDescription: "value Value of the Cookie header.<br>**Validation:** `Length LengthAtMost(8096)`",
+																			MarkdownDescription: "value Value of the Cookie header.<br>**Validation:** `Length LengthAtMost(8096)`<br>Conflicts with `secret_value`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4595,7 +4615,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"value_choice": schema.SingleNestedAttribute{
 																	Description:         "value Enter Header value as string or blindfolded secret.",
-																	MarkdownDescription: "value Enter Header value as string or blindfolded secret.",
+																	MarkdownDescription: "value Enter Header value as string or blindfolded secret.<br>Exactly one of `secret_value` or `value` must be specified.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
@@ -4608,14 +4628,14 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"secret_value": schema.SingleNestedAttribute{
 																			Description:         "Secret Value Secret Value of the HTTP header.",
-																			MarkdownDescription: "Secret Value Secret Value of the HTTP header.",
+																			MarkdownDescription: "Secret Value Secret Value of the HTTP header.<br>Conflicts with `value`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																			Attributes: map[string]schema.Attribute{
 																				"secret_info_choice": schema.SingleNestedAttribute{
 																					Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																					Required:            true,
 																					Optional:            false,
 																					Computed:            false,
@@ -4629,7 +4649,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																					Attributes: map[string]schema.Attribute{
 																						"blindfold_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -4669,7 +4689,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"clear_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -4704,7 +4724,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"none": schema.BoolAttribute{
 																							Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -4718,7 +4738,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"value": schema.StringAttribute{
 																			Description:         "value Value of the HTTP header.",
-																			MarkdownDescription: "value Value of the HTTP header.<br>**Validation:** `Length LengthAtMost(8096)`",
+																			MarkdownDescription: "value Value of the HTTP header.<br>**Validation:** `Length LengthAtMost(8096)`<br>Conflicts with `secret_value`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4758,7 +4778,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 															Attributes: map[string]schema.Attribute{
 																"domain_choice": schema.SingleNestedAttribute{
 																	Description:         "domain Domain to which cookie will be sent during request",
-																	MarkdownDescription: "domain Domain to which cookie will be sent during request",
+																	MarkdownDescription: "domain Domain to which cookie will be sent during request<br>Exactly one of `add_domain` or `ignore_domain` must be specified when `domain_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4771,7 +4791,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"add_domain": schema.StringAttribute{
 																			Description:         "add_domain Add domain attribute",
-																			MarkdownDescription: "add_domain Add domain attribute<br>**Validation:** `Length LengthBetween(1, 256)`",
+																			MarkdownDescription: "add_domain Add domain attribute<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `ignore_domain`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4785,7 +4805,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"ignore_domain": schema.BoolAttribute{
 																			Description:         "ignore_domain Ignore max age attribute",
-																			MarkdownDescription: "ignore_domain Ignore max age attribute",
+																			MarkdownDescription: "ignore_domain Ignore max age attribute<br>Conflicts with `add_domain`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4797,7 +4817,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"expiry_choice": schema.SingleNestedAttribute{
 																	Description:         "Expiry Indicates the maximum lifetime of the cookie as an HTTP-date timestamp. Eg. Mon, 01 Dec 2008 00:23:53 GMT",
-																	MarkdownDescription: "Expiry Indicates the maximum lifetime of the cookie as an HTTP-date timestamp. Eg. Mon, 01 Dec 2008 00:23:53 GMT",
+																	MarkdownDescription: "Expiry Indicates the maximum lifetime of the cookie as an HTTP-date timestamp. Eg. Mon, 01 Dec 2008 00:23:53 GMT<br>Exactly one of `add_expiry` or `ignore_expiry` must be specified when `expiry_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4810,7 +4830,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"add_expiry": schema.StringAttribute{
 																			Description:         "add_expiry Add expiry attribute",
-																			MarkdownDescription: "add_expiry Add expiry attribute<br>**Validation:** `Length LengthAtMost(256)`",
+																			MarkdownDescription: "add_expiry Add expiry attribute<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `ignore_expiry`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4820,7 +4840,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"ignore_expiry": schema.BoolAttribute{
 																			Description:         "ignore_expiry Ignore expiry attribute",
-																			MarkdownDescription: "ignore_expiry Ignore expiry attribute",
+																			MarkdownDescription: "ignore_expiry Ignore expiry attribute<br>Conflicts with `add_expiry`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4832,7 +4852,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"httponly_choice": schema.SingleNestedAttribute{
 																	Description:         "httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript.",
-																	MarkdownDescription: "httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript.",
+																	MarkdownDescription: "httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript.<br>Exactly one of `add_httponly` or `ignore_httponly` must be specified when `httponly_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4845,7 +4865,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"add_httponly": schema.BoolAttribute{
 																			Description:         "add_httponly",
-																			MarkdownDescription: "add_httponly",
+																			MarkdownDescription: "add_httponly<br>Conflicts with `ignore_httponly`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4855,7 +4875,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"ignore_httponly": schema.BoolAttribute{
 																			Description:         "ignore_httponly",
-																			MarkdownDescription: "ignore_httponly",
+																			MarkdownDescription: "ignore_httponly<br>Conflicts with `add_httponly`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4867,7 +4887,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"max_age_choice": schema.SingleNestedAttribute{
 																	Description:         "max_age Enter the maximum age in minutes for session cookies after which cookies are automatically expired",
-																	MarkdownDescription: "max_age Enter the maximum age in minutes for session cookies after which cookies are automatically expired",
+																	MarkdownDescription: "max_age Enter the maximum age in minutes for session cookies after which cookies are automatically expired<br>Exactly one of `ignore_max_age` or `max_age_value` must be specified when `max_age_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4880,7 +4900,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"ignore_max_age": schema.BoolAttribute{
 																			Description:         "ignore_max_age Ignore max age attribute",
-																			MarkdownDescription: "ignore_max_age Ignore max age attribute",
+																			MarkdownDescription: "ignore_max_age Ignore max age attribute<br>Conflicts with `max_age_value`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4890,7 +4910,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"max_age_value": schema.Int32Attribute{
 																			Description:         "add_max_age Add max age attribute",
-																			MarkdownDescription: "add_max_age Add max age attribute",
+																			MarkdownDescription: "add_max_age Add max age attribute<br>Conflicts with `ignore_max_age`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4917,7 +4937,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"partitioned_choice": schema.SingleNestedAttribute{
 																	Description:         "Partitioned A cookie with the Partitioned attribute is stored using partitioned storage.",
-																	MarkdownDescription: "Partitioned A cookie with the Partitioned attribute is stored using partitioned storage.",
+																	MarkdownDescription: "Partitioned A cookie with the Partitioned attribute is stored using partitioned storage.<br>Exactly one of `add_partitioned` or `ignore_partitioned` must be specified when `partitioned_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4930,7 +4950,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"add_partitioned": schema.BoolAttribute{
 																			Description:         "add_partitioned",
-																			MarkdownDescription: "add_partitioned",
+																			MarkdownDescription: "add_partitioned<br>Conflicts with `ignore_partitioned`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4940,7 +4960,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"ignore_partitioned": schema.BoolAttribute{
 																			Description:         "ignore_partitioned",
-																			MarkdownDescription: "ignore_partitioned",
+																			MarkdownDescription: "ignore_partitioned<br>Conflicts with `add_partitioned`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4952,7 +4972,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"path_choice": schema.SingleNestedAttribute{
 																	Description:         "path The path that must exist in the requested URL for the browser to send the Cookie header.",
-																	MarkdownDescription: "path The path that must exist in the requested URL for the browser to send the Cookie header.",
+																	MarkdownDescription: "path The path that must exist in the requested URL for the browser to send the Cookie header.<br>Exactly one of `add_path` or `ignore_path` must be specified when `path_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4965,7 +4985,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"add_path": schema.StringAttribute{
 																			Description:         "add_path Add path attribute",
-																			MarkdownDescription: "add_path Add path attribute<br>**Validation:** `Length LengthAtMost(256)`",
+																			MarkdownDescription: "add_path Add path attribute<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `ignore_path`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4979,7 +4999,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"ignore_path": schema.BoolAttribute{
 																			Description:         "ignore_domain Ignore path attribute",
-																			MarkdownDescription: "ignore_domain Ignore path attribute",
+																			MarkdownDescription: "ignore_domain Ignore path attribute<br>Conflicts with `add_path`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4991,7 +5011,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"samesite_choice": schema.SingleNestedAttribute{
 																	Description:         "samesite Controls whether or not a cookie is sent with cross-site requests",
-																	MarkdownDescription: "samesite Controls whether or not a cookie is sent with cross-site requests",
+																	MarkdownDescription: "samesite Controls whether or not a cookie is sent with cross-site requests<br>Exactly one of `ignore_samesite`, `samesite_lax`, `samesite_none`, or `samesite_strict` must be specified when `samesite_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -5006,7 +5026,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"ignore_samesite": schema.BoolAttribute{
 																			Description:         "ignore_samesite Ignore Samesite attribute",
-																			MarkdownDescription: "ignore_samesite Ignore Samesite attribute",
+																			MarkdownDescription: "ignore_samesite Ignore Samesite attribute<br>Conflicts with `samesite_lax`, `samesite_none`, and `samesite_strict`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -5016,7 +5036,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"samesite_lax": schema.BoolAttribute{
 																			Description:         "lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests",
-																			MarkdownDescription: "lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests",
+																			MarkdownDescription: "lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests<br>Conflicts with `ignore_samesite`, `samesite_none`, and `samesite_strict`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -5026,7 +5046,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"samesite_none": schema.BoolAttribute{
 																			Description:         "none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests",
-																			MarkdownDescription: "none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests",
+																			MarkdownDescription: "none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests<br>Conflicts with `ignore_samesite`, `samesite_lax`, and `samesite_strict`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -5036,7 +5056,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"samesite_strict": schema.BoolAttribute{
 																			Description:         "strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests",
-																			MarkdownDescription: "strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests",
+																			MarkdownDescription: "strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests<br>Conflicts with `ignore_samesite`, `samesite_lax`, and `samesite_none`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -5048,7 +5068,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"secure_choice": schema.SingleNestedAttribute{
 																	Description:         "secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks.",
-																	MarkdownDescription: "secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks.",
+																	MarkdownDescription: "secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks.<br>Exactly one of `add_secure` or `ignore_secure` must be specified when `secure_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -5061,7 +5081,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"add_secure": schema.BoolAttribute{
 																			Description:         "add_secure",
-																			MarkdownDescription: "add_secure",
+																			MarkdownDescription: "add_secure<br>Conflicts with `ignore_secure`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -5071,7 +5091,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"ignore_secure": schema.BoolAttribute{
 																			Description:         "ignore_secure",
-																			MarkdownDescription: "ignore_secure",
+																			MarkdownDescription: "ignore_secure<br>Conflicts with `add_secure`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -5083,7 +5103,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"value_choice": schema.SingleNestedAttribute{
 																	Description:         "value Enter Cookie value as string or blindfolded secret.",
-																	MarkdownDescription: "value Enter Cookie value as string or blindfolded secret.",
+																	MarkdownDescription: "value Enter Cookie value as string or blindfolded secret.<br>Exactly one of `ignore_value`, `secret_value`, or `value` must be specified when `value_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -5097,7 +5117,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"ignore_value": schema.BoolAttribute{
 																			Description:         "ignore_value Ignore value of cookie",
-																			MarkdownDescription: "ignore_value Ignore value of cookie",
+																			MarkdownDescription: "ignore_value Ignore value of cookie<br>Conflicts with `secret_value` and `value`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -5107,14 +5127,14 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"secret_value": schema.SingleNestedAttribute{
 																			Description:         "Secret Value Secret Value of the Cookie header",
-																			MarkdownDescription: "Secret Value Secret Value of the Cookie header",
+																			MarkdownDescription: "Secret Value Secret Value of the Cookie header<br>Conflicts with `ignore_value` and `value`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																			Attributes: map[string]schema.Attribute{
 																				"secret_info_choice": schema.SingleNestedAttribute{
 																					Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																					Required:            true,
 																					Optional:            false,
 																					Computed:            false,
@@ -5128,7 +5148,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																					Attributes: map[string]schema.Attribute{
 																						"blindfold_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -5168,7 +5188,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"clear_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -5203,7 +5223,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"none": schema.BoolAttribute{
 																							Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -5217,7 +5237,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"value": schema.StringAttribute{
 																			Description:         "value Value of the Cookie header.",
-																			MarkdownDescription: "value Value of the Cookie header.<br>**Validation:** `Length LengthAtMost(8096)`",
+																			MarkdownDescription: "value Value of the Cookie header.<br>**Validation:** `Length LengthAtMost(8096)`<br>Conflicts with `ignore_value` and `secret_value`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -5275,7 +5295,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"value_choice": schema.SingleNestedAttribute{
 																	Description:         "value Enter Header value as string or blindfolded secret.",
-																	MarkdownDescription: "value Enter Header value as string or blindfolded secret.",
+																	MarkdownDescription: "value Enter Header value as string or blindfolded secret.<br>Exactly one of `secret_value` or `value` must be specified.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
@@ -5288,14 +5308,14 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"secret_value": schema.SingleNestedAttribute{
 																			Description:         "Secret Value Secret Value of the HTTP header.",
-																			MarkdownDescription: "Secret Value Secret Value of the HTTP header.",
+																			MarkdownDescription: "Secret Value Secret Value of the HTTP header.<br>Conflicts with `value`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																			Attributes: map[string]schema.Attribute{
 																				"secret_info_choice": schema.SingleNestedAttribute{
 																					Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																					Required:            true,
 																					Optional:            false,
 																					Computed:            false,
@@ -5309,7 +5329,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																					Attributes: map[string]schema.Attribute{
 																						"blindfold_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -5349,7 +5369,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"clear_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -5384,7 +5404,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"none": schema.BoolAttribute{
 																							Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -5398,7 +5418,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"value": schema.StringAttribute{
 																			Description:         "value Value of the HTTP header.",
-																			MarkdownDescription: "value Value of the HTTP header.<br>**Validation:** `Length LengthAtMost(8096)`",
+																			MarkdownDescription: "value Value of the HTTP header.<br>**Validation:** `Length LengthAtMost(8096)`<br>Conflicts with `secret_value`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -5435,20 +5455,23 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 												Attributes: map[string]schema.Attribute{
 													"mtls_choice": schema.SingleNestedAttribute{
 														Description:         "mTLS choice mTLS authentication between clients and HTTPS load balancer",
-														MarkdownDescription: "mTLS choice mTLS authentication between clients and HTTPS load balancer",
-														Required:            true,
-														Optional:            false,
-														Computed:            false,
+														MarkdownDescription: "mTLS choice mTLS authentication between clients and HTTPS load balancer<br>Exactly one of `no_mtls` or `use_mtls` must be specified when `mtls_choice` is configured.",
+														Required:            false,
+														Optional:            true,
+														Computed:            true,
 														Validators: []validator.Object{
-															exactlyoneofvalidator.RequiredExactlyOneOf(
+															exactlyoneofvalidator.ExactlyOneOf(
 																"no_mtls",
 																"use_mtls",
 															),
 														},
+														PlanModifiers: []planmodifier.Object{
+															objectplanmodifier.UseNonNullStateForUnknown(),
+														},
 														Attributes: map[string]schema.Attribute{
 															"no_mtls": schema.BoolAttribute{
 																Description:         "No mTLS",
-																MarkdownDescription: "No mTLS",
+																MarkdownDescription: "No mTLS<br>Conflicts with `use_mtls`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -5458,7 +5481,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 															},
 															"use_mtls": schema.SingleNestedAttribute{
 																Description:         "Use mTLS",
-																MarkdownDescription: "Use mTLS",
+																MarkdownDescription: "Use mTLS<br>Conflicts with `no_mtls`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -5473,7 +5496,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	},
 																	"crl_choice": schema.SingleNestedAttribute{
 																		Description:         "crl choice Whether to verify client certificate revocation status with certificate revocation list",
-																		MarkdownDescription: "crl choice Whether to verify client certificate revocation status with certificate revocation list",
+																		MarkdownDescription: "crl choice Whether to verify client certificate revocation status with certificate revocation list<br>Exactly one of `crl` or `no_crl` must be specified when `crl_choice` is configured.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -5486,7 +5509,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		Attributes: map[string]schema.Attribute{
 																			"crl": schema.SingleNestedAttribute{
 																				Description:         "Verify client certificate with CRL Client certificate is verified against CRL. Specify the CRL server information to download the certificate revocation list",
-																				MarkdownDescription: "Verify client certificate with CRL Client certificate is verified against CRL. Specify the CRL server information to download the certificate revocation list",
+																				MarkdownDescription: "Verify client certificate with CRL Client certificate is verified against CRL. Specify the CRL server information to download the certificate revocation list<br>Conflicts with `no_crl`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -5511,15 +5534,19 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																						Required:            false,
 																						Optional:            true,
 																						Computed:            true,
+																						Validators: []validator.String{
+																							requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+																						},
 																						PlanModifiers: []planmodifier.String{
 																							stringplanmodifier.UseNonNullStateForUnknown(),
+																							requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 																						},
 																					},
 																				},
 																			},
 																			"no_crl": schema.BoolAttribute{
 																				Description:         "No client certificate verification with CRL Client certificate revocation status is not verified",
-																				MarkdownDescription: "No client certificate verification with CRL Client certificate revocation status is not verified",
+																				MarkdownDescription: "No client certificate verification with CRL Client certificate revocation status is not verified<br>Conflicts with `crl`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -5531,7 +5558,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	},
 																	"trusted_ca_choice": schema.SingleNestedAttribute{
 																		Description:         "trusted_ca_choice Root CA configuration for downstream TLS connections",
-																		MarkdownDescription: "trusted_ca_choice Root CA configuration for downstream TLS connections",
+																		MarkdownDescription: "trusted_ca_choice Root CA configuration for downstream TLS connections<br>Exactly one of `trusted_ca` or `trusted_ca_url` must be specified.",
 																		Required:            true,
 																		Optional:            false,
 																		Computed:            false,
@@ -5544,7 +5571,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		Attributes: map[string]schema.Attribute{
 																			"trusted_ca": schema.SingleNestedAttribute{
 																				Description:         "trusted_ca Select/Add a Root CA Certificate object to associate with this Load Balancer",
-																				MarkdownDescription: "trusted_ca Select/Add a Root CA Certificate object to associate with this Load Balancer",
+																				MarkdownDescription: "trusted_ca Select/Add a Root CA Certificate object to associate with this Load Balancer<br>Conflicts with `trusted_ca_url`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -5569,15 +5596,19 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																						Required:            false,
 																						Optional:            true,
 																						Computed:            true,
+																						Validators: []validator.String{
+																							requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+																						},
 																						PlanModifiers: []planmodifier.String{
 																							stringplanmodifier.UseNonNullStateForUnknown(),
+																							requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 																						},
 																					},
 																				},
 																			},
 																			"trusted_ca_url": schema.StringAttribute{
 																				Description:         "trusted_ca_url Upload a Root CA Certificate specifically for this Load Balancer",
-																				MarkdownDescription: "trusted_ca_url Upload a Root CA Certificate specifically for this Load Balancer",
+																				MarkdownDescription: "trusted_ca_url Upload a Root CA Certificate specifically for this Load Balancer<br>Conflicts with `trusted_ca`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -5625,7 +5656,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"ocsp_stapling_choice": schema.SingleNestedAttribute{
 																	Description:         "OCSP Response choice OCSP Stapling choice",
-																	MarkdownDescription: "OCSP Response choice OCSP Stapling choice",
+																	MarkdownDescription: "OCSP Response choice OCSP Stapling choice<br>Exactly one of `custom_hash_algorithms`, `disable_ocsp_stapling`, or `use_system_defaults` must be specified when `ocsp_stapling_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -5639,7 +5670,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"custom_hash_algorithms": schema.SingleNestedAttribute{
 																			Description:         "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.",
-																			MarkdownDescription: "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.",
+																			MarkdownDescription: "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.<br>Conflicts with `disable_ocsp_stapling` and `use_system_defaults`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -5661,7 +5692,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"disable_ocsp_stapling": schema.BoolAttribute{
 																			Description:         "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.",
-																			MarkdownDescription: "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.",
+																			MarkdownDescription: "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.<br>Conflicts with `custom_hash_algorithms` and `use_system_defaults`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -5671,7 +5702,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"use_system_defaults": schema.BoolAttribute{
 																			Description:         "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.",
-																			MarkdownDescription: "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.",
+																			MarkdownDescription: "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.<br>Conflicts with `custom_hash_algorithms` and `disable_ocsp_stapling`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -5690,7 +5721,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"secret_info_choice": schema.SingleNestedAttribute{
 																			Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																			MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																			MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -5704,7 +5735,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																			Attributes: map[string]schema.Attribute{
 																				"blindfold_secret_info": schema.SingleNestedAttribute{
 																					Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																					MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																					MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5744,7 +5775,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																				},
 																				"clear_secret_info": schema.SingleNestedAttribute{
 																					Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																					MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																					MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5779,7 +5810,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																				},
 																				"none": schema.BoolAttribute{
 																					Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																					MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																					MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5803,22 +5834,25 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 														Attributes: map[string]schema.Attribute{
 															"choice": schema.SingleNestedAttribute{
 																Description:         "TLS Security Level The security level for TLS handshake between client/server and the platform.",
-																MarkdownDescription: "TLS Security Level The security level for TLS handshake between client/server and the platform.",
-																Required:            true,
-																Optional:            false,
-																Computed:            false,
+																MarkdownDescription: "TLS Security Level The security level for TLS handshake between client/server and the platform.<br>Exactly one of `custom_security`, `default_security`, `low_security`, or `medium_security` must be specified when `choice` is configured.",
+																Required:            false,
+																Optional:            true,
+																Computed:            true,
 																Validators: []validator.Object{
-																	exactlyoneofvalidator.RequiredExactlyOneOf(
+																	exactlyoneofvalidator.ExactlyOneOf(
 																		"custom_security",
 																		"default_security",
 																		"low_security",
 																		"medium_security",
 																	),
 																},
+																PlanModifiers: []planmodifier.Object{
+																	objectplanmodifier.UseNonNullStateForUnknown(),
+																},
 																Attributes: map[string]schema.Attribute{
 																	"custom_security": schema.SingleNestedAttribute{
 																		Description:         "Custom Security Custom selection of TLS versions and cipher suites",
-																		MarkdownDescription: "Custom Security Custom selection of TLS versions and cipher suites",
+																		MarkdownDescription: "Custom Security Custom selection of TLS versions and cipher suites<br>Conflicts with `default_security`, `low_security`, and `medium_security`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -5865,7 +5899,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	},
 																	"default_security": schema.BoolAttribute{
 																		Description:         "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.",
-																		MarkdownDescription: "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.",
+																		MarkdownDescription: "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.<br>Conflicts with `custom_security`, `low_security`, and `medium_security`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -5875,7 +5909,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	},
 																	"low_security": schema.BoolAttribute{
 																		Description:         "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.",
-																		MarkdownDescription: "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.",
+																		MarkdownDescription: "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.<br>Conflicts with `custom_security`, `default_security`, and `medium_security`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -5885,7 +5919,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	},
 																	"medium_security": schema.BoolAttribute{
 																		Description:         "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.",
-																		MarkdownDescription: "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.",
+																		MarkdownDescription: "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.<br>Conflicts with `custom_security`, `default_security`, and `low_security`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -5903,7 +5937,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 									},
 									"sni_proxy": schema.SingleNestedAttribute{
 										Description:         "SNI proxy Destination is determined based on SNI in TLS connections",
-										MarkdownDescription: "SNI proxy Destination is determined based on SNI in TLS connections",
+										MarkdownDescription: "SNI proxy Destination is determined based on SNI in TLS connections<br>Conflicts with `http_proxy` and `https_proxy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5927,21 +5961,24 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 					},
 					"http_proxy": schema.SingleNestedAttribute{
 						Description:         "HTTP Connect Proxy This is HTTP connect Proxy, Upstream connection will be determined based on HTTP connect protocol",
-						MarkdownDescription: "HTTP Connect Proxy This is HTTP connect Proxy, Upstream connection will be determined based on HTTP connect protocol",
+						MarkdownDescription: "HTTP Connect Proxy This is HTTP connect Proxy, Upstream connection will be determined based on HTTP connect protocol<br>Conflicts with `dynamic_proxy`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"http_https_choice": schema.SingleNestedAttribute{
 								Description:         "HTTP Connect HTTP connect proxy",
-								MarkdownDescription: "HTTP Connect HTTP connect proxy",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "HTTP Connect HTTP connect proxy<br>`enable_http` must be specified when `http_https_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"enable_http",
 									),
+								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
 								},
 								Attributes: map[string]schema.Attribute{
 									"enable_http": schema.BoolAttribute{
@@ -6061,20 +6098,23 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 									},
 									"http10_choice": schema.SingleNestedAttribute{
 										Description:         "Allow HTTP/1.0 Control whether HTTP/1.0 and HTTP/0.9 requests are accepted or rejected on this load balancer.",
-										MarkdownDescription: "Allow HTTP/1.0 Control whether HTTP/1.0 and HTTP/0.9 requests are accepted or rejected on this load balancer.",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Allow HTTP/1.0 Control whether HTTP/1.0 and HTTP/0.9 requests are accepted or rejected on this load balancer.<br>Exactly one of `disable_http10` or `enable_http10` must be specified when `http10_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"disable_http10",
 												"enable_http10",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"disable_http10": schema.BoolAttribute{
 												Description:         "Disable HTTP/1.0 Reject HTTP/1.0 and HTTP/0.9 traffic on this LB.",
-												MarkdownDescription: "Disable HTTP/1.0 Reject HTTP/1.0 and HTTP/0.9 traffic on this LB.",
+												MarkdownDescription: "Disable HTTP/1.0 Reject HTTP/1.0 and HTTP/0.9 traffic on this LB.<br>Conflicts with `enable_http10`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -6084,7 +6124,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 											},
 											"enable_http10": schema.BoolAttribute{
 												Description:         "Enable HTTP/1.0 Allow HTTP/1.0 and HTTP/0.9 traffic on this LB.",
-												MarkdownDescription: "Enable HTTP/1.0 Allow HTTP/1.0 and HTTP/0.9 traffic on this LB.",
+												MarkdownDescription: "Enable HTTP/1.0 Allow HTTP/1.0 and HTTP/0.9 traffic on this LB.<br>Conflicts with `disable_http10`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -6118,20 +6158,23 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 									},
 									"max_requests_per_connection_choice": schema.SingleNestedAttribute{
 										Description:         "max_requests_per_connection Sets the maximum number of requests a downstream client can send over a single connection to Envoy.",
-										MarkdownDescription: "max_requests_per_connection Sets the maximum number of requests a downstream client can send over a single connection to Envoy.",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "max_requests_per_connection Sets the maximum number of requests a downstream client can send over a single connection to Envoy.<br>Exactly one of `max_requests_per_connection` or `no_request_limit_per_connection` must be specified when `max_requests_per_connection_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"max_requests_per_connection",
 												"no_request_limit_per_connection",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"max_requests_per_connection": schema.Int64Attribute{
 												Description:         "Maximum Requests Per Connection Sets the maximum number of requests a downstream client can send over a single connection to Envoy. Enter a value >=1 to define the request limit per connection.",
-												MarkdownDescription: "Maximum Requests Per Connection Sets the maximum number of requests a downstream client can send over a single connection to Envoy. Enter a value >=1 to define the request limit per connection.",
+												MarkdownDescription: "Maximum Requests Per Connection Sets the maximum number of requests a downstream client can send over a single connection to Envoy. Enter a value >=1 to define the request limit per connection.<br>Conflicts with `no_request_limit_per_connection`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -6141,7 +6184,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 											},
 											"no_request_limit_per_connection": schema.BoolAttribute{
 												Description:         "Disable the max requests per connection option This option disables the maximum requests per connection limit. When selected, no limit is enforced, and connections can handle unlimited requests.",
-												MarkdownDescription: "Disable the max requests per connection option This option disables the maximum requests per connection limit. When selected, no limit is enforced, and connections can handle unlimited requests.",
+												MarkdownDescription: "Disable the max requests per connection option This option disables the maximum requests per connection limit. When selected, no limit is enforced, and connections can handle unlimited requests.<br>Conflicts with `max_requests_per_connection`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -6183,7 +6226,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"value_choice": schema.SingleNestedAttribute{
 													Description:         "value Enter Cookie value as string or blindfolded secret.",
-													MarkdownDescription: "value Enter Cookie value as string or blindfolded secret.",
+													MarkdownDescription: "value Enter Cookie value as string or blindfolded secret.<br>Exactly one of `secret_value` or `value` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -6196,14 +6239,14 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 													Attributes: map[string]schema.Attribute{
 														"secret_value": schema.SingleNestedAttribute{
 															Description:         "Secret Value Secret Value of the Cookie header",
-															MarkdownDescription: "Secret Value Secret Value of the Cookie header",
+															MarkdownDescription: "Secret Value Secret Value of the Cookie header<br>Conflicts with `value`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
 															Attributes: map[string]schema.Attribute{
 																"secret_info_choice": schema.SingleNestedAttribute{
 																	Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																	MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																	MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
@@ -6217,7 +6260,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"blindfold_secret_info": schema.SingleNestedAttribute{
 																			Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																			MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																			MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -6257,7 +6300,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"clear_secret_info": schema.SingleNestedAttribute{
 																			Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																			MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																			MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -6292,7 +6335,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"none": schema.BoolAttribute{
 																			Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																			MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																			MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -6306,7 +6349,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 														},
 														"value": schema.StringAttribute{
 															Description:         "value Value of the Cookie header.",
-															MarkdownDescription: "value Value of the Cookie header.<br>**Validation:** `Length LengthAtMost(8096)`",
+															MarkdownDescription: "value Value of the Cookie header.<br>**Validation:** `Length LengthAtMost(8096)`<br>Conflicts with `secret_value`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -6364,7 +6407,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"value_choice": schema.SingleNestedAttribute{
 													Description:         "value Enter Header value as string or blindfolded secret.",
-													MarkdownDescription: "value Enter Header value as string or blindfolded secret.",
+													MarkdownDescription: "value Enter Header value as string or blindfolded secret.<br>Exactly one of `secret_value` or `value` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -6377,14 +6420,14 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 													Attributes: map[string]schema.Attribute{
 														"secret_value": schema.SingleNestedAttribute{
 															Description:         "Secret Value Secret Value of the HTTP header.",
-															MarkdownDescription: "Secret Value Secret Value of the HTTP header.",
+															MarkdownDescription: "Secret Value Secret Value of the HTTP header.<br>Conflicts with `value`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
 															Attributes: map[string]schema.Attribute{
 																"secret_info_choice": schema.SingleNestedAttribute{
 																	Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																	MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																	MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
@@ -6398,7 +6441,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"blindfold_secret_info": schema.SingleNestedAttribute{
 																			Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																			MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																			MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -6438,7 +6481,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"clear_secret_info": schema.SingleNestedAttribute{
 																			Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																			MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																			MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -6473,7 +6516,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"none": schema.BoolAttribute{
 																			Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																			MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																			MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -6487,7 +6530,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 														},
 														"value": schema.StringAttribute{
 															Description:         "value Value of the HTTP header.",
-															MarkdownDescription: "value Value of the HTTP header.<br>**Validation:** `Length LengthAtMost(8096)`",
+															MarkdownDescription: "value Value of the HTTP header.<br>**Validation:** `Length LengthAtMost(8096)`<br>Conflicts with `secret_value`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -6527,7 +6570,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 											Attributes: map[string]schema.Attribute{
 												"domain_choice": schema.SingleNestedAttribute{
 													Description:         "domain Domain to which cookie will be sent during request",
-													MarkdownDescription: "domain Domain to which cookie will be sent during request",
+													MarkdownDescription: "domain Domain to which cookie will be sent during request<br>Exactly one of `add_domain` or `ignore_domain` must be specified when `domain_choice` is configured.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -6540,7 +6583,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 													Attributes: map[string]schema.Attribute{
 														"add_domain": schema.StringAttribute{
 															Description:         "add_domain Add domain attribute",
-															MarkdownDescription: "add_domain Add domain attribute<br>**Validation:** `Length LengthBetween(1, 256)`",
+															MarkdownDescription: "add_domain Add domain attribute<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `ignore_domain`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -6554,7 +6597,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 														},
 														"ignore_domain": schema.BoolAttribute{
 															Description:         "ignore_domain Ignore max age attribute",
-															MarkdownDescription: "ignore_domain Ignore max age attribute",
+															MarkdownDescription: "ignore_domain Ignore max age attribute<br>Conflicts with `add_domain`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -6566,7 +6609,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"expiry_choice": schema.SingleNestedAttribute{
 													Description:         "Expiry Indicates the maximum lifetime of the cookie as an HTTP-date timestamp. Eg. Mon, 01 Dec 2008 00:23:53 GMT",
-													MarkdownDescription: "Expiry Indicates the maximum lifetime of the cookie as an HTTP-date timestamp. Eg. Mon, 01 Dec 2008 00:23:53 GMT",
+													MarkdownDescription: "Expiry Indicates the maximum lifetime of the cookie as an HTTP-date timestamp. Eg. Mon, 01 Dec 2008 00:23:53 GMT<br>Exactly one of `add_expiry` or `ignore_expiry` must be specified when `expiry_choice` is configured.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -6579,7 +6622,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 													Attributes: map[string]schema.Attribute{
 														"add_expiry": schema.StringAttribute{
 															Description:         "add_expiry Add expiry attribute",
-															MarkdownDescription: "add_expiry Add expiry attribute<br>**Validation:** `Length LengthAtMost(256)`",
+															MarkdownDescription: "add_expiry Add expiry attribute<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `ignore_expiry`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -6589,7 +6632,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 														},
 														"ignore_expiry": schema.BoolAttribute{
 															Description:         "ignore_expiry Ignore expiry attribute",
-															MarkdownDescription: "ignore_expiry Ignore expiry attribute",
+															MarkdownDescription: "ignore_expiry Ignore expiry attribute<br>Conflicts with `add_expiry`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -6601,7 +6644,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"httponly_choice": schema.SingleNestedAttribute{
 													Description:         "httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript.",
-													MarkdownDescription: "httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript.",
+													MarkdownDescription: "httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript.<br>Exactly one of `add_httponly` or `ignore_httponly` must be specified when `httponly_choice` is configured.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -6614,7 +6657,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 													Attributes: map[string]schema.Attribute{
 														"add_httponly": schema.BoolAttribute{
 															Description:         "add_httponly",
-															MarkdownDescription: "add_httponly",
+															MarkdownDescription: "add_httponly<br>Conflicts with `ignore_httponly`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -6624,7 +6667,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 														},
 														"ignore_httponly": schema.BoolAttribute{
 															Description:         "ignore_httponly",
-															MarkdownDescription: "ignore_httponly",
+															MarkdownDescription: "ignore_httponly<br>Conflicts with `add_httponly`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -6636,7 +6679,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"max_age_choice": schema.SingleNestedAttribute{
 													Description:         "max_age Enter the maximum age in minutes for session cookies after which cookies are automatically expired",
-													MarkdownDescription: "max_age Enter the maximum age in minutes for session cookies after which cookies are automatically expired",
+													MarkdownDescription: "max_age Enter the maximum age in minutes for session cookies after which cookies are automatically expired<br>Exactly one of `ignore_max_age` or `max_age_value` must be specified when `max_age_choice` is configured.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -6649,7 +6692,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 													Attributes: map[string]schema.Attribute{
 														"ignore_max_age": schema.BoolAttribute{
 															Description:         "ignore_max_age Ignore max age attribute",
-															MarkdownDescription: "ignore_max_age Ignore max age attribute",
+															MarkdownDescription: "ignore_max_age Ignore max age attribute<br>Conflicts with `max_age_value`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -6659,7 +6702,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 														},
 														"max_age_value": schema.Int32Attribute{
 															Description:         "add_max_age Add max age attribute",
-															MarkdownDescription: "add_max_age Add max age attribute",
+															MarkdownDescription: "add_max_age Add max age attribute<br>Conflicts with `ignore_max_age`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -6686,7 +6729,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"partitioned_choice": schema.SingleNestedAttribute{
 													Description:         "Partitioned A cookie with the Partitioned attribute is stored using partitioned storage.",
-													MarkdownDescription: "Partitioned A cookie with the Partitioned attribute is stored using partitioned storage.",
+													MarkdownDescription: "Partitioned A cookie with the Partitioned attribute is stored using partitioned storage.<br>Exactly one of `add_partitioned` or `ignore_partitioned` must be specified when `partitioned_choice` is configured.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -6699,7 +6742,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 													Attributes: map[string]schema.Attribute{
 														"add_partitioned": schema.BoolAttribute{
 															Description:         "add_partitioned",
-															MarkdownDescription: "add_partitioned",
+															MarkdownDescription: "add_partitioned<br>Conflicts with `ignore_partitioned`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -6709,7 +6752,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 														},
 														"ignore_partitioned": schema.BoolAttribute{
 															Description:         "ignore_partitioned",
-															MarkdownDescription: "ignore_partitioned",
+															MarkdownDescription: "ignore_partitioned<br>Conflicts with `add_partitioned`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -6721,7 +6764,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"path_choice": schema.SingleNestedAttribute{
 													Description:         "path The path that must exist in the requested URL for the browser to send the Cookie header.",
-													MarkdownDescription: "path The path that must exist in the requested URL for the browser to send the Cookie header.",
+													MarkdownDescription: "path The path that must exist in the requested URL for the browser to send the Cookie header.<br>Exactly one of `add_path` or `ignore_path` must be specified when `path_choice` is configured.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -6734,7 +6777,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 													Attributes: map[string]schema.Attribute{
 														"add_path": schema.StringAttribute{
 															Description:         "add_path Add path attribute",
-															MarkdownDescription: "add_path Add path attribute<br>**Validation:** `Length LengthAtMost(256)`",
+															MarkdownDescription: "add_path Add path attribute<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `ignore_path`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -6748,7 +6791,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 														},
 														"ignore_path": schema.BoolAttribute{
 															Description:         "ignore_domain Ignore path attribute",
-															MarkdownDescription: "ignore_domain Ignore path attribute",
+															MarkdownDescription: "ignore_domain Ignore path attribute<br>Conflicts with `add_path`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -6760,7 +6803,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"samesite_choice": schema.SingleNestedAttribute{
 													Description:         "samesite Controls whether or not a cookie is sent with cross-site requests",
-													MarkdownDescription: "samesite Controls whether or not a cookie is sent with cross-site requests",
+													MarkdownDescription: "samesite Controls whether or not a cookie is sent with cross-site requests<br>Exactly one of `ignore_samesite`, `samesite_lax`, `samesite_none`, or `samesite_strict` must be specified when `samesite_choice` is configured.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -6775,7 +6818,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 													Attributes: map[string]schema.Attribute{
 														"ignore_samesite": schema.BoolAttribute{
 															Description:         "ignore_samesite Ignore Samesite attribute",
-															MarkdownDescription: "ignore_samesite Ignore Samesite attribute",
+															MarkdownDescription: "ignore_samesite Ignore Samesite attribute<br>Conflicts with `samesite_lax`, `samesite_none`, and `samesite_strict`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -6785,7 +6828,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 														},
 														"samesite_lax": schema.BoolAttribute{
 															Description:         "lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests",
-															MarkdownDescription: "lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests",
+															MarkdownDescription: "lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests<br>Conflicts with `ignore_samesite`, `samesite_none`, and `samesite_strict`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -6795,7 +6838,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 														},
 														"samesite_none": schema.BoolAttribute{
 															Description:         "none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests",
-															MarkdownDescription: "none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests",
+															MarkdownDescription: "none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests<br>Conflicts with `ignore_samesite`, `samesite_lax`, and `samesite_strict`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -6805,7 +6848,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 														},
 														"samesite_strict": schema.BoolAttribute{
 															Description:         "strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests",
-															MarkdownDescription: "strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests",
+															MarkdownDescription: "strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests<br>Conflicts with `ignore_samesite`, `samesite_lax`, and `samesite_none`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -6817,7 +6860,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"secure_choice": schema.SingleNestedAttribute{
 													Description:         "secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks.",
-													MarkdownDescription: "secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks.",
+													MarkdownDescription: "secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks.<br>Exactly one of `add_secure` or `ignore_secure` must be specified when `secure_choice` is configured.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -6830,7 +6873,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 													Attributes: map[string]schema.Attribute{
 														"add_secure": schema.BoolAttribute{
 															Description:         "add_secure",
-															MarkdownDescription: "add_secure",
+															MarkdownDescription: "add_secure<br>Conflicts with `ignore_secure`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -6840,7 +6883,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 														},
 														"ignore_secure": schema.BoolAttribute{
 															Description:         "ignore_secure",
-															MarkdownDescription: "ignore_secure",
+															MarkdownDescription: "ignore_secure<br>Conflicts with `add_secure`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -6852,7 +6895,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"value_choice": schema.SingleNestedAttribute{
 													Description:         "value Enter Cookie value as string or blindfolded secret.",
-													MarkdownDescription: "value Enter Cookie value as string or blindfolded secret.",
+													MarkdownDescription: "value Enter Cookie value as string or blindfolded secret.<br>Exactly one of `ignore_value`, `secret_value`, or `value` must be specified when `value_choice` is configured.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -6866,7 +6909,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 													Attributes: map[string]schema.Attribute{
 														"ignore_value": schema.BoolAttribute{
 															Description:         "ignore_value Ignore value of cookie",
-															MarkdownDescription: "ignore_value Ignore value of cookie",
+															MarkdownDescription: "ignore_value Ignore value of cookie<br>Conflicts with `secret_value` and `value`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -6876,14 +6919,14 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 														},
 														"secret_value": schema.SingleNestedAttribute{
 															Description:         "Secret Value Secret Value of the Cookie header",
-															MarkdownDescription: "Secret Value Secret Value of the Cookie header",
+															MarkdownDescription: "Secret Value Secret Value of the Cookie header<br>Conflicts with `ignore_value` and `value`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
 															Attributes: map[string]schema.Attribute{
 																"secret_info_choice": schema.SingleNestedAttribute{
 																	Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																	MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																	MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
@@ -6897,7 +6940,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"blindfold_secret_info": schema.SingleNestedAttribute{
 																			Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																			MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																			MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -6937,7 +6980,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"clear_secret_info": schema.SingleNestedAttribute{
 																			Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																			MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																			MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -6972,7 +7015,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"none": schema.BoolAttribute{
 																			Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																			MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																			MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -6986,7 +7029,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 														},
 														"value": schema.StringAttribute{
 															Description:         "value Value of the Cookie header.",
-															MarkdownDescription: "value Value of the Cookie header.<br>**Validation:** `Length LengthAtMost(8096)`",
+															MarkdownDescription: "value Value of the Cookie header.<br>**Validation:** `Length LengthAtMost(8096)`<br>Conflicts with `ignore_value` and `secret_value`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -7044,7 +7087,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"value_choice": schema.SingleNestedAttribute{
 													Description:         "value Enter Header value as string or blindfolded secret.",
-													MarkdownDescription: "value Enter Header value as string or blindfolded secret.",
+													MarkdownDescription: "value Enter Header value as string or blindfolded secret.<br>Exactly one of `secret_value` or `value` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -7057,14 +7100,14 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 													Attributes: map[string]schema.Attribute{
 														"secret_value": schema.SingleNestedAttribute{
 															Description:         "Secret Value Secret Value of the HTTP header.",
-															MarkdownDescription: "Secret Value Secret Value of the HTTP header.",
+															MarkdownDescription: "Secret Value Secret Value of the HTTP header.<br>Conflicts with `value`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
 															Attributes: map[string]schema.Attribute{
 																"secret_info_choice": schema.SingleNestedAttribute{
 																	Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																	MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																	MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
@@ -7078,7 +7121,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"blindfold_secret_info": schema.SingleNestedAttribute{
 																			Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																			MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																			MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -7118,7 +7161,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"clear_secret_info": schema.SingleNestedAttribute{
 																			Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																			MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																			MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -7153,7 +7196,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"none": schema.BoolAttribute{
 																			Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																			MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																			MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -7167,7 +7210,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 														},
 														"value": schema.StringAttribute{
 															Description:         "value Value of the HTTP header.",
-															MarkdownDescription: "value Value of the HTTP header.<br>**Validation:** `Length LengthAtMost(8096)`",
+															MarkdownDescription: "value Value of the HTTP header.<br>**Validation:** `Length LengthAtMost(8096)`<br>Conflicts with `secret_value`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -7201,20 +7244,23 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 			},
 			"proxy_policy_choice": schema.SingleNestedAttribute{
 				Description:         "Manage Proxy Policy Manage Proxy Policy via this view",
-				MarkdownDescription: "Manage Proxy Policy Manage Proxy Policy via this view",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Manage Proxy Policy Manage Proxy Policy via this view<br>Exactly one of `active_forward_proxy_policies` or `no_forward_proxy_policy` must be specified when `proxy_policy_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"active_forward_proxy_policies",
 						"no_forward_proxy_policy",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"active_forward_proxy_policies": schema.SingleNestedAttribute{
 						Description:         "Manage Proxy Policy Forward proxy policies active for this proxy",
-						MarkdownDescription: "Manage Proxy Policy Forward proxy policies active for this proxy",
+						MarkdownDescription: "Manage Proxy Policy Forward proxy policies active for this proxy<br>Conflicts with `no_forward_proxy_policy`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -7250,8 +7296,12 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 											Required:            false,
 											Optional:            true,
 											Computed:            true,
+											Validators: []validator.String{
+												requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+											},
 											PlanModifiers: []planmodifier.String{
 												stringplanmodifier.UseNonNullStateForUnknown(),
+												requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 											},
 										},
 									},
@@ -7261,7 +7311,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 					},
 					"no_forward_proxy_policy": schema.BoolAttribute{
 						Description:         "Do Not Manage Proxy Policy Proxy Policy is disabled for this proxy.",
-						MarkdownDescription: "Do Not Manage Proxy Policy Proxy Policy is disabled for this proxy.",
+						MarkdownDescription: "Do Not Manage Proxy Policy Proxy Policy is disabled for this proxy.<br>Conflicts with `active_forward_proxy_policies`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -7273,7 +7323,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 			},
 			"site_choice": schema.SingleNestedAttribute{
 				Description:         "Proxy Sites Select where this proxy is instantiated, sites, virtual sites",
-				MarkdownDescription: "Proxy Sites Select where this proxy is instantiated, sites, virtual sites",
+				MarkdownDescription: "Proxy Sites Select where this proxy is instantiated, sites, virtual sites<br>Exactly one of `do_not_advertise` or `site_virtual_sites` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -7286,7 +7336,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 				Attributes: map[string]schema.Attribute{
 					"do_not_advertise": schema.BoolAttribute{
 						Description:         "Do Not Instantiate This proxy Do not Instantiate this Proxy",
-						MarkdownDescription: "Do Not Instantiate This proxy Do not Instantiate this Proxy",
+						MarkdownDescription: "Do Not Instantiate This proxy Do not Instantiate this Proxy<br>Conflicts with `site_virtual_sites`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -7296,7 +7346,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 					},
 					"site_virtual_sites": schema.SingleNestedAttribute{
 						Description:         "Site or Virtual Site Instantiate this proxy on specific sites and/or virtual sites",
-						MarkdownDescription: "Site or Virtual Site Instantiate this proxy on specific sites and/or virtual sites",
+						MarkdownDescription: "Site or Virtual Site Instantiate this proxy on specific sites and/or virtual sites<br>Conflicts with `do_not_advertise`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -7315,7 +7365,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 									Attributes: map[string]schema.Attribute{
 										"choice": schema.SingleNestedAttribute{
 											Description:         "Advertise choice This defines various options where a Loadbalancer could be advertised",
-											MarkdownDescription: "Advertise choice This defines various options where a Loadbalancer could be advertised",
+											MarkdownDescription: "Advertise choice This defines various options where a Loadbalancer could be advertised<br>Exactly one of `site` or `virtual_site` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -7328,7 +7378,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 											Attributes: map[string]schema.Attribute{
 												"site": schema.SingleNestedAttribute{
 													Description:         "Site Advertise on a customer site and a given network.",
-													MarkdownDescription: "Site Advertise on a customer site and a given network.",
+													MarkdownDescription: "Site Advertise on a customer site and a given network.<br>Conflicts with `virtual_site`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -7398,8 +7448,12 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            true,
+																	Validators: []validator.String{
+																		requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+																	},
 																	PlanModifiers: []planmodifier.String{
 																		stringplanmodifier.UseNonNullStateForUnknown(),
+																		requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 																	},
 																},
 															},
@@ -7408,7 +7462,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"virtual_site": schema.SingleNestedAttribute{
 													Description:         "Virtual Site Advertise on a customer virtual site and a given network.",
-													MarkdownDescription: "Virtual Site Advertise on a customer virtual site and a given network.",
+													MarkdownDescription: "Virtual Site Advertise on a customer virtual site and a given network.<br>Conflicts with `site`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -7452,8 +7506,12 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            true,
+																	Validators: []validator.String{
+																		requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+																	},
 																	PlanModifiers: []planmodifier.String{
 																		stringplanmodifier.UseNonNullStateForUnknown(),
+																		requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 																	},
 																},
 															},
@@ -7464,7 +7522,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 										},
 										"port_choice": schema.SingleNestedAttribute{
 											Description:         "Listen TCP Port Choice Available options: user provided port or system default port",
-											MarkdownDescription: "Listen TCP Port Choice Available options: user provided port or system default port",
+											MarkdownDescription: "Listen TCP Port Choice Available options: user provided port or system default port<br>Exactly one of `port` or `use_default_port` must be specified when `port_choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -7477,7 +7535,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 											Attributes: map[string]schema.Attribute{
 												"port": schema.Int64Attribute{
 													Description:         "TCP port to listen TCP port to Listen.",
-													MarkdownDescription: "TCP port to listen TCP port to Listen.",
+													MarkdownDescription: "TCP port to listen TCP port to Listen.<br>Conflicts with `use_default_port`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -7487,7 +7545,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"use_default_port": schema.BoolAttribute{
 													Description:         "Use Default port For HTTP, default is 80. For HTTPS/SNI-Proxy, default is 443.",
-													MarkdownDescription: "Use Default port For HTTP, default is 80. For HTTPS/SNI-Proxy, default is 443.",
+													MarkdownDescription: "Use Default port For HTTP, default is 80. For HTTPS/SNI-Proxy, default is 443.<br>Conflicts with `port`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -7506,7 +7564,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 			},
 			"tls_interception_choice": schema.SingleNestedAttribute{
 				Description:         "TLS Interception choice TLS interception choice for HTTPS connections on the proxy",
-				MarkdownDescription: "TLS Interception choice TLS interception choice for HTTPS connections on the proxy",
+				MarkdownDescription: "TLS Interception choice TLS interception choice for HTTPS connections on the proxy<br>Exactly one of `no_interception` or `tls_intercept` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -7519,7 +7577,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 				Attributes: map[string]schema.Attribute{
 					"no_interception": schema.BoolAttribute{
 						Description:         "No TLS interception TLS interception is not enabled",
-						MarkdownDescription: "No TLS interception TLS interception is not enabled",
+						MarkdownDescription: "No TLS interception TLS interception is not enabled<br>Conflicts with `tls_intercept`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -7529,27 +7587,30 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 					},
 					"tls_intercept": schema.SingleNestedAttribute{
 						Description:         "TLS Interception Specify TLS interception configuration",
-						MarkdownDescription: "TLS Interception Specify TLS interception configuration",
+						MarkdownDescription: "TLS Interception Specify TLS interception configuration<br>Conflicts with `no_interception`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"interception_policy_choice": schema.SingleNestedAttribute{
 								Description:         "Interception Policy Interception policy choice - enable for all domains or custom policies",
-								MarkdownDescription: "Interception Policy Interception policy choice - enable for all domains or custom policies",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Interception Policy Interception policy choice - enable for all domains or custom policies<br>Exactly one of `enable_for_all_domains` or `policy` must be specified when `interception_policy_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"enable_for_all_domains",
 										"policy",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"enable_for_all_domains": schema.BoolAttribute{
 										Description:         "Enable For All Domains Enable interception for all domains",
-										MarkdownDescription: "Enable For All Domains Enable interception for all domains",
+										MarkdownDescription: "Enable For All Domains Enable interception for all domains<br>Conflicts with `policy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -7559,7 +7620,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 									},
 									"policy": schema.SingleNestedAttribute{
 										Description:         "Policy for specific domains Policy to enable/disable specific domains, with implicit enable all domains",
-										MarkdownDescription: "Policy for specific domains Policy to enable/disable specific domains, with implicit enable all domains",
+										MarkdownDescription: "Policy for specific domains Policy to enable/disable specific domains, with implicit enable all domains<br>Conflicts with `enable_for_all_domains`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -7585,7 +7646,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 															Attributes: map[string]schema.Attribute{
 																"domain_choice": schema.SingleNestedAttribute{
 																	Description:         "Domain choice Method to specify domain part",
-																	MarkdownDescription: "Domain choice Method to specify domain part",
+																	MarkdownDescription: "Domain choice Method to specify domain part<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
@@ -7599,7 +7660,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"exact_value": schema.StringAttribute{
 																			Description:         "exact value Exact domain name.",
-																			MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`",
+																			MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -7613,7 +7674,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"regex_value": schema.StringAttribute{
 																			Description:         "regex values of Domains Regular Expression value for the domain name",
-																			MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`",
+																			MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -7623,7 +7684,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"suffix_value": schema.StringAttribute{
 																			Description:         "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'",
-																			MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`",
+																			MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -7641,20 +7702,23 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 														},
 														"enable_disable_choice": schema.SingleNestedAttribute{
 															Description:         "Enable/Disable Interception Enable or disable interception for the domain",
-															MarkdownDescription: "Enable/Disable Interception Enable or disable interception for the domain",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
+															MarkdownDescription: "Enable/Disable Interception Enable or disable interception for the domain<br>Exactly one of `disable_interception` or `enable_interception` must be specified when `enable_disable_choice` is configured.",
+															Required:            false,
+															Optional:            true,
+															Computed:            true,
 															Validators: []validator.Object{
-																exactlyoneofvalidator.RequiredExactlyOneOf(
+																exactlyoneofvalidator.ExactlyOneOf(
 																	"disable_interception",
 																	"enable_interception",
 																),
 															},
+															PlanModifiers: []planmodifier.Object{
+																objectplanmodifier.UseNonNullStateForUnknown(),
+															},
 															Attributes: map[string]schema.Attribute{
 																"disable_interception": schema.BoolAttribute{
 																	Description:         "Disable Interception Disable Interception",
-																	MarkdownDescription: "Disable Interception Disable Interception",
+																	MarkdownDescription: "Disable Interception Disable Interception<br>Conflicts with `enable_interception`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -7664,7 +7728,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"enable_interception": schema.BoolAttribute{
 																	Description:         "Enable Interception Enable Interception",
-																	MarkdownDescription: "Enable Interception Enable Interception",
+																	MarkdownDescription: "Enable Interception Enable Interception<br>Conflicts with `disable_interception`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -7683,7 +7747,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 							},
 							"signing_cert_choice": schema.SingleNestedAttribute{
 								Description:         "Signing Certificate Certificate used to generate intermediate certificate for interception",
-								MarkdownDescription: "Signing Certificate Certificate used to generate intermediate certificate for interception",
+								MarkdownDescription: "Signing Certificate Certificate used to generate intermediate certificate for interception<br>Exactly one of `custom_certificate` or `volterra_certificate` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -7696,7 +7760,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 								Attributes: map[string]schema.Attribute{
 									"custom_certificate": schema.SingleNestedAttribute{
 										Description:         "Custom Signing Certificate Certificates for generating intermediate certificate for TLS interception.",
-										MarkdownDescription: "Custom Signing Certificate Certificates for generating intermediate certificate for TLS interception.",
+										MarkdownDescription: "Custom Signing Certificate Certificates for generating intermediate certificate for TLS interception.<br>Conflicts with `volterra_certificate`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -7725,7 +7789,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 											},
 											"ocsp_stapling_choice": schema.SingleNestedAttribute{
 												Description:         "OCSP Response choice OCSP Stapling choice",
-												MarkdownDescription: "OCSP Response choice OCSP Stapling choice",
+												MarkdownDescription: "OCSP Response choice OCSP Stapling choice<br>Exactly one of `custom_hash_algorithms`, `disable_ocsp_stapling`, or `use_system_defaults` must be specified when `ocsp_stapling_choice` is configured.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -7739,7 +7803,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 												Attributes: map[string]schema.Attribute{
 													"custom_hash_algorithms": schema.SingleNestedAttribute{
 														Description:         "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.",
-														MarkdownDescription: "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.",
+														MarkdownDescription: "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.<br>Conflicts with `disable_ocsp_stapling` and `use_system_defaults`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -7761,7 +7825,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 													},
 													"disable_ocsp_stapling": schema.BoolAttribute{
 														Description:         "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.",
-														MarkdownDescription: "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.",
+														MarkdownDescription: "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.<br>Conflicts with `custom_hash_algorithms` and `use_system_defaults`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -7771,7 +7835,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 													},
 													"use_system_defaults": schema.BoolAttribute{
 														Description:         "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.",
-														MarkdownDescription: "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.",
+														MarkdownDescription: "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.<br>Conflicts with `custom_hash_algorithms` and `disable_ocsp_stapling`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -7790,7 +7854,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 												Attributes: map[string]schema.Attribute{
 													"secret_info_choice": schema.SingleNestedAttribute{
 														Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-														MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+														MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
@@ -7804,7 +7868,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 														Attributes: map[string]schema.Attribute{
 															"blindfold_secret_info": schema.SingleNestedAttribute{
 																Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -7844,7 +7908,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 															},
 															"clear_secret_info": schema.SingleNestedAttribute{
 																Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -7879,7 +7943,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 															},
 															"none": schema.BoolAttribute{
 																Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -7895,7 +7959,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 									},
 									"volterra_certificate": schema.BoolAttribute{
 										Description:         "F5XC Signing Certificate F5XC certificates for generating intermediate certificate for TLS interception.",
-										MarkdownDescription: "F5XC Signing Certificate F5XC certificates for generating intermediate certificate for TLS interception.",
+										MarkdownDescription: "F5XC Signing Certificate F5XC certificates for generating intermediate certificate for TLS interception.<br>Conflicts with `custom_certificate`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -7907,20 +7971,23 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 							},
 							"trusted_ca_choice": schema.SingleNestedAttribute{
 								Description:         "Root CA Certificate Select Root CA Certificate for upstream connection",
-								MarkdownDescription: "Root CA Certificate Select Root CA Certificate for upstream connection",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Root CA Certificate Select Root CA Certificate for upstream connection<br>Exactly one of `trusted_ca_url` or `volterra_trusted_ca` must be specified when `trusted_ca_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"trusted_ca_url",
 										"volterra_trusted_ca",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"trusted_ca_url": schema.StringAttribute{
 										Description:         "Custom Root CA Certificate Custom Root CA Certificate for validating upstream server certificate",
-										MarkdownDescription: "Custom Root CA Certificate Custom Root CA Certificate for validating upstream server certificate",
+										MarkdownDescription: "Custom Root CA Certificate Custom Root CA Certificate for validating upstream server certificate<br>Conflicts with `volterra_trusted_ca`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -7934,7 +8001,7 @@ func (r *ResourceF5XCProxy) Schema(ctx context.Context, request resource.SchemaR
 									},
 									"volterra_trusted_ca": schema.BoolAttribute{
 										Description:         "F5XC List F5XC Root CA Certificate for validating upstream server certificate",
-										MarkdownDescription: "F5XC List F5XC Root CA Certificate for validating upstream server certificate",
+										MarkdownDescription: "F5XC List F5XC Root CA Certificate for validating upstream server certificate<br>Conflicts with `trusted_ca_url`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -8120,7 +8187,7 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 		spec.ConnectionTimeout = uint32(data.ConnectionTimeout.ValueInt64())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> NetworkChoice
+	// resource modelToSpecRoot OneOfField --> NetworkChoice
 	if !data.NetworkChoice.IsNull() && !data.NetworkChoice.IsUnknown() {
 		networkChoiceModel := ProxyNetChoice{}
 		response.Diagnostics.Append(data.NetworkChoice.As(ctx, &networkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8142,6 +8209,10 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 			spec.NetworkChoice = siteLocalNetworkSpecBool
 		}
 
+	} else {
+		spec.NetworkChoice = &ves_io_schema_views_proxy.CreateSpecType_SiteLocalNetwork{
+			SiteLocalNetwork: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredOneOfField --> ProxyChoice
@@ -8161,9 +8232,12 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 			}
 			dynamicProxyOneOfSpec := &ves_io_schema_views_proxy.CreateSpecType_DynamicProxy{}
 			dynamicProxyOneOfSpec.DynamicProxy = &ves_io_schema_views_proxy.DynamicProxyType{}
+			dynamicProxyOneOfSpec.DynamicProxy.DnsChoice = &ves_io_schema_views_proxy.DynamicProxyType_EnableDnsMasquerade{
+				EnableDnsMasquerade: &ves_io_schema.Empty{},
+			}
 			spec.ProxyChoice = dynamicProxyOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> DnsChoice
+			// resource modelToSpecNested OneOfField --> DnsChoice
 			if !proxyDynamicProxyModel.DnsChoice.IsNull() && !proxyDynamicProxyModel.DnsChoice.IsUnknown() {
 				dynamicProxyDnsChoiceModel := ProxyDnsChoice{}
 				response.Diagnostics.Append(proxyDynamicProxyModel.DnsChoice.As(ctx, &dynamicProxyDnsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8231,6 +8305,12 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 						}
 						moreOptionSpec.StrictSniHostHeaderCheckChoice = &ves_io_schema_views_http_loadbalancer.AdvancedOptionsType_EnableStrictSniHostHeaderCheck{
 							EnableStrictSniHostHeaderCheck: &ves_io_schema.Empty{},
+						}
+						moreOptionSpec.Http10Choice = &ves_io_schema_views_http_loadbalancer.AdvancedOptionsType_EnableHttp10{
+							EnableHttp10: &ves_io_schema.Empty{},
+						}
+						moreOptionSpec.MaxRequestsPerConnectionChoice = &ves_io_schema_views_http_loadbalancer.AdvancedOptionsType_NoRequestLimitPerConnection{
+							NoRequestLimitPerConnection: &ves_io_schema.Empty{},
 						}
 						httpProxyOneOfSpec.HttpProxy.MoreOption = moreOptionSpec
 
@@ -8320,7 +8400,7 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 							moreOptionSpec.DisableDefaultErrorPages = bool(false)
 						}
 
-						// resource modelToSpecNested RequiredOneOfField --> Http10Choice
+						// resource modelToSpecNested OneOfField --> Http10Choice
 						if !moreOptionModel.Http10Choice.IsNull() && !moreOptionModel.Http10Choice.IsUnknown() {
 							moreOptionHttp10ChoiceModel := ProxyHttp10Choice{}
 							response.Diagnostics.Append(moreOptionModel.Http10Choice.As(ctx, &moreOptionHttp10ChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8358,7 +8438,7 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 							moreOptionSpec.MaxRequestHeaderSize = uint32(60)
 						}
 
-						// resource modelToSpecNested RequiredOneOfField --> MaxRequestsPerConnectionChoice
+						// resource modelToSpecNested OneOfField --> MaxRequestsPerConnectionChoice
 						if !moreOptionModel.MaxRequestsPerConnectionChoice.IsNull() && !moreOptionModel.MaxRequestsPerConnectionChoice.IsUnknown() {
 							moreOptionMaxRequestsPerConnectionChoiceModel := ProxyMaxRequestsPerConnChoice{}
 							response.Diagnostics.Append(moreOptionModel.MaxRequestsPerConnectionChoice.As(ctx, &moreOptionMaxRequestsPerConnectionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -9209,6 +9289,12 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 						moreOptionSpec.StrictSniHostHeaderCheckChoice = &ves_io_schema_views_http_loadbalancer.AdvancedOptionsType_EnableStrictSniHostHeaderCheck{
 							EnableStrictSniHostHeaderCheck: &ves_io_schema.Empty{},
 						}
+						moreOptionSpec.Http10Choice = &ves_io_schema_views_http_loadbalancer.AdvancedOptionsType_EnableHttp10{
+							EnableHttp10: &ves_io_schema.Empty{},
+						}
+						moreOptionSpec.MaxRequestsPerConnectionChoice = &ves_io_schema_views_http_loadbalancer.AdvancedOptionsType_NoRequestLimitPerConnection{
+							NoRequestLimitPerConnection: &ves_io_schema.Empty{},
+						}
 						httpsProxyOneOfSpec.HttpsProxy.MoreOption = moreOptionSpec
 
 						// resource modelToSpecNested PointerField --> BufferPolicy
@@ -9297,7 +9383,7 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 							moreOptionSpec.DisableDefaultErrorPages = bool(false)
 						}
 
-						// resource modelToSpecNested RequiredOneOfField --> Http10Choice
+						// resource modelToSpecNested OneOfField --> Http10Choice
 						if !moreOptionModel.Http10Choice.IsNull() && !moreOptionModel.Http10Choice.IsUnknown() {
 							moreOptionHttp10ChoiceModel := ProxyHttp10Choice{}
 							response.Diagnostics.Append(moreOptionModel.Http10Choice.As(ctx, &moreOptionHttp10ChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -9335,7 +9421,7 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 							moreOptionSpec.MaxRequestHeaderSize = uint32(60)
 						}
 
-						// resource modelToSpecNested RequiredOneOfField --> MaxRequestsPerConnectionChoice
+						// resource modelToSpecNested OneOfField --> MaxRequestsPerConnectionChoice
 						if !moreOptionModel.MaxRequestsPerConnectionChoice.IsNull() && !moreOptionModel.MaxRequestsPerConnectionChoice.IsUnknown() {
 							moreOptionMaxRequestsPerConnectionChoiceModel := ProxyMaxRequestsPerConnChoice{}
 							response.Diagnostics.Append(moreOptionModel.MaxRequestsPerConnectionChoice.As(ctx, &moreOptionMaxRequestsPerConnectionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -10167,9 +10253,12 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 						}
 
 						tlsParamsSpec := &ves_io_schema_views.DownstreamTlsParamsType{}
+						tlsParamsSpec.MtlsChoice = &ves_io_schema_views.DownstreamTlsParamsType_NoMtls{
+							NoMtls: &ves_io_schema.Empty{},
+						}
 						httpsProxyOneOfSpec.HttpsProxy.TlsParams = tlsParamsSpec
 
-						// resource modelToSpecNested RequiredOneOfField --> MtlsChoice
+						// resource modelToSpecNested OneOfField --> MtlsChoice
 						if !tlsParamsModel.MtlsChoice.IsNull() && !tlsParamsModel.MtlsChoice.IsUnknown() {
 							tlsParamsMtlsChoiceModel := ProxyMtlsChoice{}
 							response.Diagnostics.Append(tlsParamsModel.MtlsChoice.As(ctx, &tlsParamsMtlsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -10482,9 +10571,12 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 							}
 
 							tlsConfigSpec := &ves_io_schema_views.TlsConfig{}
+							tlsConfigSpec.Choice = &ves_io_schema_views.TlsConfig_DefaultSecurity{
+								DefaultSecurity: &ves_io_schema.Empty{},
+							}
 							tlsParamsSpec.TlsConfig = tlsConfigSpec
 
-							// resource modelToSpecNested RequiredOneOfField --> Choice
+							// resource modelToSpecNested OneOfField --> Choice
 							if !tlsConfigModel.Choice.IsNull() && !tlsConfigModel.Choice.IsUnknown() {
 								tlsConfigChoiceModel := ProxyChoice{}
 								response.Diagnostics.Append(tlsConfigModel.Choice.As(ctx, &tlsConfigChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -10626,9 +10718,12 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 			}
 			httpProxyOneOfSpec := &ves_io_schema_views_proxy.CreateSpecType_HttpProxy{}
 			httpProxyOneOfSpec.HttpProxy = &ves_io_schema_views_proxy.HttpConnectProxyType{}
+			httpProxyOneOfSpec.HttpProxy.HttpHttpsChoice = &ves_io_schema_views_proxy.HttpConnectProxyType_EnableHttp{
+				EnableHttp: &ves_io_schema.Empty{},
+			}
 			spec.ProxyChoice = httpProxyOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> HttpHttpsChoice
+			// resource modelToSpecNested OneOfField --> HttpHttpsChoice
 			if !proxyGstHttpProxyModel.HttpHttpsChoice.IsNull() && !proxyGstHttpProxyModel.HttpHttpsChoice.IsUnknown() {
 				httpProxyHttpHttpsChoiceModel := ProxyHttpHttpsChoice{}
 				response.Diagnostics.Append(proxyGstHttpProxyModel.HttpHttpsChoice.As(ctx, &httpProxyHttpHttpsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -10659,6 +10754,12 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 				}
 				moreOptionSpec.StrictSniHostHeaderCheckChoice = &ves_io_schema_views_http_loadbalancer.AdvancedOptionsType_EnableStrictSniHostHeaderCheck{
 					EnableStrictSniHostHeaderCheck: &ves_io_schema.Empty{},
+				}
+				moreOptionSpec.Http10Choice = &ves_io_schema_views_http_loadbalancer.AdvancedOptionsType_EnableHttp10{
+					EnableHttp10: &ves_io_schema.Empty{},
+				}
+				moreOptionSpec.MaxRequestsPerConnectionChoice = &ves_io_schema_views_http_loadbalancer.AdvancedOptionsType_NoRequestLimitPerConnection{
+					NoRequestLimitPerConnection: &ves_io_schema.Empty{},
 				}
 				httpProxyOneOfSpec.HttpProxy.MoreOption = moreOptionSpec
 
@@ -10748,7 +10849,7 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 					moreOptionSpec.DisableDefaultErrorPages = bool(false)
 				}
 
-				// resource modelToSpecNested RequiredOneOfField --> Http10Choice
+				// resource modelToSpecNested OneOfField --> Http10Choice
 				if !moreOptionModel.Http10Choice.IsNull() && !moreOptionModel.Http10Choice.IsUnknown() {
 					moreOptionHttp10ChoiceModel := ProxyHttp10Choice{}
 					response.Diagnostics.Append(moreOptionModel.Http10Choice.As(ctx, &moreOptionHttp10ChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -10786,7 +10887,7 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 					moreOptionSpec.MaxRequestHeaderSize = uint32(60)
 				}
 
-				// resource modelToSpecNested RequiredOneOfField --> MaxRequestsPerConnectionChoice
+				// resource modelToSpecNested OneOfField --> MaxRequestsPerConnectionChoice
 				if !moreOptionModel.MaxRequestsPerConnectionChoice.IsNull() && !moreOptionModel.MaxRequestsPerConnectionChoice.IsUnknown() {
 					moreOptionMaxRequestsPerConnectionChoiceModel := ProxyMaxRequestsPerConnChoice{}
 					response.Diagnostics.Append(moreOptionModel.MaxRequestsPerConnectionChoice.As(ctx, &moreOptionMaxRequestsPerConnectionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -11613,7 +11714,7 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> ProxyPolicyChoice
+	// resource modelToSpecRoot OneOfField --> ProxyPolicyChoice
 	if !data.ProxyPolicyChoice.IsNull() && !data.ProxyPolicyChoice.IsUnknown() {
 		proxyPolicyChoiceModel := ProxyProxyPolicyChoice{}
 		response.Diagnostics.Append(data.ProxyPolicyChoice.As(ctx, &proxyPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -11679,6 +11780,10 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 			spec.ProxyPolicyChoice = noForwardProxyPolicySpecBool
 		}
 
+	} else {
+		spec.ProxyPolicyChoice = &ves_io_schema_views_proxy.CreateSpecType_NoForwardProxyPolicy{
+			NoForwardProxyPolicy: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredOneOfField --> SiteChoice
@@ -11932,9 +12037,15 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 			}
 			tlsInterceptOneOfSpec := &ves_io_schema_views_proxy.CreateSpecType_TlsIntercept{}
 			tlsInterceptOneOfSpec.TlsIntercept = &ves_io_schema.TlsInterceptionType{}
+			tlsInterceptOneOfSpec.TlsIntercept.InterceptionPolicyChoice = &ves_io_schema.TlsInterceptionType_EnableForAllDomains{
+				EnableForAllDomains: &ves_io_schema.Empty{},
+			}
+			tlsInterceptOneOfSpec.TlsIntercept.TrustedCaChoice = &ves_io_schema.TlsInterceptionType_VolterraTrustedCa{
+				VolterraTrustedCa: &ves_io_schema.Empty{},
+			}
 			spec.TlsInterceptionChoice = tlsInterceptOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> InterceptionPolicyChoice
+			// resource modelToSpecNested OneOfField --> InterceptionPolicyChoice
 			if !proxyTlsInterceptModel.InterceptionPolicyChoice.IsNull() && !proxyTlsInterceptModel.InterceptionPolicyChoice.IsUnknown() {
 				tlsInterceptInterceptionPolicyChoiceModel := ProxyInterceptionPolicyChoice{}
 				response.Diagnostics.Append(proxyTlsInterceptModel.InterceptionPolicyChoice.As(ctx, &tlsInterceptInterceptionPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -11977,6 +12088,9 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 						for i, interceptionRulesElement := range interceptionRulesElements {
 							// Initialize the spec struct for the current element
 							policyOneOfSpec.Policy.InterceptionRules[i] = &ves_io_schema.TlsInterceptionRule{}
+							policyOneOfSpec.Policy.InterceptionRules[i].EnableDisableChoice = &ves_io_schema.TlsInterceptionRule_DisableInterception{
+								DisableInterception: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
@@ -12024,7 +12138,7 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 
 							}
 
-							// resource modelToSpecNested RequiredOneOfField --> EnableDisableChoice
+							// resource modelToSpecNested OneOfField --> EnableDisableChoice
 							if !interceptionRulesElement.EnableDisableChoice.IsNull() && !interceptionRulesElement.EnableDisableChoice.IsUnknown() {
 								interceptionRulesEnableDisableChoiceModel := ProxyEnableDisableChoice{}
 								response.Diagnostics.Append(interceptionRulesElement.EnableDisableChoice.As(ctx, &interceptionRulesEnableDisableChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -12238,7 +12352,7 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> TrustedCaChoice
+			// resource modelToSpecNested OneOfField --> TrustedCaChoice
 			if !proxyTlsInterceptModel.TrustedCaChoice.IsNull() && !proxyTlsInterceptModel.TrustedCaChoice.IsUnknown() {
 				tlsInterceptTrustedCaChoiceModel := ProxyTlsInterceptionTypeTrustedCaChoice{}
 				response.Diagnostics.Append(proxyTlsInterceptModel.TrustedCaChoice.As(ctx, &tlsInterceptTrustedCaChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -12417,7 +12531,7 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 		data.ConnectionTimeout = types.Int64Null()
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> NetworkChoice
+	// resource SpecToModelRoot OneOfField --> NetworkChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -12465,8 +12579,6 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.NetworkChoice = types.ObjectNull(ProxyNetworkChoiceModelAttributeMap)
 	}
 
@@ -12493,8 +12605,7 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 			if isDynamicProxy && dynamicProxyOptionsWrapper != nil && dynamicProxyOptionsWrapper.DynamicProxy != nil {
 				dynamicProxyElement := dynamicProxyOptionsWrapper.DynamicProxy
 
-				// resource specToModelNested RequiredOneOfField --> DnsChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> DnsChoice
 				if dynamicProxyElement.GetDnsChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					dynamicProxydnsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -12685,8 +12796,7 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 								// resource specToModelNested BoolField --> DisableDefaultErrorPages
 								proxyAdvancedOptionsTypeModel.DisableDefaultErrorPages = types.BoolValue(bool(moreOptionElement.GetDisableDefaultErrorPages()))
 
-								// resource specToModelNested RequiredOneOfField --> Http10Choice
-								// GlobalSpecType
+								// resource specToModelNested OneOfField --> Http10Choice
 								if moreOptionElement.GetHttp10Choice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									moreOptionhttp10ChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -12739,8 +12849,7 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 								// resource specToModelNested UintField --> MaxRequestHeaderSize
 								proxyAdvancedOptionsTypeModel.MaxRequestHeaderSize = types.Int64Value(int64(moreOptionElement.GetMaxRequestHeaderSize()))
 
-								// resource specToModelNested RequiredOneOfField --> MaxRequestsPerConnectionChoice
-								// GlobalSpecType
+								// resource specToModelNested OneOfField --> MaxRequestsPerConnectionChoice
 								if moreOptionElement.GetMaxRequestsPerConnectionChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									moreOptionmaxRequestsPerConnectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -14282,8 +14391,7 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 								// resource specToModelNested BoolField --> DisableDefaultErrorPages
 								proxyAdvancedOptionsTypeModel.DisableDefaultErrorPages = types.BoolValue(bool(moreOptionElement.GetDisableDefaultErrorPages()))
 
-								// resource specToModelNested RequiredOneOfField --> Http10Choice
-								// GlobalSpecType
+								// resource specToModelNested OneOfField --> Http10Choice
 								if moreOptionElement.GetHttp10Choice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									moreOptionhttp10ChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -14336,8 +14444,7 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 								// resource specToModelNested UintField --> MaxRequestHeaderSize
 								proxyAdvancedOptionsTypeModel.MaxRequestHeaderSize = types.Int64Value(int64(moreOptionElement.GetMaxRequestHeaderSize()))
 
-								// resource specToModelNested RequiredOneOfField --> MaxRequestsPerConnectionChoice
-								// GlobalSpecType
+								// resource specToModelNested OneOfField --> MaxRequestsPerConnectionChoice
 								if moreOptionElement.GetMaxRequestsPerConnectionChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									moreOptionmaxRequestsPerConnectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -15757,8 +15864,7 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 
 								// Recursively populate the nested struct
 
-								// resource specToModelNested RequiredOneOfField --> MtlsChoice
-								// GlobalSpecType
+								// resource specToModelNested OneOfField --> MtlsChoice
 								if tlsParamsElement.GetMtlsChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									tlsParamsmtlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -16275,8 +16381,7 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 
 									// Recursively populate the nested struct
 
-									// resource specToModelNested RequiredOneOfField --> Choice
-									// GlobalSpecType
+									// resource specToModelNested OneOfField --> Choice
 									if tlsConfigElement.GetChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -16510,8 +16615,7 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 			if isHttpProxy && httpProxyOptionsWrapper != nil && httpProxyOptionsWrapper.HttpProxy != nil {
 				httpProxyElement := httpProxyOptionsWrapper.HttpProxy
 
-				// resource specToModelNested RequiredOneOfField --> HttpHttpsChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> HttpHttpsChoice
 				if httpProxyElement.GetHttpHttpsChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					httpProxyhttpHttpsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -16658,8 +16762,7 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 					// resource specToModelNested BoolField --> DisableDefaultErrorPages
 					proxyAdvancedOptionsTypeModel.DisableDefaultErrorPages = types.BoolValue(bool(moreOptionElement.GetDisableDefaultErrorPages()))
 
-					// resource specToModelNested RequiredOneOfField --> Http10Choice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> Http10Choice
 					if moreOptionElement.GetHttp10Choice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						moreOptionhttp10ChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -16712,8 +16815,7 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 					// resource specToModelNested UintField --> MaxRequestHeaderSize
 					proxyAdvancedOptionsTypeModel.MaxRequestHeaderSize = types.Int64Value(int64(moreOptionElement.GetMaxRequestHeaderSize()))
 
-					// resource specToModelNested RequiredOneOfField --> MaxRequestsPerConnectionChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> MaxRequestsPerConnectionChoice
 					if moreOptionElement.GetMaxRequestsPerConnectionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						moreOptionmaxRequestsPerConnectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -18158,7 +18260,7 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 		data.ProxyChoice = types.ObjectNull(ProxyProxyChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> ProxyPolicyChoice
+	// resource SpecToModelRoot OneOfField --> ProxyPolicyChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -18268,8 +18370,6 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.ProxyPolicyChoice = types.ObjectNull(ProxyProxyPolicyChoiceModelAttributeMap)
 	}
 
@@ -18664,8 +18764,7 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 			if isTlsIntercept && tlsInterceptOptionsWrapper != nil && tlsInterceptOptionsWrapper.TlsIntercept != nil {
 				tlsInterceptElement := tlsInterceptOptionsWrapper.TlsIntercept
 
-				// resource specToModelNested RequiredOneOfField --> InterceptionPolicyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> InterceptionPolicyChoice
 				if tlsInterceptElement.GetInterceptionPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					tlsInterceptinterceptionPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -18788,8 +18887,7 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 										proxyTlsInterceptionRuleModel.DomainMatch = types.ObjectNull(ProxyTlsInterceptionChoiceTlsInterceptInterceptionPolicyChoicePolicyInterceptionRulesDomainMatchModelAttributeMap)
 									}
 
-									// resource specToModelNested RequiredOneOfField --> EnableDisableChoice
-									// GlobalSpecType
+									// resource specToModelNested OneOfField --> EnableDisableChoice
 									if interceptionRulesElement.GetEnableDisableChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										interceptionRulesenableDisableChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -19191,8 +19289,7 @@ func (r *ResourceF5XCProxy) Create(ctx context.Context, request resource.CreateR
 					tlsInterceptAttributeMap["signing_cert_choice"] = types.ObjectNull(ProxyTlsInterceptionChoiceTlsInterceptSigningCertChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> TrustedCaChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> TrustedCaChoice
 				if tlsInterceptElement.GetTrustedCaChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					tlsIntercepttrustedCaChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -19318,11 +19415,7 @@ func (r *ResourceF5XCProxy) Read(ctx context.Context, request resource.ReadReque
 	priorProxyChoice := data.ProxyChoice
 	priorTlsInterceptionChoice := data.TlsInterceptionChoice
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_proxy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_proxy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "proxy", err),
@@ -19451,7 +19544,7 @@ func (r *ResourceF5XCProxy) Read(ctx context.Context, request resource.ReadReque
 		data.ConnectionTimeout = types.Int64Null()
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> NetworkChoice
+	// resource SpecToModelRoot OneOfField --> NetworkChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -19499,8 +19592,6 @@ func (r *ResourceF5XCProxy) Read(ctx context.Context, request resource.ReadReque
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.NetworkChoice.IsNull() || data.NetworkChoice.IsUnknown() || ((data.NetworkChoice.Attributes()["site_local_inside_network"].IsNull() || data.NetworkChoice.Attributes()["site_local_inside_network"].IsUnknown()) && (data.NetworkChoice.Attributes()["site_local_network"].IsNull() || data.NetworkChoice.Attributes()["site_local_network"].IsUnknown())) {
 			data.NetworkChoice = types.ObjectValueMust(ProxyNetworkChoiceModelAttributeMap, map[string]attr.Value{
@@ -19533,8 +19624,7 @@ func (r *ResourceF5XCProxy) Read(ctx context.Context, request resource.ReadReque
 			if isDynamicProxy && dynamicProxyOptionsWrapper != nil && dynamicProxyOptionsWrapper.DynamicProxy != nil {
 				dynamicProxyElement := dynamicProxyOptionsWrapper.DynamicProxy
 
-				// resource specToModelNested RequiredOneOfField --> DnsChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> DnsChoice
 				if dynamicProxyElement.GetDnsChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					dynamicProxydnsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -19728,8 +19818,7 @@ func (r *ResourceF5XCProxy) Read(ctx context.Context, request resource.ReadReque
 								// resource specToModelNested BoolField --> DisableDefaultErrorPages
 								proxyAdvancedOptionsTypeModel.DisableDefaultErrorPages = types.BoolValue(bool(moreOptionElement.GetDisableDefaultErrorPages()))
 
-								// resource specToModelNested RequiredOneOfField --> Http10Choice
-								// <no value>
+								// resource specToModelNested OneOfField --> Http10Choice
 								if moreOptionElement.GetHttp10Choice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									moreOptionhttp10ChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -19785,8 +19874,7 @@ func (r *ResourceF5XCProxy) Read(ctx context.Context, request resource.ReadReque
 								// resource specToModelNested UintField --> MaxRequestHeaderSize
 								proxyAdvancedOptionsTypeModel.MaxRequestHeaderSize = types.Int64Value(int64(moreOptionElement.GetMaxRequestHeaderSize()))
 
-								// resource specToModelNested RequiredOneOfField --> MaxRequestsPerConnectionChoice
-								// <no value>
+								// resource specToModelNested OneOfField --> MaxRequestsPerConnectionChoice
 								if moreOptionElement.GetMaxRequestsPerConnectionChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									moreOptionmaxRequestsPerConnectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -21387,8 +21475,7 @@ func (r *ResourceF5XCProxy) Read(ctx context.Context, request resource.ReadReque
 								// resource specToModelNested BoolField --> DisableDefaultErrorPages
 								proxyAdvancedOptionsTypeModel.DisableDefaultErrorPages = types.BoolValue(bool(moreOptionElement.GetDisableDefaultErrorPages()))
 
-								// resource specToModelNested RequiredOneOfField --> Http10Choice
-								// <no value>
+								// resource specToModelNested OneOfField --> Http10Choice
 								if moreOptionElement.GetHttp10Choice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									moreOptionhttp10ChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -21444,8 +21531,7 @@ func (r *ResourceF5XCProxy) Read(ctx context.Context, request resource.ReadReque
 								// resource specToModelNested UintField --> MaxRequestHeaderSize
 								proxyAdvancedOptionsTypeModel.MaxRequestHeaderSize = types.Int64Value(int64(moreOptionElement.GetMaxRequestHeaderSize()))
 
-								// resource specToModelNested RequiredOneOfField --> MaxRequestsPerConnectionChoice
-								// <no value>
+								// resource specToModelNested OneOfField --> MaxRequestsPerConnectionChoice
 								if moreOptionElement.GetMaxRequestsPerConnectionChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									moreOptionmaxRequestsPerConnectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -22924,8 +23010,7 @@ func (r *ResourceF5XCProxy) Read(ctx context.Context, request resource.ReadReque
 
 								// Recursively populate the nested struct
 
-								// resource specToModelNested RequiredOneOfField --> MtlsChoice
-								// <no value>
+								// resource specToModelNested OneOfField --> MtlsChoice
 								if tlsParamsElement.GetMtlsChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									tlsParamsmtlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -23457,8 +23542,7 @@ func (r *ResourceF5XCProxy) Read(ctx context.Context, request resource.ReadReque
 
 									// Recursively populate the nested struct
 
-									// resource specToModelNested RequiredOneOfField --> Choice
-									// <no value>
+									// resource specToModelNested OneOfField --> Choice
 									if tlsConfigElement.GetChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -23703,8 +23787,7 @@ func (r *ResourceF5XCProxy) Read(ctx context.Context, request resource.ReadReque
 			if isHttpProxy && httpProxyOptionsWrapper != nil && httpProxyOptionsWrapper.HttpProxy != nil {
 				httpProxyElement := httpProxyOptionsWrapper.HttpProxy
 
-				// resource specToModelNested RequiredOneOfField --> HttpHttpsChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> HttpHttpsChoice
 				if httpProxyElement.GetHttpHttpsChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					httpProxyhttpHttpsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -23853,8 +23936,7 @@ func (r *ResourceF5XCProxy) Read(ctx context.Context, request resource.ReadReque
 					// resource specToModelNested BoolField --> DisableDefaultErrorPages
 					proxyAdvancedOptionsTypeModel.DisableDefaultErrorPages = types.BoolValue(bool(moreOptionElement.GetDisableDefaultErrorPages()))
 
-					// resource specToModelNested RequiredOneOfField --> Http10Choice
-					// <no value>
+					// resource specToModelNested OneOfField --> Http10Choice
 					if moreOptionElement.GetHttp10Choice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						moreOptionhttp10ChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -23910,8 +23992,7 @@ func (r *ResourceF5XCProxy) Read(ctx context.Context, request resource.ReadReque
 					// resource specToModelNested UintField --> MaxRequestHeaderSize
 					proxyAdvancedOptionsTypeModel.MaxRequestHeaderSize = types.Int64Value(int64(moreOptionElement.GetMaxRequestHeaderSize()))
 
-					// resource specToModelNested RequiredOneOfField --> MaxRequestsPerConnectionChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> MaxRequestsPerConnectionChoice
 					if moreOptionElement.GetMaxRequestsPerConnectionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						moreOptionmaxRequestsPerConnectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -25426,7 +25507,7 @@ func (r *ResourceF5XCProxy) Read(ctx context.Context, request resource.ReadReque
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> ProxyPolicyChoice
+	// resource SpecToModelRoot OneOfField --> ProxyPolicyChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -25536,8 +25617,6 @@ func (r *ResourceF5XCProxy) Read(ctx context.Context, request resource.ReadReque
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.ProxyPolicyChoice.IsNull() || data.ProxyPolicyChoice.IsUnknown() || ((data.ProxyPolicyChoice.Attributes()["active_forward_proxy_policies"].(types.Object).IsNull() || data.ProxyPolicyChoice.Attributes()["active_forward_proxy_policies"].(types.Object).IsUnknown() || (data.ProxyPolicyChoice.Attributes()["active_forward_proxy_policies"].(types.Object).Attributes()["forward_proxy_policies"].IsNull() || data.ProxyPolicyChoice.Attributes()["active_forward_proxy_policies"].(types.Object).Attributes()["forward_proxy_policies"].IsUnknown())) && (data.ProxyPolicyChoice.Attributes()["no_forward_proxy_policy"].IsNull() || data.ProxyPolicyChoice.Attributes()["no_forward_proxy_policy"].IsUnknown())) {
 			data.ProxyPolicyChoice = types.ObjectValueMust(ProxyProxyPolicyChoiceModelAttributeMap, map[string]attr.Value{
@@ -25938,8 +26017,7 @@ func (r *ResourceF5XCProxy) Read(ctx context.Context, request resource.ReadReque
 			if isTlsIntercept && tlsInterceptOptionsWrapper != nil && tlsInterceptOptionsWrapper.TlsIntercept != nil {
 				tlsInterceptElement := tlsInterceptOptionsWrapper.TlsIntercept
 
-				// resource specToModelNested RequiredOneOfField --> InterceptionPolicyChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> InterceptionPolicyChoice
 				if tlsInterceptElement.GetInterceptionPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					tlsInterceptinterceptionPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -26062,8 +26140,7 @@ func (r *ResourceF5XCProxy) Read(ctx context.Context, request resource.ReadReque
 										proxyTlsInterceptionRuleModel.DomainMatch = types.ObjectNull(ProxyTlsInterceptionChoiceTlsInterceptInterceptionPolicyChoicePolicyInterceptionRulesDomainMatchModelAttributeMap)
 									}
 
-									// resource specToModelNested RequiredOneOfField --> EnableDisableChoice
-									// <no value>
+									// resource specToModelNested OneOfField --> EnableDisableChoice
 									if interceptionRulesElement.GetEnableDisableChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										interceptionRulesenableDisableChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -26483,8 +26560,7 @@ func (r *ResourceF5XCProxy) Read(ctx context.Context, request resource.ReadReque
 					tlsInterceptAttributeMap["signing_cert_choice"] = types.ObjectNull(ProxyTlsInterceptionChoiceTlsInterceptSigningCertChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> TrustedCaChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> TrustedCaChoice
 				if tlsInterceptElement.GetTrustedCaChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					tlsIntercepttrustedCaChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -26715,7 +26791,7 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 		spec.ConnectionTimeout = uint32(data.ConnectionTimeout.ValueInt64())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> NetworkChoice
+	// resource modelToSpecRoot OneOfField --> NetworkChoice
 	if !data.NetworkChoice.IsNull() && !data.NetworkChoice.IsUnknown() {
 		networkChoiceModel := ProxyNetChoice{}
 		response.Diagnostics.Append(data.NetworkChoice.As(ctx, &networkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -26737,6 +26813,10 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 			spec.NetworkChoice = siteLocalNetworkSpecBool
 		}
 
+	} else {
+		spec.NetworkChoice = &ves_io_schema_views_proxy.ReplaceSpecType_SiteLocalNetwork{
+			SiteLocalNetwork: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredOneOfField --> ProxyChoice
@@ -26756,9 +26836,12 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 			}
 			dynamicProxyOneOfSpec := &ves_io_schema_views_proxy.ReplaceSpecType_DynamicProxy{}
 			dynamicProxyOneOfSpec.DynamicProxy = &ves_io_schema_views_proxy.DynamicProxyType{}
+			dynamicProxyOneOfSpec.DynamicProxy.DnsChoice = &ves_io_schema_views_proxy.DynamicProxyType_EnableDnsMasquerade{
+				EnableDnsMasquerade: &ves_io_schema.Empty{},
+			}
 			spec.ProxyChoice = dynamicProxyOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> DnsChoice
+			// resource modelToSpecNested OneOfField --> DnsChoice
 			if !proxyDynamicProxyModel.DnsChoice.IsNull() && !proxyDynamicProxyModel.DnsChoice.IsUnknown() {
 				dynamicProxyDnsChoiceModel := ProxyDnsChoice{}
 				response.Diagnostics.Append(proxyDynamicProxyModel.DnsChoice.As(ctx, &dynamicProxyDnsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -26826,6 +26909,12 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 						}
 						moreOptionSpec.StrictSniHostHeaderCheckChoice = &ves_io_schema_views_http_loadbalancer.AdvancedOptionsType_EnableStrictSniHostHeaderCheck{
 							EnableStrictSniHostHeaderCheck: &ves_io_schema.Empty{},
+						}
+						moreOptionSpec.Http10Choice = &ves_io_schema_views_http_loadbalancer.AdvancedOptionsType_EnableHttp10{
+							EnableHttp10: &ves_io_schema.Empty{},
+						}
+						moreOptionSpec.MaxRequestsPerConnectionChoice = &ves_io_schema_views_http_loadbalancer.AdvancedOptionsType_NoRequestLimitPerConnection{
+							NoRequestLimitPerConnection: &ves_io_schema.Empty{},
 						}
 						httpProxyOneOfSpec.HttpProxy.MoreOption = moreOptionSpec
 
@@ -26915,7 +27004,7 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 							moreOptionSpec.DisableDefaultErrorPages = bool(false)
 						}
 
-						// resource modelToSpecNested RequiredOneOfField --> Http10Choice
+						// resource modelToSpecNested OneOfField --> Http10Choice
 						if !moreOptionModel.Http10Choice.IsNull() && !moreOptionModel.Http10Choice.IsUnknown() {
 							moreOptionHttp10ChoiceModel := ProxyHttp10Choice{}
 							response.Diagnostics.Append(moreOptionModel.Http10Choice.As(ctx, &moreOptionHttp10ChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -26953,7 +27042,7 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 							moreOptionSpec.MaxRequestHeaderSize = uint32(60)
 						}
 
-						// resource modelToSpecNested RequiredOneOfField --> MaxRequestsPerConnectionChoice
+						// resource modelToSpecNested OneOfField --> MaxRequestsPerConnectionChoice
 						if !moreOptionModel.MaxRequestsPerConnectionChoice.IsNull() && !moreOptionModel.MaxRequestsPerConnectionChoice.IsUnknown() {
 							moreOptionMaxRequestsPerConnectionChoiceModel := ProxyMaxRequestsPerConnChoice{}
 							response.Diagnostics.Append(moreOptionModel.MaxRequestsPerConnectionChoice.As(ctx, &moreOptionMaxRequestsPerConnectionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -27804,6 +27893,12 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 						moreOptionSpec.StrictSniHostHeaderCheckChoice = &ves_io_schema_views_http_loadbalancer.AdvancedOptionsType_EnableStrictSniHostHeaderCheck{
 							EnableStrictSniHostHeaderCheck: &ves_io_schema.Empty{},
 						}
+						moreOptionSpec.Http10Choice = &ves_io_schema_views_http_loadbalancer.AdvancedOptionsType_EnableHttp10{
+							EnableHttp10: &ves_io_schema.Empty{},
+						}
+						moreOptionSpec.MaxRequestsPerConnectionChoice = &ves_io_schema_views_http_loadbalancer.AdvancedOptionsType_NoRequestLimitPerConnection{
+							NoRequestLimitPerConnection: &ves_io_schema.Empty{},
+						}
 						httpsProxyOneOfSpec.HttpsProxy.MoreOption = moreOptionSpec
 
 						// resource modelToSpecNested PointerField --> BufferPolicy
@@ -27892,7 +27987,7 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 							moreOptionSpec.DisableDefaultErrorPages = bool(false)
 						}
 
-						// resource modelToSpecNested RequiredOneOfField --> Http10Choice
+						// resource modelToSpecNested OneOfField --> Http10Choice
 						if !moreOptionModel.Http10Choice.IsNull() && !moreOptionModel.Http10Choice.IsUnknown() {
 							moreOptionHttp10ChoiceModel := ProxyHttp10Choice{}
 							response.Diagnostics.Append(moreOptionModel.Http10Choice.As(ctx, &moreOptionHttp10ChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -27930,7 +28025,7 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 							moreOptionSpec.MaxRequestHeaderSize = uint32(60)
 						}
 
-						// resource modelToSpecNested RequiredOneOfField --> MaxRequestsPerConnectionChoice
+						// resource modelToSpecNested OneOfField --> MaxRequestsPerConnectionChoice
 						if !moreOptionModel.MaxRequestsPerConnectionChoice.IsNull() && !moreOptionModel.MaxRequestsPerConnectionChoice.IsUnknown() {
 							moreOptionMaxRequestsPerConnectionChoiceModel := ProxyMaxRequestsPerConnChoice{}
 							response.Diagnostics.Append(moreOptionModel.MaxRequestsPerConnectionChoice.As(ctx, &moreOptionMaxRequestsPerConnectionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -28762,9 +28857,12 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 						}
 
 						tlsParamsSpec := &ves_io_schema_views.DownstreamTlsParamsType{}
+						tlsParamsSpec.MtlsChoice = &ves_io_schema_views.DownstreamTlsParamsType_NoMtls{
+							NoMtls: &ves_io_schema.Empty{},
+						}
 						httpsProxyOneOfSpec.HttpsProxy.TlsParams = tlsParamsSpec
 
-						// resource modelToSpecNested RequiredOneOfField --> MtlsChoice
+						// resource modelToSpecNested OneOfField --> MtlsChoice
 						if !tlsParamsModel.MtlsChoice.IsNull() && !tlsParamsModel.MtlsChoice.IsUnknown() {
 							tlsParamsMtlsChoiceModel := ProxyMtlsChoice{}
 							response.Diagnostics.Append(tlsParamsModel.MtlsChoice.As(ctx, &tlsParamsMtlsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -29077,9 +29175,12 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 							}
 
 							tlsConfigSpec := &ves_io_schema_views.TlsConfig{}
+							tlsConfigSpec.Choice = &ves_io_schema_views.TlsConfig_DefaultSecurity{
+								DefaultSecurity: &ves_io_schema.Empty{},
+							}
 							tlsParamsSpec.TlsConfig = tlsConfigSpec
 
-							// resource modelToSpecNested RequiredOneOfField --> Choice
+							// resource modelToSpecNested OneOfField --> Choice
 							if !tlsConfigModel.Choice.IsNull() && !tlsConfigModel.Choice.IsUnknown() {
 								tlsConfigChoiceModel := ProxyChoice{}
 								response.Diagnostics.Append(tlsConfigModel.Choice.As(ctx, &tlsConfigChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -29221,9 +29322,12 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 			}
 			httpProxyOneOfSpec := &ves_io_schema_views_proxy.ReplaceSpecType_HttpProxy{}
 			httpProxyOneOfSpec.HttpProxy = &ves_io_schema_views_proxy.HttpConnectProxyType{}
+			httpProxyOneOfSpec.HttpProxy.HttpHttpsChoice = &ves_io_schema_views_proxy.HttpConnectProxyType_EnableHttp{
+				EnableHttp: &ves_io_schema.Empty{},
+			}
 			spec.ProxyChoice = httpProxyOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> HttpHttpsChoice
+			// resource modelToSpecNested OneOfField --> HttpHttpsChoice
 			if !proxyGstHttpProxyModel.HttpHttpsChoice.IsNull() && !proxyGstHttpProxyModel.HttpHttpsChoice.IsUnknown() {
 				httpProxyHttpHttpsChoiceModel := ProxyHttpHttpsChoice{}
 				response.Diagnostics.Append(proxyGstHttpProxyModel.HttpHttpsChoice.As(ctx, &httpProxyHttpHttpsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -29254,6 +29358,12 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 				}
 				moreOptionSpec.StrictSniHostHeaderCheckChoice = &ves_io_schema_views_http_loadbalancer.AdvancedOptionsType_EnableStrictSniHostHeaderCheck{
 					EnableStrictSniHostHeaderCheck: &ves_io_schema.Empty{},
+				}
+				moreOptionSpec.Http10Choice = &ves_io_schema_views_http_loadbalancer.AdvancedOptionsType_EnableHttp10{
+					EnableHttp10: &ves_io_schema.Empty{},
+				}
+				moreOptionSpec.MaxRequestsPerConnectionChoice = &ves_io_schema_views_http_loadbalancer.AdvancedOptionsType_NoRequestLimitPerConnection{
+					NoRequestLimitPerConnection: &ves_io_schema.Empty{},
 				}
 				httpProxyOneOfSpec.HttpProxy.MoreOption = moreOptionSpec
 
@@ -29343,7 +29453,7 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 					moreOptionSpec.DisableDefaultErrorPages = bool(false)
 				}
 
-				// resource modelToSpecNested RequiredOneOfField --> Http10Choice
+				// resource modelToSpecNested OneOfField --> Http10Choice
 				if !moreOptionModel.Http10Choice.IsNull() && !moreOptionModel.Http10Choice.IsUnknown() {
 					moreOptionHttp10ChoiceModel := ProxyHttp10Choice{}
 					response.Diagnostics.Append(moreOptionModel.Http10Choice.As(ctx, &moreOptionHttp10ChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -29381,7 +29491,7 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 					moreOptionSpec.MaxRequestHeaderSize = uint32(60)
 				}
 
-				// resource modelToSpecNested RequiredOneOfField --> MaxRequestsPerConnectionChoice
+				// resource modelToSpecNested OneOfField --> MaxRequestsPerConnectionChoice
 				if !moreOptionModel.MaxRequestsPerConnectionChoice.IsNull() && !moreOptionModel.MaxRequestsPerConnectionChoice.IsUnknown() {
 					moreOptionMaxRequestsPerConnectionChoiceModel := ProxyMaxRequestsPerConnChoice{}
 					response.Diagnostics.Append(moreOptionModel.MaxRequestsPerConnectionChoice.As(ctx, &moreOptionMaxRequestsPerConnectionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -30208,7 +30318,7 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> ProxyPolicyChoice
+	// resource modelToSpecRoot OneOfField --> ProxyPolicyChoice
 	if !data.ProxyPolicyChoice.IsNull() && !data.ProxyPolicyChoice.IsUnknown() {
 		proxyPolicyChoiceModel := ProxyProxyPolicyChoice{}
 		response.Diagnostics.Append(data.ProxyPolicyChoice.As(ctx, &proxyPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -30274,6 +30384,10 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 			spec.ProxyPolicyChoice = noForwardProxyPolicySpecBool
 		}
 
+	} else {
+		spec.ProxyPolicyChoice = &ves_io_schema_views_proxy.ReplaceSpecType_NoForwardProxyPolicy{
+			NoForwardProxyPolicy: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredOneOfField --> SiteChoice
@@ -30527,9 +30641,15 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 			}
 			tlsInterceptOneOfSpec := &ves_io_schema_views_proxy.ReplaceSpecType_TlsIntercept{}
 			tlsInterceptOneOfSpec.TlsIntercept = &ves_io_schema.TlsInterceptionType{}
+			tlsInterceptOneOfSpec.TlsIntercept.InterceptionPolicyChoice = &ves_io_schema.TlsInterceptionType_EnableForAllDomains{
+				EnableForAllDomains: &ves_io_schema.Empty{},
+			}
+			tlsInterceptOneOfSpec.TlsIntercept.TrustedCaChoice = &ves_io_schema.TlsInterceptionType_VolterraTrustedCa{
+				VolterraTrustedCa: &ves_io_schema.Empty{},
+			}
 			spec.TlsInterceptionChoice = tlsInterceptOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> InterceptionPolicyChoice
+			// resource modelToSpecNested OneOfField --> InterceptionPolicyChoice
 			if !proxyTlsInterceptModel.InterceptionPolicyChoice.IsNull() && !proxyTlsInterceptModel.InterceptionPolicyChoice.IsUnknown() {
 				tlsInterceptInterceptionPolicyChoiceModel := ProxyInterceptionPolicyChoice{}
 				response.Diagnostics.Append(proxyTlsInterceptModel.InterceptionPolicyChoice.As(ctx, &tlsInterceptInterceptionPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -30572,6 +30692,9 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 						for i, interceptionRulesElement := range interceptionRulesElements {
 							// Initialize the spec struct for the current element
 							policyOneOfSpec.Policy.InterceptionRules[i] = &ves_io_schema.TlsInterceptionRule{}
+							policyOneOfSpec.Policy.InterceptionRules[i].EnableDisableChoice = &ves_io_schema.TlsInterceptionRule_DisableInterception{
+								DisableInterception: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
@@ -30619,7 +30742,7 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 
 							}
 
-							// resource modelToSpecNested RequiredOneOfField --> EnableDisableChoice
+							// resource modelToSpecNested OneOfField --> EnableDisableChoice
 							if !interceptionRulesElement.EnableDisableChoice.IsNull() && !interceptionRulesElement.EnableDisableChoice.IsUnknown() {
 								interceptionRulesEnableDisableChoiceModel := ProxyEnableDisableChoice{}
 								response.Diagnostics.Append(interceptionRulesElement.EnableDisableChoice.As(ctx, &interceptionRulesEnableDisableChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -30833,7 +30956,7 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> TrustedCaChoice
+			// resource modelToSpecNested OneOfField --> TrustedCaChoice
 			if !proxyTlsInterceptModel.TrustedCaChoice.IsNull() && !proxyTlsInterceptModel.TrustedCaChoice.IsUnknown() {
 				tlsInterceptTrustedCaChoiceModel := ProxyTlsInterceptionTypeTrustedCaChoice{}
 				response.Diagnostics.Append(proxyTlsInterceptModel.TrustedCaChoice.As(ctx, &tlsInterceptTrustedCaChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -30871,12 +30994,8 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_views_proxy.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_views_proxy.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "proxy", err),
@@ -30885,7 +31004,7 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_proxy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_proxy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "proxy", err),
@@ -31013,7 +31132,7 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 		data.ConnectionTimeout = types.Int64Null()
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> NetworkChoice
+	// resource SpecToModelRoot OneOfField --> NetworkChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -31061,8 +31180,6 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.NetworkChoice = types.ObjectNull(ProxyNetworkChoiceModelAttributeMap)
 	}
 
@@ -31089,8 +31206,7 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 			if isDynamicProxy && dynamicProxyOptionsWrapper != nil && dynamicProxyOptionsWrapper.DynamicProxy != nil {
 				dynamicProxyElement := dynamicProxyOptionsWrapper.DynamicProxy
 
-				// resource specToModelNested RequiredOneOfField --> DnsChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> DnsChoice
 				if dynamicProxyElement.GetDnsChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					dynamicProxydnsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -31281,8 +31397,7 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 								// resource specToModelNested BoolField --> DisableDefaultErrorPages
 								proxyAdvancedOptionsTypeModel.DisableDefaultErrorPages = types.BoolValue(bool(moreOptionElement.GetDisableDefaultErrorPages()))
 
-								// resource specToModelNested RequiredOneOfField --> Http10Choice
-								// GlobalSpecType
+								// resource specToModelNested OneOfField --> Http10Choice
 								if moreOptionElement.GetHttp10Choice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									moreOptionhttp10ChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -31335,8 +31450,7 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 								// resource specToModelNested UintField --> MaxRequestHeaderSize
 								proxyAdvancedOptionsTypeModel.MaxRequestHeaderSize = types.Int64Value(int64(moreOptionElement.GetMaxRequestHeaderSize()))
 
-								// resource specToModelNested RequiredOneOfField --> MaxRequestsPerConnectionChoice
-								// GlobalSpecType
+								// resource specToModelNested OneOfField --> MaxRequestsPerConnectionChoice
 								if moreOptionElement.GetMaxRequestsPerConnectionChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									moreOptionmaxRequestsPerConnectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -32878,8 +32992,7 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 								// resource specToModelNested BoolField --> DisableDefaultErrorPages
 								proxyAdvancedOptionsTypeModel.DisableDefaultErrorPages = types.BoolValue(bool(moreOptionElement.GetDisableDefaultErrorPages()))
 
-								// resource specToModelNested RequiredOneOfField --> Http10Choice
-								// GlobalSpecType
+								// resource specToModelNested OneOfField --> Http10Choice
 								if moreOptionElement.GetHttp10Choice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									moreOptionhttp10ChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -32932,8 +33045,7 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 								// resource specToModelNested UintField --> MaxRequestHeaderSize
 								proxyAdvancedOptionsTypeModel.MaxRequestHeaderSize = types.Int64Value(int64(moreOptionElement.GetMaxRequestHeaderSize()))
 
-								// resource specToModelNested RequiredOneOfField --> MaxRequestsPerConnectionChoice
-								// GlobalSpecType
+								// resource specToModelNested OneOfField --> MaxRequestsPerConnectionChoice
 								if moreOptionElement.GetMaxRequestsPerConnectionChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									moreOptionmaxRequestsPerConnectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -34353,8 +34465,7 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 
 								// Recursively populate the nested struct
 
-								// resource specToModelNested RequiredOneOfField --> MtlsChoice
-								// GlobalSpecType
+								// resource specToModelNested OneOfField --> MtlsChoice
 								if tlsParamsElement.GetMtlsChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									tlsParamsmtlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -34871,8 +34982,7 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 
 									// Recursively populate the nested struct
 
-									// resource specToModelNested RequiredOneOfField --> Choice
-									// GlobalSpecType
+									// resource specToModelNested OneOfField --> Choice
 									if tlsConfigElement.GetChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -35106,8 +35216,7 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 			if isHttpProxy && httpProxyOptionsWrapper != nil && httpProxyOptionsWrapper.HttpProxy != nil {
 				httpProxyElement := httpProxyOptionsWrapper.HttpProxy
 
-				// resource specToModelNested RequiredOneOfField --> HttpHttpsChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> HttpHttpsChoice
 				if httpProxyElement.GetHttpHttpsChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					httpProxyhttpHttpsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -35254,8 +35363,7 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 					// resource specToModelNested BoolField --> DisableDefaultErrorPages
 					proxyAdvancedOptionsTypeModel.DisableDefaultErrorPages = types.BoolValue(bool(moreOptionElement.GetDisableDefaultErrorPages()))
 
-					// resource specToModelNested RequiredOneOfField --> Http10Choice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> Http10Choice
 					if moreOptionElement.GetHttp10Choice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						moreOptionhttp10ChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -35308,8 +35416,7 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 					// resource specToModelNested UintField --> MaxRequestHeaderSize
 					proxyAdvancedOptionsTypeModel.MaxRequestHeaderSize = types.Int64Value(int64(moreOptionElement.GetMaxRequestHeaderSize()))
 
-					// resource specToModelNested RequiredOneOfField --> MaxRequestsPerConnectionChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> MaxRequestsPerConnectionChoice
 					if moreOptionElement.GetMaxRequestsPerConnectionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						moreOptionmaxRequestsPerConnectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -36754,7 +36861,7 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 		data.ProxyChoice = types.ObjectNull(ProxyProxyChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> ProxyPolicyChoice
+	// resource SpecToModelRoot OneOfField --> ProxyPolicyChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -36864,8 +36971,6 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.ProxyPolicyChoice = types.ObjectNull(ProxyProxyPolicyChoiceModelAttributeMap)
 	}
 
@@ -37260,8 +37365,7 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 			if isTlsIntercept && tlsInterceptOptionsWrapper != nil && tlsInterceptOptionsWrapper.TlsIntercept != nil {
 				tlsInterceptElement := tlsInterceptOptionsWrapper.TlsIntercept
 
-				// resource specToModelNested RequiredOneOfField --> InterceptionPolicyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> InterceptionPolicyChoice
 				if tlsInterceptElement.GetInterceptionPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					tlsInterceptinterceptionPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -37384,8 +37488,7 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 										proxyTlsInterceptionRuleModel.DomainMatch = types.ObjectNull(ProxyTlsInterceptionChoiceTlsInterceptInterceptionPolicyChoicePolicyInterceptionRulesDomainMatchModelAttributeMap)
 									}
 
-									// resource specToModelNested RequiredOneOfField --> EnableDisableChoice
-									// GlobalSpecType
+									// resource specToModelNested OneOfField --> EnableDisableChoice
 									if interceptionRulesElement.GetEnableDisableChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										interceptionRulesenableDisableChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -37787,8 +37890,7 @@ func (r *ResourceF5XCProxy) Update(ctx context.Context, request resource.UpdateR
 					tlsInterceptAttributeMap["signing_cert_choice"] = types.ObjectNull(ProxyTlsInterceptionChoiceTlsInterceptSigningCertChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> TrustedCaChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> TrustedCaChoice
 				if tlsInterceptElement.GetTrustedCaChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					tlsIntercepttrustedCaChoiceChoicesAttributeMap := make(map[string]attr.Value)

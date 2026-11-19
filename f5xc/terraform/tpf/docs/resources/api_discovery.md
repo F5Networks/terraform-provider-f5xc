@@ -160,12 +160,9 @@ Optional:
 <a id="nestedatt--user_defined_api_discovery_policy"></a>
 ### Nested Schema for `user_defined_api_discovery_policy`
 
-Required:
-
-- `default_behavior_choice` (Attributes) default_behavior_choice Define the default action for endpoints that do not match any rule, choosing to either include or exclude them from the discovery process. (see [below for nested schema](#nestedatt--user_defined_api_discovery_policy--default_behavior_choice))
-
 Optional:
 
+- `default_behavior_choice` (Attributes) default_behavior_choice Define the default action for endpoints that do not match any rule, choosing to either include or exclude them from the discovery process.<br>Exactly one of `exclusive` or `inclusive` must be specified when `default_behavior_choice` is configured. (see [below for nested schema](#nestedatt--user_defined_api_discovery_policy--default_behavior_choice))
 - `discovery_rules` (Attributes List) discovery_rules Define rules to include or exclude endpoints by path, domain, or header. Rules run top to bottom; unmatched endpoints follow the default action. (see [below for nested schema](#nestedatt--user_defined_api_discovery_policy--discovery_rules))
 
 <a id="nestedatt--user_defined_api_discovery_policy--default_behavior_choice"></a>
@@ -173,23 +170,23 @@ Optional:
 
 Optional:
 
-- `exclusive` (Attributes) exclusive Any traffic that does not match the specified rules will be ignored by default. (see [below for nested schema](#nestedatt--user_defined_api_discovery_policy--default_behavior_choice--exclusive))
-- `inclusive` (Boolean) inclusive Any traffic that does not match the specified rules will be discovered by default.
+- `exclusive` (Attributes) exclusive Any traffic that does not match the specified rules will be ignored by default.<br>Conflicts with `inclusive`. (see [below for nested schema](#nestedatt--user_defined_api_discovery_policy--default_behavior_choice--exclusive))
+- `inclusive` (Boolean) inclusive Any traffic that does not match the specified rules will be discovered by default.<br>Conflicts with `exclusive`.
 
 <a id="nestedatt--user_defined_api_discovery_policy--default_behavior_choice--exclusive"></a>
 ### Nested Schema for `user_defined_api_discovery_policy.default_behavior_choice.exclusive`
 
-Required:
+Optional:
 
-- `action_choice` (Attributes) action Specifies the action to take for excluded endpoints (see [below for nested schema](#nestedatt--user_defined_api_discovery_policy--default_behavior_choice--exclusive--action_choice))
+- `action_choice` (Attributes) action Specifies the action to take for excluded endpoints<br>Exactly one of `archive` or `ignore` must be specified when `action_choice` is configured. (see [below for nested schema](#nestedatt--user_defined_api_discovery_policy--default_behavior_choice--exclusive--action_choice))
 
 <a id="nestedatt--user_defined_api_discovery_policy--default_behavior_choice--exclusive--action_choice"></a>
 ### Nested Schema for `user_defined_api_discovery_policy.default_behavior_choice.exclusive.action_choice`
 
 Optional:
 
-- `archive` (Boolean) archive Endpoints are removed from active API Discovery and stored in the Archive under Non-API Rules for reference and auditing.
-- `ignore` (Boolean) ignore Excluded endpoints are completely ignored by API Discovery and will not appear in discovery results, inventories, or insights.
+- `archive` (Boolean) archive Endpoints are removed from active API Discovery and stored in the Archive under Non-API Rules for reference and auditing.<br>Conflicts with `ignore`.
+- `ignore` (Boolean) ignore Excluded endpoints are completely ignored by API Discovery and will not appear in discovery results, inventories, or insights.<br>Conflicts with `archive`.
 
 
 
@@ -220,16 +217,16 @@ Optional:
 
 Required:
 
-- `criteria_choice` (Attributes) criteria Specifies what is used to match endpoints. (see [below for nested schema](#nestedatt--user_defined_api_discovery_policy--discovery_rules--rule_properties--criteria_choice))
-- `rule_type_choice` (Attributes) rule_type_choice Determines whether matching endpoints are included in API Discovery or excluded. (see [below for nested schema](#nestedatt--user_defined_api_discovery_policy--discovery_rules--rule_properties--rule_type_choice))
+- `criteria_choice` (Attributes) criteria Specifies what is used to match endpoints.<br>Exactly one of `http_header_criteria` or `pattern` must be specified. (see [below for nested schema](#nestedatt--user_defined_api_discovery_policy--discovery_rules--rule_properties--criteria_choice))
+- `rule_type_choice` (Attributes) rule_type_choice Determines whether matching endpoints are included in API Discovery or excluded.<br>Exactly one of `exclusion` or `inclusion` must be specified. (see [below for nested schema](#nestedatt--user_defined_api_discovery_policy--discovery_rules--rule_properties--rule_type_choice))
 
 <a id="nestedatt--user_defined_api_discovery_policy--discovery_rules--rule_properties--criteria_choice"></a>
 ### Nested Schema for `user_defined_api_discovery_policy.discovery_rules.rule_properties.criteria_choice`
 
 Optional:
 
-- `http_header_criteria` (Attributes) http_header_criteria (see [below for nested schema](#nestedatt--user_defined_api_discovery_policy--discovery_rules--rule_properties--criteria_choice--http_header_criteria))
-- `pattern` (String) pattern Patterns are matched against the request path to identify endpoints by path structure, file extension, or version prefix. Endpoints that match this pattern are affected by the rule.
+- `http_header_criteria` (Attributes) http_header_criteria<br>Conflicts with `pattern`. (see [below for nested schema](#nestedatt--user_defined_api_discovery_policy--discovery_rules--rule_properties--criteria_choice--http_header_criteria))
+- `pattern` (String) pattern Patterns are matched against the request path to identify endpoints by path structure, file extension, or version prefix. Endpoints that match this pattern are affected by the rule.<br>Conflicts with `http_header_criteria`.
 
 <a id="nestedatt--user_defined_api_discovery_policy--discovery_rules--rule_properties--criteria_choice--http_header_criteria"></a>
 ### Nested Schema for `user_defined_api_discovery_policy.discovery_rules.rule_properties.criteria_choice.http_header_criteria`
@@ -251,23 +248,23 @@ Optional:
 
 Optional:
 
-- `exclusion` (Attributes) exclusion Matching endpoints will be excluded from API discovery (see [below for nested schema](#nestedatt--user_defined_api_discovery_policy--discovery_rules--rule_properties--rule_type_choice--exclusion))
-- `inclusion` (Boolean) inclusion Matching endpoints will be included in API discovery
+- `exclusion` (Attributes) exclusion Matching endpoints will be excluded from API discovery<br>Conflicts with `inclusion`. (see [below for nested schema](#nestedatt--user_defined_api_discovery_policy--discovery_rules--rule_properties--rule_type_choice--exclusion))
+- `inclusion` (Boolean) inclusion Matching endpoints will be included in API discovery<br>Conflicts with `exclusion`.
 
 <a id="nestedatt--user_defined_api_discovery_policy--discovery_rules--rule_properties--rule_type_choice--exclusion"></a>
 ### Nested Schema for `user_defined_api_discovery_policy.discovery_rules.rule_properties.rule_type_choice.exclusion`
 
-Required:
+Optional:
 
-- `action_choice` (Attributes) action Specifies the action to take for excluded endpoints (see [below for nested schema](#nestedatt--user_defined_api_discovery_policy--discovery_rules--rule_properties--rule_type_choice--exclusion--action_choice))
+- `action_choice` (Attributes) action Specifies the action to take for excluded endpoints<br>Exactly one of `archive` or `ignore` must be specified when `action_choice` is configured. (see [below for nested schema](#nestedatt--user_defined_api_discovery_policy--discovery_rules--rule_properties--rule_type_choice--exclusion--action_choice))
 
 <a id="nestedatt--user_defined_api_discovery_policy--discovery_rules--rule_properties--rule_type_choice--exclusion--action_choice"></a>
 ### Nested Schema for `user_defined_api_discovery_policy.discovery_rules.rule_properties.rule_type_choice.exclusion.action_choice`
 
 Optional:
 
-- `archive` (Boolean) archive Endpoints are removed from active API Discovery and stored in the Archive under Non-API Rules for reference and auditing.
-- `ignore` (Boolean) ignore Excluded endpoints are completely ignored by API Discovery and will not appear in discovery results, inventories, or insights.
+- `archive` (Boolean) archive Endpoints are removed from active API Discovery and stored in the Archive under Non-API Rules for reference and auditing.<br>Conflicts with `ignore`.
+- `ignore` (Boolean) ignore Excluded endpoints are completely ignored by API Discovery and will not appear in discovery results, inventories, or insights.<br>Conflicts with `archive`.
 ## Import
 
 In Terraform v1.5.0 and later, use an `import` block to import this resource by ID.
@@ -289,6 +286,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_api_discovery.example"
+	to = f5xc_api_discovery.example
 }
 ```

@@ -306,7 +306,7 @@ func (r *ResourceF5XCAppApiGroup) Schema(ctx context.Context, request resource.S
 			},
 			"scope_choice": schema.SingleNestedAttribute{
 				Description:         "API Group Scope The scope of the API Group which limits the superset of API endpoints which can be used to create an API Group",
-				MarkdownDescription: "API Group Scope The scope of the API Group which limits the superset of API endpoints which can be used to create an API Group",
+				MarkdownDescription: "API Group Scope The scope of the API Group which limits the superset of API endpoints which can be used to create an API Group<br>Exactly one of `bigip_virtual_server`, `cdn_loadbalancer`, or `http_loadbalancer` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -320,7 +320,7 @@ func (r *ResourceF5XCAppApiGroup) Schema(ctx context.Context, request resource.S
 				Attributes: map[string]schema.Attribute{
 					"bigip_virtual_server": schema.SingleNestedAttribute{
 						Description:         "BIGIP Virtual Server Scope Set scope to an BIGIP Virtual Server object to define the API endpoints list for API groups management",
-						MarkdownDescription: "BIGIP Virtual Server Scope Set scope to an BIGIP Virtual Server object to define the API endpoints list for API groups management",
+						MarkdownDescription: "BIGIP Virtual Server Scope Set scope to an BIGIP Virtual Server object to define the API endpoints list for API groups management<br>Conflicts with `cdn_loadbalancer` and `http_loadbalancer`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -362,7 +362,7 @@ func (r *ResourceF5XCAppApiGroup) Schema(ctx context.Context, request resource.S
 					},
 					"cdn_loadbalancer": schema.SingleNestedAttribute{
 						Description:         "CDN Loadbalancer Scope Set scope to an CDN Loadbalancer object to define the API endpoints list for API groups management",
-						MarkdownDescription: "CDN Loadbalancer Scope Set scope to an CDN Loadbalancer object to define the API endpoints list for API groups management",
+						MarkdownDescription: "CDN Loadbalancer Scope Set scope to an CDN Loadbalancer object to define the API endpoints list for API groups management<br>Conflicts with `bigip_virtual_server` and `http_loadbalancer`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -404,7 +404,7 @@ func (r *ResourceF5XCAppApiGroup) Schema(ctx context.Context, request resource.S
 					},
 					"http_loadbalancer": schema.SingleNestedAttribute{
 						Description:         "HTTP Loadbalancer Scope Set scope to an HTTP Loadbalancer object to define the API endpoints list for API groups management",
-						MarkdownDescription: "HTTP Loadbalancer Scope Set scope to an HTTP Loadbalancer object to define the API endpoints list for API groups management",
+						MarkdownDescription: "HTTP Loadbalancer Scope Set scope to an HTTP Loadbalancer object to define the API endpoints list for API groups management<br>Conflicts with `bigip_virtual_server` and `cdn_loadbalancer`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1256,11 +1256,7 @@ func (r *ResourceF5XCAppApiGroup) Read(ctx context.Context, request resource.Rea
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_app_api_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_app_api_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "app_api_group", err),
@@ -1977,12 +1973,8 @@ func (r *ResourceF5XCAppApiGroup) Update(ctx context.Context, request resource.U
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_views_app_api_group.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_views_app_api_group.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "app_api_group", err),
@@ -1991,7 +1983,7 @@ func (r *ResourceF5XCAppApiGroup) Update(ctx context.Context, request resource.U
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_app_api_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_app_api_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "app_api_group", err),

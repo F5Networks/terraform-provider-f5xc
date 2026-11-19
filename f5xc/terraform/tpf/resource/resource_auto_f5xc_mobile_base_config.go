@@ -589,11 +589,7 @@ func (r *ResourceF5XCMobileBaseConfig) Read(ctx context.Context, request resourc
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_shape_bot_defense_mobile_base_config.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_shape_bot_defense_mobile_base_config.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "mobile_base_config", err),
@@ -901,12 +897,8 @@ func (r *ResourceF5XCMobileBaseConfig) Update(ctx context.Context, request resou
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_shape_bot_defense_mobile_base_config.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_shape_bot_defense_mobile_base_config.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "mobile_base_config", err),
@@ -915,7 +907,7 @@ func (r *ResourceF5XCMobileBaseConfig) Update(ctx context.Context, request resou
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_shape_bot_defense_mobile_base_config.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_shape_bot_defense_mobile_base_config.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "mobile_base_config", err),

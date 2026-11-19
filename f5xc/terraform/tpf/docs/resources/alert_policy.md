@@ -129,13 +129,10 @@ Read-Only:
 <a id="nestedatt--routes"></a>
 ### Nested Schema for `routes`
 
-Required:
-
-- `action_choice` (Attributes) Action Action associated with the match condition (see [below for nested schema](#nestedatt--routes--action_choice))
-
 Optional:
 
-- `matcher_choice` (Attributes) Matcher Match condition for the alert (see [below for nested schema](#nestedatt--routes--matcher_choice))
+- `action_choice` (Attributes) Action Action associated with the match condition<br>Exactly one of `dont_send` or `send` must be specified when `action_choice` is configured. (see [below for nested schema](#nestedatt--routes--action_choice))
+- `matcher_choice` (Attributes) Matcher Match condition for the alert<br>Exactly one of `alertname`, `alertname_regex`, `any`, `custom`, `group`, or `severity` must be specified when `matcher_choice` is configured. (see [below for nested schema](#nestedatt--routes--matcher_choice))
 - `notification_parameters` (Attributes) Notification Parameters Notification parameters to decide how and when the alerts should be sent to the receivers. If the notification_config is not specified for the route, then the route inherits the config from the notification_config defined in the policy. (see [below for nested schema](#nestedatt--routes--notification_parameters))
 
 <a id="nestedatt--routes--action_choice"></a>
@@ -143,8 +140,8 @@ Optional:
 
 Optional:
 
-- `dont_send` (Boolean) Do Not Send Do not send the alert
-- `send` (Boolean) Send Send the alert
+- `dont_send` (Boolean) Do Not Send Do not send the alert<br>Conflicts with `send`.
+- `send` (Boolean) Send Send the alert<br>Conflicts with `dont_send`.
 
 
 <a id="nestedatt--routes--matcher_choice"></a>
@@ -152,12 +149,12 @@ Optional:
 
 Optional:
 
-- `alertname` (List of String) Alertname Matches the alertname of the alert<br>**Allowed Values (choose one):** `['APISecurityRiskScoreHighDetected', 'APISecuritySensitiveDataInResponseDetected', 'APISecurityShadowAPIDetected', 'APISecurityTooManyAttacks', 'APISecurityUnUsedAPIDetected', 'BotDefenseTooManySecurityEvents', 'DNSZoneIgnoredDuplicateRecord', 'L7DDoS', 'DDoSAutoMitigation', 'MaliciousUserDetected', 'RoutedDDoSAlertNotification', 'RoutedDDoSMitigationNotification', 'RoutedDDoSTunnelStatusUpdateNotification', 'ServiceClientError', 'ServiceClientErrorPerSourceSite', 'ServiceEndpointHealthcheckFailure', 'ServiceHealthLow', 'ServicePolicyTooManyAttacks', 'ServiceServerError', 'ServiceServerErrorPerSourceSite', 'ServiceUnavailable', 'SiteCustomerTunnelInterfaceDown', 'SitePhysicalInterfaceDown', 'SyntheticMonitorHealthCritical', 'ThreatCampaign', 'TLSAutomaticCertificateExpired', 'TLSAutomaticCertificateRenewalFailure', 'TLSAutomaticCertificateRenewalStillFailing', 'TLSCustomCertificateExpired', 'TLSCustomCertificateExpiring', 'TLSCustomCertificateExpiringSoon', 'TunnelsToCustomerSiteDown', 'VesClientSideDefenseSensitiveFieldRead', 'VesClientSideDefenseSuspiciousDomain', 'WAFTooManyAttacks', 'WAFTooManyMaliciousBots']`
-- `alertname_regex` (String) Alertname Regex Match Regular Expression match for the alertname
-- `any` (Boolean) Any Matches all alerts in the namespace
-- `custom` (Attributes) Custom Match A set of custom equality/regex matchers an alert has to fulfill to match the route. (see [below for nested schema](#nestedatt--routes--matcher_choice--custom))
-- `group` (Attributes) Group Matches the group name of the alert (see [below for nested schema](#nestedatt--routes--matcher_choice--group))
-- `severity` (Attributes) Severity Matches the severity level of the alert (see [below for nested schema](#nestedatt--routes--matcher_choice--severity))
+- `alertname` (List of String) Alertname Matches the alertname of the alert<br>**Allowed Values (choose one):** `['APISecurityRiskScoreHighDetected', 'APISecuritySensitiveDataInResponseDetected', 'APISecurityShadowAPIDetected', 'APISecurityTooManyAttacks', 'APISecurityUnUsedAPIDetected', 'BotDefenseTooManySecurityEvents', 'DNSZoneIgnoredDuplicateRecord', 'L7DDoS', 'DDoSAutoMitigation', 'MaliciousUserDetected', 'RoutedDDoSAlertNotification', 'RoutedDDoSMitigationNotification', 'RoutedDDoSTunnelStatusUpdateNotification', 'ServiceClientError', 'ServiceClientErrorPerSourceSite', 'ServiceEndpointHealthcheckFailure', 'ServiceHealthLow', 'ServicePolicyTooManyAttacks', 'ServiceServerError', 'ServiceServerErrorPerSourceSite', 'ServiceUnavailable', 'SiteCustomerTunnelInterfaceDown', 'SitePhysicalInterfaceDown', 'SyntheticMonitorHealthCritical', 'ThreatCampaign', 'TLSAutomaticCertificateExpired', 'TLSAutomaticCertificateRenewalFailure', 'TLSAutomaticCertificateRenewalStillFailing', 'TLSCustomCertificateExpired', 'TLSCustomCertificateExpiring', 'TLSCustomCertificateExpiringSoon', 'TunnelsToCustomerSiteDown', 'VesClientSideDefenseSensitiveFieldRead', 'VesClientSideDefenseSuspiciousDomain', 'WAFTooManyAttacks', 'WAFTooManyMaliciousBots']`<br>Conflicts with `alertname_regex`, `any`, `custom`, `group`, and `severity`.
+- `alertname_regex` (String) Alertname Regex Match Regular Expression match for the alertname<br>Conflicts with `alertname`, `any`, `custom`, `group`, and `severity`.
+- `any` (Boolean) Any Matches all alerts in the namespace<br>Conflicts with `alertname`, `alertname_regex`, `custom`, `group`, and `severity`.
+- `custom` (Attributes) Custom Match A set of custom equality/regex matchers an alert has to fulfill to match the route.<br>Conflicts with `alertname`, `alertname_regex`, `any`, `group`, and `severity`. (see [below for nested schema](#nestedatt--routes--matcher_choice--custom))
+- `group` (Attributes) Group Matches the group name of the alert<br>Conflicts with `alertname`, `alertname_regex`, `any`, `custom`, and `severity`. (see [below for nested schema](#nestedatt--routes--matcher_choice--group))
+- `severity` (Attributes) Severity Matches the severity level of the alert<br>Conflicts with `alertname`, `alertname_regex`, `any`, `custom`, and `group`. (see [below for nested schema](#nestedatt--routes--matcher_choice--severity))
 
 <a id="nestedatt--routes--matcher_choice--custom"></a>
 ### Nested Schema for `routes.matcher_choice.custom`
@@ -174,15 +171,15 @@ Optional:
 
 Required:
 
-- `matcher_type_choice` (Attributes) Matcher Type Either exact or regex match for the label (see [below for nested schema](#nestedatt--routes--matcher_choice--custom--alertlabel--matcher_type_choice))
+- `matcher_type_choice` (Attributes) Matcher Type Either exact or regex match for the label<br>Exactly one of `exact_match` or `regex_match` must be specified. (see [below for nested schema](#nestedatt--routes--matcher_choice--custom--alertlabel--matcher_type_choice))
 
 <a id="nestedatt--routes--matcher_choice--custom--alertlabel--matcher_type_choice"></a>
 ### Nested Schema for `routes.matcher_choice.custom.alertlabel.matcher_type_choice`
 
 Optional:
 
-- `exact_match` (String) Exact Match Equality match value for the label
-- `regex_match` (String) Regex Match Regular expression match value for the label
+- `exact_match` (String) Exact Match Equality match value for the label<br>Conflicts with `regex_match`.
+- `regex_match` (String) Regex Match Regular expression match value for the label<br>Conflicts with `exact_match`.
 
 
 
@@ -191,15 +188,15 @@ Optional:
 
 Required:
 
-- `matcher_type_choice` (Attributes) Matcher Type Either exact or regex match for the label (see [below for nested schema](#nestedatt--routes--matcher_choice--custom--alertname--matcher_type_choice))
+- `matcher_type_choice` (Attributes) Matcher Type Either exact or regex match for the label<br>Exactly one of `exact_match` or `regex_match` must be specified. (see [below for nested schema](#nestedatt--routes--matcher_choice--custom--alertname--matcher_type_choice))
 
 <a id="nestedatt--routes--matcher_choice--custom--alertname--matcher_type_choice"></a>
 ### Nested Schema for `routes.matcher_choice.custom.alertname.matcher_type_choice`
 
 Optional:
 
-- `exact_match` (String) Exact Match Equality match value for the label
-- `regex_match` (String) Regex Match Regular expression match value for the label
+- `exact_match` (String) Exact Match Equality match value for the label<br>Conflicts with `regex_match`.
+- `regex_match` (String) Regex Match Regular expression match value for the label<br>Conflicts with `exact_match`.
 
 
 
@@ -208,15 +205,15 @@ Optional:
 
 Required:
 
-- `matcher_type_choice` (Attributes) Matcher Type Either exact or regex match for the label (see [below for nested schema](#nestedatt--routes--matcher_choice--custom--group--matcher_type_choice))
+- `matcher_type_choice` (Attributes) Matcher Type Either exact or regex match for the label<br>Exactly one of `exact_match` or `regex_match` must be specified. (see [below for nested schema](#nestedatt--routes--matcher_choice--custom--group--matcher_type_choice))
 
 <a id="nestedatt--routes--matcher_choice--custom--group--matcher_type_choice"></a>
 ### Nested Schema for `routes.matcher_choice.custom.group.matcher_type_choice`
 
 Optional:
 
-- `exact_match` (String) Exact Match Equality match value for the label
-- `regex_match` (String) Regex Match Regular expression match value for the label
+- `exact_match` (String) Exact Match Equality match value for the label<br>Conflicts with `regex_match`.
+- `regex_match` (String) Regex Match Regular expression match value for the label<br>Conflicts with `exact_match`.
 
 
 
@@ -225,15 +222,15 @@ Optional:
 
 Required:
 
-- `matcher_type_choice` (Attributes) Matcher Type Either exact or regex match for the label (see [below for nested schema](#nestedatt--routes--matcher_choice--custom--severity--matcher_type_choice))
+- `matcher_type_choice` (Attributes) Matcher Type Either exact or regex match for the label<br>Exactly one of `exact_match` or `regex_match` must be specified. (see [below for nested schema](#nestedatt--routes--matcher_choice--custom--severity--matcher_type_choice))
 
 <a id="nestedatt--routes--matcher_choice--custom--severity--matcher_type_choice"></a>
 ### Nested Schema for `routes.matcher_choice.custom.severity.matcher_type_choice`
 
 Optional:
 
-- `exact_match` (String) Exact Match Equality match value for the label
-- `regex_match` (String) Regex Match Regular expression match value for the label
+- `exact_match` (String) Exact Match Equality match value for the label<br>Conflicts with `regex_match`.
+- `regex_match` (String) Regex Match Regular expression match value for the label<br>Conflicts with `exact_match`.
 
 
 
@@ -258,12 +255,9 @@ Optional:
 <a id="nestedatt--routes--notification_parameters"></a>
 ### Nested Schema for `routes.notification_parameters`
 
-Required:
-
-- `group_by_choice` (Attributes) Group By Set of labels to group the alerts (see [below for nested schema](#nestedatt--routes--notification_parameters--group_by_choice))
-
 Optional:
 
+- `group_by_choice` (Attributes) Group By Set of labels to group the alerts<br>Exactly one of `custom`, `default`, `individual`, or `ves_io_group` must be specified when `group_by_choice` is configured. (see [below for nested schema](#nestedatt--routes--notification_parameters--group_by_choice))
 - `group_interval` (String) Group Interval Group Interval is used to specify how long to wait before sending a notification about new alerts that are added to the group for which an initial notification has already been sent. Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days If not specified, group_interval defaults to '1m'<br>**Default:** `1m`
 - `group_wait` (String) Group Wait Time value used to specify how long to initially wait for an inhibiting alert to arrive or collect more alerts for the same group. Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days If not specified, group_wait defaults to '30s'<br>**Default:** `30s`
 - `repeat_interval` (String) Repeat Interval Repeat Interval is used to specify how long to wait before sending a notification again if it has already been sent successfully. Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days If not specified, group_interval defaults to '4h'<br>**Default:** `4h`
@@ -273,10 +267,10 @@ Optional:
 
 Optional:
 
-- `custom` (Attributes) Custom Specify set of labels for grouping the alerts (see [below for nested schema](#nestedatt--routes--notification_parameters--group_by_choice--custom))
-- `default` (Boolean, Deprecated) Default Group the alerts by severity, group name and alert name
-- `individual` (Boolean) Individual This option disables grouping of alerts
-- `ves_io_group` (Boolean) F5XC Defined Group Group the alerts by severity, group name and alert name
+- `custom` (Attributes) Custom Specify set of labels for grouping the alerts<br>Conflicts with `default`, `individual`, and `ves_io_group`. (see [below for nested schema](#nestedatt--routes--notification_parameters--group_by_choice--custom))
+- `default` (Boolean, Deprecated) Default Group the alerts by severity, group name and alert name<br>Conflicts with `custom`, `individual`, and `ves_io_group`.
+- `individual` (Boolean) Individual This option disables grouping of alerts<br>Conflicts with `custom`, `default`, and `ves_io_group`.
+- `ves_io_group` (Boolean) F5XC Defined Group Group the alerts by severity, group name and alert name<br>Conflicts with `custom`, `default`, and `individual`.
 
 <a id="nestedatt--routes--notification_parameters--group_by_choice--custom"></a>
 ### Nested Schema for `routes.notification_parameters.group_by_choice.custom`
@@ -292,12 +286,9 @@ Optional:
 <a id="nestedatt--notification_parameters"></a>
 ### Nested Schema for `notification_parameters`
 
-Required:
-
-- `group_by_choice` (Attributes) Group By Set of labels to group the alerts (see [below for nested schema](#nestedatt--notification_parameters--group_by_choice))
-
 Optional:
 
+- `group_by_choice` (Attributes) Group By Set of labels to group the alerts<br>Exactly one of `custom`, `default`, `individual`, or `ves_io_group` must be specified when `group_by_choice` is configured. (see [below for nested schema](#nestedatt--notification_parameters--group_by_choice))
 - `group_interval` (String) Group Interval Group Interval is used to specify how long to wait before sending a notification about new alerts that are added to the group for which an initial notification has already been sent. Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days If not specified, group_interval defaults to '1m'<br>**Default:** `1m`
 - `group_wait` (String) Group Wait Time value used to specify how long to initially wait for an inhibiting alert to arrive or collect more alerts for the same group. Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days If not specified, group_wait defaults to '30s'<br>**Default:** `30s`
 - `repeat_interval` (String) Repeat Interval Repeat Interval is used to specify how long to wait before sending a notification again if it has already been sent successfully. Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days If not specified, group_interval defaults to '4h'<br>**Default:** `4h`
@@ -307,10 +298,10 @@ Optional:
 
 Optional:
 
-- `custom` (Attributes) Custom Specify set of labels for grouping the alerts (see [below for nested schema](#nestedatt--notification_parameters--group_by_choice--custom))
-- `default` (Boolean, Deprecated) Default Group the alerts by severity, group name and alert name
-- `individual` (Boolean) Individual This option disables grouping of alerts
-- `ves_io_group` (Boolean) F5XC Defined Group Group the alerts by severity, group name and alert name
+- `custom` (Attributes) Custom Specify set of labels for grouping the alerts<br>Conflicts with `default`, `individual`, and `ves_io_group`. (see [below for nested schema](#nestedatt--notification_parameters--group_by_choice--custom))
+- `default` (Boolean, Deprecated) Default Group the alerts by severity, group name and alert name<br>Conflicts with `custom`, `individual`, and `ves_io_group`.
+- `individual` (Boolean) Individual This option disables grouping of alerts<br>Conflicts with `custom`, `default`, and `ves_io_group`.
+- `ves_io_group` (Boolean) F5XC Defined Group Group the alerts by severity, group name and alert name<br>Conflicts with `custom`, `default`, and `individual`.
 
 <a id="nestedatt--notification_parameters--group_by_choice--custom"></a>
 ### Nested Schema for `notification_parameters.group_by_choice.custom`
@@ -352,6 +343,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_alert_policy.example"
+	to = f5xc_alert_policy.example
 }
 ```

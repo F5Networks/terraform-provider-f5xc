@@ -5,17 +5,16 @@ package virtual_address
 
 import (
 	fmt "fmt"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strings "strings"
-
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	golang_proto "github.com/golang/protobuf/proto"
 	schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -48,7 +47,6 @@ type GlobalSpecType struct {
 	//
 	// Types that are valid to be assigned to DeploymentTypeChoice:
 	//	*GlobalSpecType_Public
-	//	*GlobalSpecType_Private
 	DeploymentTypeChoice isGlobalSpecType_DeploymentTypeChoice `protobuf_oneof:"deployment_type_choice"`
 	// view_internal
 	//
@@ -95,12 +93,8 @@ type isGlobalSpecType_DeploymentTypeChoice interface {
 type GlobalSpecType_Public struct {
 	Public *PublicDeploymentType `protobuf:"bytes,3,opt,name=public,proto3,oneof" json:"public,omitempty"`
 }
-type GlobalSpecType_Private struct {
-	Private *PrivateDeploymentType `protobuf:"bytes,4,opt,name=private,proto3,oneof" json:"private,omitempty"`
-}
 
-func (*GlobalSpecType_Public) isGlobalSpecType_DeploymentTypeChoice()  {}
-func (*GlobalSpecType_Private) isGlobalSpecType_DeploymentTypeChoice() {}
+func (*GlobalSpecType_Public) isGlobalSpecType_DeploymentTypeChoice() {}
 
 func (m *GlobalSpecType) GetDeploymentTypeChoice() isGlobalSpecType_DeploymentTypeChoice {
 	if m != nil {
@@ -123,13 +117,6 @@ func (m *GlobalSpecType) GetPublic() *PublicDeploymentType {
 	return nil
 }
 
-func (m *GlobalSpecType) GetPrivate() *PrivateDeploymentType {
-	if x, ok := m.GetDeploymentTypeChoice().(*GlobalSpecType_Private); ok {
-		return x.Private
-	}
-	return nil
-}
-
 func (m *GlobalSpecType) GetViewInternal() *views.ObjectRefType {
 	if m != nil {
 		return m.ViewInternal
@@ -141,7 +128,6 @@ func (m *GlobalSpecType) GetViewInternal() *views.ObjectRefType {
 func (*GlobalSpecType) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
 		(*GlobalSpecType_Public)(nil),
-		(*GlobalSpecType_Private)(nil),
 	}
 }
 
@@ -156,8 +142,6 @@ type PublicDeploymentType struct {
 	//
 	// Types that are valid to be assigned to WhereSelectionChoice:
 	//	*PublicDeploymentType_Global
-	//	*PublicDeploymentType_Regional
-	//	*PublicDeploymentType_Vk8SService
 	WhereSelectionChoice isPublicDeploymentType_WhereSelectionChoice `protobuf_oneof:"where_selection_choice"`
 }
 
@@ -199,16 +183,8 @@ type isPublicDeploymentType_WhereSelectionChoice interface {
 type PublicDeploymentType_Global struct {
 	Global *GlobalWhereType `protobuf:"bytes,2,opt,name=global,proto3,oneof" json:"global,omitempty"`
 }
-type PublicDeploymentType_Regional struct {
-	Regional *RegionalWhereType `protobuf:"bytes,3,opt,name=regional,proto3,oneof" json:"regional,omitempty"`
-}
-type PublicDeploymentType_Vk8SService struct {
-	Vk8SService *views.WhereVK8SService `protobuf:"bytes,4,opt,name=vk8s_service,json=vk8sService,proto3,oneof" json:"vk8s_service,omitempty"`
-}
 
-func (*PublicDeploymentType_Global) isPublicDeploymentType_WhereSelectionChoice()      {}
-func (*PublicDeploymentType_Regional) isPublicDeploymentType_WhereSelectionChoice()    {}
-func (*PublicDeploymentType_Vk8SService) isPublicDeploymentType_WhereSelectionChoice() {}
+func (*PublicDeploymentType_Global) isPublicDeploymentType_WhereSelectionChoice() {}
 
 func (m *PublicDeploymentType) GetWhereSelectionChoice() isPublicDeploymentType_WhereSelectionChoice {
 	if m != nil {
@@ -224,26 +200,10 @@ func (m *PublicDeploymentType) GetGlobal() *GlobalWhereType {
 	return nil
 }
 
-func (m *PublicDeploymentType) GetRegional() *RegionalWhereType {
-	if x, ok := m.GetWhereSelectionChoice().(*PublicDeploymentType_Regional); ok {
-		return x.Regional
-	}
-	return nil
-}
-
-func (m *PublicDeploymentType) GetVk8SService() *views.WhereVK8SService {
-	if x, ok := m.GetWhereSelectionChoice().(*PublicDeploymentType_Vk8SService); ok {
-		return x.Vk8SService
-	}
-	return nil
-}
-
 // XXX_OneofWrappers is for the internal use of the proto package.
 func (*PublicDeploymentType) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
 		(*PublicDeploymentType_Global)(nil),
-		(*PublicDeploymentType_Regional)(nil),
-		(*PublicDeploymentType_Vk8SService)(nil),
 	}
 }
 
@@ -265,7 +225,6 @@ type GlobalWhereType struct {
 	// VIP Selection
 	//
 	// Types that are valid to be assigned to VipChoice:
-	//	*GlobalWhereType_TenantPublicDefaultVip
 	//	*GlobalWhereType_SpecificVip
 	VipChoice isGlobalWhereType_VipChoice `protobuf_oneof:"vip_choice"`
 }
@@ -314,15 +273,11 @@ type isGlobalWhereType_VipChoice interface {
 type GlobalWhereType_F5GlobalNetwork struct {
 	F5GlobalNetwork *schema.Empty `protobuf:"bytes,6,opt,name=f5_global_network,json=f5GlobalNetwork,proto3,oneof" json:"f5_global_network,omitempty"`
 }
-type GlobalWhereType_TenantPublicDefaultVip struct {
-	TenantPublicDefaultVip *schema.Empty `protobuf:"bytes,9,opt,name=tenant_public_default_vip,json=tenantPublicDefaultVip,proto3,oneof" json:"tenant_public_default_vip,omitempty"`
-}
 type GlobalWhereType_SpecificVip struct {
 	SpecificVip *views.AdvertisePublic `protobuf:"bytes,10,opt,name=specific_vip,json=specificVip,proto3,oneof" json:"specific_vip,omitempty"`
 }
 
 func (*GlobalWhereType_F5GlobalNetwork) isGlobalWhereType_NetworkSelectionChoice() {}
-func (*GlobalWhereType_TenantPublicDefaultVip) isGlobalWhereType_VipChoice()       {}
 func (*GlobalWhereType_SpecificVip) isGlobalWhereType_VipChoice()                  {}
 
 func (m *GlobalWhereType) GetNetworkSelectionChoice() isGlobalWhereType_NetworkSelectionChoice {
@@ -345,13 +300,6 @@ func (m *GlobalWhereType) GetF5GlobalNetwork() *schema.Empty {
 	return nil
 }
 
-func (m *GlobalWhereType) GetTenantPublicDefaultVip() *schema.Empty {
-	if x, ok := m.GetVipChoice().(*GlobalWhereType_TenantPublicDefaultVip); ok {
-		return x.TenantPublicDefaultVip
-	}
-	return nil
-}
-
 func (m *GlobalWhereType) GetSpecificVip() *views.AdvertisePublic {
 	if x, ok := m.GetVipChoice().(*GlobalWhereType_SpecificVip); ok {
 		return x.SpecificVip
@@ -363,7 +311,6 @@ func (m *GlobalWhereType) GetSpecificVip() *views.AdvertisePublic {
 func (*GlobalWhereType) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
 		(*GlobalWhereType_F5GlobalNetwork)(nil),
-		(*GlobalWhereType_TenantPublicDefaultVip)(nil),
 		(*GlobalWhereType_SpecificVip)(nil),
 	}
 }
@@ -468,7 +415,6 @@ type RegionalSiteType struct {
 	// VIP Selection
 	//
 	// Types that are valid to be assigned to VipChoice:
-	//	*RegionalSiteType_TenantPublicDefaultVip
 	//	*RegionalSiteType_SpecificVip
 	VipChoice isRegionalSiteType_VipChoice `protobuf_oneof:"vip_choice"`
 }
@@ -517,15 +463,11 @@ type isRegionalSiteType_VipChoice interface {
 type RegionalSiteType_F5GlobalNetwork struct {
 	F5GlobalNetwork *schema.Empty `protobuf:"bytes,3,opt,name=f5_global_network,json=f5GlobalNetwork,proto3,oneof" json:"f5_global_network,omitempty"`
 }
-type RegionalSiteType_TenantPublicDefaultVip struct {
-	TenantPublicDefaultVip *schema.Empty `protobuf:"bytes,5,opt,name=tenant_public_default_vip,json=tenantPublicDefaultVip,proto3,oneof" json:"tenant_public_default_vip,omitempty"`
-}
 type RegionalSiteType_SpecificVip struct {
 	SpecificVip *views.AdvertisePublic `protobuf:"bytes,6,opt,name=specific_vip,json=specificVip,proto3,oneof" json:"specific_vip,omitempty"`
 }
 
 func (*RegionalSiteType_F5GlobalNetwork) isRegionalSiteType_NetworkSelectionChoice() {}
-func (*RegionalSiteType_TenantPublicDefaultVip) isRegionalSiteType_VipChoice()       {}
 func (*RegionalSiteType_SpecificVip) isRegionalSiteType_VipChoice()                  {}
 
 func (m *RegionalSiteType) GetNetworkSelectionChoice() isRegionalSiteType_NetworkSelectionChoice {
@@ -555,13 +497,6 @@ func (m *RegionalSiteType) GetF5GlobalNetwork() *schema.Empty {
 	return nil
 }
 
-func (m *RegionalSiteType) GetTenantPublicDefaultVip() *schema.Empty {
-	if x, ok := m.GetVipChoice().(*RegionalSiteType_TenantPublicDefaultVip); ok {
-		return x.TenantPublicDefaultVip
-	}
-	return nil
-}
-
 func (m *RegionalSiteType) GetSpecificVip() *views.AdvertisePublic {
 	if x, ok := m.GetVipChoice().(*RegionalSiteType_SpecificVip); ok {
 		return x.SpecificVip
@@ -573,7 +508,6 @@ func (m *RegionalSiteType) GetSpecificVip() *views.AdvertisePublic {
 func (*RegionalSiteType) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
 		(*RegionalSiteType_F5GlobalNetwork)(nil),
-		(*RegionalSiteType_TenantPublicDefaultVip)(nil),
 		(*RegionalSiteType_SpecificVip)(nil),
 	}
 }
@@ -586,6 +520,7 @@ type CustomVIP struct {
 	// Custom IP Selection
 	//
 	// x-displayName: "IPv4/IPv6"
+	// x-required
 	// Custom IP Selection
 	//
 	// Types that are valid to be assigned to VipSelectType:
@@ -1158,7 +1093,6 @@ type CreateSpecType struct {
 	State *schema.TMMStateType `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
 	// Types that are valid to be assigned to DeploymentTypeChoice:
 	//	*CreateSpecType_Public
-	//	*CreateSpecType_Private
 	DeploymentTypeChoice isCreateSpecType_DeploymentTypeChoice `protobuf_oneof:"deployment_type_choice"`
 }
 
@@ -1200,12 +1134,8 @@ type isCreateSpecType_DeploymentTypeChoice interface {
 type CreateSpecType_Public struct {
 	Public *PublicDeploymentType `protobuf:"bytes,3,opt,name=public,proto3,oneof" json:"public,omitempty"`
 }
-type CreateSpecType_Private struct {
-	Private *PrivateDeploymentType `protobuf:"bytes,4,opt,name=private,proto3,oneof" json:"private,omitempty"`
-}
 
-func (*CreateSpecType_Public) isCreateSpecType_DeploymentTypeChoice()  {}
-func (*CreateSpecType_Private) isCreateSpecType_DeploymentTypeChoice() {}
+func (*CreateSpecType_Public) isCreateSpecType_DeploymentTypeChoice() {}
 
 func (m *CreateSpecType) GetDeploymentTypeChoice() isCreateSpecType_DeploymentTypeChoice {
 	if m != nil {
@@ -1228,18 +1158,10 @@ func (m *CreateSpecType) GetPublic() *PublicDeploymentType {
 	return nil
 }
 
-func (m *CreateSpecType) GetPrivate() *PrivateDeploymentType {
-	if x, ok := m.GetDeploymentTypeChoice().(*CreateSpecType_Private); ok {
-		return x.Private
-	}
-	return nil
-}
-
 // XXX_OneofWrappers is for the internal use of the proto package.
 func (*CreateSpecType) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
 		(*CreateSpecType_Public)(nil),
-		(*CreateSpecType_Private)(nil),
 	}
 }
 
@@ -1251,7 +1173,6 @@ type ReplaceSpecType struct {
 	State *schema.TMMStateType `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
 	// Types that are valid to be assigned to DeploymentTypeChoice:
 	//	*ReplaceSpecType_Public
-	//	*ReplaceSpecType_Private
 	DeploymentTypeChoice isReplaceSpecType_DeploymentTypeChoice `protobuf_oneof:"deployment_type_choice"`
 }
 
@@ -1293,12 +1214,8 @@ type isReplaceSpecType_DeploymentTypeChoice interface {
 type ReplaceSpecType_Public struct {
 	Public *PublicDeploymentType `protobuf:"bytes,3,opt,name=public,proto3,oneof" json:"public,omitempty"`
 }
-type ReplaceSpecType_Private struct {
-	Private *PrivateDeploymentType `protobuf:"bytes,4,opt,name=private,proto3,oneof" json:"private,omitempty"`
-}
 
-func (*ReplaceSpecType_Public) isReplaceSpecType_DeploymentTypeChoice()  {}
-func (*ReplaceSpecType_Private) isReplaceSpecType_DeploymentTypeChoice() {}
+func (*ReplaceSpecType_Public) isReplaceSpecType_DeploymentTypeChoice() {}
 
 func (m *ReplaceSpecType) GetDeploymentTypeChoice() isReplaceSpecType_DeploymentTypeChoice {
 	if m != nil {
@@ -1321,18 +1238,10 @@ func (m *ReplaceSpecType) GetPublic() *PublicDeploymentType {
 	return nil
 }
 
-func (m *ReplaceSpecType) GetPrivate() *PrivateDeploymentType {
-	if x, ok := m.GetDeploymentTypeChoice().(*ReplaceSpecType_Private); ok {
-		return x.Private
-	}
-	return nil
-}
-
 // XXX_OneofWrappers is for the internal use of the proto package.
 func (*ReplaceSpecType) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
 		(*ReplaceSpecType_Public)(nil),
-		(*ReplaceSpecType_Private)(nil),
 	}
 }
 
@@ -1344,7 +1253,6 @@ type GetSpecType struct {
 	State *schema.TMMStateType `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
 	// Types that are valid to be assigned to DeploymentTypeChoice:
 	//	*GetSpecType_Public
-	//	*GetSpecType_Private
 	DeploymentTypeChoice isGetSpecType_DeploymentTypeChoice `protobuf_oneof:"deployment_type_choice"`
 }
 
@@ -1386,12 +1294,8 @@ type isGetSpecType_DeploymentTypeChoice interface {
 type GetSpecType_Public struct {
 	Public *PublicDeploymentType `protobuf:"bytes,3,opt,name=public,proto3,oneof" json:"public,omitempty"`
 }
-type GetSpecType_Private struct {
-	Private *PrivateDeploymentType `protobuf:"bytes,4,opt,name=private,proto3,oneof" json:"private,omitempty"`
-}
 
-func (*GetSpecType_Public) isGetSpecType_DeploymentTypeChoice()  {}
-func (*GetSpecType_Private) isGetSpecType_DeploymentTypeChoice() {}
+func (*GetSpecType_Public) isGetSpecType_DeploymentTypeChoice() {}
 
 func (m *GetSpecType) GetDeploymentTypeChoice() isGetSpecType_DeploymentTypeChoice {
 	if m != nil {
@@ -1414,18 +1318,10 @@ func (m *GetSpecType) GetPublic() *PublicDeploymentType {
 	return nil
 }
 
-func (m *GetSpecType) GetPrivate() *PrivateDeploymentType {
-	if x, ok := m.GetDeploymentTypeChoice().(*GetSpecType_Private); ok {
-		return x.Private
-	}
-	return nil
-}
-
 // XXX_OneofWrappers is for the internal use of the proto package.
 func (*GetSpecType) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
 		(*GetSpecType_Public)(nil),
-		(*GetSpecType_Private)(nil),
 	}
 }
 
@@ -1466,104 +1362,101 @@ func init() {
 }
 
 var fileDescriptor_469b55bb8e5aa63a = []byte{
-	// 1549 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x58, 0xcd, 0x6f, 0xd3, 0xd8,
-	0x16, 0xcf, 0x71, 0x3e, 0x9a, 0xdc, 0x7e, 0x24, 0xb5, 0xa0, 0x2f, 0x14, 0x30, 0x55, 0x00, 0x09,
-	0x78, 0x69, 0xd2, 0x6f, 0xa0, 0x4f, 0x7a, 0x12, 0x2e, 0x88, 0xb6, 0x7c, 0x3e, 0x97, 0x97, 0x27,
-	0xa1, 0x27, 0x59, 0x8e, 0x7d, 0xe3, 0xde, 0xd7, 0x24, 0xb6, 0xec, 0x9b, 0x40, 0x17, 0x95, 0xd0,
-	0x5b, 0x3c, 0x3d, 0xbd, 0x15, 0xd2, 0xfb, 0x0b, 0x66, 0x33, 0x1a, 0x75, 0x3b, 0x3b, 0x5c, 0x34,
-	0x99, 0xd1, 0x2c, 0x10, 0xab, 0x68, 0x56, 0x2c, 0x87, 0x74, 0xc3, 0xcc, 0x8a, 0xe5, 0x68, 0x56,
-	0x23, 0x5f, 0xdb, 0x19, 0xa7, 0x0d, 0x10, 0x10, 0xb3, 0x98, 0x11, 0xbb, 0xba, 0xf7, 0xfc, 0x7e,
-	0x3e, 0xf7, 0x77, 0x7e, 0xe7, 0x5c, 0xdf, 0xa0, 0x62, 0x13, 0xdb, 0x05, 0x62, 0x14, 0x6d, 0x75,
-	0x13, 0xd7, 0x94, 0x62, 0x93, 0xe0, 0x07, 0x76, 0xb1, 0x49, 0x2c, 0xda, 0x50, 0xaa, 0xb2, 0xa2,
-	0x69, 0x16, 0xb6, 0xed, 0x22, 0xdd, 0x36, 0xb1, 0x5d, 0x30, 0x2d, 0x83, 0x1a, 0xfc, 0x69, 0x0f,
-	0x50, 0xf0, 0x00, 0x05, 0x06, 0x28, 0x1c, 0x00, 0x4c, 0x4e, 0xeb, 0x84, 0x6e, 0x36, 0xca, 0x05,
-	0xd5, 0xa8, 0x15, 0x75, 0x43, 0x37, 0x8a, 0x0c, 0x5b, 0x6e, 0x54, 0xd8, 0x13, 0x7b, 0x60, 0x7f,
-	0x79, 0x9c, 0x93, 0xa7, 0x7a, 0x93, 0x28, 0x13, 0x9d, 0x98, 0x72, 0xe8, 0xa5, 0x93, 0x42, 0x6f,
-	0x80, 0x8a, 0x2d, 0xda, 0xb3, 0x7e, 0xbc, 0x77, 0xdd, 0x30, 0x29, 0x31, 0xea, 0xc1, 0xe2, 0xb1,
-	0xde, 0xc5, 0x30, 0xee, 0xc4, 0x81, 0xdd, 0x2b, 0x55, 0xa2, 0x29, 0x14, 0xfb, 0xab, 0x53, 0x87,
-	0xb5, 0x91, 0x7b, 0xa9, 0xcf, 0xf4, 0x53, 0xcf, 0x26, 0x14, 0xf7, 0x64, 0x77, 0xaa, 0x5f, 0x54,
-	0x28, 0x20, 0xf7, 0x59, 0x14, 0x8d, 0x5d, 0xaf, 0x1a, 0x65, 0xa5, 0xba, 0x61, 0x62, 0xf5, 0xde,
-	0xb6, 0x89, 0xf9, 0x8b, 0x28, 0x6e, 0x53, 0x85, 0xe2, 0x2c, 0x4c, 0xc1, 0xb9, 0xe1, 0xb9, 0xe3,
-	0x85, 0x5e, 0xd9, 0xef, 0xdd, 0xba, 0xb5, 0xe1, 0x2e, 0xbb, 0xb1, 0x62, 0xec, 0xb5, 0x03, 0x20,
-	0x79, 0xf1, 0xfc, 0x06, 0x4a, 0x98, 0x8d, 0x72, 0x95, 0xa8, 0xd9, 0x28, 0x43, 0x5e, 0x2e, 0x0c,
-	0x50, 0xb0, 0xc2, 0x5d, 0x06, 0xb9, 0x8a, 0xcd, 0xaa, 0xb1, 0x5d, 0xc3, 0x75, 0xea, 0xf2, 0xae,
-	0x46, 0x24, 0x9f, 0x8a, 0x2f, 0xa1, 0x21, 0xd3, 0x22, 0x4d, 0x37, 0x9f, 0x18, 0x63, 0x5d, 0x1e,
-	0x8c, 0xd5, 0xc3, 0x1c, 0xa2, 0x0d, 0xc8, 0xf8, 0xfb, 0x68, 0x94, 0xa9, 0x4a, 0xea, 0x14, 0x5b,
-	0x75, 0xa5, 0x9a, 0x7d, 0x35, 0xc4, 0xe8, 0x73, 0x7d, 0xe9, 0xef, 0x94, 0xff, 0x85, 0x55, 0x2a,
-	0xe1, 0x0a, 0xdb, 0x75, 0x66, 0x77, 0xa7, 0x17, 0x2c, 0x8d, 0xb8, 0x8f, 0x6b, 0xfe, 0xd3, 0xf2,
-	0x89, 0x6f, 0x1c, 0xc8, 0xa2, 0x09, 0x94, 0x2e, 0x79, 0x59, 0x4d, 0x5d, 0xf1, 0xb2, 0xe2, 0xa3,
-	0xb3, 0xf9, 0x39, 0xf1, 0x3c, 0x9a, 0xd0, 0xba, 0x69, 0xb1, 0x6a, 0xc9, 0xea, 0xa6, 0x41, 0x54,
-	0xcc, 0xa7, 0x5b, 0x0e, 0x44, 0xdb, 0x0e, 0x70, 0x1d, 0x07, 0xa2, 0xf3, 0xf9, 0x85, 0xf5, 0x58,
-	0x92, 0xcb, 0x44, 0x73, 0x0e, 0x87, 0x8e, 0xf4, 0x53, 0x89, 0xbf, 0x8d, 0x12, 0x3a, 0xab, 0x5d,
-	0x96, 0x63, 0xb9, 0x2f, 0x0c, 0x24, 0x8d, 0x57, 0xee, 0x7f, 0x6c, 0x62, 0x0b, 0x07, 0x5a, 0x7b,
-	0x2c, 0xfc, 0x3d, 0x94, 0xb4, 0xb0, 0x4e, 0x0c, 0x57, 0x0e, 0xaf, 0x84, 0x4b, 0x03, 0x31, 0x4a,
-	0x3e, 0x28, 0xcc, 0xd9, 0x65, 0xe2, 0xd7, 0xd1, 0x48, 0x73, 0xeb, 0x92, 0x2d, 0xdb, 0xd8, 0x6a,
-	0x12, 0x35, 0x28, 0xe3, 0xd9, 0xbe, 0xcc, 0x8c, 0xa1, 0x74, 0xe3, 0xd2, 0xc6, 0x86, 0x17, 0xbc,
-	0x1a, 0x91, 0x86, 0x5d, 0xb0, 0xff, 0x28, 0xfe, 0x19, 0x4d, 0x3c, 0x70, 0x43, 0x64, 0x1b, 0x57,
-	0xb1, 0xea, 0xf6, 0x43, 0xa0, 0xdd, 0x78, 0xcb, 0x01, 0xae, 0xed, 0x00, 0x74, 0x1c, 0x88, 0xcf,
-	0xe5, 0x3d, 0xf5, 0x20, 0xc3, 0xe5, 0x9e, 0x73, 0x28, 0x7d, 0x60, 0xcb, 0xbc, 0x88, 0xc6, 0x2b,
-	0x8b, 0xb2, 0xb7, 0x6b, 0xb9, 0x8e, 0xe9, 0x03, 0xc3, 0xda, 0xca, 0x26, 0x58, 0x5e, 0x47, 0x0e,
-	0xe4, 0x75, 0xad, 0x66, 0xd2, 0xed, 0xd5, 0x88, 0x94, 0xae, 0x2c, 0x7a, 0x2c, 0xb7, 0xbd, 0x70,
-	0xfe, 0x6f, 0xe8, 0x18, 0xc5, 0x75, 0xa5, 0x4e, 0x65, 0xcf, 0xa9, 0xb2, 0x86, 0x2b, 0x4a, 0xa3,
-	0x4a, 0xe5, 0x26, 0x31, 0xb3, 0xa9, 0xb7, 0x70, 0x81, 0x34, 0xe1, 0x01, 0x83, 0x9a, 0x32, 0x58,
-	0x89, 0x98, 0xfc, 0x1a, 0x1a, 0xb1, 0x4d, 0xac, 0x92, 0x0a, 0x51, 0x19, 0x0b, 0x62, 0x2c, 0x67,
-	0xfa, 0x2a, 0x75, 0x45, 0x6b, 0x62, 0x8b, 0x12, 0x1b, 0x7b, 0x2c, 0xab, 0x20, 0x0d, 0x07, 0xd8,
-	0x12, 0x31, 0xc5, 0xf3, 0x28, 0xeb, 0xef, 0xeb, 0xb0, 0x54, 0xa3, 0x2d, 0x07, 0x12, 0x6d, 0x07,
-	0xe2, 0x1d, 0x07, 0x60, 0x49, 0x14, 0x10, 0x6a, 0x12, 0x33, 0x58, 0xcc, 0xb4, 0x1c, 0x48, 0xb5,
-	0x1d, 0x48, 0x76, 0x1c, 0x88, 0x5d, 0xce, 0xcf, 0xce, 0xac, 0xc7, 0x92, 0xf1, 0x4c, 0x62, 0x3d,
-	0x96, 0x4c, 0x66, 0x52, 0xb9, 0xcf, 0x01, 0x8d, 0x1f, 0xaa, 0x36, 0xff, 0x4f, 0x34, 0x1a, 0x54,
-	0x5b, 0x76, 0x47, 0x90, 0x6f, 0xc7, 0xc5, 0xf7, 0x32, 0xcf, 0x06, 0xa1, 0x81, 0x77, 0x46, 0xac,
-	0xd0, 0xff, 0xc4, 0x69, 0x74, 0x82, 0xcd, 0x35, 0xc3, 0x92, 0x03, 0x6c, 0xb0, 0x35, 0xb7, 0x79,
-	0xd8, 0x76, 0x82, 0xca, 0xc3, 0x9c, 0x5f, 0xf5, 0x2f, 0xa3, 0x28, 0x73, 0x90, 0x99, 0xd7, 0x11,
-	0xdf, 0xcd, 0x13, 0x6b, 0x3a, 0xf6, 0x92, 0x85, 0xa9, 0xe8, 0x80, 0x7d, 0x7f, 0x74, 0x77, 0x27,
-	0xe6, 0x42, 0x9e, 0x3b, 0xc0, 0x59, 0xf8, 0xd1, 0x1e, 0xc0, 0xb3, 0x3d, 0x00, 0x29, 0x13, 0x90,
-	0x5e, 0xd3, 0x74, 0xec, 0xbe, 0xac, 0xbf, 0xbf, 0xa2, 0x1f, 0xd1, 0x5f, 0xf1, 0x8f, 0xe2, 0xaf,
-	0xc4, 0x6f, 0xe7, 0xaf, 0x60, 0x8c, 0xc1, 0xbc, 0x78, 0xb2, 0xc7, 0x5f, 0xee, 0x8c, 0x8b, 0xb7,
-	0x1d, 0x88, 0xb9, 0x33, 0x6e, 0x31, 0xbf, 0xe4, 0xcd, 0xb8, 0xf5, 0x58, 0x32, 0x96, 0x89, 0xe7,
-	0x1c, 0x40, 0xa9, 0x95, 0x86, 0x4d, 0x8d, 0x5a, 0x69, 0xed, 0x2e, 0x3f, 0x85, 0xe2, 0xc4, 0x94,
-	0x9b, 0x0b, 0xcc, 0x4e, 0x29, 0x31, 0xf5, 0xe4, 0x87, 0x56, 0x34, 0x66, 0x71, 0x0f, 0x61, 0x35,
-	0x22, 0xc5, 0x88, 0x59, 0x5a, 0xe0, 0xcb, 0x5e, 0xc4, 0x12, 0xd3, 0x36, 0x25, 0xde, 0xf8, 0x71,
-	0xe7, 0x9c, 0x86, 0x6b, 0xc6, 0x6c, 0x9e, 0x62, 0x9b, 0xe6, 0x55, 0x8b, 0xe6, 0x6d, 0xaa, 0xe8,
-	0xa4, 0xae, 0xe7, 0x6d, 0xa3, 0x42, 0xcb, 0x4a, 0x7d, 0x4b, 0xae, 0x61, 0x35, 0x6f, 0x5a, 0x86,
-	0xf6, 0xbf, 0xa7, 0xc0, 0x57, 0x16, 0x1f, 0xaa, 0xd3, 0xc4, 0x6c, 0x2e, 0x4d, 0xdb, 0x54, 0xa9,
-	0x6b, 0x8a, 0xa5, 0xb9, 0xaf, 0x88, 0x5b, 0xd1, 0x47, 0x10, 0xbc, 0x63, 0x49, 0xcc, 0xa1, 0xb4,
-	0x9b, 0xbe, 0xb7, 0x4b, 0xcf, 0x71, 0xe9, 0x90, 0xe3, 0xa2, 0x73, 0xf9, 0x79, 0xdf, 0x73, 0xdf,
-	0x72, 0xe8, 0x68, 0xdf, 0x73, 0x87, 0xbf, 0x83, 0x62, 0xa1, 0xbe, 0x18, 0xec, 0x5c, 0xdc, 0xc0,
-	0x6a, 0xc3, 0xc2, 0xb7, 0xb0, 0xbd, 0x59, 0x9a, 0x0b, 0xf5, 0x06, 0x23, 0xe2, 0x65, 0x94, 0x09,
-	0xe2, 0x55, 0xcf, 0xc6, 0xb6, 0xef, 0xaf, 0xf9, 0x81, 0xc8, 0xfd, 0x83, 0x69, 0xe5, 0x9a, 0xcb,
-	0x6c, 0xaf, 0x46, 0xa4, 0x31, 0x3f, 0x62, 0x85, 0x19, 0xd8, 0xe6, 0x6f, 0xa2, 0x21, 0x1b, 0xeb,
-	0xee, 0x06, 0xfc, 0x79, 0x3d, 0x33, 0x60, 0xd2, 0x7a, 0xf8, 0xb0, 0xf5, 0x29, 0xc4, 0xb3, 0x28,
-	0xd3, 0xfd, 0x34, 0x79, 0xe7, 0xc0, 0xfe, 0x3a, 0x86, 0xc6, 0x7a, 0xf3, 0xe3, 0x09, 0x4a, 0xab,
-	0xb8, 0xdb, 0xfd, 0x7e, 0xd7, 0x0e, 0x7a, 0x5a, 0x9f, 0xdc, 0xdd, 0x19, 0x09, 0x43, 0xdd, 0xee,
-	0x55, 0xf1, 0x4f, 0x0e, 0x44, 0xdc, 0x0e, 0x96, 0x46, 0x55, 0xec, 0xbf, 0x8d, 0xb5, 0xee, 0x55,
-	0xc4, 0xb3, 0x54, 0xab, 0x86, 0x3a, 0xf0, 0xd9, 0xc0, 0x36, 0x77, 0xd3, 0x05, 0x84, 0x9a, 0x37,
-	0xc4, 0x42, 0xea, 0x36, 0xd1, 0x70, 0x97, 0x6c, 0xe8, 0xad, 0x64, 0x13, 0x5d, 0xb2, 0x35, 0x06,
-	0x0b, 0x28, 0xff, 0x03, 0x28, 0xed, 0xeb, 0xd9, 0x65, 0x4a, 0x0e, 0x2c, 0xc2, 0xc5, 0xdd, 0x9d,
-	0xa0, 0x1a, 0xbb, 0x7b, 0xf0, 0xa7, 0x0b, 0x23, 0xe1, 0x86, 0xb8, 0x30, 0x54, 0xc1, 0x9a, 0xa5,
-	0xd4, 0xcc, 0x27, 0x7b, 0x30, 0x96, 0x84, 0x73, 0x30, 0x03, 0xcb, 0x09, 0xd5, 0xa8, 0x57, 0x88,
-	0xee, 0x5a, 0xc3, 0xc7, 0x05, 0x89, 0xdc, 0x41, 0x48, 0x65, 0x3d, 0x1a, 0x3a, 0xa3, 0x0a, 0x03,
-	0xb9, 0xa3, 0xdb, 0xda, 0xab, 0x20, 0xa5, 0x3c, 0x0e, 0x77, 0x96, 0x9c, 0x46, 0x63, 0xc1, 0x2c,
-	0x09, 0x79, 0x23, 0x38, 0xa1, 0xe2, 0x4b, 0xf9, 0x8b, 0xf9, 0x4b, 0xe2, 0x54, 0xcf, 0x14, 0xe1,
-	0x5b, 0x0e, 0xa0, 0xb6, 0x03, 0xa9, 0x8e, 0x03, 0xdc, 0xec, 0xcc, 0x2b, 0x07, 0xa0, 0x7b, 0x4e,
-	0xa5, 0x32, 0x28, 0xf7, 0x5d, 0x0c, 0x1d, 0xe9, 0xd7, 0x40, 0x3c, 0x45, 0x29, 0x56, 0x98, 0xba,
-	0x52, 0x7b, 0x1f, 0x0f, 0xcd, 0xef, 0xee, 0xf0, 0x36, 0xe3, 0xab, 0x61, 0x7b, 0x93, 0xd9, 0x48,
-	0x6e, 0xce, 0x05, 0x1e, 0x62, 0xb2, 0x71, 0x61, 0xd9, 0x1e, 0x3f, 0x05, 0x90, 0x92, 0x6e, 0xd8,
-	0x6d, 0xa5, 0xf6, 0xc9, 0x54, 0x7f, 0x0c, 0x53, 0x3d, 0xe6, 0xd0, 0x70, 0x68, 0xc0, 0xf1, 0xff,
-	0xed, 0x23, 0xde, 0xe0, 0x96, 0xfa, 0xcb, 0xaf, 0xe2, 0xb9, 0x1e, 0x7a, 0x2f, 0x01, 0xdf, 0x21,
-	0x5f, 0xea, 0x83, 0xe4, 0x8b, 0x84, 0xe5, 0x3b, 0xd5, 0xa3, 0xcc, 0x78, 0xe8, 0xa3, 0x10, 0x2e,
-	0xfb, 0xc2, 0xb8, 0xdf, 0x83, 0x5f, 0x71, 0x68, 0x6c, 0xc5, 0xc2, 0x0a, 0xc5, 0xdd, 0xeb, 0xe3,
-	0xec, 0xe0, 0xd7, 0xc7, 0xdf, 0xe3, 0xc5, 0x71, 0x79, 0xfc, 0xf9, 0x5f, 0x0f, 0xdc, 0x98, 0xc5,
-	0x85, 0x37, 0xde, 0xe8, 0x26, 0xff, 0xfd, 0x33, 0xbc, 0x61, 0xcd, 0xbf, 0xdc, 0xb5, 0x38, 0x94,
-	0x96, 0xb0, 0x59, 0x55, 0xd4, 0x4f, 0x12, 0x7e, 0xa0, 0x84, 0x7b, 0x1c, 0x1a, 0xbe, 0x8e, 0xe9,
-	0x27, 0xf9, 0x3e, 0x48, 0x3e, 0xf1, 0xff, 0xd0, 0x7e, 0x29, 0x44, 0x5e, 0xbc, 0x14, 0x22, 0xaf,
-	0x5f, 0x0a, 0xf0, 0xa8, 0x23, 0xc0, 0x17, 0x1d, 0x01, 0x9e, 0x75, 0x04, 0x68, 0x77, 0x04, 0x78,
-	0xd1, 0x11, 0xe0, 0xfb, 0x8e, 0x00, 0xaf, 0x3a, 0x42, 0xe4, 0x75, 0x47, 0x80, 0xc7, 0xfb, 0x42,
-	0xa4, 0xb5, 0x2f, 0x40, 0x7b, 0x5f, 0x88, 0xbc, 0xd8, 0x17, 0x22, 0xf7, 0xff, 0xae, 0x1b, 0xe6,
-	0x96, 0x5e, 0x68, 0x1a, 0x55, 0x8a, 0x2d, 0x4b, 0x29, 0x34, 0xec, 0x22, 0xfb, 0xa3, 0x62, 0x58,
-	0xb5, 0x69, 0xd3, 0x32, 0x9a, 0x44, 0xc3, 0xd6, 0xb4, 0xfb, 0xa9, 0x5d, 0x34, 0xcb, 0xba, 0x51,
-	0xc4, 0x0f, 0xa9, 0xff, 0x6b, 0xd4, 0xdb, 0x7e, 0xf8, 0x2b, 0x27, 0xd8, 0xef, 0x53, 0xf3, 0xbf,
-	0x04, 0x00, 0x00, 0xff, 0xff, 0x5c, 0xc0, 0x37, 0x0f, 0x26, 0x14, 0x00, 0x00,
+	// 1493 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x58, 0xcb, 0x6f, 0x1b, 0x55,
+	0x17, 0xf7, 0xb1, 0xc7, 0x8e, 0x7d, 0xf3, 0xb0, 0x33, 0x5f, 0x9b, 0xcf, 0x4d, 0xfb, 0x4d, 0x23,
+	0xb7, 0x9f, 0x28, 0x95, 0x63, 0x37, 0xcf, 0x3e, 0x90, 0x90, 0x3a, 0x69, 0xd5, 0x24, 0xf4, 0xc5,
+	0xa4, 0x04, 0xa9, 0x42, 0x1a, 0x8d, 0x67, 0xae, 0x27, 0x97, 0xd8, 0x9e, 0xd1, 0xcc, 0xb5, 0xdb,
+	0x2c, 0x22, 0x55, 0x2c, 0x10, 0x62, 0x15, 0x89, 0x7f, 0x80, 0x15, 0x42, 0x59, 0xb3, 0xaa, 0x53,
+	0x29, 0x20, 0x90, 0xaa, 0xae, 0x22, 0x16, 0x28, 0x4b, 0xea, 0x6c, 0x0a, 0xab, 0x4a, 0x48, 0x80,
+	0xd8, 0x80, 0xee, 0x9d, 0x19, 0x77, 0x9c, 0xba, 0xc5, 0x05, 0x75, 0x43, 0xd9, 0xcd, 0xf8, 0x9e,
+	0xf3, 0xbb, 0xe7, 0xfc, 0xce, 0xef, 0x9c, 0xeb, 0x3b, 0xa8, 0xd8, 0xc0, 0x6e, 0x81, 0x58, 0x45,
+	0x57, 0x5f, 0xc1, 0x55, 0xad, 0xd8, 0x20, 0xf8, 0x96, 0x5b, 0x6c, 0x10, 0x87, 0xd6, 0xb5, 0x8a,
+	0xaa, 0x19, 0x86, 0x83, 0x5d, 0xb7, 0x48, 0xd7, 0x6c, 0xec, 0x16, 0x6c, 0xc7, 0xa2, 0x96, 0x78,
+	0xcc, 0x73, 0x28, 0x78, 0x0e, 0x05, 0xee, 0x50, 0xd8, 0xe7, 0x30, 0x3a, 0x6e, 0x12, 0xba, 0x52,
+	0x2f, 0x15, 0x74, 0xab, 0x5a, 0x34, 0x2d, 0xd3, 0x2a, 0x72, 0xdf, 0x52, 0xbd, 0xcc, 0xdf, 0xf8,
+	0x0b, 0x7f, 0xf2, 0x30, 0x47, 0x8f, 0x76, 0x06, 0x51, 0x22, 0x26, 0xb1, 0xd5, 0xd0, 0xa6, 0xa3,
+	0x52, 0xa7, 0x81, 0x8e, 0x1d, 0xda, 0xb1, 0x7e, 0xb8, 0x73, 0xdd, 0xb2, 0x29, 0xb1, 0x6a, 0xc1,
+	0xe2, 0xa1, 0xce, 0xc5, 0xb0, 0xdf, 0x91, 0x7d, 0xd9, 0x6b, 0x15, 0x62, 0x68, 0x14, 0xfb, 0xab,
+	0x63, 0x4f, 0x73, 0xa3, 0x76, 0x42, 0x1f, 0xef, 0xc6, 0x9e, 0x4b, 0x28, 0xee, 0x88, 0xee, 0x68,
+	0x37, 0xab, 0x90, 0x41, 0xee, 0xbb, 0x28, 0x1a, 0xba, 0x54, 0xb1, 0x4a, 0x5a, 0x65, 0xc9, 0xc6,
+	0xfa, 0x8d, 0x35, 0x1b, 0x8b, 0xa7, 0x51, 0xdc, 0xa5, 0x1a, 0xc5, 0x59, 0x18, 0x83, 0x13, 0xfd,
+	0x93, 0x87, 0x0b, 0x9d, 0xb4, 0xdf, 0xb8, 0x72, 0x65, 0x89, 0x2d, 0x33, 0x5b, 0x59, 0x78, 0xdc,
+	0x04, 0x50, 0x3c, 0x7b, 0x71, 0x09, 0x25, 0xec, 0x7a, 0xa9, 0x42, 0xf4, 0x6c, 0x8c, 0x7b, 0x9e,
+	0x2d, 0xf4, 0x50, 0xb0, 0xc2, 0x75, 0xee, 0x72, 0x01, 0xdb, 0x15, 0x6b, 0xad, 0x8a, 0x6b, 0x94,
+	0xe1, 0xce, 0x47, 0x14, 0x1f, 0x4a, 0xbc, 0x89, 0x06, 0x79, 0xf6, 0xa4, 0x46, 0xb1, 0x53, 0xd3,
+	0x2a, 0xd9, 0x47, 0x7d, 0x1c, 0x3c, 0xd7, 0x15, 0xfc, 0x5a, 0xe9, 0x7d, 0xac, 0x53, 0x05, 0x97,
+	0x79, 0x74, 0x99, 0xcd, 0xf5, 0x4e, 0x67, 0x65, 0x80, 0xbd, 0x2e, 0xf8, 0x6f, 0xe7, 0x8e, 0x7c,
+	0xd5, 0x84, 0x2c, 0x1a, 0x41, 0xe9, 0x65, 0x2f, 0xa6, 0xb1, 0xf3, 0x5e, 0x4c, 0x62, 0x6c, 0x22,
+	0x3f, 0x29, 0xbf, 0x86, 0x46, 0x8c, 0x76, 0x54, 0x9c, 0x55, 0x55, 0x5f, 0xb1, 0x88, 0x8e, 0xc5,
+	0xc1, 0xed, 0x26, 0xc4, 0x76, 0x9a, 0x10, 0x6d, 0x35, 0x01, 0xa6, 0x16, 0x85, 0x64, 0x34, 0x13,
+	0x5b, 0x14, 0x92, 0x42, 0x26, 0xae, 0xf4, 0xd9, 0x0e, 0x69, 0x68, 0x14, 0xe7, 0xbe, 0x00, 0x74,
+	0xa0, 0x5b, 0x6a, 0xe2, 0x55, 0x94, 0x30, 0x39, 0xe1, 0xd9, 0x28, 0x4f, 0x64, 0xba, 0x27, 0x96,
+	0xbc, 0x1a, 0xbd, 0xbb, 0x82, 0x1d, 0x1c, 0x10, 0xe4, 0xa1, 0xc8, 0x39, 0x34, 0x72, 0x8b, 0xfd,
+	0xac, 0xba, 0xb8, 0x82, 0x75, 0x26, 0x91, 0x20, 0xcc, 0xe4, 0x4e, 0x13, 0xe0, 0xd3, 0x2d, 0x80,
+	0x45, 0x21, 0x09, 0x99, 0xe8, 0xa2, 0x90, 0x8c, 0x65, 0x04, 0x3f, 0xce, 0xa4, 0x83, 0x4d, 0x62,
+	0x79, 0x94, 0xac, 0x9e, 0x71, 0x55, 0x17, 0x3b, 0x0d, 0xa2, 0xe3, 0xdc, 0x46, 0x14, 0xa5, 0xf7,
+	0xed, 0x25, 0xca, 0x68, 0xb8, 0x3c, 0xa3, 0x7a, 0xdb, 0xa9, 0x35, 0x4c, 0x6f, 0x59, 0xce, 0x6a,
+	0x36, 0xc1, 0x83, 0x3f, 0xb0, 0x2f, 0xf8, 0x8b, 0x55, 0x9b, 0xae, 0xcd, 0x47, 0x94, 0x74, 0x79,
+	0xc6, 0x43, 0xb9, 0xea, 0x99, 0x8b, 0x0b, 0x68, 0xc0, 0xb5, 0xb1, 0x4e, 0xca, 0x44, 0x57, 0x1b,
+	0xc4, 0xce, 0x22, 0xee, 0x7e, 0xbc, 0x6b, 0xee, 0xe7, 0x8d, 0x06, 0x76, 0x28, 0x71, 0xb1, 0xc7,
+	0xdf, 0x3c, 0x28, 0xfd, 0x81, 0xef, 0x32, 0xb1, 0xe5, 0xd7, 0x51, 0xd6, 0x0f, 0xe2, 0xe9, 0x94,
+	0x59, 0x65, 0x12, 0x3b, 0x4d, 0x88, 0xb3, 0xca, 0xcc, 0xca, 0x23, 0x08, 0x35, 0x88, 0x1d, 0xe6,
+	0x23, 0xe9, 0xf3, 0x11, 0xcf, 0x24, 0x16, 0x85, 0x64, 0x32, 0x93, 0x5a, 0x14, 0x92, 0xa9, 0x0c,
+	0x52, 0x0e, 0x51, 0x5c, 0xd3, 0x6a, 0x54, 0xf5, 0x54, 0xa7, 0x1a, 0xb8, 0xac, 0xd5, 0x2b, 0x94,
+	0x85, 0x9a, 0xfb, 0x0c, 0xd0, 0xb0, 0xe2, 0xb3, 0xf5, 0x84, 0x94, 0xf7, 0xd0, 0x60, 0x40, 0xa1,
+	0xca, 0xda, 0xce, 0xaf, 0xe6, 0x4c, 0x4f, 0xd5, 0x0c, 0xe0, 0x96, 0x08, 0x0d, 0xca, 0x39, 0xe0,
+	0x84, 0x7e, 0x93, 0xc7, 0xd1, 0x11, 0xde, 0xcb, 0x96, 0xa3, 0x06, 0xbe, 0x41, 0xce, 0x4c, 0x88,
+	0x3c, 0xcf, 0x28, 0x2b, 0x2f, 0xcb, 0x73, 0xd2, 0xab, 0x6f, 0xee, 0xf7, 0x28, 0xca, 0xec, 0x47,
+	0x16, 0x4d, 0x24, 0xb6, 0xe3, 0xc4, 0x86, 0x89, 0xbd, 0x60, 0x61, 0x2c, 0xd6, 0x63, 0x0f, 0x1d,
+	0xdc, 0x5c, 0x17, 0x98, 0xcb, 0x83, 0x26, 0x44, 0x1d, 0x7c, 0x67, 0x0b, 0xe0, 0xfe, 0x16, 0x80,
+	0x92, 0x09, 0x40, 0x2f, 0x1a, 0x26, 0x66, 0x9b, 0x75, 0x57, 0x49, 0xec, 0xef, 0xa9, 0x24, 0xf1,
+	0xf2, 0x54, 0xf2, 0xa4, 0x7f, 0xe5, 0xc3, 0x1d, 0x2a, 0x09, 0x24, 0x24, 0x70, 0x09, 0x85, 0x9b,
+	0xdb, 0x93, 0xcd, 0xf3, 0xa4, 0xf2, 0x0d, 0xa0, 0xd4, 0x5c, 0xdd, 0xa5, 0x56, 0x75, 0x79, 0xe1,
+	0xba, 0x78, 0x12, 0xc5, 0x89, 0xad, 0x36, 0xa6, 0xb9, 0x34, 0x52, 0xf2, 0x7f, 0xee, 0xfe, 0xb0,
+	0x1d, 0x13, 0x9c, 0xe8, 0x6d, 0x60, 0x0f, 0x71, 0x27, 0xb6, 0x0b, 0x30, 0x1f, 0x51, 0x04, 0x62,
+	0x2f, 0x4f, 0x8b, 0x25, 0xcf, 0x76, 0x96, 0x33, 0x96, 0x92, 0xdf, 0xfa, 0x71, 0xfd, 0x84, 0x81,
+	0xab, 0xd6, 0x44, 0x9e, 0x62, 0x97, 0xe6, 0x75, 0x87, 0xe6, 0x5d, 0xaa, 0x99, 0xa4, 0x66, 0xe6,
+	0x5d, 0xab, 0x4c, 0x4b, 0x5a, 0x6d, 0x55, 0xad, 0x62, 0x3d, 0x6f, 0x3b, 0x96, 0xf1, 0xf1, 0x3d,
+	0x10, 0xcb, 0x33, 0xb7, 0xf5, 0x71, 0x62, 0x37, 0x66, 0xc7, 0x5d, 0xaa, 0xd5, 0x0c, 0xcd, 0x31,
+	0xfc, 0x3d, 0xee, 0xb4, 0xf7, 0x98, 0x95, 0x73, 0x28, 0xcd, 0xf2, 0xf4, 0xe8, 0xf0, 0x74, 0x94,
+	0x0e, 0xe9, 0x28, 0x36, 0x99, 0x9f, 0xf2, 0x95, 0xf4, 0x75, 0x14, 0x1d, 0xbc, 0xee, 0x0d, 0xb2,
+	0x7d, 0xd3, 0xeb, 0x1a, 0x12, 0x42, 0x6a, 0xef, 0x6d, 0xc2, 0x2f, 0x61, 0xbd, 0xee, 0xe0, 0x2b,
+	0xd8, 0x5d, 0x59, 0x9e, 0x0c, 0x29, 0x9e, 0x03, 0x89, 0x2a, 0xca, 0x04, 0xf6, 0xba, 0x27, 0x4e,
+	0xd7, 0x57, 0xcd, 0x54, 0x4f, 0xe0, 0xfe, 0xe8, 0x9e, 0xbb, 0xc8, 0x90, 0xdd, 0xf9, 0x88, 0x32,
+	0xe4, 0x5b, 0xcc, 0x71, 0x59, 0xba, 0xe2, 0x65, 0xd4, 0xe7, 0x62, 0x93, 0x25, 0x90, 0x15, 0x38,
+	0xee, 0xa9, 0x1e, 0x83, 0x36, 0x43, 0xa7, 0x51, 0x00, 0x21, 0xff, 0x1f, 0x65, 0xda, 0x87, 0x6c,
+	0xa0, 0x98, 0xe1, 0x10, 0x89, 0xf1, 0xc9, 0xfc, 0x54, 0x7e, 0xda, 0xa7, 0xf1, 0x4b, 0x01, 0x0d,
+	0x75, 0xc6, 0x27, 0x12, 0x94, 0xd6, 0x71, 0xbb, 0xa7, 0xfd, 0x5e, 0xec, 0xf5, 0x3c, 0xfb, 0xdf,
+	0xe6, 0xfa, 0x40, 0xd8, 0x95, 0xf5, 0xa4, 0x8e, 0x7f, 0x6d, 0x42, 0x84, 0xf5, 0xa5, 0x32, 0xa8,
+	0x63, 0x7f, 0x37, 0xde, 0x90, 0x17, 0x90, 0xc8, 0x43, 0xad, 0x58, 0x7a, 0xcf, 0x73, 0x9b, 0x27,
+	0x77, 0x99, 0x39, 0x04, 0x2d, 0xf9, 0x36, 0x3a, 0x14, 0x42, 0x21, 0x35, 0x97, 0x18, 0xb8, 0x0d,
+	0xd6, 0xf7, 0x5c, 0xb0, 0x91, 0x36, 0xd8, 0x02, 0x77, 0x0b, 0x20, 0x3f, 0x04, 0x94, 0xf6, 0xf9,
+	0x6c, 0x23, 0x25, 0x7b, 0x26, 0xe1, 0xf4, 0xe6, 0x7a, 0x50, 0x8d, 0xcd, 0x2d, 0xf8, 0xef, 0xc9,
+	0x81, 0x70, 0x43, 0x9c, 0xec, 0x2b, 0x63, 0xc3, 0xd1, 0xaa, 0xf6, 0xdd, 0x2d, 0x18, 0x4a, 0xc2,
+	0x09, 0x38, 0x05, 0xe7, 0x12, 0xba, 0x55, 0x2b, 0x13, 0x93, 0x49, 0xc3, 0xf7, 0x0b, 0x02, 0xb9,
+	0x86, 0x90, 0xce, 0xbb, 0x35, 0x74, 0x24, 0x15, 0x7a, 0x52, 0x47, 0xbb, 0xc9, 0xe7, 0x41, 0x49,
+	0x79, 0x18, 0x6c, 0xe8, 0x1c, 0x43, 0x43, 0xc1, 0xd0, 0x09, 0x69, 0x23, 0x38, 0x90, 0xe2, 0xb3,
+	0xf9, 0xd3, 0xf9, 0x33, 0xf2, 0x58, 0xc7, 0xb8, 0x11, 0xb7, 0x9b, 0x80, 0x76, 0x9a, 0x90, 0x6a,
+	0x35, 0x21, 0x3a, 0x71, 0xea, 0x51, 0x33, 0x74, 0x3c, 0xa5, 0x32, 0x28, 0xf7, 0xad, 0x80, 0x0e,
+	0x74, 0x6b, 0x20, 0x91, 0xa2, 0x14, 0x2f, 0x4c, 0x4d, 0xab, 0xbe, 0x88, 0x86, 0xa6, 0x36, 0xd7,
+	0x45, 0x97, 0xe3, 0x55, 0xb1, 0xbb, 0xc2, 0x65, 0xa4, 0x36, 0x26, 0x03, 0x0d, 0x71, 0xda, 0xa2,
+	0x61, 0xda, 0x36, 0xee, 0x01, 0x28, 0x49, 0x66, 0x76, 0x55, 0xab, 0xfe, 0x2b, 0xaa, 0x7f, 0x86,
+	0xa8, 0x36, 0xa2, 0xa8, 0x3f, 0x34, 0xe0, 0xc4, 0x8f, 0xba, 0x90, 0xd7, 0xbb, 0xa4, 0xde, 0x78,
+	0x42, 0x1e, 0xd3, 0xd0, 0x0b, 0x11, 0xf8, 0x27, 0xf4, 0xa5, 0xfe, 0x12, 0x7d, 0x91, 0x30, 0x7d,
+	0x47, 0x3b, 0x98, 0x61, 0xd4, 0xa5, 0xd8, 0xff, 0x40, 0x76, 0xba, 0x9f, 0xf5, 0x89, 0x49, 0x66,
+	0x52, 0xb9, 0x9f, 0x01, 0x0d, 0xcd, 0x39, 0x58, 0xa3, 0xb8, 0x7d, 0x11, 0x9a, 0xe8, 0xfd, 0x22,
+	0xf4, 0x32, 0xaf, 0x40, 0xe7, 0x86, 0x1f, 0xbc, 0xb9, 0xef, 0x8e, 0x26, 0x4f, 0x3f, 0xf3, 0x6e,
+	0x32, 0xfa, 0xc1, 0x6f, 0xf0, 0x8c, 0xb5, 0xee, 0x17, 0x95, 0x5f, 0x00, 0xa5, 0x15, 0x6c, 0x57,
+	0x34, 0xfd, 0x55, 0xcb, 0xfc, 0x27, 0x40, 0xfd, 0x97, 0x30, 0x7d, 0xb5, 0xb2, 0x96, 0x3f, 0x81,
+	0x9d, 0x87, 0x52, 0x64, 0xf7, 0xa1, 0x14, 0x79, 0xfc, 0x50, 0x82, 0x3b, 0x2d, 0x09, 0x3e, 0x6f,
+	0x49, 0x70, 0xbf, 0x25, 0xc1, 0x4e, 0x4b, 0x82, 0xdd, 0x96, 0x04, 0xdf, 0xb7, 0x24, 0x78, 0xd4,
+	0x92, 0x22, 0x8f, 0x5b, 0x12, 0x6c, 0xec, 0x49, 0x91, 0xed, 0x3d, 0x09, 0x76, 0xf6, 0xa4, 0xc8,
+	0xee, 0x9e, 0x14, 0xb9, 0xf9, 0x8e, 0x69, 0xd9, 0xab, 0x66, 0xa1, 0x61, 0x55, 0x28, 0x76, 0x1c,
+	0xad, 0x50, 0x77, 0x8b, 0xfc, 0xa1, 0x6c, 0x39, 0xd5, 0x71, 0xdb, 0xb1, 0x1a, 0xc4, 0xc0, 0xce,
+	0x38, 0xfb, 0x3f, 0x5a, 0xb4, 0x4b, 0xa6, 0x55, 0xc4, 0xb7, 0xa9, 0xff, 0xf1, 0xe1, 0x79, 0xdf,
+	0x79, 0x4a, 0x09, 0xfe, 0x39, 0x62, 0xea, 0x8f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x31, 0xa0, 0x64,
+	0x4b, 0x15, 0x12, 0x00, 0x00,
 }
 
 func (this *GlobalSpecType) Equal(that interface{}) bool {
@@ -1626,30 +1519,6 @@ func (this *GlobalSpecType_Public) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *GlobalSpecType_Private) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*GlobalSpecType_Private)
-	if !ok {
-		that2, ok := that.(GlobalSpecType_Private)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.Private.Equal(that1.Private) {
-		return false
-	}
-	return true
-}
 func (this *PublicDeploymentType) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -1700,54 +1569,6 @@ func (this *PublicDeploymentType_Global) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.Global.Equal(that1.Global) {
-		return false
-	}
-	return true
-}
-func (this *PublicDeploymentType_Regional) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*PublicDeploymentType_Regional)
-	if !ok {
-		that2, ok := that.(PublicDeploymentType_Regional)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.Regional.Equal(that1.Regional) {
-		return false
-	}
-	return true
-}
-func (this *PublicDeploymentType_Vk8SService) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*PublicDeploymentType_Vk8SService)
-	if !ok {
-		that2, ok := that.(PublicDeploymentType_Vk8SService)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.Vk8SService.Equal(that1.Vk8SService) {
 		return false
 	}
 	return true
@@ -1811,30 +1632,6 @@ func (this *GlobalWhereType_F5GlobalNetwork) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.F5GlobalNetwork.Equal(that1.F5GlobalNetwork) {
-		return false
-	}
-	return true
-}
-func (this *GlobalWhereType_TenantPublicDefaultVip) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*GlobalWhereType_TenantPublicDefaultVip)
-	if !ok {
-		that2, ok := that.(GlobalWhereType_TenantPublicDefaultVip)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.TenantPublicDefaultVip.Equal(that1.TenantPublicDefaultVip) {
 		return false
 	}
 	return true
@@ -1984,30 +1781,6 @@ func (this *RegionalSiteType_F5GlobalNetwork) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.F5GlobalNetwork.Equal(that1.F5GlobalNetwork) {
-		return false
-	}
-	return true
-}
-func (this *RegionalSiteType_TenantPublicDefaultVip) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*RegionalSiteType_TenantPublicDefaultVip)
-	if !ok {
-		that2, ok := that.(RegionalSiteType_TenantPublicDefaultVip)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.TenantPublicDefaultVip.Equal(that1.TenantPublicDefaultVip) {
 		return false
 	}
 	return true
@@ -2606,30 +2379,6 @@ func (this *CreateSpecType_Public) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *CreateSpecType_Private) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*CreateSpecType_Private)
-	if !ok {
-		that2, ok := that.(CreateSpecType_Private)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.Private.Equal(that1.Private) {
-		return false
-	}
-	return true
-}
 func (this *ReplaceSpecType) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -2683,30 +2432,6 @@ func (this *ReplaceSpecType_Public) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.Public.Equal(that1.Public) {
-		return false
-	}
-	return true
-}
-func (this *ReplaceSpecType_Private) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*ReplaceSpecType_Private)
-	if !ok {
-		that2, ok := that.(ReplaceSpecType_Private)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.Private.Equal(that1.Private) {
 		return false
 	}
 	return true
@@ -2768,35 +2493,11 @@ func (this *GetSpecType_Public) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *GetSpecType_Private) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*GetSpecType_Private)
-	if !ok {
-		that2, ok := that.(GetSpecType_Private)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.Private.Equal(that1.Private) {
-		return false
-	}
-	return true
-}
 func (this *GlobalSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 8)
+	s := make([]string, 0, 7)
 	s = append(s, "&virtual_address.GlobalSpecType{")
 	if this.State != nil {
 		s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
@@ -2818,19 +2519,11 @@ func (this *GlobalSpecType_Public) GoString() string {
 		`Public:` + fmt.Sprintf("%#v", this.Public) + `}`}, ", ")
 	return s
 }
-func (this *GlobalSpecType_Private) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&virtual_address.GlobalSpecType_Private{` +
-		`Private:` + fmt.Sprintf("%#v", this.Private) + `}`}, ", ")
-	return s
-}
 func (this *PublicDeploymentType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 7)
+	s := make([]string, 0, 5)
 	s = append(s, "&virtual_address.PublicDeploymentType{")
 	if this.WhereSelectionChoice != nil {
 		s = append(s, "WhereSelectionChoice: "+fmt.Sprintf("%#v", this.WhereSelectionChoice)+",\n")
@@ -2846,27 +2539,11 @@ func (this *PublicDeploymentType_Global) GoString() string {
 		`Global:` + fmt.Sprintf("%#v", this.Global) + `}`}, ", ")
 	return s
 }
-func (this *PublicDeploymentType_Regional) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&virtual_address.PublicDeploymentType_Regional{` +
-		`Regional:` + fmt.Sprintf("%#v", this.Regional) + `}`}, ", ")
-	return s
-}
-func (this *PublicDeploymentType_Vk8SService) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&virtual_address.PublicDeploymentType_Vk8SService{` +
-		`Vk8SService:` + fmt.Sprintf("%#v", this.Vk8SService) + `}`}, ", ")
-	return s
-}
 func (this *GlobalWhereType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 7)
+	s := make([]string, 0, 6)
 	s = append(s, "&virtual_address.GlobalWhereType{")
 	if this.NetworkSelectionChoice != nil {
 		s = append(s, "NetworkSelectionChoice: "+fmt.Sprintf("%#v", this.NetworkSelectionChoice)+",\n")
@@ -2883,14 +2560,6 @@ func (this *GlobalWhereType_F5GlobalNetwork) GoString() string {
 	}
 	s := strings.Join([]string{`&virtual_address.GlobalWhereType_F5GlobalNetwork{` +
 		`F5GlobalNetwork:` + fmt.Sprintf("%#v", this.F5GlobalNetwork) + `}`}, ", ")
-	return s
-}
-func (this *GlobalWhereType_TenantPublicDefaultVip) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&virtual_address.GlobalWhereType_TenantPublicDefaultVip{` +
-		`TenantPublicDefaultVip:` + fmt.Sprintf("%#v", this.TenantPublicDefaultVip) + `}`}, ", ")
 	return s
 }
 func (this *GlobalWhereType_SpecificVip) GoString() string {
@@ -2925,7 +2594,7 @@ func (this *RegionalSiteType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 8)
+	s := make([]string, 0, 7)
 	s = append(s, "&virtual_address.RegionalSiteType{")
 	if this.RegionalEdgeSite != nil {
 		s = append(s, "RegionalEdgeSite: "+fmt.Sprintf("%#v", this.RegionalEdgeSite)+",\n")
@@ -2945,14 +2614,6 @@ func (this *RegionalSiteType_F5GlobalNetwork) GoString() string {
 	}
 	s := strings.Join([]string{`&virtual_address.RegionalSiteType_F5GlobalNetwork{` +
 		`F5GlobalNetwork:` + fmt.Sprintf("%#v", this.F5GlobalNetwork) + `}`}, ", ")
-	return s
-}
-func (this *RegionalSiteType_TenantPublicDefaultVip) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&virtual_address.RegionalSiteType_TenantPublicDefaultVip{` +
-		`TenantPublicDefaultVip:` + fmt.Sprintf("%#v", this.TenantPublicDefaultVip) + `}`}, ", ")
 	return s
 }
 func (this *RegionalSiteType_SpecificVip) GoString() string {
@@ -3154,7 +2815,7 @@ func (this *CreateSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 7)
+	s := make([]string, 0, 6)
 	s = append(s, "&virtual_address.CreateSpecType{")
 	if this.State != nil {
 		s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
@@ -3173,19 +2834,11 @@ func (this *CreateSpecType_Public) GoString() string {
 		`Public:` + fmt.Sprintf("%#v", this.Public) + `}`}, ", ")
 	return s
 }
-func (this *CreateSpecType_Private) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&virtual_address.CreateSpecType_Private{` +
-		`Private:` + fmt.Sprintf("%#v", this.Private) + `}`}, ", ")
-	return s
-}
 func (this *ReplaceSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 7)
+	s := make([]string, 0, 6)
 	s = append(s, "&virtual_address.ReplaceSpecType{")
 	if this.State != nil {
 		s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
@@ -3204,19 +2857,11 @@ func (this *ReplaceSpecType_Public) GoString() string {
 		`Public:` + fmt.Sprintf("%#v", this.Public) + `}`}, ", ")
 	return s
 }
-func (this *ReplaceSpecType_Private) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&virtual_address.ReplaceSpecType_Private{` +
-		`Private:` + fmt.Sprintf("%#v", this.Private) + `}`}, ", ")
-	return s
-}
 func (this *GetSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 7)
+	s := make([]string, 0, 6)
 	s = append(s, "&virtual_address.GetSpecType{")
 	if this.State != nil {
 		s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
@@ -3233,14 +2878,6 @@ func (this *GetSpecType_Public) GoString() string {
 	}
 	s := strings.Join([]string{`&virtual_address.GetSpecType_Public{` +
 		`Public:` + fmt.Sprintf("%#v", this.Public) + `}`}, ", ")
-	return s
-}
-func (this *GetSpecType_Private) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&virtual_address.GetSpecType_Private{` +
-		`Private:` + fmt.Sprintf("%#v", this.Private) + `}`}, ", ")
 	return s
 }
 func valueToGoStringTypes(v interface{}, typ string) string {
@@ -3330,27 +2967,6 @@ func (m *GlobalSpecType_Public) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	return len(dAtA) - i, nil
 }
-func (m *GlobalSpecType_Private) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *GlobalSpecType_Private) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.Private != nil {
-		{
-			size, err := m.Private.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTypes(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x22
-	}
-	return len(dAtA) - i, nil
-}
 func (m *PublicDeploymentType) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -3401,48 +3017,6 @@ func (m *PublicDeploymentType_Global) MarshalToSizedBuffer(dAtA []byte) (int, er
 		}
 		i--
 		dAtA[i] = 0x12
-	}
-	return len(dAtA) - i, nil
-}
-func (m *PublicDeploymentType_Regional) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *PublicDeploymentType_Regional) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.Regional != nil {
-		{
-			size, err := m.Regional.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTypes(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x1a
-	}
-	return len(dAtA) - i, nil
-}
-func (m *PublicDeploymentType_Vk8SService) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *PublicDeploymentType_Vk8SService) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.Vk8SService != nil {
-		{
-			size, err := m.Vk8SService.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTypes(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x22
 	}
 	return len(dAtA) - i, nil
 }
@@ -3505,27 +3079,6 @@ func (m *GlobalWhereType_F5GlobalNetwork) MarshalToSizedBuffer(dAtA []byte) (int
 		}
 		i--
 		dAtA[i] = 0x32
-	}
-	return len(dAtA) - i, nil
-}
-func (m *GlobalWhereType_TenantPublicDefaultVip) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *GlobalWhereType_TenantPublicDefaultVip) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.TenantPublicDefaultVip != nil {
-		{
-			size, err := m.TenantPublicDefaultVip.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTypes(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x4a
 	}
 	return len(dAtA) - i, nil
 }
@@ -3676,27 +3229,6 @@ func (m *RegionalSiteType_F5GlobalNetwork) MarshalToSizedBuffer(dAtA []byte) (in
 		}
 		i--
 		dAtA[i] = 0x1a
-	}
-	return len(dAtA) - i, nil
-}
-func (m *RegionalSiteType_TenantPublicDefaultVip) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *RegionalSiteType_TenantPublicDefaultVip) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.TenantPublicDefaultVip != nil {
-		{
-			size, err := m.TenantPublicDefaultVip.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTypes(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x2a
 	}
 	return len(dAtA) - i, nil
 }
@@ -4280,27 +3812,6 @@ func (m *CreateSpecType_Public) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	return len(dAtA) - i, nil
 }
-func (m *CreateSpecType_Private) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *CreateSpecType_Private) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.Private != nil {
-		{
-			size, err := m.Private.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTypes(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x22
-	}
-	return len(dAtA) - i, nil
-}
 func (m *ReplaceSpecType) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -4363,27 +3874,6 @@ func (m *ReplaceSpecType_Public) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 		}
 		i--
 		dAtA[i] = 0x1a
-	}
-	return len(dAtA) - i, nil
-}
-func (m *ReplaceSpecType_Private) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *ReplaceSpecType_Private) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.Private != nil {
-		{
-			size, err := m.Private.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTypes(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x22
 	}
 	return len(dAtA) - i, nil
 }
@@ -4452,27 +3942,6 @@ func (m *GetSpecType_Public) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	return len(dAtA) - i, nil
 }
-func (m *GetSpecType_Private) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *GetSpecType_Private) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.Private != nil {
-		{
-			size, err := m.Private.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTypes(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x22
-	}
-	return len(dAtA) - i, nil
-}
 func encodeVarintTypes(dAtA []byte, offset int, v uint64) int {
 	offset -= sovTypes(v)
 	base := offset
@@ -4516,18 +3985,6 @@ func (m *GlobalSpecType_Public) Size() (n int) {
 	}
 	return n
 }
-func (m *GlobalSpecType_Private) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Private != nil {
-		l = m.Private.Size()
-		n += 1 + l + sovTypes(uint64(l))
-	}
-	return n
-}
 func (m *PublicDeploymentType) Size() (n int) {
 	if m == nil {
 		return 0
@@ -4548,30 +4005,6 @@ func (m *PublicDeploymentType_Global) Size() (n int) {
 	_ = l
 	if m.Global != nil {
 		l = m.Global.Size()
-		n += 1 + l + sovTypes(uint64(l))
-	}
-	return n
-}
-func (m *PublicDeploymentType_Regional) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Regional != nil {
-		l = m.Regional.Size()
-		n += 1 + l + sovTypes(uint64(l))
-	}
-	return n
-}
-func (m *PublicDeploymentType_Vk8SService) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Vk8SService != nil {
-		l = m.Vk8SService.Size()
 		n += 1 + l + sovTypes(uint64(l))
 	}
 	return n
@@ -4599,18 +4032,6 @@ func (m *GlobalWhereType_F5GlobalNetwork) Size() (n int) {
 	_ = l
 	if m.F5GlobalNetwork != nil {
 		l = m.F5GlobalNetwork.Size()
-		n += 1 + l + sovTypes(uint64(l))
-	}
-	return n
-}
-func (m *GlobalWhereType_TenantPublicDefaultVip) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.TenantPublicDefaultVip != nil {
-		l = m.TenantPublicDefaultVip.Size()
 		n += 1 + l + sovTypes(uint64(l))
 	}
 	return n
@@ -4680,18 +4101,6 @@ func (m *RegionalSiteType_F5GlobalNetwork) Size() (n int) {
 	_ = l
 	if m.F5GlobalNetwork != nil {
 		l = m.F5GlobalNetwork.Size()
-		n += 1 + l + sovTypes(uint64(l))
-	}
-	return n
-}
-func (m *RegionalSiteType_TenantPublicDefaultVip) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.TenantPublicDefaultVip != nil {
-		l = m.TenantPublicDefaultVip.Size()
 		n += 1 + l + sovTypes(uint64(l))
 	}
 	return n
@@ -4978,18 +4387,6 @@ func (m *CreateSpecType_Public) Size() (n int) {
 	}
 	return n
 }
-func (m *CreateSpecType_Private) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Private != nil {
-		l = m.Private.Size()
-		n += 1 + l + sovTypes(uint64(l))
-	}
-	return n
-}
 func (m *ReplaceSpecType) Size() (n int) {
 	if m == nil {
 		return 0
@@ -5018,18 +4415,6 @@ func (m *ReplaceSpecType_Public) Size() (n int) {
 	}
 	return n
 }
-func (m *ReplaceSpecType_Private) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Private != nil {
-		l = m.Private.Size()
-		n += 1 + l + sovTypes(uint64(l))
-	}
-	return n
-}
 func (m *GetSpecType) Size() (n int) {
 	if m == nil {
 		return 0
@@ -5054,18 +4439,6 @@ func (m *GetSpecType_Public) Size() (n int) {
 	_ = l
 	if m.Public != nil {
 		l = m.Public.Size()
-		n += 1 + l + sovTypes(uint64(l))
-	}
-	return n
-}
-func (m *GetSpecType_Private) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Private != nil {
-		l = m.Private.Size()
 		n += 1 + l + sovTypes(uint64(l))
 	}
 	return n
@@ -5099,16 +4472,6 @@ func (this *GlobalSpecType_Public) String() string {
 	}, "")
 	return s
 }
-func (this *GlobalSpecType_Private) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&GlobalSpecType_Private{`,
-		`Private:` + strings.Replace(fmt.Sprintf("%v", this.Private), "PrivateDeploymentType", "PrivateDeploymentType", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
 func (this *PublicDeploymentType) String() string {
 	if this == nil {
 		return "nil"
@@ -5125,26 +4488,6 @@ func (this *PublicDeploymentType_Global) String() string {
 	}
 	s := strings.Join([]string{`&PublicDeploymentType_Global{`,
 		`Global:` + strings.Replace(fmt.Sprintf("%v", this.Global), "GlobalWhereType", "GlobalWhereType", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *PublicDeploymentType_Regional) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&PublicDeploymentType_Regional{`,
-		`Regional:` + strings.Replace(fmt.Sprintf("%v", this.Regional), "RegionalWhereType", "RegionalWhereType", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *PublicDeploymentType_Vk8SService) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&PublicDeploymentType_Vk8SService{`,
-		`Vk8SService:` + strings.Replace(fmt.Sprintf("%v", this.Vk8SService), "WhereVK8SService", "views.WhereVK8SService", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -5166,16 +4509,6 @@ func (this *GlobalWhereType_F5GlobalNetwork) String() string {
 	}
 	s := strings.Join([]string{`&GlobalWhereType_F5GlobalNetwork{`,
 		`F5GlobalNetwork:` + strings.Replace(fmt.Sprintf("%v", this.F5GlobalNetwork), "Empty", "schema.Empty", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *GlobalWhereType_TenantPublicDefaultVip) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&GlobalWhereType_TenantPublicDefaultVip{`,
-		`TenantPublicDefaultVip:` + strings.Replace(fmt.Sprintf("%v", this.TenantPublicDefaultVip), "Empty", "schema.Empty", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -5233,16 +4566,6 @@ func (this *RegionalSiteType_F5GlobalNetwork) String() string {
 	}
 	s := strings.Join([]string{`&RegionalSiteType_F5GlobalNetwork{`,
 		`F5GlobalNetwork:` + strings.Replace(fmt.Sprintf("%v", this.F5GlobalNetwork), "Empty", "schema.Empty", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *RegionalSiteType_TenantPublicDefaultVip) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&RegionalSiteType_TenantPublicDefaultVip{`,
-		`TenantPublicDefaultVip:` + strings.Replace(fmt.Sprintf("%v", this.TenantPublicDefaultVip), "Empty", "schema.Empty", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -5473,16 +4796,6 @@ func (this *CreateSpecType_Public) String() string {
 	}, "")
 	return s
 }
-func (this *CreateSpecType_Private) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&CreateSpecType_Private{`,
-		`Private:` + strings.Replace(fmt.Sprintf("%v", this.Private), "PrivateDeploymentType", "PrivateDeploymentType", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
 func (this *ReplaceSpecType) String() string {
 	if this == nil {
 		return "nil"
@@ -5504,16 +4817,6 @@ func (this *ReplaceSpecType_Public) String() string {
 	}, "")
 	return s
 }
-func (this *ReplaceSpecType_Private) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&ReplaceSpecType_Private{`,
-		`Private:` + strings.Replace(fmt.Sprintf("%v", this.Private), "PrivateDeploymentType", "PrivateDeploymentType", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
 func (this *GetSpecType) String() string {
 	if this == nil {
 		return "nil"
@@ -5531,16 +4834,6 @@ func (this *GetSpecType_Public) String() string {
 	}
 	s := strings.Join([]string{`&GetSpecType_Public{`,
 		`Public:` + strings.Replace(fmt.Sprintf("%v", this.Public), "PublicDeploymentType", "PublicDeploymentType", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *GetSpecType_Private) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&GetSpecType_Private{`,
-		`Private:` + strings.Replace(fmt.Sprintf("%v", this.Private), "PrivateDeploymentType", "PrivateDeploymentType", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -5652,41 +4945,6 @@ func (m *GlobalSpecType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			m.DeploymentTypeChoice = &GlobalSpecType_Public{v}
-			iNdEx = postIndex
-		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Private", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			v := &PrivateDeploymentType{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.DeploymentTypeChoice = &GlobalSpecType_Private{v}
 			iNdEx = postIndex
 		case 1000:
 			if wireType != 2 {
@@ -5809,76 +5067,6 @@ func (m *PublicDeploymentType) Unmarshal(dAtA []byte) error {
 			}
 			m.WhereSelectionChoice = &PublicDeploymentType_Global{v}
 			iNdEx = postIndex
-		case 3:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Regional", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			v := &RegionalWhereType{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.WhereSelectionChoice = &PublicDeploymentType_Regional{v}
-			iNdEx = postIndex
-		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Vk8SService", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			v := &views.WhereVK8SService{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.WhereSelectionChoice = &PublicDeploymentType_Vk8SService{v}
-			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTypes(dAtA[iNdEx:])
@@ -5963,41 +5151,6 @@ func (m *GlobalWhereType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			m.NetworkSelectionChoice = &GlobalWhereType_F5GlobalNetwork{v}
-			iNdEx = postIndex
-		case 9:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TenantPublicDefaultVip", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			v := &schema.Empty{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.VipChoice = &GlobalWhereType_TenantPublicDefaultVip{v}
 			iNdEx = postIndex
 		case 10:
 			if wireType != 2 {
@@ -6237,41 +5390,6 @@ func (m *RegionalSiteType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			m.NetworkSelectionChoice = &RegionalSiteType_F5GlobalNetwork{v}
-			iNdEx = postIndex
-		case 5:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TenantPublicDefaultVip", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			v := &schema.Empty{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.VipChoice = &RegionalSiteType_TenantPublicDefaultVip{v}
 			iNdEx = postIndex
 		case 6:
 			if wireType != 2 {
@@ -7271,41 +6389,6 @@ func (m *CreateSpecType) Unmarshal(dAtA []byte) error {
 			}
 			m.DeploymentTypeChoice = &CreateSpecType_Public{v}
 			iNdEx = postIndex
-		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Private", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			v := &PrivateDeploymentType{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.DeploymentTypeChoice = &CreateSpecType_Private{v}
-			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTypes(dAtA[iNdEx:])
@@ -7427,41 +6510,6 @@ func (m *ReplaceSpecType) Unmarshal(dAtA []byte) error {
 			}
 			m.DeploymentTypeChoice = &ReplaceSpecType_Public{v}
 			iNdEx = postIndex
-		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Private", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			v := &PrivateDeploymentType{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.DeploymentTypeChoice = &ReplaceSpecType_Private{v}
-			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTypes(dAtA[iNdEx:])
@@ -7582,41 +6630,6 @@ func (m *GetSpecType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			m.DeploymentTypeChoice = &GetSpecType_Public{v}
-			iNdEx = postIndex
-		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Private", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			v := &PrivateDeploymentType{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.DeploymentTypeChoice = &GetSpecType_Private{v}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

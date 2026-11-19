@@ -29,6 +29,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -148,7 +149,7 @@ var HealthcheckHealthCheckHttpHealthCheckModelAttributeMap = map[string]attr.Typ
 	"use_http2": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> HostHeaderChoice
+// Attribute map for OneOfField --> HostHeaderChoice
 var HealthcheckHealthCheckHttpHealthCheckHostHeaderChoiceModelAttributeMap = map[string]attr.Type{
 
 	"host_header":            types.StringType,
@@ -249,7 +250,7 @@ func (r *ResourceF5XCHealthcheck) Schema(ctx context.Context, request resource.S
 			},
 			"health_check_choice": schema.SingleNestedAttribute{
 				Description:         "health_check Specifies whether to perform HTTP Health Check or TCP Health check",
-				MarkdownDescription: "health_check Specifies whether to perform HTTP Health Check or TCP Health check",
+				MarkdownDescription: "health_check Specifies whether to perform HTTP Health Check or TCP Health check<br>Exactly one of `http_health_check`, `tcp_health_check`, or `udp_icmp_health_check` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -263,7 +264,7 @@ func (r *ResourceF5XCHealthcheck) Schema(ctx context.Context, request resource.S
 				Attributes: map[string]schema.Attribute{
 					"http_health_check": schema.SingleNestedAttribute{
 						Description:         "http_health_check Specifies the following details for HTTP health check requests 1. Host header 2. Path 3. Request headers to add 4. Request headers to remove",
-						MarkdownDescription: "http_health_check Specifies the following details for HTTP health check requests 1. Host header 2. Path 3. Request headers to add 4. Request headers to remove",
+						MarkdownDescription: "http_health_check Specifies the following details for HTTP health check requests 1. Host header 2. Path 3. Request headers to add 4. Request headers to remove<br>Conflicts with `tcp_health_check` and `udp_icmp_health_check`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -314,20 +315,23 @@ func (r *ResourceF5XCHealthcheck) Schema(ctx context.Context, request resource.S
 							},
 							"host_header_choice": schema.SingleNestedAttribute{
 								Description:         "host header choice Specify the value of host header in the HTTP health check request.",
-								MarkdownDescription: "host header choice Specify the value of host header in the HTTP health check request.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "host header choice Specify the value of host header in the HTTP health check request.<br>Exactly one of `host_header` or `use_origin_server_name` must be specified when `host_header_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"host_header",
 										"use_origin_server_name",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"host_header": schema.StringAttribute{
 										Description:         "host_header The value of the host header.",
-										MarkdownDescription: "host_header The value of the host header.<br>**Validation:** `Length LengthAtMost(262)`",
+										MarkdownDescription: "host_header The value of the host header.<br>**Validation:** `Length LengthAtMost(262)`<br>Conflicts with `use_origin_server_name`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -341,7 +345,7 @@ func (r *ResourceF5XCHealthcheck) Schema(ctx context.Context, request resource.S
 									},
 									"use_origin_server_name": schema.BoolAttribute{
 										Description:         "use origin server name Use the origin server name.",
-										MarkdownDescription: "use origin server name Use the origin server name.",
+										MarkdownDescription: "use origin server name Use the origin server name.<br>Conflicts with `host_header`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -390,7 +394,7 @@ func (r *ResourceF5XCHealthcheck) Schema(ctx context.Context, request resource.S
 					},
 					"tcp_health_check": schema.SingleNestedAttribute{
 						Description:         "tcp_health_check Specifies send payload and expected response payload",
-						MarkdownDescription: "tcp_health_check Specifies send payload and expected response payload",
+						MarkdownDescription: "tcp_health_check Specifies send payload and expected response payload<br>Conflicts with `http_health_check` and `udp_icmp_health_check`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -427,7 +431,7 @@ func (r *ResourceF5XCHealthcheck) Schema(ctx context.Context, request resource.S
 					},
 					"udp_icmp_health_check": schema.BoolAttribute{
 						Description:         "udp_icmp_health_check Specifies ICMP HealthCheck for UDP Loadbalancer",
-						MarkdownDescription: "udp_icmp_health_check Specifies ICMP HealthCheck for UDP Loadbalancer",
+						MarkdownDescription: "udp_icmp_health_check Specifies ICMP HealthCheck for UDP Loadbalancer<br>Conflicts with `http_health_check` and `tcp_health_check`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -461,7 +465,7 @@ func (r *ResourceF5XCHealthcheck) Schema(ctx context.Context, request resource.S
 			},
 			"jitter_choice": schema.SingleNestedAttribute{
 				Description:         "jitter_choice Configure jitter as a percentage of the health check interval to add random variation between successive requests.",
-				MarkdownDescription: "jitter_choice Configure jitter as a percentage of the health check interval to add random variation between successive requests.",
+				MarkdownDescription: "jitter_choice Configure jitter as a percentage of the health check interval to add random variation between successive requests.<br>Exactly one of `default_jitter` or `jitter_percent` must be specified when `jitter_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -477,7 +481,7 @@ func (r *ResourceF5XCHealthcheck) Schema(ctx context.Context, request resource.S
 				Attributes: map[string]schema.Attribute{
 					"default_jitter": schema.BoolAttribute{
 						Description:         "default_jitter Use the default jitter value of 30 percent of the health check interval.",
-						MarkdownDescription: "default_jitter Use the default jitter value of 30 percent of the health check interval.",
+						MarkdownDescription: "default_jitter Use the default jitter value of 30 percent of the health check interval.<br>Conflicts with `jitter_percent`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -487,7 +491,7 @@ func (r *ResourceF5XCHealthcheck) Schema(ctx context.Context, request resource.S
 					},
 					"jitter_percent": schema.Int64Attribute{
 						Description:         "jitter_percent Specify a custom jitter value as a percentage of the health check interval. Valid values are 0 (to disable jitter) and 10 to 50.",
-						MarkdownDescription: "jitter_percent Specify a custom jitter value as a percentage of the health check interval. Valid values are 0 (to disable jitter) and 10 to 50.",
+						MarkdownDescription: "jitter_percent Specify a custom jitter value as a percentage of the health check interval. Valid values are 0 (to disable jitter) and 10 to 50.<br>Conflicts with `default_jitter`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -692,6 +696,9 @@ func (r *ResourceF5XCHealthcheck) Create(ctx context.Context, request resource.C
 			}
 			httpHealthCheckOneOfSpec := &ves_io_schema_healthcheck.CreateSpecType_HttpHealthCheck{}
 			httpHealthCheckOneOfSpec.HttpHealthCheck = &ves_io_schema_healthcheck.HttpHealthCheck{}
+			httpHealthCheckOneOfSpec.HttpHealthCheck.HostHeaderChoice = &ves_io_schema_healthcheck.HttpHealthCheck_UseOriginServerName{
+				UseOriginServerName: &ves_io_schema.Empty{},
+			}
 			spec.HealthCheck = httpHealthCheckOneOfSpec
 
 			// resource modelToSpecNested StringField --> ExpectedResponse
@@ -726,7 +733,7 @@ func (r *ResourceF5XCHealthcheck) Create(ctx context.Context, request resource.C
 				httpHealthCheckOneOfSpec.HttpHealthCheck.Headers = nil
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> HostHeaderChoice
+			// resource modelToSpecNested OneOfField --> HostHeaderChoice
 			if !healthcheckHttpHealthCheckModel.HostHeaderChoice.IsNull() && !healthcheckHttpHealthCheckModel.HostHeaderChoice.IsUnknown() {
 				httpHealthCheckHostHeaderChoiceModel := HealthcheckHostHeaderChoice{}
 				response.Diagnostics.Append(healthcheckHttpHealthCheckModel.HostHeaderChoice.As(ctx, &httpHealthCheckHostHeaderChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1056,8 +1063,7 @@ func (r *ResourceF5XCHealthcheck) Create(ctx context.Context, request resource.C
 					httpHealthCheckAttributeMap["headers"] = types.MapNull(types.StringType)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> HostHeaderChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> HostHeaderChoice
 				if httpHealthCheckElement.GetHostHeaderChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					httpHealthCheckhostHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -1367,11 +1373,7 @@ func (r *ResourceF5XCHealthcheck) Read(ctx context.Context, request resource.Rea
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_healthcheck.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_healthcheck.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "healthcheck", err),
@@ -1559,8 +1561,7 @@ func (r *ResourceF5XCHealthcheck) Read(ctx context.Context, request resource.Rea
 					httpHealthCheckAttributeMap["headers"] = types.MapNull(types.StringType)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> HostHeaderChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> HostHeaderChoice
 				if httpHealthCheckElement.GetHostHeaderChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					httpHealthCheckhostHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -1962,6 +1963,9 @@ func (r *ResourceF5XCHealthcheck) Update(ctx context.Context, request resource.U
 			}
 			httpHealthCheckOneOfSpec := &ves_io_schema_healthcheck.ReplaceSpecType_HttpHealthCheck{}
 			httpHealthCheckOneOfSpec.HttpHealthCheck = &ves_io_schema_healthcheck.HttpHealthCheck{}
+			httpHealthCheckOneOfSpec.HttpHealthCheck.HostHeaderChoice = &ves_io_schema_healthcheck.HttpHealthCheck_UseOriginServerName{
+				UseOriginServerName: &ves_io_schema.Empty{},
+			}
 			spec.HealthCheck = httpHealthCheckOneOfSpec
 
 			// resource modelToSpecNested StringField --> ExpectedResponse
@@ -1996,7 +2000,7 @@ func (r *ResourceF5XCHealthcheck) Update(ctx context.Context, request resource.U
 				httpHealthCheckOneOfSpec.HttpHealthCheck.Headers = nil
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> HostHeaderChoice
+			// resource modelToSpecNested OneOfField --> HostHeaderChoice
 			if !healthcheckHttpHealthCheckModel.HostHeaderChoice.IsNull() && !healthcheckHttpHealthCheckModel.HostHeaderChoice.IsUnknown() {
 				httpHealthCheckHostHeaderChoiceModel := HealthcheckHostHeaderChoice{}
 				response.Diagnostics.Append(healthcheckHttpHealthCheckModel.HostHeaderChoice.As(ctx, &httpHealthCheckHostHeaderChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2126,12 +2130,8 @@ func (r *ResourceF5XCHealthcheck) Update(ctx context.Context, request resource.U
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_healthcheck.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_healthcheck.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "healthcheck", err),
@@ -2140,7 +2140,7 @@ func (r *ResourceF5XCHealthcheck) Update(ctx context.Context, request resource.U
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_healthcheck.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_healthcheck.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "healthcheck", err),
@@ -2327,8 +2327,7 @@ func (r *ResourceF5XCHealthcheck) Update(ctx context.Context, request resource.U
 					httpHealthCheckAttributeMap["headers"] = types.MapNull(types.StringType)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> HostHeaderChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> HostHeaderChoice
 				if httpHealthCheckElement.GetHostHeaderChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					httpHealthCheckhostHeaderChoiceChoicesAttributeMap := make(map[string]attr.Value)

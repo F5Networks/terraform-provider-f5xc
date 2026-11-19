@@ -552,7 +552,7 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 			},
 			"ocsp_stapling_choice": schema.SingleNestedAttribute{
 				Description:         "OCSP Response choice OCSP Stapling choice",
-				MarkdownDescription: "OCSP Response choice OCSP Stapling choice",
+				MarkdownDescription: "OCSP Response choice OCSP Stapling choice<br>Exactly one of `custom_hash_algorithms`, `disable_ocsp_stapling`, or `use_system_defaults` must be specified when `ocsp_stapling_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -566,7 +566,7 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 				Attributes: map[string]schema.Attribute{
 					"custom_hash_algorithms": schema.SingleNestedAttribute{
 						Description:         "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.",
-						MarkdownDescription: "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.",
+						MarkdownDescription: "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.<br>Conflicts with `disable_ocsp_stapling` and `use_system_defaults`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -588,7 +588,7 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 					},
 					"disable_ocsp_stapling": schema.BoolAttribute{
 						Description:         "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.",
-						MarkdownDescription: "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.",
+						MarkdownDescription: "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.<br>Conflicts with `custom_hash_algorithms` and `use_system_defaults`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -598,7 +598,7 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 					},
 					"use_system_defaults": schema.BoolAttribute{
 						Description:         "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.",
-						MarkdownDescription: "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.",
+						MarkdownDescription: "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.<br>Conflicts with `custom_hash_algorithms` and `disable_ocsp_stapling`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -617,7 +617,7 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 				Attributes: map[string]schema.Attribute{
 					"secret_info_choice": schema.SingleNestedAttribute{
 						Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-						MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+						MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -631,7 +631,7 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 						Attributes: map[string]schema.Attribute{
 							"blindfold_secret_info": schema.SingleNestedAttribute{
 								Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-								MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+								MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -671,7 +671,7 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 							},
 							"clear_secret_info": schema.SingleNestedAttribute{
 								Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-								MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+								MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -706,7 +706,7 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 							},
 							"none": schema.BoolAttribute{
 								Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-								MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+								MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -720,7 +720,7 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 			},
 			"provider_choice": schema.SingleNestedAttribute{
 				Description:         "Provider How this certificate is provisioned and managed.",
-				MarkdownDescription: "Provider How this certificate is provisioned and managed.",
+				MarkdownDescription: "Provider How this certificate is provisioned and managed.<br>Exactly one of `auto_cert` or `manual` must be specified when `provider_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -733,14 +733,14 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 				Attributes: map[string]schema.Attribute{
 					"auto_cert": schema.SingleNestedAttribute{
 						Description:         "Automatic Automated certificate issuance and renewal using the ACME protocol.",
-						MarkdownDescription: "Automatic Automated certificate issuance and renewal using the ACME protocol.",
+						MarkdownDescription: "Automatic Automated certificate issuance and renewal using the ACME protocol.<br>Conflicts with `manual`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"challenge_choice": schema.SingleNestedAttribute{
 								Description:         "Challenge Method Selected ACME challenge method for domain validation. No challenge is performed for a domain that the certificate authority reports as already validated.",
-								MarkdownDescription: "Challenge Method Selected ACME challenge method for domain validation. No challenge is performed for a domain that the certificate authority reports as already validated.",
+								MarkdownDescription: "Challenge Method Selected ACME challenge method for domain validation. No challenge is performed for a domain that the certificate authority reports as already validated.<br>Exactly one of `dns_01` or `pre_validated` must be specified when `challenge_choice` is configured.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -753,14 +753,14 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 								Attributes: map[string]schema.Attribute{
 									"dns_01": schema.SingleNestedAttribute{
 										Description:         "DNS-01 Challenge DNS-01 challenge validation is performed when required to prove domain control. A TXT record is created at _acme-challenge.<domain>. This method works for all domain types. Domains reported as already validated are skipped.",
-										MarkdownDescription: "DNS-01 Challenge DNS-01 challenge validation is performed when required to prove domain control. A TXT record is created at _acme-challenge.<domain>. This method works for all domain types. Domains reported as already validated are skipped.",
+										MarkdownDescription: "DNS-01 Challenge DNS-01 challenge validation is performed when required to prove domain control. A TXT record is created at _acme-challenge.<domain>. This method works for all domain types. Domains reported as already validated are skipped.<br>Conflicts with `pre_validated`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
 										Attributes: map[string]schema.Attribute{
 											"dns_provider_choice": schema.SingleNestedAttribute{
 												Description:         "DNS Provider Choice Method used to manage DNS-01 challenge TXT records.",
-												MarkdownDescription: "DNS Provider Choice Method used to manage DNS-01 challenge TXT records.",
+												MarkdownDescription: "DNS Provider Choice Method used to manage DNS-01 challenge TXT records.<br>Exactly one of `cname_delegation` or `delegated` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -773,7 +773,7 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 												Attributes: map[string]schema.Attribute{
 													"cname_delegation": schema.BoolAttribute{
 														Description:         "Non-Managed DNS (CNAME Delegation) DNS-01 validation for domains not managed by F5 Distributed Cloud is performed through CNAME delegation. When validation is required, _acme-challenge.<domain> must point to the target provided in the certificate status. Challenge TXT records are created automatically at the CNAME target.",
-														MarkdownDescription: "Non-Managed DNS (CNAME Delegation) DNS-01 validation for domains not managed by F5 Distributed Cloud is performed through CNAME delegation. When validation is required, _acme-challenge.<domain> must point to the target provided in the certificate status. Challenge TXT records are created automatically at the CNAME target.",
+														MarkdownDescription: "Non-Managed DNS (CNAME Delegation) DNS-01 validation for domains not managed by F5 Distributed Cloud is performed through CNAME delegation. When validation is required, _acme-challenge.<domain> must point to the target provided in the certificate status. Challenge TXT records are created automatically at the CNAME target.<br>Conflicts with `delegated`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -783,7 +783,7 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 													},
 													"delegated": schema.BoolAttribute{
 														Description:         "Managed DNS F5 Distributed Cloud managed DNS zones provide DNS-01 challenge validation. The system automatically resolves which dns_zone(s) cover domains that require validation. Each zone must have 'Allow Application Managed Records' enabled.",
-														MarkdownDescription: "Managed DNS F5 Distributed Cloud managed DNS zones provide DNS-01 challenge validation. The system automatically resolves which dns_zone(s) cover domains that require validation. Each zone must have 'Allow Application Managed Records' enabled.",
+														MarkdownDescription: "Managed DNS F5 Distributed Cloud managed DNS zones provide DNS-01 challenge validation. The system automatically resolves which dns_zone(s) cover domains that require validation. Each zone must have 'Allow Application Managed Records' enabled.<br>Conflicts with `cname_delegation`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -797,7 +797,7 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 									},
 									"pre_validated": schema.BoolAttribute{
 										Description:         "Pre-Validated Domains Domains are validated directly with the certificate authority. No challenge method is configured. All domains must remain validated for initial issuance and renewal. If any domain requires validation, issuance cannot continue.",
-										MarkdownDescription: "Pre-Validated Domains Domains are validated directly with the certificate authority. No challenge method is configured. All domains must remain validated for initial issuance and renewal. If any domain requires validation, issuance cannot continue.",
+										MarkdownDescription: "Pre-Validated Domains Domains are validated directly with the certificate authority. No challenge method is configured. All domains must remain validated for initial issuance and renewal. If any domain requires validation, issuance cannot continue.<br>Conflicts with `dns_01`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -826,7 +826,7 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 							},
 							"issuer_choice": schema.SingleNestedAttribute{
 								Description:         "Select Issuer Select the ACME issuer used to issue and renew this certificate.",
-								MarkdownDescription: "Select Issuer Select the ACME issuer used to issue and renew this certificate.",
+								MarkdownDescription: "Select Issuer Select the ACME issuer used to issue and renew this certificate.<br>Exactly one of `custom_issuer` or `default` must be specified when `issuer_choice` is configured.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -839,7 +839,7 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 								Attributes: map[string]schema.Attribute{
 									"custom_issuer": schema.SingleNestedAttribute{
 										Description:         "Custom Issuer Use a custom ACME issuer.",
-										MarkdownDescription: "Custom Issuer Use a custom ACME issuer.",
+										MarkdownDescription: "Custom Issuer Use a custom ACME issuer.<br>Conflicts with `default`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -886,7 +886,7 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 									},
 									"default": schema.BoolAttribute{
 										Description:         "Default Use the built-in Let's Encrypt issuer managed by F5 Distributed Cloud.",
-										MarkdownDescription: "Default Use the built-in Let's Encrypt issuer managed by F5 Distributed Cloud.",
+										MarkdownDescription: "Default Use the built-in Let's Encrypt issuer managed by F5 Distributed Cloud.<br>Conflicts with `custom_issuer`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -924,7 +924,7 @@ func (r *ResourceF5XCCertificate) Schema(ctx context.Context, request resource.S
 					},
 					"manual": schema.BoolAttribute{
 						Description:         "Custom Certificate PEM and private key are uploaded by the user.",
-						MarkdownDescription: "Custom Certificate PEM and private key are uploaded by the user.",
+						MarkdownDescription: "Custom Certificate PEM and private key are uploaded by the user.<br>Conflicts with `auto_cert`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2484,11 +2484,7 @@ func (r *ResourceF5XCCertificate) Read(ctx context.Context, request resource.Rea
 	defer cancel()
 	priorPrivateKey := data.PrivateKey
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_certificate.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_certificate.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "certificate", err),
@@ -3937,12 +3933,8 @@ func (r *ResourceF5XCCertificate) Update(ctx context.Context, request resource.U
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_certificate.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_certificate.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "certificate", err),
@@ -3951,7 +3943,7 @@ func (r *ResourceF5XCCertificate) Update(ctx context.Context, request resource.U
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_certificate.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_certificate.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "certificate", err),

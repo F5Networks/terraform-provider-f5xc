@@ -119,185 +119,82 @@ resource "f5xc_securemesh_site_v2" "example" {
 
 ### Required
 
-- `blocked_services_choice` (Attributes) Node Local Services Manage node local services. You can enable WebUI, SSH and DNS on the nodes of the site for local management and troubleshooting. By default, these services are enabled. You can choose to disable these services on the Site Local Outside (SLO) local VRF (which is used to connect the site to F5 Distributed Cloud for management) or on the Site Local Inside (SLI) local VRF (if configured on the site). (see [below for nested schema](#nestedatt--blocked_services_choice))
-- `logs_receiver_choice` (Attributes) Logs Streaming Select logs receiver to enable streaming load balancer request logs. You can configure a log receiver from the 'Log Management' section. (see [below for nested schema](#nestedatt--logs_receiver_choice))
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
-- `provider_choice` (Attributes) Provider Name Select the infrastructure provider to deploy the Secure Mesh Site. For non-orchestrated sites, the 'Download Image' Action will download the infrastructure provider appropriate image. This field cannot be changed after the site is created. (see [below for nested schema](#nestedatt--provider_choice))
+- `provider_choice` (Attributes) Provider Name Select the infrastructure provider to deploy the Secure Mesh Site. For non-orchestrated sites, the 'Download Image' Action will download the infrastructure provider appropriate image. This field cannot be changed after the site is created.<br>Exactly one of `aks_k8s`, `aws`, `azure`, `baremetal`, `eks_k8s`, `equinix`, `gcp`, `gke_k8s`, `hyper_v`, `kvm`, `nutanix`, `oci`, `oci_k8s`, `openshift_virtualization`, `openstack`, `rseries`, or `vmware` must be specified. (see [below for nested schema](#nestedatt--provider_choice))
 
 ### Optional
 
 - `admin_user_credentials` (Attributes) Admin User Credentials Setup user credentials to manage access to nodes belonging to the site. When configured, 'admin' user will be setup and customers can access these nodes via either the node local WebUI or via SSH to access shell/CLI (see [below for nested schema](#nestedatt--admin_user_credentials))
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
+- `blocked_services_choice` (Attributes) Node Local Services Manage node local services. You can enable WebUI, SSH and DNS on the nodes of the site for local management and troubleshooting. By default, these services are enabled. You can choose to disable these services on the Site Local Outside (SLO) local VRF (which is used to connect the site to F5 Distributed Cloud for management) or on the Site Local Inside (SLI) local VRF (if configured on the site).<br>Exactly one of `block_all_services` or `blocked_services` must be specified when `blocked_services_choice` is configured. (see [below for nested schema](#nestedatt--blocked_services_choice))
 - `description` (String) description Human readable description for the object
 - `dns_ntp_config` (Attributes) DNS & NTP Servers Specify DNS and NTP servers that will be used by the nodes in this Customer Edge site. (see [below for nested schema](#nestedatt--dns_ntp_config))
-- `enterprise_proxy_choice` (Attributes) Enterprise Proxy Choose how the nodes in this Customer Edge site will communicate with F5 Distributed Cloud SaaS services. By default, all nodes will use the F5 Enterprise Proxy which is hosted on the F5 Global Network. This proxy will be used for node registration and upgrades. This proxy will not be used for the Regional Edge (RE) tunnels from this Customer Edge site. Customers can optionally choose to use an internal Enterprise Proxy. If customers choose to use the internal Enterprise Proxy, in addition to node registrations and upgrades, the Regional Edge (RE) tunnels can also be configured to use this internal Enterprise Proxy. Additionally, customers can configure their internal Enterprise Proxy to target the F5 Enterprise Proxy to handle domain resolution and network traffic for CE registrations and upgrades. Please refer to documentation for more details. (see [below for nested schema](#nestedatt--enterprise_proxy_choice))
-- `forward_proxy_choice` (Attributes) Manage Forward Proxy Attach Forward Proxy Policies to this site. (see [below for nested schema](#nestedatt--forward_proxy_choice))
+- `enterprise_proxy_choice` (Attributes) Enterprise Proxy Choose how the nodes in this Customer Edge site will communicate with F5 Distributed Cloud SaaS services. By default, all nodes will use the F5 Enterprise Proxy which is hosted on the F5 Global Network. This proxy will be used for node registration and upgrades. This proxy will not be used for the Regional Edge (RE) tunnels from this Customer Edge site. Customers can optionally choose to use an internal Enterprise Proxy. If customers choose to use the internal Enterprise Proxy, in addition to node registrations and upgrades, the Regional Edge (RE) tunnels can also be configured to use this internal Enterprise Proxy. Additionally, customers can configure their internal Enterprise Proxy to target the F5 Enterprise Proxy to handle domain resolution and network traffic for CE registrations and upgrades. Please refer to documentation for more details.<br>Exactly one of `custom_proxy`, `f5_proxy`, or `private_adn` must be specified when `enterprise_proxy_choice` is configured. (see [below for nested schema](#nestedatt--enterprise_proxy_choice))
+- `forward_proxy_choice` (Attributes) Manage Forward Proxy Attach Forward Proxy Policies to this site.<br>Exactly one of `active_forward_proxy_policies` or `no_forward_proxy` must be specified when `forward_proxy_choice` is configured. (see [below for nested schema](#nestedatt--forward_proxy_choice))
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `load_balancing` (Attributes) Load Balancing Settings This section contains settings on the site that relate to Load Balancing functionality. (see [below for nested schema](#nestedatt--load_balancing))
 - `local_vrf` (Attributes) Local VRF Settings There can be two local VRFs on each site. The Site Local Outside (SLO) local VRF is used to connect WAN side workloads to this site and to connect the site to F5 Distributed Cloud for management. All sites are required to have an SLO local VRF. The Site Local Inside (SLI) local VRF is used to connect LAN side workloads to this site. SLI local VRF is optional. (see [below for nested schema](#nestedatt--local_vrf))
-- `log_anonymization_choice` (Attributes) Log Anonymization Applies configured masking rules to logs generated by virtual servers and load balancers. (see [below for nested schema](#nestedatt--log_anonymization_choice))
-- `management_network_choice` (Attributes) Management Network Option to enable or disable the Management Network for this site. (see [below for nested schema](#nestedatt--management_network_choice))
-- `network_policy_choice` (Attributes) Network Firewall Attach Enhanced Network Firewall Policies to this site. (see [below for nested schema](#nestedatt--network_policy_choice))
-- `node_ha_choice` (Attributes) High Availability Select High Availability mode for this site. When disabled, the site will not have local HA and will only run with 1 control node. The first node added to the site will register as a control node. The site will come up as soon as the first node registers. Any additional nodes that are added will come up as worker nodes. When enabled, the site will have local HA with 3 control nodes. The first 3 nodes added to the site will register as control nodes. The site will come up after 3 nodes have registered. Any additional nodes that are added will come up as worker nodes. This setting cannot be changed after the site is created. (see [below for nested schema](#nestedatt--node_ha_choice))
+- `log_anonymization_choice` (Attributes) Log Anonymization Applies configured masking rules to logs generated by virtual servers and load balancers.<br>Exactly one of `disable_log_anonymization` or `enable_log_anonymization` must be specified when `log_anonymization_choice` is configured. (see [below for nested schema](#nestedatt--log_anonymization_choice))
+- `logs_receiver_choice` (Attributes) Logs Streaming Select logs receiver to enable streaming load balancer request logs. You can configure a log receiver from the 'Log Management' section.<br>Exactly one of `log_receiver_with_net` or `logs_streaming_disabled` must be specified when `logs_receiver_choice` is configured. (see [below for nested schema](#nestedatt--logs_receiver_choice))
+- `management_network_choice` (Attributes) Management Network Option to enable or disable the Management Network for this site.<br>Exactly one of `disable_management_network` or `enable_management_network` must be specified when `management_network_choice` is configured. (see [below for nested schema](#nestedatt--management_network_choice))
+- `network_policy_choice` (Attributes) Network Firewall Attach Enhanced Network Firewall Policies to this site.<br>Exactly one of `active_enhanced_firewall_policies` or `no_network_policy` must be specified when `network_policy_choice` is configured. (see [below for nested schema](#nestedatt--network_policy_choice))
+- `node_ha_choice` (Attributes) High Availability Select High Availability mode for this site. When disabled, the site will not have local HA and will only run with 1 control node. The first node added to the site will register as a control node. The site will come up as soon as the first node registers. Any additional nodes that are added will come up as worker nodes. When enabled, the site will have local HA with 3 control nodes. The first 3 nodes added to the site will register as control nodes. The site will come up after 3 nodes have registered. Any additional nodes that are added will come up as worker nodes. This setting cannot be changed after the site is created.<br>Exactly one of `disable_ha` or `enable_ha` must be specified when `node_ha_choice` is configured. (see [below for nested schema](#nestedatt--node_ha_choice))
 - `offline_survivability_mode` (Attributes) Offline Survivability Mode Offline Survivability allows the Site to continue functioning normally without traffic loss during periods of connectivity loss to the Regional Edge (RE) or the Global Controller (GC). When this feature is enabled, a site can continue to function as is with existing configuration for upto 7 days, even when the site is offline. The certificates needed to keep the services running on this site are signed using a local CA. Secrets would also be cached locally to handle any connectivity loss. When the mode is toggled, services will restart and traffic disruption will be seen. (see [below for nested schema](#nestedatt--offline_survivability_mode))
 - `operating_system_version` (String) Operating System Version Select the Operating System version for the site. By default, latest available Operating System version will be used.<br>**Validation:** `Length LengthAtMost(256)`<br>**Default:** ``
 - `performance_enhancement_mode` (Attributes) Performance Enhancement Choice Optimize the site for L3 or L7 traffic processing. By default, the site is optimized for L7 traffic processing. (see [below for nested schema](#nestedatt--performance_enhancement_mode))
-- `proxy_bypass_choice` (Attributes) Proxy Bypass Proxy Bypass can be used for any domains that need to bypass the forward proxy. By default, all domains will go through the F5 Enterprise Proxy or the Custom Enterprise Proxy if configured. Note: The F5 Enterprise Proxy is configured to only allow domains required for Customer Edge bootstrap and upgrades. This setting is especially useful for use-cases such as virtual kubernetes (vk8s) to pull images from custom container registries. (see [below for nested schema](#nestedatt--proxy_bypass_choice))
+- `proxy_bypass_choice` (Attributes) Proxy Bypass Proxy Bypass can be used for any domains that need to bypass the forward proxy. By default, all domains will go through the F5 Enterprise Proxy or the Custom Enterprise Proxy if configured. Note: The F5 Enterprise Proxy is configured to only allow domains required for Customer Edge bootstrap and upgrades. This setting is especially useful for use-cases such as virtual kubernetes (vk8s) to pull images from custom container registries.<br>Exactly one of `custom_proxy_bypass` or `no_proxy_bypass` must be specified when `proxy_bypass_choice` is configured. (see [below for nested schema](#nestedatt--proxy_bypass_choice))
 - `re_select` (Attributes) Regional Edge Selection Selection criteria to connect the site with F5 Distributed Cloud Regional Edge(s). (see [below for nested schema](#nestedatt--re_select))
-- `s2s_connectivity_sli_choice` (Attributes) Connect using SLI Local VRF Use this site's Site Local Inside (SLI) Local VRF to connect to other sites. (see [below for nested schema](#nestedatt--s2s_connectivity_sli_choice))
-- `s2s_connectivity_slo_choice` (Attributes) SLO Connectivity Use this site's Site Local Outside (SLO) Local VRF to connect to other sites. (see [below for nested schema](#nestedatt--s2s_connectivity_slo_choice))
+- `s2s_connectivity_sli_choice` (Attributes) Connect using SLI Local VRF Use this site's Site Local Inside (SLI) Local VRF to connect to other sites.<br>Exactly one of `dc_cluster_group_sli` or `no_s2s_connectivity_sli` must be specified when `s2s_connectivity_sli_choice` is configured. (see [below for nested schema](#nestedatt--s2s_connectivity_sli_choice))
+- `s2s_connectivity_slo_choice` (Attributes) SLO Connectivity Use this site's Site Local Outside (SLO) Local VRF to connect to other sites.<br>Exactly one of `dc_cluster_group_slo`, `no_s2s_connectivity_slo`, or `site_mesh_group_on_slo` must be specified when `s2s_connectivity_slo_choice` is configured. (see [below for nested schema](#nestedatt--s2s_connectivity_slo_choice))
 - `segment_vrf` (Attributes List) Segment VRF Settings The Segment VRF is valid across all Sites of a Tenant. These are identified with a Segment name. Though these VRFs are across all Sites of a Tenant, there are some configurations that are valid per Site that can be configured here (see [below for nested schema](#nestedatt--segment_vrf))
 - `software_settings` (Attributes) F5XC Software Settings Select OS and Software version for the site. All nodes in the site will run the same OS and Software version. These settings cannot be changed after the site is created. (see [below for nested schema](#nestedatt--software_settings))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 - `tunnel_dead_timeout` (Number) tunnel_dead_timeout Time interval, in millisec, within which any ipsec / ssl connection from the site going down is detected. When not set (== 0), a default value of 10000 msec will be used.<br>**Default:** `0`
 - `tunnel_type` (List of String) Site to site tunnel type Select the type of tunnel to be used for traffic between the site and REs. By default, IPsec will be preferred with SSL as backup.<br>**Allowed Values (choose one):** `['SITE_TO_SITE_TUNNEL_IPSEC', 'SITE_TO_SITE_TUNNEL_IPSEC_OR_SSL', 'SITE_TO_SITE_TUNNEL_SSL']`<br>**Default:** `SITE_TO_SITE_TUNNEL_IPSEC_OR_SSL`<br>**Default:** `SITE_TO_SITE_TUNNEL_IPSEC_OR_SSL`
 - `upgrade_settings` (Attributes) Upgrade Settings Specify how a site will be upgraded. (see [below for nested schema](#nestedatt--upgrade_settings))
-- `url_categorization_choice` (Attributes) URL Categorization Enable or disable URL categorization for this site. (see [below for nested schema](#nestedatt--url_categorization_choice))
+- `url_categorization_choice` (Attributes) URL Categorization Enable or disable URL categorization for this site.<br>Exactly one of `disable_url_categorization` or `enable_url_categorization` must be specified when `url_categorization_choice` is configured. (see [below for nested schema](#nestedatt--url_categorization_choice))
 - `volterra_software_version` (String) Software Version Select the F5XC Software Version for the site. By default, latest available F5XC Software Version will be used. Refer to release notes to find required released SW versions.<br>**Validation:** `Length LengthAtMost(256)`<br>**Default:** ``
 
 ### Read-Only
 
 - `uid` (String) uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.
 
-<a id="nestedatt--blocked_services_choice"></a>
-### Nested Schema for `blocked_services_choice`
-
-Optional:
-
-- `block_all_services` (Boolean) Enable all Node Local Services Enable WebUI, SSH and DNS on all nodes in this site.
-- `blocked_services` (Attributes) Disable Node Local Services Disable node local services on all nodes in this site. (see [below for nested schema](#nestedatt--blocked_services_choice--blocked_services))
-
-<a id="nestedatt--blocked_services_choice--blocked_services"></a>
-### Nested Schema for `blocked_services_choice.blocked_services`
-
-Optional:
-
-- `blocked_sevice` (Attributes List) Disable Node Local Services (see [below for nested schema](#nestedatt--blocked_services_choice--blocked_services--blocked_sevice))
-
-<a id="nestedatt--blocked_services_choice--blocked_services--blocked_sevice"></a>
-### Nested Schema for `blocked_services_choice.blocked_services.blocked_sevice`
-
-Optional:
-
-- `blocked_services_value_type_choice` (Attributes) blocked_services_type_choice Choose the Nodel Local Service to disable (see [below for nested schema](#nestedatt--blocked_services_choice--blocked_services--blocked_sevice--blocked_services_value_type_choice))
-- `network_type` (List of String) network_type Site Local VRF on which this service will be disabled<br>**Allowed Values (choose one):** `['VIRTUAL_NETWORK_GLOBAL', 'VIRTUAL_NETWORK_MANAGEMENT', 'VIRTUAL_NETWORK_PER_SITE', 'VIRTUAL_NETWORK_SEGMENT', 'VIRTUAL_NETWORK_SITE_LOCAL', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE', 'VIRTUAL_NETWORK_SITE_SERVICE']`<br>**Default:** `VIRTUAL_NETWORK_SITE_LOCAL`
-
-<a id="nestedatt--blocked_services_choice--blocked_services--blocked_sevice--blocked_services_value_type_choice"></a>
-### Nested Schema for `blocked_services_choice.blocked_services.blocked_sevice.blocked_services_value_type_choice`
-
-Optional:
-
-- `dns` (Boolean) DNS Matches DNS port 53
-- `ssh` (Boolean) SSH
-- `web_user_interface` (Boolean) Web UI
-
-
-
-
-
-<a id="nestedatt--logs_receiver_choice"></a>
-### Nested Schema for `logs_receiver_choice`
-
-Optional:
-
-- `log_receiver_with_net` (Attributes) Enable Logs Streaming Select log receiver for logs streaming (see [below for nested schema](#nestedatt--logs_receiver_choice--log_receiver_with_net))
-- `logs_streaming_disabled` (Boolean) Disable Logs Receiver
-
-<a id="nestedatt--logs_receiver_choice--log_receiver_with_net"></a>
-### Nested Schema for `logs_receiver_choice.log_receiver_with_net`
-
-Optional:
-
-- `log_receiver` (Attributes) Log Receiver Select log receiver for logs streaming (see [below for nested schema](#nestedatt--logs_receiver_choice--log_receiver_with_net--log_receiver))
-- `network_choice` (Attributes) Network for Log Streaming Option to choose SLO/SLI or Management Network for log streaming. Management Network only works if Management Network is enabled on the site. (see [below for nested schema](#nestedatt--logs_receiver_choice--log_receiver_with_net--network_choice))
-
-<a id="nestedatt--logs_receiver_choice--log_receiver_with_net--log_receiver"></a>
-### Nested Schema for `logs_receiver_choice.log_receiver_with_net.log_receiver`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-<a id="nestedatt--logs_receiver_choice--log_receiver_with_net--network_choice"></a>
-### Nested Schema for `logs_receiver_choice.log_receiver_with_net.network_choice`
-
-Optional:
-
-- `use_management_network` (Boolean) Management Allows sending the logs to a log receiver in Management Network
-- `use_slo_sli` (Boolean) SLO and SLI Allows sending the logs to a log receiver in either SLO or SLI
-
-
-
-
 <a id="nestedatt--provider_choice"></a>
 ### Nested Schema for `provider_choice`
 
 Optional:
 
-- `aks_k8s` (Attributes) AKS (Kubernetes) (see [below for nested schema](#nestedatt--provider_choice--aks_k8s))
-- `aws` (Attributes) AWS (see [below for nested schema](#nestedatt--provider_choice--aws))
-- `azure` (Attributes) Azure (see [below for nested schema](#nestedatt--provider_choice--azure))
-- `baremetal` (Attributes) Baremetal (see [below for nested schema](#nestedatt--provider_choice--baremetal))
-- `eks_k8s` (Attributes) EKS (Kubernetes) (see [below for nested schema](#nestedatt--provider_choice--eks_k8s))
-- `equinix` (Attributes) Equinix (see [below for nested schema](#nestedatt--provider_choice--equinix))
-- `gcp` (Attributes) GCP (see [below for nested schema](#nestedatt--provider_choice--gcp))
-- `gke_k8s` (Attributes) GKE (Kubernetes) (see [below for nested schema](#nestedatt--provider_choice--gke_k8s))
-- `hyper_v` (Attributes) Hyper-V (see [below for nested schema](#nestedatt--provider_choice--hyper_v))
-- `kvm` (Attributes) KVM (see [below for nested schema](#nestedatt--provider_choice--kvm))
-- `nutanix` (Attributes) Nutanix (see [below for nested schema](#nestedatt--provider_choice--nutanix))
-- `oci` (Attributes) OCI (see [below for nested schema](#nestedatt--provider_choice--oci))
-- `oci_k8s` (Attributes) OCI (Kubernetes) (see [below for nested schema](#nestedatt--provider_choice--oci_k8s))
-- `openshift_virtualization` (Attributes) OpenShift Virtualization (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization))
-- `openstack` (Attributes) OpenStack (see [below for nested schema](#nestedatt--provider_choice--openstack))
-- `rseries` (Attributes) F5 rSeries (see [below for nested schema](#nestedatt--provider_choice--rseries))
-- `vmware` (Attributes) VMWare (see [below for nested schema](#nestedatt--provider_choice--vmware))
+- `aks_k8s` (Attributes) AKS (Kubernetes)<br>Conflicts with `aws`, `azure`, `baremetal`, `eks_k8s`, `equinix`, `gcp`, `gke_k8s`, `hyper_v`, `kvm`, `nutanix`, `oci`, `oci_k8s`, `openshift_virtualization`, `openstack`, `rseries`, and `vmware`. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s))
+- `aws` (Attributes) AWS<br>Conflicts with `aks_k8s`, `azure`, `baremetal`, `eks_k8s`, `equinix`, `gcp`, `gke_k8s`, `hyper_v`, `kvm`, `nutanix`, `oci`, `oci_k8s`, `openshift_virtualization`, `openstack`, `rseries`, and `vmware`. (see [below for nested schema](#nestedatt--provider_choice--aws))
+- `azure` (Attributes) Azure<br>Conflicts with `aks_k8s`, `aws`, `baremetal`, `eks_k8s`, `equinix`, `gcp`, `gke_k8s`, `hyper_v`, `kvm`, `nutanix`, `oci`, `oci_k8s`, `openshift_virtualization`, `openstack`, `rseries`, and `vmware`. (see [below for nested schema](#nestedatt--provider_choice--azure))
+- `baremetal` (Attributes) Baremetal<br>Conflicts with `aks_k8s`, `aws`, `azure`, `eks_k8s`, `equinix`, `gcp`, `gke_k8s`, `hyper_v`, `kvm`, `nutanix`, `oci`, `oci_k8s`, `openshift_virtualization`, `openstack`, `rseries`, and `vmware`. (see [below for nested schema](#nestedatt--provider_choice--baremetal))
+- `eks_k8s` (Attributes) EKS (Kubernetes)<br>Conflicts with `aks_k8s`, `aws`, `azure`, `baremetal`, `equinix`, `gcp`, `gke_k8s`, `hyper_v`, `kvm`, `nutanix`, `oci`, `oci_k8s`, `openshift_virtualization`, `openstack`, `rseries`, and `vmware`. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s))
+- `equinix` (Attributes) Equinix<br>Conflicts with `aks_k8s`, `aws`, `azure`, `baremetal`, `eks_k8s`, `gcp`, `gke_k8s`, `hyper_v`, `kvm`, `nutanix`, `oci`, `oci_k8s`, `openshift_virtualization`, `openstack`, `rseries`, and `vmware`. (see [below for nested schema](#nestedatt--provider_choice--equinix))
+- `gcp` (Attributes) GCP<br>Conflicts with `aks_k8s`, `aws`, `azure`, `baremetal`, `eks_k8s`, `equinix`, `gke_k8s`, `hyper_v`, `kvm`, `nutanix`, `oci`, `oci_k8s`, `openshift_virtualization`, `openstack`, `rseries`, and `vmware`. (see [below for nested schema](#nestedatt--provider_choice--gcp))
+- `gke_k8s` (Attributes) GKE (Kubernetes)<br>Conflicts with `aks_k8s`, `aws`, `azure`, `baremetal`, `eks_k8s`, `equinix`, `gcp`, `hyper_v`, `kvm`, `nutanix`, `oci`, `oci_k8s`, `openshift_virtualization`, `openstack`, `rseries`, and `vmware`. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s))
+- `hyper_v` (Attributes) Hyper-V<br>Conflicts with `aks_k8s`, `aws`, `azure`, `baremetal`, `eks_k8s`, `equinix`, `gcp`, `gke_k8s`, `kvm`, `nutanix`, `oci`, `oci_k8s`, `openshift_virtualization`, `openstack`, `rseries`, and `vmware`. (see [below for nested schema](#nestedatt--provider_choice--hyper_v))
+- `kvm` (Attributes) KVM<br>Conflicts with `aks_k8s`, `aws`, `azure`, `baremetal`, `eks_k8s`, `equinix`, `gcp`, `gke_k8s`, `hyper_v`, `nutanix`, `oci`, `oci_k8s`, `openshift_virtualization`, `openstack`, `rseries`, and `vmware`. (see [below for nested schema](#nestedatt--provider_choice--kvm))
+- `nutanix` (Attributes) Nutanix<br>Conflicts with `aks_k8s`, `aws`, `azure`, `baremetal`, `eks_k8s`, `equinix`, `gcp`, `gke_k8s`, `hyper_v`, `kvm`, `oci`, `oci_k8s`, `openshift_virtualization`, `openstack`, `rseries`, and `vmware`. (see [below for nested schema](#nestedatt--provider_choice--nutanix))
+- `oci` (Attributes) OCI<br>Conflicts with `aks_k8s`, `aws`, `azure`, `baremetal`, `eks_k8s`, `equinix`, `gcp`, `gke_k8s`, `hyper_v`, `kvm`, `nutanix`, `oci_k8s`, `openshift_virtualization`, `openstack`, `rseries`, and `vmware`. (see [below for nested schema](#nestedatt--provider_choice--oci))
+- `oci_k8s` (Attributes) OCI (Kubernetes)<br>Conflicts with `aks_k8s`, `aws`, `azure`, `baremetal`, `eks_k8s`, `equinix`, `gcp`, `gke_k8s`, `hyper_v`, `kvm`, `nutanix`, `oci`, `openshift_virtualization`, `openstack`, `rseries`, and `vmware`. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s))
+- `openshift_virtualization` (Attributes) OpenShift Virtualization<br>Conflicts with `aks_k8s`, `aws`, `azure`, `baremetal`, `eks_k8s`, `equinix`, `gcp`, `gke_k8s`, `hyper_v`, `kvm`, `nutanix`, `oci`, `oci_k8s`, `openstack`, `rseries`, and `vmware`. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization))
+- `openstack` (Attributes) OpenStack<br>Conflicts with `aks_k8s`, `aws`, `azure`, `baremetal`, `eks_k8s`, `equinix`, `gcp`, `gke_k8s`, `hyper_v`, `kvm`, `nutanix`, `oci`, `oci_k8s`, `openshift_virtualization`, `rseries`, and `vmware`. (see [below for nested schema](#nestedatt--provider_choice--openstack))
+- `rseries` (Attributes) F5 rSeries<br>Conflicts with `aks_k8s`, `aws`, `azure`, `baremetal`, `eks_k8s`, `equinix`, `gcp`, `gke_k8s`, `hyper_v`, `kvm`, `nutanix`, `oci`, `oci_k8s`, `openshift_virtualization`, `openstack`, and `vmware`. (see [below for nested schema](#nestedatt--provider_choice--rseries))
+- `vmware` (Attributes) VMWare<br>Conflicts with `aks_k8s`, `aws`, `azure`, `baremetal`, `eks_k8s`, `equinix`, `gcp`, `gke_k8s`, `hyper_v`, `kvm`, `nutanix`, `oci`, `oci_k8s`, `openshift_virtualization`, `openstack`, and `rseries`. (see [below for nested schema](#nestedatt--provider_choice--vmware))
 
 <a id="nestedatt--provider_choice--aks_k8s"></a>
 ### Nested Schema for `provider_choice.aks_k8s`
 
 Required:
 
-- `anti_affinity_choice` (Attributes) Pod Anti-Affinity Enable pod anti-affinity to prevent CE pods from being scheduled on nodes where specific customer services are already running. Configure match labels to identify the existing services (e.g., app=etcd) and topology key (e.g., kubernetes.io/hostname). CE pods will avoid nodes that have matching pods across all namespaces. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--anti_affinity_choice))
 - `deployment_size` (List of String) Deployment Size Select the size/flavor for the Customer Edge deployment on Kubernetes. This determines the resource allocation (CPU, memory) for the VPM and related pods. Medium (8 vCPU, 24 GB memory) is suitable for most deployments, Large (12 vCPU, 48 GB memory) for workloads requiring additional resources.<br>**Allowed Values (choose one):** `['KUBERNETES_DEPLOYMENT_SIZE_LARGE', 'KUBERNETES_DEPLOYMENT_SIZE_MEDIUM']`
 - `not_managed` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed))
 
 Optional:
 
+- `anti_affinity_choice` (Attributes) Pod Anti-Affinity Enable pod anti-affinity to prevent CE pods from being scheduled on nodes where specific customer services are already running. Configure match labels to identify the existing services (e.g., app=etcd) and topology key (e.g., kubernetes.io/hostname). CE pods will avoid nodes that have matching pods across all namespaces.<br>Exactly one of `disable_anti_affinity` or `enable_anti_affinity` must be specified when `anti_affinity_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--anti_affinity_choice))
 - `labels` (Map of String) Node Selector Labels Add labels to control which Kubernetes nodes the VPM and related pods (etcd, VER, prometheus) are deployed to. Specify label key-value pairs that match the labels on your Kubernetes nodes. This uses Kubernetes nodeSelector to schedule pods only on nodes with matching labels.
-
-<a id="nestedatt--provider_choice--aks_k8s--anti_affinity_choice"></a>
-### Nested Schema for `provider_choice.aks_k8s.anti_affinity_choice`
-
-Optional:
-
-- `disable_anti_affinity` (Boolean) Disable Anti-Affinity Pod anti-affinity is disabled. Pods may run on the same node.
-- `enable_anti_affinity` (Attributes) Enable Anti-Affinity Pod anti-affinity is enabled. Kubernetes scheduler will distribute pods across different nodes. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--anti_affinity_choice--enable_anti_affinity))
-
-<a id="nestedatt--provider_choice--aks_k8s--anti_affinity_choice--enable_anti_affinity"></a>
-### Nested Schema for `provider_choice.aks_k8s.anti_affinity_choice.enable_anti_affinity`
-
-Required:
-
-- `rules` (Attributes List) Anti-Affinity Rules Define one or more anti-affinity rules. Each rule specifies which pods (by labels) should be distributed across which topology domains. Example: Rule 1 - Distribute VPM pods across nodes, Rule 2 - Distribute Prometheus pods across zones. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--anti_affinity_choice--enable_anti_affinity--rules))
-
-<a id="nestedatt--provider_choice--aks_k8s--anti_affinity_choice--enable_anti_affinity--rules"></a>
-### Nested Schema for `provider_choice.aks_k8s.anti_affinity_choice.enable_anti_affinity.rules`
-
-Required:
-
-- `label_key` (String) Label Key Specify the label key of the customer pods that CE pods should avoid being co-scheduled with. Combined with the label value below, this identifies the target pods.<br>**Validation:** `Length LengthBetween(1, 253)`
-- `label_value` (String) Label Value Specify the label value that, together with the label key, identifies the customer pods to avoid.<br>**Validation:** `Length LengthBetween(1, 63)`
-- `topology_keys` (List of String) Topology Keys Specify one or more node label keys that define the scope of avoidance. For each topology key (e.g., kubernetes.io/hostname), CE pods will avoid nodes whose topology value matches a node already running a pod with the above specified label. Example: with kubernetes.io/hostname, CE pods are kept off any node running the matching customer pod.
-
-
-
 
 <a id="nestedatt--provider_choice--aks_k8s--not_managed"></a>
 ### Nested Schema for `provider_choice.aks_k8s.not_managed`
@@ -324,51 +221,29 @@ Optional:
 
 Required:
 
-- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--address_choice))
-- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--interface_choice))
+- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here.<br>Exactly one of `bond_interface`, `ethernet_interface`, or `vlan_interface` must be specified. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--interface_choice))
 - `network_option` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--network_option))
 
 Optional:
 
+- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface.<br>Exactly one of `dhcp_client`, `no_ipv4_address`, or `static_ip` must be specified when `address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--address_choice))
 - `description` (String) Interface Description Description for this Interface<br>**Validation:** `Length LengthAtMost(256)`
-- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice))
+- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface.<br>Exactly one of `ipv6_auto_config`, `no_ipv6_address`, or `static_ipv6_address` must be specified when `ipv6_address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
-- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--monitoring_choice))
+- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.<br>Exactly one of `monitor` or `monitor_disabled` must be specified when `monitoring_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--monitoring_choice))
 - `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000<br>**Default:** `0`
 - `name` (String) Interface Name Name of this Interface<br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
-- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
-
-<a id="nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--address_choice"></a>
-### Nested Schema for `provider_choice.aks_k8s.not_managed.node_list.interface_list.address_choice`
-
-Optional:
-
-- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.
-- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.
-- `static_ip` (Attributes) Static IP Interface IP address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--address_choice--static_ip))
-
-<a id="nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--address_choice--static_ip"></a>
-### Nested Schema for `provider_choice.aks_k8s.not_managed.node_list.interface_list.address_choice.static_ip`
-
-Required:
-
-- `ip_address` (String) Default Gateway IP address of the interface and prefix length
-
-Optional:
-
-- `default_gw` (String) Default Gateway IP address of the default gateway.
-
-
+- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled.<br>Exactly one of `site_to_site_connectivity_interface_disabled` or `site_to_site_connectivity_interface_enabled` must be specified when `site_to_site_connectivity_interface_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
 
 <a id="nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--interface_choice"></a>
 ### Nested Schema for `provider_choice.aks_k8s.not_managed.node_list.interface_list.interface_choice`
 
 Optional:
 
-- `bond_interface` (Attributes) Bond Interface (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface))
-- `ethernet_interface` (Attributes) Ethernet Interface (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
-- `vlan_interface` (Attributes) VLAN Interface (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--interface_choice--vlan_interface))
+- `bond_interface` (Attributes) Bond Interface<br>Conflicts with `ethernet_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface))
+- `ethernet_interface` (Attributes) Ethernet Interface<br>Conflicts with `bond_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
+- `vlan_interface` (Attributes) VLAN Interface<br>Conflicts with `bond_interface` and `ethernet_interface`. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--interface_choice--vlan_interface))
 
 <a id="nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface"></a>
 ### Nested Schema for `provider_choice.aks_k8s.not_managed.node_list.interface_list.interface_choice.bond_interface`
@@ -376,7 +251,7 @@ Optional:
 Required:
 
 - `devices` (List of String) Member Ethernet Devices Ethernet devices that will make up this bond
-- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
+- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP<br>Exactly one of `active_backup` or `lacp` must be specified. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
 - `name` (String) Bond Device Name for the Bond. Ex 'bond0'<br>**Validation:** `Length LengthAtMost(64)`
 
 Optional:
@@ -389,8 +264,8 @@ Optional:
 
 Optional:
 
-- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device
-- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
+- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device<br>Conflicts with `lacp`.
+- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device<br>Conflicts with `active_backup`. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
 
 <a id="nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp"></a>
 ### Nested Schema for `provider_choice.aks_k8s.not_managed.node_list.interface_list.interface_choice.bond_interface.lacp_choice.lacp`
@@ -432,16 +307,16 @@ Optional:
 
 Optional:
 
-- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--network_option--network_choice))
+- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs).<br>Exactly one of `segment_network`, `site_local_inside_network`, or `site_local_network` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--network_option--network_choice))
 
 <a id="nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--network_option--network_choice"></a>
 ### Nested Schema for `provider_choice.aks_k8s.not_managed.node_list.interface_list.network_option.network_choice`
 
 Optional:
 
-- `segment_network` (Attributes) Segment (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
-- `site_local_inside_network` (Boolean) Site Local Network Inside
-- `site_local_network` (Boolean) Site Local Network
+- `segment_network` (Attributes) Segment<br>Conflicts with `site_local_inside_network` and `site_local_network`. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
+- `site_local_inside_network` (Boolean) Site Local Network Inside<br>Conflicts with `segment_network` and `site_local_network`.
+- `site_local_network` (Boolean) Site Local Network<br>Conflicts with `segment_network` and `site_local_inside_network`.
 
 <a id="nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--network_option--network_choice--segment_network"></a>
 ### Nested Schema for `provider_choice.aks_k8s.not_managed.node_list.interface_list.network_option.network_choice.segment_network`
@@ -458,36 +333,58 @@ Read-Only:
 
 
 
+<a id="nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--address_choice"></a>
+### Nested Schema for `provider_choice.aks_k8s.not_managed.node_list.interface_list.address_choice`
+
+Optional:
+
+- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.<br>Conflicts with `no_ipv4_address` and `static_ip`.
+- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.<br>Conflicts with `dhcp_client` and `static_ip`.
+- `static_ip` (Attributes) Static IP Interface IP address is configured statically.<br>Conflicts with `dhcp_client` and `no_ipv4_address`. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--address_choice--static_ip))
+
+<a id="nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--address_choice--static_ip"></a>
+### Nested Schema for `provider_choice.aks_k8s.not_managed.node_list.interface_list.address_choice.static_ip`
+
+Required:
+
+- `ip_address` (String) Default Gateway IP address of the interface and prefix length
+
+Optional:
+
+- `default_gw` (String) Default Gateway IP address of the default gateway.
+
+
+
 <a id="nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice"></a>
 ### Nested Schema for `provider_choice.aks_k8s.not_managed.node_list.interface_list.ipv6_address_choice`
 
 Optional:
 
-- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
-- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.
-- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
+- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration.<br>Conflicts with `no_ipv6_address` and `static_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
+- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.<br>Conflicts with `ipv6_auto_config` and `static_ipv6_address`.
+- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically.<br>Conflicts with `ipv6_auto_config` and `no_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
 
 <a id="nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config"></a>
 ### Nested Schema for `provider_choice.aks_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config`
 
-Required:
+Optional:
 
-- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
+- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration<br>Exactly one of `host` or `router` must be specified when `autoconfig_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
 
 <a id="nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice"></a>
 ### Nested Schema for `provider_choice.aks_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice`
 
 Optional:
 
-- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.
-- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
+- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.<br>Conflicts with `router`.
+- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.<br>Conflicts with `host`. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
 
 <a id="nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router"></a>
 ### Nested Schema for `provider_choice.aks_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router`
 
 Required:
 
-- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
+- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients<br>Exactly one of `network_prefix` or `stateful` must be specified. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
 
 Optional:
 
@@ -498,8 +395,8 @@ Optional:
 
 Optional:
 
-- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862
-- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
+- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862<br>Conflicts with `stateful`.
+- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag<br>Conflicts with `network_prefix`. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
 
 <a id="nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful"></a>
 ### Nested Schema for `provider_choice.aks_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful`
@@ -507,18 +404,18 @@ Optional:
 Required:
 
 - `dhcp_networks` (Attributes List) DHCP IPV6 Networks List of networks from which DHCP server can allocate ip addresses (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks))
-- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 Optional:
 
 - `fixed_ip_map` (Map of String) Fixed IPV6 Assignments Fixed MAC address to ipv6 assignments, Key: Mac address, Value: IPV6 Address Assign fixed IPv6 addresses based on the MAC Address of the DHCP Client.
+- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address<br>Exactly one of `automatic_from_end`, `automatic_from_start`, or `interface_ip_map` must be specified when `interfaces_addressing_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 <a id="nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks"></a>
 ### Nested Schema for `provider_choice.aks_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.dhcp_networks`
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site<br>`network_prefix` must be specified. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
 - `pool_settings` (List of String) DHCP Pool Settings Controls how DHCPV6 pools are handled<br>**Allowed Values (choose one):** `['EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS', 'INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS']`
 
 Optional:
@@ -548,9 +445,9 @@ Optional:
 
 Optional:
 
-- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list
-- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list
-- `interface_ip_map` (Attributes) Configured Address Configured address for every node (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
+- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list<br>Conflicts with `automatic_from_start` and `interface_ip_map`.
+- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list<br>Conflicts with `automatic_from_end` and `interface_ip_map`.
+- `interface_ip_map` (Attributes) Configured Address Configured address for every node<br>Conflicts with `automatic_from_end` and `automatic_from_start`. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
 
 <a id="nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map"></a>
 ### Nested Schema for `provider_choice.aks_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.interfaces_addressing_choice.interface_ip_map`
@@ -568,15 +465,15 @@ Optional:
 
 Required:
 
-- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
+- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined<br>Exactly one of `configured_list` or `local_dns` must be specified. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
 
 <a id="nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice"></a>
 ### Nested Schema for `provider_choice.aks_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice`
 
 Optional:
 
-- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
-- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
+- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server<br>Conflicts with `local_dns`. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
+- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server<br>Conflicts with `configured_list`. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
 
 <a id="nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list"></a>
 ### Nested Schema for `provider_choice.aks_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.configured_list`
@@ -589,18 +486,18 @@ Required:
 <a id="nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns"></a>
 ### Nested Schema for `provider_choice.aks_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns`
 
-Required:
+Optional:
 
-- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
+- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server<br>Exactly one of `configured_address`, `first_address`, or `last_address` must be specified when `local_dns_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
 
 <a id="nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice"></a>
 ### Nested Schema for `provider_choice.aks_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns.local_dns_choice`
 
 Optional:
 
-- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server
-- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server
-- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server
+- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server<br>Conflicts with `first_address` and `last_address`.
+- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `last_address`.
+- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `first_address`.
 
 
 
@@ -614,15 +511,15 @@ Optional:
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
 
 <a id="nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice"></a>
 ### Nested Schema for `provider_choice.aks_k8s.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice`
 
 Optional:
 
-- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
-- `node_static_ip` (Attributes) Node Static IP configuration for the Node (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
+- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
+- `node_static_ip` (Attributes) Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
 
 <a id="nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip"></a>
 ### Nested Schema for `provider_choice.aks_k8s.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice.cluster_static_ip`
@@ -664,8 +561,8 @@ Optional:
 
 Optional:
 
-- `monitor` (Boolean) Monitoring enabled
-- `monitor_disabled` (Boolean) Monitoring disabled
+- `monitor` (Boolean) Monitoring enabled<br>Conflicts with `monitor_disabled`.
+- `monitor_disabled` (Boolean) Monitoring disabled<br>Conflicts with `monitor`.
 
 
 <a id="nestedatt--provider_choice--aks_k8s--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice"></a>
@@ -673,9 +570,36 @@ Optional:
 
 Optional:
 
-- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.
-- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.
+- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_enabled`.
+- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_disabled`.
 
+
+
+
+
+<a id="nestedatt--provider_choice--aks_k8s--anti_affinity_choice"></a>
+### Nested Schema for `provider_choice.aks_k8s.anti_affinity_choice`
+
+Optional:
+
+- `disable_anti_affinity` (Boolean) Disable Anti-Affinity Pod anti-affinity is disabled. Pods may run on the same node.<br>Conflicts with `enable_anti_affinity`.
+- `enable_anti_affinity` (Attributes) Enable Anti-Affinity Pod anti-affinity is enabled. Kubernetes scheduler will distribute pods across different nodes.<br>Conflicts with `disable_anti_affinity`. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--anti_affinity_choice--enable_anti_affinity))
+
+<a id="nestedatt--provider_choice--aks_k8s--anti_affinity_choice--enable_anti_affinity"></a>
+### Nested Schema for `provider_choice.aks_k8s.anti_affinity_choice.enable_anti_affinity`
+
+Required:
+
+- `rules` (Attributes List) Anti-Affinity Rules Define one or more anti-affinity rules. Each rule specifies which pods (by labels) should be distributed across which topology domains. Example: Rule 1 - Distribute VPM pods across nodes, Rule 2 - Distribute Prometheus pods across zones. (see [below for nested schema](#nestedatt--provider_choice--aks_k8s--anti_affinity_choice--enable_anti_affinity--rules))
+
+<a id="nestedatt--provider_choice--aks_k8s--anti_affinity_choice--enable_anti_affinity--rules"></a>
+### Nested Schema for `provider_choice.aks_k8s.anti_affinity_choice.enable_anti_affinity.rules`
+
+Required:
+
+- `label_key` (String) Label Key Specify the label key of the customer pods that CE pods should avoid being co-scheduled with. Combined with the label value below, this identifies the target pods.<br>**Validation:** `Length LengthBetween(1, 253)`
+- `label_value` (String) Label Value Specify the label value that, together with the label key, identifies the customer pods to avoid.<br>**Validation:** `Length LengthBetween(1, 63)`
+- `topology_keys` (List of String) Topology Keys Specify one or more node label keys that define the scope of avoidance. For each topology key (e.g., kubernetes.io/hostname), CE pods will avoid nodes whose topology value matches a node already running a pod with the above specified label. Example: with kubernetes.io/hostname, CE pods are kept off any node running the matching customer pod.
 
 
 
@@ -686,7 +610,7 @@ Optional:
 
 Required:
 
-- `orchestration_choice` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice))
+- `orchestration_choice` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode.<br>`not_managed` must be specified. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice))
 
 <a id="nestedatt--provider_choice--aws--orchestration_choice"></a>
 ### Nested Schema for `provider_choice.aws.orchestration_choice`
@@ -720,51 +644,29 @@ Optional:
 
 Required:
 
-- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--address_choice))
-- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--interface_choice))
+- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here.<br>Exactly one of `bond_interface`, `ethernet_interface`, or `vlan_interface` must be specified. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--interface_choice))
 - `network_option` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--network_option))
 
 Optional:
 
+- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface.<br>Exactly one of `dhcp_client`, `no_ipv4_address`, or `static_ip` must be specified when `address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--address_choice))
 - `description` (String) Interface Description Description for this Interface<br>**Validation:** `Length LengthAtMost(256)`
-- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
+- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface.<br>Exactly one of `ipv6_auto_config`, `no_ipv6_address`, or `static_ipv6_address` must be specified when `ipv6_address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
-- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
+- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.<br>Exactly one of `monitor` or `monitor_disabled` must be specified when `monitoring_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
 - `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000<br>**Default:** `0`
 - `name` (String) Interface Name Name of this Interface<br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
-- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
-
-<a id="nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--address_choice"></a>
-### Nested Schema for `provider_choice.aws.orchestration_choice.not_managed.node_list.interface_list.address_choice`
-
-Optional:
-
-- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.
-- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.
-- `static_ip` (Attributes) Static IP Interface IP address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip))
-
-<a id="nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip"></a>
-### Nested Schema for `provider_choice.aws.orchestration_choice.not_managed.node_list.interface_list.address_choice.static_ip`
-
-Required:
-
-- `ip_address` (String) Default Gateway IP address of the interface and prefix length
-
-Optional:
-
-- `default_gw` (String) Default Gateway IP address of the default gateway.
-
-
+- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled.<br>Exactly one of `site_to_site_connectivity_interface_disabled` or `site_to_site_connectivity_interface_enabled` must be specified when `site_to_site_connectivity_interface_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
 
 <a id="nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--interface_choice"></a>
 ### Nested Schema for `provider_choice.aws.orchestration_choice.not_managed.node_list.interface_list.interface_choice`
 
 Optional:
 
-- `bond_interface` (Attributes) Bond Interface (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface))
-- `ethernet_interface` (Attributes) Ethernet Interface (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
-- `vlan_interface` (Attributes) VLAN Interface (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--interface_choice--vlan_interface))
+- `bond_interface` (Attributes) Bond Interface<br>Conflicts with `ethernet_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface))
+- `ethernet_interface` (Attributes) Ethernet Interface<br>Conflicts with `bond_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
+- `vlan_interface` (Attributes) VLAN Interface<br>Conflicts with `bond_interface` and `ethernet_interface`. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--interface_choice--vlan_interface))
 
 <a id="nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface"></a>
 ### Nested Schema for `provider_choice.aws.orchestration_choice.not_managed.node_list.interface_list.interface_choice.bond_interface`
@@ -772,7 +674,7 @@ Optional:
 Required:
 
 - `devices` (List of String) Member Ethernet Devices Ethernet devices that will make up this bond
-- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
+- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP<br>Exactly one of `active_backup` or `lacp` must be specified. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
 - `name` (String) Bond Device Name for the Bond. Ex 'bond0'<br>**Validation:** `Length LengthAtMost(64)`
 
 Optional:
@@ -785,8 +687,8 @@ Optional:
 
 Optional:
 
-- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device
-- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
+- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device<br>Conflicts with `lacp`.
+- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device<br>Conflicts with `active_backup`. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
 
 <a id="nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp"></a>
 ### Nested Schema for `provider_choice.aws.orchestration_choice.not_managed.node_list.interface_list.interface_choice.bond_interface.lacp_choice.lacp`
@@ -828,16 +730,16 @@ Optional:
 
 Optional:
 
-- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice))
+- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs).<br>Exactly one of `segment_network`, `site_local_inside_network`, or `site_local_network` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice))
 
 <a id="nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice"></a>
 ### Nested Schema for `provider_choice.aws.orchestration_choice.not_managed.node_list.interface_list.network_option.network_choice`
 
 Optional:
 
-- `segment_network` (Attributes) Segment (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
-- `site_local_inside_network` (Boolean) Site Local Network Inside
-- `site_local_network` (Boolean) Site Local Network
+- `segment_network` (Attributes) Segment<br>Conflicts with `site_local_inside_network` and `site_local_network`. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
+- `site_local_inside_network` (Boolean) Site Local Network Inside<br>Conflicts with `segment_network` and `site_local_network`.
+- `site_local_network` (Boolean) Site Local Network<br>Conflicts with `segment_network` and `site_local_inside_network`.
 
 <a id="nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network"></a>
 ### Nested Schema for `provider_choice.aws.orchestration_choice.not_managed.node_list.interface_list.network_option.network_choice.segment_network`
@@ -854,36 +756,58 @@ Read-Only:
 
 
 
+<a id="nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--address_choice"></a>
+### Nested Schema for `provider_choice.aws.orchestration_choice.not_managed.node_list.interface_list.address_choice`
+
+Optional:
+
+- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.<br>Conflicts with `no_ipv4_address` and `static_ip`.
+- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.<br>Conflicts with `dhcp_client` and `static_ip`.
+- `static_ip` (Attributes) Static IP Interface IP address is configured statically.<br>Conflicts with `dhcp_client` and `no_ipv4_address`. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip))
+
+<a id="nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip"></a>
+### Nested Schema for `provider_choice.aws.orchestration_choice.not_managed.node_list.interface_list.address_choice.static_ip`
+
+Required:
+
+- `ip_address` (String) Default Gateway IP address of the interface and prefix length
+
+Optional:
+
+- `default_gw` (String) Default Gateway IP address of the default gateway.
+
+
+
 <a id="nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice"></a>
 ### Nested Schema for `provider_choice.aws.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice`
 
 Optional:
 
-- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
-- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.
-- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
+- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration.<br>Conflicts with `no_ipv6_address` and `static_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
+- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.<br>Conflicts with `ipv6_auto_config` and `static_ipv6_address`.
+- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically.<br>Conflicts with `ipv6_auto_config` and `no_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
 
 <a id="nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config"></a>
 ### Nested Schema for `provider_choice.aws.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config`
 
-Required:
+Optional:
 
-- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
+- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration<br>Exactly one of `host` or `router` must be specified when `autoconfig_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
 
 <a id="nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice"></a>
 ### Nested Schema for `provider_choice.aws.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice`
 
 Optional:
 
-- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.
-- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
+- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.<br>Conflicts with `router`.
+- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.<br>Conflicts with `host`. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
 
 <a id="nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router"></a>
 ### Nested Schema for `provider_choice.aws.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router`
 
 Required:
 
-- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
+- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients<br>Exactly one of `network_prefix` or `stateful` must be specified. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
 
 Optional:
 
@@ -894,8 +818,8 @@ Optional:
 
 Optional:
 
-- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862
-- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
+- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862<br>Conflicts with `stateful`.
+- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag<br>Conflicts with `network_prefix`. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
 
 <a id="nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful"></a>
 ### Nested Schema for `provider_choice.aws.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful`
@@ -903,18 +827,18 @@ Optional:
 Required:
 
 - `dhcp_networks` (Attributes List) DHCP IPV6 Networks List of networks from which DHCP server can allocate ip addresses (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks))
-- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 Optional:
 
 - `fixed_ip_map` (Map of String) Fixed IPV6 Assignments Fixed MAC address to ipv6 assignments, Key: Mac address, Value: IPV6 Address Assign fixed IPv6 addresses based on the MAC Address of the DHCP Client.
+- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address<br>Exactly one of `automatic_from_end`, `automatic_from_start`, or `interface_ip_map` must be specified when `interfaces_addressing_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 <a id="nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks"></a>
 ### Nested Schema for `provider_choice.aws.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.dhcp_networks`
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site<br>`network_prefix` must be specified. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
 - `pool_settings` (List of String) DHCP Pool Settings Controls how DHCPV6 pools are handled<br>**Allowed Values (choose one):** `['EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS', 'INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS']`
 
 Optional:
@@ -944,9 +868,9 @@ Optional:
 
 Optional:
 
-- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list
-- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list
-- `interface_ip_map` (Attributes) Configured Address Configured address for every node (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
+- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list<br>Conflicts with `automatic_from_start` and `interface_ip_map`.
+- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list<br>Conflicts with `automatic_from_end` and `interface_ip_map`.
+- `interface_ip_map` (Attributes) Configured Address Configured address for every node<br>Conflicts with `automatic_from_end` and `automatic_from_start`. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
 
 <a id="nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map"></a>
 ### Nested Schema for `provider_choice.aws.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.interfaces_addressing_choice.interface_ip_map`
@@ -964,15 +888,15 @@ Optional:
 
 Required:
 
-- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
+- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined<br>Exactly one of `configured_list` or `local_dns` must be specified. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
 
 <a id="nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice"></a>
 ### Nested Schema for `provider_choice.aws.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice`
 
 Optional:
 
-- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
-- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
+- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server<br>Conflicts with `local_dns`. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
+- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server<br>Conflicts with `configured_list`. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
 
 <a id="nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list"></a>
 ### Nested Schema for `provider_choice.aws.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.configured_list`
@@ -985,18 +909,18 @@ Required:
 <a id="nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns"></a>
 ### Nested Schema for `provider_choice.aws.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns`
 
-Required:
+Optional:
 
-- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
+- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server<br>Exactly one of `configured_address`, `first_address`, or `last_address` must be specified when `local_dns_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
 
 <a id="nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice"></a>
 ### Nested Schema for `provider_choice.aws.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns.local_dns_choice`
 
 Optional:
 
-- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server
-- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server
-- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server
+- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server<br>Conflicts with `first_address` and `last_address`.
+- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `last_address`.
+- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `first_address`.
 
 
 
@@ -1010,15 +934,15 @@ Optional:
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
 
 <a id="nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice"></a>
 ### Nested Schema for `provider_choice.aws.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice`
 
 Optional:
 
-- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
-- `node_static_ip` (Attributes) Node Static IP configuration for the Node (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
+- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
+- `node_static_ip` (Attributes) Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
 
 <a id="nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip"></a>
 ### Nested Schema for `provider_choice.aws.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice.cluster_static_ip`
@@ -1060,8 +984,8 @@ Optional:
 
 Optional:
 
-- `monitor` (Boolean) Monitoring enabled
-- `monitor_disabled` (Boolean) Monitoring disabled
+- `monitor` (Boolean) Monitoring enabled<br>Conflicts with `monitor_disabled`.
+- `monitor_disabled` (Boolean) Monitoring disabled<br>Conflicts with `monitor`.
 
 
 <a id="nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice"></a>
@@ -1069,8 +993,8 @@ Optional:
 
 Optional:
 
-- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.
-- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.
+- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_enabled`.
+- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_disabled`.
 
 
 
@@ -1083,7 +1007,7 @@ Optional:
 
 Required:
 
-- `orchestration_choice` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice))
+- `orchestration_choice` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode.<br>`not_managed` must be specified. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice))
 
 <a id="nestedatt--provider_choice--azure--orchestration_choice"></a>
 ### Nested Schema for `provider_choice.azure.orchestration_choice`
@@ -1117,51 +1041,29 @@ Optional:
 
 Required:
 
-- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--address_choice))
-- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--interface_choice))
+- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here.<br>Exactly one of `bond_interface`, `ethernet_interface`, or `vlan_interface` must be specified. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--interface_choice))
 - `network_option` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--network_option))
 
 Optional:
 
+- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface.<br>Exactly one of `dhcp_client`, `no_ipv4_address`, or `static_ip` must be specified when `address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--address_choice))
 - `description` (String) Interface Description Description for this Interface<br>**Validation:** `Length LengthAtMost(256)`
-- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
+- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface.<br>Exactly one of `ipv6_auto_config`, `no_ipv6_address`, or `static_ipv6_address` must be specified when `ipv6_address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
-- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
+- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.<br>Exactly one of `monitor` or `monitor_disabled` must be specified when `monitoring_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
 - `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000<br>**Default:** `0`
 - `name` (String) Interface Name Name of this Interface<br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
-- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
-
-<a id="nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--address_choice"></a>
-### Nested Schema for `provider_choice.azure.orchestration_choice.not_managed.node_list.interface_list.address_choice`
-
-Optional:
-
-- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.
-- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.
-- `static_ip` (Attributes) Static IP Interface IP address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip))
-
-<a id="nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip"></a>
-### Nested Schema for `provider_choice.azure.orchestration_choice.not_managed.node_list.interface_list.address_choice.static_ip`
-
-Required:
-
-- `ip_address` (String) Default Gateway IP address of the interface and prefix length
-
-Optional:
-
-- `default_gw` (String) Default Gateway IP address of the default gateway.
-
-
+- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled.<br>Exactly one of `site_to_site_connectivity_interface_disabled` or `site_to_site_connectivity_interface_enabled` must be specified when `site_to_site_connectivity_interface_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
 
 <a id="nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--interface_choice"></a>
 ### Nested Schema for `provider_choice.azure.orchestration_choice.not_managed.node_list.interface_list.interface_choice`
 
 Optional:
 
-- `bond_interface` (Attributes) Bond Interface (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface))
-- `ethernet_interface` (Attributes) Ethernet Interface (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
-- `vlan_interface` (Attributes) VLAN Interface (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--interface_choice--vlan_interface))
+- `bond_interface` (Attributes) Bond Interface<br>Conflicts with `ethernet_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface))
+- `ethernet_interface` (Attributes) Ethernet Interface<br>Conflicts with `bond_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
+- `vlan_interface` (Attributes) VLAN Interface<br>Conflicts with `bond_interface` and `ethernet_interface`. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--interface_choice--vlan_interface))
 
 <a id="nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface"></a>
 ### Nested Schema for `provider_choice.azure.orchestration_choice.not_managed.node_list.interface_list.interface_choice.bond_interface`
@@ -1169,7 +1071,7 @@ Optional:
 Required:
 
 - `devices` (List of String) Member Ethernet Devices Ethernet devices that will make up this bond
-- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
+- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP<br>Exactly one of `active_backup` or `lacp` must be specified. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
 - `name` (String) Bond Device Name for the Bond. Ex 'bond0'<br>**Validation:** `Length LengthAtMost(64)`
 
 Optional:
@@ -1182,8 +1084,8 @@ Optional:
 
 Optional:
 
-- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device
-- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
+- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device<br>Conflicts with `lacp`.
+- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device<br>Conflicts with `active_backup`. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
 
 <a id="nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp"></a>
 ### Nested Schema for `provider_choice.azure.orchestration_choice.not_managed.node_list.interface_list.interface_choice.bond_interface.lacp_choice.lacp`
@@ -1225,16 +1127,16 @@ Optional:
 
 Optional:
 
-- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice))
+- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs).<br>Exactly one of `segment_network`, `site_local_inside_network`, or `site_local_network` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice))
 
 <a id="nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice"></a>
 ### Nested Schema for `provider_choice.azure.orchestration_choice.not_managed.node_list.interface_list.network_option.network_choice`
 
 Optional:
 
-- `segment_network` (Attributes) Segment (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
-- `site_local_inside_network` (Boolean) Site Local Network Inside
-- `site_local_network` (Boolean) Site Local Network
+- `segment_network` (Attributes) Segment<br>Conflicts with `site_local_inside_network` and `site_local_network`. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
+- `site_local_inside_network` (Boolean) Site Local Network Inside<br>Conflicts with `segment_network` and `site_local_network`.
+- `site_local_network` (Boolean) Site Local Network<br>Conflicts with `segment_network` and `site_local_inside_network`.
 
 <a id="nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network"></a>
 ### Nested Schema for `provider_choice.azure.orchestration_choice.not_managed.node_list.interface_list.network_option.network_choice.segment_network`
@@ -1251,36 +1153,58 @@ Read-Only:
 
 
 
+<a id="nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--address_choice"></a>
+### Nested Schema for `provider_choice.azure.orchestration_choice.not_managed.node_list.interface_list.address_choice`
+
+Optional:
+
+- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.<br>Conflicts with `no_ipv4_address` and `static_ip`.
+- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.<br>Conflicts with `dhcp_client` and `static_ip`.
+- `static_ip` (Attributes) Static IP Interface IP address is configured statically.<br>Conflicts with `dhcp_client` and `no_ipv4_address`. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip))
+
+<a id="nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip"></a>
+### Nested Schema for `provider_choice.azure.orchestration_choice.not_managed.node_list.interface_list.address_choice.static_ip`
+
+Required:
+
+- `ip_address` (String) Default Gateway IP address of the interface and prefix length
+
+Optional:
+
+- `default_gw` (String) Default Gateway IP address of the default gateway.
+
+
+
 <a id="nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice"></a>
 ### Nested Schema for `provider_choice.azure.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice`
 
 Optional:
 
-- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
-- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.
-- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
+- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration.<br>Conflicts with `no_ipv6_address` and `static_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
+- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.<br>Conflicts with `ipv6_auto_config` and `static_ipv6_address`.
+- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically.<br>Conflicts with `ipv6_auto_config` and `no_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
 
 <a id="nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config"></a>
 ### Nested Schema for `provider_choice.azure.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config`
 
-Required:
+Optional:
 
-- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
+- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration<br>Exactly one of `host` or `router` must be specified when `autoconfig_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
 
 <a id="nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice"></a>
 ### Nested Schema for `provider_choice.azure.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice`
 
 Optional:
 
-- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.
-- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
+- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.<br>Conflicts with `router`.
+- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.<br>Conflicts with `host`. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
 
 <a id="nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router"></a>
 ### Nested Schema for `provider_choice.azure.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router`
 
 Required:
 
-- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
+- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients<br>Exactly one of `network_prefix` or `stateful` must be specified. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
 
 Optional:
 
@@ -1291,8 +1215,8 @@ Optional:
 
 Optional:
 
-- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862
-- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
+- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862<br>Conflicts with `stateful`.
+- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag<br>Conflicts with `network_prefix`. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
 
 <a id="nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful"></a>
 ### Nested Schema for `provider_choice.azure.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful`
@@ -1300,18 +1224,18 @@ Optional:
 Required:
 
 - `dhcp_networks` (Attributes List) DHCP IPV6 Networks List of networks from which DHCP server can allocate ip addresses (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks))
-- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 Optional:
 
 - `fixed_ip_map` (Map of String) Fixed IPV6 Assignments Fixed MAC address to ipv6 assignments, Key: Mac address, Value: IPV6 Address Assign fixed IPv6 addresses based on the MAC Address of the DHCP Client.
+- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address<br>Exactly one of `automatic_from_end`, `automatic_from_start`, or `interface_ip_map` must be specified when `interfaces_addressing_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 <a id="nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks"></a>
 ### Nested Schema for `provider_choice.azure.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.dhcp_networks`
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site<br>`network_prefix` must be specified. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
 - `pool_settings` (List of String) DHCP Pool Settings Controls how DHCPV6 pools are handled<br>**Allowed Values (choose one):** `['EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS', 'INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS']`
 
 Optional:
@@ -1341,9 +1265,9 @@ Optional:
 
 Optional:
 
-- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list
-- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list
-- `interface_ip_map` (Attributes) Configured Address Configured address for every node (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
+- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list<br>Conflicts with `automatic_from_start` and `interface_ip_map`.
+- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list<br>Conflicts with `automatic_from_end` and `interface_ip_map`.
+- `interface_ip_map` (Attributes) Configured Address Configured address for every node<br>Conflicts with `automatic_from_end` and `automatic_from_start`. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
 
 <a id="nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map"></a>
 ### Nested Schema for `provider_choice.azure.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.interfaces_addressing_choice.interface_ip_map`
@@ -1361,15 +1285,15 @@ Optional:
 
 Required:
 
-- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
+- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined<br>Exactly one of `configured_list` or `local_dns` must be specified. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
 
 <a id="nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice"></a>
 ### Nested Schema for `provider_choice.azure.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice`
 
 Optional:
 
-- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
-- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
+- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server<br>Conflicts with `local_dns`. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
+- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server<br>Conflicts with `configured_list`. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
 
 <a id="nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list"></a>
 ### Nested Schema for `provider_choice.azure.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.configured_list`
@@ -1382,18 +1306,18 @@ Required:
 <a id="nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns"></a>
 ### Nested Schema for `provider_choice.azure.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns`
 
-Required:
+Optional:
 
-- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
+- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server<br>Exactly one of `configured_address`, `first_address`, or `last_address` must be specified when `local_dns_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
 
 <a id="nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice"></a>
 ### Nested Schema for `provider_choice.azure.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns.local_dns_choice`
 
 Optional:
 
-- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server
-- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server
-- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server
+- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server<br>Conflicts with `first_address` and `last_address`.
+- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `last_address`.
+- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `first_address`.
 
 
 
@@ -1407,15 +1331,15 @@ Optional:
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
 
 <a id="nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice"></a>
 ### Nested Schema for `provider_choice.azure.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice`
 
 Optional:
 
-- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
-- `node_static_ip` (Attributes) Node Static IP configuration for the Node (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
+- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
+- `node_static_ip` (Attributes) Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
 
 <a id="nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip"></a>
 ### Nested Schema for `provider_choice.azure.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice.cluster_static_ip`
@@ -1457,8 +1381,8 @@ Optional:
 
 Optional:
 
-- `monitor` (Boolean) Monitoring enabled
-- `monitor_disabled` (Boolean) Monitoring disabled
+- `monitor` (Boolean) Monitoring enabled<br>Conflicts with `monitor_disabled`.
+- `monitor_disabled` (Boolean) Monitoring disabled<br>Conflicts with `monitor`.
 
 
 <a id="nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice"></a>
@@ -1466,8 +1390,8 @@ Optional:
 
 Optional:
 
-- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.
-- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.
+- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_enabled`.
+- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_disabled`.
 
 
 
@@ -1480,7 +1404,7 @@ Optional:
 
 Optional:
 
-- `orchestration_choice` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice))
+- `orchestration_choice` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode.<br>`not_managed` must be specified when `orchestration_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice))
 
 <a id="nestedatt--provider_choice--baremetal--orchestration_choice"></a>
 ### Nested Schema for `provider_choice.baremetal.orchestration_choice`
@@ -1514,51 +1438,29 @@ Optional:
 
 Required:
 
-- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--address_choice))
-- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--interface_choice))
+- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here.<br>Exactly one of `bond_interface`, `ethernet_interface`, or `vlan_interface` must be specified. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--interface_choice))
 - `network_option` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--network_option))
 
 Optional:
 
+- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface.<br>Exactly one of `dhcp_client`, `no_ipv4_address`, or `static_ip` must be specified when `address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--address_choice))
 - `description` (String) Interface Description Description for this Interface<br>**Validation:** `Length LengthAtMost(256)`
-- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
+- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface.<br>Exactly one of `ipv6_auto_config`, `no_ipv6_address`, or `static_ipv6_address` must be specified when `ipv6_address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
-- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
+- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.<br>Exactly one of `monitor` or `monitor_disabled` must be specified when `monitoring_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
 - `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000<br>**Default:** `0`
 - `name` (String) Interface Name Name of this Interface<br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
-- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
-
-<a id="nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--address_choice"></a>
-### Nested Schema for `provider_choice.baremetal.orchestration_choice.not_managed.node_list.interface_list.address_choice`
-
-Optional:
-
-- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.
-- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.
-- `static_ip` (Attributes) Static IP Interface IP address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip))
-
-<a id="nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip"></a>
-### Nested Schema for `provider_choice.baremetal.orchestration_choice.not_managed.node_list.interface_list.address_choice.static_ip`
-
-Required:
-
-- `ip_address` (String) Default Gateway IP address of the interface and prefix length
-
-Optional:
-
-- `default_gw` (String) Default Gateway IP address of the default gateway.
-
-
+- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled.<br>Exactly one of `site_to_site_connectivity_interface_disabled` or `site_to_site_connectivity_interface_enabled` must be specified when `site_to_site_connectivity_interface_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
 
 <a id="nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--interface_choice"></a>
 ### Nested Schema for `provider_choice.baremetal.orchestration_choice.not_managed.node_list.interface_list.interface_choice`
 
 Optional:
 
-- `bond_interface` (Attributes) Bond Interface (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface))
-- `ethernet_interface` (Attributes) Ethernet Interface (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
-- `vlan_interface` (Attributes) VLAN Interface (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--interface_choice--vlan_interface))
+- `bond_interface` (Attributes) Bond Interface<br>Conflicts with `ethernet_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface))
+- `ethernet_interface` (Attributes) Ethernet Interface<br>Conflicts with `bond_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
+- `vlan_interface` (Attributes) VLAN Interface<br>Conflicts with `bond_interface` and `ethernet_interface`. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--interface_choice--vlan_interface))
 
 <a id="nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface"></a>
 ### Nested Schema for `provider_choice.baremetal.orchestration_choice.not_managed.node_list.interface_list.interface_choice.bond_interface`
@@ -1566,7 +1468,7 @@ Optional:
 Required:
 
 - `devices` (List of String) Member Ethernet Devices Ethernet devices that will make up this bond
-- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
+- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP<br>Exactly one of `active_backup` or `lacp` must be specified. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
 - `name` (String) Bond Device Name for the Bond. Ex 'bond0'<br>**Validation:** `Length LengthAtMost(64)`
 
 Optional:
@@ -1579,8 +1481,8 @@ Optional:
 
 Optional:
 
-- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device
-- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
+- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device<br>Conflicts with `lacp`.
+- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device<br>Conflicts with `active_backup`. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
 
 <a id="nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp"></a>
 ### Nested Schema for `provider_choice.baremetal.orchestration_choice.not_managed.node_list.interface_list.interface_choice.bond_interface.lacp_choice.lacp`
@@ -1622,16 +1524,16 @@ Optional:
 
 Optional:
 
-- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice))
+- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs).<br>Exactly one of `segment_network`, `site_local_inside_network`, or `site_local_network` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice))
 
 <a id="nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice"></a>
 ### Nested Schema for `provider_choice.baremetal.orchestration_choice.not_managed.node_list.interface_list.network_option.network_choice`
 
 Optional:
 
-- `segment_network` (Attributes) Segment (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
-- `site_local_inside_network` (Boolean) Site Local Network Inside
-- `site_local_network` (Boolean) Site Local Network
+- `segment_network` (Attributes) Segment<br>Conflicts with `site_local_inside_network` and `site_local_network`. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
+- `site_local_inside_network` (Boolean) Site Local Network Inside<br>Conflicts with `segment_network` and `site_local_network`.
+- `site_local_network` (Boolean) Site Local Network<br>Conflicts with `segment_network` and `site_local_inside_network`.
 
 <a id="nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network"></a>
 ### Nested Schema for `provider_choice.baremetal.orchestration_choice.not_managed.node_list.interface_list.network_option.network_choice.segment_network`
@@ -1648,36 +1550,58 @@ Read-Only:
 
 
 
+<a id="nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--address_choice"></a>
+### Nested Schema for `provider_choice.baremetal.orchestration_choice.not_managed.node_list.interface_list.address_choice`
+
+Optional:
+
+- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.<br>Conflicts with `no_ipv4_address` and `static_ip`.
+- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.<br>Conflicts with `dhcp_client` and `static_ip`.
+- `static_ip` (Attributes) Static IP Interface IP address is configured statically.<br>Conflicts with `dhcp_client` and `no_ipv4_address`. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip))
+
+<a id="nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip"></a>
+### Nested Schema for `provider_choice.baremetal.orchestration_choice.not_managed.node_list.interface_list.address_choice.static_ip`
+
+Required:
+
+- `ip_address` (String) Default Gateway IP address of the interface and prefix length
+
+Optional:
+
+- `default_gw` (String) Default Gateway IP address of the default gateway.
+
+
+
 <a id="nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice"></a>
 ### Nested Schema for `provider_choice.baremetal.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice`
 
 Optional:
 
-- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
-- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.
-- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
+- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration.<br>Conflicts with `no_ipv6_address` and `static_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
+- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.<br>Conflicts with `ipv6_auto_config` and `static_ipv6_address`.
+- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically.<br>Conflicts with `ipv6_auto_config` and `no_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
 
 <a id="nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config"></a>
 ### Nested Schema for `provider_choice.baremetal.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config`
 
-Required:
+Optional:
 
-- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
+- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration<br>Exactly one of `host` or `router` must be specified when `autoconfig_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
 
 <a id="nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice"></a>
 ### Nested Schema for `provider_choice.baremetal.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice`
 
 Optional:
 
-- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.
-- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
+- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.<br>Conflicts with `router`.
+- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.<br>Conflicts with `host`. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
 
 <a id="nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router"></a>
 ### Nested Schema for `provider_choice.baremetal.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router`
 
 Required:
 
-- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
+- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients<br>Exactly one of `network_prefix` or `stateful` must be specified. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
 
 Optional:
 
@@ -1688,8 +1612,8 @@ Optional:
 
 Optional:
 
-- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862
-- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
+- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862<br>Conflicts with `stateful`.
+- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag<br>Conflicts with `network_prefix`. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
 
 <a id="nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful"></a>
 ### Nested Schema for `provider_choice.baremetal.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful`
@@ -1697,18 +1621,18 @@ Optional:
 Required:
 
 - `dhcp_networks` (Attributes List) DHCP IPV6 Networks List of networks from which DHCP server can allocate ip addresses (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks))
-- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 Optional:
 
 - `fixed_ip_map` (Map of String) Fixed IPV6 Assignments Fixed MAC address to ipv6 assignments, Key: Mac address, Value: IPV6 Address Assign fixed IPv6 addresses based on the MAC Address of the DHCP Client.
+- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address<br>Exactly one of `automatic_from_end`, `automatic_from_start`, or `interface_ip_map` must be specified when `interfaces_addressing_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 <a id="nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks"></a>
 ### Nested Schema for `provider_choice.baremetal.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.dhcp_networks`
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site<br>`network_prefix` must be specified. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
 - `pool_settings` (List of String) DHCP Pool Settings Controls how DHCPV6 pools are handled<br>**Allowed Values (choose one):** `['EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS', 'INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS']`
 
 Optional:
@@ -1738,9 +1662,9 @@ Optional:
 
 Optional:
 
-- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list
-- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list
-- `interface_ip_map` (Attributes) Configured Address Configured address for every node (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
+- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list<br>Conflicts with `automatic_from_start` and `interface_ip_map`.
+- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list<br>Conflicts with `automatic_from_end` and `interface_ip_map`.
+- `interface_ip_map` (Attributes) Configured Address Configured address for every node<br>Conflicts with `automatic_from_end` and `automatic_from_start`. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
 
 <a id="nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map"></a>
 ### Nested Schema for `provider_choice.baremetal.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.interfaces_addressing_choice.interface_ip_map`
@@ -1758,15 +1682,15 @@ Optional:
 
 Required:
 
-- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
+- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined<br>Exactly one of `configured_list` or `local_dns` must be specified. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
 
 <a id="nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice"></a>
 ### Nested Schema for `provider_choice.baremetal.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice`
 
 Optional:
 
-- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
-- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
+- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server<br>Conflicts with `local_dns`. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
+- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server<br>Conflicts with `configured_list`. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
 
 <a id="nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list"></a>
 ### Nested Schema for `provider_choice.baremetal.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.configured_list`
@@ -1779,18 +1703,18 @@ Required:
 <a id="nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns"></a>
 ### Nested Schema for `provider_choice.baremetal.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns`
 
-Required:
+Optional:
 
-- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
+- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server<br>Exactly one of `configured_address`, `first_address`, or `last_address` must be specified when `local_dns_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
 
 <a id="nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice"></a>
 ### Nested Schema for `provider_choice.baremetal.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns.local_dns_choice`
 
 Optional:
 
-- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server
-- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server
-- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server
+- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server<br>Conflicts with `first_address` and `last_address`.
+- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `last_address`.
+- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `first_address`.
 
 
 
@@ -1804,15 +1728,15 @@ Optional:
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
 
 <a id="nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice"></a>
 ### Nested Schema for `provider_choice.baremetal.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice`
 
 Optional:
 
-- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
-- `node_static_ip` (Attributes) Node Static IP configuration for the Node (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
+- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
+- `node_static_ip` (Attributes) Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
 
 <a id="nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip"></a>
 ### Nested Schema for `provider_choice.baremetal.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice.cluster_static_ip`
@@ -1854,8 +1778,8 @@ Optional:
 
 Optional:
 
-- `monitor` (Boolean) Monitoring enabled
-- `monitor_disabled` (Boolean) Monitoring disabled
+- `monitor` (Boolean) Monitoring enabled<br>Conflicts with `monitor_disabled`.
+- `monitor_disabled` (Boolean) Monitoring disabled<br>Conflicts with `monitor`.
 
 
 <a id="nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice"></a>
@@ -1863,8 +1787,8 @@ Optional:
 
 Optional:
 
-- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.
-- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.
+- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_enabled`.
+- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_disabled`.
 
 
 
@@ -1877,40 +1801,13 @@ Optional:
 
 Required:
 
-- `anti_affinity_choice` (Attributes) Pod Anti-Affinity Enable pod anti-affinity to prevent CE pods from being scheduled on nodes where specific customer services are already running. Configure match labels to identify the existing services (e.g., app=etcd) and topology key (e.g., kubernetes.io/hostname). CE pods will avoid nodes that have matching pods across all namespaces. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--anti_affinity_choice))
 - `deployment_size` (List of String) Deployment Size Select the size/flavor for the Customer Edge deployment on Kubernetes. This determines the resource allocation (CPU, memory) for the VPM and related pods. Medium (8 vCPU, 24 GB memory) is suitable for most deployments, Large (12 vCPU, 48 GB memory) for workloads requiring additional resources.<br>**Allowed Values (choose one):** `['KUBERNETES_DEPLOYMENT_SIZE_LARGE', 'KUBERNETES_DEPLOYMENT_SIZE_MEDIUM']`
 - `not_managed` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed))
 
 Optional:
 
+- `anti_affinity_choice` (Attributes) Pod Anti-Affinity Enable pod anti-affinity to prevent CE pods from being scheduled on nodes where specific customer services are already running. Configure match labels to identify the existing services (e.g., app=etcd) and topology key (e.g., kubernetes.io/hostname). CE pods will avoid nodes that have matching pods across all namespaces.<br>Exactly one of `disable_anti_affinity` or `enable_anti_affinity` must be specified when `anti_affinity_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--anti_affinity_choice))
 - `labels` (Map of String) Node Selector Labels Add labels to control which Kubernetes nodes the VPM and related pods (etcd, VER, prometheus) are deployed to. Specify label key-value pairs that match the labels on your Kubernetes nodes. This uses Kubernetes nodeSelector to schedule pods only on nodes with matching labels.
-
-<a id="nestedatt--provider_choice--eks_k8s--anti_affinity_choice"></a>
-### Nested Schema for `provider_choice.eks_k8s.anti_affinity_choice`
-
-Optional:
-
-- `disable_anti_affinity` (Boolean) Disable Anti-Affinity Pod anti-affinity is disabled. Pods may run on the same node.
-- `enable_anti_affinity` (Attributes) Enable Anti-Affinity Pod anti-affinity is enabled. Kubernetes scheduler will distribute pods across different nodes. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--anti_affinity_choice--enable_anti_affinity))
-
-<a id="nestedatt--provider_choice--eks_k8s--anti_affinity_choice--enable_anti_affinity"></a>
-### Nested Schema for `provider_choice.eks_k8s.anti_affinity_choice.enable_anti_affinity`
-
-Required:
-
-- `rules` (Attributes List) Anti-Affinity Rules Define one or more anti-affinity rules. Each rule specifies which pods (by labels) should be distributed across which topology domains. Example: Rule 1 - Distribute VPM pods across nodes, Rule 2 - Distribute Prometheus pods across zones. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--anti_affinity_choice--enable_anti_affinity--rules))
-
-<a id="nestedatt--provider_choice--eks_k8s--anti_affinity_choice--enable_anti_affinity--rules"></a>
-### Nested Schema for `provider_choice.eks_k8s.anti_affinity_choice.enable_anti_affinity.rules`
-
-Required:
-
-- `label_key` (String) Label Key Specify the label key of the customer pods that CE pods should avoid being co-scheduled with. Combined with the label value below, this identifies the target pods.<br>**Validation:** `Length LengthBetween(1, 253)`
-- `label_value` (String) Label Value Specify the label value that, together with the label key, identifies the customer pods to avoid.<br>**Validation:** `Length LengthBetween(1, 63)`
-- `topology_keys` (List of String) Topology Keys Specify one or more node label keys that define the scope of avoidance. For each topology key (e.g., kubernetes.io/hostname), CE pods will avoid nodes whose topology value matches a node already running a pod with the above specified label. Example: with kubernetes.io/hostname, CE pods are kept off any node running the matching customer pod.
-
-
-
 
 <a id="nestedatt--provider_choice--eks_k8s--not_managed"></a>
 ### Nested Schema for `provider_choice.eks_k8s.not_managed`
@@ -1937,51 +1834,29 @@ Optional:
 
 Required:
 
-- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--address_choice))
-- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--interface_choice))
+- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here.<br>Exactly one of `bond_interface`, `ethernet_interface`, or `vlan_interface` must be specified. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--interface_choice))
 - `network_option` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--network_option))
 
 Optional:
 
+- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface.<br>Exactly one of `dhcp_client`, `no_ipv4_address`, or `static_ip` must be specified when `address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--address_choice))
 - `description` (String) Interface Description Description for this Interface<br>**Validation:** `Length LengthAtMost(256)`
-- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice))
+- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface.<br>Exactly one of `ipv6_auto_config`, `no_ipv6_address`, or `static_ipv6_address` must be specified when `ipv6_address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
-- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--monitoring_choice))
+- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.<br>Exactly one of `monitor` or `monitor_disabled` must be specified when `monitoring_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--monitoring_choice))
 - `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000<br>**Default:** `0`
 - `name` (String) Interface Name Name of this Interface<br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
-- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
-
-<a id="nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--address_choice"></a>
-### Nested Schema for `provider_choice.eks_k8s.not_managed.node_list.interface_list.address_choice`
-
-Optional:
-
-- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.
-- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.
-- `static_ip` (Attributes) Static IP Interface IP address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--address_choice--static_ip))
-
-<a id="nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--address_choice--static_ip"></a>
-### Nested Schema for `provider_choice.eks_k8s.not_managed.node_list.interface_list.address_choice.static_ip`
-
-Required:
-
-- `ip_address` (String) Default Gateway IP address of the interface and prefix length
-
-Optional:
-
-- `default_gw` (String) Default Gateway IP address of the default gateway.
-
-
+- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled.<br>Exactly one of `site_to_site_connectivity_interface_disabled` or `site_to_site_connectivity_interface_enabled` must be specified when `site_to_site_connectivity_interface_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
 
 <a id="nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--interface_choice"></a>
 ### Nested Schema for `provider_choice.eks_k8s.not_managed.node_list.interface_list.interface_choice`
 
 Optional:
 
-- `bond_interface` (Attributes) Bond Interface (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface))
-- `ethernet_interface` (Attributes) Ethernet Interface (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
-- `vlan_interface` (Attributes) VLAN Interface (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--interface_choice--vlan_interface))
+- `bond_interface` (Attributes) Bond Interface<br>Conflicts with `ethernet_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface))
+- `ethernet_interface` (Attributes) Ethernet Interface<br>Conflicts with `bond_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
+- `vlan_interface` (Attributes) VLAN Interface<br>Conflicts with `bond_interface` and `ethernet_interface`. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--interface_choice--vlan_interface))
 
 <a id="nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface"></a>
 ### Nested Schema for `provider_choice.eks_k8s.not_managed.node_list.interface_list.interface_choice.bond_interface`
@@ -1989,7 +1864,7 @@ Optional:
 Required:
 
 - `devices` (List of String) Member Ethernet Devices Ethernet devices that will make up this bond
-- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
+- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP<br>Exactly one of `active_backup` or `lacp` must be specified. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
 - `name` (String) Bond Device Name for the Bond. Ex 'bond0'<br>**Validation:** `Length LengthAtMost(64)`
 
 Optional:
@@ -2002,8 +1877,8 @@ Optional:
 
 Optional:
 
-- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device
-- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
+- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device<br>Conflicts with `lacp`.
+- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device<br>Conflicts with `active_backup`. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
 
 <a id="nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp"></a>
 ### Nested Schema for `provider_choice.eks_k8s.not_managed.node_list.interface_list.interface_choice.bond_interface.lacp_choice.lacp`
@@ -2045,16 +1920,16 @@ Optional:
 
 Optional:
 
-- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--network_option--network_choice))
+- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs).<br>Exactly one of `segment_network`, `site_local_inside_network`, or `site_local_network` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--network_option--network_choice))
 
 <a id="nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--network_option--network_choice"></a>
 ### Nested Schema for `provider_choice.eks_k8s.not_managed.node_list.interface_list.network_option.network_choice`
 
 Optional:
 
-- `segment_network` (Attributes) Segment (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
-- `site_local_inside_network` (Boolean) Site Local Network Inside
-- `site_local_network` (Boolean) Site Local Network
+- `segment_network` (Attributes) Segment<br>Conflicts with `site_local_inside_network` and `site_local_network`. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
+- `site_local_inside_network` (Boolean) Site Local Network Inside<br>Conflicts with `segment_network` and `site_local_network`.
+- `site_local_network` (Boolean) Site Local Network<br>Conflicts with `segment_network` and `site_local_inside_network`.
 
 <a id="nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--network_option--network_choice--segment_network"></a>
 ### Nested Schema for `provider_choice.eks_k8s.not_managed.node_list.interface_list.network_option.network_choice.segment_network`
@@ -2071,36 +1946,58 @@ Read-Only:
 
 
 
+<a id="nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--address_choice"></a>
+### Nested Schema for `provider_choice.eks_k8s.not_managed.node_list.interface_list.address_choice`
+
+Optional:
+
+- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.<br>Conflicts with `no_ipv4_address` and `static_ip`.
+- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.<br>Conflicts with `dhcp_client` and `static_ip`.
+- `static_ip` (Attributes) Static IP Interface IP address is configured statically.<br>Conflicts with `dhcp_client` and `no_ipv4_address`. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--address_choice--static_ip))
+
+<a id="nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--address_choice--static_ip"></a>
+### Nested Schema for `provider_choice.eks_k8s.not_managed.node_list.interface_list.address_choice.static_ip`
+
+Required:
+
+- `ip_address` (String) Default Gateway IP address of the interface and prefix length
+
+Optional:
+
+- `default_gw` (String) Default Gateway IP address of the default gateway.
+
+
+
 <a id="nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice"></a>
 ### Nested Schema for `provider_choice.eks_k8s.not_managed.node_list.interface_list.ipv6_address_choice`
 
 Optional:
 
-- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
-- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.
-- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
+- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration.<br>Conflicts with `no_ipv6_address` and `static_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
+- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.<br>Conflicts with `ipv6_auto_config` and `static_ipv6_address`.
+- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically.<br>Conflicts with `ipv6_auto_config` and `no_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
 
 <a id="nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config"></a>
 ### Nested Schema for `provider_choice.eks_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config`
 
-Required:
+Optional:
 
-- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
+- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration<br>Exactly one of `host` or `router` must be specified when `autoconfig_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
 
 <a id="nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice"></a>
 ### Nested Schema for `provider_choice.eks_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice`
 
 Optional:
 
-- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.
-- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
+- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.<br>Conflicts with `router`.
+- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.<br>Conflicts with `host`. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
 
 <a id="nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router"></a>
 ### Nested Schema for `provider_choice.eks_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router`
 
 Required:
 
-- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
+- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients<br>Exactly one of `network_prefix` or `stateful` must be specified. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
 
 Optional:
 
@@ -2111,8 +2008,8 @@ Optional:
 
 Optional:
 
-- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862
-- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
+- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862<br>Conflicts with `stateful`.
+- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag<br>Conflicts with `network_prefix`. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
 
 <a id="nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful"></a>
 ### Nested Schema for `provider_choice.eks_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful`
@@ -2120,18 +2017,18 @@ Optional:
 Required:
 
 - `dhcp_networks` (Attributes List) DHCP IPV6 Networks List of networks from which DHCP server can allocate ip addresses (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks))
-- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 Optional:
 
 - `fixed_ip_map` (Map of String) Fixed IPV6 Assignments Fixed MAC address to ipv6 assignments, Key: Mac address, Value: IPV6 Address Assign fixed IPv6 addresses based on the MAC Address of the DHCP Client.
+- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address<br>Exactly one of `automatic_from_end`, `automatic_from_start`, or `interface_ip_map` must be specified when `interfaces_addressing_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 <a id="nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks"></a>
 ### Nested Schema for `provider_choice.eks_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.dhcp_networks`
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site<br>`network_prefix` must be specified. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
 - `pool_settings` (List of String) DHCP Pool Settings Controls how DHCPV6 pools are handled<br>**Allowed Values (choose one):** `['EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS', 'INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS']`
 
 Optional:
@@ -2161,9 +2058,9 @@ Optional:
 
 Optional:
 
-- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list
-- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list
-- `interface_ip_map` (Attributes) Configured Address Configured address for every node (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
+- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list<br>Conflicts with `automatic_from_start` and `interface_ip_map`.
+- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list<br>Conflicts with `automatic_from_end` and `interface_ip_map`.
+- `interface_ip_map` (Attributes) Configured Address Configured address for every node<br>Conflicts with `automatic_from_end` and `automatic_from_start`. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
 
 <a id="nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map"></a>
 ### Nested Schema for `provider_choice.eks_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.interfaces_addressing_choice.interface_ip_map`
@@ -2181,15 +2078,15 @@ Optional:
 
 Required:
 
-- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
+- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined<br>Exactly one of `configured_list` or `local_dns` must be specified. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
 
 <a id="nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice"></a>
 ### Nested Schema for `provider_choice.eks_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice`
 
 Optional:
 
-- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
-- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
+- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server<br>Conflicts with `local_dns`. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
+- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server<br>Conflicts with `configured_list`. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
 
 <a id="nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list"></a>
 ### Nested Schema for `provider_choice.eks_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.configured_list`
@@ -2202,18 +2099,18 @@ Required:
 <a id="nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns"></a>
 ### Nested Schema for `provider_choice.eks_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns`
 
-Required:
+Optional:
 
-- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
+- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server<br>Exactly one of `configured_address`, `first_address`, or `last_address` must be specified when `local_dns_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
 
 <a id="nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice"></a>
 ### Nested Schema for `provider_choice.eks_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns.local_dns_choice`
 
 Optional:
 
-- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server
-- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server
-- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server
+- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server<br>Conflicts with `first_address` and `last_address`.
+- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `last_address`.
+- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `first_address`.
 
 
 
@@ -2227,15 +2124,15 @@ Optional:
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
 
 <a id="nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice"></a>
 ### Nested Schema for `provider_choice.eks_k8s.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice`
 
 Optional:
 
-- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
-- `node_static_ip` (Attributes) Node Static IP configuration for the Node (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
+- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
+- `node_static_ip` (Attributes) Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
 
 <a id="nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip"></a>
 ### Nested Schema for `provider_choice.eks_k8s.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice.cluster_static_ip`
@@ -2277,8 +2174,8 @@ Optional:
 
 Optional:
 
-- `monitor` (Boolean) Monitoring enabled
-- `monitor_disabled` (Boolean) Monitoring disabled
+- `monitor` (Boolean) Monitoring enabled<br>Conflicts with `monitor_disabled`.
+- `monitor_disabled` (Boolean) Monitoring disabled<br>Conflicts with `monitor`.
 
 
 <a id="nestedatt--provider_choice--eks_k8s--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice"></a>
@@ -2286,9 +2183,36 @@ Optional:
 
 Optional:
 
-- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.
-- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.
+- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_enabled`.
+- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_disabled`.
 
+
+
+
+
+<a id="nestedatt--provider_choice--eks_k8s--anti_affinity_choice"></a>
+### Nested Schema for `provider_choice.eks_k8s.anti_affinity_choice`
+
+Optional:
+
+- `disable_anti_affinity` (Boolean) Disable Anti-Affinity Pod anti-affinity is disabled. Pods may run on the same node.<br>Conflicts with `enable_anti_affinity`.
+- `enable_anti_affinity` (Attributes) Enable Anti-Affinity Pod anti-affinity is enabled. Kubernetes scheduler will distribute pods across different nodes.<br>Conflicts with `disable_anti_affinity`. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--anti_affinity_choice--enable_anti_affinity))
+
+<a id="nestedatt--provider_choice--eks_k8s--anti_affinity_choice--enable_anti_affinity"></a>
+### Nested Schema for `provider_choice.eks_k8s.anti_affinity_choice.enable_anti_affinity`
+
+Required:
+
+- `rules` (Attributes List) Anti-Affinity Rules Define one or more anti-affinity rules. Each rule specifies which pods (by labels) should be distributed across which topology domains. Example: Rule 1 - Distribute VPM pods across nodes, Rule 2 - Distribute Prometheus pods across zones. (see [below for nested schema](#nestedatt--provider_choice--eks_k8s--anti_affinity_choice--enable_anti_affinity--rules))
+
+<a id="nestedatt--provider_choice--eks_k8s--anti_affinity_choice--enable_anti_affinity--rules"></a>
+### Nested Schema for `provider_choice.eks_k8s.anti_affinity_choice.enable_anti_affinity.rules`
+
+Required:
+
+- `label_key` (String) Label Key Specify the label key of the customer pods that CE pods should avoid being co-scheduled with. Combined with the label value below, this identifies the target pods.<br>**Validation:** `Length LengthBetween(1, 253)`
+- `label_value` (String) Label Value Specify the label value that, together with the label key, identifies the customer pods to avoid.<br>**Validation:** `Length LengthBetween(1, 63)`
+- `topology_keys` (List of String) Topology Keys Specify one or more node label keys that define the scope of avoidance. For each topology key (e.g., kubernetes.io/hostname), CE pods will avoid nodes whose topology value matches a node already running a pod with the above specified label. Example: with kubernetes.io/hostname, CE pods are kept off any node running the matching customer pod.
 
 
 
@@ -2299,7 +2223,7 @@ Optional:
 
 Optional:
 
-- `orchestration_choice` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice))
+- `orchestration_choice` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode.<br>`not_managed` must be specified when `orchestration_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice))
 
 <a id="nestedatt--provider_choice--equinix--orchestration_choice"></a>
 ### Nested Schema for `provider_choice.equinix.orchestration_choice`
@@ -2333,51 +2257,29 @@ Optional:
 
 Required:
 
-- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--address_choice))
-- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--interface_choice))
+- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here.<br>Exactly one of `bond_interface`, `ethernet_interface`, or `vlan_interface` must be specified. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--interface_choice))
 - `network_option` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--network_option))
 
 Optional:
 
+- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface.<br>Exactly one of `dhcp_client`, `no_ipv4_address`, or `static_ip` must be specified when `address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--address_choice))
 - `description` (String) Interface Description Description for this Interface<br>**Validation:** `Length LengthAtMost(256)`
-- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
+- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface.<br>Exactly one of `ipv6_auto_config`, `no_ipv6_address`, or `static_ipv6_address` must be specified when `ipv6_address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
-- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
+- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.<br>Exactly one of `monitor` or `monitor_disabled` must be specified when `monitoring_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
 - `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000<br>**Default:** `0`
 - `name` (String) Interface Name Name of this Interface<br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
-- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
-
-<a id="nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--address_choice"></a>
-### Nested Schema for `provider_choice.equinix.orchestration_choice.not_managed.node_list.interface_list.address_choice`
-
-Optional:
-
-- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.
-- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.
-- `static_ip` (Attributes) Static IP Interface IP address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip))
-
-<a id="nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip"></a>
-### Nested Schema for `provider_choice.equinix.orchestration_choice.not_managed.node_list.interface_list.address_choice.static_ip`
-
-Required:
-
-- `ip_address` (String) Default Gateway IP address of the interface and prefix length
-
-Optional:
-
-- `default_gw` (String) Default Gateway IP address of the default gateway.
-
-
+- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled.<br>Exactly one of `site_to_site_connectivity_interface_disabled` or `site_to_site_connectivity_interface_enabled` must be specified when `site_to_site_connectivity_interface_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
 
 <a id="nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--interface_choice"></a>
 ### Nested Schema for `provider_choice.equinix.orchestration_choice.not_managed.node_list.interface_list.interface_choice`
 
 Optional:
 
-- `bond_interface` (Attributes) Bond Interface (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface))
-- `ethernet_interface` (Attributes) Ethernet Interface (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
-- `vlan_interface` (Attributes) VLAN Interface (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--interface_choice--vlan_interface))
+- `bond_interface` (Attributes) Bond Interface<br>Conflicts with `ethernet_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface))
+- `ethernet_interface` (Attributes) Ethernet Interface<br>Conflicts with `bond_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
+- `vlan_interface` (Attributes) VLAN Interface<br>Conflicts with `bond_interface` and `ethernet_interface`. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--interface_choice--vlan_interface))
 
 <a id="nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface"></a>
 ### Nested Schema for `provider_choice.equinix.orchestration_choice.not_managed.node_list.interface_list.interface_choice.bond_interface`
@@ -2385,7 +2287,7 @@ Optional:
 Required:
 
 - `devices` (List of String) Member Ethernet Devices Ethernet devices that will make up this bond
-- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
+- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP<br>Exactly one of `active_backup` or `lacp` must be specified. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
 - `name` (String) Bond Device Name for the Bond. Ex 'bond0'<br>**Validation:** `Length LengthAtMost(64)`
 
 Optional:
@@ -2398,8 +2300,8 @@ Optional:
 
 Optional:
 
-- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device
-- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
+- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device<br>Conflicts with `lacp`.
+- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device<br>Conflicts with `active_backup`. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
 
 <a id="nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp"></a>
 ### Nested Schema for `provider_choice.equinix.orchestration_choice.not_managed.node_list.interface_list.interface_choice.bond_interface.lacp_choice.lacp`
@@ -2441,16 +2343,16 @@ Optional:
 
 Optional:
 
-- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice))
+- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs).<br>Exactly one of `segment_network`, `site_local_inside_network`, or `site_local_network` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice))
 
 <a id="nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice"></a>
 ### Nested Schema for `provider_choice.equinix.orchestration_choice.not_managed.node_list.interface_list.network_option.network_choice`
 
 Optional:
 
-- `segment_network` (Attributes) Segment (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
-- `site_local_inside_network` (Boolean) Site Local Network Inside
-- `site_local_network` (Boolean) Site Local Network
+- `segment_network` (Attributes) Segment<br>Conflicts with `site_local_inside_network` and `site_local_network`. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
+- `site_local_inside_network` (Boolean) Site Local Network Inside<br>Conflicts with `segment_network` and `site_local_network`.
+- `site_local_network` (Boolean) Site Local Network<br>Conflicts with `segment_network` and `site_local_inside_network`.
 
 <a id="nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network"></a>
 ### Nested Schema for `provider_choice.equinix.orchestration_choice.not_managed.node_list.interface_list.network_option.network_choice.segment_network`
@@ -2467,36 +2369,58 @@ Read-Only:
 
 
 
+<a id="nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--address_choice"></a>
+### Nested Schema for `provider_choice.equinix.orchestration_choice.not_managed.node_list.interface_list.address_choice`
+
+Optional:
+
+- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.<br>Conflicts with `no_ipv4_address` and `static_ip`.
+- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.<br>Conflicts with `dhcp_client` and `static_ip`.
+- `static_ip` (Attributes) Static IP Interface IP address is configured statically.<br>Conflicts with `dhcp_client` and `no_ipv4_address`. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip))
+
+<a id="nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip"></a>
+### Nested Schema for `provider_choice.equinix.orchestration_choice.not_managed.node_list.interface_list.address_choice.static_ip`
+
+Required:
+
+- `ip_address` (String) Default Gateway IP address of the interface and prefix length
+
+Optional:
+
+- `default_gw` (String) Default Gateway IP address of the default gateway.
+
+
+
 <a id="nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice"></a>
 ### Nested Schema for `provider_choice.equinix.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice`
 
 Optional:
 
-- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
-- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.
-- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
+- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration.<br>Conflicts with `no_ipv6_address` and `static_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
+- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.<br>Conflicts with `ipv6_auto_config` and `static_ipv6_address`.
+- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically.<br>Conflicts with `ipv6_auto_config` and `no_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
 
 <a id="nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config"></a>
 ### Nested Schema for `provider_choice.equinix.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config`
 
-Required:
+Optional:
 
-- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
+- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration<br>Exactly one of `host` or `router` must be specified when `autoconfig_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
 
 <a id="nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice"></a>
 ### Nested Schema for `provider_choice.equinix.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice`
 
 Optional:
 
-- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.
-- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
+- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.<br>Conflicts with `router`.
+- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.<br>Conflicts with `host`. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
 
 <a id="nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router"></a>
 ### Nested Schema for `provider_choice.equinix.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router`
 
 Required:
 
-- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
+- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients<br>Exactly one of `network_prefix` or `stateful` must be specified. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
 
 Optional:
 
@@ -2507,8 +2431,8 @@ Optional:
 
 Optional:
 
-- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862
-- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
+- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862<br>Conflicts with `stateful`.
+- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag<br>Conflicts with `network_prefix`. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
 
 <a id="nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful"></a>
 ### Nested Schema for `provider_choice.equinix.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful`
@@ -2516,18 +2440,18 @@ Optional:
 Required:
 
 - `dhcp_networks` (Attributes List) DHCP IPV6 Networks List of networks from which DHCP server can allocate ip addresses (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks))
-- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 Optional:
 
 - `fixed_ip_map` (Map of String) Fixed IPV6 Assignments Fixed MAC address to ipv6 assignments, Key: Mac address, Value: IPV6 Address Assign fixed IPv6 addresses based on the MAC Address of the DHCP Client.
+- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address<br>Exactly one of `automatic_from_end`, `automatic_from_start`, or `interface_ip_map` must be specified when `interfaces_addressing_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 <a id="nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks"></a>
 ### Nested Schema for `provider_choice.equinix.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.dhcp_networks`
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site<br>`network_prefix` must be specified. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
 - `pool_settings` (List of String) DHCP Pool Settings Controls how DHCPV6 pools are handled<br>**Allowed Values (choose one):** `['EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS', 'INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS']`
 
 Optional:
@@ -2557,9 +2481,9 @@ Optional:
 
 Optional:
 
-- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list
-- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list
-- `interface_ip_map` (Attributes) Configured Address Configured address for every node (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
+- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list<br>Conflicts with `automatic_from_start` and `interface_ip_map`.
+- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list<br>Conflicts with `automatic_from_end` and `interface_ip_map`.
+- `interface_ip_map` (Attributes) Configured Address Configured address for every node<br>Conflicts with `automatic_from_end` and `automatic_from_start`. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
 
 <a id="nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map"></a>
 ### Nested Schema for `provider_choice.equinix.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.interfaces_addressing_choice.interface_ip_map`
@@ -2577,15 +2501,15 @@ Optional:
 
 Required:
 
-- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
+- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined<br>Exactly one of `configured_list` or `local_dns` must be specified. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
 
 <a id="nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice"></a>
 ### Nested Schema for `provider_choice.equinix.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice`
 
 Optional:
 
-- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
-- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
+- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server<br>Conflicts with `local_dns`. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
+- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server<br>Conflicts with `configured_list`. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
 
 <a id="nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list"></a>
 ### Nested Schema for `provider_choice.equinix.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.configured_list`
@@ -2598,18 +2522,18 @@ Required:
 <a id="nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns"></a>
 ### Nested Schema for `provider_choice.equinix.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns`
 
-Required:
+Optional:
 
-- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
+- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server<br>Exactly one of `configured_address`, `first_address`, or `last_address` must be specified when `local_dns_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
 
 <a id="nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice"></a>
 ### Nested Schema for `provider_choice.equinix.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns.local_dns_choice`
 
 Optional:
 
-- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server
-- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server
-- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server
+- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server<br>Conflicts with `first_address` and `last_address`.
+- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `last_address`.
+- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `first_address`.
 
 
 
@@ -2623,15 +2547,15 @@ Optional:
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
 
 <a id="nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice"></a>
 ### Nested Schema for `provider_choice.equinix.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice`
 
 Optional:
 
-- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
-- `node_static_ip` (Attributes) Node Static IP configuration for the Node (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
+- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
+- `node_static_ip` (Attributes) Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
 
 <a id="nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip"></a>
 ### Nested Schema for `provider_choice.equinix.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice.cluster_static_ip`
@@ -2673,8 +2597,8 @@ Optional:
 
 Optional:
 
-- `monitor` (Boolean) Monitoring enabled
-- `monitor_disabled` (Boolean) Monitoring disabled
+- `monitor` (Boolean) Monitoring enabled<br>Conflicts with `monitor_disabled`.
+- `monitor_disabled` (Boolean) Monitoring disabled<br>Conflicts with `monitor`.
 
 
 <a id="nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice"></a>
@@ -2682,8 +2606,8 @@ Optional:
 
 Optional:
 
-- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.
-- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.
+- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_enabled`.
+- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_disabled`.
 
 
 
@@ -2696,7 +2620,7 @@ Optional:
 
 Required:
 
-- `orchestration_choice` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice))
+- `orchestration_choice` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode.<br>`not_managed` must be specified. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice))
 
 <a id="nestedatt--provider_choice--gcp--orchestration_choice"></a>
 ### Nested Schema for `provider_choice.gcp.orchestration_choice`
@@ -2730,51 +2654,29 @@ Optional:
 
 Required:
 
-- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--address_choice))
-- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--interface_choice))
+- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here.<br>Exactly one of `bond_interface`, `ethernet_interface`, or `vlan_interface` must be specified. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--interface_choice))
 - `network_option` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--network_option))
 
 Optional:
 
+- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface.<br>Exactly one of `dhcp_client`, `no_ipv4_address`, or `static_ip` must be specified when `address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--address_choice))
 - `description` (String) Interface Description Description for this Interface<br>**Validation:** `Length LengthAtMost(256)`
-- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
+- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface.<br>Exactly one of `ipv6_auto_config`, `no_ipv6_address`, or `static_ipv6_address` must be specified when `ipv6_address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
-- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
+- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.<br>Exactly one of `monitor` or `monitor_disabled` must be specified when `monitoring_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
 - `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000<br>**Default:** `0`
 - `name` (String) Interface Name Name of this Interface<br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
-- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
-
-<a id="nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--address_choice"></a>
-### Nested Schema for `provider_choice.gcp.orchestration_choice.not_managed.node_list.interface_list.address_choice`
-
-Optional:
-
-- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.
-- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.
-- `static_ip` (Attributes) Static IP Interface IP address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip))
-
-<a id="nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip"></a>
-### Nested Schema for `provider_choice.gcp.orchestration_choice.not_managed.node_list.interface_list.address_choice.static_ip`
-
-Required:
-
-- `ip_address` (String) Default Gateway IP address of the interface and prefix length
-
-Optional:
-
-- `default_gw` (String) Default Gateway IP address of the default gateway.
-
-
+- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled.<br>Exactly one of `site_to_site_connectivity_interface_disabled` or `site_to_site_connectivity_interface_enabled` must be specified when `site_to_site_connectivity_interface_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
 
 <a id="nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--interface_choice"></a>
 ### Nested Schema for `provider_choice.gcp.orchestration_choice.not_managed.node_list.interface_list.interface_choice`
 
 Optional:
 
-- `bond_interface` (Attributes) Bond Interface (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface))
-- `ethernet_interface` (Attributes) Ethernet Interface (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
-- `vlan_interface` (Attributes) VLAN Interface (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--interface_choice--vlan_interface))
+- `bond_interface` (Attributes) Bond Interface<br>Conflicts with `ethernet_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface))
+- `ethernet_interface` (Attributes) Ethernet Interface<br>Conflicts with `bond_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
+- `vlan_interface` (Attributes) VLAN Interface<br>Conflicts with `bond_interface` and `ethernet_interface`. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--interface_choice--vlan_interface))
 
 <a id="nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface"></a>
 ### Nested Schema for `provider_choice.gcp.orchestration_choice.not_managed.node_list.interface_list.interface_choice.bond_interface`
@@ -2782,7 +2684,7 @@ Optional:
 Required:
 
 - `devices` (List of String) Member Ethernet Devices Ethernet devices that will make up this bond
-- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
+- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP<br>Exactly one of `active_backup` or `lacp` must be specified. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
 - `name` (String) Bond Device Name for the Bond. Ex 'bond0'<br>**Validation:** `Length LengthAtMost(64)`
 
 Optional:
@@ -2795,8 +2697,8 @@ Optional:
 
 Optional:
 
-- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device
-- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
+- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device<br>Conflicts with `lacp`.
+- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device<br>Conflicts with `active_backup`. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
 
 <a id="nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp"></a>
 ### Nested Schema for `provider_choice.gcp.orchestration_choice.not_managed.node_list.interface_list.interface_choice.bond_interface.lacp_choice.lacp`
@@ -2838,16 +2740,16 @@ Optional:
 
 Optional:
 
-- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice))
+- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs).<br>Exactly one of `segment_network`, `site_local_inside_network`, or `site_local_network` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice))
 
 <a id="nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice"></a>
 ### Nested Schema for `provider_choice.gcp.orchestration_choice.not_managed.node_list.interface_list.network_option.network_choice`
 
 Optional:
 
-- `segment_network` (Attributes) Segment (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
-- `site_local_inside_network` (Boolean) Site Local Network Inside
-- `site_local_network` (Boolean) Site Local Network
+- `segment_network` (Attributes) Segment<br>Conflicts with `site_local_inside_network` and `site_local_network`. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
+- `site_local_inside_network` (Boolean) Site Local Network Inside<br>Conflicts with `segment_network` and `site_local_network`.
+- `site_local_network` (Boolean) Site Local Network<br>Conflicts with `segment_network` and `site_local_inside_network`.
 
 <a id="nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network"></a>
 ### Nested Schema for `provider_choice.gcp.orchestration_choice.not_managed.node_list.interface_list.network_option.network_choice.segment_network`
@@ -2864,36 +2766,58 @@ Read-Only:
 
 
 
+<a id="nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--address_choice"></a>
+### Nested Schema for `provider_choice.gcp.orchestration_choice.not_managed.node_list.interface_list.address_choice`
+
+Optional:
+
+- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.<br>Conflicts with `no_ipv4_address` and `static_ip`.
+- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.<br>Conflicts with `dhcp_client` and `static_ip`.
+- `static_ip` (Attributes) Static IP Interface IP address is configured statically.<br>Conflicts with `dhcp_client` and `no_ipv4_address`. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip))
+
+<a id="nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip"></a>
+### Nested Schema for `provider_choice.gcp.orchestration_choice.not_managed.node_list.interface_list.address_choice.static_ip`
+
+Required:
+
+- `ip_address` (String) Default Gateway IP address of the interface and prefix length
+
+Optional:
+
+- `default_gw` (String) Default Gateway IP address of the default gateway.
+
+
+
 <a id="nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice"></a>
 ### Nested Schema for `provider_choice.gcp.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice`
 
 Optional:
 
-- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
-- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.
-- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
+- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration.<br>Conflicts with `no_ipv6_address` and `static_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
+- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.<br>Conflicts with `ipv6_auto_config` and `static_ipv6_address`.
+- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically.<br>Conflicts with `ipv6_auto_config` and `no_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
 
 <a id="nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config"></a>
 ### Nested Schema for `provider_choice.gcp.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config`
 
-Required:
+Optional:
 
-- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
+- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration<br>Exactly one of `host` or `router` must be specified when `autoconfig_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
 
 <a id="nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice"></a>
 ### Nested Schema for `provider_choice.gcp.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice`
 
 Optional:
 
-- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.
-- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
+- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.<br>Conflicts with `router`.
+- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.<br>Conflicts with `host`. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
 
 <a id="nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router"></a>
 ### Nested Schema for `provider_choice.gcp.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router`
 
 Required:
 
-- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
+- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients<br>Exactly one of `network_prefix` or `stateful` must be specified. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
 
 Optional:
 
@@ -2904,8 +2828,8 @@ Optional:
 
 Optional:
 
-- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862
-- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
+- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862<br>Conflicts with `stateful`.
+- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag<br>Conflicts with `network_prefix`. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
 
 <a id="nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful"></a>
 ### Nested Schema for `provider_choice.gcp.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful`
@@ -2913,18 +2837,18 @@ Optional:
 Required:
 
 - `dhcp_networks` (Attributes List) DHCP IPV6 Networks List of networks from which DHCP server can allocate ip addresses (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks))
-- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 Optional:
 
 - `fixed_ip_map` (Map of String) Fixed IPV6 Assignments Fixed MAC address to ipv6 assignments, Key: Mac address, Value: IPV6 Address Assign fixed IPv6 addresses based on the MAC Address of the DHCP Client.
+- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address<br>Exactly one of `automatic_from_end`, `automatic_from_start`, or `interface_ip_map` must be specified when `interfaces_addressing_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 <a id="nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks"></a>
 ### Nested Schema for `provider_choice.gcp.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.dhcp_networks`
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site<br>`network_prefix` must be specified. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
 - `pool_settings` (List of String) DHCP Pool Settings Controls how DHCPV6 pools are handled<br>**Allowed Values (choose one):** `['EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS', 'INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS']`
 
 Optional:
@@ -2954,9 +2878,9 @@ Optional:
 
 Optional:
 
-- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list
-- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list
-- `interface_ip_map` (Attributes) Configured Address Configured address for every node (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
+- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list<br>Conflicts with `automatic_from_start` and `interface_ip_map`.
+- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list<br>Conflicts with `automatic_from_end` and `interface_ip_map`.
+- `interface_ip_map` (Attributes) Configured Address Configured address for every node<br>Conflicts with `automatic_from_end` and `automatic_from_start`. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
 
 <a id="nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map"></a>
 ### Nested Schema for `provider_choice.gcp.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.interfaces_addressing_choice.interface_ip_map`
@@ -2974,15 +2898,15 @@ Optional:
 
 Required:
 
-- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
+- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined<br>Exactly one of `configured_list` or `local_dns` must be specified. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
 
 <a id="nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice"></a>
 ### Nested Schema for `provider_choice.gcp.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice`
 
 Optional:
 
-- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
-- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
+- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server<br>Conflicts with `local_dns`. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
+- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server<br>Conflicts with `configured_list`. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
 
 <a id="nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list"></a>
 ### Nested Schema for `provider_choice.gcp.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.configured_list`
@@ -2995,18 +2919,18 @@ Required:
 <a id="nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns"></a>
 ### Nested Schema for `provider_choice.gcp.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns`
 
-Required:
+Optional:
 
-- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
+- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server<br>Exactly one of `configured_address`, `first_address`, or `last_address` must be specified when `local_dns_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
 
 <a id="nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice"></a>
 ### Nested Schema for `provider_choice.gcp.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns.local_dns_choice`
 
 Optional:
 
-- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server
-- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server
-- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server
+- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server<br>Conflicts with `first_address` and `last_address`.
+- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `last_address`.
+- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `first_address`.
 
 
 
@@ -3020,15 +2944,15 @@ Optional:
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
 
 <a id="nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice"></a>
 ### Nested Schema for `provider_choice.gcp.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice`
 
 Optional:
 
-- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
-- `node_static_ip` (Attributes) Node Static IP configuration for the Node (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
+- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
+- `node_static_ip` (Attributes) Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
 
 <a id="nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip"></a>
 ### Nested Schema for `provider_choice.gcp.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice.cluster_static_ip`
@@ -3070,8 +2994,8 @@ Optional:
 
 Optional:
 
-- `monitor` (Boolean) Monitoring enabled
-- `monitor_disabled` (Boolean) Monitoring disabled
+- `monitor` (Boolean) Monitoring enabled<br>Conflicts with `monitor_disabled`.
+- `monitor_disabled` (Boolean) Monitoring disabled<br>Conflicts with `monitor`.
 
 
 <a id="nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice"></a>
@@ -3079,8 +3003,8 @@ Optional:
 
 Optional:
 
-- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.
-- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.
+- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_enabled`.
+- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_disabled`.
 
 
 
@@ -3093,40 +3017,13 @@ Optional:
 
 Required:
 
-- `anti_affinity_choice` (Attributes) Pod Anti-Affinity Enable pod anti-affinity to prevent CE pods from being scheduled on nodes where specific customer services are already running. Configure match labels to identify the existing services (e.g., app=etcd) and topology key (e.g., kubernetes.io/hostname). CE pods will avoid nodes that have matching pods across all namespaces. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--anti_affinity_choice))
 - `deployment_size` (List of String) Deployment Size Select the size/flavor for the Customer Edge deployment on Kubernetes. This determines the resource allocation (CPU, memory) for the VPM and related pods. Medium (8 vCPU, 24 GB memory) is suitable for most deployments, Large (12 vCPU, 48 GB memory) for workloads requiring additional resources.<br>**Allowed Values (choose one):** `['KUBERNETES_DEPLOYMENT_SIZE_LARGE', 'KUBERNETES_DEPLOYMENT_SIZE_MEDIUM']`
 - `not_managed` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed))
 
 Optional:
 
+- `anti_affinity_choice` (Attributes) Pod Anti-Affinity Enable pod anti-affinity to prevent CE pods from being scheduled on nodes where specific customer services are already running. Configure match labels to identify the existing services (e.g., app=etcd) and topology key (e.g., kubernetes.io/hostname). CE pods will avoid nodes that have matching pods across all namespaces.<br>Exactly one of `disable_anti_affinity` or `enable_anti_affinity` must be specified when `anti_affinity_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--anti_affinity_choice))
 - `labels` (Map of String) Node Selector Labels Add labels to control which Kubernetes nodes the VPM and related pods (etcd, VER, prometheus) are deployed to. Specify label key-value pairs that match the labels on your Kubernetes nodes. This uses Kubernetes nodeSelector to schedule pods only on nodes with matching labels.
-
-<a id="nestedatt--provider_choice--gke_k8s--anti_affinity_choice"></a>
-### Nested Schema for `provider_choice.gke_k8s.anti_affinity_choice`
-
-Optional:
-
-- `disable_anti_affinity` (Boolean) Disable Anti-Affinity Pod anti-affinity is disabled. Pods may run on the same node.
-- `enable_anti_affinity` (Attributes) Enable Anti-Affinity Pod anti-affinity is enabled. Kubernetes scheduler will distribute pods across different nodes. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--anti_affinity_choice--enable_anti_affinity))
-
-<a id="nestedatt--provider_choice--gke_k8s--anti_affinity_choice--enable_anti_affinity"></a>
-### Nested Schema for `provider_choice.gke_k8s.anti_affinity_choice.enable_anti_affinity`
-
-Required:
-
-- `rules` (Attributes List) Anti-Affinity Rules Define one or more anti-affinity rules. Each rule specifies which pods (by labels) should be distributed across which topology domains. Example: Rule 1 - Distribute VPM pods across nodes, Rule 2 - Distribute Prometheus pods across zones. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--anti_affinity_choice--enable_anti_affinity--rules))
-
-<a id="nestedatt--provider_choice--gke_k8s--anti_affinity_choice--enable_anti_affinity--rules"></a>
-### Nested Schema for `provider_choice.gke_k8s.anti_affinity_choice.enable_anti_affinity.rules`
-
-Required:
-
-- `label_key` (String) Label Key Specify the label key of the customer pods that CE pods should avoid being co-scheduled with. Combined with the label value below, this identifies the target pods.<br>**Validation:** `Length LengthBetween(1, 253)`
-- `label_value` (String) Label Value Specify the label value that, together with the label key, identifies the customer pods to avoid.<br>**Validation:** `Length LengthBetween(1, 63)`
-- `topology_keys` (List of String) Topology Keys Specify one or more node label keys that define the scope of avoidance. For each topology key (e.g., kubernetes.io/hostname), CE pods will avoid nodes whose topology value matches a node already running a pod with the above specified label. Example: with kubernetes.io/hostname, CE pods are kept off any node running the matching customer pod.
-
-
-
 
 <a id="nestedatt--provider_choice--gke_k8s--not_managed"></a>
 ### Nested Schema for `provider_choice.gke_k8s.not_managed`
@@ -3153,51 +3050,29 @@ Optional:
 
 Required:
 
-- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--address_choice))
-- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--interface_choice))
+- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here.<br>Exactly one of `bond_interface`, `ethernet_interface`, or `vlan_interface` must be specified. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--interface_choice))
 - `network_option` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--network_option))
 
 Optional:
 
+- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface.<br>Exactly one of `dhcp_client`, `no_ipv4_address`, or `static_ip` must be specified when `address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--address_choice))
 - `description` (String) Interface Description Description for this Interface<br>**Validation:** `Length LengthAtMost(256)`
-- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice))
+- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface.<br>Exactly one of `ipv6_auto_config`, `no_ipv6_address`, or `static_ipv6_address` must be specified when `ipv6_address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
-- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--monitoring_choice))
+- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.<br>Exactly one of `monitor` or `monitor_disabled` must be specified when `monitoring_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--monitoring_choice))
 - `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000<br>**Default:** `0`
 - `name` (String) Interface Name Name of this Interface<br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
-- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
-
-<a id="nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--address_choice"></a>
-### Nested Schema for `provider_choice.gke_k8s.not_managed.node_list.interface_list.address_choice`
-
-Optional:
-
-- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.
-- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.
-- `static_ip` (Attributes) Static IP Interface IP address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--address_choice--static_ip))
-
-<a id="nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--address_choice--static_ip"></a>
-### Nested Schema for `provider_choice.gke_k8s.not_managed.node_list.interface_list.address_choice.static_ip`
-
-Required:
-
-- `ip_address` (String) Default Gateway IP address of the interface and prefix length
-
-Optional:
-
-- `default_gw` (String) Default Gateway IP address of the default gateway.
-
-
+- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled.<br>Exactly one of `site_to_site_connectivity_interface_disabled` or `site_to_site_connectivity_interface_enabled` must be specified when `site_to_site_connectivity_interface_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
 
 <a id="nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--interface_choice"></a>
 ### Nested Schema for `provider_choice.gke_k8s.not_managed.node_list.interface_list.interface_choice`
 
 Optional:
 
-- `bond_interface` (Attributes) Bond Interface (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface))
-- `ethernet_interface` (Attributes) Ethernet Interface (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
-- `vlan_interface` (Attributes) VLAN Interface (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--interface_choice--vlan_interface))
+- `bond_interface` (Attributes) Bond Interface<br>Conflicts with `ethernet_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface))
+- `ethernet_interface` (Attributes) Ethernet Interface<br>Conflicts with `bond_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
+- `vlan_interface` (Attributes) VLAN Interface<br>Conflicts with `bond_interface` and `ethernet_interface`. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--interface_choice--vlan_interface))
 
 <a id="nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface"></a>
 ### Nested Schema for `provider_choice.gke_k8s.not_managed.node_list.interface_list.interface_choice.bond_interface`
@@ -3205,7 +3080,7 @@ Optional:
 Required:
 
 - `devices` (List of String) Member Ethernet Devices Ethernet devices that will make up this bond
-- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
+- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP<br>Exactly one of `active_backup` or `lacp` must be specified. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
 - `name` (String) Bond Device Name for the Bond. Ex 'bond0'<br>**Validation:** `Length LengthAtMost(64)`
 
 Optional:
@@ -3218,8 +3093,8 @@ Optional:
 
 Optional:
 
-- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device
-- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
+- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device<br>Conflicts with `lacp`.
+- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device<br>Conflicts with `active_backup`. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
 
 <a id="nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp"></a>
 ### Nested Schema for `provider_choice.gke_k8s.not_managed.node_list.interface_list.interface_choice.bond_interface.lacp_choice.lacp`
@@ -3261,16 +3136,16 @@ Optional:
 
 Optional:
 
-- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--network_option--network_choice))
+- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs).<br>Exactly one of `segment_network`, `site_local_inside_network`, or `site_local_network` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--network_option--network_choice))
 
 <a id="nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--network_option--network_choice"></a>
 ### Nested Schema for `provider_choice.gke_k8s.not_managed.node_list.interface_list.network_option.network_choice`
 
 Optional:
 
-- `segment_network` (Attributes) Segment (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
-- `site_local_inside_network` (Boolean) Site Local Network Inside
-- `site_local_network` (Boolean) Site Local Network
+- `segment_network` (Attributes) Segment<br>Conflicts with `site_local_inside_network` and `site_local_network`. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
+- `site_local_inside_network` (Boolean) Site Local Network Inside<br>Conflicts with `segment_network` and `site_local_network`.
+- `site_local_network` (Boolean) Site Local Network<br>Conflicts with `segment_network` and `site_local_inside_network`.
 
 <a id="nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--network_option--network_choice--segment_network"></a>
 ### Nested Schema for `provider_choice.gke_k8s.not_managed.node_list.interface_list.network_option.network_choice.segment_network`
@@ -3287,36 +3162,58 @@ Read-Only:
 
 
 
+<a id="nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--address_choice"></a>
+### Nested Schema for `provider_choice.gke_k8s.not_managed.node_list.interface_list.address_choice`
+
+Optional:
+
+- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.<br>Conflicts with `no_ipv4_address` and `static_ip`.
+- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.<br>Conflicts with `dhcp_client` and `static_ip`.
+- `static_ip` (Attributes) Static IP Interface IP address is configured statically.<br>Conflicts with `dhcp_client` and `no_ipv4_address`. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--address_choice--static_ip))
+
+<a id="nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--address_choice--static_ip"></a>
+### Nested Schema for `provider_choice.gke_k8s.not_managed.node_list.interface_list.address_choice.static_ip`
+
+Required:
+
+- `ip_address` (String) Default Gateway IP address of the interface and prefix length
+
+Optional:
+
+- `default_gw` (String) Default Gateway IP address of the default gateway.
+
+
+
 <a id="nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice"></a>
 ### Nested Schema for `provider_choice.gke_k8s.not_managed.node_list.interface_list.ipv6_address_choice`
 
 Optional:
 
-- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
-- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.
-- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
+- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration.<br>Conflicts with `no_ipv6_address` and `static_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
+- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.<br>Conflicts with `ipv6_auto_config` and `static_ipv6_address`.
+- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically.<br>Conflicts with `ipv6_auto_config` and `no_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
 
 <a id="nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config"></a>
 ### Nested Schema for `provider_choice.gke_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config`
 
-Required:
+Optional:
 
-- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
+- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration<br>Exactly one of `host` or `router` must be specified when `autoconfig_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
 
 <a id="nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice"></a>
 ### Nested Schema for `provider_choice.gke_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice`
 
 Optional:
 
-- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.
-- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
+- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.<br>Conflicts with `router`.
+- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.<br>Conflicts with `host`. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
 
 <a id="nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router"></a>
 ### Nested Schema for `provider_choice.gke_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router`
 
 Required:
 
-- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
+- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients<br>Exactly one of `network_prefix` or `stateful` must be specified. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
 
 Optional:
 
@@ -3327,8 +3224,8 @@ Optional:
 
 Optional:
 
-- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862
-- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
+- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862<br>Conflicts with `stateful`.
+- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag<br>Conflicts with `network_prefix`. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
 
 <a id="nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful"></a>
 ### Nested Schema for `provider_choice.gke_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful`
@@ -3336,18 +3233,18 @@ Optional:
 Required:
 
 - `dhcp_networks` (Attributes List) DHCP IPV6 Networks List of networks from which DHCP server can allocate ip addresses (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks))
-- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 Optional:
 
 - `fixed_ip_map` (Map of String) Fixed IPV6 Assignments Fixed MAC address to ipv6 assignments, Key: Mac address, Value: IPV6 Address Assign fixed IPv6 addresses based on the MAC Address of the DHCP Client.
+- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address<br>Exactly one of `automatic_from_end`, `automatic_from_start`, or `interface_ip_map` must be specified when `interfaces_addressing_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 <a id="nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks"></a>
 ### Nested Schema for `provider_choice.gke_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.dhcp_networks`
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site<br>`network_prefix` must be specified. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
 - `pool_settings` (List of String) DHCP Pool Settings Controls how DHCPV6 pools are handled<br>**Allowed Values (choose one):** `['EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS', 'INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS']`
 
 Optional:
@@ -3377,9 +3274,9 @@ Optional:
 
 Optional:
 
-- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list
-- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list
-- `interface_ip_map` (Attributes) Configured Address Configured address for every node (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
+- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list<br>Conflicts with `automatic_from_start` and `interface_ip_map`.
+- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list<br>Conflicts with `automatic_from_end` and `interface_ip_map`.
+- `interface_ip_map` (Attributes) Configured Address Configured address for every node<br>Conflicts with `automatic_from_end` and `automatic_from_start`. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
 
 <a id="nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map"></a>
 ### Nested Schema for `provider_choice.gke_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.interfaces_addressing_choice.interface_ip_map`
@@ -3397,15 +3294,15 @@ Optional:
 
 Required:
 
-- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
+- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined<br>Exactly one of `configured_list` or `local_dns` must be specified. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
 
 <a id="nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice"></a>
 ### Nested Schema for `provider_choice.gke_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice`
 
 Optional:
 
-- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
-- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
+- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server<br>Conflicts with `local_dns`. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
+- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server<br>Conflicts with `configured_list`. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
 
 <a id="nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list"></a>
 ### Nested Schema for `provider_choice.gke_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.configured_list`
@@ -3418,18 +3315,18 @@ Required:
 <a id="nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns"></a>
 ### Nested Schema for `provider_choice.gke_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns`
 
-Required:
+Optional:
 
-- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
+- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server<br>Exactly one of `configured_address`, `first_address`, or `last_address` must be specified when `local_dns_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
 
 <a id="nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice"></a>
 ### Nested Schema for `provider_choice.gke_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns.local_dns_choice`
 
 Optional:
 
-- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server
-- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server
-- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server
+- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server<br>Conflicts with `first_address` and `last_address`.
+- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `last_address`.
+- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `first_address`.
 
 
 
@@ -3443,15 +3340,15 @@ Optional:
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
 
 <a id="nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice"></a>
 ### Nested Schema for `provider_choice.gke_k8s.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice`
 
 Optional:
 
-- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
-- `node_static_ip` (Attributes) Node Static IP configuration for the Node (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
+- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
+- `node_static_ip` (Attributes) Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
 
 <a id="nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip"></a>
 ### Nested Schema for `provider_choice.gke_k8s.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice.cluster_static_ip`
@@ -3493,8 +3390,8 @@ Optional:
 
 Optional:
 
-- `monitor` (Boolean) Monitoring enabled
-- `monitor_disabled` (Boolean) Monitoring disabled
+- `monitor` (Boolean) Monitoring enabled<br>Conflicts with `monitor_disabled`.
+- `monitor_disabled` (Boolean) Monitoring disabled<br>Conflicts with `monitor`.
 
 
 <a id="nestedatt--provider_choice--gke_k8s--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice"></a>
@@ -3502,9 +3399,36 @@ Optional:
 
 Optional:
 
-- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.
-- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.
+- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_enabled`.
+- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_disabled`.
 
+
+
+
+
+<a id="nestedatt--provider_choice--gke_k8s--anti_affinity_choice"></a>
+### Nested Schema for `provider_choice.gke_k8s.anti_affinity_choice`
+
+Optional:
+
+- `disable_anti_affinity` (Boolean) Disable Anti-Affinity Pod anti-affinity is disabled. Pods may run on the same node.<br>Conflicts with `enable_anti_affinity`.
+- `enable_anti_affinity` (Attributes) Enable Anti-Affinity Pod anti-affinity is enabled. Kubernetes scheduler will distribute pods across different nodes.<br>Conflicts with `disable_anti_affinity`. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--anti_affinity_choice--enable_anti_affinity))
+
+<a id="nestedatt--provider_choice--gke_k8s--anti_affinity_choice--enable_anti_affinity"></a>
+### Nested Schema for `provider_choice.gke_k8s.anti_affinity_choice.enable_anti_affinity`
+
+Required:
+
+- `rules` (Attributes List) Anti-Affinity Rules Define one or more anti-affinity rules. Each rule specifies which pods (by labels) should be distributed across which topology domains. Example: Rule 1 - Distribute VPM pods across nodes, Rule 2 - Distribute Prometheus pods across zones. (see [below for nested schema](#nestedatt--provider_choice--gke_k8s--anti_affinity_choice--enable_anti_affinity--rules))
+
+<a id="nestedatt--provider_choice--gke_k8s--anti_affinity_choice--enable_anti_affinity--rules"></a>
+### Nested Schema for `provider_choice.gke_k8s.anti_affinity_choice.enable_anti_affinity.rules`
+
+Required:
+
+- `label_key` (String) Label Key Specify the label key of the customer pods that CE pods should avoid being co-scheduled with. Combined with the label value below, this identifies the target pods.<br>**Validation:** `Length LengthBetween(1, 253)`
+- `label_value` (String) Label Value Specify the label value that, together with the label key, identifies the customer pods to avoid.<br>**Validation:** `Length LengthBetween(1, 63)`
+- `topology_keys` (List of String) Topology Keys Specify one or more node label keys that define the scope of avoidance. For each topology key (e.g., kubernetes.io/hostname), CE pods will avoid nodes whose topology value matches a node already running a pod with the above specified label. Example: with kubernetes.io/hostname, CE pods are kept off any node running the matching customer pod.
 
 
 
@@ -3515,7 +3439,7 @@ Optional:
 
 Optional:
 
-- `orchestration_choice` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice))
+- `orchestration_choice` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode.<br>`not_managed` must be specified when `orchestration_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice))
 
 <a id="nestedatt--provider_choice--hyper_v--orchestration_choice"></a>
 ### Nested Schema for `provider_choice.hyper_v.orchestration_choice`
@@ -3549,51 +3473,29 @@ Optional:
 
 Required:
 
-- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--address_choice))
-- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--interface_choice))
+- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here.<br>Exactly one of `bond_interface`, `ethernet_interface`, or `vlan_interface` must be specified. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--interface_choice))
 - `network_option` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--network_option))
 
 Optional:
 
+- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface.<br>Exactly one of `dhcp_client`, `no_ipv4_address`, or `static_ip` must be specified when `address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--address_choice))
 - `description` (String) Interface Description Description for this Interface<br>**Validation:** `Length LengthAtMost(256)`
-- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
+- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface.<br>Exactly one of `ipv6_auto_config`, `no_ipv6_address`, or `static_ipv6_address` must be specified when `ipv6_address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
-- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
+- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.<br>Exactly one of `monitor` or `monitor_disabled` must be specified when `monitoring_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
 - `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000<br>**Default:** `0`
 - `name` (String) Interface Name Name of this Interface<br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
-- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
-
-<a id="nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--address_choice"></a>
-### Nested Schema for `provider_choice.hyper_v.orchestration_choice.not_managed.node_list.interface_list.address_choice`
-
-Optional:
-
-- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.
-- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.
-- `static_ip` (Attributes) Static IP Interface IP address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip))
-
-<a id="nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip"></a>
-### Nested Schema for `provider_choice.hyper_v.orchestration_choice.not_managed.node_list.interface_list.address_choice.static_ip`
-
-Required:
-
-- `ip_address` (String) Default Gateway IP address of the interface and prefix length
-
-Optional:
-
-- `default_gw` (String) Default Gateway IP address of the default gateway.
-
-
+- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled.<br>Exactly one of `site_to_site_connectivity_interface_disabled` or `site_to_site_connectivity_interface_enabled` must be specified when `site_to_site_connectivity_interface_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
 
 <a id="nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--interface_choice"></a>
 ### Nested Schema for `provider_choice.hyper_v.orchestration_choice.not_managed.node_list.interface_list.interface_choice`
 
 Optional:
 
-- `bond_interface` (Attributes) Bond Interface (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface))
-- `ethernet_interface` (Attributes) Ethernet Interface (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
-- `vlan_interface` (Attributes) VLAN Interface (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--interface_choice--vlan_interface))
+- `bond_interface` (Attributes) Bond Interface<br>Conflicts with `ethernet_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface))
+- `ethernet_interface` (Attributes) Ethernet Interface<br>Conflicts with `bond_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
+- `vlan_interface` (Attributes) VLAN Interface<br>Conflicts with `bond_interface` and `ethernet_interface`. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--interface_choice--vlan_interface))
 
 <a id="nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface"></a>
 ### Nested Schema for `provider_choice.hyper_v.orchestration_choice.not_managed.node_list.interface_list.interface_choice.bond_interface`
@@ -3601,7 +3503,7 @@ Optional:
 Required:
 
 - `devices` (List of String) Member Ethernet Devices Ethernet devices that will make up this bond
-- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
+- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP<br>Exactly one of `active_backup` or `lacp` must be specified. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
 - `name` (String) Bond Device Name for the Bond. Ex 'bond0'<br>**Validation:** `Length LengthAtMost(64)`
 
 Optional:
@@ -3614,8 +3516,8 @@ Optional:
 
 Optional:
 
-- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device
-- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
+- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device<br>Conflicts with `lacp`.
+- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device<br>Conflicts with `active_backup`. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
 
 <a id="nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp"></a>
 ### Nested Schema for `provider_choice.hyper_v.orchestration_choice.not_managed.node_list.interface_list.interface_choice.bond_interface.lacp_choice.lacp`
@@ -3657,16 +3559,16 @@ Optional:
 
 Optional:
 
-- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice))
+- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs).<br>Exactly one of `segment_network`, `site_local_inside_network`, or `site_local_network` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice))
 
 <a id="nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice"></a>
 ### Nested Schema for `provider_choice.hyper_v.orchestration_choice.not_managed.node_list.interface_list.network_option.network_choice`
 
 Optional:
 
-- `segment_network` (Attributes) Segment (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
-- `site_local_inside_network` (Boolean) Site Local Network Inside
-- `site_local_network` (Boolean) Site Local Network
+- `segment_network` (Attributes) Segment<br>Conflicts with `site_local_inside_network` and `site_local_network`. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
+- `site_local_inside_network` (Boolean) Site Local Network Inside<br>Conflicts with `segment_network` and `site_local_network`.
+- `site_local_network` (Boolean) Site Local Network<br>Conflicts with `segment_network` and `site_local_inside_network`.
 
 <a id="nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network"></a>
 ### Nested Schema for `provider_choice.hyper_v.orchestration_choice.not_managed.node_list.interface_list.network_option.network_choice.segment_network`
@@ -3683,36 +3585,58 @@ Read-Only:
 
 
 
+<a id="nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--address_choice"></a>
+### Nested Schema for `provider_choice.hyper_v.orchestration_choice.not_managed.node_list.interface_list.address_choice`
+
+Optional:
+
+- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.<br>Conflicts with `no_ipv4_address` and `static_ip`.
+- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.<br>Conflicts with `dhcp_client` and `static_ip`.
+- `static_ip` (Attributes) Static IP Interface IP address is configured statically.<br>Conflicts with `dhcp_client` and `no_ipv4_address`. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip))
+
+<a id="nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip"></a>
+### Nested Schema for `provider_choice.hyper_v.orchestration_choice.not_managed.node_list.interface_list.address_choice.static_ip`
+
+Required:
+
+- `ip_address` (String) Default Gateway IP address of the interface and prefix length
+
+Optional:
+
+- `default_gw` (String) Default Gateway IP address of the default gateway.
+
+
+
 <a id="nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice"></a>
 ### Nested Schema for `provider_choice.hyper_v.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice`
 
 Optional:
 
-- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
-- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.
-- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
+- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration.<br>Conflicts with `no_ipv6_address` and `static_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
+- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.<br>Conflicts with `ipv6_auto_config` and `static_ipv6_address`.
+- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically.<br>Conflicts with `ipv6_auto_config` and `no_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
 
 <a id="nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config"></a>
 ### Nested Schema for `provider_choice.hyper_v.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config`
 
-Required:
+Optional:
 
-- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
+- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration<br>Exactly one of `host` or `router` must be specified when `autoconfig_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
 
 <a id="nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice"></a>
 ### Nested Schema for `provider_choice.hyper_v.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice`
 
 Optional:
 
-- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.
-- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
+- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.<br>Conflicts with `router`.
+- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.<br>Conflicts with `host`. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
 
 <a id="nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router"></a>
 ### Nested Schema for `provider_choice.hyper_v.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router`
 
 Required:
 
-- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
+- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients<br>Exactly one of `network_prefix` or `stateful` must be specified. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
 
 Optional:
 
@@ -3723,8 +3647,8 @@ Optional:
 
 Optional:
 
-- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862
-- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
+- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862<br>Conflicts with `stateful`.
+- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag<br>Conflicts with `network_prefix`. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
 
 <a id="nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful"></a>
 ### Nested Schema for `provider_choice.hyper_v.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful`
@@ -3732,18 +3656,18 @@ Optional:
 Required:
 
 - `dhcp_networks` (Attributes List) DHCP IPV6 Networks List of networks from which DHCP server can allocate ip addresses (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks))
-- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 Optional:
 
 - `fixed_ip_map` (Map of String) Fixed IPV6 Assignments Fixed MAC address to ipv6 assignments, Key: Mac address, Value: IPV6 Address Assign fixed IPv6 addresses based on the MAC Address of the DHCP Client.
+- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address<br>Exactly one of `automatic_from_end`, `automatic_from_start`, or `interface_ip_map` must be specified when `interfaces_addressing_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 <a id="nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks"></a>
 ### Nested Schema for `provider_choice.hyper_v.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.dhcp_networks`
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site<br>`network_prefix` must be specified. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
 - `pool_settings` (List of String) DHCP Pool Settings Controls how DHCPV6 pools are handled<br>**Allowed Values (choose one):** `['EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS', 'INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS']`
 
 Optional:
@@ -3773,9 +3697,9 @@ Optional:
 
 Optional:
 
-- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list
-- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list
-- `interface_ip_map` (Attributes) Configured Address Configured address for every node (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
+- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list<br>Conflicts with `automatic_from_start` and `interface_ip_map`.
+- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list<br>Conflicts with `automatic_from_end` and `interface_ip_map`.
+- `interface_ip_map` (Attributes) Configured Address Configured address for every node<br>Conflicts with `automatic_from_end` and `automatic_from_start`. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
 
 <a id="nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map"></a>
 ### Nested Schema for `provider_choice.hyper_v.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.interfaces_addressing_choice.interface_ip_map`
@@ -3793,15 +3717,15 @@ Optional:
 
 Required:
 
-- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
+- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined<br>Exactly one of `configured_list` or `local_dns` must be specified. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
 
 <a id="nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice"></a>
 ### Nested Schema for `provider_choice.hyper_v.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice`
 
 Optional:
 
-- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
-- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
+- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server<br>Conflicts with `local_dns`. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
+- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server<br>Conflicts with `configured_list`. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
 
 <a id="nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list"></a>
 ### Nested Schema for `provider_choice.hyper_v.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.configured_list`
@@ -3814,18 +3738,18 @@ Required:
 <a id="nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns"></a>
 ### Nested Schema for `provider_choice.hyper_v.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns`
 
-Required:
+Optional:
 
-- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
+- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server<br>Exactly one of `configured_address`, `first_address`, or `last_address` must be specified when `local_dns_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
 
 <a id="nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice"></a>
 ### Nested Schema for `provider_choice.hyper_v.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns.local_dns_choice`
 
 Optional:
 
-- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server
-- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server
-- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server
+- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server<br>Conflicts with `first_address` and `last_address`.
+- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `last_address`.
+- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `first_address`.
 
 
 
@@ -3839,15 +3763,15 @@ Optional:
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
 
 <a id="nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice"></a>
 ### Nested Schema for `provider_choice.hyper_v.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice`
 
 Optional:
 
-- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
-- `node_static_ip` (Attributes) Node Static IP configuration for the Node (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
+- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
+- `node_static_ip` (Attributes) Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
 
 <a id="nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip"></a>
 ### Nested Schema for `provider_choice.hyper_v.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice.cluster_static_ip`
@@ -3889,8 +3813,8 @@ Optional:
 
 Optional:
 
-- `monitor` (Boolean) Monitoring enabled
-- `monitor_disabled` (Boolean) Monitoring disabled
+- `monitor` (Boolean) Monitoring enabled<br>Conflicts with `monitor_disabled`.
+- `monitor_disabled` (Boolean) Monitoring disabled<br>Conflicts with `monitor`.
 
 
 <a id="nestedatt--provider_choice--hyper_v--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice"></a>
@@ -3898,8 +3822,8 @@ Optional:
 
 Optional:
 
-- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.
-- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.
+- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_enabled`.
+- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_disabled`.
 
 
 
@@ -3912,7 +3836,7 @@ Optional:
 
 Optional:
 
-- `orchestration_choice` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice))
+- `orchestration_choice` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode.<br>`not_managed` must be specified when `orchestration_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice))
 
 <a id="nestedatt--provider_choice--kvm--orchestration_choice"></a>
 ### Nested Schema for `provider_choice.kvm.orchestration_choice`
@@ -3946,51 +3870,29 @@ Optional:
 
 Required:
 
-- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--address_choice))
-- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--interface_choice))
+- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here.<br>Exactly one of `bond_interface`, `ethernet_interface`, or `vlan_interface` must be specified. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--interface_choice))
 - `network_option` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--network_option))
 
 Optional:
 
+- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface.<br>Exactly one of `dhcp_client`, `no_ipv4_address`, or `static_ip` must be specified when `address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--address_choice))
 - `description` (String) Interface Description Description for this Interface<br>**Validation:** `Length LengthAtMost(256)`
-- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
+- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface.<br>Exactly one of `ipv6_auto_config`, `no_ipv6_address`, or `static_ipv6_address` must be specified when `ipv6_address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
-- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
+- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.<br>Exactly one of `monitor` or `monitor_disabled` must be specified when `monitoring_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
 - `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000<br>**Default:** `0`
 - `name` (String) Interface Name Name of this Interface<br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
-- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
-
-<a id="nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--address_choice"></a>
-### Nested Schema for `provider_choice.kvm.orchestration_choice.not_managed.node_list.interface_list.address_choice`
-
-Optional:
-
-- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.
-- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.
-- `static_ip` (Attributes) Static IP Interface IP address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip))
-
-<a id="nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip"></a>
-### Nested Schema for `provider_choice.kvm.orchestration_choice.not_managed.node_list.interface_list.address_choice.static_ip`
-
-Required:
-
-- `ip_address` (String) Default Gateway IP address of the interface and prefix length
-
-Optional:
-
-- `default_gw` (String) Default Gateway IP address of the default gateway.
-
-
+- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled.<br>Exactly one of `site_to_site_connectivity_interface_disabled` or `site_to_site_connectivity_interface_enabled` must be specified when `site_to_site_connectivity_interface_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
 
 <a id="nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--interface_choice"></a>
 ### Nested Schema for `provider_choice.kvm.orchestration_choice.not_managed.node_list.interface_list.interface_choice`
 
 Optional:
 
-- `bond_interface` (Attributes) Bond Interface (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface))
-- `ethernet_interface` (Attributes) Ethernet Interface (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
-- `vlan_interface` (Attributes) VLAN Interface (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--interface_choice--vlan_interface))
+- `bond_interface` (Attributes) Bond Interface<br>Conflicts with `ethernet_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface))
+- `ethernet_interface` (Attributes) Ethernet Interface<br>Conflicts with `bond_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
+- `vlan_interface` (Attributes) VLAN Interface<br>Conflicts with `bond_interface` and `ethernet_interface`. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--interface_choice--vlan_interface))
 
 <a id="nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface"></a>
 ### Nested Schema for `provider_choice.kvm.orchestration_choice.not_managed.node_list.interface_list.interface_choice.bond_interface`
@@ -3998,7 +3900,7 @@ Optional:
 Required:
 
 - `devices` (List of String) Member Ethernet Devices Ethernet devices that will make up this bond
-- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
+- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP<br>Exactly one of `active_backup` or `lacp` must be specified. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
 - `name` (String) Bond Device Name for the Bond. Ex 'bond0'<br>**Validation:** `Length LengthAtMost(64)`
 
 Optional:
@@ -4011,8 +3913,8 @@ Optional:
 
 Optional:
 
-- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device
-- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
+- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device<br>Conflicts with `lacp`.
+- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device<br>Conflicts with `active_backup`. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
 
 <a id="nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp"></a>
 ### Nested Schema for `provider_choice.kvm.orchestration_choice.not_managed.node_list.interface_list.interface_choice.bond_interface.lacp_choice.lacp`
@@ -4054,16 +3956,16 @@ Optional:
 
 Optional:
 
-- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice))
+- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs).<br>Exactly one of `segment_network`, `site_local_inside_network`, or `site_local_network` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice))
 
 <a id="nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice"></a>
 ### Nested Schema for `provider_choice.kvm.orchestration_choice.not_managed.node_list.interface_list.network_option.network_choice`
 
 Optional:
 
-- `segment_network` (Attributes) Segment (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
-- `site_local_inside_network` (Boolean) Site Local Network Inside
-- `site_local_network` (Boolean) Site Local Network
+- `segment_network` (Attributes) Segment<br>Conflicts with `site_local_inside_network` and `site_local_network`. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
+- `site_local_inside_network` (Boolean) Site Local Network Inside<br>Conflicts with `segment_network` and `site_local_network`.
+- `site_local_network` (Boolean) Site Local Network<br>Conflicts with `segment_network` and `site_local_inside_network`.
 
 <a id="nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network"></a>
 ### Nested Schema for `provider_choice.kvm.orchestration_choice.not_managed.node_list.interface_list.network_option.network_choice.segment_network`
@@ -4080,36 +3982,58 @@ Read-Only:
 
 
 
+<a id="nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--address_choice"></a>
+### Nested Schema for `provider_choice.kvm.orchestration_choice.not_managed.node_list.interface_list.address_choice`
+
+Optional:
+
+- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.<br>Conflicts with `no_ipv4_address` and `static_ip`.
+- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.<br>Conflicts with `dhcp_client` and `static_ip`.
+- `static_ip` (Attributes) Static IP Interface IP address is configured statically.<br>Conflicts with `dhcp_client` and `no_ipv4_address`. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip))
+
+<a id="nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip"></a>
+### Nested Schema for `provider_choice.kvm.orchestration_choice.not_managed.node_list.interface_list.address_choice.static_ip`
+
+Required:
+
+- `ip_address` (String) Default Gateway IP address of the interface and prefix length
+
+Optional:
+
+- `default_gw` (String) Default Gateway IP address of the default gateway.
+
+
+
 <a id="nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice"></a>
 ### Nested Schema for `provider_choice.kvm.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice`
 
 Optional:
 
-- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
-- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.
-- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
+- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration.<br>Conflicts with `no_ipv6_address` and `static_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
+- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.<br>Conflicts with `ipv6_auto_config` and `static_ipv6_address`.
+- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically.<br>Conflicts with `ipv6_auto_config` and `no_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
 
 <a id="nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config"></a>
 ### Nested Schema for `provider_choice.kvm.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config`
 
-Required:
+Optional:
 
-- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
+- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration<br>Exactly one of `host` or `router` must be specified when `autoconfig_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
 
 <a id="nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice"></a>
 ### Nested Schema for `provider_choice.kvm.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice`
 
 Optional:
 
-- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.
-- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
+- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.<br>Conflicts with `router`.
+- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.<br>Conflicts with `host`. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
 
 <a id="nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router"></a>
 ### Nested Schema for `provider_choice.kvm.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router`
 
 Required:
 
-- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
+- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients<br>Exactly one of `network_prefix` or `stateful` must be specified. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
 
 Optional:
 
@@ -4120,8 +4044,8 @@ Optional:
 
 Optional:
 
-- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862
-- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
+- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862<br>Conflicts with `stateful`.
+- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag<br>Conflicts with `network_prefix`. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
 
 <a id="nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful"></a>
 ### Nested Schema for `provider_choice.kvm.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful`
@@ -4129,18 +4053,18 @@ Optional:
 Required:
 
 - `dhcp_networks` (Attributes List) DHCP IPV6 Networks List of networks from which DHCP server can allocate ip addresses (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks))
-- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 Optional:
 
 - `fixed_ip_map` (Map of String) Fixed IPV6 Assignments Fixed MAC address to ipv6 assignments, Key: Mac address, Value: IPV6 Address Assign fixed IPv6 addresses based on the MAC Address of the DHCP Client.
+- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address<br>Exactly one of `automatic_from_end`, `automatic_from_start`, or `interface_ip_map` must be specified when `interfaces_addressing_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 <a id="nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks"></a>
 ### Nested Schema for `provider_choice.kvm.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.dhcp_networks`
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site<br>`network_prefix` must be specified. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
 - `pool_settings` (List of String) DHCP Pool Settings Controls how DHCPV6 pools are handled<br>**Allowed Values (choose one):** `['EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS', 'INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS']`
 
 Optional:
@@ -4170,9 +4094,9 @@ Optional:
 
 Optional:
 
-- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list
-- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list
-- `interface_ip_map` (Attributes) Configured Address Configured address for every node (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
+- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list<br>Conflicts with `automatic_from_start` and `interface_ip_map`.
+- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list<br>Conflicts with `automatic_from_end` and `interface_ip_map`.
+- `interface_ip_map` (Attributes) Configured Address Configured address for every node<br>Conflicts with `automatic_from_end` and `automatic_from_start`. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
 
 <a id="nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map"></a>
 ### Nested Schema for `provider_choice.kvm.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.interfaces_addressing_choice.interface_ip_map`
@@ -4190,15 +4114,15 @@ Optional:
 
 Required:
 
-- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
+- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined<br>Exactly one of `configured_list` or `local_dns` must be specified. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
 
 <a id="nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice"></a>
 ### Nested Schema for `provider_choice.kvm.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice`
 
 Optional:
 
-- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
-- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
+- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server<br>Conflicts with `local_dns`. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
+- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server<br>Conflicts with `configured_list`. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
 
 <a id="nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list"></a>
 ### Nested Schema for `provider_choice.kvm.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.configured_list`
@@ -4211,18 +4135,18 @@ Required:
 <a id="nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns"></a>
 ### Nested Schema for `provider_choice.kvm.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns`
 
-Required:
+Optional:
 
-- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
+- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server<br>Exactly one of `configured_address`, `first_address`, or `last_address` must be specified when `local_dns_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
 
 <a id="nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice"></a>
 ### Nested Schema for `provider_choice.kvm.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns.local_dns_choice`
 
 Optional:
 
-- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server
-- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server
-- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server
+- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server<br>Conflicts with `first_address` and `last_address`.
+- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `last_address`.
+- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `first_address`.
 
 
 
@@ -4236,15 +4160,15 @@ Optional:
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
 
 <a id="nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice"></a>
 ### Nested Schema for `provider_choice.kvm.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice`
 
 Optional:
 
-- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
-- `node_static_ip` (Attributes) Node Static IP configuration for the Node (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
+- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
+- `node_static_ip` (Attributes) Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
 
 <a id="nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip"></a>
 ### Nested Schema for `provider_choice.kvm.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice.cluster_static_ip`
@@ -4286,8 +4210,8 @@ Optional:
 
 Optional:
 
-- `monitor` (Boolean) Monitoring enabled
-- `monitor_disabled` (Boolean) Monitoring disabled
+- `monitor` (Boolean) Monitoring enabled<br>Conflicts with `monitor_disabled`.
+- `monitor_disabled` (Boolean) Monitoring disabled<br>Conflicts with `monitor`.
 
 
 <a id="nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice"></a>
@@ -4295,8 +4219,8 @@ Optional:
 
 Optional:
 
-- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.
-- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.
+- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_enabled`.
+- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_disabled`.
 
 
 
@@ -4309,7 +4233,7 @@ Optional:
 
 Optional:
 
-- `orchestration_choice` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice))
+- `orchestration_choice` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode.<br>`not_managed` must be specified when `orchestration_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice))
 
 <a id="nestedatt--provider_choice--nutanix--orchestration_choice"></a>
 ### Nested Schema for `provider_choice.nutanix.orchestration_choice`
@@ -4343,51 +4267,29 @@ Optional:
 
 Required:
 
-- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--address_choice))
-- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--interface_choice))
+- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here.<br>Exactly one of `bond_interface`, `ethernet_interface`, or `vlan_interface` must be specified. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--interface_choice))
 - `network_option` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--network_option))
 
 Optional:
 
+- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface.<br>Exactly one of `dhcp_client`, `no_ipv4_address`, or `static_ip` must be specified when `address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--address_choice))
 - `description` (String) Interface Description Description for this Interface<br>**Validation:** `Length LengthAtMost(256)`
-- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
+- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface.<br>Exactly one of `ipv6_auto_config`, `no_ipv6_address`, or `static_ipv6_address` must be specified when `ipv6_address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
-- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
+- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.<br>Exactly one of `monitor` or `monitor_disabled` must be specified when `monitoring_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
 - `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000<br>**Default:** `0`
 - `name` (String) Interface Name Name of this Interface<br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
-- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
-
-<a id="nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--address_choice"></a>
-### Nested Schema for `provider_choice.nutanix.orchestration_choice.not_managed.node_list.interface_list.address_choice`
-
-Optional:
-
-- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.
-- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.
-- `static_ip` (Attributes) Static IP Interface IP address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip))
-
-<a id="nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip"></a>
-### Nested Schema for `provider_choice.nutanix.orchestration_choice.not_managed.node_list.interface_list.address_choice.static_ip`
-
-Required:
-
-- `ip_address` (String) Default Gateway IP address of the interface and prefix length
-
-Optional:
-
-- `default_gw` (String) Default Gateway IP address of the default gateway.
-
-
+- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled.<br>Exactly one of `site_to_site_connectivity_interface_disabled` or `site_to_site_connectivity_interface_enabled` must be specified when `site_to_site_connectivity_interface_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
 
 <a id="nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--interface_choice"></a>
 ### Nested Schema for `provider_choice.nutanix.orchestration_choice.not_managed.node_list.interface_list.interface_choice`
 
 Optional:
 
-- `bond_interface` (Attributes) Bond Interface (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface))
-- `ethernet_interface` (Attributes) Ethernet Interface (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
-- `vlan_interface` (Attributes) VLAN Interface (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--interface_choice--vlan_interface))
+- `bond_interface` (Attributes) Bond Interface<br>Conflicts with `ethernet_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface))
+- `ethernet_interface` (Attributes) Ethernet Interface<br>Conflicts with `bond_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
+- `vlan_interface` (Attributes) VLAN Interface<br>Conflicts with `bond_interface` and `ethernet_interface`. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--interface_choice--vlan_interface))
 
 <a id="nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface"></a>
 ### Nested Schema for `provider_choice.nutanix.orchestration_choice.not_managed.node_list.interface_list.interface_choice.bond_interface`
@@ -4395,7 +4297,7 @@ Optional:
 Required:
 
 - `devices` (List of String) Member Ethernet Devices Ethernet devices that will make up this bond
-- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
+- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP<br>Exactly one of `active_backup` or `lacp` must be specified. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
 - `name` (String) Bond Device Name for the Bond. Ex 'bond0'<br>**Validation:** `Length LengthAtMost(64)`
 
 Optional:
@@ -4408,8 +4310,8 @@ Optional:
 
 Optional:
 
-- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device
-- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
+- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device<br>Conflicts with `lacp`.
+- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device<br>Conflicts with `active_backup`. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
 
 <a id="nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp"></a>
 ### Nested Schema for `provider_choice.nutanix.orchestration_choice.not_managed.node_list.interface_list.interface_choice.bond_interface.lacp_choice.lacp`
@@ -4451,16 +4353,16 @@ Optional:
 
 Optional:
 
-- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice))
+- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs).<br>Exactly one of `segment_network`, `site_local_inside_network`, or `site_local_network` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice))
 
 <a id="nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice"></a>
 ### Nested Schema for `provider_choice.nutanix.orchestration_choice.not_managed.node_list.interface_list.network_option.network_choice`
 
 Optional:
 
-- `segment_network` (Attributes) Segment (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
-- `site_local_inside_network` (Boolean) Site Local Network Inside
-- `site_local_network` (Boolean) Site Local Network
+- `segment_network` (Attributes) Segment<br>Conflicts with `site_local_inside_network` and `site_local_network`. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
+- `site_local_inside_network` (Boolean) Site Local Network Inside<br>Conflicts with `segment_network` and `site_local_network`.
+- `site_local_network` (Boolean) Site Local Network<br>Conflicts with `segment_network` and `site_local_inside_network`.
 
 <a id="nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network"></a>
 ### Nested Schema for `provider_choice.nutanix.orchestration_choice.not_managed.node_list.interface_list.network_option.network_choice.segment_network`
@@ -4477,36 +4379,58 @@ Read-Only:
 
 
 
+<a id="nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--address_choice"></a>
+### Nested Schema for `provider_choice.nutanix.orchestration_choice.not_managed.node_list.interface_list.address_choice`
+
+Optional:
+
+- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.<br>Conflicts with `no_ipv4_address` and `static_ip`.
+- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.<br>Conflicts with `dhcp_client` and `static_ip`.
+- `static_ip` (Attributes) Static IP Interface IP address is configured statically.<br>Conflicts with `dhcp_client` and `no_ipv4_address`. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip))
+
+<a id="nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip"></a>
+### Nested Schema for `provider_choice.nutanix.orchestration_choice.not_managed.node_list.interface_list.address_choice.static_ip`
+
+Required:
+
+- `ip_address` (String) Default Gateway IP address of the interface and prefix length
+
+Optional:
+
+- `default_gw` (String) Default Gateway IP address of the default gateway.
+
+
+
 <a id="nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice"></a>
 ### Nested Schema for `provider_choice.nutanix.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice`
 
 Optional:
 
-- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
-- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.
-- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
+- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration.<br>Conflicts with `no_ipv6_address` and `static_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
+- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.<br>Conflicts with `ipv6_auto_config` and `static_ipv6_address`.
+- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically.<br>Conflicts with `ipv6_auto_config` and `no_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
 
 <a id="nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config"></a>
 ### Nested Schema for `provider_choice.nutanix.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config`
 
-Required:
+Optional:
 
-- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
+- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration<br>Exactly one of `host` or `router` must be specified when `autoconfig_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
 
 <a id="nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice"></a>
 ### Nested Schema for `provider_choice.nutanix.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice`
 
 Optional:
 
-- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.
-- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
+- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.<br>Conflicts with `router`.
+- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.<br>Conflicts with `host`. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
 
 <a id="nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router"></a>
 ### Nested Schema for `provider_choice.nutanix.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router`
 
 Required:
 
-- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
+- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients<br>Exactly one of `network_prefix` or `stateful` must be specified. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
 
 Optional:
 
@@ -4517,8 +4441,8 @@ Optional:
 
 Optional:
 
-- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862
-- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
+- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862<br>Conflicts with `stateful`.
+- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag<br>Conflicts with `network_prefix`. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
 
 <a id="nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful"></a>
 ### Nested Schema for `provider_choice.nutanix.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful`
@@ -4526,18 +4450,18 @@ Optional:
 Required:
 
 - `dhcp_networks` (Attributes List) DHCP IPV6 Networks List of networks from which DHCP server can allocate ip addresses (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks))
-- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 Optional:
 
 - `fixed_ip_map` (Map of String) Fixed IPV6 Assignments Fixed MAC address to ipv6 assignments, Key: Mac address, Value: IPV6 Address Assign fixed IPv6 addresses based on the MAC Address of the DHCP Client.
+- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address<br>Exactly one of `automatic_from_end`, `automatic_from_start`, or `interface_ip_map` must be specified when `interfaces_addressing_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 <a id="nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks"></a>
 ### Nested Schema for `provider_choice.nutanix.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.dhcp_networks`
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site<br>`network_prefix` must be specified. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
 - `pool_settings` (List of String) DHCP Pool Settings Controls how DHCPV6 pools are handled<br>**Allowed Values (choose one):** `['EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS', 'INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS']`
 
 Optional:
@@ -4567,9 +4491,9 @@ Optional:
 
 Optional:
 
-- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list
-- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list
-- `interface_ip_map` (Attributes) Configured Address Configured address for every node (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
+- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list<br>Conflicts with `automatic_from_start` and `interface_ip_map`.
+- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list<br>Conflicts with `automatic_from_end` and `interface_ip_map`.
+- `interface_ip_map` (Attributes) Configured Address Configured address for every node<br>Conflicts with `automatic_from_end` and `automatic_from_start`. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
 
 <a id="nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map"></a>
 ### Nested Schema for `provider_choice.nutanix.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.interfaces_addressing_choice.interface_ip_map`
@@ -4587,15 +4511,15 @@ Optional:
 
 Required:
 
-- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
+- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined<br>Exactly one of `configured_list` or `local_dns` must be specified. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
 
 <a id="nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice"></a>
 ### Nested Schema for `provider_choice.nutanix.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice`
 
 Optional:
 
-- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
-- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
+- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server<br>Conflicts with `local_dns`. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
+- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server<br>Conflicts with `configured_list`. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
 
 <a id="nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list"></a>
 ### Nested Schema for `provider_choice.nutanix.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.configured_list`
@@ -4608,18 +4532,18 @@ Required:
 <a id="nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns"></a>
 ### Nested Schema for `provider_choice.nutanix.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns`
 
-Required:
+Optional:
 
-- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
+- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server<br>Exactly one of `configured_address`, `first_address`, or `last_address` must be specified when `local_dns_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
 
 <a id="nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice"></a>
 ### Nested Schema for `provider_choice.nutanix.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns.local_dns_choice`
 
 Optional:
 
-- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server
-- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server
-- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server
+- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server<br>Conflicts with `first_address` and `last_address`.
+- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `last_address`.
+- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `first_address`.
 
 
 
@@ -4633,15 +4557,15 @@ Optional:
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
 
 <a id="nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice"></a>
 ### Nested Schema for `provider_choice.nutanix.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice`
 
 Optional:
 
-- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
-- `node_static_ip` (Attributes) Node Static IP configuration for the Node (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
+- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
+- `node_static_ip` (Attributes) Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
 
 <a id="nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip"></a>
 ### Nested Schema for `provider_choice.nutanix.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice.cluster_static_ip`
@@ -4683,8 +4607,8 @@ Optional:
 
 Optional:
 
-- `monitor` (Boolean) Monitoring enabled
-- `monitor_disabled` (Boolean) Monitoring disabled
+- `monitor` (Boolean) Monitoring enabled<br>Conflicts with `monitor_disabled`.
+- `monitor_disabled` (Boolean) Monitoring disabled<br>Conflicts with `monitor`.
 
 
 <a id="nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice"></a>
@@ -4692,8 +4616,8 @@ Optional:
 
 Optional:
 
-- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.
-- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.
+- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_enabled`.
+- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_disabled`.
 
 
 
@@ -4706,7 +4630,7 @@ Optional:
 
 Optional:
 
-- `orchestration_choice` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice))
+- `orchestration_choice` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode.<br>`not_managed` must be specified when `orchestration_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice))
 
 <a id="nestedatt--provider_choice--oci--orchestration_choice"></a>
 ### Nested Schema for `provider_choice.oci.orchestration_choice`
@@ -4740,51 +4664,29 @@ Optional:
 
 Required:
 
-- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--address_choice))
-- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--interface_choice))
+- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here.<br>Exactly one of `bond_interface`, `ethernet_interface`, or `vlan_interface` must be specified. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--interface_choice))
 - `network_option` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--network_option))
 
 Optional:
 
+- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface.<br>Exactly one of `dhcp_client`, `no_ipv4_address`, or `static_ip` must be specified when `address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--address_choice))
 - `description` (String) Interface Description Description for this Interface<br>**Validation:** `Length LengthAtMost(256)`
-- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
+- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface.<br>Exactly one of `ipv6_auto_config`, `no_ipv6_address`, or `static_ipv6_address` must be specified when `ipv6_address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
-- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
+- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.<br>Exactly one of `monitor` or `monitor_disabled` must be specified when `monitoring_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
 - `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000<br>**Default:** `0`
 - `name` (String) Interface Name Name of this Interface<br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
-- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
-
-<a id="nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--address_choice"></a>
-### Nested Schema for `provider_choice.oci.orchestration_choice.not_managed.node_list.interface_list.address_choice`
-
-Optional:
-
-- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.
-- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.
-- `static_ip` (Attributes) Static IP Interface IP address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip))
-
-<a id="nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip"></a>
-### Nested Schema for `provider_choice.oci.orchestration_choice.not_managed.node_list.interface_list.address_choice.static_ip`
-
-Required:
-
-- `ip_address` (String) Default Gateway IP address of the interface and prefix length
-
-Optional:
-
-- `default_gw` (String) Default Gateway IP address of the default gateway.
-
-
+- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled.<br>Exactly one of `site_to_site_connectivity_interface_disabled` or `site_to_site_connectivity_interface_enabled` must be specified when `site_to_site_connectivity_interface_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
 
 <a id="nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--interface_choice"></a>
 ### Nested Schema for `provider_choice.oci.orchestration_choice.not_managed.node_list.interface_list.interface_choice`
 
 Optional:
 
-- `bond_interface` (Attributes) Bond Interface (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface))
-- `ethernet_interface` (Attributes) Ethernet Interface (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
-- `vlan_interface` (Attributes) VLAN Interface (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--interface_choice--vlan_interface))
+- `bond_interface` (Attributes) Bond Interface<br>Conflicts with `ethernet_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface))
+- `ethernet_interface` (Attributes) Ethernet Interface<br>Conflicts with `bond_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
+- `vlan_interface` (Attributes) VLAN Interface<br>Conflicts with `bond_interface` and `ethernet_interface`. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--interface_choice--vlan_interface))
 
 <a id="nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface"></a>
 ### Nested Schema for `provider_choice.oci.orchestration_choice.not_managed.node_list.interface_list.interface_choice.bond_interface`
@@ -4792,7 +4694,7 @@ Optional:
 Required:
 
 - `devices` (List of String) Member Ethernet Devices Ethernet devices that will make up this bond
-- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
+- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP<br>Exactly one of `active_backup` or `lacp` must be specified. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
 - `name` (String) Bond Device Name for the Bond. Ex 'bond0'<br>**Validation:** `Length LengthAtMost(64)`
 
 Optional:
@@ -4805,8 +4707,8 @@ Optional:
 
 Optional:
 
-- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device
-- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
+- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device<br>Conflicts with `lacp`.
+- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device<br>Conflicts with `active_backup`. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
 
 <a id="nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp"></a>
 ### Nested Schema for `provider_choice.oci.orchestration_choice.not_managed.node_list.interface_list.interface_choice.bond_interface.lacp_choice.lacp`
@@ -4848,16 +4750,16 @@ Optional:
 
 Optional:
 
-- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice))
+- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs).<br>Exactly one of `segment_network`, `site_local_inside_network`, or `site_local_network` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice))
 
 <a id="nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice"></a>
 ### Nested Schema for `provider_choice.oci.orchestration_choice.not_managed.node_list.interface_list.network_option.network_choice`
 
 Optional:
 
-- `segment_network` (Attributes) Segment (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
-- `site_local_inside_network` (Boolean) Site Local Network Inside
-- `site_local_network` (Boolean) Site Local Network
+- `segment_network` (Attributes) Segment<br>Conflicts with `site_local_inside_network` and `site_local_network`. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
+- `site_local_inside_network` (Boolean) Site Local Network Inside<br>Conflicts with `segment_network` and `site_local_network`.
+- `site_local_network` (Boolean) Site Local Network<br>Conflicts with `segment_network` and `site_local_inside_network`.
 
 <a id="nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network"></a>
 ### Nested Schema for `provider_choice.oci.orchestration_choice.not_managed.node_list.interface_list.network_option.network_choice.segment_network`
@@ -4874,36 +4776,58 @@ Read-Only:
 
 
 
+<a id="nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--address_choice"></a>
+### Nested Schema for `provider_choice.oci.orchestration_choice.not_managed.node_list.interface_list.address_choice`
+
+Optional:
+
+- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.<br>Conflicts with `no_ipv4_address` and `static_ip`.
+- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.<br>Conflicts with `dhcp_client` and `static_ip`.
+- `static_ip` (Attributes) Static IP Interface IP address is configured statically.<br>Conflicts with `dhcp_client` and `no_ipv4_address`. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip))
+
+<a id="nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip"></a>
+### Nested Schema for `provider_choice.oci.orchestration_choice.not_managed.node_list.interface_list.address_choice.static_ip`
+
+Required:
+
+- `ip_address` (String) Default Gateway IP address of the interface and prefix length
+
+Optional:
+
+- `default_gw` (String) Default Gateway IP address of the default gateway.
+
+
+
 <a id="nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice"></a>
 ### Nested Schema for `provider_choice.oci.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice`
 
 Optional:
 
-- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
-- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.
-- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
+- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration.<br>Conflicts with `no_ipv6_address` and `static_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
+- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.<br>Conflicts with `ipv6_auto_config` and `static_ipv6_address`.
+- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically.<br>Conflicts with `ipv6_auto_config` and `no_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
 
 <a id="nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config"></a>
 ### Nested Schema for `provider_choice.oci.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config`
 
-Required:
+Optional:
 
-- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
+- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration<br>Exactly one of `host` or `router` must be specified when `autoconfig_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
 
 <a id="nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice"></a>
 ### Nested Schema for `provider_choice.oci.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice`
 
 Optional:
 
-- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.
-- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
+- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.<br>Conflicts with `router`.
+- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.<br>Conflicts with `host`. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
 
 <a id="nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router"></a>
 ### Nested Schema for `provider_choice.oci.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router`
 
 Required:
 
-- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
+- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients<br>Exactly one of `network_prefix` or `stateful` must be specified. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
 
 Optional:
 
@@ -4914,8 +4838,8 @@ Optional:
 
 Optional:
 
-- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862
-- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
+- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862<br>Conflicts with `stateful`.
+- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag<br>Conflicts with `network_prefix`. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
 
 <a id="nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful"></a>
 ### Nested Schema for `provider_choice.oci.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful`
@@ -4923,18 +4847,18 @@ Optional:
 Required:
 
 - `dhcp_networks` (Attributes List) DHCP IPV6 Networks List of networks from which DHCP server can allocate ip addresses (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks))
-- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 Optional:
 
 - `fixed_ip_map` (Map of String) Fixed IPV6 Assignments Fixed MAC address to ipv6 assignments, Key: Mac address, Value: IPV6 Address Assign fixed IPv6 addresses based on the MAC Address of the DHCP Client.
+- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address<br>Exactly one of `automatic_from_end`, `automatic_from_start`, or `interface_ip_map` must be specified when `interfaces_addressing_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 <a id="nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks"></a>
 ### Nested Schema for `provider_choice.oci.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.dhcp_networks`
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site<br>`network_prefix` must be specified. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
 - `pool_settings` (List of String) DHCP Pool Settings Controls how DHCPV6 pools are handled<br>**Allowed Values (choose one):** `['EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS', 'INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS']`
 
 Optional:
@@ -4964,9 +4888,9 @@ Optional:
 
 Optional:
 
-- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list
-- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list
-- `interface_ip_map` (Attributes) Configured Address Configured address for every node (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
+- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list<br>Conflicts with `automatic_from_start` and `interface_ip_map`.
+- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list<br>Conflicts with `automatic_from_end` and `interface_ip_map`.
+- `interface_ip_map` (Attributes) Configured Address Configured address for every node<br>Conflicts with `automatic_from_end` and `automatic_from_start`. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
 
 <a id="nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map"></a>
 ### Nested Schema for `provider_choice.oci.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.interfaces_addressing_choice.interface_ip_map`
@@ -4984,15 +4908,15 @@ Optional:
 
 Required:
 
-- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
+- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined<br>Exactly one of `configured_list` or `local_dns` must be specified. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
 
 <a id="nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice"></a>
 ### Nested Schema for `provider_choice.oci.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice`
 
 Optional:
 
-- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
-- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
+- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server<br>Conflicts with `local_dns`. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
+- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server<br>Conflicts with `configured_list`. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
 
 <a id="nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list"></a>
 ### Nested Schema for `provider_choice.oci.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.configured_list`
@@ -5005,18 +4929,18 @@ Required:
 <a id="nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns"></a>
 ### Nested Schema for `provider_choice.oci.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns`
 
-Required:
+Optional:
 
-- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
+- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server<br>Exactly one of `configured_address`, `first_address`, or `last_address` must be specified when `local_dns_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
 
 <a id="nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice"></a>
 ### Nested Schema for `provider_choice.oci.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns.local_dns_choice`
 
 Optional:
 
-- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server
-- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server
-- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server
+- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server<br>Conflicts with `first_address` and `last_address`.
+- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `last_address`.
+- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `first_address`.
 
 
 
@@ -5030,15 +4954,15 @@ Optional:
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
 
 <a id="nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice"></a>
 ### Nested Schema for `provider_choice.oci.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice`
 
 Optional:
 
-- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
-- `node_static_ip` (Attributes) Node Static IP configuration for the Node (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
+- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
+- `node_static_ip` (Attributes) Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
 
 <a id="nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip"></a>
 ### Nested Schema for `provider_choice.oci.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice.cluster_static_ip`
@@ -5080,8 +5004,8 @@ Optional:
 
 Optional:
 
-- `monitor` (Boolean) Monitoring enabled
-- `monitor_disabled` (Boolean) Monitoring disabled
+- `monitor` (Boolean) Monitoring enabled<br>Conflicts with `monitor_disabled`.
+- `monitor_disabled` (Boolean) Monitoring disabled<br>Conflicts with `monitor`.
 
 
 <a id="nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice"></a>
@@ -5089,8 +5013,8 @@ Optional:
 
 Optional:
 
-- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.
-- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.
+- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_enabled`.
+- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_disabled`.
 
 
 
@@ -5103,40 +5027,13 @@ Optional:
 
 Required:
 
-- `anti_affinity_choice` (Attributes) Pod Anti-Affinity Enable pod anti-affinity to prevent CE pods from being scheduled on nodes where specific customer services are already running. Configure match labels to identify the existing services (e.g., app=etcd) and topology key (e.g., kubernetes.io/hostname). CE pods will avoid nodes that have matching pods across all namespaces. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--anti_affinity_choice))
 - `deployment_size` (List of String) Deployment Size Select the size/flavor for the Customer Edge deployment on Kubernetes. This determines the resource allocation (CPU, memory) for the VPM and related pods. Medium (8 vCPU, 24 GB memory) is suitable for most deployments, Large (12 vCPU, 48 GB memory) for workloads requiring additional resources.<br>**Allowed Values (choose one):** `['KUBERNETES_DEPLOYMENT_SIZE_LARGE', 'KUBERNETES_DEPLOYMENT_SIZE_MEDIUM']`
 - `not_managed` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed))
 
 Optional:
 
+- `anti_affinity_choice` (Attributes) Pod Anti-Affinity Enable pod anti-affinity to prevent CE pods from being scheduled on nodes where specific customer services are already running. Configure match labels to identify the existing services (e.g., app=etcd) and topology key (e.g., kubernetes.io/hostname). CE pods will avoid nodes that have matching pods across all namespaces.<br>Exactly one of `disable_anti_affinity` or `enable_anti_affinity` must be specified when `anti_affinity_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--anti_affinity_choice))
 - `labels` (Map of String) Node Selector Labels Add labels to control which Kubernetes nodes the VPM and related pods (etcd, VER, prometheus) are deployed to. Specify label key-value pairs that match the labels on your Kubernetes nodes. This uses Kubernetes nodeSelector to schedule pods only on nodes with matching labels.
-
-<a id="nestedatt--provider_choice--oci_k8s--anti_affinity_choice"></a>
-### Nested Schema for `provider_choice.oci_k8s.anti_affinity_choice`
-
-Optional:
-
-- `disable_anti_affinity` (Boolean) Disable Anti-Affinity Pod anti-affinity is disabled. Pods may run on the same node.
-- `enable_anti_affinity` (Attributes) Enable Anti-Affinity Pod anti-affinity is enabled. Kubernetes scheduler will distribute pods across different nodes. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--anti_affinity_choice--enable_anti_affinity))
-
-<a id="nestedatt--provider_choice--oci_k8s--anti_affinity_choice--enable_anti_affinity"></a>
-### Nested Schema for `provider_choice.oci_k8s.anti_affinity_choice.enable_anti_affinity`
-
-Required:
-
-- `rules` (Attributes List) Anti-Affinity Rules Define one or more anti-affinity rules. Each rule specifies which pods (by labels) should be distributed across which topology domains. Example: Rule 1 - Distribute VPM pods across nodes, Rule 2 - Distribute Prometheus pods across zones. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--anti_affinity_choice--enable_anti_affinity--rules))
-
-<a id="nestedatt--provider_choice--oci_k8s--anti_affinity_choice--enable_anti_affinity--rules"></a>
-### Nested Schema for `provider_choice.oci_k8s.anti_affinity_choice.enable_anti_affinity.rules`
-
-Required:
-
-- `label_key` (String) Label Key Specify the label key of the customer pods that CE pods should avoid being co-scheduled with. Combined with the label value below, this identifies the target pods.<br>**Validation:** `Length LengthBetween(1, 253)`
-- `label_value` (String) Label Value Specify the label value that, together with the label key, identifies the customer pods to avoid.<br>**Validation:** `Length LengthBetween(1, 63)`
-- `topology_keys` (List of String) Topology Keys Specify one or more node label keys that define the scope of avoidance. For each topology key (e.g., kubernetes.io/hostname), CE pods will avoid nodes whose topology value matches a node already running a pod with the above specified label. Example: with kubernetes.io/hostname, CE pods are kept off any node running the matching customer pod.
-
-
-
 
 <a id="nestedatt--provider_choice--oci_k8s--not_managed"></a>
 ### Nested Schema for `provider_choice.oci_k8s.not_managed`
@@ -5163,51 +5060,29 @@ Optional:
 
 Required:
 
-- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--address_choice))
-- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--interface_choice))
+- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here.<br>Exactly one of `bond_interface`, `ethernet_interface`, or `vlan_interface` must be specified. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--interface_choice))
 - `network_option` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--network_option))
 
 Optional:
 
+- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface.<br>Exactly one of `dhcp_client`, `no_ipv4_address`, or `static_ip` must be specified when `address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--address_choice))
 - `description` (String) Interface Description Description for this Interface<br>**Validation:** `Length LengthAtMost(256)`
-- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice))
+- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface.<br>Exactly one of `ipv6_auto_config`, `no_ipv6_address`, or `static_ipv6_address` must be specified when `ipv6_address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
-- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--monitoring_choice))
+- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.<br>Exactly one of `monitor` or `monitor_disabled` must be specified when `monitoring_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--monitoring_choice))
 - `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000<br>**Default:** `0`
 - `name` (String) Interface Name Name of this Interface<br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
-- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
-
-<a id="nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--address_choice"></a>
-### Nested Schema for `provider_choice.oci_k8s.not_managed.node_list.interface_list.address_choice`
-
-Optional:
-
-- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.
-- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.
-- `static_ip` (Attributes) Static IP Interface IP address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--address_choice--static_ip))
-
-<a id="nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--address_choice--static_ip"></a>
-### Nested Schema for `provider_choice.oci_k8s.not_managed.node_list.interface_list.address_choice.static_ip`
-
-Required:
-
-- `ip_address` (String) Default Gateway IP address of the interface and prefix length
-
-Optional:
-
-- `default_gw` (String) Default Gateway IP address of the default gateway.
-
-
+- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled.<br>Exactly one of `site_to_site_connectivity_interface_disabled` or `site_to_site_connectivity_interface_enabled` must be specified when `site_to_site_connectivity_interface_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
 
 <a id="nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--interface_choice"></a>
 ### Nested Schema for `provider_choice.oci_k8s.not_managed.node_list.interface_list.interface_choice`
 
 Optional:
 
-- `bond_interface` (Attributes) Bond Interface (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface))
-- `ethernet_interface` (Attributes) Ethernet Interface (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
-- `vlan_interface` (Attributes) VLAN Interface (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--interface_choice--vlan_interface))
+- `bond_interface` (Attributes) Bond Interface<br>Conflicts with `ethernet_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface))
+- `ethernet_interface` (Attributes) Ethernet Interface<br>Conflicts with `bond_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
+- `vlan_interface` (Attributes) VLAN Interface<br>Conflicts with `bond_interface` and `ethernet_interface`. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--interface_choice--vlan_interface))
 
 <a id="nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface"></a>
 ### Nested Schema for `provider_choice.oci_k8s.not_managed.node_list.interface_list.interface_choice.bond_interface`
@@ -5215,7 +5090,7 @@ Optional:
 Required:
 
 - `devices` (List of String) Member Ethernet Devices Ethernet devices that will make up this bond
-- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
+- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP<br>Exactly one of `active_backup` or `lacp` must be specified. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
 - `name` (String) Bond Device Name for the Bond. Ex 'bond0'<br>**Validation:** `Length LengthAtMost(64)`
 
 Optional:
@@ -5228,8 +5103,8 @@ Optional:
 
 Optional:
 
-- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device
-- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
+- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device<br>Conflicts with `lacp`.
+- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device<br>Conflicts with `active_backup`. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
 
 <a id="nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp"></a>
 ### Nested Schema for `provider_choice.oci_k8s.not_managed.node_list.interface_list.interface_choice.bond_interface.lacp_choice.lacp`
@@ -5271,16 +5146,16 @@ Optional:
 
 Optional:
 
-- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--network_option--network_choice))
+- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs).<br>Exactly one of `segment_network`, `site_local_inside_network`, or `site_local_network` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--network_option--network_choice))
 
 <a id="nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--network_option--network_choice"></a>
 ### Nested Schema for `provider_choice.oci_k8s.not_managed.node_list.interface_list.network_option.network_choice`
 
 Optional:
 
-- `segment_network` (Attributes) Segment (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
-- `site_local_inside_network` (Boolean) Site Local Network Inside
-- `site_local_network` (Boolean) Site Local Network
+- `segment_network` (Attributes) Segment<br>Conflicts with `site_local_inside_network` and `site_local_network`. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
+- `site_local_inside_network` (Boolean) Site Local Network Inside<br>Conflicts with `segment_network` and `site_local_network`.
+- `site_local_network` (Boolean) Site Local Network<br>Conflicts with `segment_network` and `site_local_inside_network`.
 
 <a id="nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--network_option--network_choice--segment_network"></a>
 ### Nested Schema for `provider_choice.oci_k8s.not_managed.node_list.interface_list.network_option.network_choice.segment_network`
@@ -5297,36 +5172,58 @@ Read-Only:
 
 
 
+<a id="nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--address_choice"></a>
+### Nested Schema for `provider_choice.oci_k8s.not_managed.node_list.interface_list.address_choice`
+
+Optional:
+
+- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.<br>Conflicts with `no_ipv4_address` and `static_ip`.
+- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.<br>Conflicts with `dhcp_client` and `static_ip`.
+- `static_ip` (Attributes) Static IP Interface IP address is configured statically.<br>Conflicts with `dhcp_client` and `no_ipv4_address`. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--address_choice--static_ip))
+
+<a id="nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--address_choice--static_ip"></a>
+### Nested Schema for `provider_choice.oci_k8s.not_managed.node_list.interface_list.address_choice.static_ip`
+
+Required:
+
+- `ip_address` (String) Default Gateway IP address of the interface and prefix length
+
+Optional:
+
+- `default_gw` (String) Default Gateway IP address of the default gateway.
+
+
+
 <a id="nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice"></a>
 ### Nested Schema for `provider_choice.oci_k8s.not_managed.node_list.interface_list.ipv6_address_choice`
 
 Optional:
 
-- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
-- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.
-- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
+- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration.<br>Conflicts with `no_ipv6_address` and `static_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
+- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.<br>Conflicts with `ipv6_auto_config` and `static_ipv6_address`.
+- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically.<br>Conflicts with `ipv6_auto_config` and `no_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
 
 <a id="nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config"></a>
 ### Nested Schema for `provider_choice.oci_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config`
 
-Required:
+Optional:
 
-- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
+- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration<br>Exactly one of `host` or `router` must be specified when `autoconfig_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
 
 <a id="nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice"></a>
 ### Nested Schema for `provider_choice.oci_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice`
 
 Optional:
 
-- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.
-- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
+- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.<br>Conflicts with `router`.
+- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.<br>Conflicts with `host`. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
 
 <a id="nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router"></a>
 ### Nested Schema for `provider_choice.oci_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router`
 
 Required:
 
-- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
+- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients<br>Exactly one of `network_prefix` or `stateful` must be specified. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
 
 Optional:
 
@@ -5337,8 +5234,8 @@ Optional:
 
 Optional:
 
-- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862
-- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
+- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862<br>Conflicts with `stateful`.
+- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag<br>Conflicts with `network_prefix`. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
 
 <a id="nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful"></a>
 ### Nested Schema for `provider_choice.oci_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful`
@@ -5346,18 +5243,18 @@ Optional:
 Required:
 
 - `dhcp_networks` (Attributes List) DHCP IPV6 Networks List of networks from which DHCP server can allocate ip addresses (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks))
-- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 Optional:
 
 - `fixed_ip_map` (Map of String) Fixed IPV6 Assignments Fixed MAC address to ipv6 assignments, Key: Mac address, Value: IPV6 Address Assign fixed IPv6 addresses based on the MAC Address of the DHCP Client.
+- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address<br>Exactly one of `automatic_from_end`, `automatic_from_start`, or `interface_ip_map` must be specified when `interfaces_addressing_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 <a id="nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks"></a>
 ### Nested Schema for `provider_choice.oci_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.dhcp_networks`
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site<br>`network_prefix` must be specified. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
 - `pool_settings` (List of String) DHCP Pool Settings Controls how DHCPV6 pools are handled<br>**Allowed Values (choose one):** `['EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS', 'INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS']`
 
 Optional:
@@ -5387,9 +5284,9 @@ Optional:
 
 Optional:
 
-- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list
-- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list
-- `interface_ip_map` (Attributes) Configured Address Configured address for every node (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
+- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list<br>Conflicts with `automatic_from_start` and `interface_ip_map`.
+- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list<br>Conflicts with `automatic_from_end` and `interface_ip_map`.
+- `interface_ip_map` (Attributes) Configured Address Configured address for every node<br>Conflicts with `automatic_from_end` and `automatic_from_start`. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
 
 <a id="nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map"></a>
 ### Nested Schema for `provider_choice.oci_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.interfaces_addressing_choice.interface_ip_map`
@@ -5407,15 +5304,15 @@ Optional:
 
 Required:
 
-- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
+- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined<br>Exactly one of `configured_list` or `local_dns` must be specified. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
 
 <a id="nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice"></a>
 ### Nested Schema for `provider_choice.oci_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice`
 
 Optional:
 
-- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
-- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
+- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server<br>Conflicts with `local_dns`. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
+- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server<br>Conflicts with `configured_list`. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
 
 <a id="nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list"></a>
 ### Nested Schema for `provider_choice.oci_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.configured_list`
@@ -5428,18 +5325,18 @@ Required:
 <a id="nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns"></a>
 ### Nested Schema for `provider_choice.oci_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns`
 
-Required:
+Optional:
 
-- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
+- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server<br>Exactly one of `configured_address`, `first_address`, or `last_address` must be specified when `local_dns_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
 
 <a id="nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice"></a>
 ### Nested Schema for `provider_choice.oci_k8s.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns.local_dns_choice`
 
 Optional:
 
-- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server
-- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server
-- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server
+- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server<br>Conflicts with `first_address` and `last_address`.
+- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `last_address`.
+- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `first_address`.
 
 
 
@@ -5453,15 +5350,15 @@ Optional:
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
 
 <a id="nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice"></a>
 ### Nested Schema for `provider_choice.oci_k8s.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice`
 
 Optional:
 
-- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
-- `node_static_ip` (Attributes) Node Static IP configuration for the Node (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
+- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
+- `node_static_ip` (Attributes) Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
 
 <a id="nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip"></a>
 ### Nested Schema for `provider_choice.oci_k8s.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice.cluster_static_ip`
@@ -5503,8 +5400,8 @@ Optional:
 
 Optional:
 
-- `monitor` (Boolean) Monitoring enabled
-- `monitor_disabled` (Boolean) Monitoring disabled
+- `monitor` (Boolean) Monitoring enabled<br>Conflicts with `monitor_disabled`.
+- `monitor_disabled` (Boolean) Monitoring disabled<br>Conflicts with `monitor`.
 
 
 <a id="nestedatt--provider_choice--oci_k8s--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice"></a>
@@ -5512,9 +5409,36 @@ Optional:
 
 Optional:
 
-- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.
-- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.
+- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_enabled`.
+- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_disabled`.
 
+
+
+
+
+<a id="nestedatt--provider_choice--oci_k8s--anti_affinity_choice"></a>
+### Nested Schema for `provider_choice.oci_k8s.anti_affinity_choice`
+
+Optional:
+
+- `disable_anti_affinity` (Boolean) Disable Anti-Affinity Pod anti-affinity is disabled. Pods may run on the same node.<br>Conflicts with `enable_anti_affinity`.
+- `enable_anti_affinity` (Attributes) Enable Anti-Affinity Pod anti-affinity is enabled. Kubernetes scheduler will distribute pods across different nodes.<br>Conflicts with `disable_anti_affinity`. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--anti_affinity_choice--enable_anti_affinity))
+
+<a id="nestedatt--provider_choice--oci_k8s--anti_affinity_choice--enable_anti_affinity"></a>
+### Nested Schema for `provider_choice.oci_k8s.anti_affinity_choice.enable_anti_affinity`
+
+Required:
+
+- `rules` (Attributes List) Anti-Affinity Rules Define one or more anti-affinity rules. Each rule specifies which pods (by labels) should be distributed across which topology domains. Example: Rule 1 - Distribute VPM pods across nodes, Rule 2 - Distribute Prometheus pods across zones. (see [below for nested schema](#nestedatt--provider_choice--oci_k8s--anti_affinity_choice--enable_anti_affinity--rules))
+
+<a id="nestedatt--provider_choice--oci_k8s--anti_affinity_choice--enable_anti_affinity--rules"></a>
+### Nested Schema for `provider_choice.oci_k8s.anti_affinity_choice.enable_anti_affinity.rules`
+
+Required:
+
+- `label_key` (String) Label Key Specify the label key of the customer pods that CE pods should avoid being co-scheduled with. Combined with the label value below, this identifies the target pods.<br>**Validation:** `Length LengthBetween(1, 253)`
+- `label_value` (String) Label Value Specify the label value that, together with the label key, identifies the customer pods to avoid.<br>**Validation:** `Length LengthBetween(1, 63)`
+- `topology_keys` (List of String) Topology Keys Specify one or more node label keys that define the scope of avoidance. For each topology key (e.g., kubernetes.io/hostname), CE pods will avoid nodes whose topology value matches a node already running a pod with the above specified label. Example: with kubernetes.io/hostname, CE pods are kept off any node running the matching customer pod.
 
 
 
@@ -5525,7 +5449,7 @@ Optional:
 
 Optional:
 
-- `orchestration_choice` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice))
+- `orchestration_choice` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode.<br>`not_managed` must be specified when `orchestration_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice))
 
 <a id="nestedatt--provider_choice--openshift_virtualization--orchestration_choice"></a>
 ### Nested Schema for `provider_choice.openshift_virtualization.orchestration_choice`
@@ -5559,51 +5483,29 @@ Optional:
 
 Required:
 
-- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--address_choice))
-- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--interface_choice))
+- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here.<br>Exactly one of `bond_interface`, `ethernet_interface`, or `vlan_interface` must be specified. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--interface_choice))
 - `network_option` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--network_option))
 
 Optional:
 
+- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface.<br>Exactly one of `dhcp_client`, `no_ipv4_address`, or `static_ip` must be specified when `address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--address_choice))
 - `description` (String) Interface Description Description for this Interface<br>**Validation:** `Length LengthAtMost(256)`
-- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
+- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface.<br>Exactly one of `ipv6_auto_config`, `no_ipv6_address`, or `static_ipv6_address` must be specified when `ipv6_address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
-- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
+- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.<br>Exactly one of `monitor` or `monitor_disabled` must be specified when `monitoring_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
 - `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000<br>**Default:** `0`
 - `name` (String) Interface Name Name of this Interface<br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
-- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
-
-<a id="nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--address_choice"></a>
-### Nested Schema for `provider_choice.openshift_virtualization.orchestration_choice.not_managed.node_list.interface_list.address_choice`
-
-Optional:
-
-- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.
-- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.
-- `static_ip` (Attributes) Static IP Interface IP address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip))
-
-<a id="nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip"></a>
-### Nested Schema for `provider_choice.openshift_virtualization.orchestration_choice.not_managed.node_list.interface_list.address_choice.static_ip`
-
-Required:
-
-- `ip_address` (String) Default Gateway IP address of the interface and prefix length
-
-Optional:
-
-- `default_gw` (String) Default Gateway IP address of the default gateway.
-
-
+- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled.<br>Exactly one of `site_to_site_connectivity_interface_disabled` or `site_to_site_connectivity_interface_enabled` must be specified when `site_to_site_connectivity_interface_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
 
 <a id="nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--interface_choice"></a>
 ### Nested Schema for `provider_choice.openshift_virtualization.orchestration_choice.not_managed.node_list.interface_list.interface_choice`
 
 Optional:
 
-- `bond_interface` (Attributes) Bond Interface (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface))
-- `ethernet_interface` (Attributes) Ethernet Interface (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
-- `vlan_interface` (Attributes) VLAN Interface (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--interface_choice--vlan_interface))
+- `bond_interface` (Attributes) Bond Interface<br>Conflicts with `ethernet_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface))
+- `ethernet_interface` (Attributes) Ethernet Interface<br>Conflicts with `bond_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
+- `vlan_interface` (Attributes) VLAN Interface<br>Conflicts with `bond_interface` and `ethernet_interface`. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--interface_choice--vlan_interface))
 
 <a id="nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface"></a>
 ### Nested Schema for `provider_choice.openshift_virtualization.orchestration_choice.not_managed.node_list.interface_list.interface_choice.bond_interface`
@@ -5611,7 +5513,7 @@ Optional:
 Required:
 
 - `devices` (List of String) Member Ethernet Devices Ethernet devices that will make up this bond
-- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
+- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP<br>Exactly one of `active_backup` or `lacp` must be specified. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
 - `name` (String) Bond Device Name for the Bond. Ex 'bond0'<br>**Validation:** `Length LengthAtMost(64)`
 
 Optional:
@@ -5624,8 +5526,8 @@ Optional:
 
 Optional:
 
-- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device
-- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
+- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device<br>Conflicts with `lacp`.
+- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device<br>Conflicts with `active_backup`. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
 
 <a id="nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp"></a>
 ### Nested Schema for `provider_choice.openshift_virtualization.orchestration_choice.not_managed.node_list.interface_list.interface_choice.bond_interface.lacp_choice.lacp`
@@ -5667,16 +5569,16 @@ Optional:
 
 Optional:
 
-- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice))
+- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs).<br>Exactly one of `segment_network`, `site_local_inside_network`, or `site_local_network` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice))
 
 <a id="nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice"></a>
 ### Nested Schema for `provider_choice.openshift_virtualization.orchestration_choice.not_managed.node_list.interface_list.network_option.network_choice`
 
 Optional:
 
-- `segment_network` (Attributes) Segment (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
-- `site_local_inside_network` (Boolean) Site Local Network Inside
-- `site_local_network` (Boolean) Site Local Network
+- `segment_network` (Attributes) Segment<br>Conflicts with `site_local_inside_network` and `site_local_network`. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
+- `site_local_inside_network` (Boolean) Site Local Network Inside<br>Conflicts with `segment_network` and `site_local_network`.
+- `site_local_network` (Boolean) Site Local Network<br>Conflicts with `segment_network` and `site_local_inside_network`.
 
 <a id="nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network"></a>
 ### Nested Schema for `provider_choice.openshift_virtualization.orchestration_choice.not_managed.node_list.interface_list.network_option.network_choice.segment_network`
@@ -5693,36 +5595,58 @@ Read-Only:
 
 
 
+<a id="nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--address_choice"></a>
+### Nested Schema for `provider_choice.openshift_virtualization.orchestration_choice.not_managed.node_list.interface_list.address_choice`
+
+Optional:
+
+- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.<br>Conflicts with `no_ipv4_address` and `static_ip`.
+- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.<br>Conflicts with `dhcp_client` and `static_ip`.
+- `static_ip` (Attributes) Static IP Interface IP address is configured statically.<br>Conflicts with `dhcp_client` and `no_ipv4_address`. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip))
+
+<a id="nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip"></a>
+### Nested Schema for `provider_choice.openshift_virtualization.orchestration_choice.not_managed.node_list.interface_list.address_choice.static_ip`
+
+Required:
+
+- `ip_address` (String) Default Gateway IP address of the interface and prefix length
+
+Optional:
+
+- `default_gw` (String) Default Gateway IP address of the default gateway.
+
+
+
 <a id="nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice"></a>
 ### Nested Schema for `provider_choice.openshift_virtualization.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice`
 
 Optional:
 
-- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
-- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.
-- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
+- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration.<br>Conflicts with `no_ipv6_address` and `static_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
+- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.<br>Conflicts with `ipv6_auto_config` and `static_ipv6_address`.
+- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically.<br>Conflicts with `ipv6_auto_config` and `no_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
 
 <a id="nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config"></a>
 ### Nested Schema for `provider_choice.openshift_virtualization.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config`
 
-Required:
+Optional:
 
-- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
+- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration<br>Exactly one of `host` or `router` must be specified when `autoconfig_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
 
 <a id="nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice"></a>
 ### Nested Schema for `provider_choice.openshift_virtualization.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice`
 
 Optional:
 
-- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.
-- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
+- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.<br>Conflicts with `router`.
+- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.<br>Conflicts with `host`. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
 
 <a id="nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router"></a>
 ### Nested Schema for `provider_choice.openshift_virtualization.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router`
 
 Required:
 
-- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
+- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients<br>Exactly one of `network_prefix` or `stateful` must be specified. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
 
 Optional:
 
@@ -5733,8 +5657,8 @@ Optional:
 
 Optional:
 
-- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862
-- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
+- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862<br>Conflicts with `stateful`.
+- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag<br>Conflicts with `network_prefix`. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
 
 <a id="nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful"></a>
 ### Nested Schema for `provider_choice.openshift_virtualization.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful`
@@ -5742,18 +5666,18 @@ Optional:
 Required:
 
 - `dhcp_networks` (Attributes List) DHCP IPV6 Networks List of networks from which DHCP server can allocate ip addresses (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks))
-- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 Optional:
 
 - `fixed_ip_map` (Map of String) Fixed IPV6 Assignments Fixed MAC address to ipv6 assignments, Key: Mac address, Value: IPV6 Address Assign fixed IPv6 addresses based on the MAC Address of the DHCP Client.
+- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address<br>Exactly one of `automatic_from_end`, `automatic_from_start`, or `interface_ip_map` must be specified when `interfaces_addressing_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 <a id="nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks"></a>
 ### Nested Schema for `provider_choice.openshift_virtualization.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.dhcp_networks`
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site<br>`network_prefix` must be specified. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
 - `pool_settings` (List of String) DHCP Pool Settings Controls how DHCPV6 pools are handled<br>**Allowed Values (choose one):** `['EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS', 'INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS']`
 
 Optional:
@@ -5783,9 +5707,9 @@ Optional:
 
 Optional:
 
-- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list
-- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list
-- `interface_ip_map` (Attributes) Configured Address Configured address for every node (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
+- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list<br>Conflicts with `automatic_from_start` and `interface_ip_map`.
+- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list<br>Conflicts with `automatic_from_end` and `interface_ip_map`.
+- `interface_ip_map` (Attributes) Configured Address Configured address for every node<br>Conflicts with `automatic_from_end` and `automatic_from_start`. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
 
 <a id="nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map"></a>
 ### Nested Schema for `provider_choice.openshift_virtualization.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.interfaces_addressing_choice.interface_ip_map`
@@ -5803,15 +5727,15 @@ Optional:
 
 Required:
 
-- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
+- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined<br>Exactly one of `configured_list` or `local_dns` must be specified. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
 
 <a id="nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice"></a>
 ### Nested Schema for `provider_choice.openshift_virtualization.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice`
 
 Optional:
 
-- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
-- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
+- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server<br>Conflicts with `local_dns`. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
+- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server<br>Conflicts with `configured_list`. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
 
 <a id="nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list"></a>
 ### Nested Schema for `provider_choice.openshift_virtualization.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.configured_list`
@@ -5824,18 +5748,18 @@ Required:
 <a id="nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns"></a>
 ### Nested Schema for `provider_choice.openshift_virtualization.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns`
 
-Required:
+Optional:
 
-- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
+- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server<br>Exactly one of `configured_address`, `first_address`, or `last_address` must be specified when `local_dns_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
 
 <a id="nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice"></a>
 ### Nested Schema for `provider_choice.openshift_virtualization.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns.local_dns_choice`
 
 Optional:
 
-- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server
-- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server
-- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server
+- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server<br>Conflicts with `first_address` and `last_address`.
+- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `last_address`.
+- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `first_address`.
 
 
 
@@ -5849,15 +5773,15 @@ Optional:
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
 
 <a id="nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice"></a>
 ### Nested Schema for `provider_choice.openshift_virtualization.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice`
 
 Optional:
 
-- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
-- `node_static_ip` (Attributes) Node Static IP configuration for the Node (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
+- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
+- `node_static_ip` (Attributes) Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
 
 <a id="nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip"></a>
 ### Nested Schema for `provider_choice.openshift_virtualization.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice.cluster_static_ip`
@@ -5899,8 +5823,8 @@ Optional:
 
 Optional:
 
-- `monitor` (Boolean) Monitoring enabled
-- `monitor_disabled` (Boolean) Monitoring disabled
+- `monitor` (Boolean) Monitoring enabled<br>Conflicts with `monitor_disabled`.
+- `monitor_disabled` (Boolean) Monitoring disabled<br>Conflicts with `monitor`.
 
 
 <a id="nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice"></a>
@@ -5908,8 +5832,8 @@ Optional:
 
 Optional:
 
-- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.
-- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.
+- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_enabled`.
+- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_disabled`.
 
 
 
@@ -5922,7 +5846,7 @@ Optional:
 
 Optional:
 
-- `orchestration_choice` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice))
+- `orchestration_choice` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode.<br>`not_managed` must be specified when `orchestration_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice))
 
 <a id="nestedatt--provider_choice--openstack--orchestration_choice"></a>
 ### Nested Schema for `provider_choice.openstack.orchestration_choice`
@@ -5956,51 +5880,29 @@ Optional:
 
 Required:
 
-- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--address_choice))
-- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--interface_choice))
+- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here.<br>Exactly one of `bond_interface`, `ethernet_interface`, or `vlan_interface` must be specified. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--interface_choice))
 - `network_option` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--network_option))
 
 Optional:
 
+- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface.<br>Exactly one of `dhcp_client`, `no_ipv4_address`, or `static_ip` must be specified when `address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--address_choice))
 - `description` (String) Interface Description Description for this Interface<br>**Validation:** `Length LengthAtMost(256)`
-- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
+- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface.<br>Exactly one of `ipv6_auto_config`, `no_ipv6_address`, or `static_ipv6_address` must be specified when `ipv6_address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
-- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
+- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.<br>Exactly one of `monitor` or `monitor_disabled` must be specified when `monitoring_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
 - `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000<br>**Default:** `0`
 - `name` (String) Interface Name Name of this Interface<br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
-- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
-
-<a id="nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--address_choice"></a>
-### Nested Schema for `provider_choice.openstack.orchestration_choice.not_managed.node_list.interface_list.address_choice`
-
-Optional:
-
-- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.
-- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.
-- `static_ip` (Attributes) Static IP Interface IP address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip))
-
-<a id="nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip"></a>
-### Nested Schema for `provider_choice.openstack.orchestration_choice.not_managed.node_list.interface_list.address_choice.static_ip`
-
-Required:
-
-- `ip_address` (String) Default Gateway IP address of the interface and prefix length
-
-Optional:
-
-- `default_gw` (String) Default Gateway IP address of the default gateway.
-
-
+- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled.<br>Exactly one of `site_to_site_connectivity_interface_disabled` or `site_to_site_connectivity_interface_enabled` must be specified when `site_to_site_connectivity_interface_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
 
 <a id="nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--interface_choice"></a>
 ### Nested Schema for `provider_choice.openstack.orchestration_choice.not_managed.node_list.interface_list.interface_choice`
 
 Optional:
 
-- `bond_interface` (Attributes) Bond Interface (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface))
-- `ethernet_interface` (Attributes) Ethernet Interface (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
-- `vlan_interface` (Attributes) VLAN Interface (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--interface_choice--vlan_interface))
+- `bond_interface` (Attributes) Bond Interface<br>Conflicts with `ethernet_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface))
+- `ethernet_interface` (Attributes) Ethernet Interface<br>Conflicts with `bond_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
+- `vlan_interface` (Attributes) VLAN Interface<br>Conflicts with `bond_interface` and `ethernet_interface`. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--interface_choice--vlan_interface))
 
 <a id="nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface"></a>
 ### Nested Schema for `provider_choice.openstack.orchestration_choice.not_managed.node_list.interface_list.interface_choice.bond_interface`
@@ -6008,7 +5910,7 @@ Optional:
 Required:
 
 - `devices` (List of String) Member Ethernet Devices Ethernet devices that will make up this bond
-- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
+- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP<br>Exactly one of `active_backup` or `lacp` must be specified. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
 - `name` (String) Bond Device Name for the Bond. Ex 'bond0'<br>**Validation:** `Length LengthAtMost(64)`
 
 Optional:
@@ -6021,8 +5923,8 @@ Optional:
 
 Optional:
 
-- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device
-- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
+- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device<br>Conflicts with `lacp`.
+- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device<br>Conflicts with `active_backup`. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
 
 <a id="nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp"></a>
 ### Nested Schema for `provider_choice.openstack.orchestration_choice.not_managed.node_list.interface_list.interface_choice.bond_interface.lacp_choice.lacp`
@@ -6064,16 +5966,16 @@ Optional:
 
 Optional:
 
-- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice))
+- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs).<br>Exactly one of `segment_network`, `site_local_inside_network`, or `site_local_network` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice))
 
 <a id="nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice"></a>
 ### Nested Schema for `provider_choice.openstack.orchestration_choice.not_managed.node_list.interface_list.network_option.network_choice`
 
 Optional:
 
-- `segment_network` (Attributes) Segment (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
-- `site_local_inside_network` (Boolean) Site Local Network Inside
-- `site_local_network` (Boolean) Site Local Network
+- `segment_network` (Attributes) Segment<br>Conflicts with `site_local_inside_network` and `site_local_network`. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
+- `site_local_inside_network` (Boolean) Site Local Network Inside<br>Conflicts with `segment_network` and `site_local_network`.
+- `site_local_network` (Boolean) Site Local Network<br>Conflicts with `segment_network` and `site_local_inside_network`.
 
 <a id="nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network"></a>
 ### Nested Schema for `provider_choice.openstack.orchestration_choice.not_managed.node_list.interface_list.network_option.network_choice.segment_network`
@@ -6090,36 +5992,58 @@ Read-Only:
 
 
 
+<a id="nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--address_choice"></a>
+### Nested Schema for `provider_choice.openstack.orchestration_choice.not_managed.node_list.interface_list.address_choice`
+
+Optional:
+
+- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.<br>Conflicts with `no_ipv4_address` and `static_ip`.
+- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.<br>Conflicts with `dhcp_client` and `static_ip`.
+- `static_ip` (Attributes) Static IP Interface IP address is configured statically.<br>Conflicts with `dhcp_client` and `no_ipv4_address`. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip))
+
+<a id="nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip"></a>
+### Nested Schema for `provider_choice.openstack.orchestration_choice.not_managed.node_list.interface_list.address_choice.static_ip`
+
+Required:
+
+- `ip_address` (String) Default Gateway IP address of the interface and prefix length
+
+Optional:
+
+- `default_gw` (String) Default Gateway IP address of the default gateway.
+
+
+
 <a id="nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice"></a>
 ### Nested Schema for `provider_choice.openstack.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice`
 
 Optional:
 
-- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
-- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.
-- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
+- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration.<br>Conflicts with `no_ipv6_address` and `static_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
+- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.<br>Conflicts with `ipv6_auto_config` and `static_ipv6_address`.
+- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically.<br>Conflicts with `ipv6_auto_config` and `no_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
 
 <a id="nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config"></a>
 ### Nested Schema for `provider_choice.openstack.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config`
 
-Required:
+Optional:
 
-- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
+- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration<br>Exactly one of `host` or `router` must be specified when `autoconfig_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
 
 <a id="nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice"></a>
 ### Nested Schema for `provider_choice.openstack.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice`
 
 Optional:
 
-- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.
-- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
+- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.<br>Conflicts with `router`.
+- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.<br>Conflicts with `host`. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
 
 <a id="nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router"></a>
 ### Nested Schema for `provider_choice.openstack.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router`
 
 Required:
 
-- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
+- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients<br>Exactly one of `network_prefix` or `stateful` must be specified. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
 
 Optional:
 
@@ -6130,8 +6054,8 @@ Optional:
 
 Optional:
 
-- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862
-- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
+- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862<br>Conflicts with `stateful`.
+- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag<br>Conflicts with `network_prefix`. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
 
 <a id="nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful"></a>
 ### Nested Schema for `provider_choice.openstack.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful`
@@ -6139,18 +6063,18 @@ Optional:
 Required:
 
 - `dhcp_networks` (Attributes List) DHCP IPV6 Networks List of networks from which DHCP server can allocate ip addresses (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks))
-- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 Optional:
 
 - `fixed_ip_map` (Map of String) Fixed IPV6 Assignments Fixed MAC address to ipv6 assignments, Key: Mac address, Value: IPV6 Address Assign fixed IPv6 addresses based on the MAC Address of the DHCP Client.
+- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address<br>Exactly one of `automatic_from_end`, `automatic_from_start`, or `interface_ip_map` must be specified when `interfaces_addressing_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 <a id="nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks"></a>
 ### Nested Schema for `provider_choice.openstack.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.dhcp_networks`
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site<br>`network_prefix` must be specified. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
 - `pool_settings` (List of String) DHCP Pool Settings Controls how DHCPV6 pools are handled<br>**Allowed Values (choose one):** `['EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS', 'INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS']`
 
 Optional:
@@ -6180,9 +6104,9 @@ Optional:
 
 Optional:
 
-- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list
-- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list
-- `interface_ip_map` (Attributes) Configured Address Configured address for every node (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
+- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list<br>Conflicts with `automatic_from_start` and `interface_ip_map`.
+- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list<br>Conflicts with `automatic_from_end` and `interface_ip_map`.
+- `interface_ip_map` (Attributes) Configured Address Configured address for every node<br>Conflicts with `automatic_from_end` and `automatic_from_start`. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
 
 <a id="nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map"></a>
 ### Nested Schema for `provider_choice.openstack.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.interfaces_addressing_choice.interface_ip_map`
@@ -6200,15 +6124,15 @@ Optional:
 
 Required:
 
-- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
+- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined<br>Exactly one of `configured_list` or `local_dns` must be specified. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
 
 <a id="nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice"></a>
 ### Nested Schema for `provider_choice.openstack.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice`
 
 Optional:
 
-- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
-- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
+- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server<br>Conflicts with `local_dns`. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
+- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server<br>Conflicts with `configured_list`. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
 
 <a id="nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list"></a>
 ### Nested Schema for `provider_choice.openstack.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.configured_list`
@@ -6221,18 +6145,18 @@ Required:
 <a id="nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns"></a>
 ### Nested Schema for `provider_choice.openstack.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns`
 
-Required:
+Optional:
 
-- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
+- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server<br>Exactly one of `configured_address`, `first_address`, or `last_address` must be specified when `local_dns_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
 
 <a id="nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice"></a>
 ### Nested Schema for `provider_choice.openstack.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns.local_dns_choice`
 
 Optional:
 
-- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server
-- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server
-- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server
+- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server<br>Conflicts with `first_address` and `last_address`.
+- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `last_address`.
+- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `first_address`.
 
 
 
@@ -6246,15 +6170,15 @@ Optional:
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
 
 <a id="nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice"></a>
 ### Nested Schema for `provider_choice.openstack.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice`
 
 Optional:
 
-- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
-- `node_static_ip` (Attributes) Node Static IP configuration for the Node (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
+- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
+- `node_static_ip` (Attributes) Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
 
 <a id="nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip"></a>
 ### Nested Schema for `provider_choice.openstack.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice.cluster_static_ip`
@@ -6296,8 +6220,8 @@ Optional:
 
 Optional:
 
-- `monitor` (Boolean) Monitoring enabled
-- `monitor_disabled` (Boolean) Monitoring disabled
+- `monitor` (Boolean) Monitoring enabled<br>Conflicts with `monitor_disabled`.
+- `monitor_disabled` (Boolean) Monitoring disabled<br>Conflicts with `monitor`.
 
 
 <a id="nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice"></a>
@@ -6305,8 +6229,8 @@ Optional:
 
 Optional:
 
-- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.
-- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.
+- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_enabled`.
+- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_disabled`.
 
 
 
@@ -6319,7 +6243,7 @@ Optional:
 
 Optional:
 
-- `orchestration_choice` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice))
+- `orchestration_choice` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode.<br>`not_managed` must be specified when `orchestration_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice))
 
 <a id="nestedatt--provider_choice--rseries--orchestration_choice"></a>
 ### Nested Schema for `provider_choice.rseries.orchestration_choice`
@@ -6353,51 +6277,29 @@ Optional:
 
 Required:
 
-- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--address_choice))
-- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--interface_choice))
+- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here.<br>Exactly one of `bond_interface`, `ethernet_interface`, or `vlan_interface` must be specified. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--interface_choice))
 - `network_option` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--network_option))
 
 Optional:
 
+- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface.<br>Exactly one of `dhcp_client`, `no_ipv4_address`, or `static_ip` must be specified when `address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--address_choice))
 - `description` (String) Interface Description Description for this Interface<br>**Validation:** `Length LengthAtMost(256)`
-- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
+- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface.<br>Exactly one of `ipv6_auto_config`, `no_ipv6_address`, or `static_ipv6_address` must be specified when `ipv6_address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
-- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
+- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.<br>Exactly one of `monitor` or `monitor_disabled` must be specified when `monitoring_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
 - `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000<br>**Default:** `0`
 - `name` (String) Interface Name Name of this Interface<br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
-- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
-
-<a id="nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--address_choice"></a>
-### Nested Schema for `provider_choice.rseries.orchestration_choice.not_managed.node_list.interface_list.address_choice`
-
-Optional:
-
-- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.
-- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.
-- `static_ip` (Attributes) Static IP Interface IP address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip))
-
-<a id="nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip"></a>
-### Nested Schema for `provider_choice.rseries.orchestration_choice.not_managed.node_list.interface_list.address_choice.static_ip`
-
-Required:
-
-- `ip_address` (String) Default Gateway IP address of the interface and prefix length
-
-Optional:
-
-- `default_gw` (String) Default Gateway IP address of the default gateway.
-
-
+- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled.<br>Exactly one of `site_to_site_connectivity_interface_disabled` or `site_to_site_connectivity_interface_enabled` must be specified when `site_to_site_connectivity_interface_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
 
 <a id="nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--interface_choice"></a>
 ### Nested Schema for `provider_choice.rseries.orchestration_choice.not_managed.node_list.interface_list.interface_choice`
 
 Optional:
 
-- `bond_interface` (Attributes) Bond Interface (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface))
-- `ethernet_interface` (Attributes) Ethernet Interface (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
-- `vlan_interface` (Attributes) VLAN Interface (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--interface_choice--vlan_interface))
+- `bond_interface` (Attributes) Bond Interface<br>Conflicts with `ethernet_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface))
+- `ethernet_interface` (Attributes) Ethernet Interface<br>Conflicts with `bond_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
+- `vlan_interface` (Attributes) VLAN Interface<br>Conflicts with `bond_interface` and `ethernet_interface`. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--interface_choice--vlan_interface))
 
 <a id="nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface"></a>
 ### Nested Schema for `provider_choice.rseries.orchestration_choice.not_managed.node_list.interface_list.interface_choice.bond_interface`
@@ -6405,7 +6307,7 @@ Optional:
 Required:
 
 - `devices` (List of String) Member Ethernet Devices Ethernet devices that will make up this bond
-- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
+- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP<br>Exactly one of `active_backup` or `lacp` must be specified. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
 - `name` (String) Bond Device Name for the Bond. Ex 'bond0'<br>**Validation:** `Length LengthAtMost(64)`
 
 Optional:
@@ -6418,8 +6320,8 @@ Optional:
 
 Optional:
 
-- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device
-- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
+- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device<br>Conflicts with `lacp`.
+- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device<br>Conflicts with `active_backup`. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
 
 <a id="nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp"></a>
 ### Nested Schema for `provider_choice.rseries.orchestration_choice.not_managed.node_list.interface_list.interface_choice.bond_interface.lacp_choice.lacp`
@@ -6461,16 +6363,16 @@ Optional:
 
 Optional:
 
-- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice))
+- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs).<br>Exactly one of `segment_network`, `site_local_inside_network`, or `site_local_network` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice))
 
 <a id="nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice"></a>
 ### Nested Schema for `provider_choice.rseries.orchestration_choice.not_managed.node_list.interface_list.network_option.network_choice`
 
 Optional:
 
-- `segment_network` (Attributes) Segment (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
-- `site_local_inside_network` (Boolean) Site Local Network Inside
-- `site_local_network` (Boolean) Site Local Network
+- `segment_network` (Attributes) Segment<br>Conflicts with `site_local_inside_network` and `site_local_network`. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
+- `site_local_inside_network` (Boolean) Site Local Network Inside<br>Conflicts with `segment_network` and `site_local_network`.
+- `site_local_network` (Boolean) Site Local Network<br>Conflicts with `segment_network` and `site_local_inside_network`.
 
 <a id="nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network"></a>
 ### Nested Schema for `provider_choice.rseries.orchestration_choice.not_managed.node_list.interface_list.network_option.network_choice.segment_network`
@@ -6487,36 +6389,58 @@ Read-Only:
 
 
 
+<a id="nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--address_choice"></a>
+### Nested Schema for `provider_choice.rseries.orchestration_choice.not_managed.node_list.interface_list.address_choice`
+
+Optional:
+
+- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.<br>Conflicts with `no_ipv4_address` and `static_ip`.
+- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.<br>Conflicts with `dhcp_client` and `static_ip`.
+- `static_ip` (Attributes) Static IP Interface IP address is configured statically.<br>Conflicts with `dhcp_client` and `no_ipv4_address`. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip))
+
+<a id="nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip"></a>
+### Nested Schema for `provider_choice.rseries.orchestration_choice.not_managed.node_list.interface_list.address_choice.static_ip`
+
+Required:
+
+- `ip_address` (String) Default Gateway IP address of the interface and prefix length
+
+Optional:
+
+- `default_gw` (String) Default Gateway IP address of the default gateway.
+
+
+
 <a id="nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice"></a>
 ### Nested Schema for `provider_choice.rseries.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice`
 
 Optional:
 
-- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
-- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.
-- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
+- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration.<br>Conflicts with `no_ipv6_address` and `static_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
+- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.<br>Conflicts with `ipv6_auto_config` and `static_ipv6_address`.
+- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically.<br>Conflicts with `ipv6_auto_config` and `no_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
 
 <a id="nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config"></a>
 ### Nested Schema for `provider_choice.rseries.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config`
 
-Required:
+Optional:
 
-- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
+- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration<br>Exactly one of `host` or `router` must be specified when `autoconfig_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
 
 <a id="nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice"></a>
 ### Nested Schema for `provider_choice.rseries.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice`
 
 Optional:
 
-- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.
-- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
+- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.<br>Conflicts with `router`.
+- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.<br>Conflicts with `host`. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
 
 <a id="nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router"></a>
 ### Nested Schema for `provider_choice.rseries.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router`
 
 Required:
 
-- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
+- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients<br>Exactly one of `network_prefix` or `stateful` must be specified. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
 
 Optional:
 
@@ -6527,8 +6451,8 @@ Optional:
 
 Optional:
 
-- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862
-- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
+- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862<br>Conflicts with `stateful`.
+- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag<br>Conflicts with `network_prefix`. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
 
 <a id="nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful"></a>
 ### Nested Schema for `provider_choice.rseries.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful`
@@ -6536,18 +6460,18 @@ Optional:
 Required:
 
 - `dhcp_networks` (Attributes List) DHCP IPV6 Networks List of networks from which DHCP server can allocate ip addresses (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks))
-- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 Optional:
 
 - `fixed_ip_map` (Map of String) Fixed IPV6 Assignments Fixed MAC address to ipv6 assignments, Key: Mac address, Value: IPV6 Address Assign fixed IPv6 addresses based on the MAC Address of the DHCP Client.
+- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address<br>Exactly one of `automatic_from_end`, `automatic_from_start`, or `interface_ip_map` must be specified when `interfaces_addressing_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 <a id="nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks"></a>
 ### Nested Schema for `provider_choice.rseries.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.dhcp_networks`
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site<br>`network_prefix` must be specified. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
 - `pool_settings` (List of String) DHCP Pool Settings Controls how DHCPV6 pools are handled<br>**Allowed Values (choose one):** `['EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS', 'INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS']`
 
 Optional:
@@ -6577,9 +6501,9 @@ Optional:
 
 Optional:
 
-- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list
-- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list
-- `interface_ip_map` (Attributes) Configured Address Configured address for every node (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
+- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list<br>Conflicts with `automatic_from_start` and `interface_ip_map`.
+- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list<br>Conflicts with `automatic_from_end` and `interface_ip_map`.
+- `interface_ip_map` (Attributes) Configured Address Configured address for every node<br>Conflicts with `automatic_from_end` and `automatic_from_start`. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
 
 <a id="nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map"></a>
 ### Nested Schema for `provider_choice.rseries.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.interfaces_addressing_choice.interface_ip_map`
@@ -6597,15 +6521,15 @@ Optional:
 
 Required:
 
-- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
+- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined<br>Exactly one of `configured_list` or `local_dns` must be specified. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
 
 <a id="nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice"></a>
 ### Nested Schema for `provider_choice.rseries.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice`
 
 Optional:
 
-- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
-- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
+- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server<br>Conflicts with `local_dns`. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
+- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server<br>Conflicts with `configured_list`. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
 
 <a id="nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list"></a>
 ### Nested Schema for `provider_choice.rseries.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.configured_list`
@@ -6618,18 +6542,18 @@ Required:
 <a id="nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns"></a>
 ### Nested Schema for `provider_choice.rseries.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns`
 
-Required:
+Optional:
 
-- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
+- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server<br>Exactly one of `configured_address`, `first_address`, or `last_address` must be specified when `local_dns_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
 
 <a id="nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice"></a>
 ### Nested Schema for `provider_choice.rseries.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns.local_dns_choice`
 
 Optional:
 
-- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server
-- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server
-- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server
+- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server<br>Conflicts with `first_address` and `last_address`.
+- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `last_address`.
+- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `first_address`.
 
 
 
@@ -6643,15 +6567,15 @@ Optional:
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
 
 <a id="nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice"></a>
 ### Nested Schema for `provider_choice.rseries.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice`
 
 Optional:
 
-- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
-- `node_static_ip` (Attributes) Node Static IP configuration for the Node (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
+- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
+- `node_static_ip` (Attributes) Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
 
 <a id="nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip"></a>
 ### Nested Schema for `provider_choice.rseries.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice.cluster_static_ip`
@@ -6693,8 +6617,8 @@ Optional:
 
 Optional:
 
-- `monitor` (Boolean) Monitoring enabled
-- `monitor_disabled` (Boolean) Monitoring disabled
+- `monitor` (Boolean) Monitoring enabled<br>Conflicts with `monitor_disabled`.
+- `monitor_disabled` (Boolean) Monitoring disabled<br>Conflicts with `monitor`.
 
 
 <a id="nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice"></a>
@@ -6702,8 +6626,8 @@ Optional:
 
 Optional:
 
-- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.
-- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.
+- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_enabled`.
+- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_disabled`.
 
 
 
@@ -6716,7 +6640,7 @@ Optional:
 
 Optional:
 
-- `orchestration_choice` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice))
+- `orchestration_choice` (Attributes) Orchestration Mode Select the orchestration mode for this site. Customers can either choose to use F5 Distributed Cloud's orchestration services to manage the lifecycle of nodes for this site, or, choose to manage the lifecycle of the nodes themselves via manual provisioning or using automation tools such as Terraform. At this time, Secure Mesh Site only supports the 'Not Managed by F5XC' mode.<br>`not_managed` must be specified when `orchestration_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice))
 
 <a id="nestedatt--provider_choice--vmware--orchestration_choice"></a>
 ### Nested Schema for `provider_choice.vmware.orchestration_choice`
@@ -6750,51 +6674,29 @@ Optional:
 
 Required:
 
-- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--address_choice))
-- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--interface_choice))
+- `interface_choice` (Attributes) Interface Config Type Select the appropriate interface type. For sites with F5 rSeries as the provider, the 1st interface will be an Ethernet interface mapped to the Site Local Outside (SLO) local VRF. Configure any additional interfaces required as VLAN interfaces. For sites with Bond interfaces, Bond for Site Local Outside (SLO) local VRF will be configured on the node itself during provisioning. After the node registers, this bond interface can be managed from here. Any additional Bond interfaces can be configured from here.<br>Exactly one of `bond_interface`, `ethernet_interface`, or `vlan_interface` must be specified. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--interface_choice))
 - `network_option` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--network_option))
 
 Optional:
 
+- `address_choice` (Attributes) Interface Addressing Select how ipv4 address will be assigned to this interface.<br>Exactly one of `dhcp_client`, `no_ipv4_address`, or `static_ip` must be specified when `address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--address_choice))
 - `description` (String) Interface Description Description for this Interface<br>**Validation:** `Length LengthAtMost(256)`
-- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
+- `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface.<br>Exactly one of `ipv6_auto_config`, `no_ipv6_address`, or `static_ipv6_address` must be specified when `ipv6_address_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
-- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
+- `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes.<br>Exactly one of `monitor` or `monitor_disabled` must be specified when `monitoring_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
 - `mtu` (Number) Maximum Packet Size (MTU) Maximum packet size (Maximum Transfer Unit) of the interface When configured, mtu must be between 512 and 8000<br>**Default:** `0`
 - `name` (String) Interface Name Name of this Interface<br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
-- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
-
-<a id="nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--address_choice"></a>
-### Nested Schema for `provider_choice.vmware.orchestration_choice.not_managed.node_list.interface_list.address_choice`
-
-Optional:
-
-- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.
-- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.
-- `static_ip` (Attributes) Static IP Interface IP address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip))
-
-<a id="nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip"></a>
-### Nested Schema for `provider_choice.vmware.orchestration_choice.not_managed.node_list.interface_list.address_choice.static_ip`
-
-Required:
-
-- `ip_address` (String) Default Gateway IP address of the interface and prefix length
-
-Optional:
-
-- `default_gw` (String) Default Gateway IP address of the default gateway.
-
-
+- `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled.<br>Exactly one of `site_to_site_connectivity_interface_disabled` or `site_to_site_connectivity_interface_enabled` must be specified when `site_to_site_connectivity_interface_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
 
 <a id="nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--interface_choice"></a>
 ### Nested Schema for `provider_choice.vmware.orchestration_choice.not_managed.node_list.interface_list.interface_choice`
 
 Optional:
 
-- `bond_interface` (Attributes) Bond Interface (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface))
-- `ethernet_interface` (Attributes) Ethernet Interface (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
-- `vlan_interface` (Attributes) VLAN Interface (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--interface_choice--vlan_interface))
+- `bond_interface` (Attributes) Bond Interface<br>Conflicts with `ethernet_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface))
+- `ethernet_interface` (Attributes) Ethernet Interface<br>Conflicts with `bond_interface` and `vlan_interface`. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--interface_choice--ethernet_interface))
+- `vlan_interface` (Attributes) VLAN Interface<br>Conflicts with `bond_interface` and `ethernet_interface`. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--interface_choice--vlan_interface))
 
 <a id="nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface"></a>
 ### Nested Schema for `provider_choice.vmware.orchestration_choice.not_managed.node_list.interface_list.interface_choice.bond_interface`
@@ -6802,7 +6704,7 @@ Optional:
 Required:
 
 - `devices` (List of String) Member Ethernet Devices Ethernet devices that will make up this bond
-- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
+- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP<br>Exactly one of `active_backup` or `lacp` must be specified. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice))
 - `name` (String) Bond Device Name for the Bond. Ex 'bond0'<br>**Validation:** `Length LengthAtMost(64)`
 
 Optional:
@@ -6815,8 +6717,8 @@ Optional:
 
 Optional:
 
-- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device
-- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
+- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device<br>Conflicts with `lacp`.
+- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device<br>Conflicts with `active_backup`. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp))
 
 <a id="nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--interface_choice--bond_interface--lacp_choice--lacp"></a>
 ### Nested Schema for `provider_choice.vmware.orchestration_choice.not_managed.node_list.interface_list.interface_choice.bond_interface.lacp_choice.lacp`
@@ -6858,16 +6760,16 @@ Optional:
 
 Optional:
 
-- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs). (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice))
+- `network_choice` (Attributes) Select VRF Select virtual network (VRF) for this interface. There are 2 kinds of VRFs, local VRFs which are local to the site and global VRFs which extend into multiple sites. A site can have 2 Local VRFs, Site Local Outside (SLO), which is required for every site and Site Local Inside (SLI) which is optional. Global VRFs are configured via Networking > Segments. A site can have multple Network Segments (global VRFs).<br>Exactly one of `segment_network`, `site_local_inside_network`, or `site_local_network` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice))
 
 <a id="nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice"></a>
 ### Nested Schema for `provider_choice.vmware.orchestration_choice.not_managed.node_list.interface_list.network_option.network_choice`
 
 Optional:
 
-- `segment_network` (Attributes) Segment (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
-- `site_local_inside_network` (Boolean) Site Local Network Inside
-- `site_local_network` (Boolean) Site Local Network
+- `segment_network` (Attributes) Segment<br>Conflicts with `site_local_inside_network` and `site_local_network`. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network))
+- `site_local_inside_network` (Boolean) Site Local Network Inside<br>Conflicts with `segment_network` and `site_local_network`.
+- `site_local_network` (Boolean) Site Local Network<br>Conflicts with `segment_network` and `site_local_inside_network`.
 
 <a id="nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--network_option--network_choice--segment_network"></a>
 ### Nested Schema for `provider_choice.vmware.orchestration_choice.not_managed.node_list.interface_list.network_option.network_choice.segment_network`
@@ -6884,36 +6786,58 @@ Read-Only:
 
 
 
+<a id="nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--address_choice"></a>
+### Nested Schema for `provider_choice.vmware.orchestration_choice.not_managed.node_list.interface_list.address_choice`
+
+Optional:
+
+- `dhcp_client` (Boolean) DHCP Client Interface gets it's IP address from an external DHCP server.<br>Conflicts with `no_ipv4_address` and `static_ip`.
+- `no_ipv4_address` (Boolean) Disabled Interface does not have an IPv4 Address.<br>Conflicts with `dhcp_client` and `static_ip`.
+- `static_ip` (Attributes) Static IP Interface IP address is configured statically.<br>Conflicts with `dhcp_client` and `no_ipv4_address`. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip))
+
+<a id="nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--address_choice--static_ip"></a>
+### Nested Schema for `provider_choice.vmware.orchestration_choice.not_managed.node_list.interface_list.address_choice.static_ip`
+
+Required:
+
+- `ip_address` (String) Default Gateway IP address of the interface and prefix length
+
+Optional:
+
+- `default_gw` (String) Default Gateway IP address of the default gateway.
+
+
+
 <a id="nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice"></a>
 ### Nested Schema for `provider_choice.vmware.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice`
 
 Optional:
 
-- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
-- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.
-- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
+- `ipv6_auto_config` (Attributes) IPV6 Auto configuration Interface IPv6 address will be configured via Auto Configuration.<br>Conflicts with `no_ipv6_address` and `static_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config))
+- `no_ipv6_address` (Boolean) no_ipv6_address Interface does not have an IPv6 Address.<br>Conflicts with `ipv6_auto_config` and `static_ipv6_address`.
+- `static_ipv6_address` (Attributes) Static IP Interface IPv6 address is configured statically.<br>Conflicts with `ipv6_auto_config` and `no_ipv6_address`. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address))
 
 <a id="nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config"></a>
 ### Nested Schema for `provider_choice.vmware.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config`
 
-Required:
+Optional:
 
-- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
+- `autoconfig_choice` (Attributes) Auto config Choice Specify how the system should behave w.r.t IPv6 auto configuration<br>Exactly one of `host` or `router` must be specified when `autoconfig_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice))
 
 <a id="nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice"></a>
 ### Nested Schema for `provider_choice.vmware.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice`
 
 Optional:
 
-- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.
-- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
+- `host` (Boolean) host System behaves like auto config host and receives the auto configuration parameters from other auto configuration routers. This is similar to a DHCP Client.<br>Conflicts with `router`.
+- `router` (Attributes) router System behaves like auto config Router and provides auto config parameters. This is similar to a DHCP Server.<br>Conflicts with `host`. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router))
 
 <a id="nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router"></a>
 ### Nested Schema for `provider_choice.vmware.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router`
 
 Required:
 
-- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
+- `address_choice` (Attributes) address choice Specify how the address need to be obtained for interfaces and clients<br>Exactly one of `network_prefix` or `stateful` must be specified. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice))
 
 Optional:
 
@@ -6924,8 +6848,8 @@ Optional:
 
 Optional:
 
-- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862
-- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
+- `network_prefix` (String) Prefix Info Nework prefix that is used as Prefix information Allowed only /64 prefix length as per RFC 4862<br>Conflicts with `stateful`.
+- `stateful` (Attributes) Stateful DHCP IPV6 server Use stateful dhcp server which provides the IPV6 address to clients works along with Router Advertisement' Managed flag<br>Conflicts with `network_prefix`. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful))
 
 <a id="nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful"></a>
 ### Nested Schema for `provider_choice.vmware.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful`
@@ -6933,18 +6857,18 @@ Optional:
 Required:
 
 - `dhcp_networks` (Attributes List) DHCP IPV6 Networks List of networks from which DHCP server can allocate ip addresses (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks))
-- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 Optional:
 
 - `fixed_ip_map` (Map of String) Fixed IPV6 Assignments Fixed MAC address to ipv6 assignments, Key: Mac address, Value: IPV6 Address Assign fixed IPv6 addresses based on the MAC Address of the DHCP Client.
+- `interfaces_addressing_choice` (Attributes) Interface IP(s) Specify how interfaces on each node are assigned local address<br>Exactly one of `automatic_from_end`, `automatic_from_start`, or `interface_ip_map` must be specified when `interfaces_addressing_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice))
 
 <a id="nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks"></a>
 ### Nested Schema for `provider_choice.vmware.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.dhcp_networks`
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site<br>`network_prefix` must be specified. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
 - `pool_settings` (List of String) DHCP Pool Settings Controls how DHCPV6 pools are handled<br>**Allowed Values (choose one):** `['EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS', 'INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS']`
 
 Optional:
@@ -6974,9 +6898,9 @@ Optional:
 
 Optional:
 
-- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list
-- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list
-- `interface_ip_map` (Attributes) Configured Address Configured address for every node (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
+- `automatic_from_end` (Boolean) Automatic End Assign automatically from End of the first network in the list<br>Conflicts with `automatic_from_start` and `interface_ip_map`.
+- `automatic_from_start` (Boolean) Automatic Start Assign automatically from start of the first network in the list<br>Conflicts with `automatic_from_end` and `interface_ip_map`.
+- `interface_ip_map` (Attributes) Configured Address Configured address for every node<br>Conflicts with `automatic_from_end` and `automatic_from_start`. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map))
 
 <a id="nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--interfaces_addressing_choice--interface_ip_map"></a>
 ### Nested Schema for `provider_choice.vmware.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.address_choice.stateful.interfaces_addressing_choice.interface_ip_map`
@@ -6994,15 +6918,15 @@ Optional:
 
 Required:
 
-- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
+- `dns_choice` (Attributes) DNS server Address Select how DNS server address is determined<br>Exactly one of `configured_list` or `local_dns` must be specified. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice))
 
 <a id="nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice"></a>
 ### Nested Schema for `provider_choice.vmware.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice`
 
 Optional:
 
-- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
-- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
+- `configured_list` (Attributes) Configured Address List Configured address outside network range - external dns server<br>Conflicts with `local_dns`. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list))
+- `local_dns` (Attributes) Local Dns Address Choose the address from the network prefix range as dns server<br>Conflicts with `configured_list`. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns))
 
 <a id="nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--configured_list"></a>
 ### Nested Schema for `provider_choice.vmware.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.configured_list`
@@ -7015,18 +6939,18 @@ Required:
 <a id="nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns"></a>
 ### Nested Schema for `provider_choice.vmware.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns`
 
-Required:
+Optional:
 
-- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
+- `local_dns_choice` (Attributes) Local Dns Address Select address from network prefix range as dns server<br>Exactly one of `configured_address`, `first_address`, or `last_address` must be specified when `local_dns_choice` is configured. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice))
 
 <a id="nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--dns_config--dns_choice--local_dns--local_dns_choice"></a>
 ### Nested Schema for `provider_choice.vmware.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.ipv6_auto_config.autoconfig_choice.router.dns_config.dns_choice.local_dns.local_dns_choice`
 
 Optional:
 
-- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server
-- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server
-- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server
+- `configured_address` (String) Configured Address Configured address from the network prefix is chosen as dns server<br>Conflicts with `first_address` and `last_address`.
+- `first_address` (Boolean) First Address First usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `last_address`.
+- `last_address` (Boolean) Last Address Last usable address from the network prefix is chosen as dns server<br>Conflicts with `configured_address` and `first_address`.
 
 
 
@@ -7040,15 +6964,15 @@ Optional:
 
 Required:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice Select static ip configuration for Node/Cluster/Fleet<br>Exactly one of `cluster_static_ip` or `node_static_ip` must be specified. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice))
 
 <a id="nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice"></a>
 ### Nested Schema for `provider_choice.vmware.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice`
 
 Optional:
 
-- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
-- `node_static_ip` (Attributes) Node Static IP configuration for the Node (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
+- `cluster_static_ip` (Attributes) Node Specific Static IP configuration for a specific node<br>Conflicts with `node_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip))
+- `node_static_ip` (Attributes) Node Static IP configuration for the Node<br>Conflicts with `cluster_static_ip`. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--node_static_ip))
 
 <a id="nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--static_ipv6_address--network_prefix_choice--cluster_static_ip"></a>
 ### Nested Schema for `provider_choice.vmware.orchestration_choice.not_managed.node_list.interface_list.ipv6_address_choice.static_ipv6_address.network_prefix_choice.cluster_static_ip`
@@ -7090,8 +7014,8 @@ Optional:
 
 Optional:
 
-- `monitor` (Boolean) Monitoring enabled
-- `monitor_disabled` (Boolean) Monitoring disabled
+- `monitor` (Boolean) Monitoring enabled<br>Conflicts with `monitor_disabled`.
+- `monitor_disabled` (Boolean) Monitoring disabled<br>Conflicts with `monitor`.
 
 
 <a id="nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice"></a>
@@ -7099,8 +7023,8 @@ Optional:
 
 Optional:
 
-- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.
-- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.
+- `site_to_site_connectivity_interface_disabled` (Boolean) Disabled Do not use this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_enabled`.
+- `site_to_site_connectivity_interface_enabled` (Boolean) Enabled Use this this interface for site to site connectivity.<br>Conflicts with `site_to_site_connectivity_interface_disabled`.
 
 
 
@@ -7122,16 +7046,16 @@ Optional:
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--admin_user_credentials--admin_password--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--admin_user_credentials--admin_password--secret_info_choice))
 
 <a id="nestedatt--admin_user_credentials--admin_password--secret_info_choice"></a>
 ### Nested Schema for `admin_user_credentials.admin_password.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--admin_user_credentials--admin_password--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--admin_user_credentials--admin_password--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--admin_user_credentials--admin_password--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--admin_user_credentials--admin_password--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--admin_user_credentials--admin_password--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `admin_user_credentials.admin_password.secret_info_choice.blindfold_secret_info`
@@ -7161,22 +7085,58 @@ Optional:
 
 
 
+<a id="nestedatt--blocked_services_choice"></a>
+### Nested Schema for `blocked_services_choice`
+
+Optional:
+
+- `block_all_services` (Boolean) Enable all Node Local Services Enable WebUI, SSH and DNS on all nodes in this site.<br>Conflicts with `blocked_services`.
+- `blocked_services` (Attributes) Disable Node Local Services Disable node local services on all nodes in this site.<br>Conflicts with `block_all_services`. (see [below for nested schema](#nestedatt--blocked_services_choice--blocked_services))
+
+<a id="nestedatt--blocked_services_choice--blocked_services"></a>
+### Nested Schema for `blocked_services_choice.blocked_services`
+
+Optional:
+
+- `blocked_sevice` (Attributes List) Disable Node Local Services (see [below for nested schema](#nestedatt--blocked_services_choice--blocked_services--blocked_sevice))
+
+<a id="nestedatt--blocked_services_choice--blocked_services--blocked_sevice"></a>
+### Nested Schema for `blocked_services_choice.blocked_services.blocked_sevice`
+
+Optional:
+
+- `blocked_services_value_type_choice` (Attributes) blocked_services_type_choice Choose the Nodel Local Service to disable<br>Exactly one of `dns`, `ssh`, or `web_user_interface` must be specified when `blocked_services_value_type_choice` is configured. (see [below for nested schema](#nestedatt--blocked_services_choice--blocked_services--blocked_sevice--blocked_services_value_type_choice))
+- `network_type` (List of String) network_type Site Local VRF on which this service will be disabled<br>**Allowed Values (choose one):** `['VIRTUAL_NETWORK_GLOBAL', 'VIRTUAL_NETWORK_MANAGEMENT', 'VIRTUAL_NETWORK_PER_SITE', 'VIRTUAL_NETWORK_SEGMENT', 'VIRTUAL_NETWORK_SITE_LOCAL', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE', 'VIRTUAL_NETWORK_SITE_SERVICE']`<br>**Default:** `VIRTUAL_NETWORK_SITE_LOCAL`
+
+<a id="nestedatt--blocked_services_choice--blocked_services--blocked_sevice--blocked_services_value_type_choice"></a>
+### Nested Schema for `blocked_services_choice.blocked_services.blocked_sevice.blocked_services_value_type_choice`
+
+Optional:
+
+- `dns` (Boolean) DNS Matches DNS port 53<br>Conflicts with `ssh` and `web_user_interface`.
+- `ssh` (Boolean) SSH<br>Conflicts with `dns` and `web_user_interface`.
+- `web_user_interface` (Boolean) Web UI<br>Conflicts with `dns` and `ssh`.
+
+
+
+
+
 <a id="nestedatt--dns_ntp_config"></a>
 ### Nested Schema for `dns_ntp_config`
 
 Optional:
 
-- `cedns_record_choice` (Attributes) CE External DNS settings When enabled, a fully qualified domain name (FQDN) of a site is published using the public IP address configured, allowing external clients to reach it by the FQDN. (see [below for nested schema](#nestedatt--dns_ntp_config--cedns_record_choice))
-- `dns_server_choice` (Attributes) DNS Servers Specify DNS Servers that will be used for resolving domains required for registration and upgrades. By default, 8.8.8.8 and 8.8.4.4 DNS nameservers will be used. (see [below for nested schema](#nestedatt--dns_ntp_config--dns_server_choice))
-- `ntp_server_choice` (Attributes) NTP Servers Specify NTP Servers that will be used by the nodes of this Customer Edge site. By default, time.google.com is used during registration and once tunnels to REs are formed, NTP service hosted by F5 Distributed Cloud will be used. When custom is selected, NTP service hosted by F5 Distributed Cloud will not be used. (see [below for nested schema](#nestedatt--dns_ntp_config--ntp_server_choice))
+- `cedns_record_choice` (Attributes) CE External DNS settings When enabled, a fully qualified domain name (FQDN) of a site is published using the public IP address configured, allowing external clients to reach it by the FQDN.<br>Exactly one of `disable_cedns_record` or `enable_cedns_record` must be specified when `cedns_record_choice` is configured. (see [below for nested schema](#nestedatt--dns_ntp_config--cedns_record_choice))
+- `dns_server_choice` (Attributes) DNS Servers Specify DNS Servers that will be used for resolving domains required for registration and upgrades. By default, 8.8.8.8 and 8.8.4.4 DNS nameservers will be used.<br>Exactly one of `custom_dns` or `f5_dns_default` must be specified when `dns_server_choice` is configured. (see [below for nested schema](#nestedatt--dns_ntp_config--dns_server_choice))
+- `ntp_server_choice` (Attributes) NTP Servers Specify NTP Servers that will be used by the nodes of this Customer Edge site. By default, time.google.com is used during registration and once tunnels to REs are formed, NTP service hosted by F5 Distributed Cloud will be used. When custom is selected, NTP service hosted by F5 Distributed Cloud will not be used.<br>Exactly one of `custom_ntp` or `f5_ntp_default` must be specified when `ntp_server_choice` is configured. (see [below for nested schema](#nestedatt--dns_ntp_config--ntp_server_choice))
 
 <a id="nestedatt--dns_ntp_config--cedns_record_choice"></a>
 ### Nested Schema for `dns_ntp_config.cedns_record_choice`
 
 Optional:
 
-- `disable_cedns_record` (Boolean) Disable CE External DNS Disable publishing external DNS for this Site
-- `enable_cedns_record` (Boolean) Enable CE External DNS Enable publishing external DNS for this Site
+- `disable_cedns_record` (Boolean) Disable CE External DNS Disable publishing external DNS for this Site<br>Conflicts with `enable_cedns_record`.
+- `enable_cedns_record` (Boolean) Enable CE External DNS Enable publishing external DNS for this Site<br>Conflicts with `disable_cedns_record`.
 
 
 <a id="nestedatt--dns_ntp_config--dns_server_choice"></a>
@@ -7184,8 +7144,8 @@ Optional:
 
 Optional:
 
-- `custom_dns` (Attributes) Custom User specified DNS Servers (see [below for nested schema](#nestedatt--dns_ntp_config--dns_server_choice--custom_dns))
-- `f5_dns_default` (Boolean) Default F5 defaults will use 8.8.8.8, 8.8.4.4
+- `custom_dns` (Attributes) Custom User specified DNS Servers<br>Conflicts with `f5_dns_default`. (see [below for nested schema](#nestedatt--dns_ntp_config--dns_server_choice--custom_dns))
+- `f5_dns_default` (Boolean) Default F5 defaults will use 8.8.8.8, 8.8.4.4<br>Conflicts with `custom_dns`.
 
 <a id="nestedatt--dns_ntp_config--dns_server_choice--custom_dns"></a>
 ### Nested Schema for `dns_ntp_config.dns_server_choice.custom_dns`
@@ -7201,8 +7161,8 @@ Optional:
 
 Optional:
 
-- `custom_ntp` (Attributes) Custom User specified NTP Servers (see [below for nested schema](#nestedatt--dns_ntp_config--ntp_server_choice--custom_ntp))
-- `f5_ntp_default` (Boolean) Default F5 default will use time.google.com during registration
+- `custom_ntp` (Attributes) Custom User specified NTP Servers<br>Conflicts with `f5_ntp_default`. (see [below for nested schema](#nestedatt--dns_ntp_config--ntp_server_choice--custom_ntp))
+- `f5_ntp_default` (Boolean) Default F5 default will use time.google.com during registration<br>Conflicts with `custom_ntp`.
 
 <a id="nestedatt--dns_ntp_config--ntp_server_choice--custom_ntp"></a>
 ### Nested Schema for `dns_ntp_config.ntp_server_choice.custom_ntp`
@@ -7219,9 +7179,9 @@ Optional:
 
 Optional:
 
-- `custom_proxy` (Attributes) Custom Enterprise Proxy Use the customer provided internal Enterprise Proxy (see [below for nested schema](#nestedatt--enterprise_proxy_choice--custom_proxy))
-- `f5_proxy` (Boolean) F5 Enterprise Proxy Use the F5 Enterprise Proxy hosted on the F5 Global Network
-- `private_adn` (Attributes) Private ADN Network Establish private connectivity with the F5 Distributed Cloud Global Network using a Private ADN network. To provision a Private ADN network, please contact F5 Distributed Cloud support. (see [below for nested schema](#nestedatt--enterprise_proxy_choice--private_adn))
+- `custom_proxy` (Attributes) Custom Enterprise Proxy Use the customer provided internal Enterprise Proxy<br>Conflicts with `f5_proxy` and `private_adn`. (see [below for nested schema](#nestedatt--enterprise_proxy_choice--custom_proxy))
+- `f5_proxy` (Boolean) F5 Enterprise Proxy Use the F5 Enterprise Proxy hosted on the F5 Global Network<br>Conflicts with `custom_proxy` and `private_adn`.
+- `private_adn` (Attributes) Private ADN Network Establish private connectivity with the F5 Distributed Cloud Global Network using a Private ADN network. To provision a Private ADN network, please contact F5 Distributed Cloud support.<br>Conflicts with `custom_proxy` and `f5_proxy`. (see [below for nested schema](#nestedatt--enterprise_proxy_choice--private_adn))
 
 <a id="nestedatt--enterprise_proxy_choice--custom_proxy"></a>
 ### Nested Schema for `enterprise_proxy_choice.custom_proxy`
@@ -7234,7 +7194,7 @@ Optional:
 
 - `password` (Attributes) Password If the internal Enterprise Proxy is using basic authentication, specify the password. This is an optional field. Note: To protect the password, it is recommended to blindfold it. (see [below for nested schema](#nestedatt--enterprise_proxy_choice--custom_proxy--password))
 - `proxy_port` (Number) Proxy Port Specify the Port of the internal Enterprise Proxy<br>**Default:** `443`
-- `use_for_re_tunnel_choice` (Attributes) Use for RE Tunnels Use this internal Enterprise Proxy for RE Tunnels. When enabled, the nodes in this Customer Edge site will go through this internal Enterprise Proxy to form tunnels with F5 Regional Edges (REs) (see [below for nested schema](#nestedatt--enterprise_proxy_choice--custom_proxy--use_for_re_tunnel_choice))
+- `use_for_re_tunnel_choice` (Attributes) Use for RE Tunnels Use this internal Enterprise Proxy for RE Tunnels. When enabled, the nodes in this Customer Edge site will go through this internal Enterprise Proxy to form tunnels with F5 Regional Edges (REs)<br>Exactly one of `disable_re_tunnel` or `enable_re_tunnel` must be specified when `use_for_re_tunnel_choice` is configured. (see [below for nested schema](#nestedatt--enterprise_proxy_choice--custom_proxy--use_for_re_tunnel_choice))
 - `username` (String) Username If the internal Enterprise Proxy is using basic authentication, specify the username. This is an optional field.<br>**Default:** ``
 
 <a id="nestedatt--enterprise_proxy_choice--custom_proxy--password"></a>
@@ -7242,16 +7202,16 @@ Optional:
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--enterprise_proxy_choice--custom_proxy--password--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--enterprise_proxy_choice--custom_proxy--password--secret_info_choice))
 
 <a id="nestedatt--enterprise_proxy_choice--custom_proxy--password--secret_info_choice"></a>
 ### Nested Schema for `enterprise_proxy_choice.custom_proxy.password.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--enterprise_proxy_choice--custom_proxy--password--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--enterprise_proxy_choice--custom_proxy--password--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--enterprise_proxy_choice--custom_proxy--password--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--enterprise_proxy_choice--custom_proxy--password--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--enterprise_proxy_choice--custom_proxy--password--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `enterprise_proxy_choice.custom_proxy.password.secret_info_choice.blindfold_secret_info`
@@ -7285,8 +7245,8 @@ Optional:
 
 Optional:
 
-- `disable_re_tunnel` (Boolean) Disable Do not use the internal Enterprise Proxy for RE Tunnels
-- `enable_re_tunnel` (Boolean) Enable Use the internal Enterprise Proxy for RE Tunnels
+- `disable_re_tunnel` (Boolean) Disable Do not use the internal Enterprise Proxy for RE Tunnels<br>Conflicts with `enable_re_tunnel`.
+- `enable_re_tunnel` (Boolean) Enable Use the internal Enterprise Proxy for RE Tunnels<br>Conflicts with `disable_re_tunnel`.
 
 
 
@@ -7304,8 +7264,8 @@ Required:
 
 Optional:
 
-- `active_forward_proxy_policies` (Attributes) Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site. Traffic will be processed in the order that Forward Proxy Policies are added. (see [below for nested schema](#nestedatt--forward_proxy_choice--active_forward_proxy_policies))
-- `no_forward_proxy` (Boolean) Disable Forward Proxy Disable Forward Proxy for this site.
+- `active_forward_proxy_policies` (Attributes) Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site. Traffic will be processed in the order that Forward Proxy Policies are added.<br>Conflicts with `no_forward_proxy`. (see [below for nested schema](#nestedatt--forward_proxy_choice--active_forward_proxy_policies))
+- `no_forward_proxy` (Boolean) Disable Forward Proxy Disable Forward Proxy for this site.<br>Conflicts with `active_forward_proxy_policies`.
 
 <a id="nestedatt--forward_proxy_choice--active_forward_proxy_policies"></a>
 ### Nested Schema for `forward_proxy_choice.active_forward_proxy_policies`
@@ -7340,196 +7300,21 @@ Optional:
 <a id="nestedatt--local_vrf"></a>
 ### Nested Schema for `local_vrf`
 
-Required:
-
-- `slo_choice` (Attributes) Site Local Network (see [below for nested schema](#nestedatt--local_vrf--slo_choice))
-
 Optional:
 
-- `sli_choice` (Attributes) Site Local Inside Network (see [below for nested schema](#nestedatt--local_vrf--sli_choice))
-
-<a id="nestedatt--local_vrf--slo_choice"></a>
-### Nested Schema for `local_vrf.slo_choice`
-
-Optional:
-
-- `default_config` (Boolean) Default Configuration
-- `slo_config` (Attributes) Configure Site Local Network Configure properties such as static routes, DNS and common VIP for Load Balancing on the Site Local Outside (SLO) local VRF. (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config))
-
-<a id="nestedatt--local_vrf--slo_choice--slo_config"></a>
-### Nested Schema for `local_vrf.slo_choice.slo_config`
-
-Required:
-
-- `static_route_choice` (Attributes) Manage Static Routes Add static routes to network. Used to reach indirectly connected subnets. (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_route_choice))
-- `static_v6_route_choice` (Attributes) Manage IPv6 Static Routes Add IPv6 static routes to network. Used to reach indirectly connected IPv6 subnets. (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice))
-
-Optional:
-
-- `labels` (Map of String) Network labels Add Labels for this network, these labels can be used in firewall policy
-- `nameserver` (String) nameserver Optional IPv4 DNS server to be used for name resolution
-- `nameserver_v6` (String) nameserver_v6 Optional IPv6 DNS server to be used for name resolution
-- `secondary_nameserver` (String) secondary_nameserver Optional Secondary IPv4 DNS server to be used for name resolution
-- `vip` (String) Common V4 VIP Optional common virtual V4 IP across all nodes to be used as automatic VIP.
-- `vip_v6` (String) Common V6 VIP Optional common virtual V6 IP across all nodes to be used as automatic VIP.
-
-<a id="nestedatt--local_vrf--slo_choice--slo_config--static_route_choice"></a>
-### Nested Schema for `local_vrf.slo_choice.slo_config.static_route_choice`
-
-Optional:
-
-- `no_static_routes` (Boolean) Do Not Manage Static Routes Static IPv4 Routes disabled for this site local network (VRF).
-- `static_routes` (Attributes) Manage Static routes Manage IPv4 static routes for this site local network (VRF). (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes))
-
-<a id="nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes"></a>
-### Nested Schema for `local_vrf.slo_choice.slo_config.static_route_choice.static_routes`
-
-Required:
-
-- `static_routes` (Attributes List) static_routes (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes--static_routes))
-
-<a id="nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes--static_routes"></a>
-### Nested Schema for `local_vrf.slo_choice.slo_config.static_route_choice.static_routes.static_routes`
-
-Required:
-
-- `ip_prefixes` (List of String) IP Prefixes List of route prefixes that have common next hop and attributes
-- `next_hop_choice` (Attributes) Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface. (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes--static_routes--next_hop_choice))
-
-Optional:
-
-- `attrs` (List of String) Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)
-
-<a id="nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes--static_routes--next_hop_choice"></a>
-### Nested Schema for `local_vrf.slo_choice.slo_config.static_route_choice.static_routes.static_routes.next_hop_choice`
-
-Optional:
-
-- `default_gateway` (Boolean) Default Gateway Traffic matching the ip prefixes is sent to the default gateway
-- `ip_address` (String) IP Address Traffic matching the ip prefixes is sent to this IP Address
-- `node_interface` (Attributes) Node Interface Traffic matching the ip prefixes is sent to this interface (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface))
-
-<a id="nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface"></a>
-### Nested Schema for `local_vrf.slo_choice.slo_config.static_route_choice.static_routes.static_routes.next_hop_choice.node_interface`
-
-Optional:
-
-- `list` (Attributes List) NodeInterfaceInfo On a multinode site, this list holds the nodes and corresponding networking_interface (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface--list))
-
-<a id="nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface--list"></a>
-### Nested Schema for `local_vrf.slo_choice.slo_config.static_route_choice.static_routes.static_routes.next_hop_choice.node_interface.list`
-
-Optional:
-
-- `interface` (Attributes List) Interface Interface reference on this node (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface--list--interface))
-- `node` (String) Node Node name on this site
-
-<a id="nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface--list--interface"></a>
-### Nested Schema for `local_vrf.slo_choice.slo_config.static_route_choice.static_routes.static_routes.next_hop_choice.node_interface.list.interface`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-
-
-
-
-
-
-<a id="nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice"></a>
-### Nested Schema for `local_vrf.slo_choice.slo_config.static_v6_route_choice`
-
-Optional:
-
-- `no_v6_static_routes` (Boolean) Do Not Manage IPv6 Static Routes Static IPv6 Routes disabled for this site local network (VRF).
-- `static_v6_routes` (Attributes) Manage IPv6 Static routes Manage IPv6 static routes for this site local network (VRF). (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice--static_v6_routes))
-
-<a id="nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice--static_v6_routes"></a>
-### Nested Schema for `local_vrf.slo_choice.slo_config.static_v6_route_choice.static_v6_routes`
-
-Required:
-
-- `static_routes` (Attributes List) static_routes List of IPv6 static routes (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice--static_v6_routes--static_routes))
-
-<a id="nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice--static_v6_routes--static_routes"></a>
-### Nested Schema for `local_vrf.slo_choice.slo_config.static_v6_route_choice.static_v6_routes.static_routes`
-
-Required:
-
-- `ip_prefixes` (List of String) IPv6 Prefixes List of IPv6 route prefixes that have common next hop and attributes
-- `next_hop_choice` (Attributes) Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface. (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice))
-
-Optional:
-
-- `attrs` (List of String) Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)
-
-<a id="nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice"></a>
-### Nested Schema for `local_vrf.slo_choice.slo_config.static_v6_route_choice.static_v6_routes.static_routes.next_hop_choice`
-
-Optional:
-
-- `default_gateway` (Boolean) Default Gateway Traffic matching the ip prefixes is sent to the default gateway
-- `ip_address` (String) IP Address Traffic matching the ip prefixes is sent to this IP Address
-- `node_interface` (Attributes) Node Interface Traffic matching the ip prefixes is sent to this interface (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface))
-
-<a id="nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface"></a>
-### Nested Schema for `local_vrf.slo_choice.slo_config.static_v6_route_choice.static_v6_routes.static_routes.next_hop_choice.node_interface`
-
-Optional:
-
-- `list` (Attributes List) NodeInterfaceInfo On a multinode site, this list holds the nodes and corresponding networking_interface (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface--list))
-
-<a id="nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface--list"></a>
-### Nested Schema for `local_vrf.slo_choice.slo_config.static_v6_route_choice.static_v6_routes.static_routes.next_hop_choice.node_interface.list`
-
-Optional:
-
-- `interface` (Attributes List) Interface Interface reference on this node (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface--list--interface))
-- `node` (String) Node Node name on this site
-
-<a id="nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface--list--interface"></a>
-### Nested Schema for `local_vrf.slo_choice.slo_config.static_v6_route_choice.static_v6_routes.static_routes.next_hop_choice.node_interface.list.interface`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-
-
-
-
-
-
-
+- `sli_choice` (Attributes) Site Local Inside Network<br>Exactly one of `default_sli_config` or `sli_config` must be specified when `sli_choice` is configured. (see [below for nested schema](#nestedatt--local_vrf--sli_choice))
+- `slo_choice` (Attributes) Site Local Network<br>Exactly one of `default_config` or `slo_config` must be specified when `slo_choice` is configured. (see [below for nested schema](#nestedatt--local_vrf--slo_choice))
 
 <a id="nestedatt--local_vrf--sli_choice"></a>
 ### Nested Schema for `local_vrf.sli_choice`
 
 Optional:
 
-- `default_sli_config` (Boolean) Default Configuration
-- `sli_config` (Attributes) Configure Site Local Inside Network Configure properties such as static routes, DNS and common VIP for Load Balancing on the Site Local Inside (SLI) local VRF. (see [below for nested schema](#nestedatt--local_vrf--sli_choice--sli_config))
+- `default_sli_config` (Boolean) Default Configuration<br>Conflicts with `sli_config`.
+- `sli_config` (Attributes) Configure Site Local Inside Network Configure properties such as static routes, DNS and common VIP for Load Balancing on the Site Local Inside (SLI) local VRF.<br>Conflicts with `default_sli_config`. (see [below for nested schema](#nestedatt--local_vrf--sli_choice--sli_config))
 
 <a id="nestedatt--local_vrf--sli_choice--sli_config"></a>
 ### Nested Schema for `local_vrf.sli_choice.sli_config`
-
-Required:
-
-- `static_route_choice` (Attributes) Manage Static Routes Add static routes to network. Used to reach indirectly connected subnets. (see [below for nested schema](#nestedatt--local_vrf--sli_choice--sli_config--static_route_choice))
-- `static_v6_route_choice` (Attributes) Manage IPv6 Static Routes Add IPv6 static routes to network. Used to reach indirectly connected IPv6 subnets. (see [below for nested schema](#nestedatt--local_vrf--sli_choice--sli_config--static_v6_route_choice))
 
 Optional:
 
@@ -7537,6 +7322,8 @@ Optional:
 - `nameserver` (String) nameserver Optional IPv4 DNS server to be used for name resolution
 - `nameserver_v6` (String) nameserver_v6 Optional IPv6 DNS server to be used for name resolution
 - `secondary_nameserver` (String) secondary_nameserver Optional Secondary IPv4 DNS server to be used for name resolution
+- `static_route_choice` (Attributes) Manage Static Routes Add static routes to network. Used to reach indirectly connected subnets.<br>Exactly one of `no_static_routes` or `static_routes` must be specified when `static_route_choice` is configured. (see [below for nested schema](#nestedatt--local_vrf--sli_choice--sli_config--static_route_choice))
+- `static_v6_route_choice` (Attributes) Manage IPv6 Static Routes Add IPv6 static routes to network. Used to reach indirectly connected IPv6 subnets.<br>Exactly one of `no_v6_static_routes` or `static_v6_routes` must be specified when `static_v6_route_choice` is configured. (see [below for nested schema](#nestedatt--local_vrf--sli_choice--sli_config--static_v6_route_choice))
 - `vip` (String) Common V4 VIP Optional common virtual V4 IP across all nodes to be used as automatic VIP.
 - `vip_v6` (String) Common V6 VIP Optional common virtual V6 IP across all nodes to be used as automatic VIP.
 
@@ -7545,8 +7332,8 @@ Optional:
 
 Optional:
 
-- `no_static_routes` (Boolean) Do Not Manage Static Routes Static IPv4 Routes disabled for this site local network (VRF).
-- `static_routes` (Attributes) Manage Static routes Manage IPv4 static routes for this site local network (VRF). (see [below for nested schema](#nestedatt--local_vrf--sli_choice--sli_config--static_route_choice--static_routes))
+- `no_static_routes` (Boolean) Do Not Manage Static Routes Static IPv4 Routes disabled for this site local network (VRF).<br>Conflicts with `static_routes`.
+- `static_routes` (Attributes) Manage Static routes Manage IPv4 static routes for this site local network (VRF).<br>Conflicts with `no_static_routes`. (see [below for nested schema](#nestedatt--local_vrf--sli_choice--sli_config--static_route_choice--static_routes))
 
 <a id="nestedatt--local_vrf--sli_choice--sli_config--static_route_choice--static_routes"></a>
 ### Nested Schema for `local_vrf.sli_choice.sli_config.static_route_choice.static_routes`
@@ -7561,7 +7348,7 @@ Required:
 Required:
 
 - `ip_prefixes` (List of String) IP Prefixes List of route prefixes that have common next hop and attributes
-- `next_hop_choice` (Attributes) Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface. (see [below for nested schema](#nestedatt--local_vrf--sli_choice--sli_config--static_route_choice--static_routes--static_routes--next_hop_choice))
+- `next_hop_choice` (Attributes) Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface.<br>Exactly one of `default_gateway`, `ip_address`, or `node_interface` must be specified. (see [below for nested schema](#nestedatt--local_vrf--sli_choice--sli_config--static_route_choice--static_routes--static_routes--next_hop_choice))
 
 Optional:
 
@@ -7572,9 +7359,9 @@ Optional:
 
 Optional:
 
-- `default_gateway` (Boolean) Default Gateway Traffic matching the ip prefixes is sent to the default gateway
-- `ip_address` (String) IP Address Traffic matching the ip prefixes is sent to this IP Address
-- `node_interface` (Attributes) Node Interface Traffic matching the ip prefixes is sent to this interface (see [below for nested schema](#nestedatt--local_vrf--sli_choice--sli_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface))
+- `default_gateway` (Boolean) Default Gateway Traffic matching the ip prefixes is sent to the default gateway<br>Conflicts with `ip_address` and `node_interface`.
+- `ip_address` (String) IP Address Traffic matching the ip prefixes is sent to this IP Address<br>Conflicts with `default_gateway` and `node_interface`.
+- `node_interface` (Attributes) Node Interface Traffic matching the ip prefixes is sent to this interface<br>Conflicts with `default_gateway` and `ip_address`. (see [below for nested schema](#nestedatt--local_vrf--sli_choice--sli_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface))
 
 <a id="nestedatt--local_vrf--sli_choice--sli_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface"></a>
 ### Nested Schema for `local_vrf.sli_choice.sli_config.static_route_choice.static_routes.static_routes.next_hop_choice.node_interface`
@@ -7615,8 +7402,8 @@ Read-Only:
 
 Optional:
 
-- `no_v6_static_routes` (Boolean) Do Not Manage IPv6 Static Routes Static IPv6 Routes disabled for this site local network (VRF).
-- `static_v6_routes` (Attributes) Manage IPv6 Static routes Manage IPv6 static routes for this site local network (VRF). (see [below for nested schema](#nestedatt--local_vrf--sli_choice--sli_config--static_v6_route_choice--static_v6_routes))
+- `no_v6_static_routes` (Boolean) Do Not Manage IPv6 Static Routes Static IPv6 Routes disabled for this site local network (VRF).<br>Conflicts with `static_v6_routes`.
+- `static_v6_routes` (Attributes) Manage IPv6 Static routes Manage IPv6 static routes for this site local network (VRF).<br>Conflicts with `no_v6_static_routes`. (see [below for nested schema](#nestedatt--local_vrf--sli_choice--sli_config--static_v6_route_choice--static_v6_routes))
 
 <a id="nestedatt--local_vrf--sli_choice--sli_config--static_v6_route_choice--static_v6_routes"></a>
 ### Nested Schema for `local_vrf.sli_choice.sli_config.static_v6_route_choice.static_v6_routes`
@@ -7631,7 +7418,7 @@ Required:
 Required:
 
 - `ip_prefixes` (List of String) IPv6 Prefixes List of IPv6 route prefixes that have common next hop and attributes
-- `next_hop_choice` (Attributes) Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface. (see [below for nested schema](#nestedatt--local_vrf--sli_choice--sli_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice))
+- `next_hop_choice` (Attributes) Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface.<br>Exactly one of `default_gateway`, `ip_address`, or `node_interface` must be specified. (see [below for nested schema](#nestedatt--local_vrf--sli_choice--sli_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice))
 
 Optional:
 
@@ -7642,9 +7429,9 @@ Optional:
 
 Optional:
 
-- `default_gateway` (Boolean) Default Gateway Traffic matching the ip prefixes is sent to the default gateway
-- `ip_address` (String) IP Address Traffic matching the ip prefixes is sent to this IP Address
-- `node_interface` (Attributes) Node Interface Traffic matching the ip prefixes is sent to this interface (see [below for nested schema](#nestedatt--local_vrf--sli_choice--sli_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface))
+- `default_gateway` (Boolean) Default Gateway Traffic matching the ip prefixes is sent to the default gateway<br>Conflicts with `ip_address` and `node_interface`.
+- `ip_address` (String) IP Address Traffic matching the ip prefixes is sent to this IP Address<br>Conflicts with `default_gateway` and `node_interface`.
+- `node_interface` (Attributes) Node Interface Traffic matching the ip prefixes is sent to this interface<br>Conflicts with `default_gateway` and `ip_address`. (see [below for nested schema](#nestedatt--local_vrf--sli_choice--sli_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface))
 
 <a id="nestedatt--local_vrf--sli_choice--sli_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface"></a>
 ### Nested Schema for `local_vrf.sli_choice.sli_config.static_v6_route_choice.static_v6_routes.static_routes.next_hop_choice.node_interface`
@@ -7682,14 +7469,218 @@ Read-Only:
 
 
 
+<a id="nestedatt--local_vrf--slo_choice"></a>
+### Nested Schema for `local_vrf.slo_choice`
+
+Optional:
+
+- `default_config` (Boolean) Default Configuration<br>Conflicts with `slo_config`.
+- `slo_config` (Attributes) Configure Site Local Network Configure properties such as static routes, DNS and common VIP for Load Balancing on the Site Local Outside (SLO) local VRF.<br>Conflicts with `default_config`. (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config))
+
+<a id="nestedatt--local_vrf--slo_choice--slo_config"></a>
+### Nested Schema for `local_vrf.slo_choice.slo_config`
+
+Optional:
+
+- `labels` (Map of String) Network labels Add Labels for this network, these labels can be used in firewall policy
+- `nameserver` (String) nameserver Optional IPv4 DNS server to be used for name resolution
+- `nameserver_v6` (String) nameserver_v6 Optional IPv6 DNS server to be used for name resolution
+- `secondary_nameserver` (String) secondary_nameserver Optional Secondary IPv4 DNS server to be used for name resolution
+- `static_route_choice` (Attributes) Manage Static Routes Add static routes to network. Used to reach indirectly connected subnets.<br>Exactly one of `no_static_routes` or `static_routes` must be specified when `static_route_choice` is configured. (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_route_choice))
+- `static_v6_route_choice` (Attributes) Manage IPv6 Static Routes Add IPv6 static routes to network. Used to reach indirectly connected IPv6 subnets.<br>Exactly one of `no_v6_static_routes` or `static_v6_routes` must be specified when `static_v6_route_choice` is configured. (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice))
+- `vip` (String) Common V4 VIP Optional common virtual V4 IP across all nodes to be used as automatic VIP.
+- `vip_v6` (String) Common V6 VIP Optional common virtual V6 IP across all nodes to be used as automatic VIP.
+
+<a id="nestedatt--local_vrf--slo_choice--slo_config--static_route_choice"></a>
+### Nested Schema for `local_vrf.slo_choice.slo_config.static_route_choice`
+
+Optional:
+
+- `no_static_routes` (Boolean) Do Not Manage Static Routes Static IPv4 Routes disabled for this site local network (VRF).<br>Conflicts with `static_routes`.
+- `static_routes` (Attributes) Manage Static routes Manage IPv4 static routes for this site local network (VRF).<br>Conflicts with `no_static_routes`. (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes))
+
+<a id="nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes"></a>
+### Nested Schema for `local_vrf.slo_choice.slo_config.static_route_choice.static_routes`
+
+Required:
+
+- `static_routes` (Attributes List) static_routes (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes--static_routes))
+
+<a id="nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes--static_routes"></a>
+### Nested Schema for `local_vrf.slo_choice.slo_config.static_route_choice.static_routes.static_routes`
+
+Required:
+
+- `ip_prefixes` (List of String) IP Prefixes List of route prefixes that have common next hop and attributes
+- `next_hop_choice` (Attributes) Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface.<br>Exactly one of `default_gateway`, `ip_address`, or `node_interface` must be specified. (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes--static_routes--next_hop_choice))
+
+Optional:
+
+- `attrs` (List of String) Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)
+
+<a id="nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes--static_routes--next_hop_choice"></a>
+### Nested Schema for `local_vrf.slo_choice.slo_config.static_route_choice.static_routes.static_routes.next_hop_choice`
+
+Optional:
+
+- `default_gateway` (Boolean) Default Gateway Traffic matching the ip prefixes is sent to the default gateway<br>Conflicts with `ip_address` and `node_interface`.
+- `ip_address` (String) IP Address Traffic matching the ip prefixes is sent to this IP Address<br>Conflicts with `default_gateway` and `node_interface`.
+- `node_interface` (Attributes) Node Interface Traffic matching the ip prefixes is sent to this interface<br>Conflicts with `default_gateway` and `ip_address`. (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface))
+
+<a id="nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface"></a>
+### Nested Schema for `local_vrf.slo_choice.slo_config.static_route_choice.static_routes.static_routes.next_hop_choice.node_interface`
+
+Optional:
+
+- `list` (Attributes List) NodeInterfaceInfo On a multinode site, this list holds the nodes and corresponding networking_interface (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface--list))
+
+<a id="nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface--list"></a>
+### Nested Schema for `local_vrf.slo_choice.slo_config.static_route_choice.static_routes.static_routes.next_hop_choice.node_interface.list`
+
+Optional:
+
+- `interface` (Attributes List) Interface Interface reference on this node (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface--list--interface))
+- `node` (String) Node Node name on this site
+
+<a id="nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface--list--interface"></a>
+### Nested Schema for `local_vrf.slo_choice.slo_config.static_route_choice.static_routes.static_routes.next_hop_choice.node_interface.list.interface`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+
+
+
+
+
+
+<a id="nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice"></a>
+### Nested Schema for `local_vrf.slo_choice.slo_config.static_v6_route_choice`
+
+Optional:
+
+- `no_v6_static_routes` (Boolean) Do Not Manage IPv6 Static Routes Static IPv6 Routes disabled for this site local network (VRF).<br>Conflicts with `static_v6_routes`.
+- `static_v6_routes` (Attributes) Manage IPv6 Static routes Manage IPv6 static routes for this site local network (VRF).<br>Conflicts with `no_v6_static_routes`. (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice--static_v6_routes))
+
+<a id="nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice--static_v6_routes"></a>
+### Nested Schema for `local_vrf.slo_choice.slo_config.static_v6_route_choice.static_v6_routes`
+
+Required:
+
+- `static_routes` (Attributes List) static_routes List of IPv6 static routes (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice--static_v6_routes--static_routes))
+
+<a id="nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice--static_v6_routes--static_routes"></a>
+### Nested Schema for `local_vrf.slo_choice.slo_config.static_v6_route_choice.static_v6_routes.static_routes`
+
+Required:
+
+- `ip_prefixes` (List of String) IPv6 Prefixes List of IPv6 route prefixes that have common next hop and attributes
+- `next_hop_choice` (Attributes) Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface.<br>Exactly one of `default_gateway`, `ip_address`, or `node_interface` must be specified. (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice))
+
+Optional:
+
+- `attrs` (List of String) Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability<br>**Valid Options:** `['ROUTE_ATTR_ADVERTISE', 'ROUTE_ATTR_INSTALL_FORWARDING', 'ROUTE_ATTR_INSTALL_HOST', 'ROUTE_ATTR_MERGE_ONLY', 'ROUTE_ATTR_NO_OP']` (Multiple selection allowed)
+
+<a id="nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice"></a>
+### Nested Schema for `local_vrf.slo_choice.slo_config.static_v6_route_choice.static_v6_routes.static_routes.next_hop_choice`
+
+Optional:
+
+- `default_gateway` (Boolean) Default Gateway Traffic matching the ip prefixes is sent to the default gateway<br>Conflicts with `ip_address` and `node_interface`.
+- `ip_address` (String) IP Address Traffic matching the ip prefixes is sent to this IP Address<br>Conflicts with `default_gateway` and `node_interface`.
+- `node_interface` (Attributes) Node Interface Traffic matching the ip prefixes is sent to this interface<br>Conflicts with `default_gateway` and `ip_address`. (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface))
+
+<a id="nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface"></a>
+### Nested Schema for `local_vrf.slo_choice.slo_config.static_v6_route_choice.static_v6_routes.static_routes.next_hop_choice.node_interface`
+
+Optional:
+
+- `list` (Attributes List) NodeInterfaceInfo On a multinode site, this list holds the nodes and corresponding networking_interface (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface--list))
+
+<a id="nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface--list"></a>
+### Nested Schema for `local_vrf.slo_choice.slo_config.static_v6_route_choice.static_v6_routes.static_routes.next_hop_choice.node_interface.list`
+
+Optional:
+
+- `interface` (Attributes List) Interface Interface reference on this node (see [below for nested schema](#nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface--list--interface))
+- `node` (String) Node Node name on this site
+
+<a id="nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface--list--interface"></a>
+### Nested Schema for `local_vrf.slo_choice.slo_config.static_v6_route_choice.static_v6_routes.static_routes.next_hop_choice.node_interface.list.interface`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+
+
+
+
+
+
+
+
 
 <a id="nestedatt--log_anonymization_choice"></a>
 ### Nested Schema for `log_anonymization_choice`
 
 Optional:
 
-- `disable_log_anonymization` (Boolean) Disable Log Anonymization Disable Log Anonymization for this site.
-- `enable_log_anonymization` (Boolean) Enable Log Anonymization Enable Log Anonymization for this site. Traffic will be processed in the order that Log Anonymize.
+- `disable_log_anonymization` (Boolean) Disable Log Anonymization Disable Log Anonymization for this site.<br>Conflicts with `enable_log_anonymization`.
+- `enable_log_anonymization` (Boolean) Enable Log Anonymization Enable Log Anonymization for this site. Traffic will be processed in the order that Log Anonymize.<br>Conflicts with `disable_log_anonymization`.
+
+
+<a id="nestedatt--logs_receiver_choice"></a>
+### Nested Schema for `logs_receiver_choice`
+
+Optional:
+
+- `log_receiver_with_net` (Attributes) Enable Logs Streaming Select log receiver for logs streaming<br>Conflicts with `logs_streaming_disabled`. (see [below for nested schema](#nestedatt--logs_receiver_choice--log_receiver_with_net))
+- `logs_streaming_disabled` (Boolean) Disable Logs Receiver<br>Conflicts with `log_receiver_with_net`.
+
+<a id="nestedatt--logs_receiver_choice--log_receiver_with_net"></a>
+### Nested Schema for `logs_receiver_choice.log_receiver_with_net`
+
+Optional:
+
+- `log_receiver` (Attributes) Log Receiver Select log receiver for logs streaming (see [below for nested schema](#nestedatt--logs_receiver_choice--log_receiver_with_net--log_receiver))
+- `network_choice` (Attributes) Network for Log Streaming Option to choose SLO/SLI or Management Network for log streaming. Management Network only works if Management Network is enabled on the site.<br>Exactly one of `use_management_network` or `use_slo_sli` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--logs_receiver_choice--log_receiver_with_net--network_choice))
+
+<a id="nestedatt--logs_receiver_choice--log_receiver_with_net--log_receiver"></a>
+### Nested Schema for `logs_receiver_choice.log_receiver_with_net.log_receiver`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+<a id="nestedatt--logs_receiver_choice--log_receiver_with_net--network_choice"></a>
+### Nested Schema for `logs_receiver_choice.log_receiver_with_net.network_choice`
+
+Optional:
+
+- `use_management_network` (Boolean) Management Allows sending the logs to a log receiver in Management Network<br>Conflicts with `use_slo_sli`.
+- `use_slo_sli` (Boolean) SLO and SLI Allows sending the logs to a log receiver in either SLO or SLI<br>Conflicts with `use_management_network`.
+
+
 
 
 <a id="nestedatt--management_network_choice"></a>
@@ -7697,8 +7688,8 @@ Optional:
 
 Optional:
 
-- `disable_management_network` (Boolean) Disable Management Network Management Network is disabled for this site.
-- `enable_management_network` (Boolean) Enable Management Network Management Network is enabled for this site.
+- `disable_management_network` (Boolean) Disable Management Network Management Network is disabled for this site.<br>Conflicts with `enable_management_network`.
+- `enable_management_network` (Boolean) Enable Management Network Management Network is enabled for this site.<br>Conflicts with `disable_management_network`.
 
 
 <a id="nestedatt--network_policy_choice"></a>
@@ -7706,8 +7697,8 @@ Optional:
 
 Optional:
 
-- `active_enhanced_firewall_policies` (Attributes) Manage Enhanced Firewall Policy Enable Network Firewall for this site. Traffic will be processed in the order that Network Firewall Policies are added. (see [below for nested schema](#nestedatt--network_policy_choice--active_enhanced_firewall_policies))
-- `no_network_policy` (Boolean) Do Not Manage Firewall Policy Disable Network Firewall for this site.
+- `active_enhanced_firewall_policies` (Attributes) Manage Enhanced Firewall Policy Enable Network Firewall for this site. Traffic will be processed in the order that Network Firewall Policies are added.<br>Conflicts with `no_network_policy`. (see [below for nested schema](#nestedatt--network_policy_choice--active_enhanced_firewall_policies))
+- `no_network_policy` (Boolean) Do Not Manage Firewall Policy Disable Network Firewall for this site.<br>Conflicts with `active_enhanced_firewall_policies`.
 
 <a id="nestedatt--network_policy_choice--active_enhanced_firewall_policies"></a>
 ### Nested Schema for `network_policy_choice.active_enhanced_firewall_policies`
@@ -7736,24 +7727,24 @@ Read-Only:
 
 Optional:
 
-- `disable_ha` (Boolean) Disable
-- `enable_ha` (Boolean) Enable
+- `disable_ha` (Boolean) Disable<br>Conflicts with `enable_ha`.
+- `enable_ha` (Boolean) Enable<br>Conflicts with `disable_ha`.
 
 
 <a id="nestedatt--offline_survivability_mode"></a>
 ### Nested Schema for `offline_survivability_mode`
 
-Required:
+Optional:
 
-- `offline_survivability_mode_choice` (Attributes) offline_survivability_mode_choice Offline Survivability allows the Site to continue functioning normally without traffic loss during periods of connectivity loss to the Regional Edge (RE) or the Global Controller (GC). When this feature is enabled, a site can continue to function as is with existing configuration for upto 7 days, even when the site is offline. The certificates needed to keep the services running on this site are signed using a local CA. Secrets would also be cached locally to handle the connectivity loss. When the mode is toggled, services will restart and traffic disruption will be seen. (see [below for nested schema](#nestedatt--offline_survivability_mode--offline_survivability_mode_choice))
+- `offline_survivability_mode_choice` (Attributes) offline_survivability_mode_choice Offline Survivability allows the Site to continue functioning normally without traffic loss during periods of connectivity loss to the Regional Edge (RE) or the Global Controller (GC). When this feature is enabled, a site can continue to function as is with existing configuration for upto 7 days, even when the site is offline. The certificates needed to keep the services running on this site are signed using a local CA. Secrets would also be cached locally to handle the connectivity loss. When the mode is toggled, services will restart and traffic disruption will be seen.<br>Exactly one of `enable_offline_survivability_mode` or `no_offline_survivability_mode` must be specified when `offline_survivability_mode_choice` is configured. (see [below for nested schema](#nestedatt--offline_survivability_mode--offline_survivability_mode_choice))
 
 <a id="nestedatt--offline_survivability_mode--offline_survivability_mode_choice"></a>
 ### Nested Schema for `offline_survivability_mode.offline_survivability_mode_choice`
 
 Optional:
 
-- `enable_offline_survivability_mode` (Boolean) Enable Offline Survivability Mode
-- `no_offline_survivability_mode` (Boolean) Disable Offline Survivability Mode
+- `enable_offline_survivability_mode` (Boolean) Enable Offline Survivability Mode<br>Conflicts with `no_offline_survivability_mode`.
+- `no_offline_survivability_mode` (Boolean) Disable Offline Survivability Mode<br>Conflicts with `enable_offline_survivability_mode`.
 
 
 
@@ -7762,47 +7753,47 @@ Optional:
 
 Required:
 
-- `perf_mode_choice` (Attributes) Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation. (see [below for nested schema](#nestedatt--performance_enhancement_mode--perf_mode_choice))
+- `perf_mode_choice` (Attributes) Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.<br>Exactly one of `perf_mode_l3_enhanced` or `perf_mode_l7_enhanced` must be specified. (see [below for nested schema](#nestedatt--performance_enhancement_mode--perf_mode_choice))
 
 <a id="nestedatt--performance_enhancement_mode--perf_mode_choice"></a>
 ### Nested Schema for `performance_enhancement_mode.perf_mode_choice`
 
 Optional:
 
-- `perf_mode_l3_enhanced` (Attributes) L3 Mode Enhanced Performance Site optimized for L3 traffic processing (see [below for nested schema](#nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l3_enhanced))
-- `perf_mode_l7_enhanced` (Attributes) Default Performance Mode Site optimized for L7 traffic processing (see [below for nested schema](#nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l7_enhanced))
+- `perf_mode_l3_enhanced` (Attributes) L3 Mode Enhanced Performance Site optimized for L3 traffic processing<br>Conflicts with `perf_mode_l7_enhanced`. (see [below for nested schema](#nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l3_enhanced))
+- `perf_mode_l7_enhanced` (Attributes) Default Performance Mode Site optimized for L7 traffic processing<br>Conflicts with `perf_mode_l3_enhanced`. (see [below for nested schema](#nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l7_enhanced))
 
 <a id="nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l3_enhanced"></a>
 ### Nested Schema for `performance_enhancement_mode.perf_mode_choice.perf_mode_l3_enhanced`
 
-Required:
+Optional:
 
-- `perf_mode_choice` (Attributes) L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads. (see [below for nested schema](#nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l3_enhanced--perf_mode_choice))
+- `perf_mode_choice` (Attributes) L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads.<br>Exactly one of `jumbo` or `no_jumbo` must be specified when `perf_mode_choice` is configured. (see [below for nested schema](#nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l3_enhanced--perf_mode_choice))
 
 <a id="nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l3_enhanced--perf_mode_choice"></a>
 ### Nested Schema for `performance_enhancement_mode.perf_mode_choice.perf_mode_l3_enhanced.perf_mode_choice`
 
 Optional:
 
-- `jumbo` (Boolean) L3 Mode Enhanced Performance with jumbo frame support(9000)
-- `no_jumbo` (Boolean) L3 Mode Enhanced Performance with no jumbo frame support
+- `jumbo` (Boolean) L3 Mode Enhanced Performance with jumbo frame support(9000)<br>Conflicts with `no_jumbo`.
+- `no_jumbo` (Boolean) L3 Mode Enhanced Performance with no jumbo frame support<br>Conflicts with `jumbo`.
 
 
 
 <a id="nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l7_enhanced"></a>
 ### Nested Schema for `performance_enhancement_mode.perf_mode_choice.perf_mode_l7_enhanced`
 
-Required:
+Optional:
 
-- `perf_mode_choice` (Attributes) L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads. (see [below for nested schema](#nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l7_enhanced--perf_mode_choice))
+- `perf_mode_choice` (Attributes) L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads.<br>Exactly one of `jumbo_disabled` or `jumbo_enabled` must be specified when `perf_mode_choice` is configured. (see [below for nested schema](#nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l7_enhanced--perf_mode_choice))
 
 <a id="nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l7_enhanced--perf_mode_choice"></a>
 ### Nested Schema for `performance_enhancement_mode.perf_mode_choice.perf_mode_l7_enhanced.perf_mode_choice`
 
 Optional:
 
-- `jumbo_disabled` (Boolean) L7 Mode Enhanced Performance with no jumbo frame support
-- `jumbo_enabled` (Boolean) L7 Mode Enhanced Performance with jumbo frame support(9000)
+- `jumbo_disabled` (Boolean) L7 Mode Enhanced Performance with no jumbo frame support<br>Conflicts with `jumbo_enabled`.
+- `jumbo_enabled` (Boolean) L7 Mode Enhanced Performance with jumbo frame support(9000)<br>Conflicts with `jumbo_disabled`.
 
 
 
@@ -7813,8 +7804,8 @@ Optional:
 
 Optional:
 
-- `custom_proxy_bypass` (Attributes) Custom User specified domains will bypass the proxy (see [below for nested schema](#nestedatt--proxy_bypass_choice--custom_proxy_bypass))
-- `no_proxy_bypass` (Boolean) Default No domains will bypass the proxy
+- `custom_proxy_bypass` (Attributes) Custom User specified domains will bypass the proxy<br>Conflicts with `no_proxy_bypass`. (see [below for nested schema](#nestedatt--proxy_bypass_choice--custom_proxy_bypass))
+- `no_proxy_bypass` (Boolean) Default No domains will bypass the proxy<br>Conflicts with `custom_proxy_bypass`.
 
 <a id="nestedatt--proxy_bypass_choice--custom_proxy_bypass"></a>
 ### Nested Schema for `proxy_bypass_choice.custom_proxy_bypass`
@@ -7830,15 +7821,15 @@ Optional:
 
 Optional:
 
-- `re_selection_choice` (Attributes) Regional Edge Selection Selection criteria to connect the site with F5 Distributed Cloud Regional Edge(s). By default, REs in closest proximity to the site will be selected based on the public IP address of the control nodes of the site. (see [below for nested schema](#nestedatt--re_select--re_selection_choice))
+- `re_selection_choice` (Attributes) Regional Edge Selection Selection criteria to connect the site with F5 Distributed Cloud Regional Edge(s). By default, REs in closest proximity to the site will be selected based on the public IP address of the control nodes of the site.<br>Exactly one of `geo_proximity` or `specific_re` must be specified when `re_selection_choice` is configured. (see [below for nested schema](#nestedatt--re_select--re_selection_choice))
 
 <a id="nestedatt--re_select--re_selection_choice"></a>
 ### Nested Schema for `re_select.re_selection_choice`
 
 Optional:
 
-- `geo_proximity` (Boolean) Based on Geo-proximity Select REs in closest proximity to the site based on the public IP address of the control nodes of the site.
-- `specific_re` (Attributes) Specific Geography Select specific REs. This is useful when a site needs to deterministically connect to a set of REs. A site will always be connected to 2 REs. (see [below for nested schema](#nestedatt--re_select--re_selection_choice--specific_re))
+- `geo_proximity` (Boolean) Based on Geo-proximity Select REs in closest proximity to the site based on the public IP address of the control nodes of the site.<br>Conflicts with `specific_re`.
+- `specific_re` (Attributes) Specific Geography Select specific REs. This is useful when a site needs to deterministically connect to a set of REs. A site will always be connected to 2 REs.<br>Conflicts with `geo_proximity`. (see [below for nested schema](#nestedatt--re_select--re_selection_choice--specific_re))
 
 <a id="nestedatt--re_select--re_selection_choice--specific_re"></a>
 ### Nested Schema for `re_select.re_selection_choice.specific_re`
@@ -7856,8 +7847,8 @@ Optional:
 
 Optional:
 
-- `dc_cluster_group_sli` (Attributes) Member of DC cluster Group Use a DC Cluster Group to connect to other sites. (see [below for nested schema](#nestedatt--s2s_connectivity_sli_choice--dc_cluster_group_sli))
-- `no_s2s_connectivity_sli` (Boolean) Not Connected on SLI
+- `dc_cluster_group_sli` (Attributes) Member of DC cluster Group Use a DC Cluster Group to connect to other sites.<br>Conflicts with `no_s2s_connectivity_sli`. (see [below for nested schema](#nestedatt--s2s_connectivity_sli_choice--dc_cluster_group_sli))
+- `no_s2s_connectivity_sli` (Boolean) Not Connected on SLI<br>Conflicts with `dc_cluster_group_sli`.
 
 <a id="nestedatt--s2s_connectivity_sli_choice--dc_cluster_group_sli"></a>
 ### Nested Schema for `s2s_connectivity_sli_choice.dc_cluster_group_sli`
@@ -7878,9 +7869,9 @@ Read-Only:
 
 Optional:
 
-- `dc_cluster_group_slo` (Attributes) Member of DC cluster Group Use a DC Cluster Group to connect to other sites. (see [below for nested schema](#nestedatt--s2s_connectivity_slo_choice--dc_cluster_group_slo))
-- `no_s2s_connectivity_slo` (Boolean) Not Connected on SLO
-- `site_mesh_group_on_slo` (Attributes) Site Mesh Group Use a Site Mesh Group to connect to other sites. (see [below for nested schema](#nestedatt--s2s_connectivity_slo_choice--site_mesh_group_on_slo))
+- `dc_cluster_group_slo` (Attributes) Member of DC cluster Group Use a DC Cluster Group to connect to other sites.<br>Conflicts with `no_s2s_connectivity_slo` and `site_mesh_group_on_slo`. (see [below for nested schema](#nestedatt--s2s_connectivity_slo_choice--dc_cluster_group_slo))
+- `no_s2s_connectivity_slo` (Boolean) Not Connected on SLO<br>Conflicts with `dc_cluster_group_slo` and `site_mesh_group_on_slo`.
+- `site_mesh_group_on_slo` (Attributes) Site Mesh Group Use a Site Mesh Group to connect to other sites.<br>Conflicts with `dc_cluster_group_slo` and `no_s2s_connectivity_slo`. (see [below for nested schema](#nestedatt--s2s_connectivity_slo_choice--site_mesh_group_on_slo))
 
 <a id="nestedatt--s2s_connectivity_slo_choice--dc_cluster_group_slo"></a>
 ### Nested Schema for `s2s_connectivity_slo_choice.dc_cluster_group_slo`
@@ -7898,17 +7889,17 @@ Read-Only:
 <a id="nestedatt--s2s_connectivity_slo_choice--site_mesh_group_on_slo"></a>
 ### Nested Schema for `s2s_connectivity_slo_choice.site_mesh_group_on_slo`
 
-Required:
+Optional:
 
-- `site_mesh_group_ip_choice` (Attributes) Site Mesh Group Connection Type Select how the site mesh group will be connected. By default, public IPs of the control nodes of the site will be used. (see [below for nested schema](#nestedatt--s2s_connectivity_slo_choice--site_mesh_group_on_slo--site_mesh_group_ip_choice))
+- `site_mesh_group_ip_choice` (Attributes) Site Mesh Group Connection Type Select how the site mesh group will be connected. By default, public IPs of the control nodes of the site will be used.<br>Exactly one of `sm_connection_public_ip` or `sm_connection_pvt_ip` must be specified when `site_mesh_group_ip_choice` is configured. (see [below for nested schema](#nestedatt--s2s_connectivity_slo_choice--site_mesh_group_on_slo--site_mesh_group_ip_choice))
 
 <a id="nestedatt--s2s_connectivity_slo_choice--site_mesh_group_on_slo--site_mesh_group_ip_choice"></a>
 ### Nested Schema for `s2s_connectivity_slo_choice.site_mesh_group_on_slo.site_mesh_group_ip_choice`
 
 Optional:
 
-- `sm_connection_public_ip` (Boolean) Site Mesh Group Connection Via Public Ip This option will use the public IPs of the control nodes of this site to create IPsec tunnels to other sites which are part of the site mesh group.
-- `sm_connection_pvt_ip` (Boolean) Site Mesh Group Connection Via Private Ip This option will use the private IPs of the control nodes of this site to create IPsec tunnels to other sites which are part of the site mesh group. These private IPs will be the IPs on the interfaces that belong to the Site Local Outside (SLO) Local VRF on the control nodes. If multiple interfaces on a control node belong to the Site Local Outside (SLO) Local VRF, the interface which has 'Use for Site to Site Connectivity' set will be used.
+- `sm_connection_public_ip` (Boolean) Site Mesh Group Connection Via Public Ip This option will use the public IPs of the control nodes of this site to create IPsec tunnels to other sites which are part of the site mesh group.<br>Conflicts with `sm_connection_pvt_ip`.
+- `sm_connection_pvt_ip` (Boolean) Site Mesh Group Connection Via Private Ip This option will use the private IPs of the control nodes of this site to create IPsec tunnels to other sites which are part of the site mesh group. These private IPs will be the IPs on the interfaces that belong to the Site Local Outside (SLO) Local VRF on the control nodes. If multiple interfaces on a control node belong to the Site Local Outside (SLO) Local VRF, the interface which has 'Use for Site to Site Connectivity' set will be used.<br>Conflicts with `sm_connection_public_ip`.
 
 
 
@@ -7924,23 +7915,20 @@ Optional:
 <a id="nestedatt--segment_vrf--segment_config"></a>
 ### Nested Schema for `segment_vrf.segment_config`
 
-Required:
-
-- `static_route_choice` (Attributes) Manage Static Routes Add static routes to network. Used to reach indirectly connected subnets. (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_route_choice))
-- `static_v6_route_choice` (Attributes) Manage IPv6 Static Routes Add IPv6 static routes to network. Used to reach indirectly connected IPv6 subnets. (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_v6_route_choice))
-
 Optional:
 
 - `nameserver` (String) nameserver Optional IPv4 DNS server to be used for name resolution
 - `secondary_nameserver` (String) secondary_nameserver Optional Secondary IPv4 DNS server to be used for name resolution
+- `static_route_choice` (Attributes) Manage Static Routes Add static routes to network. Used to reach indirectly connected subnets.<br>Exactly one of `no_static_routes` or `static_routes` must be specified when `static_route_choice` is configured. (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_route_choice))
+- `static_v6_route_choice` (Attributes) Manage IPv6 Static Routes Add IPv6 static routes to network. Used to reach indirectly connected IPv6 subnets.<br>Exactly one of `no_v6_static_routes` or `static_v6_routes` must be specified when `static_v6_route_choice` is configured. (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_v6_route_choice))
 
 <a id="nestedatt--segment_vrf--segment_config--static_route_choice"></a>
 ### Nested Schema for `segment_vrf.segment_config.static_route_choice`
 
 Optional:
 
-- `no_static_routes` (Boolean) Do Not Manage Static Routes Static IPv4 Routes disabled for this Segment Network (VRF).
-- `static_routes` (Attributes) Manage Static routes Manage IPv4 static routes for this Segment Network (VRF). (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_route_choice--static_routes))
+- `no_static_routes` (Boolean) Do Not Manage Static Routes Static IPv4 Routes disabled for this Segment Network (VRF).<br>Conflicts with `static_routes`.
+- `static_routes` (Attributes) Manage Static routes Manage IPv4 static routes for this Segment Network (VRF).<br>Conflicts with `no_static_routes`. (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_route_choice--static_routes))
 
 <a id="nestedatt--segment_vrf--segment_config--static_route_choice--static_routes"></a>
 ### Nested Schema for `segment_vrf.segment_config.static_route_choice.static_routes`
@@ -7955,7 +7943,7 @@ Required:
 Required:
 
 - `ip_prefixes` (List of String) IP Prefixes List of route prefixes that have common next hop and attributes
-- `next_hop_choice` (Attributes) Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface. (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_route_choice--static_routes--static_routes--next_hop_choice))
+- `next_hop_choice` (Attributes) Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface.<br>Exactly one of `default_gateway`, `ip_address`, or `node_interface` must be specified. (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_route_choice--static_routes--static_routes--next_hop_choice))
 
 Optional:
 
@@ -7966,9 +7954,9 @@ Optional:
 
 Optional:
 
-- `default_gateway` (Boolean) Default Gateway Traffic matching the ip prefixes is sent to the default gateway
-- `ip_address` (String) IP Address Traffic matching the ip prefixes is sent to this IP Address
-- `node_interface` (Attributes) Node Interface Traffic matching the ip prefixes is sent to this interface (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface))
+- `default_gateway` (Boolean) Default Gateway Traffic matching the ip prefixes is sent to the default gateway<br>Conflicts with `ip_address` and `node_interface`.
+- `ip_address` (String) IP Address Traffic matching the ip prefixes is sent to this IP Address<br>Conflicts with `default_gateway` and `node_interface`.
+- `node_interface` (Attributes) Node Interface Traffic matching the ip prefixes is sent to this interface<br>Conflicts with `default_gateway` and `ip_address`. (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface))
 
 <a id="nestedatt--segment_vrf--segment_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface"></a>
 ### Nested Schema for `segment_vrf.segment_config.static_route_choice.static_routes.static_routes.next_hop_choice.node_interface`
@@ -8009,8 +7997,8 @@ Read-Only:
 
 Optional:
 
-- `no_v6_static_routes` (Boolean) Do Not Manage IPv6 Static Routes Static IPv6 Routes disabled for this segment Network (VRF).
-- `static_v6_routes` (Attributes) Manage IPv6 Static routes Manage IPv6 static routes for this Segment Nework(VRF). (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes))
+- `no_v6_static_routes` (Boolean) Do Not Manage IPv6 Static Routes Static IPv6 Routes disabled for this segment Network (VRF).<br>Conflicts with `static_v6_routes`.
+- `static_v6_routes` (Attributes) Manage IPv6 Static routes Manage IPv6 static routes for this Segment Nework(VRF).<br>Conflicts with `no_v6_static_routes`. (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes))
 
 <a id="nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes"></a>
 ### Nested Schema for `segment_vrf.segment_config.static_v6_route_choice.static_v6_routes`
@@ -8025,7 +8013,7 @@ Required:
 Required:
 
 - `ip_prefixes` (List of String) IPv6 Prefixes List of IPv6 route prefixes that have common next hop and attributes
-- `next_hop_choice` (Attributes) Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface. (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice))
+- `next_hop_choice` (Attributes) Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface.<br>Exactly one of `default_gateway`, `ip_address`, or `node_interface` must be specified. (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice))
 
 Optional:
 
@@ -8036,9 +8024,9 @@ Optional:
 
 Optional:
 
-- `default_gateway` (Boolean) Default Gateway Traffic matching the ip prefixes is sent to the default gateway
-- `ip_address` (String) IP Address Traffic matching the ip prefixes is sent to this IP Address
-- `node_interface` (Attributes) Node Interface Traffic matching the ip prefixes is sent to this interface (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface))
+- `default_gateway` (Boolean) Default Gateway Traffic matching the ip prefixes is sent to the default gateway<br>Conflicts with `ip_address` and `node_interface`.
+- `ip_address` (String) IP Address Traffic matching the ip prefixes is sent to this IP Address<br>Conflicts with `default_gateway` and `node_interface`.
+- `node_interface` (Attributes) Node Interface Traffic matching the ip prefixes is sent to this interface<br>Conflicts with `default_gateway` and `ip_address`. (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface))
 
 <a id="nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface"></a>
 ### Nested Schema for `segment_vrf.segment_config.static_v6_route_choice.static_v6_routes.static_routes.next_hop_choice.node_interface`
@@ -8101,51 +8089,51 @@ Optional:
 <a id="nestedatt--software_settings--os"></a>
 ### Nested Schema for `software_settings.os`
 
-Required:
+Optional:
 
-- `operating_system_version_choice` (Attributes) Operating System Version Select the F5XC Operating System Version for the site. By default, latest available OS Version will be used. Refer to release notes to find required released OS versions. (see [below for nested schema](#nestedatt--software_settings--os--operating_system_version_choice))
+- `operating_system_version_choice` (Attributes) Operating System Version Select the F5XC Operating System Version for the site. By default, latest available OS Version will be used. Refer to release notes to find required released OS versions.<br>Exactly one of `default_os_version` or `operating_system_version` must be specified when `operating_system_version_choice` is configured. (see [below for nested schema](#nestedatt--software_settings--os--operating_system_version_choice))
 
 <a id="nestedatt--software_settings--os--operating_system_version_choice"></a>
 ### Nested Schema for `software_settings.os.operating_system_version_choice`
 
 Optional:
 
-- `default_os_version` (Boolean) Default OS Version Will assign latest available OS version
-- `operating_system_version` (String) Operating System Version Specify a OS version to be used e.g. 9.2024.6.<br>**Validation:** `Length LengthAtMost(20)`
+- `default_os_version` (Boolean) Default OS Version Will assign latest available OS version<br>Conflicts with `operating_system_version`.
+- `operating_system_version` (String) Operating System Version Specify a OS version to be used e.g. 9.2024.6.<br>**Validation:** `Length LengthAtMost(20)`<br>Conflicts with `default_os_version`.
 
 
 
 <a id="nestedatt--software_settings--sw"></a>
 ### Nested Schema for `software_settings.sw`
 
-Required:
+Optional:
 
-- `volterra_sw_version_choice` (Attributes) F5XC Software Version Select the F5XC Software Version for the site. By default, latest available F5XC Software Version will be used. Refer to release notes to find required released SW versions. (see [below for nested schema](#nestedatt--software_settings--sw--volterra_sw_version_choice))
+- `volterra_sw_version_choice` (Attributes) F5XC Software Version Select the F5XC Software Version for the site. By default, latest available F5XC Software Version will be used. Refer to release notes to find required released SW versions.<br>Exactly one of `default_sw_version` or `volterra_software_version` must be specified when `volterra_sw_version_choice` is configured. (see [below for nested schema](#nestedatt--software_settings--sw--volterra_sw_version_choice))
 
 <a id="nestedatt--software_settings--sw--volterra_sw_version_choice"></a>
 ### Nested Schema for `software_settings.sw.volterra_sw_version_choice`
 
 Optional:
 
-- `default_sw_version` (Boolean) Default SW Version Will assign latest available F5XC Software Version
-- `volterra_software_version` (String) F5XC Software Version Specify a F5XC Software Version to be used e.g. crt-20210329-1002.<br>**Validation:** `Length LengthAtMost(20)`
+- `default_sw_version` (Boolean) Default SW Version Will assign latest available F5XC Software Version<br>Conflicts with `volterra_software_version`.
+- `volterra_software_version` (String) F5XC Software Version Specify a F5XC Software Version to be used e.g. crt-20210329-1002.<br>**Validation:** `Length LengthAtMost(20)`<br>Conflicts with `default_sw_version`.
 
 
 
 <a id="nestedatt--software_settings--waf_signatures"></a>
 ### Nested Schema for `software_settings.waf_signatures`
 
-Required:
+Optional:
 
-- `signatures_update_mode_choice` (Attributes) WAF Signatures update mode Select F5XC WAF Signatures update mode for the site. By default, new signatures will be applied manually. Refer to release notes for details about available Signatures update modes and versions. (see [below for nested schema](#nestedatt--software_settings--waf_signatures--signatures_update_mode_choice))
+- `signatures_update_mode_choice` (Attributes) WAF Signatures update mode Select F5XC WAF Signatures update mode for the site. By default, new signatures will be applied manually. Refer to release notes for details about available Signatures update modes and versions.<br>Exactly one of `automatic` or `manual` must be specified when `signatures_update_mode_choice` is configured. (see [below for nested schema](#nestedatt--software_settings--waf_signatures--signatures_update_mode_choice))
 
 <a id="nestedatt--software_settings--waf_signatures--signatures_update_mode_choice"></a>
 ### Nested Schema for `software_settings.waf_signatures.signatures_update_mode_choice`
 
 Optional:
 
-- `automatic` (Boolean) Automatic update mode New WAF signatures will be applied automatically as soon as they are released.
-- `manual` (Boolean) Manual update mode New WAF signatures will only be applied when an update is triggered manually.
+- `automatic` (Boolean) Automatic update mode New WAF signatures will be applied automatically as soon as they are released.<br>Conflicts with `manual`.
+- `manual` (Boolean) Manual update mode New WAF signatures will only be applied when an update is triggered manually.<br>Conflicts with `automatic`.
 
 
 
@@ -8173,22 +8161,22 @@ Optional:
 
 Required:
 
-- `kubernetes_upgrade_drain_enable_choice` (Attributes) F5XC Enable/Disable Node by Node Upgrade Specify how nodes within a site will be upgraded. If enabled, you can specify number of Worker nodes to be upgraded in parallel. Note: This does not influence Control nodes. This is benefitial for sites with large number of nodes. (see [below for nested schema](#nestedatt--upgrade_settings--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice))
+- `kubernetes_upgrade_drain_enable_choice` (Attributes) F5XC Enable/Disable Node by Node Upgrade Specify how nodes within a site will be upgraded. If enabled, you can specify number of Worker nodes to be upgraded in parallel. Note: This does not influence Control nodes. This is benefitial for sites with large number of nodes.<br>Exactly one of `disable_upgrade_drain` or `enable_upgrade_drain` must be specified. (see [below for nested schema](#nestedatt--upgrade_settings--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice))
 
 <a id="nestedatt--upgrade_settings--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice"></a>
 ### Nested Schema for `upgrade_settings.kubernetes_upgrade_drain.kubernetes_upgrade_drain_enable_choice`
 
 Optional:
 
-- `disable_upgrade_drain` (Boolean) Disable upgrade drain
-- `enable_upgrade_drain` (Attributes) Enable Node by Node Upgrade (see [below for nested schema](#nestedatt--upgrade_settings--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice--enable_upgrade_drain))
+- `disable_upgrade_drain` (Boolean) Disable upgrade drain<br>Conflicts with `enable_upgrade_drain`.
+- `enable_upgrade_drain` (Attributes) Enable Node by Node Upgrade<br>Conflicts with `disable_upgrade_drain`. (see [below for nested schema](#nestedatt--upgrade_settings--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice--enable_upgrade_drain))
 
 <a id="nestedatt--upgrade_settings--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice--enable_upgrade_drain"></a>
 ### Nested Schema for `upgrade_settings.kubernetes_upgrade_drain.kubernetes_upgrade_drain_enable_choice.enable_upgrade_drain`
 
 Required:
 
-- `drain_max_unavailable_choice` (Attributes) Node Batch Size Max number of worker nodes to be upgraded in parallel (see [below for nested schema](#nestedatt--upgrade_settings--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice--enable_upgrade_drain--drain_max_unavailable_choice))
+- `drain_max_unavailable_choice` (Attributes) Node Batch Size Max number of worker nodes to be upgraded in parallel<br>`drain_max_unavailable_node_count` must be specified. (see [below for nested schema](#nestedatt--upgrade_settings--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice--enable_upgrade_drain--drain_max_unavailable_choice))
 
 Optional:
 
@@ -8211,8 +8199,8 @@ Optional:
 
 Optional:
 
-- `disable_url_categorization` (Boolean) Disable URL Categorization
-- `enable_url_categorization` (Boolean) Enable URL Categorization
+- `disable_url_categorization` (Boolean) Disable URL Categorization<br>Conflicts with `enable_url_categorization`.
+- `enable_url_categorization` (Boolean) Enable URL Categorization<br>Conflicts with `disable_url_categorization`.
 ## Import
 
 In Terraform v1.5.0 and later, use an `import` block to import this resource by ID.
@@ -8234,6 +8222,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_securemesh_site_v2.example"
+	to = f5xc_securemesh_site_v2.example
 }
 ```

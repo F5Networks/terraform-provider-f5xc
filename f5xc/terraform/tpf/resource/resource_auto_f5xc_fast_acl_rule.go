@@ -321,7 +321,7 @@ func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.S
 				Attributes: map[string]schema.Attribute{
 					"action_choice": schema.SingleNestedAttribute{
 						Description:         "action The type of action to perform",
-						MarkdownDescription: "action The type of action to perform",
+						MarkdownDescription: "action The type of action to perform<br>Exactly one of `policer_action`, `protocol_policer_action`, or `simple_action` must be specified when `action_choice` is configured.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -335,7 +335,7 @@ func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.S
 						Attributes: map[string]schema.Attribute{
 							"policer_action": schema.SingleNestedAttribute{
 								Description:         "policer_action Reference to policer object to which traffic would be subjected",
-								MarkdownDescription: "policer_action Reference to policer object to which traffic would be subjected",
+								MarkdownDescription: "policer_action Reference to policer object to which traffic would be subjected<br>Conflicts with `protocol_policer_action` and `simple_action`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -382,7 +382,7 @@ func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.S
 							},
 							"protocol_policer_action": schema.SingleNestedAttribute{
 								Description:         "protocol_policer_action Reference to protocol based policer object",
-								MarkdownDescription: "protocol_policer_action Reference to protocol based policer object",
+								MarkdownDescription: "protocol_policer_action Reference to protocol based policer object<br>Conflicts with `policer_action` and `simple_action`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -429,7 +429,7 @@ func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.S
 							},
 							"simple_action": schema.ListAttribute{
 								Description:         "simple_action Simple action like dropping or forwarding the traffic",
-								MarkdownDescription: "simple_action Simple action like dropping or forwarding the traffic<br>**Allowed Values (choose one):** `['ALLOW', 'DENY']`",
+								MarkdownDescription: "simple_action Simple action like dropping or forwarding the traffic<br>**Allowed Values (choose one):** `['ALLOW', 'DENY']`<br>Conflicts with `policer_action` and `protocol_policer_action`.",
 								ElementType:         types.StringType,
 								Required:            false,
 								Optional:            true,
@@ -456,7 +456,7 @@ func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.S
 					Attributes: map[string]schema.Attribute{
 						"port_value_type_choice": schema.SingleNestedAttribute{
 							Description:         "port_value_type_choice Match criteria for port",
-							MarkdownDescription: "port_value_type_choice Match criteria for port",
+							MarkdownDescription: "port_value_type_choice Match criteria for port<br>Exactly one of `all`, `dns`, or `user_defined` must be specified when `port_value_type_choice` is configured.",
 							Required:            false,
 							Optional:            true,
 							Computed:            false,
@@ -470,7 +470,7 @@ func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.S
 							Attributes: map[string]schema.Attribute{
 								"all": schema.BoolAttribute{
 									Description:         "All port Matches all port",
-									MarkdownDescription: "All port Matches all port",
+									MarkdownDescription: "All port Matches all port<br>Conflicts with `dns` and `user_defined`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -480,7 +480,7 @@ func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.S
 								},
 								"dns": schema.BoolAttribute{
 									Description:         "DNS port Matches dns port 53",
-									MarkdownDescription: "DNS port Matches dns port 53",
+									MarkdownDescription: "DNS port Matches dns port 53<br>Conflicts with `all` and `user_defined`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -490,7 +490,7 @@ func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.S
 								},
 								"user_defined": schema.Int64Attribute{
 									Description:         "User defined Port Matches the user defined port",
-									MarkdownDescription: "User defined Port Matches the user defined port",
+									MarkdownDescription: "User defined Port Matches the user defined port<br>Conflicts with `all` and `dns`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -505,7 +505,7 @@ func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.S
 			},
 			"source_choice": schema.SingleNestedAttribute{
 				Description:         "source IP match criteria, source can be either a prefix list or reference to IP prefix set",
-				MarkdownDescription: "source IP match criteria, source can be either a prefix list or reference to IP prefix set",
+				MarkdownDescription: "source IP match criteria, source can be either a prefix list or reference to IP prefix set<br>Exactly one of `ip_prefix_set` or `prefix` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -518,7 +518,7 @@ func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.S
 				Attributes: map[string]schema.Attribute{
 					"ip_prefix_set": schema.SingleNestedAttribute{
 						Description:         "ip_prefix_set Reference to IP prefix set object",
-						MarkdownDescription: "ip_prefix_set Reference to IP prefix set object",
+						MarkdownDescription: "ip_prefix_set Reference to IP prefix set object<br>Conflicts with `prefix`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -565,7 +565,7 @@ func (r *ResourceF5XCFastAclRule) Schema(ctx context.Context, request resource.S
 					},
 					"prefix": schema.SingleNestedAttribute{
 						Description:         "prefix List of IP prefixes",
-						MarkdownDescription: "prefix List of IP prefixes",
+						MarkdownDescription: "prefix List of IP prefixes<br>Conflicts with `ip_prefix_set`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1705,11 +1705,7 @@ func (r *ResourceF5XCFastAclRule) Read(ctx context.Context, request resource.Rea
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_fast_acl_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_fast_acl_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "fast_acl_rule", err),
@@ -2717,12 +2713,8 @@ func (r *ResourceF5XCFastAclRule) Update(ctx context.Context, request resource.U
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_fast_acl_rule.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_fast_acl_rule.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "fast_acl_rule", err),
@@ -2731,7 +2723,7 @@ func (r *ResourceF5XCFastAclRule) Update(ctx context.Context, request resource.U
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_fast_acl_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_fast_acl_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "fast_acl_rule", err),

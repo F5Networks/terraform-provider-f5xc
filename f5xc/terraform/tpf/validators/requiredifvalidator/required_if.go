@@ -2,28 +2,6 @@
 // Copyright (c) 2026 F5, Inc. All rights reserved.
 //
 
-// Package requiredifvalidator provides a Terraform string validator that ensures a field is set
-// when a sibling field holds one of the specified values.
-//
-// This is useful for enforcing conditional required fields, such as when a field becomes mandatory
-// only when another field is set to a specific value.
-//
-// The RequiredIfValidator checks the specified sibling field and reports an error if the current
-// field is null (not set) while the sibling field matches one of the specified values.
-// The sibling field may be either a string attribute or a list attribute; both are handled
-// transparently.
-//
-// Example usage in a resource schema:
-//
-//	"site_name": schema.StringAttribute{
-//	  Optional: true,
-//	  Validators: []validator.String{
-//	    requiredifvalidator.RequiredIf("type", "JWT"),
-//	  },
-//	},
-//
-// In this example, site_name becomes required when the type field is set to "JWT" (string) or
-// contains "JWT" as a list element (list of strings).
 package requiredifvalidator
 
 import (

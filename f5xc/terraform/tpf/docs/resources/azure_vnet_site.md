@@ -131,33 +131,32 @@ resource "f5xc_azure_vnet_site" "example" {
 
 ### Required
 
-- `blocked_services_choice` (Attributes) Blocked Services on Site By default webui, ssh and dns are all blocked, you can choose other options to unblock. (see [below for nested schema](#nestedatt--blocked_services_choice))
-- `deployment_choice` (Attributes) Automatic Deployment Deploying automatic via volterra. (see [below for nested schema](#nestedatt--deployment_choice))
-- `logs_receiver_choice` (Attributes) Logs Streaming Select Logs receiver for logs streaming (see [below for nested schema](#nestedatt--logs_receiver_choice))
+- `deployment_choice` (Attributes) Automatic Deployment Deploying automatic via volterra.<br>`azure_cred` must be specified. (see [below for nested schema](#nestedatt--deployment_choice))
 - `machine_type` (String) Machine Type Select Instance size based on performance needed. The default setting for Accelerated Networking is enabled, thus make sure you select a Virtual Machine that supports accelerated networking or disable the setting under, Select Ingress Gateway or Ingress/Egress Gateway > advanced options.<br>**Validation:** `Length LengthAtMost(64)`
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
-- `region_choice` (Attributes) Select Azure Region Type Choice of selecting recommended region or alternate region (see [below for nested schema](#nestedatt--region_choice))
+- `region_choice` (Attributes) Select Azure Region Type Choice of selecting recommended region or alternate region<br>Exactly one of `alternate_region` or `azure_region` must be specified. (see [below for nested schema](#nestedatt--region_choice))
 - `resource_group` (String) Resource Group Azure resource group for resources that will be created<br>**Validation:** `Length LengthBetween(1, 64)`
-- `site_type_choice` (Attributes) Number of interfaces on CE Choice of deploying one interface or two interface site (see [below for nested schema](#nestedatt--site_type_choice))
+- `site_type_choice` (Attributes) Number of interfaces on CE Choice of deploying one interface or two interface site<br>Exactly one of `ingress_egress_gw`, `ingress_egress_gw_ar`, `ingress_gw`, `ingress_gw_ar`, `voltstack_cluster`, or `voltstack_cluster_ar` must be specified. (see [below for nested schema](#nestedatt--site_type_choice))
 - `ssh_key` (String) Public SSH key Public SSH key for accessing the site.<br>**Validation:** `Length LengthBetween(1, 8192)`
 - `vnet` (Attributes) Vnet Choice of using existing VNet or create new VNet (see [below for nested schema](#nestedatt--vnet))
-- `worker_nodes_choice` (Attributes) Desired Worker Nodes Selection Choice of deploying desired number of worker nodes. (see [below for nested schema](#nestedatt--worker_nodes_choice))
 
 ### Optional
 
 - `address` (String) address Site's geographical address that can be used to determine its latitude and longitude.<br>**Validation:** `Length LengthAtMost(256)`<br>**Default:** ``
 - `admin_password` (Attributes) Admin Password Admin password user for accessing site through serial console . (see [below for nested schema](#nestedatt--admin_password))
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
+- `blocked_services_choice` (Attributes) Blocked Services on Site By default webui, ssh and dns are all blocked, you can choose other options to unblock.<br>Exactly one of `block_all_services`, `blocked_services`, or `default_blocked_services` must be specified when `blocked_services_choice` is configured. (see [below for nested schema](#nestedatt--blocked_services_choice))
 - `cloud_site_info` (Attributes) Azure VNet Site Info Azure VNet Site information obtained after creating the site (see [below for nested schema](#nestedatt--cloud_site_info))
 - `coordinates` (Attributes) coordinates Site longitude and latitude co-ordinates (see [below for nested schema](#nestedatt--coordinates))
 - `custom_dns` (Attributes) custom_dns custom dns configure to the CE site (see [below for nested schema](#nestedatt--custom_dns))
 - `description` (String) description Human readable description for the object
 - `disk_size` (Number) Cloud Disk size Disk size to be used for this instance in GiB. 80 is 80 GiB<br>**Default:** `80`
-- `encryption_choice` (Attributes) Encryption Option to encrypt the node disk with CMK. Defaults to disable encryption (see [below for nested schema](#nestedatt--encryption_choice))
+- `encryption_choice` (Attributes) Encryption Option to encrypt the node disk with CMK. Defaults to disable encryption<br>Exactly one of `disable_encryption` or `enable_encryption` must be specified when `encryption_choice` is configured. (see [below for nested schema](#nestedatt--encryption_choice))
 - `error_description` (String) error_description Description of error on site<br>**Default:** ``
 - `kubernetes_upgrade_drain` (Attributes) Enable Drain Enable Kubernetes Drain during OS or SW upgrade (see [below for nested schema](#nestedatt--kubernetes_upgrade_drain))
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
+- `logs_receiver_choice` (Attributes) Logs Streaming Select Logs receiver for logs streaming<br>Exactly one of `log_receiver` or `logs_streaming_disabled` must be specified when `logs_receiver_choice` is configured. (see [below for nested schema](#nestedatt--logs_receiver_choice))
 - `offline_survivability_mode` (Attributes) Offline Survivability Mode Enable/Disable offline survivability mode (see [below for nested schema](#nestedatt--offline_survivability_mode))
 - `os` (Attributes) Operating System Operating System Details (see [below for nested schema](#nestedatt--os))
 - `suggested_action` (String) suggested_action Suggested action for customer on error<br>**Default:** ``
@@ -165,47 +164,12 @@ resource "f5xc_azure_vnet_site" "example" {
 - `tags` (Map of String) Azure Tags Azure Tags is a label consisting of a user-defined key and value. It helps to manage, identify, organize, search for, and filter resources in Azure console.
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 - `waf_signatures` (Attributes) WAF Signatures Update Mode Select WAF Signatures Update Mode for the site. By default, new signatures will be applied manually. (see [below for nested schema](#nestedatt--waf_signatures))
+- `worker_nodes_choice` (Attributes) Desired Worker Nodes Selection Choice of deploying desired number of worker nodes.<br>Exactly one of `no_worker_nodes`, `nodes_per_az`, or `total_nodes` must be specified when `worker_nodes_choice` is configured. (see [below for nested schema](#nestedatt--worker_nodes_choice))
 
 ### Read-Only
 
 - `uid` (String) uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.
 - `validation_state` (List of String) validation_state Validation State of the Site<br>**Allowed Values (choose one):** `['VALIDATION_FAILED', 'VALIDATION_IN_PROGRESS', 'VALIDATION_STATE_NONE', 'VALIDATION_SUCCEEDED']`
-
-<a id="nestedatt--blocked_services_choice"></a>
-### Nested Schema for `blocked_services_choice`
-
-Optional:
-
-- `block_all_services` (Boolean) Block DNS, SSH & WebUI services on Site Block DNS, SSH & WebUI services on Site
-- `blocked_services` (Attributes) Custom Blocked Services Configuration Use custom blocked services configuration (see [below for nested schema](#nestedatt--blocked_services_choice--blocked_services))
-- `default_blocked_services` (Boolean, Deprecated) Allow access to DNS, SSH services on Site Allow access to DNS, SSH services on Site
-
-<a id="nestedatt--blocked_services_choice--blocked_services"></a>
-### Nested Schema for `blocked_services_choice.blocked_services`
-
-Optional:
-
-- `blocked_sevice` (Attributes List) Disable Node Local Services (see [below for nested schema](#nestedatt--blocked_services_choice--blocked_services--blocked_sevice))
-
-<a id="nestedatt--blocked_services_choice--blocked_services--blocked_sevice"></a>
-### Nested Schema for `blocked_services_choice.blocked_services.blocked_sevice`
-
-Optional:
-
-- `blocked_services_value_type_choice` (Attributes) blocked_services_type_choice Choose the Nodel Local Service to disable (see [below for nested schema](#nestedatt--blocked_services_choice--blocked_services--blocked_sevice--blocked_services_value_type_choice))
-- `network_type` (List of String) network_type Site Local VRF on which this service will be disabled<br>**Allowed Values (choose one):** `['VIRTUAL_NETWORK_GLOBAL', 'VIRTUAL_NETWORK_MANAGEMENT', 'VIRTUAL_NETWORK_PER_SITE', 'VIRTUAL_NETWORK_SEGMENT', 'VIRTUAL_NETWORK_SITE_LOCAL', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE', 'VIRTUAL_NETWORK_SITE_SERVICE']`<br>**Default:** `VIRTUAL_NETWORK_SITE_LOCAL`
-
-<a id="nestedatt--blocked_services_choice--blocked_services--blocked_sevice--blocked_services_value_type_choice"></a>
-### Nested Schema for `blocked_services_choice.blocked_services.blocked_sevice.blocked_services_value_type_choice`
-
-Optional:
-
-- `dns` (Boolean) DNS Matches DNS port 53
-- `ssh` (Boolean) SSH
-
-
-
-
 
 <a id="nestedatt--deployment_choice"></a>
 ### Nested Schema for `deployment_choice`
@@ -228,35 +192,13 @@ Read-Only:
 
 
 
-<a id="nestedatt--logs_receiver_choice"></a>
-### Nested Schema for `logs_receiver_choice`
-
-Optional:
-
-- `log_receiver` (Attributes) Disable Logs Streaming Select log receiver for logs streaming (see [below for nested schema](#nestedatt--logs_receiver_choice--log_receiver))
-- `logs_streaming_disabled` (Boolean) Disable Logs Receiver Logs Streaming is disabled
-
-<a id="nestedatt--logs_receiver_choice--log_receiver"></a>
-### Nested Schema for `logs_receiver_choice.log_receiver`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-
 <a id="nestedatt--region_choice"></a>
 ### Nested Schema for `region_choice`
 
 Optional:
 
-- `alternate_region` (String) Alternate Azure Region Name Name of the azure region which does not support availability zones.<br>**Validation:** `Length LengthAtMost(64)`
-- `azure_region` (String) Recommended Azure Region Name Name of the azure region which supports availability zones.<br>**Validation:** `Length LengthAtMost(64)`
+- `alternate_region` (String) Alternate Azure Region Name Name of the azure region which does not support availability zones.<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `azure_region`.
+- `azure_region` (String) Recommended Azure Region Name Name of the azure region which supports availability zones.<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `alternate_region`.
 
 
 <a id="nestedatt--site_type_choice"></a>
@@ -264,12 +206,12 @@ Optional:
 
 Optional:
 
-- `ingress_egress_gw` (Attributes) Ingress/Egress Gateway on Recommended Region Two interface site is useful when site is used as ingress/egress gateway to the VNet. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw))
-- `ingress_egress_gw_ar` (Attributes) Ingress/Egress Gateway on Alternate Region Two interface site is useful when site is used as ingress/egress gateway to the VNet. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar))
-- `ingress_gw` (Attributes) Ingress Gateway on Recommended Region One interface site is useful when site is only used as ingress gateway to the VNet. (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw))
-- `ingress_gw_ar` (Attributes) Ingress Gateway on Alternate Region One interface site is useful when site is only used as ingress gateway to the VNet. (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw_ar))
-- `voltstack_cluster` (Attributes) App Stack Cluster on Recommended Region App Stack Cluster using single interface, useful for deploying K8s cluster. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster))
-- `voltstack_cluster_ar` (Attributes) App Stack Cluster on Alternate Region App Stack Cluster using single interface, useful for deploying K8s cluster. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar))
+- `ingress_egress_gw` (Attributes) Ingress/Egress Gateway on Recommended Region Two interface site is useful when site is used as ingress/egress gateway to the VNet.<br>Conflicts with `ingress_egress_gw_ar`, `ingress_gw`, `ingress_gw_ar`, `voltstack_cluster`, and `voltstack_cluster_ar`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw))
+- `ingress_egress_gw_ar` (Attributes) Ingress/Egress Gateway on Alternate Region Two interface site is useful when site is used as ingress/egress gateway to the VNet.<br>Conflicts with `ingress_egress_gw`, `ingress_gw`, `ingress_gw_ar`, `voltstack_cluster`, and `voltstack_cluster_ar`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar))
+- `ingress_gw` (Attributes) Ingress Gateway on Recommended Region One interface site is useful when site is only used as ingress gateway to the VNet.<br>Conflicts with `ingress_egress_gw`, `ingress_egress_gw_ar`, `ingress_gw_ar`, `voltstack_cluster`, and `voltstack_cluster_ar`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw))
+- `ingress_gw_ar` (Attributes) Ingress Gateway on Alternate Region One interface site is useful when site is only used as ingress gateway to the VNet.<br>Conflicts with `ingress_egress_gw`, `ingress_egress_gw_ar`, `ingress_gw`, `voltstack_cluster`, and `voltstack_cluster_ar`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw_ar))
+- `voltstack_cluster` (Attributes) App Stack Cluster on Recommended Region App Stack Cluster using single interface, useful for deploying K8s cluster.<br>Conflicts with `ingress_egress_gw`, `ingress_egress_gw_ar`, `ingress_gw`, `ingress_gw_ar`, and `voltstack_cluster_ar`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster))
+- `voltstack_cluster_ar` (Attributes) App Stack Cluster on Alternate Region App Stack Cluster using single interface, useful for deploying K8s cluster.<br>Conflicts with `ingress_egress_gw`, `ingress_egress_gw_ar`, `ingress_gw`, `ingress_gw_ar`, and `voltstack_cluster`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw`
@@ -277,20 +219,20 @@ Optional:
 Required:
 
 - `az_nodes` (Attributes List) Nodes Only Single AZ or Three AZ(s) nodes are supported currently. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--az_nodes))
-- `dc_cluster_group_choice` (Attributes) Select DC Cluster Group Is this site member of a dc cluster group via selected network type (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--dc_cluster_group_choice))
-- `forward_proxy_choice` (Attributes) Manage Forward Proxy Manage Forward Proxy for this site (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--forward_proxy_choice))
-- `global_network_choice` (Attributes) Connect to Global Network Select global networks to connect to inside or outside network (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--global_network_choice))
-- `hub_choice` (Attributes) Choice of VNet type Select VNet is a hub or standalone (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice))
-- `inside_static_route_choice` (Attributes) Manage Static Routes for Inside Network Add static routes to inside network. Used to reach indirectly connected subnets. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--inside_static_route_choice))
-- `network_policy_choice` (Attributes) Manage Firewall Policy Manage Firewall Policy via this view (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--network_policy_choice))
-- `outside_static_route_choice` (Attributes) Manage Static Routes for Outside Network Add static routes to outside network. Used to reach indirectly connected subnets. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--outside_static_route_choice))
-- `site_mesh_group_choice` (Attributes) Site Mesh Group Connection Type Select how the site mesh group needs to be connected (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--site_mesh_group_choice))
+- `hub_choice` (Attributes) Choice of VNet type Select VNet is a hub or standalone<br>Exactly one of `hub` or `not_hub` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice))
 
 Optional:
 
 - `accelerated_networking` (Attributes) Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--accelerated_networking))
 - `azure_certified_hw` (String) Azure Certified Hardware Name for Azure certified hardware.<br>**Default:** `azure-byol-multi-nic-voltmesh`<br>**Validation:** `Length LengthAtMost(64)`<br>**Allowed Values (choose one):** `['azure-byol-multi-nic-voltmesh']`
+- `dc_cluster_group_choice` (Attributes) Select DC Cluster Group Is this site member of a dc cluster group via selected network type<br>Exactly one of `dc_cluster_group_inside_vn`, `dc_cluster_group_outside_vn`, or `no_dc_cluster_group` must be specified when `dc_cluster_group_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--dc_cluster_group_choice))
+- `forward_proxy_choice` (Attributes) Manage Forward Proxy Manage Forward Proxy for this site<br>Exactly one of `active_forward_proxy_policies`, `forward_proxy_allow_all`, or `no_forward_proxy` must be specified when `forward_proxy_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--forward_proxy_choice))
+- `global_network_choice` (Attributes) Connect to Global Network Select global networks to connect to inside or outside network<br>Exactly one of `global_network_list` or `no_global_network` must be specified when `global_network_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--global_network_choice))
+- `inside_static_route_choice` (Attributes) Manage Static Routes for Inside Network Add static routes to inside network. Used to reach indirectly connected subnets.<br>Exactly one of `inside_static_routes` or `no_inside_static_routes` must be specified when `inside_static_route_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--inside_static_route_choice))
+- `network_policy_choice` (Attributes) Manage Firewall Policy Manage Firewall Policy via this view<br>Exactly one of `active_enhanced_firewall_policies`, `active_network_policies`, or `no_network_policy` must be specified when `network_policy_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--network_policy_choice))
+- `outside_static_route_choice` (Attributes) Manage Static Routes for Outside Network Add static routes to outside network. Used to reach indirectly connected subnets.<br>Exactly one of `no_outside_static_routes` or `outside_static_routes` must be specified when `outside_static_route_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--outside_static_route_choice))
 - `performance_enhancement_mode` (Attributes) Performance Enhancement Choice Performance Enhancement Mode to optimize for L3 or L7 networking (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--performance_enhancement_mode))
+- `site_mesh_group_choice` (Attributes) Site Mesh Group Connection Type Select how the site mesh group needs to be connected<br>Exactly one of `sm_connection_public_ip` or `sm_connection_pvt_ip` must be specified when `site_mesh_group_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--site_mesh_group_choice))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw--az_nodes"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.az_nodes`
@@ -309,15 +251,15 @@ Optional:
 
 Required:
 
-- `choice` (Attributes) Choice of subnet Subnet for the Single interface of the site (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--az_nodes--inside_subnet--choice))
+- `choice` (Attributes) Choice of subnet Subnet for the Single interface of the site<br>Exactly one of `subnet` or `subnet_param` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--az_nodes--inside_subnet--choice))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw--az_nodes--inside_subnet--choice"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.az_nodes.inside_subnet.choice`
 
 Optional:
 
-- `subnet` (Attributes) Existing Subnet Information about existing subnet. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--az_nodes--inside_subnet--choice--subnet))
-- `subnet_param` (Attributes) New Subnet Parameters for creating new subnet. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--az_nodes--inside_subnet--choice--subnet_param))
+- `subnet` (Attributes) Existing Subnet Information about existing subnet.<br>Conflicts with `subnet_param`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--az_nodes--inside_subnet--choice--subnet))
+- `subnet_param` (Attributes) New Subnet Parameters for creating new subnet.<br>Conflicts with `subnet`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--az_nodes--inside_subnet--choice--subnet_param))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw--az_nodes--inside_subnet--choice--subnet"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.az_nodes.inside_subnet.choice.subnet`
@@ -328,15 +270,15 @@ Required:
 
 Optional:
 
-- `resource_group_choice` (Attributes) Existing Subnet Resource Group Resource group for this subnet. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--az_nodes--inside_subnet--choice--subnet--resource_group_choice))
+- `resource_group_choice` (Attributes) Existing Subnet Resource Group Resource group for this subnet.<br>Exactly one of `subnet_resource_grp` or `vnet_resource_group` must be specified when `resource_group_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--az_nodes--inside_subnet--choice--subnet--resource_group_choice))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw--az_nodes--inside_subnet--choice--subnet--resource_group_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.az_nodes.inside_subnet.choice.subnet.resource_group_choice`
 
 Optional:
 
-- `subnet_resource_grp` (String) subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`
-- `vnet_resource_group` (Boolean) vnet_resource_group Use the same Resource Group as the Vnet
+- `subnet_resource_grp` (String) subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `vnet_resource_group`.
+- `vnet_resource_group` (Boolean) vnet_resource_group Use the same Resource Group as the Vnet<br>Conflicts with `subnet_resource_grp`.
 
 
 
@@ -355,15 +297,15 @@ Required:
 
 Required:
 
-- `choice` (Attributes) Choice of subnet Subnet for the Single interface of the site (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--az_nodes--outside_subnet--choice))
+- `choice` (Attributes) Choice of subnet Subnet for the Single interface of the site<br>Exactly one of `subnet` or `subnet_param` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--az_nodes--outside_subnet--choice))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw--az_nodes--outside_subnet--choice"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.az_nodes.outside_subnet.choice`
 
 Optional:
 
-- `subnet` (Attributes) Existing Subnet Information about existing subnet. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--az_nodes--outside_subnet--choice--subnet))
-- `subnet_param` (Attributes) New Subnet Parameters for creating new subnet. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--az_nodes--outside_subnet--choice--subnet_param))
+- `subnet` (Attributes) Existing Subnet Information about existing subnet.<br>Conflicts with `subnet_param`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--az_nodes--outside_subnet--choice--subnet))
+- `subnet_param` (Attributes) New Subnet Parameters for creating new subnet.<br>Conflicts with `subnet`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--az_nodes--outside_subnet--choice--subnet_param))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw--az_nodes--outside_subnet--choice--subnet"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.az_nodes.outside_subnet.choice.subnet`
@@ -374,15 +316,15 @@ Required:
 
 Optional:
 
-- `resource_group_choice` (Attributes) Existing Subnet Resource Group Resource group for this subnet. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--az_nodes--outside_subnet--choice--subnet--resource_group_choice))
+- `resource_group_choice` (Attributes) Existing Subnet Resource Group Resource group for this subnet.<br>Exactly one of `subnet_resource_grp` or `vnet_resource_group` must be specified when `resource_group_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--az_nodes--outside_subnet--choice--subnet--resource_group_choice))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw--az_nodes--outside_subnet--choice--subnet--resource_group_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.az_nodes.outside_subnet.choice.subnet.resource_group_choice`
 
 Optional:
 
-- `subnet_resource_grp` (String) subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`
-- `vnet_resource_group` (Boolean) vnet_resource_group Use the same Resource Group as the Vnet
+- `subnet_resource_grp` (String) subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `vnet_resource_group`.
+- `vnet_resource_group` (Boolean) vnet_resource_group Use the same Resource Group as the Vnet<br>Conflicts with `subnet_resource_grp`.
 
 
 
@@ -397,14 +339,337 @@ Required:
 
 
 
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice`
+
+Optional:
+
+- `hub` (Attributes) Hub VNet This VNet is a hub VNet<br>Conflicts with `not_hub`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub))
+- `not_hub` (Boolean) Standalone VNet This VNet is a standalone VNet<br>Conflicts with `hub`.
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub`
+
+Required:
+
+- `express_route_choice` (Attributes) Express Route Configuration Express Route is disabled on this site or Express Route is enabled on this site<br>Exactly one of `express_route_disabled` or `express_route_enabled` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice))
+
+Optional:
+
+- `spoke_vnets` (Attributes List) Spoke VNet Peering Spoke VNet Peering (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--spoke_vnets))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice`
+
+Optional:
+
+- `express_route_disabled` (Boolean) Disabled Express Route is disabled on this site<br>Conflicts with `express_route_enabled`.
+- `express_route_enabled` (Attributes) Enabled Express Route is enabled on this site<br>Conflicts with `express_route_disabled`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled`
+
+Required:
+
+- `connections` (Attributes List) Connections Add the ExpressRoute Circuit Connections to this site (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections))
+
+Optional:
+
+- `asn_choice` (Attributes) Autonomous System Number (ASN) for F5XC Site Autonomous System Number (ASN) for F5XC Site<br>Exactly one of `auto_asn` or `custom_asn` must be specified when `asn_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--asn_choice))
+- `connectivity_options_choice` (Attributes) Site Registration & Connectivity to RE<br>Exactly one of `site_registration_over_express_route` or `site_registration_over_internet` must be specified when `connectivity_options_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connectivity_options_choice))
+- `gateway_subnet` (Attributes) Gateway Subnet Select the type of subnet to be used for VNet Gateway (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet))
+- `route_server_subnet` (Attributes) Route Server Subnet Select the type of subnet to be used for Azure Route Server (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet))
+- `sku_choice` (Attributes) Gateway SKU Gateway SKU to be used for Azure VNet Gateway<br>Exactly one of `sku_ergw1az`, `sku_ergw2az`, `sku_high_perf`, or `sku_standard` must be specified when `sku_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--sku_choice))
+- `spoke_vnet_routes_choice` (Attributes) Spoke Vnet Route Advertisement To Route Server<br>Exactly one of `advertise_to_route_server` or `do_not_advertise_to_route_server` must be specified when `spoke_vnet_routes_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--spoke_vnet_routes_choice))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.connections`
+
+Required:
+
+- `metadata` (Attributes) Connection Metadata Connection Metadata like name and description (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--metadata))
+
+Optional:
+
+- `subscription_choice` (Attributes) Express Route Circuit Configuration Select the type of Express Route Circuit Subscription<br>Exactly one of `circuit_id` or `other_subscription` must be specified when `subscription_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice))
+- `weight` (Number) Routing Weight The weight (or priority) for the routes received from this connection. The default value is 10.<br>**Default:** `10`
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--metadata"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.connections.metadata`
+
+Required:
+
+- `name` (String) name This is the name of the message. The value of name has to follow DNS-1035 format.<br>**Validation:** `Length LengthAtLeast(1)`
+
+Optional:
+
+- `description` (String) description Human readable description.<br>**Validation:** `Length LengthAtMost(256)`
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.connections.subscription_choice`
+
+Optional:
+
+- `circuit_id` (String) Circuit in Same subscription ExpressRoute Circuit is in same subscription as the site<br>**Validation:** `Length LengthAtMost(512)`<br>Conflicts with `other_subscription`.
+- `other_subscription` (Attributes) Circuit in another subscription ExpressRoute Circuit is in a different subscription than the site. In this case both Circuit ID and Authorization key are needed<br>Conflicts with `circuit_id`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.connections.subscription_choice.other_subscription`
+
+Optional:
+
+- `authorized_key` (Attributes) Authorization Key Authorization Key created by the circuit owner (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key))
+- `circuit_id` (String) Circuit ID Circuit ID<br>**Validation:** `Length LengthAtMost(512)`
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.connections.subscription_choice.other_subscription.authorized_key`
+
+Required:
+
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key--secret_info_choice))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key--secret_info_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.connections.subscription_choice.other_subscription.authorized_key.secret_info_choice`
+
+Optional:
+
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key--secret_info_choice--blindfold_secret_info"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.connections.subscription_choice.other_subscription.authorized_key.secret_info_choice.blindfold_secret_info`
+
+Required:
+
+- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+
+Optional:
+
+- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
+- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key--secret_info_choice--clear_secret_info"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.connections.subscription_choice.other_subscription.authorized_key.secret_info_choice.clear_secret_info`
+
+Required:
+
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+
+Optional:
+
+- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+
+
+
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--asn_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.asn_choice`
+
+Optional:
+
+- `auto_asn` (Boolean) Auto ASN (Recommended) Automatically set ASN for F5XC Site<br>Conflicts with `custom_asn`.
+- `custom_asn` (Number) Custom ASN Set custom ASN for F5XC Site<br>Conflicts with `auto_asn`.
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connectivity_options_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.connectivity_options_choice`
+
+Optional:
+
+- `site_registration_over_express_route` (Attributes) Site Registration & Connectivity to RE over Azure Express Route Site Registration and Site to RE tunnels go over the Azure Express Route<br>Conflicts with `site_registration_over_internet`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connectivity_options_choice--site_registration_over_express_route))
+- `site_registration_over_internet` (Boolean) Site Registration & Connectivity to RE over Internet Site Registration and Site to RE tunnels go over the internet<br>Conflicts with `site_registration_over_express_route`.
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connectivity_options_choice--site_registration_over_express_route"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.connectivity_options_choice.site_registration_over_express_route`
+
+Required:
+
+- `cloudlink_network_name` (String) Private ADN Network Establish private connectivity with the F5 Distributed Cloud Global Network using a Private ADN network. To provision a Private ADN network, please contact F5 Distributed Cloud support.
+
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.gateway_subnet`
+
+Optional:
+
+- `choice` (Attributes) Choice of subnet Select Auto Subnet, Existing Subnet or Create New<br>Exactly one of `auto`, `subnet`, or `subnet_param` must be specified when `choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.gateway_subnet.choice`
+
+Optional:
+
+- `auto` (Boolean) Auto Subnet The subnet CIDR is autogenerated.<br>Conflicts with `subnet` and `subnet_param`.
+- `subnet` (Attributes) Existing Subnet An existing subnet in specified resource group is used.<br>Conflicts with `auto` and `subnet_param`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice--subnet))
+- `subnet_param` (Attributes) New Subnet A new subnet with specified CIDR is created.<br>Conflicts with `auto` and `subnet`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice--subnet_param))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice--subnet"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.gateway_subnet.choice.subnet`
+
+Optional:
+
+- `resource_group_choice` (Attributes) Existing Subnet Resource Group Resource group for this subnet.<br>Exactly one of `subnet_resource_grp` or `vnet_resource_group` must be specified when `resource_group_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice--subnet--resource_group_choice))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice--subnet--resource_group_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.gateway_subnet.choice.subnet.resource_group_choice`
+
+Optional:
+
+- `subnet_resource_grp` (String) subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `vnet_resource_group`.
+- `vnet_resource_group` (Boolean) vnet_resource_group Use the same Resource Group as the Vnet<br>Conflicts with `subnet_resource_grp`.
+
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice--subnet_param"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.gateway_subnet.choice.subnet_param`
+
+Required:
+
+- `ipv4` (String) IPv4 Subnet IPv4 subnet prefix for this subnet
+
+
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.route_server_subnet`
+
+Optional:
+
+- `choice` (Attributes) Choice of subnet Select Auto Subnet, Existing Subnet or Create New<br>Exactly one of `auto`, `subnet`, or `subnet_param` must be specified when `choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.route_server_subnet.choice`
+
+Optional:
+
+- `auto` (Boolean) Auto Subnet The subnet CIDR is autogenerated.<br>Conflicts with `subnet` and `subnet_param`.
+- `subnet` (Attributes) Existing Subnet An existing subnet in specified resource group is used.<br>Conflicts with `auto` and `subnet_param`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice--subnet))
+- `subnet_param` (Attributes) New Subnet A new subnet with specified CIDR is created.<br>Conflicts with `auto` and `subnet`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice--subnet_param))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice--subnet"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.route_server_subnet.choice.subnet`
+
+Optional:
+
+- `resource_group_choice` (Attributes) Existing Subnet Resource Group Resource group for this subnet.<br>Exactly one of `subnet_resource_grp` or `vnet_resource_group` must be specified when `resource_group_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice--subnet--resource_group_choice))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice--subnet--resource_group_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.route_server_subnet.choice.subnet.resource_group_choice`
+
+Optional:
+
+- `subnet_resource_grp` (String) subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `vnet_resource_group`.
+- `vnet_resource_group` (Boolean) vnet_resource_group Use the same Resource Group as the Vnet<br>Conflicts with `subnet_resource_grp`.
+
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice--subnet_param"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.route_server_subnet.choice.subnet_param`
+
+Required:
+
+- `ipv4` (String) IPv4 Subnet IPv4 subnet prefix for this subnet
+
+
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--sku_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.sku_choice`
+
+Optional:
+
+- `sku_ergw1az` (Boolean) ErGw1Az SKU ErGw1Az SKU (Standard + Zone protection)<br>Conflicts with `sku_ergw2az`, `sku_high_perf`, and `sku_standard`.
+- `sku_ergw2az` (Boolean) ErGw2Az SKU ErGw2Az SKU (High Perf + Zone protection)<br>Conflicts with `sku_ergw1az`, `sku_high_perf`, and `sku_standard`.
+- `sku_high_perf` (Boolean) High Perf SKU High Perf SKU<br>Conflicts with `sku_ergw1az`, `sku_ergw2az`, and `sku_standard`.
+- `sku_standard` (Boolean) Standard SKU Standard SKU<br>Conflicts with `sku_ergw1az`, `sku_ergw2az`, and `sku_high_perf`.
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--spoke_vnet_routes_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.spoke_vnet_routes_choice`
+
+Optional:
+
+- `advertise_to_route_server` (Boolean) Advertise Spoke Vnet CIDR Routes To Route Server Advertise Spoke Vnet CIDR Routes To  Azure Route Server via BGP<br>Conflicts with `do_not_advertise_to_route_server`.
+- `do_not_advertise_to_route_server` (Boolean) Do Not Advertise Spoke Vnet CIDR Routes To Route Server Do Not Advertise Spoke Vnet CIDR Routes To  Azure Route Server via BGP<br>Conflicts with `advertise_to_route_server`.
+
+
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--spoke_vnets"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.spoke_vnets`
+
+Optional:
+
+- `labels` (Map of String) Labels For VNet's Peering Add Labels for each of the VNets peered with transit VNet, these labels can be used in firewall policy These labels used must be from known key and label defined in shared namespace
+- `routing_choice` (Attributes) Choice of routing configuration Select automatic or manual configuration for routes<br>Exactly one of `auto` or `manual` must be specified when `routing_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--spoke_vnets--routing_choice))
+- `vnet` (Attributes) VNet ID Information about existing VNet (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--spoke_vnets--vnet))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--spoke_vnets--routing_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.spoke_vnets.routing_choice`
+
+Optional:
+
+- `auto` (Boolean) Auto Routing setup routing for all existing subnets on spoke VNet<br>Conflicts with `manual`.
+- `manual` (Boolean) Manual Routing Manually setup routing on spoke VNet<br>Conflicts with `auto`.
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--spoke_vnets--vnet"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.spoke_vnets.vnet`
+
+Required:
+
+- `resource_group` (String) Existing Vnet Resource Group Resource group of existing Vnet<br>**Validation:** `Length LengthBetween(1, 64)`
+- `vnet_name` (String) Existing Vnet Name Name of existing Vnet<br>**Validation:** `Length LengthBetween(1, 64)`
+
+Optional:
+
+- `routing_type_choice` (Attributes) Choice of Routing This is choice of F5 Orchestrated Routing or Manual Routing for CE VPC/VNET<br>Exactly one of `f5_orchestrated_routing` or `manual_routing` must be specified when `routing_type_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--spoke_vnets--vnet--routing_type_choice))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--spoke_vnets--vnet--routing_type_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.spoke_vnets.vnet.routing_type_choice`
+
+Optional:
+
+- `f5_orchestrated_routing` (Boolean) F5 Orchestrated Routing F5 will orchestrate required routes for SLO Route Table towards Internet and SLI RT towards the CE.<br>Conflicts with `manual_routing`.
+- `manual_routing` (Boolean) Manual Routing In this mode, F5 will not create nor alter any route tables or routes within the existing VPCs/Vnets providing better integration for existing environments.<br>Conflicts with `f5_orchestrated_routing`.
+
+
+
+
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--accelerated_networking"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.accelerated_networking`
+
+Optional:
+
+- `accelerated_networking_choice` (Attributes) Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen<br>Exactly one of `disable` or `enable` must be specified when `accelerated_networking_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--accelerated_networking--accelerated_networking_choice))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--accelerated_networking--accelerated_networking_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.accelerated_networking.accelerated_networking_choice`
+
+Optional:
+
+- `disable` (Boolean) Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.<br>Conflicts with `enable`.
+- `enable` (Boolean) Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance<br>Conflicts with `disable`.
+
+
+
 <a id="nestedatt--site_type_choice--ingress_egress_gw--dc_cluster_group_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.dc_cluster_group_choice`
 
 Optional:
 
-- `dc_cluster_group_inside_vn` (Attributes) Member of DC cluster Group via Inside Network This site is member of dc cluster group connected via inside network (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--dc_cluster_group_choice--dc_cluster_group_inside_vn))
-- `dc_cluster_group_outside_vn` (Attributes) Member of DC cluster Group via Outside Network This site is member of dc cluster group connected via outside network (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--dc_cluster_group_choice--dc_cluster_group_outside_vn))
-- `no_dc_cluster_group` (Boolean) Not a Member of DC Cluster Group This site is not a member of dc cluster group
+- `dc_cluster_group_inside_vn` (Attributes) Member of DC cluster Group via Inside Network This site is member of dc cluster group connected via inside network<br>Conflicts with `dc_cluster_group_outside_vn` and `no_dc_cluster_group`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--dc_cluster_group_choice--dc_cluster_group_inside_vn))
+- `dc_cluster_group_outside_vn` (Attributes) Member of DC cluster Group via Outside Network This site is member of dc cluster group connected via outside network<br>Conflicts with `dc_cluster_group_inside_vn` and `no_dc_cluster_group`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--dc_cluster_group_choice--dc_cluster_group_outside_vn))
+- `no_dc_cluster_group` (Boolean) Not a Member of DC Cluster Group This site is not a member of dc cluster group<br>Conflicts with `dc_cluster_group_inside_vn` and `dc_cluster_group_outside_vn`.
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw--dc_cluster_group_choice--dc_cluster_group_inside_vn"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.dc_cluster_group_choice.dc_cluster_group_inside_vn`
@@ -438,9 +703,9 @@ Read-Only:
 
 Optional:
 
-- `active_forward_proxy_policies` (Attributes) Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--forward_proxy_choice--active_forward_proxy_policies))
-- `forward_proxy_allow_all` (Boolean) Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.
-- `no_forward_proxy` (Boolean) Disable Forward Proxy Disable Forward Proxy for this site
+- `active_forward_proxy_policies` (Attributes) Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies<br>Conflicts with `forward_proxy_allow_all` and `no_forward_proxy`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--forward_proxy_choice--active_forward_proxy_policies))
+- `forward_proxy_allow_all` (Boolean) Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.<br>Conflicts with `active_forward_proxy_policies` and `no_forward_proxy`.
+- `no_forward_proxy` (Boolean) Disable Forward Proxy Disable Forward Proxy for this site<br>Conflicts with `active_forward_proxy_policies` and `forward_proxy_allow_all`.
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw--forward_proxy_choice--active_forward_proxy_policies"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.forward_proxy_choice.active_forward_proxy_policies`
@@ -469,8 +734,8 @@ Read-Only:
 
 Optional:
 
-- `global_network_list` (Attributes) Connect Global Networks List of global network connections (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--global_network_choice--global_network_list))
-- `no_global_network` (Boolean) Do not Connect Global Networks No global network to connect
+- `global_network_list` (Attributes) Connect Global Networks List of global network connections<br>Conflicts with `no_global_network`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--global_network_choice--global_network_list))
+- `no_global_network` (Boolean) Do not Connect Global Networks No global network to connect<br>Conflicts with `global_network_list`.
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw--global_network_choice--global_network_list"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.global_network_choice.global_network_list`
@@ -484,15 +749,15 @@ Required:
 
 Required:
 
-- `connection_choice` (Attributes) Connector Choice Select the networks and method in which they are connected. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--global_network_choice--global_network_list--global_network_connections--connection_choice))
+- `connection_choice` (Attributes) Connector Choice Select the networks and method in which they are connected.<br>Exactly one of `sli_to_global_dr` or `slo_to_global_dr` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--global_network_choice--global_network_list--global_network_connections--connection_choice))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw--global_network_choice--global_network_list--global_network_connections--connection_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.global_network_choice.global_network_list.global_network_connections.connection_choice`
 
 Optional:
 
-- `sli_to_global_dr` (Attributes) Site Local Inside to a Global Network' Site local inside is connected directly to a given global network (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--global_network_choice--global_network_list--global_network_connections--connection_choice--sli_to_global_dr))
-- `slo_to_global_dr` (Attributes) Site Local Outside to a Global Network' Site local outside is connected directly to a given global network (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--global_network_choice--global_network_list--global_network_connections--connection_choice--slo_to_global_dr))
+- `sli_to_global_dr` (Attributes) Site Local Inside to a Global Network' Site local inside is connected directly to a given global network<br>Conflicts with `slo_to_global_dr`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--global_network_choice--global_network_list--global_network_connections--connection_choice--sli_to_global_dr))
+- `slo_to_global_dr` (Attributes) Site Local Outside to a Global Network' Site local outside is connected directly to a given global network<br>Conflicts with `sli_to_global_dr`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--global_network_choice--global_network_list--global_network_connections--connection_choice--slo_to_global_dr))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw--global_network_choice--global_network_list--global_network_connections--connection_choice--sli_to_global_dr"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.global_network_choice.global_network_list.global_network_connections.connection_choice.sli_to_global_dr`
@@ -540,319 +805,13 @@ Read-Only:
 
 
 
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice`
-
-Optional:
-
-- `hub` (Attributes) Hub VNet This VNet is a hub VNet (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub))
-- `not_hub` (Boolean) Standalone VNet This VNet is a standalone VNet
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub`
-
-Required:
-
-- `express_route_choice` (Attributes) Express Route Configuration Express Route is disabled on this site or Express Route is enabled on this site (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice))
-
-Optional:
-
-- `spoke_vnets` (Attributes List) Spoke VNet Peering Spoke VNet Peering (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--spoke_vnets))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice`
-
-Optional:
-
-- `express_route_disabled` (Boolean) Disabled Express Route is disabled on this site
-- `express_route_enabled` (Attributes) Enabled Express Route is enabled on this site (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled`
-
-Required:
-
-- `asn_choice` (Attributes) Autonomous System Number (ASN) for F5XC Site Autonomous System Number (ASN) for F5XC Site (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--asn_choice))
-- `connections` (Attributes List) Connections Add the ExpressRoute Circuit Connections to this site (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections))
-
-Optional:
-
-- `connectivity_options_choice` (Attributes) Site Registration & Connectivity to RE (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connectivity_options_choice))
-- `gateway_subnet` (Attributes) Gateway Subnet Select the type of subnet to be used for VNet Gateway (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet))
-- `route_server_subnet` (Attributes) Route Server Subnet Select the type of subnet to be used for Azure Route Server (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet))
-- `sku_choice` (Attributes) Gateway SKU Gateway SKU to be used for Azure VNet Gateway (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--sku_choice))
-- `spoke_vnet_routes_choice` (Attributes) Spoke Vnet Route Advertisement To Route Server (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--spoke_vnet_routes_choice))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--asn_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.asn_choice`
-
-Optional:
-
-- `auto_asn` (Boolean) Auto ASN (Recommended) Automatically set ASN for F5XC Site
-- `custom_asn` (Number) Custom ASN Set custom ASN for F5XC Site
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.connections`
-
-Required:
-
-- `metadata` (Attributes) Connection Metadata Connection Metadata like name and description (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--metadata))
-
-Optional:
-
-- `subscription_choice` (Attributes) Express Route Circuit Configuration Select the type of Express Route Circuit Subscription (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice))
-- `weight` (Number) Routing Weight The weight (or priority) for the routes received from this connection. The default value is 10.<br>**Default:** `10`
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--metadata"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.connections.metadata`
-
-Required:
-
-- `name` (String) name This is the name of the message. The value of name has to follow DNS-1035 format.<br>**Validation:** `Length LengthAtLeast(1)`
-
-Optional:
-
-- `description` (String) description Human readable description.<br>**Validation:** `Length LengthAtMost(256)`
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.connections.subscription_choice`
-
-Optional:
-
-- `circuit_id` (String) Circuit in Same subscription ExpressRoute Circuit is in same subscription as the site<br>**Validation:** `Length LengthAtMost(512)`
-- `other_subscription` (Attributes) Circuit in another subscription ExpressRoute Circuit is in a different subscription than the site. In this case both Circuit ID and Authorization key are needed (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.connections.subscription_choice.other_subscription`
-
-Optional:
-
-- `authorized_key` (Attributes) Authorization Key Authorization Key created by the circuit owner (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key))
-- `circuit_id` (String) Circuit ID Circuit ID<br>**Validation:** `Length LengthAtMost(512)`
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.connections.subscription_choice.other_subscription.authorized_key`
-
-Required:
-
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key--secret_info_choice))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key--secret_info_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.connections.subscription_choice.other_subscription.authorized_key.secret_info_choice`
-
-Optional:
-
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key--secret_info_choice--blindfold_secret_info"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.connections.subscription_choice.other_subscription.authorized_key.secret_info_choice.blindfold_secret_info`
-
-Required:
-
-- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
-
-Optional:
-
-- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
-- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key--secret_info_choice--clear_secret_info"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.connections.subscription_choice.other_subscription.authorized_key.secret_info_choice.clear_secret_info`
-
-Required:
-
-- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
-
-Optional:
-
-- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-
-
-
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connectivity_options_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.connectivity_options_choice`
-
-Optional:
-
-- `site_registration_over_express_route` (Attributes) Site Registration & Connectivity to RE over Azure Express Route Site Registration and Site to RE tunnels go over the Azure Express Route (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connectivity_options_choice--site_registration_over_express_route))
-- `site_registration_over_internet` (Boolean) Site Registration & Connectivity to RE over Internet Site Registration and Site to RE tunnels go over the internet
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--connectivity_options_choice--site_registration_over_express_route"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.connectivity_options_choice.site_registration_over_express_route`
-
-Required:
-
-- `cloudlink_network_name` (String) Private ADN Network Establish private connectivity with the F5 Distributed Cloud Global Network using a Private ADN network. To provision a Private ADN network, please contact F5 Distributed Cloud support.
-
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.gateway_subnet`
-
-Required:
-
-- `choice` (Attributes) Choice of subnet Select Auto Subnet, Existing Subnet or Create New (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.gateway_subnet.choice`
-
-Optional:
-
-- `auto` (Boolean) Auto Subnet The subnet CIDR is autogenerated.
-- `subnet` (Attributes) Existing Subnet An existing subnet in specified resource group is used. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice--subnet))
-- `subnet_param` (Attributes) New Subnet A new subnet with specified CIDR is created. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice--subnet_param))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice--subnet"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.gateway_subnet.choice.subnet`
-
-Optional:
-
-- `resource_group_choice` (Attributes) Existing Subnet Resource Group Resource group for this subnet. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice--subnet--resource_group_choice))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice--subnet--resource_group_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.gateway_subnet.choice.subnet.resource_group_choice`
-
-Optional:
-
-- `subnet_resource_grp` (String) subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`
-- `vnet_resource_group` (Boolean) vnet_resource_group Use the same Resource Group as the Vnet
-
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice--subnet_param"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.gateway_subnet.choice.subnet_param`
-
-Required:
-
-- `ipv4` (String) IPv4 Subnet IPv4 subnet prefix for this subnet
-
-
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.route_server_subnet`
-
-Required:
-
-- `choice` (Attributes) Choice of subnet Select Auto Subnet, Existing Subnet or Create New (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.route_server_subnet.choice`
-
-Optional:
-
-- `auto` (Boolean) Auto Subnet The subnet CIDR is autogenerated.
-- `subnet` (Attributes) Existing Subnet An existing subnet in specified resource group is used. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice--subnet))
-- `subnet_param` (Attributes) New Subnet A new subnet with specified CIDR is created. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice--subnet_param))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice--subnet"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.route_server_subnet.choice.subnet`
-
-Optional:
-
-- `resource_group_choice` (Attributes) Existing Subnet Resource Group Resource group for this subnet. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice--subnet--resource_group_choice))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice--subnet--resource_group_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.route_server_subnet.choice.subnet.resource_group_choice`
-
-Optional:
-
-- `subnet_resource_grp` (String) subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`
-- `vnet_resource_group` (Boolean) vnet_resource_group Use the same Resource Group as the Vnet
-
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice--subnet_param"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.route_server_subnet.choice.subnet_param`
-
-Required:
-
-- `ipv4` (String) IPv4 Subnet IPv4 subnet prefix for this subnet
-
-
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--sku_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.sku_choice`
-
-Optional:
-
-- `sku_ergw1az` (Boolean) ErGw1Az SKU ErGw1Az SKU (Standard + Zone protection)
-- `sku_ergw2az` (Boolean) ErGw2Az SKU ErGw2Az SKU (High Perf + Zone protection)
-- `sku_high_perf` (Boolean) High Perf SKU High Perf SKU
-- `sku_standard` (Boolean) Standard SKU Standard SKU
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--express_route_choice--express_route_enabled--spoke_vnet_routes_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.express_route_choice.express_route_enabled.spoke_vnet_routes_choice`
-
-Optional:
-
-- `advertise_to_route_server` (Boolean) Advertise Spoke Vnet CIDR Routes To Route Server Advertise Spoke Vnet CIDR Routes To  Azure Route Server via BGP
-- `do_not_advertise_to_route_server` (Boolean) Do Not Advertise Spoke Vnet CIDR Routes To Route Server Do Not Advertise Spoke Vnet CIDR Routes To  Azure Route Server via BGP
-
-
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--spoke_vnets"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.spoke_vnets`
-
-Required:
-
-- `routing_choice` (Attributes) Choice of routing configuration Select automatic or manual configuration for routes (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--spoke_vnets--routing_choice))
-
-Optional:
-
-- `labels` (Map of String) Labels For VNet's Peering Add Labels for each of the VNets peered with transit VNet, these labels can be used in firewall policy These labels used must be from known key and label defined in shared namespace
-- `vnet` (Attributes) VNet ID Information about existing VNet (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--spoke_vnets--vnet))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--spoke_vnets--routing_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.spoke_vnets.routing_choice`
-
-Optional:
-
-- `auto` (Boolean) Auto Routing setup routing for all existing subnets on spoke VNet
-- `manual` (Boolean) Manual Routing Manually setup routing on spoke VNet
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--spoke_vnets--vnet"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.spoke_vnets.vnet`
-
-Required:
-
-- `resource_group` (String) Existing Vnet Resource Group Resource group of existing Vnet<br>**Validation:** `Length LengthBetween(1, 64)`
-- `routing_type_choice` (Attributes) Choice of Routing This is choice of F5 Orchestrated Routing or Manual Routing for CE VPC/VNET (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--spoke_vnets--vnet--routing_type_choice))
-- `vnet_name` (String) Existing Vnet Name Name of existing Vnet<br>**Validation:** `Length LengthBetween(1, 64)`
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--hub_choice--hub--spoke_vnets--vnet--routing_type_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.hub_choice.hub.spoke_vnets.vnet.routing_type_choice`
-
-Optional:
-
-- `f5_orchestrated_routing` (Boolean) F5 Orchestrated Routing F5 will orchestrate required routes for SLO Route Table towards Internet and SLI RT towards the CE.
-- `manual_routing` (Boolean) Manual Routing In this mode, F5 will not create nor alter any route tables or routes within the existing VPCs/Vnets providing better integration for existing environments.
-
-
-
-
-
-
 <a id="nestedatt--site_type_choice--ingress_egress_gw--inside_static_route_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.inside_static_route_choice`
 
 Optional:
 
-- `inside_static_routes` (Attributes) Manage Static routes Manage static routes for inside network. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--inside_static_route_choice--inside_static_routes))
-- `no_inside_static_routes` (Boolean) Do Not Manage Static Routes Static Routes disabled for inside network.
+- `inside_static_routes` (Attributes) Manage Static routes Manage static routes for inside network.<br>Conflicts with `no_inside_static_routes`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--inside_static_route_choice--inside_static_routes))
+- `no_inside_static_routes` (Boolean) Do Not Manage Static Routes Static Routes disabled for inside network.<br>Conflicts with `inside_static_routes`.
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw--inside_static_route_choice--inside_static_routes"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.inside_static_route_choice.inside_static_routes`
@@ -866,15 +825,15 @@ Required:
 
 Required:
 
-- `config_mode_choice` (Attributes) Static Route Config Mode Select method for configuring the route (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice))
+- `config_mode_choice` (Attributes) Static Route Config Mode Select method for configuring the route<br>Exactly one of `custom_static_route` or `simple_static_route` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.inside_static_route_choice.inside_static_routes.static_route_list.config_mode_choice`
 
 Optional:
 
-- `custom_static_route` (Attributes) Custom Static Route Use Custom static route to configure all advanced options (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route))
-- `simple_static_route` (String) Simple Static Route Use simple static route for prefix pointing to single interface in the network
+- `custom_static_route` (Attributes) Custom Static Route Use Custom static route to configure all advanced options<br>Conflicts with `simple_static_route`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route))
+- `simple_static_route` (String) Simple Static Route Use simple static route for prefix pointing to single interface in the network<br>Conflicts with `custom_static_route`.
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.inside_static_route_choice.inside_static_routes.static_route_list.config_mode_choice.custom_static_route`
@@ -894,7 +853,7 @@ Optional:
 
 Required:
 
-- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--subnets--ver_choice))
+- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address<br>`ipv4` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--subnets--ver_choice))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--subnets--ver_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.inside_static_route_choice.inside_static_routes.static_route_list.config_mode_choice.custom_static_route.subnets.ver_choice`
@@ -941,15 +900,15 @@ Read-Only:
 
 Optional:
 
-- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 Address or IPv6 Address (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice))
+- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 Address or IPv6 Address<br>Exactly one of `dual_stack` or `ipv4` must be specified when `ver_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.inside_static_route_choice.inside_static_routes.static_route_list.config_mode_choice.custom_static_route.nexthop.nexthop_address.ver_choice`
 
 Optional:
 
-- `dual_stack` (Attributes) Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--dual_stack))
-- `ipv4` (Attributes) IPv4 Address IPv4 Address (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--ipv4))
+- `dual_stack` (Attributes) Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together<br>Conflicts with `ipv4`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--dual_stack))
+- `ipv4` (Attributes) IPv4 Address IPv4 Address<br>Conflicts with `dual_stack`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--ipv4))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--dual_stack"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.inside_static_route_choice.inside_static_routes.static_route_list.config_mode_choice.custom_static_route.nexthop.nexthop_address.ver_choice.dual_stack`
@@ -997,9 +956,9 @@ Optional:
 
 Optional:
 
-- `active_enhanced_firewall_policies` (Attributes) Manage Enhanced Firewall Policy Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--network_policy_choice--active_enhanced_firewall_policies))
-- `active_network_policies` (Attributes) Manage Firewall Policy Firewall Policies active for this site. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--network_policy_choice--active_network_policies))
-- `no_network_policy` (Boolean) Do Not Manage Firewall Policy Firewall Policy is disabled for this site.
+- `active_enhanced_firewall_policies` (Attributes) Manage Enhanced Firewall Policy Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion.<br>Conflicts with `active_network_policies` and `no_network_policy`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--network_policy_choice--active_enhanced_firewall_policies))
+- `active_network_policies` (Attributes) Manage Firewall Policy Firewall Policies active for this site.<br>Conflicts with `active_enhanced_firewall_policies` and `no_network_policy`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--network_policy_choice--active_network_policies))
+- `no_network_policy` (Boolean) Do Not Manage Firewall Policy Firewall Policy is disabled for this site.<br>Conflicts with `active_enhanced_firewall_policies` and `active_network_policies`.
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw--network_policy_choice--active_enhanced_firewall_policies"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.network_policy_choice.active_enhanced_firewall_policies`
@@ -1049,8 +1008,8 @@ Read-Only:
 
 Optional:
 
-- `no_outside_static_routes` (Boolean) Do Not Manage Static Routes Static Routes disabled for outside network.
-- `outside_static_routes` (Attributes) Manage Static routes Manage static routes for outside network. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--outside_static_route_choice--outside_static_routes))
+- `no_outside_static_routes` (Boolean) Do Not Manage Static Routes Static Routes disabled for outside network.<br>Conflicts with `outside_static_routes`.
+- `outside_static_routes` (Attributes) Manage Static routes Manage static routes for outside network.<br>Conflicts with `no_outside_static_routes`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--outside_static_route_choice--outside_static_routes))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw--outside_static_route_choice--outside_static_routes"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.outside_static_route_choice.outside_static_routes`
@@ -1064,15 +1023,15 @@ Required:
 
 Required:
 
-- `config_mode_choice` (Attributes) Static Route Config Mode Select method for configuring the route (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice))
+- `config_mode_choice` (Attributes) Static Route Config Mode Select method for configuring the route<br>Exactly one of `custom_static_route` or `simple_static_route` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.outside_static_route_choice.outside_static_routes.static_route_list.config_mode_choice`
 
 Optional:
 
-- `custom_static_route` (Attributes) Custom Static Route Use Custom static route to configure all advanced options (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route))
-- `simple_static_route` (String) Simple Static Route Use simple static route for prefix pointing to single interface in the network
+- `custom_static_route` (Attributes) Custom Static Route Use Custom static route to configure all advanced options<br>Conflicts with `simple_static_route`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route))
+- `simple_static_route` (String) Simple Static Route Use simple static route for prefix pointing to single interface in the network<br>Conflicts with `custom_static_route`.
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.outside_static_route_choice.outside_static_routes.static_route_list.config_mode_choice.custom_static_route`
@@ -1092,7 +1051,7 @@ Optional:
 
 Required:
 
-- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--subnets--ver_choice))
+- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address<br>`ipv4` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--subnets--ver_choice))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--subnets--ver_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.outside_static_route_choice.outside_static_routes.static_route_list.config_mode_choice.custom_static_route.subnets.ver_choice`
@@ -1139,15 +1098,15 @@ Read-Only:
 
 Optional:
 
-- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 Address or IPv6 Address (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice))
+- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 Address or IPv6 Address<br>Exactly one of `dual_stack` or `ipv4` must be specified when `ver_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.outside_static_route_choice.outside_static_routes.static_route_list.config_mode_choice.custom_static_route.nexthop.nexthop_address.ver_choice`
 
 Optional:
 
-- `dual_stack` (Attributes) Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--dual_stack))
-- `ipv4` (Attributes) IPv4 Address IPv4 Address (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--ipv4))
+- `dual_stack` (Attributes) Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together<br>Conflicts with `ipv4`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--dual_stack))
+- `ipv4` (Attributes) IPv4 Address IPv4 Address<br>Conflicts with `dual_stack`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--ipv4))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--dual_stack"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.outside_static_route_choice.outside_static_routes.static_route_list.config_mode_choice.custom_static_route.nexthop.nexthop_address.ver_choice.dual_stack`
@@ -1190,47 +1149,30 @@ Optional:
 
 
 
-<a id="nestedatt--site_type_choice--ingress_egress_gw--site_mesh_group_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.site_mesh_group_choice`
-
-Optional:
-
-- `sm_connection_public_ip` (Boolean) Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group
-- `sm_connection_pvt_ip` (Boolean) Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--accelerated_networking"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.accelerated_networking`
-
-Required:
-
-- `accelerated_networking_choice` (Attributes) Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--accelerated_networking--accelerated_networking_choice))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw--accelerated_networking--accelerated_networking_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw.accelerated_networking.accelerated_networking_choice`
-
-Optional:
-
-- `disable` (Boolean) Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.
-- `enable` (Boolean) Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance
-
-
-
 <a id="nestedatt--site_type_choice--ingress_egress_gw--performance_enhancement_mode"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.performance_enhancement_mode`
 
-Required:
+Optional:
 
-- `perf_mode_choice` (Attributes) Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--performance_enhancement_mode--perf_mode_choice))
+- `perf_mode_choice` (Attributes) Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.<br>Exactly one of `perf_mode_l3_enhanced` or `perf_mode_l7_enhanced` must be specified when `perf_mode_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw--performance_enhancement_mode--perf_mode_choice))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw--performance_enhancement_mode--perf_mode_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw.performance_enhancement_mode.perf_mode_choice`
 
 Optional:
 
-- `perf_mode_l3_enhanced` (Boolean) L3 Mode Enhanced Performance Site optimized for L3 traffic processing
-- `perf_mode_l7_enhanced` (Boolean) Default Performance Mode Site optimized for L7 traffic processing
+- `perf_mode_l3_enhanced` (Boolean) L3 Mode Enhanced Performance Site optimized for L3 traffic processing<br>Conflicts with `perf_mode_l7_enhanced`.
+- `perf_mode_l7_enhanced` (Boolean) Default Performance Mode Site optimized for L7 traffic processing<br>Conflicts with `perf_mode_l3_enhanced`.
 
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw--site_mesh_group_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw.site_mesh_group_choice`
+
+Optional:
+
+- `sm_connection_public_ip` (Boolean) Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group<br>Conflicts with `sm_connection_pvt_ip`.
+- `sm_connection_pvt_ip` (Boolean) Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group<br>Conflicts with `sm_connection_public_ip`.
 
 
 
@@ -1239,30 +1181,353 @@ Optional:
 
 Required:
 
-- `dc_cluster_group_choice` (Attributes) Select DC Cluster Group Is this site member of a dc cluster group via selected network type (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--dc_cluster_group_choice))
-- `forward_proxy_choice` (Attributes) Manage Forward Proxy Manage Forward Proxy for this site (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--forward_proxy_choice))
-- `global_network_choice` (Attributes) Connect to Global Network Select global networks to connect to inside or outside network (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--global_network_choice))
-- `hub_choice` (Attributes) Choice of VNet type Select VNet is a hub or standalone (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice))
-- `inside_static_route_choice` (Attributes) Manage Static Routes for Inside Network Add static routes to inside network. Used to reach indirectly connected subnets. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--inside_static_route_choice))
-- `network_policy_choice` (Attributes) Manage Firewall Policy Manage Firewall Policy via this view (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--network_policy_choice))
-- `outside_static_route_choice` (Attributes) Manage Static Routes for Outside Network Add static routes to outside network. Used to reach indirectly connected subnets. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--outside_static_route_choice))
-- `site_mesh_group_choice` (Attributes) Site Mesh Group Connection Type Select how the site mesh group needs to be connected (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--site_mesh_group_choice))
+- `hub_choice` (Attributes) Choice of VNet type Select VNet is a hub or standalone<br>Exactly one of `hub` or `not_hub` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice))
 
 Optional:
 
 - `accelerated_networking` (Attributes) Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--accelerated_networking))
 - `azure_certified_hw` (String) Azure Certified Hardware Name for Azure certified hardware.<br>**Default:** `azure-byol-multi-nic-voltmesh`<br>**Validation:** `Length LengthAtMost(64)`<br>**Allowed Values (choose one):** `['azure-byol-multi-nic-voltmesh']`
+- `dc_cluster_group_choice` (Attributes) Select DC Cluster Group Is this site member of a dc cluster group via selected network type<br>Exactly one of `dc_cluster_group_inside_vn`, `dc_cluster_group_outside_vn`, or `no_dc_cluster_group` must be specified when `dc_cluster_group_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--dc_cluster_group_choice))
+- `forward_proxy_choice` (Attributes) Manage Forward Proxy Manage Forward Proxy for this site<br>Exactly one of `active_forward_proxy_policies`, `forward_proxy_allow_all`, or `no_forward_proxy` must be specified when `forward_proxy_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--forward_proxy_choice))
+- `global_network_choice` (Attributes) Connect to Global Network Select global networks to connect to inside or outside network<br>Exactly one of `global_network_list` or `no_global_network` must be specified when `global_network_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--global_network_choice))
+- `inside_static_route_choice` (Attributes) Manage Static Routes for Inside Network Add static routes to inside network. Used to reach indirectly connected subnets.<br>Exactly one of `inside_static_routes` or `no_inside_static_routes` must be specified when `inside_static_route_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--inside_static_route_choice))
+- `network_policy_choice` (Attributes) Manage Firewall Policy Manage Firewall Policy via this view<br>Exactly one of `active_enhanced_firewall_policies`, `active_network_policies`, or `no_network_policy` must be specified when `network_policy_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--network_policy_choice))
 - `node` (Attributes) Node Information Ingress/Egress Gateway (Two Interface) Node information. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--node))
+- `outside_static_route_choice` (Attributes) Manage Static Routes for Outside Network Add static routes to outside network. Used to reach indirectly connected subnets.<br>Exactly one of `no_outside_static_routes` or `outside_static_routes` must be specified when `outside_static_route_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--outside_static_route_choice))
 - `performance_enhancement_mode` (Attributes) Performance Enhancement Choice Performance Enhancement Mode to optimize for L3 or L7 networking (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--performance_enhancement_mode))
+- `site_mesh_group_choice` (Attributes) Site Mesh Group Connection Type Select how the site mesh group needs to be connected<br>Exactly one of `sm_connection_public_ip` or `sm_connection_pvt_ip` must be specified when `site_mesh_group_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--site_mesh_group_choice))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice`
+
+Optional:
+
+- `hub` (Attributes) Hub VNet This VNet is a hub VNet<br>Conflicts with `not_hub`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub))
+- `not_hub` (Boolean) Standalone VNet This VNet is a standalone VNet<br>Conflicts with `hub`.
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub`
+
+Required:
+
+- `express_route_choice` (Attributes) Express Route Configuration Express Route is disabled on this site or Express Route is enabled on this site<br>Exactly one of `express_route_disabled` or `express_route_enabled` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice))
+
+Optional:
+
+- `spoke_vnets` (Attributes List) Spoke VNet Peering Spoke VNet Peering (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--spoke_vnets))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice`
+
+Optional:
+
+- `express_route_disabled` (Boolean) Disabled Express Route is disabled on this site<br>Conflicts with `express_route_enabled`.
+- `express_route_enabled` (Attributes) Enabled Express Route is enabled on this site<br>Conflicts with `express_route_disabled`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled`
+
+Required:
+
+- `connections` (Attributes List) Connections Add the ExpressRoute Circuit Connections to this site (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections))
+
+Optional:
+
+- `asn_choice` (Attributes) Autonomous System Number (ASN) for F5XC Site Autonomous System Number (ASN) for F5XC Site<br>Exactly one of `auto_asn` or `custom_asn` must be specified when `asn_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--asn_choice))
+- `connectivity_options_choice` (Attributes) Site Registration & Connectivity to RE<br>Exactly one of `site_registration_over_express_route` or `site_registration_over_internet` must be specified when `connectivity_options_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connectivity_options_choice))
+- `gateway_subnet` (Attributes) Gateway Subnet Select the type of subnet to be used for VNet Gateway (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet))
+- `route_server_subnet` (Attributes) Route Server Subnet Select the type of subnet to be used for Azure Route Server (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet))
+- `sku_choice` (Attributes) Gateway SKU Gateway SKU to be used for Azure VNet Gateway<br>Exactly one of `sku_ergw1az`, `sku_ergw2az`, `sku_high_perf`, or `sku_standard` must be specified when `sku_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--sku_choice))
+- `spoke_vnet_routes_choice` (Attributes) Spoke Vnet Route Advertisement To Route Server<br>Exactly one of `advertise_to_route_server` or `do_not_advertise_to_route_server` must be specified when `spoke_vnet_routes_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--spoke_vnet_routes_choice))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.connections`
+
+Required:
+
+- `metadata` (Attributes) Connection Metadata Connection Metadata like name and description (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--metadata))
+
+Optional:
+
+- `subscription_choice` (Attributes) Express Route Circuit Configuration Select the type of Express Route Circuit Subscription<br>Exactly one of `circuit_id` or `other_subscription` must be specified when `subscription_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice))
+- `weight` (Number) Routing Weight The weight (or priority) for the routes received from this connection. The default value is 10.<br>**Default:** `10`
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--metadata"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.connections.metadata`
+
+Required:
+
+- `name` (String) name This is the name of the message. The value of name has to follow DNS-1035 format.<br>**Validation:** `Length LengthAtLeast(1)`
+
+Optional:
+
+- `description` (String) description Human readable description.<br>**Validation:** `Length LengthAtMost(256)`
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.connections.subscription_choice`
+
+Optional:
+
+- `circuit_id` (String) Circuit in Same subscription ExpressRoute Circuit is in same subscription as the site<br>**Validation:** `Length LengthAtMost(512)`<br>Conflicts with `other_subscription`.
+- `other_subscription` (Attributes) Circuit in another subscription ExpressRoute Circuit is in a different subscription than the site. In this case both Circuit ID and Authorization key are needed<br>Conflicts with `circuit_id`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.connections.subscription_choice.other_subscription`
+
+Optional:
+
+- `authorized_key` (Attributes) Authorization Key Authorization Key created by the circuit owner (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key))
+- `circuit_id` (String) Circuit ID Circuit ID<br>**Validation:** `Length LengthAtMost(512)`
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.connections.subscription_choice.other_subscription.authorized_key`
+
+Required:
+
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key--secret_info_choice))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key--secret_info_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.connections.subscription_choice.other_subscription.authorized_key.secret_info_choice`
+
+Optional:
+
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key--secret_info_choice--blindfold_secret_info"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.connections.subscription_choice.other_subscription.authorized_key.secret_info_choice.blindfold_secret_info`
+
+Required:
+
+- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+
+Optional:
+
+- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
+- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key--secret_info_choice--clear_secret_info"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.connections.subscription_choice.other_subscription.authorized_key.secret_info_choice.clear_secret_info`
+
+Required:
+
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+
+Optional:
+
+- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+
+
+
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--asn_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.asn_choice`
+
+Optional:
+
+- `auto_asn` (Boolean) Auto ASN (Recommended) Automatically set ASN for F5XC Site<br>Conflicts with `custom_asn`.
+- `custom_asn` (Number) Custom ASN Set custom ASN for F5XC Site<br>Conflicts with `auto_asn`.
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connectivity_options_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.connectivity_options_choice`
+
+Optional:
+
+- `site_registration_over_express_route` (Attributes) Site Registration & Connectivity to RE over Azure Express Route Site Registration and Site to RE tunnels go over the Azure Express Route<br>Conflicts with `site_registration_over_internet`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connectivity_options_choice--site_registration_over_express_route))
+- `site_registration_over_internet` (Boolean) Site Registration & Connectivity to RE over Internet Site Registration and Site to RE tunnels go over the internet<br>Conflicts with `site_registration_over_express_route`.
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connectivity_options_choice--site_registration_over_express_route"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.connectivity_options_choice.site_registration_over_express_route`
+
+Required:
+
+- `cloudlink_network_name` (String) Private ADN Network Establish private connectivity with the F5 Distributed Cloud Global Network using a Private ADN network. To provision a Private ADN network, please contact F5 Distributed Cloud support.
+
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.gateway_subnet`
+
+Optional:
+
+- `choice` (Attributes) Choice of subnet Select Auto Subnet, Existing Subnet or Create New<br>Exactly one of `auto`, `subnet`, or `subnet_param` must be specified when `choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.gateway_subnet.choice`
+
+Optional:
+
+- `auto` (Boolean) Auto Subnet The subnet CIDR is autogenerated.<br>Conflicts with `subnet` and `subnet_param`.
+- `subnet` (Attributes) Existing Subnet An existing subnet in specified resource group is used.<br>Conflicts with `auto` and `subnet_param`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice--subnet))
+- `subnet_param` (Attributes) New Subnet A new subnet with specified CIDR is created.<br>Conflicts with `auto` and `subnet`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice--subnet_param))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice--subnet"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.gateway_subnet.choice.subnet`
+
+Optional:
+
+- `resource_group_choice` (Attributes) Existing Subnet Resource Group Resource group for this subnet.<br>Exactly one of `subnet_resource_grp` or `vnet_resource_group` must be specified when `resource_group_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice--subnet--resource_group_choice))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice--subnet--resource_group_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.gateway_subnet.choice.subnet.resource_group_choice`
+
+Optional:
+
+- `subnet_resource_grp` (String) subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `vnet_resource_group`.
+- `vnet_resource_group` (Boolean) vnet_resource_group Use the same Resource Group as the Vnet<br>Conflicts with `subnet_resource_grp`.
+
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice--subnet_param"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.gateway_subnet.choice.subnet_param`
+
+Required:
+
+- `ipv4` (String) IPv4 Subnet IPv4 subnet prefix for this subnet
+
+
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.route_server_subnet`
+
+Optional:
+
+- `choice` (Attributes) Choice of subnet Select Auto Subnet, Existing Subnet or Create New<br>Exactly one of `auto`, `subnet`, or `subnet_param` must be specified when `choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.route_server_subnet.choice`
+
+Optional:
+
+- `auto` (Boolean) Auto Subnet The subnet CIDR is autogenerated.<br>Conflicts with `subnet` and `subnet_param`.
+- `subnet` (Attributes) Existing Subnet An existing subnet in specified resource group is used.<br>Conflicts with `auto` and `subnet_param`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice--subnet))
+- `subnet_param` (Attributes) New Subnet A new subnet with specified CIDR is created.<br>Conflicts with `auto` and `subnet`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice--subnet_param))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice--subnet"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.route_server_subnet.choice.subnet`
+
+Optional:
+
+- `resource_group_choice` (Attributes) Existing Subnet Resource Group Resource group for this subnet.<br>Exactly one of `subnet_resource_grp` or `vnet_resource_group` must be specified when `resource_group_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice--subnet--resource_group_choice))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice--subnet--resource_group_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.route_server_subnet.choice.subnet.resource_group_choice`
+
+Optional:
+
+- `subnet_resource_grp` (String) subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `vnet_resource_group`.
+- `vnet_resource_group` (Boolean) vnet_resource_group Use the same Resource Group as the Vnet<br>Conflicts with `subnet_resource_grp`.
+
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice--subnet_param"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.route_server_subnet.choice.subnet_param`
+
+Required:
+
+- `ipv4` (String) IPv4 Subnet IPv4 subnet prefix for this subnet
+
+
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--sku_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.sku_choice`
+
+Optional:
+
+- `sku_ergw1az` (Boolean) ErGw1Az SKU ErGw1Az SKU (Standard + Zone protection)<br>Conflicts with `sku_ergw2az`, `sku_high_perf`, and `sku_standard`.
+- `sku_ergw2az` (Boolean) ErGw2Az SKU ErGw2Az SKU (High Perf + Zone protection)<br>Conflicts with `sku_ergw1az`, `sku_high_perf`, and `sku_standard`.
+- `sku_high_perf` (Boolean) High Perf SKU High Perf SKU<br>Conflicts with `sku_ergw1az`, `sku_ergw2az`, and `sku_standard`.
+- `sku_standard` (Boolean) Standard SKU Standard SKU<br>Conflicts with `sku_ergw1az`, `sku_ergw2az`, and `sku_high_perf`.
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--spoke_vnet_routes_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.spoke_vnet_routes_choice`
+
+Optional:
+
+- `advertise_to_route_server` (Boolean) Advertise Spoke Vnet CIDR Routes To Route Server Advertise Spoke Vnet CIDR Routes To  Azure Route Server via BGP<br>Conflicts with `do_not_advertise_to_route_server`.
+- `do_not_advertise_to_route_server` (Boolean) Do Not Advertise Spoke Vnet CIDR Routes To Route Server Do Not Advertise Spoke Vnet CIDR Routes To  Azure Route Server via BGP<br>Conflicts with `advertise_to_route_server`.
+
+
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--spoke_vnets"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.spoke_vnets`
+
+Optional:
+
+- `labels` (Map of String) Labels For VNet's Peering Add Labels for each of the VNets peered with transit VNet, these labels can be used in firewall policy These labels used must be from known key and label defined in shared namespace
+- `routing_choice` (Attributes) Choice of routing configuration Select automatic or manual configuration for routes<br>Exactly one of `auto` or `manual` must be specified when `routing_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--spoke_vnets--routing_choice))
+- `vnet` (Attributes) VNet ID Information about existing VNet (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--spoke_vnets--vnet))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--spoke_vnets--routing_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.spoke_vnets.routing_choice`
+
+Optional:
+
+- `auto` (Boolean) Auto Routing setup routing for all existing subnets on spoke VNet<br>Conflicts with `manual`.
+- `manual` (Boolean) Manual Routing Manually setup routing on spoke VNet<br>Conflicts with `auto`.
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--spoke_vnets--vnet"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.spoke_vnets.vnet`
+
+Required:
+
+- `resource_group` (String) Existing Vnet Resource Group Resource group of existing Vnet<br>**Validation:** `Length LengthBetween(1, 64)`
+- `vnet_name` (String) Existing Vnet Name Name of existing Vnet<br>**Validation:** `Length LengthBetween(1, 64)`
+
+Optional:
+
+- `routing_type_choice` (Attributes) Choice of Routing This is choice of F5 Orchestrated Routing or Manual Routing for CE VPC/VNET<br>Exactly one of `f5_orchestrated_routing` or `manual_routing` must be specified when `routing_type_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--spoke_vnets--vnet--routing_type_choice))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--spoke_vnets--vnet--routing_type_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.spoke_vnets.vnet.routing_type_choice`
+
+Optional:
+
+- `f5_orchestrated_routing` (Boolean) F5 Orchestrated Routing F5 will orchestrate required routes for SLO Route Table towards Internet and SLI RT towards the CE.<br>Conflicts with `manual_routing`.
+- `manual_routing` (Boolean) Manual Routing In this mode, F5 will not create nor alter any route tables or routes within the existing VPCs/Vnets providing better integration for existing environments.<br>Conflicts with `f5_orchestrated_routing`.
+
+
+
+
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--accelerated_networking"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.accelerated_networking`
+
+Optional:
+
+- `accelerated_networking_choice` (Attributes) Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen<br>Exactly one of `disable` or `enable` must be specified when `accelerated_networking_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--accelerated_networking--accelerated_networking_choice))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--accelerated_networking--accelerated_networking_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.accelerated_networking.accelerated_networking_choice`
+
+Optional:
+
+- `disable` (Boolean) Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.<br>Conflicts with `enable`.
+- `enable` (Boolean) Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance<br>Conflicts with `disable`.
+
+
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw_ar--dc_cluster_group_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw_ar.dc_cluster_group_choice`
 
 Optional:
 
-- `dc_cluster_group_inside_vn` (Attributes) Member of DC cluster Group via Inside Network This site is member of dc cluster group connected via inside network (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--dc_cluster_group_choice--dc_cluster_group_inside_vn))
-- `dc_cluster_group_outside_vn` (Attributes) Member of DC cluster Group via Outside Network This site is member of dc cluster group connected via outside network (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--dc_cluster_group_choice--dc_cluster_group_outside_vn))
-- `no_dc_cluster_group` (Boolean) Not a Member of DC Cluster Group This site is not a member of dc cluster group
+- `dc_cluster_group_inside_vn` (Attributes) Member of DC cluster Group via Inside Network This site is member of dc cluster group connected via inside network<br>Conflicts with `dc_cluster_group_outside_vn` and `no_dc_cluster_group`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--dc_cluster_group_choice--dc_cluster_group_inside_vn))
+- `dc_cluster_group_outside_vn` (Attributes) Member of DC cluster Group via Outside Network This site is member of dc cluster group connected via outside network<br>Conflicts with `dc_cluster_group_inside_vn` and `no_dc_cluster_group`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--dc_cluster_group_choice--dc_cluster_group_outside_vn))
+- `no_dc_cluster_group` (Boolean) Not a Member of DC Cluster Group This site is not a member of dc cluster group<br>Conflicts with `dc_cluster_group_inside_vn` and `dc_cluster_group_outside_vn`.
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw_ar--dc_cluster_group_choice--dc_cluster_group_inside_vn"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw_ar.dc_cluster_group_choice.dc_cluster_group_inside_vn`
@@ -1296,9 +1561,9 @@ Read-Only:
 
 Optional:
 
-- `active_forward_proxy_policies` (Attributes) Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--forward_proxy_choice--active_forward_proxy_policies))
-- `forward_proxy_allow_all` (Boolean) Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.
-- `no_forward_proxy` (Boolean) Disable Forward Proxy Disable Forward Proxy for this site
+- `active_forward_proxy_policies` (Attributes) Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies<br>Conflicts with `forward_proxy_allow_all` and `no_forward_proxy`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--forward_proxy_choice--active_forward_proxy_policies))
+- `forward_proxy_allow_all` (Boolean) Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.<br>Conflicts with `active_forward_proxy_policies` and `no_forward_proxy`.
+- `no_forward_proxy` (Boolean) Disable Forward Proxy Disable Forward Proxy for this site<br>Conflicts with `active_forward_proxy_policies` and `forward_proxy_allow_all`.
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw_ar--forward_proxy_choice--active_forward_proxy_policies"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw_ar.forward_proxy_choice.active_forward_proxy_policies`
@@ -1327,8 +1592,8 @@ Read-Only:
 
 Optional:
 
-- `global_network_list` (Attributes) Connect Global Networks List of global network connections (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--global_network_choice--global_network_list))
-- `no_global_network` (Boolean) Do not Connect Global Networks No global network to connect
+- `global_network_list` (Attributes) Connect Global Networks List of global network connections<br>Conflicts with `no_global_network`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--global_network_choice--global_network_list))
+- `no_global_network` (Boolean) Do not Connect Global Networks No global network to connect<br>Conflicts with `global_network_list`.
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw_ar--global_network_choice--global_network_list"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw_ar.global_network_choice.global_network_list`
@@ -1342,15 +1607,15 @@ Required:
 
 Required:
 
-- `connection_choice` (Attributes) Connector Choice Select the networks and method in which they are connected. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--global_network_choice--global_network_list--global_network_connections--connection_choice))
+- `connection_choice` (Attributes) Connector Choice Select the networks and method in which they are connected.<br>Exactly one of `sli_to_global_dr` or `slo_to_global_dr` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--global_network_choice--global_network_list--global_network_connections--connection_choice))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw_ar--global_network_choice--global_network_list--global_network_connections--connection_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw_ar.global_network_choice.global_network_list.global_network_connections.connection_choice`
 
 Optional:
 
-- `sli_to_global_dr` (Attributes) Site Local Inside to a Global Network' Site local inside is connected directly to a given global network (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--global_network_choice--global_network_list--global_network_connections--connection_choice--sli_to_global_dr))
-- `slo_to_global_dr` (Attributes) Site Local Outside to a Global Network' Site local outside is connected directly to a given global network (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--global_network_choice--global_network_list--global_network_connections--connection_choice--slo_to_global_dr))
+- `sli_to_global_dr` (Attributes) Site Local Inside to a Global Network' Site local inside is connected directly to a given global network<br>Conflicts with `slo_to_global_dr`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--global_network_choice--global_network_list--global_network_connections--connection_choice--sli_to_global_dr))
+- `slo_to_global_dr` (Attributes) Site Local Outside to a Global Network' Site local outside is connected directly to a given global network<br>Conflicts with `sli_to_global_dr`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--global_network_choice--global_network_list--global_network_connections--connection_choice--slo_to_global_dr))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw_ar--global_network_choice--global_network_list--global_network_connections--connection_choice--sli_to_global_dr"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw_ar.global_network_choice.global_network_list.global_network_connections.connection_choice.sli_to_global_dr`
@@ -1398,319 +1663,13 @@ Read-Only:
 
 
 
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice`
-
-Optional:
-
-- `hub` (Attributes) Hub VNet This VNet is a hub VNet (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub))
-- `not_hub` (Boolean) Standalone VNet This VNet is a standalone VNet
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub`
-
-Required:
-
-- `express_route_choice` (Attributes) Express Route Configuration Express Route is disabled on this site or Express Route is enabled on this site (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice))
-
-Optional:
-
-- `spoke_vnets` (Attributes List) Spoke VNet Peering Spoke VNet Peering (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--spoke_vnets))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice`
-
-Optional:
-
-- `express_route_disabled` (Boolean) Disabled Express Route is disabled on this site
-- `express_route_enabled` (Attributes) Enabled Express Route is enabled on this site (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled`
-
-Required:
-
-- `asn_choice` (Attributes) Autonomous System Number (ASN) for F5XC Site Autonomous System Number (ASN) for F5XC Site (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--asn_choice))
-- `connections` (Attributes List) Connections Add the ExpressRoute Circuit Connections to this site (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections))
-
-Optional:
-
-- `connectivity_options_choice` (Attributes) Site Registration & Connectivity to RE (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connectivity_options_choice))
-- `gateway_subnet` (Attributes) Gateway Subnet Select the type of subnet to be used for VNet Gateway (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet))
-- `route_server_subnet` (Attributes) Route Server Subnet Select the type of subnet to be used for Azure Route Server (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet))
-- `sku_choice` (Attributes) Gateway SKU Gateway SKU to be used for Azure VNet Gateway (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--sku_choice))
-- `spoke_vnet_routes_choice` (Attributes) Spoke Vnet Route Advertisement To Route Server (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--spoke_vnet_routes_choice))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--asn_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.asn_choice`
-
-Optional:
-
-- `auto_asn` (Boolean) Auto ASN (Recommended) Automatically set ASN for F5XC Site
-- `custom_asn` (Number) Custom ASN Set custom ASN for F5XC Site
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.connections`
-
-Required:
-
-- `metadata` (Attributes) Connection Metadata Connection Metadata like name and description (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--metadata))
-
-Optional:
-
-- `subscription_choice` (Attributes) Express Route Circuit Configuration Select the type of Express Route Circuit Subscription (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice))
-- `weight` (Number) Routing Weight The weight (or priority) for the routes received from this connection. The default value is 10.<br>**Default:** `10`
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--metadata"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.connections.metadata`
-
-Required:
-
-- `name` (String) name This is the name of the message. The value of name has to follow DNS-1035 format.<br>**Validation:** `Length LengthAtLeast(1)`
-
-Optional:
-
-- `description` (String) description Human readable description.<br>**Validation:** `Length LengthAtMost(256)`
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.connections.subscription_choice`
-
-Optional:
-
-- `circuit_id` (String) Circuit in Same subscription ExpressRoute Circuit is in same subscription as the site<br>**Validation:** `Length LengthAtMost(512)`
-- `other_subscription` (Attributes) Circuit in another subscription ExpressRoute Circuit is in a different subscription than the site. In this case both Circuit ID and Authorization key are needed (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.connections.subscription_choice.other_subscription`
-
-Optional:
-
-- `authorized_key` (Attributes) Authorization Key Authorization Key created by the circuit owner (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key))
-- `circuit_id` (String) Circuit ID Circuit ID<br>**Validation:** `Length LengthAtMost(512)`
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.connections.subscription_choice.other_subscription.authorized_key`
-
-Required:
-
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key--secret_info_choice))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key--secret_info_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.connections.subscription_choice.other_subscription.authorized_key.secret_info_choice`
-
-Optional:
-
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key--secret_info_choice--blindfold_secret_info"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.connections.subscription_choice.other_subscription.authorized_key.secret_info_choice.blindfold_secret_info`
-
-Required:
-
-- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
-
-Optional:
-
-- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
-- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connections--subscription_choice--other_subscription--authorized_key--secret_info_choice--clear_secret_info"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.connections.subscription_choice.other_subscription.authorized_key.secret_info_choice.clear_secret_info`
-
-Required:
-
-- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
-
-Optional:
-
-- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-
-
-
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connectivity_options_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.connectivity_options_choice`
-
-Optional:
-
-- `site_registration_over_express_route` (Attributes) Site Registration & Connectivity to RE over Azure Express Route Site Registration and Site to RE tunnels go over the Azure Express Route (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connectivity_options_choice--site_registration_over_express_route))
-- `site_registration_over_internet` (Boolean) Site Registration & Connectivity to RE over Internet Site Registration and Site to RE tunnels go over the internet
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--connectivity_options_choice--site_registration_over_express_route"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.connectivity_options_choice.site_registration_over_express_route`
-
-Required:
-
-- `cloudlink_network_name` (String) Private ADN Network Establish private connectivity with the F5 Distributed Cloud Global Network using a Private ADN network. To provision a Private ADN network, please contact F5 Distributed Cloud support.
-
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.gateway_subnet`
-
-Required:
-
-- `choice` (Attributes) Choice of subnet Select Auto Subnet, Existing Subnet or Create New (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.gateway_subnet.choice`
-
-Optional:
-
-- `auto` (Boolean) Auto Subnet The subnet CIDR is autogenerated.
-- `subnet` (Attributes) Existing Subnet An existing subnet in specified resource group is used. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice--subnet))
-- `subnet_param` (Attributes) New Subnet A new subnet with specified CIDR is created. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice--subnet_param))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice--subnet"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.gateway_subnet.choice.subnet`
-
-Optional:
-
-- `resource_group_choice` (Attributes) Existing Subnet Resource Group Resource group for this subnet. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice--subnet--resource_group_choice))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice--subnet--resource_group_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.gateway_subnet.choice.subnet.resource_group_choice`
-
-Optional:
-
-- `subnet_resource_grp` (String) subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`
-- `vnet_resource_group` (Boolean) vnet_resource_group Use the same Resource Group as the Vnet
-
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--gateway_subnet--choice--subnet_param"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.gateway_subnet.choice.subnet_param`
-
-Required:
-
-- `ipv4` (String) IPv4 Subnet IPv4 subnet prefix for this subnet
-
-
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.route_server_subnet`
-
-Required:
-
-- `choice` (Attributes) Choice of subnet Select Auto Subnet, Existing Subnet or Create New (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.route_server_subnet.choice`
-
-Optional:
-
-- `auto` (Boolean) Auto Subnet The subnet CIDR is autogenerated.
-- `subnet` (Attributes) Existing Subnet An existing subnet in specified resource group is used. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice--subnet))
-- `subnet_param` (Attributes) New Subnet A new subnet with specified CIDR is created. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice--subnet_param))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice--subnet"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.route_server_subnet.choice.subnet`
-
-Optional:
-
-- `resource_group_choice` (Attributes) Existing Subnet Resource Group Resource group for this subnet. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice--subnet--resource_group_choice))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice--subnet--resource_group_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.route_server_subnet.choice.subnet.resource_group_choice`
-
-Optional:
-
-- `subnet_resource_grp` (String) subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`
-- `vnet_resource_group` (Boolean) vnet_resource_group Use the same Resource Group as the Vnet
-
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--route_server_subnet--choice--subnet_param"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.route_server_subnet.choice.subnet_param`
-
-Required:
-
-- `ipv4` (String) IPv4 Subnet IPv4 subnet prefix for this subnet
-
-
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--sku_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.sku_choice`
-
-Optional:
-
-- `sku_ergw1az` (Boolean) ErGw1Az SKU ErGw1Az SKU (Standard + Zone protection)
-- `sku_ergw2az` (Boolean) ErGw2Az SKU ErGw2Az SKU (High Perf + Zone protection)
-- `sku_high_perf` (Boolean) High Perf SKU High Perf SKU
-- `sku_standard` (Boolean) Standard SKU Standard SKU
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--express_route_choice--express_route_enabled--spoke_vnet_routes_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.express_route_choice.express_route_enabled.spoke_vnet_routes_choice`
-
-Optional:
-
-- `advertise_to_route_server` (Boolean) Advertise Spoke Vnet CIDR Routes To Route Server Advertise Spoke Vnet CIDR Routes To  Azure Route Server via BGP
-- `do_not_advertise_to_route_server` (Boolean) Do Not Advertise Spoke Vnet CIDR Routes To Route Server Do Not Advertise Spoke Vnet CIDR Routes To  Azure Route Server via BGP
-
-
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--spoke_vnets"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.spoke_vnets`
-
-Required:
-
-- `routing_choice` (Attributes) Choice of routing configuration Select automatic or manual configuration for routes (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--spoke_vnets--routing_choice))
-
-Optional:
-
-- `labels` (Map of String) Labels For VNet's Peering Add Labels for each of the VNets peered with transit VNet, these labels can be used in firewall policy These labels used must be from known key and label defined in shared namespace
-- `vnet` (Attributes) VNet ID Information about existing VNet (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--spoke_vnets--vnet))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--spoke_vnets--routing_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.spoke_vnets.routing_choice`
-
-Optional:
-
-- `auto` (Boolean) Auto Routing setup routing for all existing subnets on spoke VNet
-- `manual` (Boolean) Manual Routing Manually setup routing on spoke VNet
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--spoke_vnets--vnet"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.spoke_vnets.vnet`
-
-Required:
-
-- `resource_group` (String) Existing Vnet Resource Group Resource group of existing Vnet<br>**Validation:** `Length LengthBetween(1, 64)`
-- `routing_type_choice` (Attributes) Choice of Routing This is choice of F5 Orchestrated Routing or Manual Routing for CE VPC/VNET (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--spoke_vnets--vnet--routing_type_choice))
-- `vnet_name` (String) Existing Vnet Name Name of existing Vnet<br>**Validation:** `Length LengthBetween(1, 64)`
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--hub_choice--hub--spoke_vnets--vnet--routing_type_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.hub_choice.hub.spoke_vnets.vnet.routing_type_choice`
-
-Optional:
-
-- `f5_orchestrated_routing` (Boolean) F5 Orchestrated Routing F5 will orchestrate required routes for SLO Route Table towards Internet and SLI RT towards the CE.
-- `manual_routing` (Boolean) Manual Routing In this mode, F5 will not create nor alter any route tables or routes within the existing VPCs/Vnets providing better integration for existing environments.
-
-
-
-
-
-
 <a id="nestedatt--site_type_choice--ingress_egress_gw_ar--inside_static_route_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw_ar.inside_static_route_choice`
 
 Optional:
 
-- `inside_static_routes` (Attributes) Manage Static routes Manage static routes for inside network. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--inside_static_route_choice--inside_static_routes))
-- `no_inside_static_routes` (Boolean) Do Not Manage Static Routes Static Routes disabled for inside network.
+- `inside_static_routes` (Attributes) Manage Static routes Manage static routes for inside network.<br>Conflicts with `no_inside_static_routes`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--inside_static_route_choice--inside_static_routes))
+- `no_inside_static_routes` (Boolean) Do Not Manage Static Routes Static Routes disabled for inside network.<br>Conflicts with `inside_static_routes`.
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw_ar--inside_static_route_choice--inside_static_routes"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw_ar.inside_static_route_choice.inside_static_routes`
@@ -1724,15 +1683,15 @@ Required:
 
 Required:
 
-- `config_mode_choice` (Attributes) Static Route Config Mode Select method for configuring the route (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice))
+- `config_mode_choice` (Attributes) Static Route Config Mode Select method for configuring the route<br>Exactly one of `custom_static_route` or `simple_static_route` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw_ar--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw_ar.inside_static_route_choice.inside_static_routes.static_route_list.config_mode_choice`
 
 Optional:
 
-- `custom_static_route` (Attributes) Custom Static Route Use Custom static route to configure all advanced options (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route))
-- `simple_static_route` (String) Simple Static Route Use simple static route for prefix pointing to single interface in the network
+- `custom_static_route` (Attributes) Custom Static Route Use Custom static route to configure all advanced options<br>Conflicts with `simple_static_route`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route))
+- `simple_static_route` (String) Simple Static Route Use simple static route for prefix pointing to single interface in the network<br>Conflicts with `custom_static_route`.
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw_ar--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw_ar.inside_static_route_choice.inside_static_routes.static_route_list.config_mode_choice.custom_static_route`
@@ -1752,7 +1711,7 @@ Optional:
 
 Required:
 
-- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--subnets--ver_choice))
+- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address<br>`ipv4` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--subnets--ver_choice))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw_ar--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--subnets--ver_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw_ar.inside_static_route_choice.inside_static_routes.static_route_list.config_mode_choice.custom_static_route.subnets.ver_choice`
@@ -1799,15 +1758,15 @@ Read-Only:
 
 Optional:
 
-- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 Address or IPv6 Address (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice))
+- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 Address or IPv6 Address<br>Exactly one of `dual_stack` or `ipv4` must be specified when `ver_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw_ar--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw_ar.inside_static_route_choice.inside_static_routes.static_route_list.config_mode_choice.custom_static_route.nexthop.nexthop_address.ver_choice`
 
 Optional:
 
-- `dual_stack` (Attributes) Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--dual_stack))
-- `ipv4` (Attributes) IPv4 Address IPv4 Address (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--ipv4))
+- `dual_stack` (Attributes) Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together<br>Conflicts with `ipv4`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--dual_stack))
+- `ipv4` (Attributes) IPv4 Address IPv4 Address<br>Conflicts with `dual_stack`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--ipv4))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw_ar--inside_static_route_choice--inside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--dual_stack"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw_ar.inside_static_route_choice.inside_static_routes.static_route_list.config_mode_choice.custom_static_route.nexthop.nexthop_address.ver_choice.dual_stack`
@@ -1855,9 +1814,9 @@ Optional:
 
 Optional:
 
-- `active_enhanced_firewall_policies` (Attributes) Manage Enhanced Firewall Policy Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--network_policy_choice--active_enhanced_firewall_policies))
-- `active_network_policies` (Attributes) Manage Firewall Policy Firewall Policies active for this site. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--network_policy_choice--active_network_policies))
-- `no_network_policy` (Boolean) Do Not Manage Firewall Policy Firewall Policy is disabled for this site.
+- `active_enhanced_firewall_policies` (Attributes) Manage Enhanced Firewall Policy Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion.<br>Conflicts with `active_network_policies` and `no_network_policy`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--network_policy_choice--active_enhanced_firewall_policies))
+- `active_network_policies` (Attributes) Manage Firewall Policy Firewall Policies active for this site.<br>Conflicts with `active_enhanced_firewall_policies` and `no_network_policy`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--network_policy_choice--active_network_policies))
+- `no_network_policy` (Boolean) Do Not Manage Firewall Policy Firewall Policy is disabled for this site.<br>Conflicts with `active_enhanced_firewall_policies` and `active_network_policies`.
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw_ar--network_policy_choice--active_enhanced_firewall_policies"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw_ar.network_policy_choice.active_enhanced_firewall_policies`
@@ -1902,13 +1861,120 @@ Read-Only:
 
 
 
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--node"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.node`
+
+Required:
+
+- `node_number` (Number) Number of main nodes Number of main nodes to create, either 1 or 3.
+
+Optional:
+
+- `fault_domain` (Number) Number of fault domains Namuber of fault domains to be used while creating the availability set<br>**Default:** `1`
+- `inside_subnet` (Attributes) Subnet Subnets for the inside interface of the node (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--node--inside_subnet))
+- `outside_subnet` (Attributes) Subnet Subnets for the outside interface of the node (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--node--outside_subnet))
+- `update_domain` (Number) Number of update domains Namuber of update domains to be used while creating the availability set<br>**Default:** `5`
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--node--inside_subnet"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.node.inside_subnet`
+
+Required:
+
+- `choice` (Attributes) Choice of subnet Subnet for the Single interface of the site<br>Exactly one of `subnet` or `subnet_param` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--node--inside_subnet--choice))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--node--inside_subnet--choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.node.inside_subnet.choice`
+
+Optional:
+
+- `subnet` (Attributes) Existing Subnet Information about existing subnet.<br>Conflicts with `subnet_param`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--node--inside_subnet--choice--subnet))
+- `subnet_param` (Attributes) New Subnet Parameters for creating new subnet.<br>Conflicts with `subnet`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--node--inside_subnet--choice--subnet_param))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--node--inside_subnet--choice--subnet"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.node.inside_subnet.choice.subnet`
+
+Required:
+
+- `subnet_name` (String) Existing Subnet Name Name of existing subnet.<br>**Validation:** `Length LengthAtMost(64)`
+
+Optional:
+
+- `resource_group_choice` (Attributes) Existing Subnet Resource Group Resource group for this subnet.<br>Exactly one of `subnet_resource_grp` or `vnet_resource_group` must be specified when `resource_group_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--node--inside_subnet--choice--subnet--resource_group_choice))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--node--inside_subnet--choice--subnet--resource_group_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.node.inside_subnet.choice.subnet.resource_group_choice`
+
+Optional:
+
+- `subnet_resource_grp` (String) subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `vnet_resource_group`.
+- `vnet_resource_group` (Boolean) vnet_resource_group Use the same Resource Group as the Vnet<br>Conflicts with `subnet_resource_grp`.
+
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--node--inside_subnet--choice--subnet_param"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.node.inside_subnet.choice.subnet_param`
+
+Required:
+
+- `ipv4` (String) IPv4 Subnet IPv4 subnet prefix for this subnet
+
+
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--node--outside_subnet"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.node.outside_subnet`
+
+Required:
+
+- `choice` (Attributes) Choice of subnet Subnet for the Single interface of the site<br>Exactly one of `subnet` or `subnet_param` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--node--outside_subnet--choice))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--node--outside_subnet--choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.node.outside_subnet.choice`
+
+Optional:
+
+- `subnet` (Attributes) Existing Subnet Information about existing subnet.<br>Conflicts with `subnet_param`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--node--outside_subnet--choice--subnet))
+- `subnet_param` (Attributes) New Subnet Parameters for creating new subnet.<br>Conflicts with `subnet`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--node--outside_subnet--choice--subnet_param))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--node--outside_subnet--choice--subnet"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.node.outside_subnet.choice.subnet`
+
+Required:
+
+- `subnet_name` (String) Existing Subnet Name Name of existing subnet.<br>**Validation:** `Length LengthAtMost(64)`
+
+Optional:
+
+- `resource_group_choice` (Attributes) Existing Subnet Resource Group Resource group for this subnet.<br>Exactly one of `subnet_resource_grp` or `vnet_resource_group` must be specified when `resource_group_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--node--outside_subnet--choice--subnet--resource_group_choice))
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--node--outside_subnet--choice--subnet--resource_group_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.node.outside_subnet.choice.subnet.resource_group_choice`
+
+Optional:
+
+- `subnet_resource_grp` (String) subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `vnet_resource_group`.
+- `vnet_resource_group` (Boolean) vnet_resource_group Use the same Resource Group as the Vnet<br>Conflicts with `subnet_resource_grp`.
+
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--node--outside_subnet--choice--subnet_param"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.node.outside_subnet.choice.subnet_param`
+
+Required:
+
+- `ipv4` (String) IPv4 Subnet IPv4 subnet prefix for this subnet
+
+
+
+
+
 <a id="nestedatt--site_type_choice--ingress_egress_gw_ar--outside_static_route_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw_ar.outside_static_route_choice`
 
 Optional:
 
-- `no_outside_static_routes` (Boolean) Do Not Manage Static Routes Static Routes disabled for outside network.
-- `outside_static_routes` (Attributes) Manage Static routes Manage static routes for outside network. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--outside_static_route_choice--outside_static_routes))
+- `no_outside_static_routes` (Boolean) Do Not Manage Static Routes Static Routes disabled for outside network.<br>Conflicts with `outside_static_routes`.
+- `outside_static_routes` (Attributes) Manage Static routes Manage static routes for outside network.<br>Conflicts with `no_outside_static_routes`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--outside_static_route_choice--outside_static_routes))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw_ar--outside_static_route_choice--outside_static_routes"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw_ar.outside_static_route_choice.outside_static_routes`
@@ -1922,15 +1988,15 @@ Required:
 
 Required:
 
-- `config_mode_choice` (Attributes) Static Route Config Mode Select method for configuring the route (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice))
+- `config_mode_choice` (Attributes) Static Route Config Mode Select method for configuring the route<br>Exactly one of `custom_static_route` or `simple_static_route` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw_ar.outside_static_route_choice.outside_static_routes.static_route_list.config_mode_choice`
 
 Optional:
 
-- `custom_static_route` (Attributes) Custom Static Route Use Custom static route to configure all advanced options (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route))
-- `simple_static_route` (String) Simple Static Route Use simple static route for prefix pointing to single interface in the network
+- `custom_static_route` (Attributes) Custom Static Route Use Custom static route to configure all advanced options<br>Conflicts with `simple_static_route`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route))
+- `simple_static_route` (String) Simple Static Route Use simple static route for prefix pointing to single interface in the network<br>Conflicts with `custom_static_route`.
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw_ar.outside_static_route_choice.outside_static_routes.static_route_list.config_mode_choice.custom_static_route`
@@ -1950,7 +2016,7 @@ Optional:
 
 Required:
 
-- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--subnets--ver_choice))
+- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address<br>`ipv4` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--subnets--ver_choice))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--subnets--ver_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw_ar.outside_static_route_choice.outside_static_routes.static_route_list.config_mode_choice.custom_static_route.subnets.ver_choice`
@@ -1997,15 +2063,15 @@ Read-Only:
 
 Optional:
 
-- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 Address or IPv6 Address (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice))
+- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 Address or IPv6 Address<br>Exactly one of `dual_stack` or `ipv4` must be specified when `ver_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw_ar.outside_static_route_choice.outside_static_routes.static_route_list.config_mode_choice.custom_static_route.nexthop.nexthop_address.ver_choice`
 
 Optional:
 
-- `dual_stack` (Attributes) Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--dual_stack))
-- `ipv4` (Attributes) IPv4 Address IPv4 Address (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--ipv4))
+- `dual_stack` (Attributes) Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together<br>Conflicts with `ipv4`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--dual_stack))
+- `ipv4` (Attributes) IPv4 Address IPv4 Address<br>Conflicts with `dual_stack`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--ipv4))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--dual_stack"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw_ar.outside_static_route_choice.outside_static_routes.static_route_list.config_mode_choice.custom_static_route.nexthop.nexthop_address.ver_choice.dual_stack`
@@ -2048,154 +2114,30 @@ Optional:
 
 
 
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--site_mesh_group_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.site_mesh_group_choice`
-
-Optional:
-
-- `sm_connection_public_ip` (Boolean) Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group
-- `sm_connection_pvt_ip` (Boolean) Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--accelerated_networking"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.accelerated_networking`
-
-Required:
-
-- `accelerated_networking_choice` (Attributes) Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--accelerated_networking--accelerated_networking_choice))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--accelerated_networking--accelerated_networking_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.accelerated_networking.accelerated_networking_choice`
-
-Optional:
-
-- `disable` (Boolean) Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.
-- `enable` (Boolean) Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance
-
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--node"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.node`
-
-Required:
-
-- `node_number` (Number) Number of main nodes Number of main nodes to create, either 1 or 3.
-
-Optional:
-
-- `fault_domain` (Number) Number of fault domains Namuber of fault domains to be used while creating the availability set<br>**Default:** `1`
-- `inside_subnet` (Attributes) Subnet Subnets for the inside interface of the node (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--node--inside_subnet))
-- `outside_subnet` (Attributes) Subnet Subnets for the outside interface of the node (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--node--outside_subnet))
-- `update_domain` (Number) Number of update domains Namuber of update domains to be used while creating the availability set<br>**Default:** `5`
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--node--inside_subnet"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.node.inside_subnet`
-
-Required:
-
-- `choice` (Attributes) Choice of subnet Subnet for the Single interface of the site (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--node--inside_subnet--choice))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--node--inside_subnet--choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.node.inside_subnet.choice`
-
-Optional:
-
-- `subnet` (Attributes) Existing Subnet Information about existing subnet. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--node--inside_subnet--choice--subnet))
-- `subnet_param` (Attributes) New Subnet Parameters for creating new subnet. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--node--inside_subnet--choice--subnet_param))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--node--inside_subnet--choice--subnet"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.node.inside_subnet.choice.subnet`
-
-Required:
-
-- `subnet_name` (String) Existing Subnet Name Name of existing subnet.<br>**Validation:** `Length LengthAtMost(64)`
-
-Optional:
-
-- `resource_group_choice` (Attributes) Existing Subnet Resource Group Resource group for this subnet. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--node--inside_subnet--choice--subnet--resource_group_choice))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--node--inside_subnet--choice--subnet--resource_group_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.node.inside_subnet.choice.subnet.resource_group_choice`
-
-Optional:
-
-- `subnet_resource_grp` (String) subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`
-- `vnet_resource_group` (Boolean) vnet_resource_group Use the same Resource Group as the Vnet
-
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--node--inside_subnet--choice--subnet_param"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.node.inside_subnet.choice.subnet_param`
-
-Required:
-
-- `ipv4` (String) IPv4 Subnet IPv4 subnet prefix for this subnet
-
-
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--node--outside_subnet"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.node.outside_subnet`
-
-Required:
-
-- `choice` (Attributes) Choice of subnet Subnet for the Single interface of the site (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--node--outside_subnet--choice))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--node--outside_subnet--choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.node.outside_subnet.choice`
-
-Optional:
-
-- `subnet` (Attributes) Existing Subnet Information about existing subnet. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--node--outside_subnet--choice--subnet))
-- `subnet_param` (Attributes) New Subnet Parameters for creating new subnet. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--node--outside_subnet--choice--subnet_param))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--node--outside_subnet--choice--subnet"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.node.outside_subnet.choice.subnet`
-
-Required:
-
-- `subnet_name` (String) Existing Subnet Name Name of existing subnet.<br>**Validation:** `Length LengthAtMost(64)`
-
-Optional:
-
-- `resource_group_choice` (Attributes) Existing Subnet Resource Group Resource group for this subnet. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--node--outside_subnet--choice--subnet--resource_group_choice))
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--node--outside_subnet--choice--subnet--resource_group_choice"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.node.outside_subnet.choice.subnet.resource_group_choice`
-
-Optional:
-
-- `subnet_resource_grp` (String) subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`
-- `vnet_resource_group` (Boolean) vnet_resource_group Use the same Resource Group as the Vnet
-
-
-
-<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--node--outside_subnet--choice--subnet_param"></a>
-### Nested Schema for `site_type_choice.ingress_egress_gw_ar.node.outside_subnet.choice.subnet_param`
-
-Required:
-
-- `ipv4` (String) IPv4 Subnet IPv4 subnet prefix for this subnet
-
-
-
-
-
 <a id="nestedatt--site_type_choice--ingress_egress_gw_ar--performance_enhancement_mode"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw_ar.performance_enhancement_mode`
 
-Required:
+Optional:
 
-- `perf_mode_choice` (Attributes) Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--performance_enhancement_mode--perf_mode_choice))
+- `perf_mode_choice` (Attributes) Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.<br>Exactly one of `perf_mode_l3_enhanced` or `perf_mode_l7_enhanced` must be specified when `perf_mode_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_egress_gw_ar--performance_enhancement_mode--perf_mode_choice))
 
 <a id="nestedatt--site_type_choice--ingress_egress_gw_ar--performance_enhancement_mode--perf_mode_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_egress_gw_ar.performance_enhancement_mode.perf_mode_choice`
 
 Optional:
 
-- `perf_mode_l3_enhanced` (Boolean) L3 Mode Enhanced Performance Site optimized for L3 traffic processing
-- `perf_mode_l7_enhanced` (Boolean) Default Performance Mode Site optimized for L7 traffic processing
+- `perf_mode_l3_enhanced` (Boolean) L3 Mode Enhanced Performance Site optimized for L3 traffic processing<br>Conflicts with `perf_mode_l7_enhanced`.
+- `perf_mode_l7_enhanced` (Boolean) Default Performance Mode Site optimized for L7 traffic processing<br>Conflicts with `perf_mode_l3_enhanced`.
 
+
+
+<a id="nestedatt--site_type_choice--ingress_egress_gw_ar--site_mesh_group_choice"></a>
+### Nested Schema for `site_type_choice.ingress_egress_gw_ar.site_mesh_group_choice`
+
+Optional:
+
+- `sm_connection_public_ip` (Boolean) Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group<br>Conflicts with `sm_connection_pvt_ip`.
+- `sm_connection_pvt_ip` (Boolean) Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group<br>Conflicts with `sm_connection_public_ip`.
 
 
 
@@ -2228,15 +2170,15 @@ Optional:
 
 Required:
 
-- `choice` (Attributes) Choice of subnet Subnet for the Single interface of the site (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw--az_nodes--local_subnet--choice))
+- `choice` (Attributes) Choice of subnet Subnet for the Single interface of the site<br>Exactly one of `subnet` or `subnet_param` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw--az_nodes--local_subnet--choice))
 
 <a id="nestedatt--site_type_choice--ingress_gw--az_nodes--local_subnet--choice"></a>
 ### Nested Schema for `site_type_choice.ingress_gw.az_nodes.local_subnet.choice`
 
 Optional:
 
-- `subnet` (Attributes) Existing Subnet Information about existing subnet. (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw--az_nodes--local_subnet--choice--subnet))
-- `subnet_param` (Attributes) New Subnet Parameters for creating new subnet. (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw--az_nodes--local_subnet--choice--subnet_param))
+- `subnet` (Attributes) Existing Subnet Information about existing subnet.<br>Conflicts with `subnet_param`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw--az_nodes--local_subnet--choice--subnet))
+- `subnet_param` (Attributes) New Subnet Parameters for creating new subnet.<br>Conflicts with `subnet`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw--az_nodes--local_subnet--choice--subnet_param))
 
 <a id="nestedatt--site_type_choice--ingress_gw--az_nodes--local_subnet--choice--subnet"></a>
 ### Nested Schema for `site_type_choice.ingress_gw.az_nodes.local_subnet.choice.subnet`
@@ -2247,15 +2189,15 @@ Required:
 
 Optional:
 
-- `resource_group_choice` (Attributes) Existing Subnet Resource Group Resource group for this subnet. (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw--az_nodes--local_subnet--choice--subnet--resource_group_choice))
+- `resource_group_choice` (Attributes) Existing Subnet Resource Group Resource group for this subnet.<br>Exactly one of `subnet_resource_grp` or `vnet_resource_group` must be specified when `resource_group_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw--az_nodes--local_subnet--choice--subnet--resource_group_choice))
 
 <a id="nestedatt--site_type_choice--ingress_gw--az_nodes--local_subnet--choice--subnet--resource_group_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_gw.az_nodes.local_subnet.choice.subnet.resource_group_choice`
 
 Optional:
 
-- `subnet_resource_grp` (String) subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`
-- `vnet_resource_group` (Boolean) vnet_resource_group Use the same Resource Group as the Vnet
+- `subnet_resource_grp` (String) subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `vnet_resource_group`.
+- `vnet_resource_group` (Boolean) vnet_resource_group Use the same Resource Group as the Vnet<br>Conflicts with `subnet_resource_grp`.
 
 
 
@@ -2273,34 +2215,34 @@ Required:
 <a id="nestedatt--site_type_choice--ingress_gw--accelerated_networking"></a>
 ### Nested Schema for `site_type_choice.ingress_gw.accelerated_networking`
 
-Required:
+Optional:
 
-- `accelerated_networking_choice` (Attributes) Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw--accelerated_networking--accelerated_networking_choice))
+- `accelerated_networking_choice` (Attributes) Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen<br>Exactly one of `disable` or `enable` must be specified when `accelerated_networking_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw--accelerated_networking--accelerated_networking_choice))
 
 <a id="nestedatt--site_type_choice--ingress_gw--accelerated_networking--accelerated_networking_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_gw.accelerated_networking.accelerated_networking_choice`
 
 Optional:
 
-- `disable` (Boolean) Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.
-- `enable` (Boolean) Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance
+- `disable` (Boolean) Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.<br>Conflicts with `enable`.
+- `enable` (Boolean) Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance<br>Conflicts with `disable`.
 
 
 
 <a id="nestedatt--site_type_choice--ingress_gw--performance_enhancement_mode"></a>
 ### Nested Schema for `site_type_choice.ingress_gw.performance_enhancement_mode`
 
-Required:
+Optional:
 
-- `perf_mode_choice` (Attributes) Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation. (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw--performance_enhancement_mode--perf_mode_choice))
+- `perf_mode_choice` (Attributes) Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.<br>Exactly one of `perf_mode_l3_enhanced` or `perf_mode_l7_enhanced` must be specified when `perf_mode_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw--performance_enhancement_mode--perf_mode_choice))
 
 <a id="nestedatt--site_type_choice--ingress_gw--performance_enhancement_mode--perf_mode_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_gw.performance_enhancement_mode.perf_mode_choice`
 
 Optional:
 
-- `perf_mode_l3_enhanced` (Boolean) L3 Mode Enhanced Performance Site optimized for L3 traffic processing
-- `perf_mode_l7_enhanced` (Boolean) Default Performance Mode Site optimized for L7 traffic processing
+- `perf_mode_l3_enhanced` (Boolean) L3 Mode Enhanced Performance Site optimized for L3 traffic processing<br>Conflicts with `perf_mode_l7_enhanced`.
+- `perf_mode_l7_enhanced` (Boolean) Default Performance Mode Site optimized for L7 traffic processing<br>Conflicts with `perf_mode_l3_enhanced`.
 
 
 
@@ -2318,17 +2260,17 @@ Optional:
 <a id="nestedatt--site_type_choice--ingress_gw_ar--accelerated_networking"></a>
 ### Nested Schema for `site_type_choice.ingress_gw_ar.accelerated_networking`
 
-Required:
+Optional:
 
-- `accelerated_networking_choice` (Attributes) Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw_ar--accelerated_networking--accelerated_networking_choice))
+- `accelerated_networking_choice` (Attributes) Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen<br>Exactly one of `disable` or `enable` must be specified when `accelerated_networking_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw_ar--accelerated_networking--accelerated_networking_choice))
 
 <a id="nestedatt--site_type_choice--ingress_gw_ar--accelerated_networking--accelerated_networking_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_gw_ar.accelerated_networking.accelerated_networking_choice`
 
 Optional:
 
-- `disable` (Boolean) Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.
-- `enable` (Boolean) Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance
+- `disable` (Boolean) Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.<br>Conflicts with `enable`.
+- `enable` (Boolean) Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance<br>Conflicts with `disable`.
 
 
 
@@ -2350,15 +2292,15 @@ Optional:
 
 Required:
 
-- `choice` (Attributes) Choice of subnet Subnet for the Single interface of the site (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw_ar--node--local_subnet--choice))
+- `choice` (Attributes) Choice of subnet Subnet for the Single interface of the site<br>Exactly one of `subnet` or `subnet_param` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw_ar--node--local_subnet--choice))
 
 <a id="nestedatt--site_type_choice--ingress_gw_ar--node--local_subnet--choice"></a>
 ### Nested Schema for `site_type_choice.ingress_gw_ar.node.local_subnet.choice`
 
 Optional:
 
-- `subnet` (Attributes) Existing Subnet Information about existing subnet. (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw_ar--node--local_subnet--choice--subnet))
-- `subnet_param` (Attributes) New Subnet Parameters for creating new subnet. (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw_ar--node--local_subnet--choice--subnet_param))
+- `subnet` (Attributes) Existing Subnet Information about existing subnet.<br>Conflicts with `subnet_param`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw_ar--node--local_subnet--choice--subnet))
+- `subnet_param` (Attributes) New Subnet Parameters for creating new subnet.<br>Conflicts with `subnet`. (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw_ar--node--local_subnet--choice--subnet_param))
 
 <a id="nestedatt--site_type_choice--ingress_gw_ar--node--local_subnet--choice--subnet"></a>
 ### Nested Schema for `site_type_choice.ingress_gw_ar.node.local_subnet.choice.subnet`
@@ -2369,15 +2311,15 @@ Required:
 
 Optional:
 
-- `resource_group_choice` (Attributes) Existing Subnet Resource Group Resource group for this subnet. (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw_ar--node--local_subnet--choice--subnet--resource_group_choice))
+- `resource_group_choice` (Attributes) Existing Subnet Resource Group Resource group for this subnet.<br>Exactly one of `subnet_resource_grp` or `vnet_resource_group` must be specified when `resource_group_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw_ar--node--local_subnet--choice--subnet--resource_group_choice))
 
 <a id="nestedatt--site_type_choice--ingress_gw_ar--node--local_subnet--choice--subnet--resource_group_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_gw_ar.node.local_subnet.choice.subnet.resource_group_choice`
 
 Optional:
 
-- `subnet_resource_grp` (String) subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`
-- `vnet_resource_group` (Boolean) vnet_resource_group Use the same Resource Group as the Vnet
+- `subnet_resource_grp` (String) subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `vnet_resource_group`.
+- `vnet_resource_group` (Boolean) vnet_resource_group Use the same Resource Group as the Vnet<br>Conflicts with `subnet_resource_grp`.
 
 
 
@@ -2395,17 +2337,17 @@ Required:
 <a id="nestedatt--site_type_choice--ingress_gw_ar--performance_enhancement_mode"></a>
 ### Nested Schema for `site_type_choice.ingress_gw_ar.performance_enhancement_mode`
 
-Required:
+Optional:
 
-- `perf_mode_choice` (Attributes) Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation. (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw_ar--performance_enhancement_mode--perf_mode_choice))
+- `perf_mode_choice` (Attributes) Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.<br>Exactly one of `perf_mode_l3_enhanced` or `perf_mode_l7_enhanced` must be specified when `perf_mode_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--ingress_gw_ar--performance_enhancement_mode--perf_mode_choice))
 
 <a id="nestedatt--site_type_choice--ingress_gw_ar--performance_enhancement_mode--perf_mode_choice"></a>
 ### Nested Schema for `site_type_choice.ingress_gw_ar.performance_enhancement_mode.perf_mode_choice`
 
 Optional:
 
-- `perf_mode_l3_enhanced` (Boolean) L3 Mode Enhanced Performance Site optimized for L3 traffic processing
-- `perf_mode_l7_enhanced` (Boolean) Default Performance Mode Site optimized for L7 traffic processing
+- `perf_mode_l3_enhanced` (Boolean) L3 Mode Enhanced Performance Site optimized for L3 traffic processing<br>Conflicts with `perf_mode_l7_enhanced`.
+- `perf_mode_l7_enhanced` (Boolean) Default Performance Mode Site optimized for L7 traffic processing<br>Conflicts with `perf_mode_l3_enhanced`.
 
 
 
@@ -2416,19 +2358,19 @@ Optional:
 Required:
 
 - `az_nodes` (Attributes List) Nodes Only Single AZ or Three AZ(s) nodes are supported currently. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--az_nodes))
-- `dc_cluster_group_choice` (Attributes) Select DC Cluster Group Is this site member of a dc cluster group via selected network type (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--dc_cluster_group_choice))
-- `forward_proxy_choice` (Attributes) Manage Forward Proxy Manage Forward Proxy for this site (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--forward_proxy_choice))
-- `global_network_choice` (Attributes) Connect to Global Network Select global networks to connect to site local network (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--global_network_choice))
-- `k8s_cluster_choice` (Attributes) Site Local K8s API access Enable/Disable choice for site local K8s API access (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--k8s_cluster_choice))
-- `network_policy_choice` (Attributes) Manage Firewall Policy Manage Firewall Policy via this view (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--network_policy_choice))
-- `outside_static_route_choice` (Attributes) Manage Static Routes for Site Local Network Add static routes to site local network. Used to reach indirectly connected subnets. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--outside_static_route_choice))
-- `site_mesh_group_choice` (Attributes) Site Mesh Group Connection Type Select how the site mesh group needs to be connected (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--site_mesh_group_choice))
-- `storage_class_choice` (Attributes) Storage Class Configuration Configure custom storage classes in kubernetes for this site (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--storage_class_choice))
 
 Optional:
 
 - `accelerated_networking` (Attributes) Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--accelerated_networking))
 - `azure_certified_hw` (String) Azure Certified Hardware Name for Azure certified hardware.<br>**Default:** `azure-byol-voltstack-combo`<br>**Validation:** `Length LengthAtMost(64)`<br>**Allowed Values (choose one):** `['azure-byol-voltstack-combo']`
+- `dc_cluster_group_choice` (Attributes) Select DC Cluster Group Is this site member of a dc cluster group via selected network type<br>Exactly one of `dc_cluster_group` or `no_dc_cluster_group` must be specified when `dc_cluster_group_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--dc_cluster_group_choice))
+- `forward_proxy_choice` (Attributes) Manage Forward Proxy Manage Forward Proxy for this site<br>Exactly one of `active_forward_proxy_policies`, `forward_proxy_allow_all`, or `no_forward_proxy` must be specified when `forward_proxy_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--forward_proxy_choice))
+- `global_network_choice` (Attributes) Connect to Global Network Select global networks to connect to site local network<br>Exactly one of `global_network_list` or `no_global_network` must be specified when `global_network_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--global_network_choice))
+- `k8s_cluster_choice` (Attributes) Site Local K8s API access Enable/Disable choice for site local K8s API access<br>Exactly one of `k8s_cluster` or `no_k8s_cluster` must be specified when `k8s_cluster_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--k8s_cluster_choice))
+- `network_policy_choice` (Attributes) Manage Firewall Policy Manage Firewall Policy via this view<br>Exactly one of `active_enhanced_firewall_policies`, `active_network_policies`, or `no_network_policy` must be specified when `network_policy_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--network_policy_choice))
+- `outside_static_route_choice` (Attributes) Manage Static Routes for Site Local Network Add static routes to site local network. Used to reach indirectly connected subnets.<br>Exactly one of `no_outside_static_routes` or `outside_static_routes` must be specified when `outside_static_route_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--outside_static_route_choice))
+- `site_mesh_group_choice` (Attributes) Site Mesh Group Connection Type Select how the site mesh group needs to be connected<br>Exactly one of `sm_connection_public_ip` or `sm_connection_pvt_ip` must be specified when `site_mesh_group_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--site_mesh_group_choice))
+- `storage_class_choice` (Attributes) Storage Class Configuration Configure custom storage classes in kubernetes for this site<br>Exactly one of `default_storage` or `storage_class_list` must be specified when `storage_class_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--storage_class_choice))
 
 <a id="nestedatt--site_type_choice--voltstack_cluster--az_nodes"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster.az_nodes`
@@ -2446,15 +2388,15 @@ Optional:
 
 Required:
 
-- `choice` (Attributes) Choice of subnet Subnet for the Single interface of the site (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--az_nodes--local_subnet--choice))
+- `choice` (Attributes) Choice of subnet Subnet for the Single interface of the site<br>Exactly one of `subnet` or `subnet_param` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--az_nodes--local_subnet--choice))
 
 <a id="nestedatt--site_type_choice--voltstack_cluster--az_nodes--local_subnet--choice"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster.az_nodes.local_subnet.choice`
 
 Optional:
 
-- `subnet` (Attributes) Existing Subnet Information about existing subnet. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--az_nodes--local_subnet--choice--subnet))
-- `subnet_param` (Attributes) New Subnet Parameters for creating new subnet. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--az_nodes--local_subnet--choice--subnet_param))
+- `subnet` (Attributes) Existing Subnet Information about existing subnet.<br>Conflicts with `subnet_param`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--az_nodes--local_subnet--choice--subnet))
+- `subnet_param` (Attributes) New Subnet Parameters for creating new subnet.<br>Conflicts with `subnet`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--az_nodes--local_subnet--choice--subnet_param))
 
 <a id="nestedatt--site_type_choice--voltstack_cluster--az_nodes--local_subnet--choice--subnet"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster.az_nodes.local_subnet.choice.subnet`
@@ -2465,15 +2407,15 @@ Required:
 
 Optional:
 
-- `resource_group_choice` (Attributes) Existing Subnet Resource Group Resource group for this subnet. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--az_nodes--local_subnet--choice--subnet--resource_group_choice))
+- `resource_group_choice` (Attributes) Existing Subnet Resource Group Resource group for this subnet.<br>Exactly one of `subnet_resource_grp` or `vnet_resource_group` must be specified when `resource_group_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--az_nodes--local_subnet--choice--subnet--resource_group_choice))
 
 <a id="nestedatt--site_type_choice--voltstack_cluster--az_nodes--local_subnet--choice--subnet--resource_group_choice"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster.az_nodes.local_subnet.choice.subnet.resource_group_choice`
 
 Optional:
 
-- `subnet_resource_grp` (String) subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`
-- `vnet_resource_group` (Boolean) vnet_resource_group Use the same Resource Group as the Vnet
+- `subnet_resource_grp` (String) subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `vnet_resource_group`.
+- `vnet_resource_group` (Boolean) vnet_resource_group Use the same Resource Group as the Vnet<br>Conflicts with `subnet_resource_grp`.
 
 
 
@@ -2488,13 +2430,30 @@ Required:
 
 
 
+<a id="nestedatt--site_type_choice--voltstack_cluster--accelerated_networking"></a>
+### Nested Schema for `site_type_choice.voltstack_cluster.accelerated_networking`
+
+Optional:
+
+- `accelerated_networking_choice` (Attributes) Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen<br>Exactly one of `disable` or `enable` must be specified when `accelerated_networking_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--accelerated_networking--accelerated_networking_choice))
+
+<a id="nestedatt--site_type_choice--voltstack_cluster--accelerated_networking--accelerated_networking_choice"></a>
+### Nested Schema for `site_type_choice.voltstack_cluster.accelerated_networking.accelerated_networking_choice`
+
+Optional:
+
+- `disable` (Boolean) Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.<br>Conflicts with `enable`.
+- `enable` (Boolean) Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance<br>Conflicts with `disable`.
+
+
+
 <a id="nestedatt--site_type_choice--voltstack_cluster--dc_cluster_group_choice"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster.dc_cluster_group_choice`
 
 Optional:
 
-- `dc_cluster_group` (Attributes) Member of DC cluster Group of DC Cluster Group This site is member of dc cluster group via Outside Network (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--dc_cluster_group_choice--dc_cluster_group))
-- `no_dc_cluster_group` (Boolean) Not a Member of DC Cluster Group This site is not a member of dc cluster group
+- `dc_cluster_group` (Attributes) Member of DC cluster Group of DC Cluster Group This site is member of dc cluster group via Outside Network<br>Conflicts with `no_dc_cluster_group`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--dc_cluster_group_choice--dc_cluster_group))
+- `no_dc_cluster_group` (Boolean) Not a Member of DC Cluster Group This site is not a member of dc cluster group<br>Conflicts with `dc_cluster_group`.
 
 <a id="nestedatt--site_type_choice--voltstack_cluster--dc_cluster_group_choice--dc_cluster_group"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster.dc_cluster_group_choice.dc_cluster_group`
@@ -2515,9 +2474,9 @@ Read-Only:
 
 Optional:
 
-- `active_forward_proxy_policies` (Attributes) Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--forward_proxy_choice--active_forward_proxy_policies))
-- `forward_proxy_allow_all` (Boolean) Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.
-- `no_forward_proxy` (Boolean) Disable Forward Proxy Disable Forward Proxy for this site
+- `active_forward_proxy_policies` (Attributes) Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies<br>Conflicts with `forward_proxy_allow_all` and `no_forward_proxy`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--forward_proxy_choice--active_forward_proxy_policies))
+- `forward_proxy_allow_all` (Boolean) Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.<br>Conflicts with `active_forward_proxy_policies` and `no_forward_proxy`.
+- `no_forward_proxy` (Boolean) Disable Forward Proxy Disable Forward Proxy for this site<br>Conflicts with `active_forward_proxy_policies` and `forward_proxy_allow_all`.
 
 <a id="nestedatt--site_type_choice--voltstack_cluster--forward_proxy_choice--active_forward_proxy_policies"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster.forward_proxy_choice.active_forward_proxy_policies`
@@ -2546,8 +2505,8 @@ Read-Only:
 
 Optional:
 
-- `global_network_list` (Attributes) Connect Global Networks List of global network connections (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--global_network_choice--global_network_list))
-- `no_global_network` (Boolean) Do not Connect Global Networks No global network to connect
+- `global_network_list` (Attributes) Connect Global Networks List of global network connections<br>Conflicts with `no_global_network`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--global_network_choice--global_network_list))
+- `no_global_network` (Boolean) Do not Connect Global Networks No global network to connect<br>Conflicts with `global_network_list`.
 
 <a id="nestedatt--site_type_choice--voltstack_cluster--global_network_choice--global_network_list"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster.global_network_choice.global_network_list`
@@ -2561,15 +2520,15 @@ Required:
 
 Required:
 
-- `connection_choice` (Attributes) Connector Choice Select the networks and method in which they are connected. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--global_network_choice--global_network_list--global_network_connections--connection_choice))
+- `connection_choice` (Attributes) Connector Choice Select the networks and method in which they are connected.<br>Exactly one of `sli_to_global_dr` or `slo_to_global_dr` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--global_network_choice--global_network_list--global_network_connections--connection_choice))
 
 <a id="nestedatt--site_type_choice--voltstack_cluster--global_network_choice--global_network_list--global_network_connections--connection_choice"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster.global_network_choice.global_network_list.global_network_connections.connection_choice`
 
 Optional:
 
-- `sli_to_global_dr` (Attributes) Site Local Inside to a Global Network' Site local inside is connected directly to a given global network (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--global_network_choice--global_network_list--global_network_connections--connection_choice--sli_to_global_dr))
-- `slo_to_global_dr` (Attributes) Site Local Outside to a Global Network' Site local outside is connected directly to a given global network (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--global_network_choice--global_network_list--global_network_connections--connection_choice--slo_to_global_dr))
+- `sli_to_global_dr` (Attributes) Site Local Inside to a Global Network' Site local inside is connected directly to a given global network<br>Conflicts with `slo_to_global_dr`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--global_network_choice--global_network_list--global_network_connections--connection_choice--sli_to_global_dr))
+- `slo_to_global_dr` (Attributes) Site Local Outside to a Global Network' Site local outside is connected directly to a given global network<br>Conflicts with `sli_to_global_dr`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--global_network_choice--global_network_list--global_network_connections--connection_choice--slo_to_global_dr))
 
 <a id="nestedatt--site_type_choice--voltstack_cluster--global_network_choice--global_network_list--global_network_connections--connection_choice--sli_to_global_dr"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster.global_network_choice.global_network_list.global_network_connections.connection_choice.sli_to_global_dr`
@@ -2622,8 +2581,8 @@ Read-Only:
 
 Optional:
 
-- `k8s_cluster` (Attributes) Enable Site Local K8s API access Site Local K8s API access is enabled, using k8s_cluster object (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--k8s_cluster_choice--k8s_cluster))
-- `no_k8s_cluster` (Boolean) Disable Site Local K8s API access Site Local K8s API access is disabled
+- `k8s_cluster` (Attributes) Enable Site Local K8s API access Site Local K8s API access is enabled, using k8s_cluster object<br>Conflicts with `no_k8s_cluster`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--k8s_cluster_choice--k8s_cluster))
+- `no_k8s_cluster` (Boolean) Disable Site Local K8s API access Site Local K8s API access is disabled<br>Conflicts with `k8s_cluster`.
 
 <a id="nestedatt--site_type_choice--voltstack_cluster--k8s_cluster_choice--k8s_cluster"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster.k8s_cluster_choice.k8s_cluster`
@@ -2644,9 +2603,9 @@ Read-Only:
 
 Optional:
 
-- `active_enhanced_firewall_policies` (Attributes) Manage Enhanced Firewall Policy Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--network_policy_choice--active_enhanced_firewall_policies))
-- `active_network_policies` (Attributes) Manage Firewall Policy Firewall Policies active for this site. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--network_policy_choice--active_network_policies))
-- `no_network_policy` (Boolean) Do Not Manage Firewall Policy Firewall Policy is disabled for this site.
+- `active_enhanced_firewall_policies` (Attributes) Manage Enhanced Firewall Policy Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion.<br>Conflicts with `active_network_policies` and `no_network_policy`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--network_policy_choice--active_enhanced_firewall_policies))
+- `active_network_policies` (Attributes) Manage Firewall Policy Firewall Policies active for this site.<br>Conflicts with `active_enhanced_firewall_policies` and `no_network_policy`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--network_policy_choice--active_network_policies))
+- `no_network_policy` (Boolean) Do Not Manage Firewall Policy Firewall Policy is disabled for this site.<br>Conflicts with `active_enhanced_firewall_policies` and `active_network_policies`.
 
 <a id="nestedatt--site_type_choice--voltstack_cluster--network_policy_choice--active_enhanced_firewall_policies"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster.network_policy_choice.active_enhanced_firewall_policies`
@@ -2696,8 +2655,8 @@ Read-Only:
 
 Optional:
 
-- `no_outside_static_routes` (Boolean) Do Not Manage Static Routes Static Routes disabled for outside network.
-- `outside_static_routes` (Attributes) Manage Static routes Manage static routes for outside network. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--outside_static_route_choice--outside_static_routes))
+- `no_outside_static_routes` (Boolean) Do Not Manage Static Routes Static Routes disabled for outside network.<br>Conflicts with `outside_static_routes`.
+- `outside_static_routes` (Attributes) Manage Static routes Manage static routes for outside network.<br>Conflicts with `no_outside_static_routes`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--outside_static_route_choice--outside_static_routes))
 
 <a id="nestedatt--site_type_choice--voltstack_cluster--outside_static_route_choice--outside_static_routes"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster.outside_static_route_choice.outside_static_routes`
@@ -2711,15 +2670,15 @@ Required:
 
 Required:
 
-- `config_mode_choice` (Attributes) Static Route Config Mode Select method for configuring the route (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice))
+- `config_mode_choice` (Attributes) Static Route Config Mode Select method for configuring the route<br>Exactly one of `custom_static_route` or `simple_static_route` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice))
 
 <a id="nestedatt--site_type_choice--voltstack_cluster--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster.outside_static_route_choice.outside_static_routes.static_route_list.config_mode_choice`
 
 Optional:
 
-- `custom_static_route` (Attributes) Custom Static Route Use Custom static route to configure all advanced options (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route))
-- `simple_static_route` (String) Simple Static Route Use simple static route for prefix pointing to single interface in the network
+- `custom_static_route` (Attributes) Custom Static Route Use Custom static route to configure all advanced options<br>Conflicts with `simple_static_route`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route))
+- `simple_static_route` (String) Simple Static Route Use simple static route for prefix pointing to single interface in the network<br>Conflicts with `custom_static_route`.
 
 <a id="nestedatt--site_type_choice--voltstack_cluster--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster.outside_static_route_choice.outside_static_routes.static_route_list.config_mode_choice.custom_static_route`
@@ -2739,7 +2698,7 @@ Optional:
 
 Required:
 
-- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--subnets--ver_choice))
+- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address<br>`ipv4` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--subnets--ver_choice))
 
 <a id="nestedatt--site_type_choice--voltstack_cluster--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--subnets--ver_choice"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster.outside_static_route_choice.outside_static_routes.static_route_list.config_mode_choice.custom_static_route.subnets.ver_choice`
@@ -2786,15 +2745,15 @@ Read-Only:
 
 Optional:
 
-- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 Address or IPv6 Address (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice))
+- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 Address or IPv6 Address<br>Exactly one of `dual_stack` or `ipv4` must be specified when `ver_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice))
 
 <a id="nestedatt--site_type_choice--voltstack_cluster--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster.outside_static_route_choice.outside_static_routes.static_route_list.config_mode_choice.custom_static_route.nexthop.nexthop_address.ver_choice`
 
 Optional:
 
-- `dual_stack` (Attributes) Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--dual_stack))
-- `ipv4` (Attributes) IPv4 Address IPv4 Address (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--ipv4))
+- `dual_stack` (Attributes) Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together<br>Conflicts with `ipv4`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--dual_stack))
+- `ipv4` (Attributes) IPv4 Address IPv4 Address<br>Conflicts with `dual_stack`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--ipv4))
 
 <a id="nestedatt--site_type_choice--voltstack_cluster--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--dual_stack"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster.outside_static_route_choice.outside_static_routes.static_route_list.config_mode_choice.custom_static_route.nexthop.nexthop_address.ver_choice.dual_stack`
@@ -2842,8 +2801,8 @@ Optional:
 
 Optional:
 
-- `sm_connection_public_ip` (Boolean) Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group
-- `sm_connection_pvt_ip` (Boolean) Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group
+- `sm_connection_public_ip` (Boolean) Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group<br>Conflicts with `sm_connection_pvt_ip`.
+- `sm_connection_pvt_ip` (Boolean) Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group<br>Conflicts with `sm_connection_public_ip`.
 
 
 <a id="nestedatt--site_type_choice--voltstack_cluster--storage_class_choice"></a>
@@ -2851,8 +2810,8 @@ Optional:
 
 Optional:
 
-- `default_storage` (Boolean) Default Storage Class Use standard storage class configured as AWS EBS
-- `storage_class_list` (Attributes) Custom Storage Class Add additional custom storage classes in kubernetes for site (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--storage_class_choice--storage_class_list))
+- `default_storage` (Boolean) Default Storage Class Use standard storage class configured as AWS EBS<br>Conflicts with `storage_class_list`.
+- `storage_class_list` (Attributes) Custom Storage Class Add additional custom storage classes in kubernetes for site<br>Conflicts with `default_storage`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--storage_class_choice--storage_class_list))
 
 <a id="nestedatt--site_type_choice--voltstack_cluster--storage_class_choice--storage_class_list"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster.storage_class_choice.storage_class_list`
@@ -2875,51 +2834,48 @@ Optional:
 
 
 
-<a id="nestedatt--site_type_choice--voltstack_cluster--accelerated_networking"></a>
-### Nested Schema for `site_type_choice.voltstack_cluster.accelerated_networking`
-
-Required:
-
-- `accelerated_networking_choice` (Attributes) Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster--accelerated_networking--accelerated_networking_choice))
-
-<a id="nestedatt--site_type_choice--voltstack_cluster--accelerated_networking--accelerated_networking_choice"></a>
-### Nested Schema for `site_type_choice.voltstack_cluster.accelerated_networking.accelerated_networking_choice`
-
-Optional:
-
-- `disable` (Boolean) Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.
-- `enable` (Boolean) Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance
-
-
-
 
 <a id="nestedatt--site_type_choice--voltstack_cluster_ar"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster_ar`
-
-Required:
-
-- `dc_cluster_group_choice` (Attributes) Select DC Cluster Group Is this site member of a dc cluster group via selected network type (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--dc_cluster_group_choice))
-- `forward_proxy_choice` (Attributes) Manage Forward Proxy Manage Forward Proxy for this site (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--forward_proxy_choice))
-- `global_network_choice` (Attributes) Connect to Global Network Select global networks to connect to site local network (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--global_network_choice))
-- `k8s_cluster_choice` (Attributes) Site Local K8s API access Enable/Disable choice for site local K8s API access (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--k8s_cluster_choice))
-- `network_policy_choice` (Attributes) Manage Firewall Policy Manage Firewall Policy via this view (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--network_policy_choice))
-- `outside_static_route_choice` (Attributes) Manage Static Routes for Site Local Network Add static routes to site local network. Used to reach indirectly connected subnets. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--outside_static_route_choice))
-- `site_mesh_group_choice` (Attributes) Site Mesh Group Connection Type Select how the site mesh group needs to be connected (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--site_mesh_group_choice))
-- `storage_class_choice` (Attributes) Storage Class Configuration Configure custom storage classes in kubernetes for this site (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--storage_class_choice))
 
 Optional:
 
 - `accelerated_networking` (Attributes) Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--accelerated_networking))
 - `azure_certified_hw` (String) Azure Certified Hardware Name for Azure certified hardware.<br>**Default:** `azure-byol-voltstack-combo`<br>**Validation:** `Length LengthAtMost(64)`<br>**Allowed Values (choose one):** `['azure-byol-voltstack-combo']`
+- `dc_cluster_group_choice` (Attributes) Select DC Cluster Group Is this site member of a dc cluster group via selected network type<br>Exactly one of `dc_cluster_group` or `no_dc_cluster_group` must be specified when `dc_cluster_group_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--dc_cluster_group_choice))
+- `forward_proxy_choice` (Attributes) Manage Forward Proxy Manage Forward Proxy for this site<br>Exactly one of `active_forward_proxy_policies`, `forward_proxy_allow_all`, or `no_forward_proxy` must be specified when `forward_proxy_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--forward_proxy_choice))
+- `global_network_choice` (Attributes) Connect to Global Network Select global networks to connect to site local network<br>Exactly one of `global_network_list` or `no_global_network` must be specified when `global_network_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--global_network_choice))
+- `k8s_cluster_choice` (Attributes) Site Local K8s API access Enable/Disable choice for site local K8s API access<br>Exactly one of `k8s_cluster` or `no_k8s_cluster` must be specified when `k8s_cluster_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--k8s_cluster_choice))
+- `network_policy_choice` (Attributes) Manage Firewall Policy Manage Firewall Policy via this view<br>Exactly one of `active_enhanced_firewall_policies`, `active_network_policies`, or `no_network_policy` must be specified when `network_policy_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--network_policy_choice))
 - `node` (Attributes) Node Information Only Single AZ or Three AZ(s) nodes are supported currently. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--node))
+- `outside_static_route_choice` (Attributes) Manage Static Routes for Site Local Network Add static routes to site local network. Used to reach indirectly connected subnets.<br>Exactly one of `no_outside_static_routes` or `outside_static_routes` must be specified when `outside_static_route_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--outside_static_route_choice))
+- `site_mesh_group_choice` (Attributes) Site Mesh Group Connection Type Select how the site mesh group needs to be connected<br>Exactly one of `sm_connection_public_ip` or `sm_connection_pvt_ip` must be specified when `site_mesh_group_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--site_mesh_group_choice))
+- `storage_class_choice` (Attributes) Storage Class Configuration Configure custom storage classes in kubernetes for this site<br>Exactly one of `default_storage` or `storage_class_list` must be specified when `storage_class_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--storage_class_choice))
+
+<a id="nestedatt--site_type_choice--voltstack_cluster_ar--accelerated_networking"></a>
+### Nested Schema for `site_type_choice.voltstack_cluster_ar.accelerated_networking`
+
+Optional:
+
+- `accelerated_networking_choice` (Attributes) Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen<br>Exactly one of `disable` or `enable` must be specified when `accelerated_networking_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--accelerated_networking--accelerated_networking_choice))
+
+<a id="nestedatt--site_type_choice--voltstack_cluster_ar--accelerated_networking--accelerated_networking_choice"></a>
+### Nested Schema for `site_type_choice.voltstack_cluster_ar.accelerated_networking.accelerated_networking_choice`
+
+Optional:
+
+- `disable` (Boolean) Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.<br>Conflicts with `enable`.
+- `enable` (Boolean) Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance<br>Conflicts with `disable`.
+
+
 
 <a id="nestedatt--site_type_choice--voltstack_cluster_ar--dc_cluster_group_choice"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster_ar.dc_cluster_group_choice`
 
 Optional:
 
-- `dc_cluster_group` (Attributes) Member of DC cluster Group This site is member of dc cluster group via outside network (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--dc_cluster_group_choice--dc_cluster_group))
-- `no_dc_cluster_group` (Boolean) Not a Member This site is not a member of dc cluster group
+- `dc_cluster_group` (Attributes) Member of DC cluster Group This site is member of dc cluster group via outside network<br>Conflicts with `no_dc_cluster_group`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--dc_cluster_group_choice--dc_cluster_group))
+- `no_dc_cluster_group` (Boolean) Not a Member This site is not a member of dc cluster group<br>Conflicts with `dc_cluster_group`.
 
 <a id="nestedatt--site_type_choice--voltstack_cluster_ar--dc_cluster_group_choice--dc_cluster_group"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster_ar.dc_cluster_group_choice.dc_cluster_group`
@@ -2940,9 +2896,9 @@ Read-Only:
 
 Optional:
 
-- `active_forward_proxy_policies` (Attributes) Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--forward_proxy_choice--active_forward_proxy_policies))
-- `forward_proxy_allow_all` (Boolean) Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.
-- `no_forward_proxy` (Boolean) Disable Forward Proxy Disable Forward Proxy for this site
+- `active_forward_proxy_policies` (Attributes) Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies<br>Conflicts with `forward_proxy_allow_all` and `no_forward_proxy`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--forward_proxy_choice--active_forward_proxy_policies))
+- `forward_proxy_allow_all` (Boolean) Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.<br>Conflicts with `active_forward_proxy_policies` and `no_forward_proxy`.
+- `no_forward_proxy` (Boolean) Disable Forward Proxy Disable Forward Proxy for this site<br>Conflicts with `active_forward_proxy_policies` and `forward_proxy_allow_all`.
 
 <a id="nestedatt--site_type_choice--voltstack_cluster_ar--forward_proxy_choice--active_forward_proxy_policies"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster_ar.forward_proxy_choice.active_forward_proxy_policies`
@@ -2971,8 +2927,8 @@ Read-Only:
 
 Optional:
 
-- `global_network_list` (Attributes) Connect Global Networks List of global network connections (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--global_network_choice--global_network_list))
-- `no_global_network` (Boolean) Do not Connect Global Networks No global network to connect
+- `global_network_list` (Attributes) Connect Global Networks List of global network connections<br>Conflicts with `no_global_network`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--global_network_choice--global_network_list))
+- `no_global_network` (Boolean) Do not Connect Global Networks No global network to connect<br>Conflicts with `global_network_list`.
 
 <a id="nestedatt--site_type_choice--voltstack_cluster_ar--global_network_choice--global_network_list"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster_ar.global_network_choice.global_network_list`
@@ -2986,15 +2942,15 @@ Required:
 
 Required:
 
-- `connection_choice` (Attributes) Connector Choice Select the networks and method in which they are connected. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--global_network_choice--global_network_list--global_network_connections--connection_choice))
+- `connection_choice` (Attributes) Connector Choice Select the networks and method in which they are connected.<br>Exactly one of `sli_to_global_dr` or `slo_to_global_dr` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--global_network_choice--global_network_list--global_network_connections--connection_choice))
 
 <a id="nestedatt--site_type_choice--voltstack_cluster_ar--global_network_choice--global_network_list--global_network_connections--connection_choice"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster_ar.global_network_choice.global_network_list.global_network_connections.connection_choice`
 
 Optional:
 
-- `sli_to_global_dr` (Attributes) Site Local Inside to a Global Network' Site local inside is connected directly to a given global network (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--global_network_choice--global_network_list--global_network_connections--connection_choice--sli_to_global_dr))
-- `slo_to_global_dr` (Attributes) Site Local Outside to a Global Network' Site local outside is connected directly to a given global network (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--global_network_choice--global_network_list--global_network_connections--connection_choice--slo_to_global_dr))
+- `sli_to_global_dr` (Attributes) Site Local Inside to a Global Network' Site local inside is connected directly to a given global network<br>Conflicts with `slo_to_global_dr`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--global_network_choice--global_network_list--global_network_connections--connection_choice--sli_to_global_dr))
+- `slo_to_global_dr` (Attributes) Site Local Outside to a Global Network' Site local outside is connected directly to a given global network<br>Conflicts with `sli_to_global_dr`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--global_network_choice--global_network_list--global_network_connections--connection_choice--slo_to_global_dr))
 
 <a id="nestedatt--site_type_choice--voltstack_cluster_ar--global_network_choice--global_network_list--global_network_connections--connection_choice--sli_to_global_dr"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster_ar.global_network_choice.global_network_list.global_network_connections.connection_choice.sli_to_global_dr`
@@ -3047,8 +3003,8 @@ Read-Only:
 
 Optional:
 
-- `k8s_cluster` (Attributes) Enable Site Local K8s API access Site Local K8s API access is enabled, using k8s_cluster object (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--k8s_cluster_choice--k8s_cluster))
-- `no_k8s_cluster` (Boolean) Disable Site Local K8s API access Site Local K8s API access is disabled
+- `k8s_cluster` (Attributes) Enable Site Local K8s API access Site Local K8s API access is enabled, using k8s_cluster object<br>Conflicts with `no_k8s_cluster`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--k8s_cluster_choice--k8s_cluster))
+- `no_k8s_cluster` (Boolean) Disable Site Local K8s API access Site Local K8s API access is disabled<br>Conflicts with `k8s_cluster`.
 
 <a id="nestedatt--site_type_choice--voltstack_cluster_ar--k8s_cluster_choice--k8s_cluster"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster_ar.k8s_cluster_choice.k8s_cluster`
@@ -3069,9 +3025,9 @@ Read-Only:
 
 Optional:
 
-- `active_enhanced_firewall_policies` (Attributes) Manage Enhanced Firewall Policy Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--network_policy_choice--active_enhanced_firewall_policies))
-- `active_network_policies` (Attributes) Manage Firewall Policy Firewall Policies active for this site. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--network_policy_choice--active_network_policies))
-- `no_network_policy` (Boolean) Do Not Manage Firewall Policy Firewall Policy is disabled for this site.
+- `active_enhanced_firewall_policies` (Attributes) Manage Enhanced Firewall Policy Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion.<br>Conflicts with `active_network_policies` and `no_network_policy`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--network_policy_choice--active_enhanced_firewall_policies))
+- `active_network_policies` (Attributes) Manage Firewall Policy Firewall Policies active for this site.<br>Conflicts with `active_enhanced_firewall_policies` and `no_network_policy`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--network_policy_choice--active_network_policies))
+- `no_network_policy` (Boolean) Do Not Manage Firewall Policy Firewall Policy is disabled for this site.<br>Conflicts with `active_enhanced_firewall_policies` and `active_network_policies`.
 
 <a id="nestedatt--site_type_choice--voltstack_cluster_ar--network_policy_choice--active_enhanced_firewall_policies"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster_ar.network_policy_choice.active_enhanced_firewall_policies`
@@ -3116,13 +3072,73 @@ Read-Only:
 
 
 
+<a id="nestedatt--site_type_choice--voltstack_cluster_ar--node"></a>
+### Nested Schema for `site_type_choice.voltstack_cluster_ar.node`
+
+Required:
+
+- `node_number` (Number) Number of main nodes Number of main nodes to create, either 1 or 3.
+
+Optional:
+
+- `fault_domain` (Number) Number of fault domains Namuber of fault domains to be used while creating the availability set<br>**Default:** `1`
+- `local_subnet` (Attributes) Subnet Subnets for the site local interface of the node (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--node--local_subnet))
+- `update_domain` (Number) Number of update domains Namuber of update domains to be used while creating the availability set<br>**Default:** `1`
+
+<a id="nestedatt--site_type_choice--voltstack_cluster_ar--node--local_subnet"></a>
+### Nested Schema for `site_type_choice.voltstack_cluster_ar.node.local_subnet`
+
+Required:
+
+- `choice` (Attributes) Choice of subnet Subnet for the Single interface of the site<br>Exactly one of `subnet` or `subnet_param` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--node--local_subnet--choice))
+
+<a id="nestedatt--site_type_choice--voltstack_cluster_ar--node--local_subnet--choice"></a>
+### Nested Schema for `site_type_choice.voltstack_cluster_ar.node.local_subnet.choice`
+
+Optional:
+
+- `subnet` (Attributes) Existing Subnet Information about existing subnet.<br>Conflicts with `subnet_param`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--node--local_subnet--choice--subnet))
+- `subnet_param` (Attributes) New Subnet Parameters for creating new subnet.<br>Conflicts with `subnet`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--node--local_subnet--choice--subnet_param))
+
+<a id="nestedatt--site_type_choice--voltstack_cluster_ar--node--local_subnet--choice--subnet"></a>
+### Nested Schema for `site_type_choice.voltstack_cluster_ar.node.local_subnet.choice.subnet`
+
+Required:
+
+- `subnet_name` (String) Existing Subnet Name Name of existing subnet.<br>**Validation:** `Length LengthAtMost(64)`
+
+Optional:
+
+- `resource_group_choice` (Attributes) Existing Subnet Resource Group Resource group for this subnet.<br>Exactly one of `subnet_resource_grp` or `vnet_resource_group` must be specified when `resource_group_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--node--local_subnet--choice--subnet--resource_group_choice))
+
+<a id="nestedatt--site_type_choice--voltstack_cluster_ar--node--local_subnet--choice--subnet--resource_group_choice"></a>
+### Nested Schema for `site_type_choice.voltstack_cluster_ar.node.local_subnet.choice.subnet.resource_group_choice`
+
+Optional:
+
+- `subnet_resource_grp` (String) subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `vnet_resource_group`.
+- `vnet_resource_group` (Boolean) vnet_resource_group Use the same Resource Group as the Vnet<br>Conflicts with `subnet_resource_grp`.
+
+
+
+<a id="nestedatt--site_type_choice--voltstack_cluster_ar--node--local_subnet--choice--subnet_param"></a>
+### Nested Schema for `site_type_choice.voltstack_cluster_ar.node.local_subnet.choice.subnet_param`
+
+Required:
+
+- `ipv4` (String) IPv4 Subnet IPv4 subnet prefix for this subnet
+
+
+
+
+
 <a id="nestedatt--site_type_choice--voltstack_cluster_ar--outside_static_route_choice"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster_ar.outside_static_route_choice`
 
 Optional:
 
-- `no_outside_static_routes` (Boolean) Do Not Manage Static Routes Static Routes disabled for outside network.
-- `outside_static_routes` (Attributes) Manage Static routes Manage static routes for outside network. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--outside_static_route_choice--outside_static_routes))
+- `no_outside_static_routes` (Boolean) Do Not Manage Static Routes Static Routes disabled for outside network.<br>Conflicts with `outside_static_routes`.
+- `outside_static_routes` (Attributes) Manage Static routes Manage static routes for outside network.<br>Conflicts with `no_outside_static_routes`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--outside_static_route_choice--outside_static_routes))
 
 <a id="nestedatt--site_type_choice--voltstack_cluster_ar--outside_static_route_choice--outside_static_routes"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster_ar.outside_static_route_choice.outside_static_routes`
@@ -3136,15 +3152,15 @@ Required:
 
 Required:
 
-- `config_mode_choice` (Attributes) Static Route Config Mode Select method for configuring the route (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice))
+- `config_mode_choice` (Attributes) Static Route Config Mode Select method for configuring the route<br>Exactly one of `custom_static_route` or `simple_static_route` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice))
 
 <a id="nestedatt--site_type_choice--voltstack_cluster_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster_ar.outside_static_route_choice.outside_static_routes.static_route_list.config_mode_choice`
 
 Optional:
 
-- `custom_static_route` (Attributes) Custom Static Route Use Custom static route to configure all advanced options (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route))
-- `simple_static_route` (String) Simple Static Route Use simple static route for prefix pointing to single interface in the network
+- `custom_static_route` (Attributes) Custom Static Route Use Custom static route to configure all advanced options<br>Conflicts with `simple_static_route`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route))
+- `simple_static_route` (String) Simple Static Route Use simple static route for prefix pointing to single interface in the network<br>Conflicts with `custom_static_route`.
 
 <a id="nestedatt--site_type_choice--voltstack_cluster_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster_ar.outside_static_route_choice.outside_static_routes.static_route_list.config_mode_choice.custom_static_route`
@@ -3164,7 +3180,7 @@ Optional:
 
 Required:
 
-- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--subnets--ver_choice))
+- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address<br>`ipv4` must be specified. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--subnets--ver_choice))
 
 <a id="nestedatt--site_type_choice--voltstack_cluster_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--subnets--ver_choice"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster_ar.outside_static_route_choice.outside_static_routes.static_route_list.config_mode_choice.custom_static_route.subnets.ver_choice`
@@ -3211,15 +3227,15 @@ Read-Only:
 
 Optional:
 
-- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 Address or IPv6 Address (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice))
+- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 Address or IPv6 Address<br>Exactly one of `dual_stack` or `ipv4` must be specified when `ver_choice` is configured. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice))
 
 <a id="nestedatt--site_type_choice--voltstack_cluster_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster_ar.outside_static_route_choice.outside_static_routes.static_route_list.config_mode_choice.custom_static_route.nexthop.nexthop_address.ver_choice`
 
 Optional:
 
-- `dual_stack` (Attributes) Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--dual_stack))
-- `ipv4` (Attributes) IPv4 Address IPv4 Address (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--ipv4))
+- `dual_stack` (Attributes) Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together<br>Conflicts with `ipv4`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--dual_stack))
+- `ipv4` (Attributes) IPv4 Address IPv4 Address<br>Conflicts with `dual_stack`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--ipv4))
 
 <a id="nestedatt--site_type_choice--voltstack_cluster_ar--outside_static_route_choice--outside_static_routes--static_route_list--config_mode_choice--custom_static_route--nexthop--nexthop_address--ver_choice--dual_stack"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster_ar.outside_static_route_choice.outside_static_routes.static_route_list.config_mode_choice.custom_static_route.nexthop.nexthop_address.ver_choice.dual_stack`
@@ -3267,8 +3283,8 @@ Optional:
 
 Optional:
 
-- `sm_connection_public_ip` (Boolean) Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group
-- `sm_connection_pvt_ip` (Boolean) Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group
+- `sm_connection_public_ip` (Boolean) Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group<br>Conflicts with `sm_connection_pvt_ip`.
+- `sm_connection_pvt_ip` (Boolean) Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group<br>Conflicts with `sm_connection_public_ip`.
 
 
 <a id="nestedatt--site_type_choice--voltstack_cluster_ar--storage_class_choice"></a>
@@ -3276,8 +3292,8 @@ Optional:
 
 Optional:
 
-- `default_storage` (Boolean) Default Storage Class Use standard storage class configured as AWS EBS
-- `storage_class_list` (Attributes) Custom Storage Class Add additional custom storage classes in kubernetes for site (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--storage_class_choice--storage_class_list))
+- `default_storage` (Boolean) Default Storage Class Use standard storage class configured as AWS EBS<br>Conflicts with `storage_class_list`.
+- `storage_class_list` (Attributes) Custom Storage Class Add additional custom storage classes in kubernetes for site<br>Conflicts with `default_storage`. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--storage_class_choice--storage_class_list))
 
 <a id="nestedatt--site_type_choice--voltstack_cluster_ar--storage_class_choice--storage_class_list"></a>
 ### Nested Schema for `site_type_choice.voltstack_cluster_ar.storage_class_choice.storage_class_list`
@@ -3300,83 +3316,6 @@ Optional:
 
 
 
-<a id="nestedatt--site_type_choice--voltstack_cluster_ar--accelerated_networking"></a>
-### Nested Schema for `site_type_choice.voltstack_cluster_ar.accelerated_networking`
-
-Required:
-
-- `accelerated_networking_choice` (Attributes) Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--accelerated_networking--accelerated_networking_choice))
-
-<a id="nestedatt--site_type_choice--voltstack_cluster_ar--accelerated_networking--accelerated_networking_choice"></a>
-### Nested Schema for `site_type_choice.voltstack_cluster_ar.accelerated_networking.accelerated_networking_choice`
-
-Optional:
-
-- `disable` (Boolean) Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.
-- `enable` (Boolean) Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance
-
-
-
-<a id="nestedatt--site_type_choice--voltstack_cluster_ar--node"></a>
-### Nested Schema for `site_type_choice.voltstack_cluster_ar.node`
-
-Required:
-
-- `node_number` (Number) Number of main nodes Number of main nodes to create, either 1 or 3.
-
-Optional:
-
-- `fault_domain` (Number) Number of fault domains Namuber of fault domains to be used while creating the availability set<br>**Default:** `1`
-- `local_subnet` (Attributes) Subnet Subnets for the site local interface of the node (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--node--local_subnet))
-- `update_domain` (Number) Number of update domains Namuber of update domains to be used while creating the availability set<br>**Default:** `1`
-
-<a id="nestedatt--site_type_choice--voltstack_cluster_ar--node--local_subnet"></a>
-### Nested Schema for `site_type_choice.voltstack_cluster_ar.node.local_subnet`
-
-Required:
-
-- `choice` (Attributes) Choice of subnet Subnet for the Single interface of the site (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--node--local_subnet--choice))
-
-<a id="nestedatt--site_type_choice--voltstack_cluster_ar--node--local_subnet--choice"></a>
-### Nested Schema for `site_type_choice.voltstack_cluster_ar.node.local_subnet.choice`
-
-Optional:
-
-- `subnet` (Attributes) Existing Subnet Information about existing subnet. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--node--local_subnet--choice--subnet))
-- `subnet_param` (Attributes) New Subnet Parameters for creating new subnet. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--node--local_subnet--choice--subnet_param))
-
-<a id="nestedatt--site_type_choice--voltstack_cluster_ar--node--local_subnet--choice--subnet"></a>
-### Nested Schema for `site_type_choice.voltstack_cluster_ar.node.local_subnet.choice.subnet`
-
-Required:
-
-- `subnet_name` (String) Existing Subnet Name Name of existing subnet.<br>**Validation:** `Length LengthAtMost(64)`
-
-Optional:
-
-- `resource_group_choice` (Attributes) Existing Subnet Resource Group Resource group for this subnet. (see [below for nested schema](#nestedatt--site_type_choice--voltstack_cluster_ar--node--local_subnet--choice--subnet--resource_group_choice))
-
-<a id="nestedatt--site_type_choice--voltstack_cluster_ar--node--local_subnet--choice--subnet--resource_group_choice"></a>
-### Nested Schema for `site_type_choice.voltstack_cluster_ar.node.local_subnet.choice.subnet.resource_group_choice`
-
-Optional:
-
-- `subnet_resource_grp` (String) subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`
-- `vnet_resource_group` (Boolean) vnet_resource_group Use the same Resource Group as the Vnet
-
-
-
-<a id="nestedatt--site_type_choice--voltstack_cluster_ar--node--local_subnet--choice--subnet_param"></a>
-### Nested Schema for `site_type_choice.voltstack_cluster_ar.node.local_subnet.choice.subnet_param`
-
-Required:
-
-- `ipv4` (String) IPv4 Subnet IPv4 subnet prefix for this subnet
-
-
-
-
-
 
 
 <a id="nestedatt--vnet"></a>
@@ -3384,15 +3323,15 @@ Required:
 
 Required:
 
-- `choice` (Attributes) Choice of existing or new Vnet This is choice of existing Vnet or new Vnet (see [below for nested schema](#nestedatt--vnet--choice))
+- `choice` (Attributes) Choice of existing or new Vnet This is choice of existing Vnet or new Vnet<br>Exactly one of `existing_vnet` or `new_vnet` must be specified. (see [below for nested schema](#nestedatt--vnet--choice))
 
 <a id="nestedatt--vnet--choice"></a>
 ### Nested Schema for `vnet.choice`
 
 Optional:
 
-- `existing_vnet` (Attributes) Existing VPC Information about existing Vnet (see [below for nested schema](#nestedatt--vnet--choice--existing_vnet))
-- `new_vnet` (Attributes) New VPC Parameters for creating new Vnet (see [below for nested schema](#nestedatt--vnet--choice--new_vnet))
+- `existing_vnet` (Attributes) Existing VPC Information about existing Vnet<br>Conflicts with `new_vnet`. (see [below for nested schema](#nestedatt--vnet--choice--existing_vnet))
+- `new_vnet` (Attributes) New VPC Parameters for creating new Vnet<br>Conflicts with `existing_vnet`. (see [below for nested schema](#nestedatt--vnet--choice--new_vnet))
 
 <a id="nestedatt--vnet--choice--existing_vnet"></a>
 ### Nested Schema for `vnet.choice.existing_vnet`
@@ -3400,16 +3339,19 @@ Optional:
 Required:
 
 - `resource_group` (String) Existing Vnet Resource Group Resource group of existing Vnet<br>**Validation:** `Length LengthBetween(1, 64)`
-- `routing_type_choice` (Attributes) Choice of Routing This is choice of F5 Orchestrated Routing or Manual Routing for CE VPC/VNET (see [below for nested schema](#nestedatt--vnet--choice--existing_vnet--routing_type_choice))
 - `vnet_name` (String) Existing Vnet Name Name of existing Vnet<br>**Validation:** `Length LengthBetween(1, 64)`
+
+Optional:
+
+- `routing_type_choice` (Attributes) Choice of Routing This is choice of F5 Orchestrated Routing or Manual Routing for CE VPC/VNET<br>Exactly one of `f5_orchestrated_routing` or `manual_routing` must be specified when `routing_type_choice` is configured. (see [below for nested schema](#nestedatt--vnet--choice--existing_vnet--routing_type_choice))
 
 <a id="nestedatt--vnet--choice--existing_vnet--routing_type_choice"></a>
 ### Nested Schema for `vnet.choice.existing_vnet.routing_type_choice`
 
 Optional:
 
-- `f5_orchestrated_routing` (Boolean) F5 Orchestrated Routing F5 will orchestrate required routes for SLO Route Table towards Internet and SLI RT towards the CE.
-- `manual_routing` (Boolean) Manual Routing In this mode, F5 will not create nor alter any route tables or routes within the existing VPCs/Vnets providing better integration for existing environments.
+- `f5_orchestrated_routing` (Boolean) F5 Orchestrated Routing F5 will orchestrate required routes for SLO Route Table towards Internet and SLI RT towards the CE.<br>Conflicts with `manual_routing`.
+- `manual_routing` (Boolean) Manual Routing In this mode, F5 will not create nor alter any route tables or routes within the existing VPCs/Vnets providing better integration for existing environments.<br>Conflicts with `f5_orchestrated_routing`.
 
 
 
@@ -3418,29 +3360,22 @@ Optional:
 
 Required:
 
-- `name_choice` (Attributes) Azure Vnet Name Name for your Azure Vnet (see [below for nested schema](#nestedatt--vnet--choice--new_vnet--name_choice))
 - `primary_ipv4` (String) IPv4 CIDR block IPv4 CIDR block for this Vnet. It has to be private address space.
+
+Optional:
+
+- `name_choice` (Attributes) Azure Vnet Name Name for your Azure Vnet<br>Exactly one of `autogenerate` or `name` must be specified when `name_choice` is configured. (see [below for nested schema](#nestedatt--vnet--choice--new_vnet--name_choice))
 
 <a id="nestedatt--vnet--choice--new_vnet--name_choice"></a>
 ### Nested Schema for `vnet.choice.new_vnet.name_choice`
 
 Optional:
 
-- `autogenerate` (Boolean) autogenerate Autogenerate the Vnet Name
-- `name` (String) name Specify the Vnet Name<br>**Validation:** `Length LengthBetween(1, 64)`
+- `autogenerate` (Boolean) autogenerate Autogenerate the Vnet Name<br>Conflicts with `name`.
+- `name` (String) name Specify the Vnet Name<br>**Validation:** `Length LengthBetween(1, 64)`<br>Conflicts with `autogenerate`.
 
 
 
-
-
-<a id="nestedatt--worker_nodes_choice"></a>
-### Nested Schema for `worker_nodes_choice`
-
-Optional:
-
-- `no_worker_nodes` (Boolean) No Worker Nodes Worker nodes is set to zero
-- `nodes_per_az` (Number) Desired Worker Nodes Per AZ Desired Worker Nodes Per AZ. Max limit is up to 21
-- `total_nodes` (Number) Total Number of Worker Nodes for a Site Total number of worker nodes to be deployed across all AZ's used in the Site
 
 
 <a id="nestedatt--admin_password"></a>
@@ -3448,16 +3383,16 @@ Optional:
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--admin_password--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--admin_password--secret_info_choice))
 
 <a id="nestedatt--admin_password--secret_info_choice"></a>
 ### Nested Schema for `admin_password.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--admin_password--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--admin_password--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--admin_password--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--admin_password--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--admin_password--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `admin_password.secret_info_choice.blindfold_secret_info`
@@ -3482,6 +3417,42 @@ Required:
 Optional:
 
 - `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+
+
+<a id="nestedatt--blocked_services_choice"></a>
+### Nested Schema for `blocked_services_choice`
+
+Optional:
+
+- `block_all_services` (Boolean) Block DNS, SSH & WebUI services on Site Block DNS, SSH & WebUI services on Site<br>Conflicts with `blocked_services` and `default_blocked_services`.
+- `blocked_services` (Attributes) Custom Blocked Services Configuration Use custom blocked services configuration<br>Conflicts with `block_all_services` and `default_blocked_services`. (see [below for nested schema](#nestedatt--blocked_services_choice--blocked_services))
+- `default_blocked_services` (Boolean, Deprecated) Allow access to DNS, SSH services on Site Allow access to DNS, SSH services on Site<br>Conflicts with `block_all_services` and `blocked_services`.
+
+<a id="nestedatt--blocked_services_choice--blocked_services"></a>
+### Nested Schema for `blocked_services_choice.blocked_services`
+
+Optional:
+
+- `blocked_sevice` (Attributes List) Disable Node Local Services (see [below for nested schema](#nestedatt--blocked_services_choice--blocked_services--blocked_sevice))
+
+<a id="nestedatt--blocked_services_choice--blocked_services--blocked_sevice"></a>
+### Nested Schema for `blocked_services_choice.blocked_services.blocked_sevice`
+
+Optional:
+
+- `blocked_services_value_type_choice` (Attributes) blocked_services_type_choice Choose the Nodel Local Service to disable<br>Exactly one of `dns` or `ssh` must be specified when `blocked_services_value_type_choice` is configured. (see [below for nested schema](#nestedatt--blocked_services_choice--blocked_services--blocked_sevice--blocked_services_value_type_choice))
+- `network_type` (List of String) network_type Site Local VRF on which this service will be disabled<br>**Allowed Values (choose one):** `['VIRTUAL_NETWORK_GLOBAL', 'VIRTUAL_NETWORK_MANAGEMENT', 'VIRTUAL_NETWORK_PER_SITE', 'VIRTUAL_NETWORK_SEGMENT', 'VIRTUAL_NETWORK_SITE_LOCAL', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE', 'VIRTUAL_NETWORK_SITE_SERVICE']`<br>**Default:** `VIRTUAL_NETWORK_SITE_LOCAL`
+
+<a id="nestedatt--blocked_services_choice--blocked_services--blocked_sevice--blocked_services_value_type_choice"></a>
+### Nested Schema for `blocked_services_choice.blocked_services.blocked_sevice.blocked_services_value_type_choice`
+
+Optional:
+
+- `dns` (Boolean) DNS Matches DNS port 53<br>Conflicts with `ssh`.
+- `ssh` (Boolean) SSH<br>Conflicts with `dns`.
+
 
 
 
@@ -3539,16 +3510,19 @@ Optional:
 Required:
 
 - `resource_group` (String) Existing Vnet Resource Group Resource group of existing Vnet<br>**Validation:** `Length LengthBetween(1, 64)`
-- `routing_type_choice` (Attributes) Choice of Routing This is choice of F5 Orchestrated Routing or Manual Routing for CE VPC/VNET (see [below for nested schema](#nestedatt--cloud_site_info--spoke_vnet_prefix_info--vnet--routing_type_choice))
 - `vnet_name` (String) Existing Vnet Name Name of existing Vnet<br>**Validation:** `Length LengthBetween(1, 64)`
+
+Optional:
+
+- `routing_type_choice` (Attributes) Choice of Routing This is choice of F5 Orchestrated Routing or Manual Routing for CE VPC/VNET<br>Exactly one of `f5_orchestrated_routing` or `manual_routing` must be specified when `routing_type_choice` is configured. (see [below for nested schema](#nestedatt--cloud_site_info--spoke_vnet_prefix_info--vnet--routing_type_choice))
 
 <a id="nestedatt--cloud_site_info--spoke_vnet_prefix_info--vnet--routing_type_choice"></a>
 ### Nested Schema for `cloud_site_info.spoke_vnet_prefix_info.vnet.routing_type_choice`
 
 Optional:
 
-- `f5_orchestrated_routing` (Boolean) F5 Orchestrated Routing F5 will orchestrate required routes for SLO Route Table towards Internet and SLI RT towards the CE.
-- `manual_routing` (Boolean) Manual Routing In this mode, F5 will not create nor alter any route tables or routes within the existing VPCs/Vnets providing better integration for existing environments.
+- `f5_orchestrated_routing` (Boolean) F5 Orchestrated Routing F5 will orchestrate required routes for SLO Route Table towards Internet and SLI RT towards the CE.<br>Conflicts with `manual_routing`.
+- `manual_routing` (Boolean) Manual Routing In this mode, F5 will not create nor alter any route tables or routes within the existing VPCs/Vnets providing better integration for existing environments.<br>Conflicts with `f5_orchestrated_routing`.
 
 
 
@@ -3588,8 +3562,8 @@ Optional:
 
 Optional:
 
-- `disable_encryption` (Boolean) Disable Encryption Disk attached to VM will not be encrypted with CMK
-- `enable_encryption` (Attributes) Enable Encryption Disk will be encrypted with the specified key (see [below for nested schema](#nestedatt--encryption_choice--enable_encryption))
+- `disable_encryption` (Boolean) Disable Encryption Disk attached to VM will not be encrypted with CMK<br>Conflicts with `enable_encryption`.
+- `enable_encryption` (Attributes) Enable Encryption Disk will be encrypted with the specified key<br>Conflicts with `disable_encryption`. (see [below for nested schema](#nestedatt--encryption_choice--enable_encryption))
 
 <a id="nestedatt--encryption_choice--enable_encryption"></a>
 ### Nested Schema for `encryption_choice.enable_encryption`
@@ -3606,22 +3580,22 @@ Required:
 
 Required:
 
-- `kubernetes_upgrade_drain_enable_choice` (Attributes) F5XC Enable/Disable Node by Node Upgrade Specify how nodes within a site will be upgraded. If enabled, you can specify number of Worker nodes to be upgraded in parallel. Note: This does not influence Control nodes. This is benefitial for sites with large number of nodes. (see [below for nested schema](#nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice))
+- `kubernetes_upgrade_drain_enable_choice` (Attributes) F5XC Enable/Disable Node by Node Upgrade Specify how nodes within a site will be upgraded. If enabled, you can specify number of Worker nodes to be upgraded in parallel. Note: This does not influence Control nodes. This is benefitial for sites with large number of nodes.<br>Exactly one of `disable_upgrade_drain` or `enable_upgrade_drain` must be specified. (see [below for nested schema](#nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice))
 
 <a id="nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice"></a>
 ### Nested Schema for `kubernetes_upgrade_drain.kubernetes_upgrade_drain_enable_choice`
 
 Optional:
 
-- `disable_upgrade_drain` (Boolean) Disable upgrade drain
-- `enable_upgrade_drain` (Attributes) Enable Node by Node Upgrade (see [below for nested schema](#nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice--enable_upgrade_drain))
+- `disable_upgrade_drain` (Boolean) Disable upgrade drain<br>Conflicts with `enable_upgrade_drain`.
+- `enable_upgrade_drain` (Attributes) Enable Node by Node Upgrade<br>Conflicts with `disable_upgrade_drain`. (see [below for nested schema](#nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice--enable_upgrade_drain))
 
 <a id="nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice--enable_upgrade_drain"></a>
 ### Nested Schema for `kubernetes_upgrade_drain.kubernetes_upgrade_drain_enable_choice.enable_upgrade_drain`
 
 Required:
 
-- `drain_max_unavailable_choice` (Attributes) Node Batch Size Max number of worker nodes to be upgraded in parallel (see [below for nested schema](#nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice--enable_upgrade_drain--drain_max_unavailable_choice))
+- `drain_max_unavailable_choice` (Attributes) Node Batch Size Max number of worker nodes to be upgraded in parallel<br>`drain_max_unavailable_node_count` must be specified. (see [below for nested schema](#nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice--enable_upgrade_drain--drain_max_unavailable_choice))
 
 Optional:
 
@@ -3638,54 +3612,76 @@ Optional:
 
 
 
-<a id="nestedatt--offline_survivability_mode"></a>
-### Nested Schema for `offline_survivability_mode`
+<a id="nestedatt--logs_receiver_choice"></a>
+### Nested Schema for `logs_receiver_choice`
+
+Optional:
+
+- `log_receiver` (Attributes) Disable Logs Streaming Select log receiver for logs streaming<br>Conflicts with `logs_streaming_disabled`. (see [below for nested schema](#nestedatt--logs_receiver_choice--log_receiver))
+- `logs_streaming_disabled` (Boolean) Disable Logs Receiver Logs Streaming is disabled<br>Conflicts with `log_receiver`.
+
+<a id="nestedatt--logs_receiver_choice--log_receiver"></a>
+### Nested Schema for `logs_receiver_choice.log_receiver`
 
 Required:
 
-- `offline_survivability_mode_choice` (Attributes) offline_survivability_mode_choice Offline Survivability allows the Site to continue functioning normally without traffic loss during periods of connectivity loss to the Regional Edge (RE) or the Global Controller (GC). When this feature is enabled, a site can continue to function as is with existing configuration for upto 7 days, even when the site is offline. The certificates needed to keep the services running on this site are signed using a local CA. Secrets would also be cached locally to handle the connectivity loss. When the mode is toggled, services will restart and traffic disruption will be seen. (see [below for nested schema](#nestedatt--offline_survivability_mode--offline_survivability_mode_choice))
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+
+<a id="nestedatt--offline_survivability_mode"></a>
+### Nested Schema for `offline_survivability_mode`
+
+Optional:
+
+- `offline_survivability_mode_choice` (Attributes) offline_survivability_mode_choice Offline Survivability allows the Site to continue functioning normally without traffic loss during periods of connectivity loss to the Regional Edge (RE) or the Global Controller (GC). When this feature is enabled, a site can continue to function as is with existing configuration for upto 7 days, even when the site is offline. The certificates needed to keep the services running on this site are signed using a local CA. Secrets would also be cached locally to handle the connectivity loss. When the mode is toggled, services will restart and traffic disruption will be seen.<br>Exactly one of `enable_offline_survivability_mode` or `no_offline_survivability_mode` must be specified when `offline_survivability_mode_choice` is configured. (see [below for nested schema](#nestedatt--offline_survivability_mode--offline_survivability_mode_choice))
 
 <a id="nestedatt--offline_survivability_mode--offline_survivability_mode_choice"></a>
 ### Nested Schema for `offline_survivability_mode.offline_survivability_mode_choice`
 
 Optional:
 
-- `enable_offline_survivability_mode` (Boolean) Enable Offline Survivability Mode
-- `no_offline_survivability_mode` (Boolean) Disable Offline Survivability Mode
+- `enable_offline_survivability_mode` (Boolean) Enable Offline Survivability Mode<br>Conflicts with `no_offline_survivability_mode`.
+- `no_offline_survivability_mode` (Boolean) Disable Offline Survivability Mode<br>Conflicts with `enable_offline_survivability_mode`.
 
 
 
 <a id="nestedatt--os"></a>
 ### Nested Schema for `os`
 
-Required:
+Optional:
 
-- `operating_system_version_choice` (Attributes) Operating System Version Select the F5XC Operating System Version for the site. By default, latest available OS Version will be used. Refer to release notes to find required released OS versions. (see [below for nested schema](#nestedatt--os--operating_system_version_choice))
+- `operating_system_version_choice` (Attributes) Operating System Version Select the F5XC Operating System Version for the site. By default, latest available OS Version will be used. Refer to release notes to find required released OS versions.<br>Exactly one of `default_os_version` or `operating_system_version` must be specified when `operating_system_version_choice` is configured. (see [below for nested schema](#nestedatt--os--operating_system_version_choice))
 
 <a id="nestedatt--os--operating_system_version_choice"></a>
 ### Nested Schema for `os.operating_system_version_choice`
 
 Optional:
 
-- `default_os_version` (Boolean) Default OS Version Will assign latest available OS version
-- `operating_system_version` (String) Operating System Version Specify a OS version to be used e.g. 9.2024.6.<br>**Validation:** `Length LengthAtMost(20)`
+- `default_os_version` (Boolean) Default OS Version Will assign latest available OS version<br>Conflicts with `operating_system_version`.
+- `operating_system_version` (String) Operating System Version Specify a OS version to be used e.g. 9.2024.6.<br>**Validation:** `Length LengthAtMost(20)`<br>Conflicts with `default_os_version`.
 
 
 
 <a id="nestedatt--sw"></a>
 ### Nested Schema for `sw`
 
-Required:
+Optional:
 
-- `volterra_sw_version_choice` (Attributes) F5XC Software Version Select the F5XC Software Version for the site. By default, latest available F5XC Software Version will be used. Refer to release notes to find required released SW versions. (see [below for nested schema](#nestedatt--sw--volterra_sw_version_choice))
+- `volterra_sw_version_choice` (Attributes) F5XC Software Version Select the F5XC Software Version for the site. By default, latest available F5XC Software Version will be used. Refer to release notes to find required released SW versions.<br>Exactly one of `default_sw_version` or `volterra_software_version` must be specified when `volterra_sw_version_choice` is configured. (see [below for nested schema](#nestedatt--sw--volterra_sw_version_choice))
 
 <a id="nestedatt--sw--volterra_sw_version_choice"></a>
 ### Nested Schema for `sw.volterra_sw_version_choice`
 
 Optional:
 
-- `default_sw_version` (Boolean) Default SW Version Will assign latest available F5XC Software Version
-- `volterra_software_version` (String) F5XC Software Version Specify a F5XC Software Version to be used e.g. crt-20210329-1002.<br>**Validation:** `Length LengthAtMost(20)`
+- `default_sw_version` (Boolean) Default SW Version Will assign latest available F5XC Software Version<br>Conflicts with `volterra_software_version`.
+- `volterra_software_version` (String) F5XC Software Version Specify a F5XC Software Version to be used e.g. crt-20210329-1002.<br>**Validation:** `Length LengthAtMost(20)`<br>Conflicts with `default_sw_version`.
 
 
 
@@ -3703,17 +3699,28 @@ Optional:
 <a id="nestedatt--waf_signatures"></a>
 ### Nested Schema for `waf_signatures`
 
-Required:
+Optional:
 
-- `signatures_update_mode_choice` (Attributes) WAF Signatures update mode Select F5XC WAF Signatures update mode for the site. By default, new signatures will be applied manually. Refer to release notes for details about available Signatures update modes and versions. (see [below for nested schema](#nestedatt--waf_signatures--signatures_update_mode_choice))
+- `signatures_update_mode_choice` (Attributes) WAF Signatures update mode Select F5XC WAF Signatures update mode for the site. By default, new signatures will be applied manually. Refer to release notes for details about available Signatures update modes and versions.<br>Exactly one of `automatic` or `manual` must be specified when `signatures_update_mode_choice` is configured. (see [below for nested schema](#nestedatt--waf_signatures--signatures_update_mode_choice))
 
 <a id="nestedatt--waf_signatures--signatures_update_mode_choice"></a>
 ### Nested Schema for `waf_signatures.signatures_update_mode_choice`
 
 Optional:
 
-- `automatic` (Boolean) Automatic update mode New WAF signatures will be applied automatically as soon as they are released.
-- `manual` (Boolean) Manual update mode New WAF signatures will only be applied when an update is triggered manually.
+- `automatic` (Boolean) Automatic update mode New WAF signatures will be applied automatically as soon as they are released.<br>Conflicts with `manual`.
+- `manual` (Boolean) Manual update mode New WAF signatures will only be applied when an update is triggered manually.<br>Conflicts with `automatic`.
+
+
+
+<a id="nestedatt--worker_nodes_choice"></a>
+### Nested Schema for `worker_nodes_choice`
+
+Optional:
+
+- `no_worker_nodes` (Boolean) No Worker Nodes Worker nodes is set to zero<br>Conflicts with `nodes_per_az` and `total_nodes`.
+- `nodes_per_az` (Number) Desired Worker Nodes Per AZ Desired Worker Nodes Per AZ. Max limit is up to 21<br>Conflicts with `no_worker_nodes` and `total_nodes`.
+- `total_nodes` (Number) Total Number of Worker Nodes for a Site Total number of worker nodes to be deployed across all AZ's used in the Site<br>Conflicts with `no_worker_nodes` and `nodes_per_az`.
 ## Import
 
 In Terraform v1.5.0 and later, use an `import` block to import this resource by ID.
@@ -3735,6 +3742,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_azure_vnet_site.example"
+	to = f5xc_azure_vnet_site.example
 }
 ```

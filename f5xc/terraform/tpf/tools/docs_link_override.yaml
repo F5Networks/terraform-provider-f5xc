@@ -20,3 +20,7 @@ resources:
   tcp_loadbalancer_service_policy_attachments: https://docs.cloud.f5.com/docs-v2/api/views-tcp-loadbalancer
   securemesh_site_v2_enhanced_firewall_policy_attachments: https://docs.cloud.f5.com/docs-v2/api/views-securemesh-site-v2
   securemesh_site_v2_forward_proxy_policy_attachments: https://docs.cloud.f5.com/docs-v2/api/views-securemesh-site-v2
+  k8s_cluster: https://docs.cloud.f5.com/docs-v2/api/k8s-cluster
+  k8s_cluster_role: https://docs.cloud.f5.com/docs-v2/api/k8s-cluster-role
+  k8s_cluster_role_binding: https://docs.cloud.f5.com/docs-v2/api/k8s-cluster-role-binding
+  k8s_pod_security_admission: https://docs.cloud.f5.com/docs-v2/api/k8s-pod-security-admission

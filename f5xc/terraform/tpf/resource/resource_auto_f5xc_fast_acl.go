@@ -31,6 +31,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -380,7 +381,7 @@ var FastAclSiteChoiceReAclFastAclRulesSourcePrefixModelAttributeMap = map[string
 	},
 }
 
-// Attribute map for RequiredOneOfField --> VipChoice
+// Attribute map for OneOfField --> VipChoice
 var FastAclSiteChoiceReAclVipChoiceModelAttributeMap = map[string]attr.Type{
 
 	"all_public_vips":    types.BoolType,
@@ -593,14 +594,14 @@ var FastAclSiteChoiceSiteAclFastAclRulesSourcePrefixModelAttributeMap = map[stri
 	},
 }
 
-// Attribute map for RequiredOneOfField --> NetworkChoice
+// Attribute map for OneOfField --> NetworkChoice
 var FastAclSiteChoiceSiteAclNetworkChoiceModelAttributeMap = map[string]attr.Type{
 
 	"inside_network":  types.BoolType,
 	"outside_network": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> VipChoice
+// Attribute map for OneOfField --> VipChoice
 var FastAclSiteChoiceSiteAclVipChoiceModelAttributeMap = map[string]attr.Type{
 
 	"all_services":       types.BoolType,
@@ -724,7 +725,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 			},
 			"site_choice": schema.SingleNestedAttribute{
 				Description:         "Site Choice Select type of sites where this acl will be applied",
-				MarkdownDescription: "Site Choice Select type of sites where this acl will be applied",
+				MarkdownDescription: "Site Choice Select type of sites where this acl will be applied<br>Exactly one of `re_acl` or `site_acl` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -737,7 +738,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 				Attributes: map[string]schema.Attribute{
 					"re_acl": schema.SingleNestedAttribute{
 						Description:         "ACL for RE ACL will be applied at regional edge sites",
-						MarkdownDescription: "ACL for RE ACL will be applied at regional edge sites",
+						MarkdownDescription: "ACL for RE ACL will be applied at regional edge sites<br>Conflicts with `site_acl`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -762,7 +763,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 											Attributes: map[string]schema.Attribute{
 												"action_choice": schema.SingleNestedAttribute{
 													Description:         "action The type of action to perform",
-													MarkdownDescription: "action The type of action to perform",
+													MarkdownDescription: "action The type of action to perform<br>Exactly one of `policer_action`, `protocol_policer_action`, or `simple_action` must be specified when `action_choice` is configured.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -776,7 +777,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 													Attributes: map[string]schema.Attribute{
 														"policer_action": schema.SingleNestedAttribute{
 															Description:         "policer_action Reference to policer object to which traffic would be subjected",
-															MarkdownDescription: "policer_action Reference to policer object to which traffic would be subjected",
+															MarkdownDescription: "policer_action Reference to policer object to which traffic would be subjected<br>Conflicts with `protocol_policer_action` and `simple_action`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -823,7 +824,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 														},
 														"protocol_policer_action": schema.SingleNestedAttribute{
 															Description:         "protocol_policer_action Reference to protocol based policer object",
-															MarkdownDescription: "protocol_policer_action Reference to protocol based policer object",
+															MarkdownDescription: "protocol_policer_action Reference to protocol based policer object<br>Conflicts with `policer_action` and `simple_action`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -870,7 +871,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 														},
 														"simple_action": schema.ListAttribute{
 															Description:         "simple_action Simple action like dropping or forwarding the traffic",
-															MarkdownDescription: "simple_action Simple action like dropping or forwarding the traffic<br>**Allowed Values (choose one):** `['ALLOW', 'DENY']`",
+															MarkdownDescription: "simple_action Simple action like dropping or forwarding the traffic<br>**Allowed Values (choose one):** `['ALLOW', 'DENY']`<br>Conflicts with `policer_action` and `protocol_policer_action`.",
 															ElementType:         types.StringType,
 															Required:            false,
 															Optional:            true,
@@ -930,7 +931,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 												Attributes: map[string]schema.Attribute{
 													"port_value_type_choice": schema.SingleNestedAttribute{
 														Description:         "port_value_type_choice Match criteria for port",
-														MarkdownDescription: "port_value_type_choice Match criteria for port",
+														MarkdownDescription: "port_value_type_choice Match criteria for port<br>Exactly one of `all`, `dns`, or `user_defined` must be specified when `port_value_type_choice` is configured.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -944,7 +945,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 														Attributes: map[string]schema.Attribute{
 															"all": schema.BoolAttribute{
 																Description:         "All port Matches all port",
-																MarkdownDescription: "All port Matches all port",
+																MarkdownDescription: "All port Matches all port<br>Conflicts with `dns` and `user_defined`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -954,7 +955,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 															},
 															"dns": schema.BoolAttribute{
 																Description:         "DNS port Matches dns port 53",
-																MarkdownDescription: "DNS port Matches dns port 53",
+																MarkdownDescription: "DNS port Matches dns port 53<br>Conflicts with `all` and `user_defined`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -964,7 +965,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 															},
 															"user_defined": schema.Int64Attribute{
 																Description:         "User defined Port Matches the user defined port",
-																MarkdownDescription: "User defined Port Matches the user defined port",
+																MarkdownDescription: "User defined Port Matches the user defined port<br>Conflicts with `all` and `dns`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -979,7 +980,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 										},
 										"source_choice": schema.SingleNestedAttribute{
 											Description:         "source IP match criteria, source can be either a prefix list or reference to IP prefix set",
-											MarkdownDescription: "source IP match criteria, source can be either a prefix list or reference to IP prefix set",
+											MarkdownDescription: "source IP match criteria, source can be either a prefix list or reference to IP prefix set<br>Exactly one of `ip_prefix_set` or `prefix` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -992,7 +993,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 											Attributes: map[string]schema.Attribute{
 												"ip_prefix_set": schema.SingleNestedAttribute{
 													Description:         "ip_prefix_set Reference to IP prefix set object",
-													MarkdownDescription: "ip_prefix_set Reference to IP prefix set object",
+													MarkdownDescription: "ip_prefix_set Reference to IP prefix set object<br>Conflicts with `prefix`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1039,7 +1040,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 												},
 												"prefix": schema.SingleNestedAttribute{
 													Description:         "prefix List of IP prefixes",
-													MarkdownDescription: "prefix List of IP prefixes",
+													MarkdownDescription: "prefix List of IP prefixes<br>Conflicts with `ip_prefix_set`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1083,21 +1084,24 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 							},
 							"vip_choice": schema.SingleNestedAttribute{
 								Description:         "VIP Choice Select VIP(s) where Fast ACL will be applied. Fast ACL with shared VIP not supported.",
-								MarkdownDescription: "VIP Choice Select VIP(s) where Fast ACL will be applied. Fast ACL with shared VIP not supported.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "VIP Choice Select VIP(s) where Fast ACL will be applied. Fast ACL with shared VIP not supported.<br>Exactly one of `all_public_vips`, `default_tenant_vip`, or `selected_tenant_vip` must be specified when `vip_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"all_public_vips",
 										"default_tenant_vip",
 										"selected_tenant_vip",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"all_public_vips": schema.BoolAttribute{
 										Description:         "All Public VIP(s) Apply this Fast ACL to all public vips",
-										MarkdownDescription: "All Public VIP(s) Apply this Fast ACL to all public vips",
+										MarkdownDescription: "All Public VIP(s) Apply this Fast ACL to all public vips<br>Conflicts with `default_tenant_vip` and `selected_tenant_vip`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1107,7 +1111,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 									},
 									"default_tenant_vip": schema.BoolAttribute{
 										Description:         "Default Tenant VIP(s) Apply this Fast ACL to Default(dedicated) Tenant VIP",
-										MarkdownDescription: "Default Tenant VIP(s) Apply this Fast ACL to Default(dedicated) Tenant VIP",
+										MarkdownDescription: "Default Tenant VIP(s) Apply this Fast ACL to Default(dedicated) Tenant VIP<br>Conflicts with `all_public_vips` and `selected_tenant_vip`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1117,7 +1121,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 									},
 									"selected_tenant_vip": schema.SingleNestedAttribute{
 										Description:         "Chose Specific VIP(s) Do not apply to dedicated Tenant VIP Apply this Fast ACL to List of some selected public VIP(s)",
-										MarkdownDescription: "Chose Specific VIP(s) Do not apply to dedicated Tenant VIP Apply this Fast ACL to List of some selected public VIP(s)",
+										MarkdownDescription: "Chose Specific VIP(s) Do not apply to dedicated Tenant VIP Apply this Fast ACL to List of some selected public VIP(s)<br>Conflicts with `all_public_vips` and `default_tenant_vip`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1176,7 +1180,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 					},
 					"site_acl": schema.SingleNestedAttribute{
 						Description:         "ACL for Site ACL will be applied at customer edge sites",
-						MarkdownDescription: "ACL for Site ACL will be applied at customer edge sites",
+						MarkdownDescription: "ACL for Site ACL will be applied at customer edge sites<br>Conflicts with `re_acl`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1201,7 +1205,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 											Attributes: map[string]schema.Attribute{
 												"action_choice": schema.SingleNestedAttribute{
 													Description:         "action The type of action to perform",
-													MarkdownDescription: "action The type of action to perform",
+													MarkdownDescription: "action The type of action to perform<br>Exactly one of `policer_action`, `protocol_policer_action`, or `simple_action` must be specified when `action_choice` is configured.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1215,7 +1219,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 													Attributes: map[string]schema.Attribute{
 														"policer_action": schema.SingleNestedAttribute{
 															Description:         "policer_action Reference to policer object to which traffic would be subjected",
-															MarkdownDescription: "policer_action Reference to policer object to which traffic would be subjected",
+															MarkdownDescription: "policer_action Reference to policer object to which traffic would be subjected<br>Conflicts with `protocol_policer_action` and `simple_action`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1262,7 +1266,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 														},
 														"protocol_policer_action": schema.SingleNestedAttribute{
 															Description:         "protocol_policer_action Reference to protocol based policer object",
-															MarkdownDescription: "protocol_policer_action Reference to protocol based policer object",
+															MarkdownDescription: "protocol_policer_action Reference to protocol based policer object<br>Conflicts with `policer_action` and `simple_action`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1309,7 +1313,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 														},
 														"simple_action": schema.ListAttribute{
 															Description:         "simple_action Simple action like dropping or forwarding the traffic",
-															MarkdownDescription: "simple_action Simple action like dropping or forwarding the traffic<br>**Allowed Values (choose one):** `['ALLOW', 'DENY']`",
+															MarkdownDescription: "simple_action Simple action like dropping or forwarding the traffic<br>**Allowed Values (choose one):** `['ALLOW', 'DENY']`<br>Conflicts with `policer_action` and `protocol_policer_action`.",
 															ElementType:         types.StringType,
 															Required:            false,
 															Optional:            true,
@@ -1369,7 +1373,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 												Attributes: map[string]schema.Attribute{
 													"port_value_type_choice": schema.SingleNestedAttribute{
 														Description:         "port_value_type_choice Match criteria for port",
-														MarkdownDescription: "port_value_type_choice Match criteria for port",
+														MarkdownDescription: "port_value_type_choice Match criteria for port<br>Exactly one of `all`, `dns`, or `user_defined` must be specified when `port_value_type_choice` is configured.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1383,7 +1387,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 														Attributes: map[string]schema.Attribute{
 															"all": schema.BoolAttribute{
 																Description:         "All port Matches all port",
-																MarkdownDescription: "All port Matches all port",
+																MarkdownDescription: "All port Matches all port<br>Conflicts with `dns` and `user_defined`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -1393,7 +1397,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 															},
 															"dns": schema.BoolAttribute{
 																Description:         "DNS port Matches dns port 53",
-																MarkdownDescription: "DNS port Matches dns port 53",
+																MarkdownDescription: "DNS port Matches dns port 53<br>Conflicts with `all` and `user_defined`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -1403,7 +1407,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 															},
 															"user_defined": schema.Int64Attribute{
 																Description:         "User defined Port Matches the user defined port",
-																MarkdownDescription: "User defined Port Matches the user defined port",
+																MarkdownDescription: "User defined Port Matches the user defined port<br>Conflicts with `all` and `dns`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -1418,7 +1422,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 										},
 										"source_choice": schema.SingleNestedAttribute{
 											Description:         "source IP match criteria, source can be either a prefix list or reference to IP prefix set",
-											MarkdownDescription: "source IP match criteria, source can be either a prefix list or reference to IP prefix set",
+											MarkdownDescription: "source IP match criteria, source can be either a prefix list or reference to IP prefix set<br>Exactly one of `ip_prefix_set` or `prefix` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -1431,7 +1435,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 											Attributes: map[string]schema.Attribute{
 												"ip_prefix_set": schema.SingleNestedAttribute{
 													Description:         "ip_prefix_set Reference to IP prefix set object",
-													MarkdownDescription: "ip_prefix_set Reference to IP prefix set object",
+													MarkdownDescription: "ip_prefix_set Reference to IP prefix set object<br>Conflicts with `prefix`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1478,7 +1482,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 												},
 												"prefix": schema.SingleNestedAttribute{
 													Description:         "prefix List of IP prefixes",
-													MarkdownDescription: "prefix List of IP prefixes",
+													MarkdownDescription: "prefix List of IP prefixes<br>Conflicts with `ip_prefix_set`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1522,20 +1526,23 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 							},
 							"network_choice": schema.SingleNestedAttribute{
 								Description:         "Network Select Network where this ACL will be applied",
-								MarkdownDescription: "Network Select Network where this ACL will be applied",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Network Select Network where this ACL will be applied<br>Exactly one of `inside_network` or `outside_network` must be specified when `network_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"inside_network",
 										"outside_network",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"inside_network": schema.BoolAttribute{
 										Description:         "Inside Network Site Local Inside network",
-										MarkdownDescription: "Inside Network Site Local Inside network",
+										MarkdownDescription: "Inside Network Site Local Inside network<br>Conflicts with `outside_network`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1545,7 +1552,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 									},
 									"outside_network": schema.BoolAttribute{
 										Description:         "Outside Network Site Local Outside network",
-										MarkdownDescription: "Outside Network Site Local Outside network",
+										MarkdownDescription: "Outside Network Site Local Outside network<br>Conflicts with `inside_network`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1557,21 +1564,24 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 							},
 							"vip_choice": schema.SingleNestedAttribute{
 								Description:         "Destination IP Choice Can be applied to ip addresses seen by the site.",
-								MarkdownDescription: "Destination IP Choice Can be applied to ip addresses seen by the site.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Destination IP Choice Can be applied to ip addresses seen by the site.<br>Exactly one of `all_services`, `interface_services`, or `vip_services` must be specified when `vip_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"all_services",
 										"interface_services",
 										"vip_services",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"all_services": schema.BoolAttribute{
 										Description:         "All VIP(S) Destination will be all VIP(s), interface IP(s) and configured VIP(s) Port and protocol is picked up from advertise policies",
-										MarkdownDescription: "All VIP(S) Destination will be all VIP(s), interface IP(s) and configured VIP(s) Port and protocol is picked up from advertise policies",
+										MarkdownDescription: "All VIP(S) Destination will be all VIP(s), interface IP(s) and configured VIP(s) Port and protocol is picked up from advertise policies<br>Conflicts with `interface_services` and `vip_services`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1581,7 +1591,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 									},
 									"interface_services": schema.BoolAttribute{
 										Description:         "Interface Services Destination matching any IP address assigned to the interfaces (e.g from DHCP) and is used as (VIP) Port and protocol is picked up from advertise policies",
-										MarkdownDescription: "Interface Services Destination matching any IP address assigned to the interfaces (e.g from DHCP) and is used as (VIP) Port and protocol is picked up from advertise policies",
+										MarkdownDescription: "Interface Services Destination matching any IP address assigned to the interfaces (e.g from DHCP) and is used as (VIP) Port and protocol is picked up from advertise policies<br>Conflicts with `all_services` and `vip_services`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1591,7 +1601,7 @@ func (r *ResourceF5XCFastAcl) Schema(ctx context.Context, request resource.Schem
 									},
 									"vip_services": schema.BoolAttribute{
 										Description:         "VIP Services Destination matching configured VIP(s) Port and protocol is picked up from advertise policies",
-										MarkdownDescription: "VIP Services Destination matching configured VIP(s) Port and protocol is picked up from advertise policies",
+										MarkdownDescription: "VIP Services Destination matching configured VIP(s) Port and protocol is picked up from advertise policies<br>Conflicts with `all_services` and `interface_services`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1802,6 +1812,9 @@ func (r *ResourceF5XCFastAcl) Create(ctx context.Context, request resource.Creat
 			}
 			reAclOneOfSpec := &ves_io_schema_fast_acl.CreateSpecType_ReAcl{}
 			reAclOneOfSpec.ReAcl = &ves_io_schema_fast_acl.ReACLType{}
+			reAclOneOfSpec.ReAcl.VipChoice = &ves_io_schema_fast_acl.ReACLType_AllPublicVips{
+				AllPublicVips: &ves_io_schema.Empty{},
+			}
 			spec.SiteChoice = reAclOneOfSpec
 
 			// resource modelToSpecNested ArrayOfPointerField --> FastAclRules
@@ -2136,7 +2149,7 @@ func (r *ResourceF5XCFastAcl) Create(ctx context.Context, request resource.Creat
 				}
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> VipChoice
+			// resource modelToSpecNested OneOfField --> VipChoice
 			if !fastAclReAclModel.VipChoice.IsNull() && !fastAclReAclModel.VipChoice.IsUnknown() {
 				reAclVipChoiceModel := FastAclVipChoice{}
 				response.Diagnostics.Append(fastAclReAclModel.VipChoice.As(ctx, &reAclVipChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2224,6 +2237,12 @@ func (r *ResourceF5XCFastAcl) Create(ctx context.Context, request resource.Creat
 			}
 			siteAclOneOfSpec := &ves_io_schema_fast_acl.CreateSpecType_SiteAcl{}
 			siteAclOneOfSpec.SiteAcl = &ves_io_schema_fast_acl.SiteACLType{}
+			siteAclOneOfSpec.SiteAcl.NetworkChoice = &ves_io_schema_fast_acl.SiteACLType_OutsideNetwork{
+				OutsideNetwork: &ves_io_schema.Empty{},
+			}
+			siteAclOneOfSpec.SiteAcl.VipChoice = &ves_io_schema_fast_acl.SiteACLType_InterfaceServices{
+				InterfaceServices: &ves_io_schema.Empty{},
+			}
 			spec.SiteChoice = siteAclOneOfSpec
 
 			// resource modelToSpecNested ArrayOfPointerField --> FastAclRules
@@ -2558,7 +2577,7 @@ func (r *ResourceF5XCFastAcl) Create(ctx context.Context, request resource.Creat
 				}
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> NetworkChoice
+			// resource modelToSpecNested OneOfField --> NetworkChoice
 			if !fastAclSiteAclModel.NetworkChoice.IsNull() && !fastAclSiteAclModel.NetworkChoice.IsUnknown() {
 				siteAclNetworkChoiceModel := FastAclNetChoice{}
 				response.Diagnostics.Append(fastAclSiteAclModel.NetworkChoice.As(ctx, &siteAclNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2582,7 +2601,7 @@ func (r *ResourceF5XCFastAcl) Create(ctx context.Context, request resource.Creat
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> VipChoice
+			// resource modelToSpecNested OneOfField --> VipChoice
 			if !fastAclSiteAclModel.VipChoice.IsNull() && !fastAclSiteAclModel.VipChoice.IsUnknown() {
 				siteAclVipChoiceModel := FastAclSiteACLTypeVipChoice{}
 				response.Diagnostics.Append(fastAclSiteAclModel.VipChoice.As(ctx, &siteAclVipChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3528,8 +3547,7 @@ func (r *ResourceF5XCFastAcl) Create(ctx context.Context, request resource.Creat
 					reAclAttributeMap["fast_acl_rules"] = types.ListNull(types.ObjectType{AttrTypes: FastAclSiteChoiceReAclFastAclRulesModelAttributeMap})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> VipChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> VipChoice
 				// CreateSpecType: GetVipChoice() returns the oneof interface value.
 				if reAclElement.GetVipChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -4296,8 +4314,7 @@ func (r *ResourceF5XCFastAcl) Create(ctx context.Context, request resource.Creat
 					siteAclAttributeMap["fast_acl_rules"] = types.ListNull(types.ObjectType{AttrTypes: FastAclSiteChoiceSiteAclFastAclRulesModelAttributeMap})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NetworkChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> NetworkChoice
 				// CreateSpecType: GetNetworkChoice() returns the oneof interface value.
 				if siteAclElement.GetNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -4372,8 +4389,7 @@ func (r *ResourceF5XCFastAcl) Create(ctx context.Context, request resource.Creat
 					siteAclAttributeMap["network_choice"] = types.ObjectNull(FastAclSiteChoiceSiteAclNetworkChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> VipChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> VipChoice
 				// CreateSpecType: GetVipChoice() returns the oneof interface value.
 				if siteAclElement.GetVipChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -4544,15 +4560,14 @@ func (r *ResourceF5XCFastAcl) Read(ctx context.Context, request resource.ReadReq
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
 	readGetRspType := strings.Replace(ves_io_schema_fast_acl.ObjectType, "Object", "GetResponse", 1)
 	readGetProtoMsgType := proto.MessageType(readGetRspType).Elem()
 	readCallRsp := &server.CallResponse{
 		ProtoMsg: reflect.New(readGetProtoMsgType).Interface().(proto.Message),
 	}
-	opts = append(opts, vesapi.WithOutCallResponse(readCallRsp))
+	opts := []vesapi.CallOpt{
+		vesapi.WithOutCallResponse(readCallRsp),
+	}
 
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_fast_acl.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
@@ -5437,8 +5452,7 @@ func (r *ResourceF5XCFastAcl) Read(ctx context.Context, request resource.ReadReq
 					reAclAttributeMap["fast_acl_rules"] = types.ListNull(types.ObjectType{AttrTypes: FastAclSiteChoiceReAclFastAclRulesModelAttributeMap})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> VipChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> VipChoice
 				// CreateSpecType: GetVipChoice() returns the oneof interface value.
 				if reAclElement.GetVipChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -6209,8 +6223,7 @@ func (r *ResourceF5XCFastAcl) Read(ctx context.Context, request resource.ReadReq
 					siteAclAttributeMap["fast_acl_rules"] = types.ListNull(types.ObjectType{AttrTypes: FastAclSiteChoiceSiteAclFastAclRulesModelAttributeMap})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NetworkChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> NetworkChoice
 				// CreateSpecType: GetNetworkChoice() returns the oneof interface value.
 				if siteAclElement.GetNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -6288,8 +6301,7 @@ func (r *ResourceF5XCFastAcl) Read(ctx context.Context, request resource.ReadReq
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> VipChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> VipChoice
 				// CreateSpecType: GetVipChoice() returns the oneof interface value.
 				if siteAclElement.GetVipChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -6593,6 +6605,9 @@ func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.Updat
 			}
 			reAclOneOfSpec := &ves_io_schema_fast_acl.ReplaceSpecType_ReAcl{}
 			reAclOneOfSpec.ReAcl = &ves_io_schema_fast_acl.ReACLType{}
+			reAclOneOfSpec.ReAcl.VipChoice = &ves_io_schema_fast_acl.ReACLType_AllPublicVips{
+				AllPublicVips: &ves_io_schema.Empty{},
+			}
 			spec.SiteChoice = reAclOneOfSpec
 
 			// resource modelToSpecNested ArrayOfPointerField --> FastAclRules
@@ -6927,7 +6942,7 @@ func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.Updat
 				}
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> VipChoice
+			// resource modelToSpecNested OneOfField --> VipChoice
 			if !fastAclReAclModel.VipChoice.IsNull() && !fastAclReAclModel.VipChoice.IsUnknown() {
 				reAclVipChoiceModel := FastAclVipChoice{}
 				response.Diagnostics.Append(fastAclReAclModel.VipChoice.As(ctx, &reAclVipChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7015,6 +7030,12 @@ func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.Updat
 			}
 			siteAclOneOfSpec := &ves_io_schema_fast_acl.ReplaceSpecType_SiteAcl{}
 			siteAclOneOfSpec.SiteAcl = &ves_io_schema_fast_acl.SiteACLType{}
+			siteAclOneOfSpec.SiteAcl.NetworkChoice = &ves_io_schema_fast_acl.SiteACLType_OutsideNetwork{
+				OutsideNetwork: &ves_io_schema.Empty{},
+			}
+			siteAclOneOfSpec.SiteAcl.VipChoice = &ves_io_schema_fast_acl.SiteACLType_InterfaceServices{
+				InterfaceServices: &ves_io_schema.Empty{},
+			}
 			spec.SiteChoice = siteAclOneOfSpec
 
 			// resource modelToSpecNested ArrayOfPointerField --> FastAclRules
@@ -7349,7 +7370,7 @@ func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.Updat
 				}
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> NetworkChoice
+			// resource modelToSpecNested OneOfField --> NetworkChoice
 			if !fastAclSiteAclModel.NetworkChoice.IsNull() && !fastAclSiteAclModel.NetworkChoice.IsUnknown() {
 				siteAclNetworkChoiceModel := FastAclNetChoice{}
 				response.Diagnostics.Append(fastAclSiteAclModel.NetworkChoice.As(ctx, &siteAclNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7373,7 +7394,7 @@ func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.Updat
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> VipChoice
+			// resource modelToSpecNested OneOfField --> VipChoice
 			if !fastAclSiteAclModel.VipChoice.IsNull() && !fastAclSiteAclModel.VipChoice.IsUnknown() {
 				siteAclVipChoiceModel := FastAclSiteACLTypeVipChoice{}
 				response.Diagnostics.Append(fastAclSiteAclModel.VipChoice.As(ctx, &siteAclVipChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7418,12 +7439,8 @@ func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.Updat
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_fast_acl.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_fast_acl.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "fast_acl", err),
@@ -7435,7 +7452,9 @@ func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.Updat
 	updateCallRsp := &server.CallResponse{
 		ProtoMsg: reflect.New(updateGetProtoMsgType).Interface().(proto.Message),
 	}
-	opts = append(opts, vesapi.WithOutCallResponse(updateCallRsp))
+	opts := []vesapi.CallOpt{
+		vesapi.WithOutCallResponse(updateCallRsp),
+	}
 
 	// Read the replaced object
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_fast_acl.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
@@ -8320,8 +8339,7 @@ func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.Updat
 					reAclAttributeMap["fast_acl_rules"] = types.ListNull(types.ObjectType{AttrTypes: FastAclSiteChoiceReAclFastAclRulesModelAttributeMap})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> VipChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> VipChoice
 				// CreateSpecType: GetVipChoice() returns the oneof interface value.
 				if reAclElement.GetVipChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -9088,8 +9106,7 @@ func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.Updat
 					siteAclAttributeMap["fast_acl_rules"] = types.ListNull(types.ObjectType{AttrTypes: FastAclSiteChoiceSiteAclFastAclRulesModelAttributeMap})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NetworkChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> NetworkChoice
 				// CreateSpecType: GetNetworkChoice() returns the oneof interface value.
 				if siteAclElement.GetNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -9164,8 +9181,7 @@ func (r *ResourceF5XCFastAcl) Update(ctx context.Context, request resource.Updat
 					siteAclAttributeMap["network_choice"] = types.ObjectNull(FastAclSiteChoiceSiteAclNetworkChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> VipChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> VipChoice
 				// CreateSpecType: GetVipChoice() returns the oneof interface value.
 				if siteAclElement.GetVipChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf

@@ -25,6 +25,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -150,7 +151,7 @@ var MaliciousUserMitigationMitigationTypeRulesMitigationActionModelAttributeMap 
 	},
 }
 
-// Attribute map for RequiredOneOfField --> MitigationAction
+// Attribute map for OneOfField --> MitigationAction
 var MaliciousUserMitigationMitigationTypeRulesMitigationActionMitigationActionModelAttributeMap = map[string]attr.Type{
 
 	"block_temporarily":    types.BoolType,
@@ -166,7 +167,7 @@ var MaliciousUserMitigationMitigationTypeRulesThreatLevelModelAttributeMap = map
 	},
 }
 
-// Attribute map for RequiredOneOfField --> ThreatLevel
+// Attribute map for OneOfField --> ThreatLevel
 var MaliciousUserMitigationMitigationTypeRulesThreatLevelThreatLevelModelAttributeMap = map[string]attr.Type{
 
 	"high":   types.BoolType,
@@ -280,21 +281,24 @@ func (r *ResourceF5XCMaliciousUserMitigation) Schema(ctx context.Context, reques
 									Attributes: map[string]schema.Attribute{
 										"mitigation_action_choice": schema.SingleNestedAttribute{
 											Description:         "mitigation action Supported actions that can be taken to mitigate malicious activity from a user",
-											MarkdownDescription: "mitigation action Supported actions that can be taken to mitigate malicious activity from a user",
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
+											MarkdownDescription: "mitigation action Supported actions that can be taken to mitigate malicious activity from a user<br>Exactly one of `block_temporarily`, `captcha_challenge`, or `javascript_challenge` must be specified when `mitigation_action_choice` is configured.",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
 											Validators: []validator.Object{
-												exactlyoneofvalidator.RequiredExactlyOneOf(
+												exactlyoneofvalidator.ExactlyOneOf(
 													"block_temporarily",
 													"captcha_challenge",
 													"javascript_challenge",
 												),
 											},
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.UseNonNullStateForUnknown(),
+											},
 											Attributes: map[string]schema.Attribute{
 												"block_temporarily": schema.BoolAttribute{
 													Description:         "Block User Temporarily The user is blocked for the duration, they are in the corresponding threat level assigned to this mitigation action",
-													MarkdownDescription: "Block User Temporarily The user is blocked for the duration, they are in the corresponding threat level assigned to this mitigation action",
+													MarkdownDescription: "Block User Temporarily The user is blocked for the duration, they are in the corresponding threat level assigned to this mitigation action<br>Conflicts with `captcha_challenge` and `javascript_challenge`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -304,7 +308,7 @@ func (r *ResourceF5XCMaliciousUserMitigation) Schema(ctx context.Context, reques
 												},
 												"captcha_challenge": schema.BoolAttribute{
 													Description:         "Captcha Challenge Default Captcha Challenge settings will be used, if custom parameters are not configured on the corresponding http load balancer",
-													MarkdownDescription: "Captcha Challenge Default Captcha Challenge settings will be used, if custom parameters are not configured on the corresponding http load balancer",
+													MarkdownDescription: "Captcha Challenge Default Captcha Challenge settings will be used, if custom parameters are not configured on the corresponding http load balancer<br>Conflicts with `block_temporarily` and `javascript_challenge`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -314,7 +318,7 @@ func (r *ResourceF5XCMaliciousUserMitigation) Schema(ctx context.Context, reques
 												},
 												"javascript_challenge": schema.BoolAttribute{
 													Description:         "Javascript Challenge Default Javascript Challenge settings will be used, if custom parameters are not configured on the corresponding http load balancer",
-													MarkdownDescription: "Javascript Challenge Default Javascript Challenge settings will be used, if custom parameters are not configured on the corresponding http load balancer",
+													MarkdownDescription: "Javascript Challenge Default Javascript Challenge settings will be used, if custom parameters are not configured on the corresponding http load balancer<br>Conflicts with `block_temporarily` and `captcha_challenge`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -335,21 +339,24 @@ func (r *ResourceF5XCMaliciousUserMitigation) Schema(ctx context.Context, reques
 									Attributes: map[string]schema.Attribute{
 										"threat_level_choice": schema.SingleNestedAttribute{
 											Description:         "threat level Threat level category assigned to user, based on the user activity and reputation",
-											MarkdownDescription: "threat level Threat level category assigned to user, based on the user activity and reputation",
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
+											MarkdownDescription: "threat level Threat level category assigned to user, based on the user activity and reputation<br>Exactly one of `high`, `low`, or `medium` must be specified when `threat_level_choice` is configured.",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
 											Validators: []validator.Object{
-												exactlyoneofvalidator.RequiredExactlyOneOf(
+												exactlyoneofvalidator.ExactlyOneOf(
 													"high",
 													"low",
 													"medium",
 												),
 											},
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.UseNonNullStateForUnknown(),
+											},
 											Attributes: map[string]schema.Attribute{
 												"high": schema.BoolAttribute{
 													Description:         "High",
-													MarkdownDescription: "High",
+													MarkdownDescription: "High<br>Conflicts with `low` and `medium`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -359,7 +366,7 @@ func (r *ResourceF5XCMaliciousUserMitigation) Schema(ctx context.Context, reques
 												},
 												"low": schema.BoolAttribute{
 													Description:         "Low",
-													MarkdownDescription: "Low",
+													MarkdownDescription: "Low<br>Conflicts with `high` and `medium`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -369,7 +376,7 @@ func (r *ResourceF5XCMaliciousUserMitigation) Schema(ctx context.Context, reques
 												},
 												"medium": schema.BoolAttribute{
 													Description:         "Medium",
-													MarkdownDescription: "Medium",
+													MarkdownDescription: "Medium<br>Conflicts with `high` and `low`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -582,9 +589,12 @@ func (r *ResourceF5XCMaliciousUserMitigation) Create(ctx context.Context, reques
 						}
 
 						mitigationActionSpec := &ves_io_schema_malicious_user_mitigation.MaliciousUserMitigationAction{}
+						mitigationActionSpec.MitigationAction = &ves_io_schema_malicious_user_mitigation.MaliciousUserMitigationAction_JavascriptChallenge{
+							JavascriptChallenge: &ves_io_schema.Empty{},
+						}
 						rulesSpec[i].MitigationAction = mitigationActionSpec
 
-						// resource modelToSpecNested RequiredOneOfField --> MitigationAction
+						// resource modelToSpecNested OneOfField --> MitigationAction
 						if !mitigationActionModel.MitigationActionChoice.IsNull() && !mitigationActionModel.MitigationActionChoice.IsUnknown() {
 							mitigationActionMitigationActionChoiceModel := MaliciousUserMitigationMitigationActionChoice{}
 							response.Diagnostics.Append(mitigationActionModel.MitigationActionChoice.As(ctx, &mitigationActionMitigationActionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -626,9 +636,12 @@ func (r *ResourceF5XCMaliciousUserMitigation) Create(ctx context.Context, reques
 						}
 
 						threatLevelSpec := &ves_io_schema_malicious_user_mitigation.MaliciousUserThreatLevel{}
+						threatLevelSpec.ThreatLevel = &ves_io_schema_malicious_user_mitigation.MaliciousUserThreatLevel_Low{
+							Low: &ves_io_schema.Empty{},
+						}
 						rulesSpec[i].ThreatLevel = threatLevelSpec
 
-						// resource modelToSpecNested RequiredOneOfField --> ThreatLevel
+						// resource modelToSpecNested OneOfField --> ThreatLevel
 						if !threatLevelModel.ThreatLevelChoice.IsNull() && !threatLevelModel.ThreatLevelChoice.IsUnknown() {
 							threatLevelThreatLevelChoiceModel := MaliciousUserMitigationThreatLevelChoice{}
 							response.Diagnostics.Append(threatLevelModel.ThreatLevelChoice.As(ctx, &threatLevelThreatLevelChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -832,8 +845,7 @@ func (r *ResourceF5XCMaliciousUserMitigation) Create(ctx context.Context, reques
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> MitigationAction
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> MitigationAction
 					if mitigationActionElement.GetMitigationAction() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						mitigationActionmitigationActionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -915,8 +927,7 @@ func (r *ResourceF5XCMaliciousUserMitigation) Create(ctx context.Context, reques
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> ThreatLevel
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> ThreatLevel
 					if threatLevelElement.GetThreatLevel() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						threatLevelthreatLevelChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -1065,11 +1076,7 @@ func (r *ResourceF5XCMaliciousUserMitigation) Read(ctx context.Context, request 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_malicious_user_mitigation.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_malicious_user_mitigation.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "malicious_user_mitigation", err),
@@ -1211,8 +1218,7 @@ func (r *ResourceF5XCMaliciousUserMitigation) Read(ctx context.Context, request 
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> MitigationAction
-					// <no value>
+					// resource specToModelNested OneOfField --> MitigationAction
 					if mitigationActionElement.GetMitigationAction() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						mitigationActionmitigationActionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -1303,8 +1309,7 @@ func (r *ResourceF5XCMaliciousUserMitigation) Read(ctx context.Context, request 
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> ThreatLevel
-					// <no value>
+					// resource specToModelNested OneOfField --> ThreatLevel
 					if threatLevelElement.GetThreatLevel() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						threatLevelthreatLevelChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -1577,9 +1582,12 @@ func (r *ResourceF5XCMaliciousUserMitigation) Update(ctx context.Context, reques
 						}
 
 						mitigationActionSpec := &ves_io_schema_malicious_user_mitigation.MaliciousUserMitigationAction{}
+						mitigationActionSpec.MitigationAction = &ves_io_schema_malicious_user_mitigation.MaliciousUserMitigationAction_JavascriptChallenge{
+							JavascriptChallenge: &ves_io_schema.Empty{},
+						}
 						rulesSpec[i].MitigationAction = mitigationActionSpec
 
-						// resource modelToSpecNested RequiredOneOfField --> MitigationAction
+						// resource modelToSpecNested OneOfField --> MitigationAction
 						if !mitigationActionModel.MitigationActionChoice.IsNull() && !mitigationActionModel.MitigationActionChoice.IsUnknown() {
 							mitigationActionMitigationActionChoiceModel := MaliciousUserMitigationMitigationActionChoice{}
 							response.Diagnostics.Append(mitigationActionModel.MitigationActionChoice.As(ctx, &mitigationActionMitigationActionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1621,9 +1629,12 @@ func (r *ResourceF5XCMaliciousUserMitigation) Update(ctx context.Context, reques
 						}
 
 						threatLevelSpec := &ves_io_schema_malicious_user_mitigation.MaliciousUserThreatLevel{}
+						threatLevelSpec.ThreatLevel = &ves_io_schema_malicious_user_mitigation.MaliciousUserThreatLevel_Low{
+							Low: &ves_io_schema.Empty{},
+						}
 						rulesSpec[i].ThreatLevel = threatLevelSpec
 
-						// resource modelToSpecNested RequiredOneOfField --> ThreatLevel
+						// resource modelToSpecNested OneOfField --> ThreatLevel
 						if !threatLevelModel.ThreatLevelChoice.IsNull() && !threatLevelModel.ThreatLevelChoice.IsUnknown() {
 							threatLevelThreatLevelChoiceModel := MaliciousUserMitigationThreatLevelChoice{}
 							response.Diagnostics.Append(threatLevelModel.ThreatLevelChoice.As(ctx, &threatLevelThreatLevelChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1673,12 +1684,8 @@ func (r *ResourceF5XCMaliciousUserMitigation) Update(ctx context.Context, reques
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_malicious_user_mitigation.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_malicious_user_mitigation.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "malicious_user_mitigation", err),
@@ -1687,7 +1694,7 @@ func (r *ResourceF5XCMaliciousUserMitigation) Update(ctx context.Context, reques
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_malicious_user_mitigation.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_malicious_user_mitigation.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "malicious_user_mitigation", err),
@@ -1828,8 +1835,7 @@ func (r *ResourceF5XCMaliciousUserMitigation) Update(ctx context.Context, reques
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> MitigationAction
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> MitigationAction
 					if mitigationActionElement.GetMitigationAction() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						mitigationActionmitigationActionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -1911,8 +1917,7 @@ func (r *ResourceF5XCMaliciousUserMitigation) Update(ctx context.Context, reques
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> ThreatLevel
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> ThreatLevel
 					if threatLevelElement.GetThreatLevel() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						threatLevelthreatLevelChoiceChoicesAttributeMap := make(map[string]attr.Value)

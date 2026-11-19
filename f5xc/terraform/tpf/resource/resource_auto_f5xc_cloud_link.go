@@ -30,6 +30,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int32planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -419,7 +420,7 @@ var CloudLinkCloudProviderGcpCloudLinkTypeByocConnectionsMetadataModelAttributeM
 	"name":        types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> ProjectChoice
+// Attribute map for OneOfField --> ProjectChoice
 var CloudLinkCloudProviderGcpCloudLinkTypeByocConnectionsProjectChoiceModelAttributeMap = map[string]attr.Type{
 
 	"project":            types.StringType,
@@ -434,7 +435,7 @@ var CloudLinkCloudProviderGcpGcpCredModelAttributeMap = map[string]attr.Type{
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> EnableConnectionToReChoice
+// Attribute map for OneOfField --> EnableConnectionToReChoice
 var CloudLinkEnableConnectionToReChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disabled": types.BoolType,
@@ -540,7 +541,7 @@ func (r *ResourceF5XCCloudLink) Schema(ctx context.Context, request resource.Sch
 			},
 			"cloud_provider_choice": schema.SingleNestedAttribute{
 				Description:         "Type Select the cloud provider type where CloudLink needs to be deployed",
-				MarkdownDescription: "Type Select the cloud provider type where CloudLink needs to be deployed",
+				MarkdownDescription: "Type Select the cloud provider type where CloudLink needs to be deployed<br>Exactly one of `aws` or `gcp` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -553,7 +554,7 @@ func (r *ResourceF5XCCloudLink) Schema(ctx context.Context, request resource.Sch
 				Attributes: map[string]schema.Attribute{
 					"aws": schema.SingleNestedAttribute{
 						Description:         "Amazon Web Services(AWS) CloudLink for AWS Cloud",
-						MarkdownDescription: "Amazon Web Services(AWS) CloudLink for AWS Cloud",
+						MarkdownDescription: "Amazon Web Services(AWS) CloudLink for AWS Cloud<br>Conflicts with `gcp`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -593,7 +594,7 @@ func (r *ResourceF5XCCloudLink) Schema(ctx context.Context, request resource.Sch
 							},
 							"cloud_link_type_choice": schema.SingleNestedAttribute{
 								Description:         "CloudLink Type of CloudLink which needs to be created",
-								MarkdownDescription: "CloudLink Type of CloudLink which needs to be created",
+								MarkdownDescription: "CloudLink Type of CloudLink which needs to be created<br>`byoc` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -630,7 +631,7 @@ func (r *ResourceF5XCCloudLink) Schema(ctx context.Context, request resource.Sch
 															Attributes: map[string]schema.Attribute{
 																"secret_info_choice": schema.SingleNestedAttribute{
 																	Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																	MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																	MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
@@ -644,7 +645,7 @@ func (r *ResourceF5XCCloudLink) Schema(ctx context.Context, request resource.Sch
 																	Attributes: map[string]schema.Attribute{
 																		"blindfold_secret_info": schema.SingleNestedAttribute{
 																			Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																			MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																			MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -684,7 +685,7 @@ func (r *ResourceF5XCCloudLink) Schema(ctx context.Context, request resource.Sch
 																		},
 																		"clear_secret_info": schema.SingleNestedAttribute{
 																			Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																			MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																			MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -719,7 +720,7 @@ func (r *ResourceF5XCCloudLink) Schema(ctx context.Context, request resource.Sch
 																		},
 																		"none": schema.BoolAttribute{
 																			Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																			MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																			MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -757,7 +758,7 @@ func (r *ResourceF5XCCloudLink) Schema(ctx context.Context, request resource.Sch
 														},
 														"ip_type_choice": schema.SingleNestedAttribute{
 															Description:         "Address family Configure BGP IP peering for endpoints",
-															MarkdownDescription: "Address family Configure BGP IP peering for endpoints",
+															MarkdownDescription: "Address family Configure BGP IP peering for endpoints<br>`ipv4` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -909,7 +910,7 @@ func (r *ResourceF5XCCloudLink) Schema(ctx context.Context, request resource.Sch
 							},
 							"direct_connect_gateway_asn_choice": schema.SingleNestedAttribute{
 								Description:         "Direct Connect Gateway ASN Option to provide ASN for Direct Connect Gateway. AWS Direct Connect Gateway will be created automatically by F5XC.",
-								MarkdownDescription: "Direct Connect Gateway ASN Option to provide ASN for Direct Connect Gateway. AWS Direct Connect Gateway will be created automatically by F5XC.",
+								MarkdownDescription: "Direct Connect Gateway ASN Option to provide ASN for Direct Connect Gateway. AWS Direct Connect Gateway will be created automatically by F5XC.<br>`custom_asn` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -938,14 +939,14 @@ func (r *ResourceF5XCCloudLink) Schema(ctx context.Context, request resource.Sch
 					},
 					"gcp": schema.SingleNestedAttribute{
 						Description:         "Google Cloud Platform CloudLink for Google Cloud Platform",
-						MarkdownDescription: "Google Cloud Platform CloudLink for Google Cloud Platform",
+						MarkdownDescription: "Google Cloud Platform CloudLink for Google Cloud Platform<br>Conflicts with `aws`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"cloud_link_type_choice": schema.SingleNestedAttribute{
 								Description:         "CloudLink Type of CloudLink which needs to be created",
-								MarkdownDescription: "CloudLink Type of CloudLink which needs to be created",
+								MarkdownDescription: "CloudLink Type of CloudLink which needs to be created<br>`byoc` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -1018,20 +1019,23 @@ func (r *ResourceF5XCCloudLink) Schema(ctx context.Context, request resource.Sch
 														},
 														"project_choice": schema.SingleNestedAttribute{
 															Description:         "Project GCP Project in which the GCP Interconnect Attachment is configured",
-															MarkdownDescription: "Project GCP Project in which the GCP Interconnect Attachment is configured",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
+															MarkdownDescription: "Project GCP Project in which the GCP Interconnect Attachment is configured<br>Exactly one of `project` or `same_as_credential` must be specified when `project_choice` is configured.",
+															Required:            false,
+															Optional:            true,
+															Computed:            true,
 															Validators: []validator.Object{
-																exactlyoneofvalidator.RequiredExactlyOneOf(
+																exactlyoneofvalidator.ExactlyOneOf(
 																	"project",
 																	"same_as_credential",
 																),
 															},
+															PlanModifiers: []planmodifier.Object{
+																objectplanmodifier.UseNonNullStateForUnknown(),
+															},
 															Attributes: map[string]schema.Attribute{
 																"project": schema.StringAttribute{
 																	Description:         "Project ID Specify a GCP Project for the interconnect attachment",
-																	MarkdownDescription: "Project ID Specify a GCP Project for the interconnect attachment<br>**Validation:** `Length LengthBetween(4, 30)`",
+																	MarkdownDescription: "Project ID Specify a GCP Project for the interconnect attachment<br>**Validation:** `Length LengthBetween(4, 30)`<br>Conflicts with `same_as_credential`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1041,7 +1045,7 @@ func (r *ResourceF5XCCloudLink) Schema(ctx context.Context, request resource.Sch
 																},
 																"same_as_credential": schema.BoolAttribute{
 																	Description:         "Same As Credential GCP Project for the interconnect is the same as the project specified in the credential",
-																	MarkdownDescription: "Same As Credential GCP Project for the interconnect is the same as the project specified in the credential",
+																	MarkdownDescription: "Same As Credential GCP Project for the interconnect is the same as the project specified in the credential<br>Conflicts with `project`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1107,20 +1111,23 @@ func (r *ResourceF5XCCloudLink) Schema(ctx context.Context, request resource.Sch
 			},
 			"enable_connection_to_re_choice": schema.SingleNestedAttribute{
 				Description:         "Private Connectivity via Regional Edge (RE) Private Connectivity via Regional Edge (RE)",
-				MarkdownDescription: "Private Connectivity via Regional Edge (RE) Private Connectivity via Regional Edge (RE)",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Private Connectivity via Regional Edge (RE) Private Connectivity via Regional Edge (RE)<br>Exactly one of `disabled` or `enabled` must be specified when `enable_connection_to_re_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"disabled",
 						"enabled",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"disabled": schema.BoolAttribute{
 						Description:         "Disabled Connection to RE CloudLink connection to RE Site is disabled",
-						MarkdownDescription: "Disabled Connection to RE CloudLink connection to RE Site is disabled",
+						MarkdownDescription: "Disabled Connection to RE CloudLink connection to RE Site is disabled<br>Conflicts with `enabled`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1130,7 +1137,7 @@ func (r *ResourceF5XCCloudLink) Schema(ctx context.Context, request resource.Sch
 					},
 					"enabled": schema.SingleNestedAttribute{
 						Description:         "Enable Connection to RE CloudLink connection to RE Site is enabled",
-						MarkdownDescription: "Enable Connection to RE CloudLink connection to RE Site is enabled",
+						MarkdownDescription: "Enable Connection to RE CloudLink connection to RE Site is enabled<br>Conflicts with `disabled`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1679,6 +1686,9 @@ func (r *ResourceF5XCCloudLink) Create(ctx context.Context, request resource.Cre
 						for i, connectionsElement := range connectionsElements {
 							// Initialize the spec struct for the current element
 							byocOneOfSpec.Byoc.Connections[i] = &ves_io_schema_cloud_link.GCPBYOCType{}
+							byocOneOfSpec.Byoc.Connections[i].ProjectChoice = &ves_io_schema_cloud_link.GCPBYOCType_SameAsCredential{
+								SameAsCredential: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
@@ -1710,7 +1720,7 @@ func (r *ResourceF5XCCloudLink) Create(ctx context.Context, request resource.Cre
 
 							}
 
-							// resource modelToSpecNested RequiredOneOfField --> ProjectChoice
+							// resource modelToSpecNested OneOfField --> ProjectChoice
 							if !connectionsElement.ProjectChoice.IsNull() && !connectionsElement.ProjectChoice.IsUnknown() {
 								connectionsProjectChoiceModel := CloudLinkProjectChoice{}
 								response.Diagnostics.Append(connectionsElement.ProjectChoice.As(ctx, &connectionsProjectChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1773,7 +1783,7 @@ func (r *ResourceF5XCCloudLink) Create(ctx context.Context, request resource.Cre
 
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> EnableConnectionToReChoice
+	// resource modelToSpecRoot OneOfField --> EnableConnectionToReChoice
 	if !data.EnableConnectionToReChoice.IsNull() && !data.EnableConnectionToReChoice.IsUnknown() {
 		enableConnectionToReChoiceModel := CloudLinkEnableConnToReChoice{}
 		response.Diagnostics.Append(data.EnableConnectionToReChoice.As(ctx, &enableConnectionToReChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1806,6 +1816,10 @@ func (r *ResourceF5XCCloudLink) Create(ctx context.Context, request resource.Cre
 
 		}
 
+	} else {
+		spec.EnableConnectionToReChoice = &ves_io_schema_cloud_link.CreateSpecType_Disabled{
+			Disabled: &ves_io_schema.Empty{},
+		}
 	}
 
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
@@ -2572,8 +2586,7 @@ func (r *ResourceF5XCCloudLink) Create(ctx context.Context, request resource.Cre
 										cloudLinkGCPBYOCTypeModel.Metadata = types.ObjectNull(CloudLinkCloudProviderGcpCloudLinkTypeByocConnectionsMetadataModelAttributeMap)
 									}
 
-									// resource specToModelNested RequiredOneOfField --> ProjectChoice
-									// GlobalSpecType
+									// resource specToModelNested OneOfField --> ProjectChoice
 									if connectionsElement.GetProjectChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										connectionsprojectChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -2760,7 +2773,7 @@ func (r *ResourceF5XCCloudLink) Create(ctx context.Context, request resource.Cre
 		data.CloudProviderChoice = types.ObjectNull(CloudLinkCloudProviderModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> EnableConnectionToReChoice
+	// resource SpecToModelRoot OneOfField --> EnableConnectionToReChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -2828,8 +2841,6 @@ func (r *ResourceF5XCCloudLink) Create(ctx context.Context, request resource.Cre
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.EnableConnectionToReChoice = types.ObjectNull(CloudLinkEnableConnectionToReChoiceModelAttributeMap)
 	}
 
@@ -2897,11 +2908,7 @@ func (r *ResourceF5XCCloudLink) Read(ctx context.Context, request resource.ReadR
 	defer cancel()
 	priorCloudProviderChoice := data.CloudProviderChoice
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cloud_link.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cloud_link.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "cloud_link", err),
@@ -3654,8 +3661,7 @@ func (r *ResourceF5XCCloudLink) Read(ctx context.Context, request resource.ReadR
 										cloudLinkGCPBYOCTypeModel.Metadata = types.ObjectNull(CloudLinkCloudProviderGcpCloudLinkTypeByocConnectionsMetadataModelAttributeMap)
 									}
 
-									// resource specToModelNested RequiredOneOfField --> ProjectChoice
-									// <no value>
+									// resource specToModelNested OneOfField --> ProjectChoice
 									if connectionsElement.GetProjectChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										connectionsprojectChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3845,7 +3851,7 @@ func (r *ResourceF5XCCloudLink) Read(ctx context.Context, request resource.ReadR
 		data.CloudProviderChoice = types.ObjectNull(CloudLinkCloudProviderModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> EnableConnectionToReChoice
+	// resource SpecToModelRoot OneOfField --> EnableConnectionToReChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -3913,8 +3919,6 @@ func (r *ResourceF5XCCloudLink) Read(ctx context.Context, request resource.ReadR
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.EnableConnectionToReChoice.IsNull() || data.EnableConnectionToReChoice.IsUnknown() || ((data.EnableConnectionToReChoice.Attributes()["disabled"].IsNull() || data.EnableConnectionToReChoice.Attributes()["disabled"].IsUnknown()) && (data.EnableConnectionToReChoice.Attributes()["enabled"].(types.Object).IsNull() || data.EnableConnectionToReChoice.Attributes()["enabled"].(types.Object).IsUnknown() || (data.EnableConnectionToReChoice.Attributes()["enabled"].(types.Object).Attributes()["cloudlink_network_name"].IsNull() || data.EnableConnectionToReChoice.Attributes()["enabled"].(types.Object).Attributes()["cloudlink_network_name"].IsUnknown()))) {
 			data.EnableConnectionToReChoice = types.ObjectValueMust(CloudLinkEnableConnectionToReChoiceModelAttributeMap, map[string]attr.Value{
@@ -4416,6 +4420,9 @@ func (r *ResourceF5XCCloudLink) Update(ctx context.Context, request resource.Upd
 						for i, connectionsElement := range connectionsElements {
 							// Initialize the spec struct for the current element
 							byocOneOfSpec.Byoc.Connections[i] = &ves_io_schema_cloud_link.GCPBYOCType{}
+							byocOneOfSpec.Byoc.Connections[i].ProjectChoice = &ves_io_schema_cloud_link.GCPBYOCType_SameAsCredential{
+								SameAsCredential: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
@@ -4447,7 +4454,7 @@ func (r *ResourceF5XCCloudLink) Update(ctx context.Context, request resource.Upd
 
 							}
 
-							// resource modelToSpecNested RequiredOneOfField --> ProjectChoice
+							// resource modelToSpecNested OneOfField --> ProjectChoice
 							if !connectionsElement.ProjectChoice.IsNull() && !connectionsElement.ProjectChoice.IsUnknown() {
 								connectionsProjectChoiceModel := CloudLinkProjectChoice{}
 								response.Diagnostics.Append(connectionsElement.ProjectChoice.As(ctx, &connectionsProjectChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4510,7 +4517,7 @@ func (r *ResourceF5XCCloudLink) Update(ctx context.Context, request resource.Upd
 
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> EnableConnectionToReChoice
+	// resource modelToSpecRoot OneOfField --> EnableConnectionToReChoice
 	if !data.EnableConnectionToReChoice.IsNull() && !data.EnableConnectionToReChoice.IsUnknown() {
 		enableConnectionToReChoiceModel := CloudLinkEnableConnToReChoice{}
 		response.Diagnostics.Append(data.EnableConnectionToReChoice.As(ctx, &enableConnectionToReChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4543,6 +4550,10 @@ func (r *ResourceF5XCCloudLink) Update(ctx context.Context, request resource.Upd
 
 		}
 
+	} else {
+		spec.EnableConnectionToReChoice = &ves_io_schema_cloud_link.ReplaceSpecType_Disabled{
+			Disabled: &ves_io_schema.Empty{},
+		}
 	}
 
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
@@ -4556,12 +4567,8 @@ func (r *ResourceF5XCCloudLink) Update(ctx context.Context, request resource.Upd
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_cloud_link.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_cloud_link.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "cloud_link", err),
@@ -4570,7 +4577,7 @@ func (r *ResourceF5XCCloudLink) Update(ctx context.Context, request resource.Upd
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cloud_link.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cloud_link.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "cloud_link", err),
@@ -5310,8 +5317,7 @@ func (r *ResourceF5XCCloudLink) Update(ctx context.Context, request resource.Upd
 										cloudLinkGCPBYOCTypeModel.Metadata = types.ObjectNull(CloudLinkCloudProviderGcpCloudLinkTypeByocConnectionsMetadataModelAttributeMap)
 									}
 
-									// resource specToModelNested RequiredOneOfField --> ProjectChoice
-									// GlobalSpecType
+									// resource specToModelNested OneOfField --> ProjectChoice
 									if connectionsElement.GetProjectChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										connectionsprojectChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5498,7 +5504,7 @@ func (r *ResourceF5XCCloudLink) Update(ctx context.Context, request resource.Upd
 		data.CloudProviderChoice = types.ObjectNull(CloudLinkCloudProviderModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> EnableConnectionToReChoice
+	// resource SpecToModelRoot OneOfField --> EnableConnectionToReChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -5566,8 +5572,6 @@ func (r *ResourceF5XCCloudLink) Update(ctx context.Context, request resource.Upd
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.EnableConnectionToReChoice = types.ObjectNull(CloudLinkEnableConnectionToReChoiceModelAttributeMap)
 	}
 

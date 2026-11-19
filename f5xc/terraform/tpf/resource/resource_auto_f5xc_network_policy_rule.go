@@ -343,7 +343,7 @@ func (r *ResourceF5XCNetworkPolicyRule) Schema(ctx context.Context, request reso
 			},
 			"remote_endpoint_choice": schema.SingleNestedAttribute{
 				Description:         "Remote Endpoint Remote endpoint is the other endpoint for ingress or egress session with local endpoint of network policy. If network policy rule is a ingress rule in network policy then remote endpoint indicates the source endpoint from  which session is initiated. If network policy rule is a egress rule in network policy then remote endpoint indicates the destination endpoint to which session is initiated. Not specifying any endpoint will result in creation of ANY endpoint",
-				MarkdownDescription: "Remote Endpoint Remote endpoint is the other endpoint for ingress or egress session with local endpoint of network policy. If network policy rule is a ingress rule in network policy then remote endpoint indicates the source endpoint from  which session is initiated. If network policy rule is a egress rule in network policy then remote endpoint indicates the destination endpoint to which session is initiated. Not specifying any endpoint will result in creation of ANY endpoint",
+				MarkdownDescription: "Remote Endpoint Remote endpoint is the other endpoint for ingress or egress session with local endpoint of network policy. If network policy rule is a ingress rule in network policy then remote endpoint indicates the source endpoint from  which session is initiated. If network policy rule is a egress rule in network policy then remote endpoint indicates the destination endpoint to which session is initiated. Not specifying any endpoint will result in creation of ANY endpoint<br>Exactly one of `ip_prefix_set`, `prefix`, or `prefix_selector` must be specified when `remote_endpoint_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -357,7 +357,7 @@ func (r *ResourceF5XCNetworkPolicyRule) Schema(ctx context.Context, request reso
 				Attributes: map[string]schema.Attribute{
 					"ip_prefix_set": schema.SingleNestedAttribute{
 						Description:         "ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint",
-						MarkdownDescription: "ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint",
+						MarkdownDescription: "ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint<br>Conflicts with `prefix` and `prefix_selector`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -404,7 +404,7 @@ func (r *ResourceF5XCNetworkPolicyRule) Schema(ctx context.Context, request reso
 					},
 					"prefix": schema.SingleNestedAttribute{
 						Description:         "prefix List of IP prefixes that are member of set representing remote endpoint. Prefix is the list of IP addresses to match. For egress rules these IP prefixes are source.For ingress rules these IP prefixes are destination",
-						MarkdownDescription: "prefix List of IP prefixes that are member of set representing remote endpoint. Prefix is the list of IP addresses to match. For egress rules these IP prefixes are source.For ingress rules these IP prefixes are destination",
+						MarkdownDescription: "prefix List of IP prefixes that are member of set representing remote endpoint. Prefix is the list of IP addresses to match. For egress rules these IP prefixes are source.For ingress rules these IP prefixes are destination<br>Conflicts with `ip_prefix_set` and `prefix_selector`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -443,7 +443,7 @@ func (r *ResourceF5XCNetworkPolicyRule) Schema(ctx context.Context, request reso
 					},
 					"prefix_selector": schema.SingleNestedAttribute{
 						Description:         "prefix selector Remote endpoint is determined by label selector expression. Prefix selector is the set of labels to match. Labels can be specified in BNF grammar format. Constraint : Only first expression is selected even though LabelSelectorType can provide multiple",
-						MarkdownDescription: "prefix selector Remote endpoint is determined by label selector expression. Prefix selector is the set of labels to match. Labels can be specified in BNF grammar format. Constraint : Only first expression is selected even though LabelSelectorType can provide multiple",
+						MarkdownDescription: "prefix selector Remote endpoint is determined by label selector expression. Prefix selector is the set of labels to match. Labels can be specified in BNF grammar format. Constraint : Only first expression is selected even though LabelSelectorType can provide multiple<br>Conflicts with `ip_prefix_set` and `prefix`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1356,11 +1356,7 @@ func (r *ResourceF5XCNetworkPolicyRule) Read(ctx context.Context, request resour
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_network_policy_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_network_policy_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "network_policy_rule", err),
@@ -2159,12 +2155,8 @@ func (r *ResourceF5XCNetworkPolicyRule) Update(ctx context.Context, request reso
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_network_policy_rule.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_network_policy_rule.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "network_policy_rule", err),
@@ -2173,7 +2165,7 @@ func (r *ResourceF5XCNetworkPolicyRule) Update(ctx context.Context, request reso
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_network_policy_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_network_policy_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "network_policy_rule", err),

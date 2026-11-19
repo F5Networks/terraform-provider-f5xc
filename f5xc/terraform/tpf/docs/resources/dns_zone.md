@@ -111,7 +111,7 @@ resource "f5xc_dns_zone" "example" {
 
 ### Required
 
-- `dns_type_choice` (Attributes) Choice to DNS zone type Select type of zone whether its primary or secondary (see [below for nested schema](#nestedatt--dns_type_choice))
+- `dns_type_choice` (Attributes) Choice to DNS zone type Select type of zone whether its primary or secondary<br>Exactly one of `primary` or `secondary` must be specified. (see [below for nested schema](#nestedatt--dns_type_choice))
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
 
@@ -133,15 +133,11 @@ resource "f5xc_dns_zone" "example" {
 
 Optional:
 
-- `primary` (Attributes) Primary DNS Configuration Primary DNS (see [below for nested schema](#nestedatt--dns_type_choice--primary))
-- `secondary` (Attributes) Secondary DNS Configuration Secondary DNS (see [below for nested schema](#nestedatt--dns_type_choice--secondary))
+- `primary` (Attributes) Primary DNS Configuration Primary DNS<br>Conflicts with `secondary`. (see [below for nested schema](#nestedatt--dns_type_choice--primary))
+- `secondary` (Attributes) Secondary DNS Configuration Secondary DNS<br>Conflicts with `primary`. (see [below for nested schema](#nestedatt--dns_type_choice--secondary))
 
 <a id="nestedatt--dns_type_choice--primary"></a>
 ### Nested Schema for `dns_type_choice.primary`
-
-Required:
-
-- `soa_record_parameters_choice` (Attributes) SOA Record Parameters Start Of Authority (SOA) Record Properties (see [below for nested schema](#nestedatt--dns_type_choice--primary--soa_record_parameters_choice))
 
 Optional:
 
@@ -149,39 +145,19 @@ Optional:
 - `default_rr_set_group` (Attributes List) Default DNS Record Sets Add and manage DNS resource record sets part of Default set group. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group))
 - `dnssec_mode` (Attributes) DNSSEC Mode (see [below for nested schema](#nestedatt--dns_type_choice--primary--dnssec_mode))
 - `rr_set_group` (Attributes List) Record Sets Group (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group))
+- `soa_record_parameters_choice` (Attributes) SOA Record Parameters Start Of Authority (SOA) Record Properties<br>Exactly one of `default_soa_parameters` or `soa_parameters` must be specified when `soa_record_parameters_choice` is configured. (see [below for nested schema](#nestedatt--dns_type_choice--primary--soa_record_parameters_choice))
 
 Read-Only:
 
 - `admin` (String) Administrator
 - `serial` (Number) Serial number Secondary nameservers should initiate a zone transfer when this number is incremented
 
-<a id="nestedatt--dns_type_choice--primary--soa_record_parameters_choice"></a>
-### Nested Schema for `dns_type_choice.primary.soa_record_parameters_choice`
-
-Optional:
-
-- `default_soa_parameters` (Boolean) Default parameters Use default parameters
-- `soa_parameters` (Attributes) SOARecordParameterConfig Configure SOA Record parameters (see [below for nested schema](#nestedatt--dns_type_choice--primary--soa_record_parameters_choice--soa_parameters))
-
-<a id="nestedatt--dns_type_choice--primary--soa_record_parameters_choice--soa_parameters"></a>
-### Nested Schema for `dns_type_choice.primary.soa_record_parameters_choice.soa_parameters`
-
-Optional:
-
-- `expire` (Number) Expire (in seconds) expire value indicates when secondary nameservers should stop answering request for this zone if primary does not respond<br>**Default:** `360000`
-- `negative_ttl` (Number) Negative TTL (in seconds) negative ttl value indicates how long to cache non-existent resource record for this zone<br>**Default:** `1800`
-- `refresh` (Number) Refresh (in seconds) refresh value indicates when secondary nameservers should query for the SOA record to detect zone changes<br>**Default:** `86400`
-- `retry` (Number) Retry (in seconds) retry value indicates when secondary nameservers should retry to request the serial number if primary does not respond<br>**Default:** `7200`
-- `ttl` (Number) TTL SOA record time to live (in seconds)<br>**Default:** `86400`
-
-
-
 <a id="nestedatt--dns_type_choice--primary--default_rr_set_group"></a>
 ### Nested Schema for `dns_type_choice.primary.default_rr_set_group`
 
 Required:
 
-- `type_record_set_choice` (Attributes) Record Set (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice))
+- `type_record_set_choice` (Attributes) Record Set<br>Exactly one of `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, or `txt_record` must be specified. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice))
 
 Optional:
 
@@ -193,27 +169,27 @@ Optional:
 
 Optional:
 
-- `a_record` (Attributes) A Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--a_record))
-- `aaaa_record` (Attributes) AAAA Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--aaaa_record))
-- `afsdb_record` (Attributes) AFSDB Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--afsdb_record))
-- `alias_record` (Attributes) ALIAS Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--alias_record))
-- `caa_record` (Attributes) CAA Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--caa_record))
-- `cds_record` (Attributes) CDS Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--cds_record))
-- `cert_record` (Attributes) CERT Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--cert_record))
-- `cname_record` (Attributes) CNAME Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--cname_record))
-- `ds_record` (Attributes) DS Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--ds_record))
-- `eui48_record` (Attributes) EUI48 Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--eui48_record))
-- `eui64_record` (Attributes) EUI64 Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--eui64_record))
-- `lb_record` (Attributes) DNS LB Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--lb_record))
-- `loc_record` (Attributes) LOC Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--loc_record))
-- `mx_record` (Attributes) MX Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--mx_record))
-- `naptr_record` (Attributes) NAPTR Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--naptr_record))
-- `ns_record` (Attributes) NS Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--ns_record))
-- `ptr_record` (Attributes) PTR Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--ptr_record))
-- `srv_record` (Attributes) SRV Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--srv_record))
-- `sshfp_record` (Attributes) SSHFP Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--sshfp_record))
-- `tlsa_record` (Attributes) TLSA Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--tlsa_record))
-- `txt_record` (Attributes) TXT Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--txt_record))
+- `a_record` (Attributes) A Record<br>Conflicts with `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--a_record))
+- `aaaa_record` (Attributes) AAAA Record<br>Conflicts with `a_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--aaaa_record))
+- `afsdb_record` (Attributes) AFSDB Record<br>Conflicts with `a_record`, `aaaa_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--afsdb_record))
+- `alias_record` (Attributes) ALIAS Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--alias_record))
+- `caa_record` (Attributes) CAA Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--caa_record))
+- `cds_record` (Attributes) CDS Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--cds_record))
+- `cert_record` (Attributes) CERT Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--cert_record))
+- `cname_record` (Attributes) CNAME Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--cname_record))
+- `ds_record` (Attributes) DS Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--ds_record))
+- `eui48_record` (Attributes) EUI48 Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--eui48_record))
+- `eui64_record` (Attributes) EUI64 Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--eui64_record))
+- `lb_record` (Attributes) DNS LB Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--lb_record))
+- `loc_record` (Attributes) LOC Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--loc_record))
+- `mx_record` (Attributes) MX Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--mx_record))
+- `naptr_record` (Attributes) NAPTR Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--naptr_record))
+- `ns_record` (Attributes) NS Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--ns_record))
+- `ptr_record` (Attributes) PTR Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--ptr_record))
+- `srv_record` (Attributes) SRV Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--srv_record))
+- `sshfp_record` (Attributes) SSHFP Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--sshfp_record))
+- `tlsa_record` (Attributes) TLSA Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--tlsa_record))
+- `txt_record` (Attributes) TXT Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, and `tlsa_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--txt_record))
 
 <a id="nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--a_record"></a>
 ### Nested Schema for `dns_type_choice.primary.default_rr_set_group.type_record_set_choice.a_record`
@@ -303,7 +279,7 @@ Optional:
 
 Required:
 
-- `digest_choice` (Attributes) Digest (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--cds_record--values--digest_choice))
+- `digest_choice` (Attributes) Digest<br>Exactly one of `sha1_digest`, `sha256_digest`, or `sha384_digest` must be specified. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--cds_record--values--digest_choice))
 - `ds_key_algorithm` (List of String) DS Key Algorithm DS key value must be compatible with the specified algorithm.<br>**Allowed Values (choose one):** `['ECDSAP256SHA256', 'ECDSAP384SHA384', 'ED25519', 'ED448', 'RSASHA1', 'RSASHA1NSEC3SHA1', 'RSASHA256', 'RSASHA512', 'UNSPECIFIED']`
 - `key_tag` (Number) Key Tag A short numeric value which can help quickly identify the referenced DNSKEY-record.
 
@@ -312,9 +288,9 @@ Required:
 
 Optional:
 
-- `sha1_digest` (Attributes) SHA1 Digest (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--cds_record--values--digest_choice--sha1_digest))
-- `sha256_digest` (Attributes) SHA256 Digest (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--cds_record--values--digest_choice--sha256_digest))
-- `sha384_digest` (Attributes) SHA384 Digest (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--cds_record--values--digest_choice--sha384_digest))
+- `sha1_digest` (Attributes) SHA1 Digest<br>Conflicts with `sha256_digest` and `sha384_digest`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--cds_record--values--digest_choice--sha1_digest))
+- `sha256_digest` (Attributes) SHA256 Digest<br>Conflicts with `sha1_digest` and `sha384_digest`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--cds_record--values--digest_choice--sha256_digest))
+- `sha384_digest` (Attributes) SHA384 Digest<br>Conflicts with `sha1_digest` and `sha256_digest`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--cds_record--values--digest_choice--sha384_digest))
 
 <a id="nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--cds_record--values--digest_choice--sha1_digest"></a>
 ### Nested Schema for `dns_type_choice.primary.default_rr_set_group.type_record_set_choice.cds_record.values.digest_choice.sha1_digest`
@@ -394,7 +370,7 @@ Optional:
 
 Required:
 
-- `digest_choice` (Attributes) Digest (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--ds_record--values--digest_choice))
+- `digest_choice` (Attributes) Digest<br>Exactly one of `sha1_digest`, `sha256_digest`, or `sha384_digest` must be specified. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--ds_record--values--digest_choice))
 - `ds_key_algorithm` (List of String) DS Key Algorithm DS key value must be compatible with the specified algorithm.<br>**Allowed Values (choose one):** `['ECDSAP256SHA256', 'ECDSAP384SHA384', 'ED25519', 'ED448', 'RSASHA1', 'RSASHA1NSEC3SHA1', 'RSASHA256', 'RSASHA512', 'UNSPECIFIED']`
 - `key_tag` (Number) Key Tag A short numeric value which can help quickly identify the referenced DNSKEY-record.
 
@@ -403,9 +379,9 @@ Required:
 
 Optional:
 
-- `sha1_digest` (Attributes) SHA1 Digest (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--ds_record--values--digest_choice--sha1_digest))
-- `sha256_digest` (Attributes) SHA256 Digest (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--ds_record--values--digest_choice--sha256_digest))
-- `sha384_digest` (Attributes) SHA384 Digest (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--ds_record--values--digest_choice--sha384_digest))
+- `sha1_digest` (Attributes) SHA1 Digest<br>Conflicts with `sha256_digest` and `sha384_digest`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--ds_record--values--digest_choice--sha1_digest))
+- `sha256_digest` (Attributes) SHA256 Digest<br>Conflicts with `sha1_digest` and `sha384_digest`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--ds_record--values--digest_choice--sha256_digest))
+- `sha384_digest` (Attributes) SHA384 Digest<br>Conflicts with `sha1_digest` and `sha256_digest`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--ds_record--values--digest_choice--sha384_digest))
 
 <a id="nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--ds_record--values--digest_choice--sha1_digest"></a>
 ### Nested Schema for `dns_type_choice.primary.default_rr_set_group.type_record_set_choice.ds_record.values.digest_choice.sha1_digest`
@@ -621,15 +597,15 @@ Optional:
 Required:
 
 - `algorithm` (List of String) SSHFP Algorithm Algorithm of the public key.<br>**Allowed Values (choose one):** `['DSA', 'ECDSA', 'Ed25519', 'Ed448', 'RSA']`
-- `fingerprint_type_choice` (Attributes) Fingerprint Type Algorithm used to calculate the fingerprint of the public key and the hexadecimal representation of the hash result of the SSH key as text. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--sshfp_record--values--fingerprint_type_choice))
+- `fingerprint_type_choice` (Attributes) Fingerprint Type Algorithm used to calculate the fingerprint of the public key and the hexadecimal representation of the hash result of the SSH key as text.<br>Exactly one of `sha1_fingerprint` or `sha256_fingerprint` must be specified. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--sshfp_record--values--fingerprint_type_choice))
 
 <a id="nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--sshfp_record--values--fingerprint_type_choice"></a>
 ### Nested Schema for `dns_type_choice.primary.default_rr_set_group.type_record_set_choice.sshfp_record.values.fingerprint_type_choice`
 
 Optional:
 
-- `sha1_fingerprint` (Attributes) SHA1 Fingerprint (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--sshfp_record--values--fingerprint_type_choice--sha1_fingerprint))
-- `sha256_fingerprint` (Attributes) SHA256 Digest (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--sshfp_record--values--fingerprint_type_choice--sha256_fingerprint))
+- `sha1_fingerprint` (Attributes) SHA1 Fingerprint<br>Conflicts with `sha256_fingerprint`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--sshfp_record--values--fingerprint_type_choice--sha1_fingerprint))
+- `sha256_fingerprint` (Attributes) SHA256 Digest<br>Conflicts with `sha1_fingerprint`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--sshfp_record--values--fingerprint_type_choice--sha256_fingerprint))
 
 <a id="nestedatt--dns_type_choice--primary--default_rr_set_group--type_record_set_choice--sshfp_record--values--fingerprint_type_choice--sha1_fingerprint"></a>
 ### Nested Schema for `dns_type_choice.primary.default_rr_set_group.type_record_set_choice.sshfp_record.values.fingerprint_type_choice.sha1_fingerprint`
@@ -690,17 +666,17 @@ Optional:
 <a id="nestedatt--dns_type_choice--primary--dnssec_mode"></a>
 ### Nested Schema for `dns_type_choice.primary.dnssec_mode`
 
-Required:
+Optional:
 
-- `mode_choice` (Attributes) DNSSEC Mode DNSSEC Mode of operation (see [below for nested schema](#nestedatt--dns_type_choice--primary--dnssec_mode--mode_choice))
+- `mode_choice` (Attributes) DNSSEC Mode DNSSEC Mode of operation<br>Exactly one of `disable` or `enable` must be specified when `mode_choice` is configured. (see [below for nested schema](#nestedatt--dns_type_choice--primary--dnssec_mode--mode_choice))
 
 <a id="nestedatt--dns_type_choice--primary--dnssec_mode--mode_choice"></a>
 ### Nested Schema for `dns_type_choice.primary.dnssec_mode.mode_choice`
 
 Optional:
 
-- `disable` (Boolean) Disable DNSSEC disabled
-- `enable` (Boolean) Enable DNSSEC enable
+- `disable` (Boolean) Disable DNSSEC disabled<br>Conflicts with `enable`.
+- `enable` (Boolean) Enable DNSSEC enable<br>Conflicts with `disable`.
 
 
 
@@ -732,7 +708,7 @@ Optional:
 
 Required:
 
-- `type_record_set_choice` (Attributes) Record Set (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice))
+- `type_record_set_choice` (Attributes) Record Set<br>Exactly one of `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, or `txt_record` must be specified. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice))
 
 Optional:
 
@@ -744,27 +720,27 @@ Optional:
 
 Optional:
 
-- `a_record` (Attributes) A Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--a_record))
-- `aaaa_record` (Attributes) AAAA Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--aaaa_record))
-- `afsdb_record` (Attributes) AFSDB Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--afsdb_record))
-- `alias_record` (Attributes) ALIAS Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--alias_record))
-- `caa_record` (Attributes) CAA Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--caa_record))
-- `cds_record` (Attributes) CDS Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--cds_record))
-- `cert_record` (Attributes) CERT Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--cert_record))
-- `cname_record` (Attributes) CNAME Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--cname_record))
-- `ds_record` (Attributes) DS Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--ds_record))
-- `eui48_record` (Attributes) EUI48 Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--eui48_record))
-- `eui64_record` (Attributes) EUI64 Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--eui64_record))
-- `lb_record` (Attributes) DNS LB Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--lb_record))
-- `loc_record` (Attributes) LOC Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--loc_record))
-- `mx_record` (Attributes) MX Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--mx_record))
-- `naptr_record` (Attributes) NAPTR Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--naptr_record))
-- `ns_record` (Attributes) NS Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--ns_record))
-- `ptr_record` (Attributes) PTR Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--ptr_record))
-- `srv_record` (Attributes) SRV Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--srv_record))
-- `sshfp_record` (Attributes) SSHFP Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--sshfp_record))
-- `tlsa_record` (Attributes) TLSA Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--tlsa_record))
-- `txt_record` (Attributes) TXT Record (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--txt_record))
+- `a_record` (Attributes) A Record<br>Conflicts with `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--a_record))
+- `aaaa_record` (Attributes) AAAA Record<br>Conflicts with `a_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--aaaa_record))
+- `afsdb_record` (Attributes) AFSDB Record<br>Conflicts with `a_record`, `aaaa_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--afsdb_record))
+- `alias_record` (Attributes) ALIAS Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--alias_record))
+- `caa_record` (Attributes) CAA Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--caa_record))
+- `cds_record` (Attributes) CDS Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--cds_record))
+- `cert_record` (Attributes) CERT Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--cert_record))
+- `cname_record` (Attributes) CNAME Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--cname_record))
+- `ds_record` (Attributes) DS Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--ds_record))
+- `eui48_record` (Attributes) EUI48 Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--eui48_record))
+- `eui64_record` (Attributes) EUI64 Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--eui64_record))
+- `lb_record` (Attributes) DNS LB Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--lb_record))
+- `loc_record` (Attributes) LOC Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--loc_record))
+- `mx_record` (Attributes) MX Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--mx_record))
+- `naptr_record` (Attributes) NAPTR Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--naptr_record))
+- `ns_record` (Attributes) NS Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ptr_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--ns_record))
+- `ptr_record` (Attributes) PTR Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `srv_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--ptr_record))
+- `srv_record` (Attributes) SRV Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `sshfp_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--srv_record))
+- `sshfp_record` (Attributes) SSHFP Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `tlsa_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--sshfp_record))
+- `tlsa_record` (Attributes) TLSA Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, and `txt_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--tlsa_record))
+- `txt_record` (Attributes) TXT Record<br>Conflicts with `a_record`, `aaaa_record`, `afsdb_record`, `alias_record`, `caa_record`, `cds_record`, `cert_record`, `cname_record`, `ds_record`, `eui48_record`, `eui64_record`, `lb_record`, `loc_record`, `mx_record`, `naptr_record`, `ns_record`, `ptr_record`, `srv_record`, `sshfp_record`, and `tlsa_record`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--txt_record))
 
 <a id="nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--a_record"></a>
 ### Nested Schema for `dns_type_choice.primary.rr_set_group.rr_set.type_record_set_choice.a_record`
@@ -854,7 +830,7 @@ Optional:
 
 Required:
 
-- `digest_choice` (Attributes) Digest (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--cds_record--values--digest_choice))
+- `digest_choice` (Attributes) Digest<br>Exactly one of `sha1_digest`, `sha256_digest`, or `sha384_digest` must be specified. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--cds_record--values--digest_choice))
 - `ds_key_algorithm` (List of String) DS Key Algorithm DS key value must be compatible with the specified algorithm.<br>**Allowed Values (choose one):** `['ECDSAP256SHA256', 'ECDSAP384SHA384', 'ED25519', 'ED448', 'RSASHA1', 'RSASHA1NSEC3SHA1', 'RSASHA256', 'RSASHA512', 'UNSPECIFIED']`
 - `key_tag` (Number) Key Tag A short numeric value which can help quickly identify the referenced DNSKEY-record.
 
@@ -863,9 +839,9 @@ Required:
 
 Optional:
 
-- `sha1_digest` (Attributes) SHA1 Digest (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--cds_record--values--digest_choice--sha1_digest))
-- `sha256_digest` (Attributes) SHA256 Digest (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--cds_record--values--digest_choice--sha256_digest))
-- `sha384_digest` (Attributes) SHA384 Digest (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--cds_record--values--digest_choice--sha384_digest))
+- `sha1_digest` (Attributes) SHA1 Digest<br>Conflicts with `sha256_digest` and `sha384_digest`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--cds_record--values--digest_choice--sha1_digest))
+- `sha256_digest` (Attributes) SHA256 Digest<br>Conflicts with `sha1_digest` and `sha384_digest`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--cds_record--values--digest_choice--sha256_digest))
+- `sha384_digest` (Attributes) SHA384 Digest<br>Conflicts with `sha1_digest` and `sha256_digest`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--cds_record--values--digest_choice--sha384_digest))
 
 <a id="nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--cds_record--values--digest_choice--sha1_digest"></a>
 ### Nested Schema for `dns_type_choice.primary.rr_set_group.rr_set.type_record_set_choice.cds_record.values.digest_choice.sha1_digest`
@@ -945,7 +921,7 @@ Optional:
 
 Required:
 
-- `digest_choice` (Attributes) Digest (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--ds_record--values--digest_choice))
+- `digest_choice` (Attributes) Digest<br>Exactly one of `sha1_digest`, `sha256_digest`, or `sha384_digest` must be specified. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--ds_record--values--digest_choice))
 - `ds_key_algorithm` (List of String) DS Key Algorithm DS key value must be compatible with the specified algorithm.<br>**Allowed Values (choose one):** `['ECDSAP256SHA256', 'ECDSAP384SHA384', 'ED25519', 'ED448', 'RSASHA1', 'RSASHA1NSEC3SHA1', 'RSASHA256', 'RSASHA512', 'UNSPECIFIED']`
 - `key_tag` (Number) Key Tag A short numeric value which can help quickly identify the referenced DNSKEY-record.
 
@@ -954,9 +930,9 @@ Required:
 
 Optional:
 
-- `sha1_digest` (Attributes) SHA1 Digest (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--ds_record--values--digest_choice--sha1_digest))
-- `sha256_digest` (Attributes) SHA256 Digest (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--ds_record--values--digest_choice--sha256_digest))
-- `sha384_digest` (Attributes) SHA384 Digest (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--ds_record--values--digest_choice--sha384_digest))
+- `sha1_digest` (Attributes) SHA1 Digest<br>Conflicts with `sha256_digest` and `sha384_digest`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--ds_record--values--digest_choice--sha1_digest))
+- `sha256_digest` (Attributes) SHA256 Digest<br>Conflicts with `sha1_digest` and `sha384_digest`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--ds_record--values--digest_choice--sha256_digest))
+- `sha384_digest` (Attributes) SHA384 Digest<br>Conflicts with `sha1_digest` and `sha256_digest`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--ds_record--values--digest_choice--sha384_digest))
 
 <a id="nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--ds_record--values--digest_choice--sha1_digest"></a>
 ### Nested Schema for `dns_type_choice.primary.rr_set_group.rr_set.type_record_set_choice.ds_record.values.digest_choice.sha1_digest`
@@ -1172,15 +1148,15 @@ Optional:
 Required:
 
 - `algorithm` (List of String) SSHFP Algorithm Algorithm of the public key.<br>**Allowed Values (choose one):** `['DSA', 'ECDSA', 'Ed25519', 'Ed448', 'RSA']`
-- `fingerprint_type_choice` (Attributes) Fingerprint Type Algorithm used to calculate the fingerprint of the public key and the hexadecimal representation of the hash result of the SSH key as text. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--sshfp_record--values--fingerprint_type_choice))
+- `fingerprint_type_choice` (Attributes) Fingerprint Type Algorithm used to calculate the fingerprint of the public key and the hexadecimal representation of the hash result of the SSH key as text.<br>Exactly one of `sha1_fingerprint` or `sha256_fingerprint` must be specified. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--sshfp_record--values--fingerprint_type_choice))
 
 <a id="nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--sshfp_record--values--fingerprint_type_choice"></a>
 ### Nested Schema for `dns_type_choice.primary.rr_set_group.rr_set.type_record_set_choice.sshfp_record.values.fingerprint_type_choice`
 
 Optional:
 
-- `sha1_fingerprint` (Attributes) SHA1 Fingerprint (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--sshfp_record--values--fingerprint_type_choice--sha1_fingerprint))
-- `sha256_fingerprint` (Attributes) SHA256 Digest (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--sshfp_record--values--fingerprint_type_choice--sha256_fingerprint))
+- `sha1_fingerprint` (Attributes) SHA1 Fingerprint<br>Conflicts with `sha256_fingerprint`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--sshfp_record--values--fingerprint_type_choice--sha1_fingerprint))
+- `sha256_fingerprint` (Attributes) SHA256 Digest<br>Conflicts with `sha1_fingerprint`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--sshfp_record--values--fingerprint_type_choice--sha256_fingerprint))
 
 <a id="nestedatt--dns_type_choice--primary--rr_set_group--rr_set--type_record_set_choice--sshfp_record--values--fingerprint_type_choice--sha1_fingerprint"></a>
 ### Nested Schema for `dns_type_choice.primary.rr_set_group.rr_set.type_record_set_choice.sshfp_record.values.fingerprint_type_choice.sha1_fingerprint`
@@ -1239,6 +1215,27 @@ Optional:
 
 
 
+<a id="nestedatt--dns_type_choice--primary--soa_record_parameters_choice"></a>
+### Nested Schema for `dns_type_choice.primary.soa_record_parameters_choice`
+
+Optional:
+
+- `default_soa_parameters` (Boolean) Default parameters Use default parameters<br>Conflicts with `soa_parameters`.
+- `soa_parameters` (Attributes) SOARecordParameterConfig Configure SOA Record parameters<br>Conflicts with `default_soa_parameters`. (see [below for nested schema](#nestedatt--dns_type_choice--primary--soa_record_parameters_choice--soa_parameters))
+
+<a id="nestedatt--dns_type_choice--primary--soa_record_parameters_choice--soa_parameters"></a>
+### Nested Schema for `dns_type_choice.primary.soa_record_parameters_choice.soa_parameters`
+
+Optional:
+
+- `expire` (Number) Expire (in seconds) expire value indicates when secondary nameservers should stop answering request for this zone if primary does not respond<br>**Default:** `360000`
+- `negative_ttl` (Number) Negative TTL (in seconds) negative ttl value indicates how long to cache non-existent resource record for this zone<br>**Default:** `1800`
+- `refresh` (Number) Refresh (in seconds) refresh value indicates when secondary nameservers should query for the SOA record to detect zone changes<br>**Default:** `86400`
+- `retry` (Number) Retry (in seconds) retry value indicates when secondary nameservers should retry to request the serial number if primary does not respond<br>**Default:** `7200`
+- `ttl` (Number) TTL SOA record time to live (in seconds)<br>**Default:** `86400`
+
+
+
 
 <a id="nestedatt--dns_type_choice--secondary"></a>
 ### Nested Schema for `dns_type_choice.secondary`
@@ -1259,16 +1256,16 @@ Optional:
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--dns_type_choice--secondary--tsig_key_value--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--dns_type_choice--secondary--tsig_key_value--secret_info_choice))
 
 <a id="nestedatt--dns_type_choice--secondary--tsig_key_value--secret_info_choice"></a>
 ### Nested Schema for `dns_type_choice.secondary.tsig_key_value.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--dns_type_choice--secondary--tsig_key_value--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--dns_type_choice--secondary--tsig_key_value--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--dns_type_choice--secondary--tsig_key_value--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--dns_type_choice--secondary--tsig_key_value--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--dns_type_choice--secondary--tsig_key_value--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `dns_type_choice.secondary.tsig_key_value.secret_info_choice.blindfold_secret_info`
@@ -1304,15 +1301,15 @@ Optional:
 
 Optional:
 
-- `mode_choice` (Attributes) Namespace RBAC Mode Control which namespaces can use this zone for HTTP Load Balancer domains and auto-cert, and who can manage DNS records in this zone. When disabled, any namespace can use this zone. Control which namespaces can use this zone for HTTP Load Balancer domains and auto-cert. Changes are restricted to DNS administrators. When disabled, any namespace can use this zone. (see [below for nested schema](#nestedatt--namespace_rbac--mode_choice))
+- `mode_choice` (Attributes) Namespace RBAC Mode Control which namespaces can use this zone for HTTP Load Balancer domains and auto-cert, and who can manage DNS records in this zone. When disabled, any namespace can use this zone. Control which namespaces can use this zone for HTTP Load Balancer domains and auto-cert. Changes are restricted to DNS administrators. When disabled, any namespace can use this zone.<br>Exactly one of `disabled` or `enabled` must be specified when `mode_choice` is configured. (see [below for nested schema](#nestedatt--namespace_rbac--mode_choice))
 
 <a id="nestedatt--namespace_rbac--mode_choice"></a>
 ### Nested Schema for `namespace_rbac.mode_choice`
 
 Optional:
 
-- `disabled` (Boolean) Disabled Any namespace can use this DNS zone for HTTP Load Balancer domains and auto-cert. DNS records can be managed based on existing DNS permissions
-- `enabled` (Attributes) Enabled Map this DNS zone to authorized namespaces (up to 64). Only mapped namespaces can use this zone for HTTP Load Balancer domains and auto-cert, and manage DNS records in this zone. (see [below for nested schema](#nestedatt--namespace_rbac--mode_choice--enabled))
+- `disabled` (Boolean) Disabled Any namespace can use this DNS zone for HTTP Load Balancer domains and auto-cert. DNS records can be managed based on existing DNS permissions<br>Conflicts with `enabled`.
+- `enabled` (Attributes) Enabled Map this DNS zone to authorized namespaces (up to 64). Only mapped namespaces can use this zone for HTTP Load Balancer domains and auto-cert, and manage DNS records in this zone.<br>Conflicts with `disabled`. (see [below for nested schema](#nestedatt--namespace_rbac--mode_choice--enabled))
 
 <a id="nestedatt--namespace_rbac--mode_choice--enabled"></a>
 ### Nested Schema for `namespace_rbac.mode_choice.enabled`
@@ -1354,6 +1351,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_dns_zone.example"
+	to = f5xc_dns_zone.example
 }
 ```

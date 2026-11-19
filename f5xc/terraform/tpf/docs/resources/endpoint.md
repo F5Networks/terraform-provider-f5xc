@@ -105,7 +105,7 @@ resource "f5xc_endpoint" "example" {
 
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `description` (String) description Human readable description for the object
-- `endpoint_address_choice` (Attributes) Endpoint Address Endpoint address can be specified in multiple ways. It can be configured as ip address or DNS name. It can be discovered using a service discovery method. This field represents any one of method by which this endpoint is addressed or discovered. (see [below for nested schema](#nestedatt--endpoint_address_choice))
+- `endpoint_address_choice` (Attributes) Endpoint Address Endpoint address can be specified in multiple ways. It can be configured as ip address or DNS name. It can be discovered using a service discovery method. This field represents any one of method by which this endpoint is addressed or discovered.<br>Exactly one of `dns_name`, `dns_name_advanced`, `ip`, or `service_info` must be specified when `endpoint_address_choice` is configured. (see [below for nested schema](#nestedatt--endpoint_address_choice))
 - `health_check_port` (Number) Health check Port By default the health check port of an endpoint is the same as the endpoint’s port. This option provides an alternative health check port. Setting this with a non-zero value allows an endpoint to have different health check port.<br>**Default:** `0`
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `port` (Number) Port Endpoint service is available on this port<br>**Default:** `0`
@@ -123,10 +123,10 @@ resource "f5xc_endpoint" "example" {
 
 Optional:
 
-- `dns_name` (String) dns_name Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`
-- `dns_name_advanced` (Attributes) dns_name_advanced Specifies name and TTL used for DNS resolution. (see [below for nested schema](#nestedatt--endpoint_address_choice--dns_name_advanced))
-- `ip` (String) Endpoint IP Address Endpoint is reachable at the given ipv4/ipv6 address
-- `service_info` (Attributes) Service Selector Info It contains information about how the service is selected (either by service name or label selector) and where the service is discovered (either in K8s or Consul) Service Name. String represent name of the service. System will perform discovery based on the discovery method. In case of K8S, System will watch K8s API server and automatically discover services and endpoints of interest. In case Virtual K8s cluster, system already has access to it. In case K8s cluster outside ves.io, K8s cluster credentials come from the site configuration. In case of Consul, System will watch the consul server and automatically discover the services and endpoints of interest. Label selector for selecting the services Label selector expression for selecting services or serverless functions to automatically discover services and endpoint of interest. discovery_type specifies where endpoint will be discovered Endpoint can be discovered in K8S or Consul In case of K8S, labels on the service is matched against service_selector In case of Consul, tags on the service is matched against service_selector (see [below for nested schema](#nestedatt--endpoint_address_choice--service_info))
+- `dns_name` (String) dns_name Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `dns_name_advanced`, `ip`, and `service_info`.
+- `dns_name_advanced` (Attributes) dns_name_advanced Specifies name and TTL used for DNS resolution.<br>Conflicts with `dns_name`, `ip`, and `service_info`. (see [below for nested schema](#nestedatt--endpoint_address_choice--dns_name_advanced))
+- `ip` (String) Endpoint IP Address Endpoint is reachable at the given ipv4/ipv6 address<br>Conflicts with `dns_name`, `dns_name_advanced`, and `service_info`.
+- `service_info` (Attributes) Service Selector Info It contains information about how the service is selected (either by service name or label selector) and where the service is discovered (either in K8s or Consul) Service Name. String represent name of the service. System will perform discovery based on the discovery method. In case of K8S, System will watch K8s API server and automatically discover services and endpoints of interest. In case Virtual K8s cluster, system already has access to it. In case K8s cluster outside ves.io, K8s cluster credentials come from the site configuration. In case of Consul, System will watch the consul server and automatically discover the services and endpoints of interest. Label selector for selecting the services Label selector expression for selecting services or serverless functions to automatically discover services and endpoint of interest. discovery_type specifies where endpoint will be discovered Endpoint can be discovered in K8S or Consul In case of K8S, labels on the service is matched against service_selector In case of Consul, tags on the service is matched against service_selector<br>Conflicts with `dns_name`, `dns_name_advanced`, and `ip`. (see [below for nested schema](#nestedatt--endpoint_address_choice--service_info))
 
 <a id="nestedatt--endpoint_address_choice--dns_name_advanced"></a>
 ### Nested Schema for `endpoint_address_choice.dns_name_advanced`
@@ -134,7 +134,7 @@ Optional:
 Optional:
 
 - `name` (String) name Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`
-- `ttl_choice` (Attributes) ttl_choice Time to live parameter (see [below for nested schema](#nestedatt--endpoint_address_choice--dns_name_advanced--ttl_choice))
+- `ttl_choice` (Attributes) ttl_choice Time to live parameter<br>`refresh_interval` must be specified when `ttl_choice` is configured. (see [below for nested schema](#nestedatt--endpoint_address_choice--dns_name_advanced--ttl_choice))
 
 <a id="nestedatt--endpoint_address_choice--dns_name_advanced--ttl_choice"></a>
 ### Nested Schema for `endpoint_address_choice.dns_name_advanced.ttl_choice`
@@ -154,15 +154,15 @@ Required:
 
 Optional:
 
-- `service_info_choice` (Attributes) service_info Specifies whether service discovery has to be done using service name or labels (see [below for nested schema](#nestedatt--endpoint_address_choice--service_info--service_info_choice))
+- `service_info_choice` (Attributes) service_info Specifies whether service discovery has to be done using service name or labels<br>Exactly one of `service_name` or `service_selector` must be specified when `service_info_choice` is configured. (see [below for nested schema](#nestedatt--endpoint_address_choice--service_info--service_info_choice))
 
 <a id="nestedatt--endpoint_address_choice--service_info--service_info_choice"></a>
 ### Nested Schema for `endpoint_address_choice.service_info.service_info_choice`
 
 Optional:
 
-- `service_name` (String) service_name Name of the service to discover with an optional namespace and cluster identifier. The format is service_name.namespace_name:cluster_identifier for K8S and service_name:cluster_identifier for Consul Endpoint will be discovered in all discovery objects where the cluster identifier matches. If cluster identifier is not specified then discovery will be done in all discovery objects of the site.
-- `service_selector` (Attributes) service_selector Labels of the service to discover By default services will be discovered from all discovery objects for the site. If user want to restrict discovery from specific discovery object, then he can configure implicit label with 'name.ves.io/discovery-cluster' as key and the value as the cluster identifier of the discovery object in which discovery has to happen. This implicit label is added to service_selector (see [below for nested schema](#nestedatt--endpoint_address_choice--service_info--service_info_choice--service_selector))
+- `service_name` (String) service_name Name of the service to discover with an optional namespace and cluster identifier. The format is service_name.namespace_name:cluster_identifier for K8S and service_name:cluster_identifier for Consul Endpoint will be discovered in all discovery objects where the cluster identifier matches. If cluster identifier is not specified then discovery will be done in all discovery objects of the site.<br>Conflicts with `service_selector`.
+- `service_selector` (Attributes) service_selector Labels of the service to discover By default services will be discovered from all discovery objects for the site. If user want to restrict discovery from specific discovery object, then he can configure implicit label with 'name.ves.io/discovery-cluster' as key and the value as the cluster identifier of the discovery object in which discovery has to happen. This implicit label is added to service_selector<br>Conflicts with `service_name`. (see [below for nested schema](#nestedatt--endpoint_address_choice--service_info--service_info_choice--service_selector))
 
 <a id="nestedatt--endpoint_address_choice--service_info--service_info_choice--service_selector"></a>
 ### Nested Schema for `endpoint_address_choice.service_info.service_info_choice.service_selector`
@@ -180,15 +180,15 @@ Required:
 
 Optional:
 
-- `snat_pool_choice` (Attributes) Snat Pool Choice Snat Pool for the origin server (see [below for nested schema](#nestedatt--snat_pool--snat_pool_choice))
+- `snat_pool_choice` (Attributes) Snat Pool Choice Snat Pool for the origin server<br>Exactly one of `no_snat_pool` or `snat_pool` must be specified when `snat_pool_choice` is configured. (see [below for nested schema](#nestedatt--snat_pool--snat_pool_choice))
 
 <a id="nestedatt--snat_pool--snat_pool_choice"></a>
 ### Nested Schema for `snat_pool.snat_pool_choice`
 
 Optional:
 
-- `no_snat_pool` (Boolean) No SNAT Pool No configured SNAT Pool to reach Origin Server
-- `snat_pool` (Attributes) SNAT Pool Configure SNAT Pool to reach Origin Server (see [below for nested schema](#nestedatt--snat_pool--snat_pool_choice--snat_pool))
+- `no_snat_pool` (Boolean) No SNAT Pool No configured SNAT Pool to reach Origin Server<br>Conflicts with `snat_pool`.
+- `snat_pool` (Attributes) SNAT Pool Configure SNAT Pool to reach Origin Server<br>Conflicts with `no_snat_pool`. (see [below for nested schema](#nestedatt--snat_pool--snat_pool_choice--snat_pool))
 
 <a id="nestedatt--snat_pool--snat_pool_choice--snat_pool"></a>
 ### Nested Schema for `snat_pool.snat_pool_choice.snat_pool`
@@ -217,16 +217,16 @@ Optional:
 
 Required:
 
-- `ref_or_selector_choice` (Attributes) ref_or_selector One of following (see [below for nested schema](#nestedatt--where--ref_or_selector_choice))
+- `ref_or_selector_choice` (Attributes) ref_or_selector One of following<br>Exactly one of `site`, `virtual_network`, or `virtual_site` must be specified. (see [below for nested schema](#nestedatt--where--ref_or_selector_choice))
 
 <a id="nestedatt--where--ref_or_selector_choice"></a>
 ### Nested Schema for `where.ref_or_selector_choice`
 
 Optional:
 
-- `site` (Attributes) site Direct reference to site object (see [below for nested schema](#nestedatt--where--ref_or_selector_choice--site))
-- `virtual_network` (Attributes) virtual_network Direct reference to virtual network object (see [below for nested schema](#nestedatt--where--ref_or_selector_choice--virtual_network))
-- `virtual_site` (Attributes) virtual_site Direct reference to virtual site object (see [below for nested schema](#nestedatt--where--ref_or_selector_choice--virtual_site))
+- `site` (Attributes) site Direct reference to site object<br>Conflicts with `virtual_network` and `virtual_site`. (see [below for nested schema](#nestedatt--where--ref_or_selector_choice--site))
+- `virtual_network` (Attributes) virtual_network Direct reference to virtual network object<br>Conflicts with `site` and `virtual_site`. (see [below for nested schema](#nestedatt--where--ref_or_selector_choice--virtual_network))
+- `virtual_site` (Attributes) virtual_site Direct reference to virtual site object<br>Conflicts with `site` and `virtual_network`. (see [below for nested schema](#nestedatt--where--ref_or_selector_choice--virtual_site))
 
 <a id="nestedatt--where--ref_or_selector_choice--site"></a>
 ### Nested Schema for `where.ref_or_selector_choice.site`
@@ -308,6 +308,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_endpoint.example"
+	to = f5xc_endpoint.example
 }
 ```

@@ -97,13 +97,13 @@ resource "f5xc_cluster" "example" {
 - `fallback_policy` (List of String) fallback_policy If subsets are configured and a route specifies no metadata or no subset matching the metadata exists, the subset load balancer initiates its fallback policy. The default policy is NO_FALLBACK, in which case the request fails as if the cluster had no endpoints. Conversely, the ANY_ENDPOINT fallback policy load balances across all endpoints in the cluster, without regard to endpoint metadata. Finally, the DEFAULT_SUBSET causes fallback to load balance among endpoints that match a specific set of metadata defined as default_set<br>**Allowed Values (choose one):** `['ANY_ENDPOINT', 'DEFAULT_SUBSET', 'NO_FALLBACK']`<br>**Default:** `NO_FALLBACK`
 - `health_checks` (Attributes List) health_checks List of references to healthcheck object for this cluster. (see [below for nested schema](#nestedatt--health_checks))
 - `http_idle_timeout` (Number) http_idle_timeout The idle timeout for upstream connection pool connections. The idle timeout is defined as the period in which there are no active requests. When the idle timeout is reached the connection will be closed. Note that request based timeouts mean that HTTP/2 PINGs will not keep the connection alive. This is specified in milliseconds. The default value is 5 minutes.<br>**Default:** `0`
-- `http_protocol_type_choice` (Attributes) HTTP Protocol Configuration HTTP protocol configuration options for upstream connections (see [below for nested schema](#nestedatt--http_protocol_type_choice))
+- `http_protocol_type_choice` (Attributes) HTTP Protocol Configuration HTTP protocol configuration options for upstream connections<br>Exactly one of `auto_http_config`, `http1_config`, or `http2_options` must be specified when `http_protocol_type_choice` is configured. (see [below for nested schema](#nestedatt--http_protocol_type_choice))
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `loadbalancer_algorithm` (List of String) loadbalancer_algorithm When a connection to a endpoint in an upstream cluster is required, the loadbalancer uses loadbalancer_algorithm to determine which host is selected.<br>**Allowed Values (choose one):** `['LB_OVERRIDE', 'LEAST_REQUEST', 'RANDOM', 'RING_HASH', 'ROUND_ROBIN']`<br>**Default:** `LB_OVERRIDE`
-- `max_requests_per_connection_choice` (Attributes) max_requests_per_connection Sets the maximum number of requests allowed per connection to the origin server. (see [below for nested schema](#nestedatt--max_requests_per_connection_choice))
+- `max_requests_per_connection_choice` (Attributes) max_requests_per_connection Sets the maximum number of requests allowed per connection to the origin server.<br>Exactly one of `max_requests_per_connection` or `no_request_limit_per_connection` must be specified when `max_requests_per_connection_choice` is configured. (see [below for nested schema](#nestedatt--max_requests_per_connection_choice))
 - `outlier_detection` (Attributes) outlier_detection Outlier detection and ejection is the process of dynamically determining whether some number of hosts in an upstream cluster are performing unlike the others and removing them from the healthy load balancing set. Outlier detection is a form of passive health checking. (see [below for nested schema](#nestedatt--outlier_detection))
-- `panic_threshold_type_choice` (Attributes) Panic threshold During loadbalancing, ADC will only consider healthy endpoints in an upstream cluster. However, if the percentage of healthy endpoints in the cluster becomes too low, ADC can disregard health status and loadbalance either amongst all endpoints or no endpoints. This is known as the panic threshold. (see [below for nested schema](#nestedatt--panic_threshold_type_choice))
-- `proxy_protocol_type_choice` (Attributes) Proxy Protocol Configuration Proxy protocol configuration options for upstream connections (see [below for nested schema](#nestedatt--proxy_protocol_type_choice))
+- `panic_threshold_type_choice` (Attributes) Panic threshold During loadbalancing, ADC will only consider healthy endpoints in an upstream cluster. However, if the percentage of healthy endpoints in the cluster becomes too low, ADC can disregard health status and loadbalance either amongst all endpoints or no endpoints. This is known as the panic threshold.<br>Exactly one of `no_panic_threshold` or `panic_threshold` must be specified when `panic_threshold_type_choice` is configured. (see [below for nested schema](#nestedatt--panic_threshold_type_choice))
+- `proxy_protocol_type_choice` (Attributes) Proxy Protocol Configuration Proxy protocol configuration options for upstream connections<br>Exactly one of `disable_proxy_protocol`, `proxy_protocol_v1`, or `proxy_protocol_v2` must be specified when `proxy_protocol_type_choice` is configured. (see [below for nested schema](#nestedatt--proxy_protocol_type_choice))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 - `tls_parameters` (Attributes) tls_parameters TLS parameters to access upstream endpoints for this cluster (see [below for nested schema](#nestedatt--tls_parameters))
 - `upstream_conn_pool_reuse_type` (Attributes) Select upstream connection pool reuse state Select upstream connection pool reuse state for every downstream connection This configuration choice is for HTTP(S) LB only. (see [below for nested schema](#nestedatt--upstream_conn_pool_reuse_type))
@@ -164,9 +164,9 @@ Read-Only:
 
 Optional:
 
-- `auto_http_config` (Boolean) auto_http_config This allows switching on protocol based on ALPN. It can use either HTTP/1.1 or HTTP/2, and will use whichever protocol is negotiated by ALPN with the upstream.
-- `http1_config` (Attributes) http1_config Enable HTTP/1.1 for upstream connections (see [below for nested schema](#nestedatt--http_protocol_type_choice--http1_config))
-- `http2_options` (Attributes) http2_options Enable HTTP/2 for upstream connections (see [below for nested schema](#nestedatt--http_protocol_type_choice--http2_options))
+- `auto_http_config` (Boolean) auto_http_config This allows switching on protocol based on ALPN. It can use either HTTP/1.1 or HTTP/2, and will use whichever protocol is negotiated by ALPN with the upstream.<br>Conflicts with `http1_config` and `http2_options`.
+- `http1_config` (Attributes) http1_config Enable HTTP/1.1 for upstream connections<br>Conflicts with `auto_http_config` and `http2_options`. (see [below for nested schema](#nestedatt--http_protocol_type_choice--http1_config))
+- `http2_options` (Attributes) http2_options Enable HTTP/2 for upstream connections<br>Conflicts with `auto_http_config` and `http1_config`. (see [below for nested schema](#nestedatt--http_protocol_type_choice--http2_options))
 
 <a id="nestedatt--http_protocol_type_choice--http1_config"></a>
 ### Nested Schema for `http_protocol_type_choice.http1_config`
@@ -178,19 +178,19 @@ Optional:
 <a id="nestedatt--http_protocol_type_choice--http1_config--header_transformation"></a>
 ### Nested Schema for `http_protocol_type_choice.http1_config.header_transformation`
 
-Required:
+Optional:
 
-- `header_transformation_choice` (Attributes) Header transformation Select header transformation options for HTTP/1.1 (see [below for nested schema](#nestedatt--http_protocol_type_choice--http1_config--header_transformation--header_transformation_choice))
+- `header_transformation_choice` (Attributes) Header transformation Select header transformation options for HTTP/1.1<br>Exactly one of `default_header_transformation`, `legacy_header_transformation`, `preserve_case_header_transformation`, or `proper_case_header_transformation` must be specified when `header_transformation_choice` is configured. (see [below for nested schema](#nestedatt--http_protocol_type_choice--http1_config--header_transformation--header_transformation_choice))
 
 <a id="nestedatt--http_protocol_type_choice--http1_config--header_transformation--header_transformation_choice"></a>
 ### Nested Schema for `http_protocol_type_choice.http1_config.header_transformation.header_transformation_choice`
 
 Optional:
 
-- `default_header_transformation` (Boolean) Default header transformation Normalize the headers to lower case
-- `legacy_header_transformation` (Boolean) Legacy header transformations Use old header transformation if configured earlier
-- `preserve_case_header_transformation` (Boolean) Preserve case header transformation Preserves the original case of headers without any modifications.
-- `proper_case_header_transformation` (Boolean) Proper case header transformation Normalize the headers to proper case words. The first character and any character following a special character will be capitalized if it’s an alpha character. For example, “content-type” becomes “Content-Type”, and “foo$b#$are” becomes “Foo$B#$Are”
+- `default_header_transformation` (Boolean) Default header transformation Normalize the headers to lower case<br>Conflicts with `legacy_header_transformation`, `preserve_case_header_transformation`, and `proper_case_header_transformation`.
+- `legacy_header_transformation` (Boolean) Legacy header transformations Use old header transformation if configured earlier<br>Conflicts with `default_header_transformation`, `preserve_case_header_transformation`, and `proper_case_header_transformation`.
+- `preserve_case_header_transformation` (Boolean) Preserve case header transformation Preserves the original case of headers without any modifications.<br>Conflicts with `default_header_transformation`, `legacy_header_transformation`, and `proper_case_header_transformation`.
+- `proper_case_header_transformation` (Boolean) Proper case header transformation Normalize the headers to proper case words. The first character and any character following a special character will be capitalized if it’s an alpha character. For example, “content-type” becomes “Content-Type”, and “foo$b#$are” becomes “Foo$B#$Are”<br>Conflicts with `default_header_transformation`, `legacy_header_transformation`, and `preserve_case_header_transformation`.
 
 
 
@@ -209,8 +209,8 @@ Optional:
 
 Optional:
 
-- `max_requests_per_connection` (Number) Maximum Requests Per Connection Sets the maximum number of requests allowed per connection to the origin server. Enter a value >=1 to define the request limit per connection.
-- `no_request_limit_per_connection` (Boolean) Disable the max requests per connection option This option disables the maximum requests per connection limit. When selected, no limit is enforced, and connections can handle unlimited requests.
+- `max_requests_per_connection` (Number) Maximum Requests Per Connection Sets the maximum number of requests allowed per connection to the origin server. Enter a value >=1 to define the request limit per connection.<br>Conflicts with `no_request_limit_per_connection`.
+- `no_request_limit_per_connection` (Boolean) Disable the max requests per connection option This option disables the maximum requests per connection limit. When selected, no limit is enforced, and connections can handle unlimited requests.<br>Conflicts with `max_requests_per_connection`.
 
 
 <a id="nestedatt--outlier_detection"></a>
@@ -230,8 +230,8 @@ Optional:
 
 Optional:
 
-- `no_panic_threshold` (Boolean) Disable panic threshold Disable panic threshold. Only healthy endpoints are considered for loadbalancing.
-- `panic_threshold` (Number) Panic threshold Configure a threshold (percentage of unhealthy endpoints) below which all endpoints will be considered for loadbalancing ignoring its health status.
+- `no_panic_threshold` (Boolean) Disable panic threshold Disable panic threshold. Only healthy endpoints are considered for loadbalancing.<br>Conflicts with `panic_threshold`.
+- `panic_threshold` (Number) Panic threshold Configure a threshold (percentage of unhealthy endpoints) below which all endpoints will be considered for loadbalancing ignoring its health status.<br>Conflicts with `no_panic_threshold`.
 
 
 <a id="nestedatt--proxy_protocol_type_choice"></a>
@@ -239,9 +239,9 @@ Optional:
 
 Optional:
 
-- `disable_proxy_protocol` (Boolean) disable_proxy_protocol Disable Proxy Protocol for upstream connections
-- `proxy_protocol_v1` (Boolean) proxy_protocol_v1 Enable Proxy Protocol V1 for upstream connections
-- `proxy_protocol_v2` (Boolean) proxy_protocol_v2 Enable Proxy Protocol V2 for upstream connections
+- `disable_proxy_protocol` (Boolean) disable_proxy_protocol Disable Proxy Protocol for upstream connections<br>Conflicts with `proxy_protocol_v1` and `proxy_protocol_v2`.
+- `proxy_protocol_v1` (Boolean) proxy_protocol_v1 Enable Proxy Protocol V1 for upstream connections<br>Conflicts with `disable_proxy_protocol` and `proxy_protocol_v2`.
+- `proxy_protocol_v2` (Boolean) proxy_protocol_v2 Enable Proxy Protocol V2 for upstream connections<br>Conflicts with `disable_proxy_protocol` and `proxy_protocol_v1`.
 
 
 <a id="nestedatt--timeouts"></a>
@@ -260,28 +260,21 @@ Optional:
 
 Required:
 
-- `max_session_keys_type_choice` (Attributes) Max Session Keys Maximum number of session keys (Pre-Shared Keys for TLSv1.3+, Session IDs and Session Tickets for TLSv1.2 and older) to store for the purpose of session resumption. (see [below for nested schema](#nestedatt--tls_parameters--max_session_keys_type_choice))
-- `sni_choice` (Attributes) sni choice SNI to be used while connecting to upstream service. (see [below for nested schema](#nestedatt--tls_parameters--sni_choice))
-- `tls_params_choice` (Attributes) TLS Parameters Select TLS Certificate object, or specify TLS Certificate Parameters inline (legacy) (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice))
-
-<a id="nestedatt--tls_parameters--max_session_keys_type_choice"></a>
-### Nested Schema for `tls_parameters.max_session_keys_type_choice`
+- `sni_choice` (Attributes) sni choice SNI to be used while connecting to upstream service.<br>Exactly one of `disable_sni`, `sni`, or `use_host_header_as_sni` must be specified. (see [below for nested schema](#nestedatt--tls_parameters--sni_choice))
+- `tls_params_choice` (Attributes) TLS Parameters Select TLS Certificate object, or specify TLS Certificate Parameters inline (legacy)<br>Exactly one of `cert_params` or `common_params` must be specified. (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice))
 
 Optional:
 
-- `default_session_key_caching` (Boolean) Default Session Key Caching Default session key caching. Only one session key will be cached.
-- `disable_session_key_caching` (Boolean) Disable Session Key Caching Disable session key caching. This will disable TLS session resumption.
-- `max_session_keys` (Number) Max Session Keys Cached Number of session keys that are cached.
-
+- `max_session_keys_type_choice` (Attributes) Max Session Keys Maximum number of session keys (Pre-Shared Keys for TLSv1.3+, Session IDs and Session Tickets for TLSv1.2 and older) to store for the purpose of session resumption.<br>Exactly one of `default_session_key_caching`, `disable_session_key_caching`, or `max_session_keys` must be specified when `max_session_keys_type_choice` is configured. (see [below for nested schema](#nestedatt--tls_parameters--max_session_keys_type_choice))
 
 <a id="nestedatt--tls_parameters--sni_choice"></a>
 ### Nested Schema for `tls_parameters.sni_choice`
 
 Optional:
 
-- `disable_sni` (Boolean) disable_sni Do not use SNI.
-- `sni` (String) sni SNI value to be used.<br>**Validation:** `Length LengthAtMost(256)`
-- `use_host_header_as_sni` (Boolean) use_host_headers_as_sni Use the host header as SNI
+- `disable_sni` (Boolean) disable_sni Do not use SNI.<br>Conflicts with `sni` and `use_host_header_as_sni`.
+- `sni` (String) sni SNI value to be used.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `disable_sni` and `use_host_header_as_sni`.
+- `use_host_header_as_sni` (Boolean) use_host_headers_as_sni Use the host header as SNI<br>Conflicts with `disable_sni` and `sni`.
 
 
 <a id="nestedatt--tls_parameters--tls_params_choice"></a>
@@ -289,8 +282,8 @@ Optional:
 
 Optional:
 
-- `cert_params` (Attributes) TLS Certificate Parameters TLS certificate parameters for upstream connections (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice--cert_params))
-- `common_params` (Attributes) common_params Common TLS parameters used in upstream connections (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice--common_params))
+- `cert_params` (Attributes) TLS Certificate Parameters TLS certificate parameters for upstream connections<br>Conflicts with `common_params`. (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice--cert_params))
+- `common_params` (Attributes) common_params Common TLS parameters used in upstream connections<br>Conflicts with `cert_params`. (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice--common_params))
 
 <a id="nestedatt--tls_parameters--tls_params_choice--cert_params"></a>
 ### Nested Schema for `tls_parameters.tls_params_choice.cert_params`
@@ -304,7 +297,7 @@ Optional:
 - `cipher_suites` (List of String) cipher_suites The following list specifies the supported cipher suite TLS_AES_128_GCM_SHA256 TLS_AES_256_GCM_SHA384 TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_128_CBC_SHA TLS_RSA_WITH_AES_128_GCM_SHA256 TLS_RSA_WITH_AES_256_CBC_SHA TLS_RSA_WITH_AES_256_GCM_SHA384 If not specified, the default list: TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 will be used.<br>**Valid Options:** `['TLS_AES_128_GCM_SHA256', 'TLS_AES_256_GCM_SHA384', 'TLS_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_128_CBC_SHA', 'TLS_RSA_WITH_AES_128_GCM_SHA256', 'TLS_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_256_GCM_SHA384']` (Multiple selection allowed)
 - `maximum_protocol_version` (List of String) maximum_protocol_version Maximum TLS protocol version.<br>**Allowed Values (choose one):** `['TLS_AUTO', 'TLSv1_0', 'TLSv1_1', 'TLSv1_2', 'TLSv1_3']`<br>**Default:** `TLS_AUTO`
 - `minimum_protocol_version` (List of String) minimum_protocol_version Minimum TLS protocol version.<br>**Allowed Values (choose one):** `['TLS_AUTO', 'TLSv1_0', 'TLSv1_1', 'TLSv1_2', 'TLSv1_3']`<br>**Default:** `TLS_AUTO`
-- `server_validation_choice` (Attributes) server_validation_choice Choose whether to perform TLS verification. (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice--cert_params--server_validation_choice))
+- `server_validation_choice` (Attributes) server_validation_choice Choose whether to perform TLS verification.<br>Exactly one of `skip_server_verification`, `tls_validation_params`, or `volterra_trusted_ca` must be specified when `server_validation_choice` is configured. (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice--cert_params--server_validation_choice))
 
 <a id="nestedatt--tls_parameters--tls_params_choice--cert_params--certificates"></a>
 ### Nested Schema for `tls_parameters.tls_params_choice.cert_params.certificates`
@@ -324,16 +317,16 @@ Read-Only:
 
 Optional:
 
-- `skip_server_verification` (Boolean) Skip Server Verification Skip server verification
-- `tls_validation_params` (Attributes) tls_validation_params This includes URL for a trust store, whether SAN verification is required and list of Subject Alt Names for verification (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice--cert_params--server_validation_choice--tls_validation_params))
-- `volterra_trusted_ca` (Boolean) F5XC Root CA Perform origin server verification using F5XC Default Root CA Certificate
+- `skip_server_verification` (Boolean) Skip Server Verification Skip server verification<br>Conflicts with `tls_validation_params` and `volterra_trusted_ca`.
+- `tls_validation_params` (Attributes) tls_validation_params This includes URL for a trust store, whether SAN verification is required and list of Subject Alt Names for verification<br>Conflicts with `skip_server_verification` and `volterra_trusted_ca`. (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice--cert_params--server_validation_choice--tls_validation_params))
+- `volterra_trusted_ca` (Boolean) F5XC Root CA Perform origin server verification using F5XC Default Root CA Certificate<br>Conflicts with `skip_server_verification` and `tls_validation_params`.
 
 <a id="nestedatt--tls_parameters--tls_params_choice--cert_params--server_validation_choice--tls_validation_params"></a>
 ### Nested Schema for `tls_parameters.tls_params_choice.cert_params.server_validation_choice.tls_validation_params`
 
 Required:
 
-- `trusted_ca_choice` (Attributes) trusted_ca_choice Root CA configuration for downstream TLS connections (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice--cert_params--server_validation_choice--tls_validation_params--trusted_ca_choice))
+- `trusted_ca_choice` (Attributes) trusted_ca_choice Root CA configuration for downstream TLS connections<br>Exactly one of `trusted_ca` or `trusted_ca_url` must be specified. (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice--cert_params--server_validation_choice--tls_validation_params--trusted_ca_choice))
 
 Optional:
 
@@ -345,8 +338,8 @@ Optional:
 
 Optional:
 
-- `trusted_ca` (Attributes) trusted_ca Root CA Certificate (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice--cert_params--server_validation_choice--tls_validation_params--trusted_ca_choice--trusted_ca))
-- `trusted_ca_url` (String) trusted_ca_url Inline Root CA Certificate
+- `trusted_ca` (Attributes) trusted_ca Root CA Certificate<br>Conflicts with `trusted_ca_url`. (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice--cert_params--server_validation_choice--tls_validation_params--trusted_ca_choice--trusted_ca))
+- `trusted_ca_url` (String) trusted_ca_url Inline Root CA Certificate<br>Conflicts with `trusted_ca`.
 
 <a id="nestedatt--tls_parameters--tls_params_choice--cert_params--server_validation_choice--tls_validation_params--trusted_ca_choice--trusted_ca"></a>
 ### Nested Schema for `tls_parameters.tls_params_choice.cert_params.server_validation_choice.tls_validation_params.trusted_ca_choice.trusted_ca`
@@ -395,23 +388,23 @@ Required:
 Optional:
 
 - `description` (String) description Description for the certificate
-- `ocsp_stapling_choice` (Attributes) OCSP Response choice OCSP Stapling choice (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice--common_params--tls_certificates--ocsp_stapling_choice))
+- `ocsp_stapling_choice` (Attributes) OCSP Response choice OCSP Stapling choice<br>Exactly one of `custom_hash_algorithms`, `disable_ocsp_stapling`, or `use_system_defaults` must be specified when `ocsp_stapling_choice` is configured. (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice--common_params--tls_certificates--ocsp_stapling_choice))
 
 <a id="nestedatt--tls_parameters--tls_params_choice--common_params--tls_certificates--private_key"></a>
 ### Nested Schema for `tls_parameters.tls_params_choice.common_params.tls_certificates.private_key`
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice--common_params--tls_certificates--private_key--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice--common_params--tls_certificates--private_key--secret_info_choice))
 
 <a id="nestedatt--tls_parameters--tls_params_choice--common_params--tls_certificates--private_key--secret_info_choice"></a>
 ### Nested Schema for `tls_parameters.tls_params_choice.common_params.tls_certificates.private_key.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice--common_params--tls_certificates--private_key--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice--common_params--tls_certificates--private_key--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice--common_params--tls_certificates--private_key--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice--common_params--tls_certificates--private_key--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--tls_parameters--tls_params_choice--common_params--tls_certificates--private_key--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `tls_parameters.tls_params_choice.common_params.tls_certificates.private_key.secret_info_choice.blindfold_secret_info`
@@ -445,9 +438,9 @@ Optional:
 
 Optional:
 
-- `custom_hash_algorithms` (Attributes) Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice--common_params--tls_certificates--ocsp_stapling_choice--custom_hash_algorithms))
-- `disable_ocsp_stapling` (Boolean) Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.
-- `use_system_defaults` (Boolean) Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.
+- `custom_hash_algorithms` (Attributes) Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.<br>Conflicts with `disable_ocsp_stapling` and `use_system_defaults`. (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice--common_params--tls_certificates--ocsp_stapling_choice--custom_hash_algorithms))
+- `disable_ocsp_stapling` (Boolean) Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.<br>Conflicts with `custom_hash_algorithms` and `use_system_defaults`.
+- `use_system_defaults` (Boolean) Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.<br>Conflicts with `custom_hash_algorithms` and `disable_ocsp_stapling`.
 
 <a id="nestedatt--tls_parameters--tls_params_choice--common_params--tls_certificates--ocsp_stapling_choice--custom_hash_algorithms"></a>
 ### Nested Schema for `tls_parameters.tls_params_choice.common_params.tls_certificates.ocsp_stapling_choice.custom_hash_algorithms`
@@ -464,7 +457,7 @@ Required:
 
 Required:
 
-- `trusted_ca_choice` (Attributes) trusted_ca_choice Root CA configuration for downstream TLS connections (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice--common_params--validation_params--trusted_ca_choice))
+- `trusted_ca_choice` (Attributes) trusted_ca_choice Root CA configuration for downstream TLS connections<br>Exactly one of `trusted_ca` or `trusted_ca_url` must be specified. (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice--common_params--validation_params--trusted_ca_choice))
 
 Optional:
 
@@ -476,8 +469,8 @@ Optional:
 
 Optional:
 
-- `trusted_ca` (Attributes) trusted_ca Root CA Certificate (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice--common_params--validation_params--trusted_ca_choice--trusted_ca))
-- `trusted_ca_url` (String) trusted_ca_url Inline Root CA Certificate
+- `trusted_ca` (Attributes) trusted_ca Root CA Certificate<br>Conflicts with `trusted_ca_url`. (see [below for nested schema](#nestedatt--tls_parameters--tls_params_choice--common_params--validation_params--trusted_ca_choice--trusted_ca))
+- `trusted_ca_url` (String) trusted_ca_url Inline Root CA Certificate<br>Conflicts with `trusted_ca`.
 
 <a id="nestedatt--tls_parameters--tls_params_choice--common_params--validation_params--trusted_ca_choice--trusted_ca"></a>
 ### Nested Schema for `tls_parameters.tls_params_choice.common_params.validation_params.trusted_ca_choice.trusted_ca`
@@ -504,21 +497,31 @@ Read-Only:
 
 
 
+<a id="nestedatt--tls_parameters--max_session_keys_type_choice"></a>
+### Nested Schema for `tls_parameters.max_session_keys_type_choice`
+
+Optional:
+
+- `default_session_key_caching` (Boolean) Default Session Key Caching Default session key caching. Only one session key will be cached.<br>Conflicts with `disable_session_key_caching` and `max_session_keys`.
+- `disable_session_key_caching` (Boolean) Disable Session Key Caching Disable session key caching. This will disable TLS session resumption.<br>Conflicts with `default_session_key_caching` and `max_session_keys`.
+- `max_session_keys` (Number) Max Session Keys Cached Number of session keys that are cached.<br>Conflicts with `default_session_key_caching` and `disable_session_key_caching`.
+
+
 
 <a id="nestedatt--upstream_conn_pool_reuse_type"></a>
 ### Nested Schema for `upstream_conn_pool_reuse_type`
 
-Required:
+Optional:
 
-- `map_downstream_to_upstream_conn_pool_type_choice` (Attributes) Select upstream connection pool reuse state Select upstream connection pool reuse state for every downstream connection This configuration choice is for HTTP(S) LB only. (see [below for nested schema](#nestedatt--upstream_conn_pool_reuse_type--map_downstream_to_upstream_conn_pool_type_choice))
+- `map_downstream_to_upstream_conn_pool_type_choice` (Attributes) Select upstream connection pool reuse state Select upstream connection pool reuse state for every downstream connection This configuration choice is for HTTP(S) LB only.<br>Exactly one of `disable_conn_pool_reuse` or `enable_conn_pool_reuse` must be specified when `map_downstream_to_upstream_conn_pool_type_choice` is configured. (see [below for nested schema](#nestedatt--upstream_conn_pool_reuse_type--map_downstream_to_upstream_conn_pool_type_choice))
 
 <a id="nestedatt--upstream_conn_pool_reuse_type--map_downstream_to_upstream_conn_pool_type_choice"></a>
 ### Nested Schema for `upstream_conn_pool_reuse_type.map_downstream_to_upstream_conn_pool_type_choice`
 
 Optional:
 
-- `disable_conn_pool_reuse` (Boolean) disable_conn_pool_reuse Open new upstream connection pool for every new downstream connection
-- `enable_conn_pool_reuse` (Boolean) enable_conn_pool_reuse Reuse upstream connection pool for multiple downstream connections
+- `disable_conn_pool_reuse` (Boolean) disable_conn_pool_reuse Open new upstream connection pool for every new downstream connection<br>Conflicts with `enable_conn_pool_reuse`.
+- `enable_conn_pool_reuse` (Boolean) enable_conn_pool_reuse Reuse upstream connection pool for multiple downstream connections<br>Conflicts with `disable_conn_pool_reuse`.
 
 
 
@@ -550,6 +553,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_cluster.example"
+	to = f5xc_cluster.example
 }
 ```

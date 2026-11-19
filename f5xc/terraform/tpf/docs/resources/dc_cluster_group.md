@@ -88,15 +88,15 @@ Optional:
 
 Optional:
 
-- `dc_cluster_group_mesh_choice` (Attributes) DC Cluster Group Mesh Choice Choice of data plane, data plane and control plane dc cluster mesh (see [below for nested schema](#nestedatt--type--dc_cluster_group_mesh_choice))
+- `dc_cluster_group_mesh_choice` (Attributes) DC Cluster Group Mesh Choice Choice of data plane, data plane and control plane dc cluster mesh<br>Exactly one of `control_and_data_plane_mesh` or `data_plane_mesh` must be specified when `dc_cluster_group_mesh_choice` is configured. (see [below for nested schema](#nestedatt--type--dc_cluster_group_mesh_choice))
 
 <a id="nestedatt--type--dc_cluster_group_mesh_choice"></a>
 ### Nested Schema for `type.dc_cluster_group_mesh_choice`
 
 Optional:
 
-- `control_and_data_plane_mesh` (Boolean) Control and Data Plane Mesh Full Mesh of data plane connectivity across sites and control plane peering across sites
-- `data_plane_mesh` (Boolean) Data Plane Mesh Full Mesh of Data plane connectivity across sites
+- `control_and_data_plane_mesh` (Boolean) Control and Data Plane Mesh Full Mesh of data plane connectivity across sites and control plane peering across sites<br>Conflicts with `data_plane_mesh`.
+- `data_plane_mesh` (Boolean) Data Plane Mesh Full Mesh of Data plane connectivity across sites<br>Conflicts with `control_and_data_plane_mesh`.
 ## Import
 
 In Terraform v1.5.0 and later, use an `import` block to import this resource by ID.
@@ -118,6 +118,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_dc_cluster_group.example"
+	to = f5xc_dc_cluster_group.example
 }
 ```

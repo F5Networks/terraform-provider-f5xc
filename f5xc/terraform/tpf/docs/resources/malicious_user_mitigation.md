@@ -151,36 +151,36 @@ Required:
 <a id="nestedatt--mitigation_type--rules--mitigation_action"></a>
 ### Nested Schema for `mitigation_type.rules.mitigation_action`
 
-Required:
+Optional:
 
-- `mitigation_action_choice` (Attributes) mitigation action Supported actions that can be taken to mitigate malicious activity from a user (see [below for nested schema](#nestedatt--mitigation_type--rules--mitigation_action--mitigation_action_choice))
+- `mitigation_action_choice` (Attributes) mitigation action Supported actions that can be taken to mitigate malicious activity from a user<br>Exactly one of `block_temporarily`, `captcha_challenge`, or `javascript_challenge` must be specified when `mitigation_action_choice` is configured. (see [below for nested schema](#nestedatt--mitigation_type--rules--mitigation_action--mitigation_action_choice))
 
 <a id="nestedatt--mitigation_type--rules--mitigation_action--mitigation_action_choice"></a>
 ### Nested Schema for `mitigation_type.rules.mitigation_action.mitigation_action_choice`
 
 Optional:
 
-- `block_temporarily` (Boolean) Block User Temporarily The user is blocked for the duration, they are in the corresponding threat level assigned to this mitigation action
-- `captcha_challenge` (Boolean) Captcha Challenge Default Captcha Challenge settings will be used, if custom parameters are not configured on the corresponding http load balancer
-- `javascript_challenge` (Boolean) Javascript Challenge Default Javascript Challenge settings will be used, if custom parameters are not configured on the corresponding http load balancer
+- `block_temporarily` (Boolean) Block User Temporarily The user is blocked for the duration, they are in the corresponding threat level assigned to this mitigation action<br>Conflicts with `captcha_challenge` and `javascript_challenge`.
+- `captcha_challenge` (Boolean) Captcha Challenge Default Captcha Challenge settings will be used, if custom parameters are not configured on the corresponding http load balancer<br>Conflicts with `block_temporarily` and `javascript_challenge`.
+- `javascript_challenge` (Boolean) Javascript Challenge Default Javascript Challenge settings will be used, if custom parameters are not configured on the corresponding http load balancer<br>Conflicts with `block_temporarily` and `captcha_challenge`.
 
 
 
 <a id="nestedatt--mitigation_type--rules--threat_level"></a>
 ### Nested Schema for `mitigation_type.rules.threat_level`
 
-Required:
+Optional:
 
-- `threat_level_choice` (Attributes) threat level Threat level category assigned to user, based on the user activity and reputation (see [below for nested schema](#nestedatt--mitigation_type--rules--threat_level--threat_level_choice))
+- `threat_level_choice` (Attributes) threat level Threat level category assigned to user, based on the user activity and reputation<br>Exactly one of `high`, `low`, or `medium` must be specified when `threat_level_choice` is configured. (see [below for nested schema](#nestedatt--mitigation_type--rules--threat_level--threat_level_choice))
 
 <a id="nestedatt--mitigation_type--rules--threat_level--threat_level_choice"></a>
 ### Nested Schema for `mitigation_type.rules.threat_level.threat_level_choice`
 
 Optional:
 
-- `high` (Boolean) High
-- `low` (Boolean) Low
-- `medium` (Boolean) Medium
+- `high` (Boolean) High<br>Conflicts with `low` and `medium`.
+- `low` (Boolean) Low<br>Conflicts with `high` and `medium`.
+- `medium` (Boolean) Medium<br>Conflicts with `high` and `low`.
 
 
 
@@ -216,6 +216,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_malicious_user_mitigation.example"
+	to = f5xc_malicious_user_mitigation.example
 }
 ```

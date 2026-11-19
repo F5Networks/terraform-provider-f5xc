@@ -96,17 +96,17 @@ resource "f5xc_site_mesh_group" "example" {
 
 ### Required
 
-- `bfd_choice` (Attributes) BFD Choice Options for enabling or disabling BFD for the Site Mesh Group. BFD is used for fast failure detection. (see [below for nested schema](#nestedatt--bfd_choice))
+- `bfd_choice` (Attributes) BFD Choice Options for enabling or disabling BFD for the Site Mesh Group. BFD is used for fast failure detection.<br>Exactly one of `bfd_disabled` or `bfd_enabled` must be specified. (see [below for nested schema](#nestedatt--bfd_choice))
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
-- `re_fallback_choice` (Attributes) RE Fallback Fallback to RE Connectivity when the SMG fails (see [below for nested schema](#nestedatt--re_fallback_choice))
 
 ### Optional
 
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `description` (String) description Human readable description for the object
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
-- `mesh_choice` (Attributes) Mesh Choice Type of Site to Site connectivity (Spoke, Hub or Full Mesh) (see [below for nested schema](#nestedatt--mesh_choice))
+- `mesh_choice` (Attributes) Mesh Choice Type of Site to Site connectivity (Spoke, Hub or Full Mesh)<br>Exactly one of `full_mesh`, `hub_mesh`, or `spoke_mesh` must be specified when `mesh_choice` is configured. (see [below for nested schema](#nestedatt--mesh_choice))
+- `re_fallback_choice` (Attributes) RE Fallback Fallback to RE Connectivity when the SMG fails<br>Exactly one of `disable_re_fallback` or `enable_re_fallback` must be specified when `re_fallback_choice` is configured. (see [below for nested schema](#nestedatt--re_fallback_choice))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 - `virtual_site` (Attributes List) virtual_site Set of sites for which this mesh group config is valid. If 'Type' is Spoke, then it gives set of spoke sites. If 'Type' is Hub, then it gives set of hub sites. If 'Type' is Full Mesh, then it gives set of sites that are connected in full mesh. (see [below for nested schema](#nestedatt--virtual_site))
 
@@ -119,8 +119,8 @@ resource "f5xc_site_mesh_group" "example" {
 
 Optional:
 
-- `bfd_disabled` (Boolean) BFD Disabled Disable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group.
-- `bfd_enabled` (Attributes) BFD Enabled Enable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group. (see [below for nested schema](#nestedatt--bfd_choice--bfd_enabled))
+- `bfd_disabled` (Boolean) BFD Disabled Disable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group.<br>Conflicts with `bfd_enabled`.
+- `bfd_enabled` (Attributes) BFD Enabled Enable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group.<br>Conflicts with `bfd_disabled`. (see [below for nested schema](#nestedatt--bfd_choice--bfd_enabled))
 
 <a id="nestedatt--bfd_choice--bfd_enabled"></a>
 ### Nested Schema for `bfd_choice.bfd_enabled`
@@ -133,38 +133,29 @@ Optional:
 
 
 
-<a id="nestedatt--re_fallback_choice"></a>
-### Nested Schema for `re_fallback_choice`
-
-Optional:
-
-- `disable_re_fallback` (Boolean) disable Disable RE Fallback connectivity when SMG fails
-- `enable_re_fallback` (Boolean) enable Enable RE Fallback connectivity when SMG fails
-
-
 <a id="nestedatt--mesh_choice"></a>
 ### Nested Schema for `mesh_choice`
 
 Optional:
 
-- `full_mesh` (Attributes) full_mesh Full mesh of tunnels are created between all sites (see [below for nested schema](#nestedatt--mesh_choice--full_mesh))
-- `hub_mesh` (Boolean) hub Mesh of Type Hub
-- `spoke_mesh` (Attributes) spoke Mesh of Type Spoke (see [below for nested schema](#nestedatt--mesh_choice--spoke_mesh))
+- `full_mesh` (Attributes) full_mesh Full mesh of tunnels are created between all sites<br>Conflicts with `hub_mesh` and `spoke_mesh`. (see [below for nested schema](#nestedatt--mesh_choice--full_mesh))
+- `hub_mesh` (Boolean) hub Mesh of Type Hub<br>Conflicts with `full_mesh` and `spoke_mesh`.
+- `spoke_mesh` (Attributes) spoke Mesh of Type Spoke<br>Conflicts with `full_mesh` and `hub_mesh`. (see [below for nested schema](#nestedatt--mesh_choice--spoke_mesh))
 
 <a id="nestedatt--mesh_choice--full_mesh"></a>
 ### Nested Schema for `mesh_choice.full_mesh`
 
 Optional:
 
-- `full_mesh_choice` (Attributes) Full Mesh Choice Choice of data plane, data plane and control plane full mesh (see [below for nested schema](#nestedatt--mesh_choice--full_mesh--full_mesh_choice))
+- `full_mesh_choice` (Attributes) Full Mesh Choice Choice of data plane, data plane and control plane full mesh<br>Exactly one of `control_and_data_plane_mesh` or `data_plane_mesh` must be specified when `full_mesh_choice` is configured. (see [below for nested schema](#nestedatt--mesh_choice--full_mesh--full_mesh_choice))
 
 <a id="nestedatt--mesh_choice--full_mesh--full_mesh_choice"></a>
 ### Nested Schema for `mesh_choice.full_mesh.full_mesh_choice`
 
 Optional:
 
-- `control_and_data_plane_mesh` (Boolean) Control and Data Plane Mesh Full mesh of data plane tunnels across sites and control plane peering across sites
-- `data_plane_mesh` (Boolean) Data Plane Mesh Full Mesh of data plane tunnels across sites
+- `control_and_data_plane_mesh` (Boolean) Control and Data Plane Mesh Full mesh of data plane tunnels across sites and control plane peering across sites<br>Conflicts with `data_plane_mesh`.
+- `data_plane_mesh` (Boolean) Data Plane Mesh Full Mesh of data plane tunnels across sites<br>Conflicts with `control_and_data_plane_mesh`.
 
 
 
@@ -188,6 +179,15 @@ Read-Only:
 - `tenant` (String)
 
 
+
+
+<a id="nestedatt--re_fallback_choice"></a>
+### Nested Schema for `re_fallback_choice`
+
+Optional:
+
+- `disable_re_fallback` (Boolean) disable Disable RE Fallback connectivity when SMG fails<br>Conflicts with `enable_re_fallback`.
+- `enable_re_fallback` (Boolean) enable Enable RE Fallback connectivity when SMG fails<br>Conflicts with `disable_re_fallback`.
 
 
 <a id="nestedatt--timeouts"></a>
@@ -233,6 +233,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_site_mesh_group.example"
+	to = f5xc_site_mesh_group.example
 }
 ```

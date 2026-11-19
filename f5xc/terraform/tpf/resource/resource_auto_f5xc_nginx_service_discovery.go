@@ -260,7 +260,7 @@ func (r *ResourceF5XCNginxServiceDiscovery) Schema(ctx context.Context, request 
 				Attributes: map[string]schema.Attribute{
 					"target_choice": schema.SingleNestedAttribute{
 						Description:         "Target choice",
-						MarkdownDescription: "Target choice",
+						MarkdownDescription: "Target choice<br>Exactly one of `config_sync_group` or `nginx_instance` must be specified.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -273,7 +273,7 @@ func (r *ResourceF5XCNginxServiceDiscovery) Schema(ctx context.Context, request 
 						Attributes: map[string]schema.Attribute{
 							"config_sync_group": schema.SingleNestedAttribute{
 								Description:         "Config Sync Group",
-								MarkdownDescription: "Config Sync Group",
+								MarkdownDescription: "Config Sync Group<br>Conflicts with `nginx_instance`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -320,7 +320,7 @@ func (r *ResourceF5XCNginxServiceDiscovery) Schema(ctx context.Context, request 
 							},
 							"nginx_instance": schema.SingleNestedAttribute{
 								Description:         "NGINX Instance",
-								MarkdownDescription: "NGINX Instance",
+								MarkdownDescription: "NGINX Instance<br>Conflicts with `config_sync_group`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1174,11 +1174,7 @@ func (r *ResourceF5XCNginxServiceDiscovery) Read(ctx context.Context, request re
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_nginx_one_nginx_service_discovery.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_nginx_one_nginx_service_discovery.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "nginx_service_discovery", err),
@@ -1834,12 +1830,8 @@ func (r *ResourceF5XCNginxServiceDiscovery) Update(ctx context.Context, request 
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_nginx_one_nginx_service_discovery.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_nginx_one_nginx_service_discovery.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "nginx_service_discovery", err),
@@ -1848,7 +1840,7 @@ func (r *ResourceF5XCNginxServiceDiscovery) Update(ctx context.Context, request 
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_nginx_one_nginx_service_discovery.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_nginx_one_nginx_service_discovery.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "nginx_service_discovery", err),

@@ -247,7 +247,7 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for RequiredOneOfField --> AllowedResponseCodesChoice
+// Attribute map for OneOfField --> AllowedResponseCodesChoice
 var AppFirewallAllowedResponseCodesChoiceModelAttributeMap = map[string]attr.Type{
 
 	"allow_all_response_codes": types.BoolType,
@@ -264,7 +264,7 @@ var AppFirewallAllowedResponseCodesChoiceAllowedResponseCodesModelAttributeMap =
 	},
 }
 
-// Attribute map for RequiredOneOfField --> AnonymizationSetting
+// Attribute map for OneOfField --> AnonymizationSetting
 var AppFirewallAnonymizationSettingModelAttributeMap = map[string]attr.Type{
 
 	"custom_anonymization": types.ObjectType{
@@ -329,7 +329,7 @@ var AppFirewallAnonymizationSettingCustomAnonymizationAnonymizationConfigAnonymi
 	"query_param_name": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> BlockingPageChoice
+// Attribute map for OneOfField --> BlockingPageChoice
 var AppFirewallBlockingPageChoiceModelAttributeMap = map[string]attr.Type{
 
 	"blocking_page": types.ObjectType{
@@ -347,7 +347,7 @@ var AppFirewallBlockingPageChoiceBlockingPageModelAttributeMap = map[string]attr
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DetectionSettingChoice
+// Attribute map for OneOfField --> DetectionSettingChoice
 var AppFirewallDetectionSettingChoiceModelAttributeMap = map[string]attr.Type{
 
 	"default_detection_settings": types.BoolType,
@@ -387,7 +387,7 @@ var AppFirewallDetectionSettingChoiceDetectionSettingsModelAttributeMap = map[st
 	},
 }
 
-// Attribute map for RequiredOneOfField --> BotProtectionChoice
+// Attribute map for OneOfField --> BotProtectionChoice
 var AppFirewallDetectionSettingChoiceDetectionSettingsBotProtectionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"bot_protection_setting": types.ObjectType{
@@ -410,7 +410,7 @@ var AppFirewallDetectionSettingChoiceDetectionSettingsBotProtectionChoiceBotProt
 	},
 }
 
-// Attribute map for RequiredOneOfField --> FalsePositiveSuppression
+// Attribute map for OneOfField --> FalsePositiveSuppression
 var AppFirewallDetectionSettingChoiceDetectionSettingsFalsePositiveSuppressionModelAttributeMap = map[string]attr.Type{
 
 	"disable_suppression": types.BoolType,
@@ -431,7 +431,7 @@ var AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingM
 	},
 }
 
-// Attribute map for RequiredOneOfField --> AttackTypeSetting
+// Attribute map for OneOfField --> AttackTypeSetting
 var AppFirewallDetectionSettingChoiceDetectionSettingsSignatureSelectionSettingAttackTypeSettingModelAttributeMap = map[string]attr.Type{
 
 	"attack_type_settings": types.ObjectType{
@@ -503,7 +503,7 @@ var AppFirewallDetectionSettingChoiceDetectionSettingsSignaturesStagingSettingsS
 	"staging_period": types.Int64Type,
 }
 
-// Attribute map for RequiredOneOfField --> ThreatCampaignChoice
+// Attribute map for OneOfField --> ThreatCampaignChoice
 var AppFirewallDetectionSettingChoiceDetectionSettingsThreatCampaignChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disable_threat_campaigns": types.BoolType,
@@ -527,14 +527,14 @@ var AppFirewallDetectionSettingChoiceDetectionSettingsViolationDetectionSettingV
 	},
 }
 
-// Attribute map for RequiredOneOfField --> EnforcementModeChoice
+// Attribute map for OneOfField --> EnforcementModeChoice
 var AppFirewallEnforcementModeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"blocking":   types.BoolType,
 	"monitoring": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> EnhanceWithAiChoice
+// Attribute map for OneOfField --> EnhanceWithAiChoice
 var AppFirewallEnhanceWithAiChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disable_ai_enhancements": types.BoolType,
@@ -551,7 +551,7 @@ var AppFirewallEnhanceWithAiChoiceEnableAiEnhancementsModelAttributeMap = map[st
 	},
 }
 
-// Attribute map for RequiredOneOfField --> RiskScoreActionChoice
+// Attribute map for OneOfField --> RiskScoreActionChoice
 var AppFirewallEnhanceWithAiChoiceEnableAiEnhancementsRiskScoreActionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"mitigate_high_medium_risk_action": types.BoolType,
@@ -638,20 +638,23 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 			},
 			"allowed_response_codes_choice": schema.SingleNestedAttribute{
 				Description:         "Allowed Response Status Codes HTTP response status codes which are allowed to pass through the platform to the client. All response codes other than the allowed ones are blocked by the platform.",
-				MarkdownDescription: "Allowed Response Status Codes HTTP response status codes which are allowed to pass through the platform to the client. All response codes other than the allowed ones are blocked by the platform.",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Allowed Response Status Codes HTTP response status codes which are allowed to pass through the platform to the client. All response codes other than the allowed ones are blocked by the platform.<br>Exactly one of `allow_all_response_codes` or `allowed_response_codes` must be specified when `allowed_response_codes_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"allow_all_response_codes",
 						"allowed_response_codes",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"allow_all_response_codes": schema.BoolAttribute{
 						Description:         "Default All HTTP response status codes are allowed",
-						MarkdownDescription: "Default All HTTP response status codes are allowed",
+						MarkdownDescription: "Default All HTTP response status codes are allowed<br>Conflicts with `allowed_response_codes`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -661,7 +664,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 					},
 					"allowed_response_codes": schema.SingleNestedAttribute{
 						Description:         "Custom Define list of HTTP response status codes that are allowed",
-						MarkdownDescription: "Custom Define list of HTTP response status codes that are allowed",
+						MarkdownDescription: "Custom Define list of HTTP response status codes that are allowed<br>Conflicts with `allow_all_response_codes`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -685,21 +688,24 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 			},
 			"anonymization_setting_choice": schema.SingleNestedAttribute{
 				Description:         "Anonymization Settings Replaces sensitive data in the logs (as defined in the context) with a string of asterisks (*)",
-				MarkdownDescription: "Anonymization Settings Replaces sensitive data in the logs (as defined in the context) with a string of asterisks (*)",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Anonymization Settings Replaces sensitive data in the logs (as defined in the context) with a string of asterisks (*)<br>Exactly one of `custom_anonymization`, `default_anonymization`, or `disable_anonymization` must be specified when `anonymization_setting_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"custom_anonymization",
 						"default_anonymization",
 						"disable_anonymization",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"custom_anonymization": schema.SingleNestedAttribute{
 						Description:         "CustomAnonymization Define HTTP headers, query parameters, or cookies whose values should be masked",
-						MarkdownDescription: "CustomAnonymization Define HTTP headers, query parameters, or cookies whose values should be masked",
+						MarkdownDescription: "CustomAnonymization Define HTTP headers, query parameters, or cookies whose values should be masked<br>Conflicts with `default_anonymization` and `disable_anonymization`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -718,7 +724,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 									Attributes: map[string]schema.Attribute{
 										"anonymization_choice": schema.SingleNestedAttribute{
 											Description:         "Anonymization Choice Define HTTP headers, query parameters or cookie names whose values should be masked",
-											MarkdownDescription: "Anonymization Choice Define HTTP headers, query parameters or cookie names whose values should be masked",
+											MarkdownDescription: "Anonymization Choice Define HTTP headers, query parameters or cookie names whose values should be masked<br>Exactly one of `cookie`, `http_header`, or `query_parameter` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -732,7 +738,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 											Attributes: map[string]schema.Attribute{
 												"cookie": schema.SingleNestedAttribute{
 													Description:         "AnonymizeCookie",
-													MarkdownDescription: "AnonymizeCookie",
+													MarkdownDescription: "AnonymizeCookie<br>Conflicts with `http_header` and `query_parameter`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -751,7 +757,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 												},
 												"http_header": schema.SingleNestedAttribute{
 													Description:         "http_header",
-													MarkdownDescription: "http_header",
+													MarkdownDescription: "http_header<br>Conflicts with `cookie` and `query_parameter`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -773,7 +779,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 												},
 												"query_parameter": schema.SingleNestedAttribute{
 													Description:         "AnonymizeParameter",
-													MarkdownDescription: "AnonymizeParameter",
+													MarkdownDescription: "AnonymizeParameter<br>Conflicts with `cookie` and `http_header`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -799,7 +805,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 					},
 					"default_anonymization": schema.BoolAttribute{
 						Description:         "DefaultAnonymization Default settings will be applied. Values of query parameters 'card', 'pass', 'pwd' and 'password' will be masked.",
-						MarkdownDescription: "DefaultAnonymization Default settings will be applied. Values of query parameters 'card', 'pass', 'pwd' and 'password' will be masked.",
+						MarkdownDescription: "DefaultAnonymization Default settings will be applied. Values of query parameters 'card', 'pass', 'pwd' and 'password' will be masked.<br>Conflicts with `custom_anonymization` and `disable_anonymization`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -809,7 +815,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 					},
 					"disable_anonymization": schema.BoolAttribute{
 						Description:         "DisableAnonymization Disable masking of sensitive parameters in logs",
-						MarkdownDescription: "DisableAnonymization Disable masking of sensitive parameters in logs",
+						MarkdownDescription: "DisableAnonymization Disable masking of sensitive parameters in logs<br>Conflicts with `custom_anonymization` and `default_anonymization`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -821,20 +827,23 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 			},
 			"blocking_page_choice": schema.SingleNestedAttribute{
 				Description:         "Blocking Page Blocking response page that should be returned to the client when the client request, or the web server response, is blocked by the App Firewall",
-				MarkdownDescription: "Blocking Page Blocking response page that should be returned to the client when the client request, or the web server response, is blocked by the App Firewall",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Blocking Page Blocking response page that should be returned to the client when the client request, or the web server response, is blocked by the App Firewall<br>Exactly one of `blocking_page` or `use_default_blocking_page` must be specified when `blocking_page_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"blocking_page",
 						"use_default_blocking_page",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"blocking_page": schema.SingleNestedAttribute{
 						Description:         "Custom Blocking Page The system returns a response page with HTML code that you define",
-						MarkdownDescription: "Custom Blocking Page The system returns a response page with HTML code that you define",
+						MarkdownDescription: "Custom Blocking Page The system returns a response page with HTML code that you define<br>Conflicts with `use_default_blocking_page`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -871,7 +880,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 					},
 					"use_default_blocking_page": schema.BoolAttribute{
 						Description:         "Default Blocking Page The system returns the system-supplied response page in HTML. No further configuration is needed.",
-						MarkdownDescription: "Default Blocking Page The system returns the system-supplied response page in HTML. No further configuration is needed.",
+						MarkdownDescription: "Default Blocking Page The system returns the system-supplied response page in HTML. No further configuration is needed.<br>Conflicts with `blocking_page`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -883,20 +892,23 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 			},
 			"detection_setting_choice": schema.SingleNestedAttribute{
 				Description:         "Security Policy Settings used by WAF to detect malicious requests. These settings can be used to tune WAF operations for optimum detection with minimal false positives.",
-				MarkdownDescription: "Security Policy Settings used by WAF to detect malicious requests. These settings can be used to tune WAF operations for optimum detection with minimal false positives.",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Security Policy Settings used by WAF to detect malicious requests. These settings can be used to tune WAF operations for optimum detection with minimal false positives.<br>Exactly one of `default_detection_settings` or `detection_settings` must be specified when `detection_setting_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"default_detection_settings",
 						"detection_settings",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"default_detection_settings": schema.BoolAttribute{
 						Description:         "Default Detection Settings Default policy settings will be applied. All Attack Types, high and medium accuracy signatures, automatic Attack Signatures tuning, Threat Campaigns and all Violations will be enabled.",
-						MarkdownDescription: "Default Detection Settings Default policy settings will be applied. All Attack Types, high and medium accuracy signatures, automatic Attack Signatures tuning, Threat Campaigns and all Violations will be enabled.",
+						MarkdownDescription: "Default Detection Settings Default policy settings will be applied. All Attack Types, high and medium accuracy signatures, automatic Attack Signatures tuning, Threat Campaigns and all Violations will be enabled.<br>Conflicts with `detection_settings`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -906,27 +918,30 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 					},
 					"detection_settings": schema.SingleNestedAttribute{
 						Description:         "Custom Detection Settings Define Custom Security Policy settings",
-						MarkdownDescription: "Custom Detection Settings Define Custom Security Policy settings",
+						MarkdownDescription: "Custom Detection Settings Define Custom Security Policy settings<br>Conflicts with `default_detection_settings`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"bot_protection_choice": schema.SingleNestedAttribute{
 								Description:         "Signature-based Bot Protection Settings to manage and mitigate bot traffic. These settings work in tandem with the appfirewall enforcement mode i.e, block setting for bot protection is enforced if both bot and appfirewall enforcement modes are in block. In all other scenarios, bots will only be reported. Behavior based bot protection, which prevents large-scale fraud with account takeover protection and much more, is available as F5 Distributed Cloud Bot Defense and is an add-on subscription service.",
-								MarkdownDescription: "Signature-based Bot Protection Settings to manage and mitigate bot traffic. These settings work in tandem with the appfirewall enforcement mode i.e, block setting for bot protection is enforced if both bot and appfirewall enforcement modes are in block. In all other scenarios, bots will only be reported. Behavior based bot protection, which prevents large-scale fraud with account takeover protection and much more, is available as F5 Distributed Cloud Bot Defense and is an add-on subscription service.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Signature-based Bot Protection Settings to manage and mitigate bot traffic. These settings work in tandem with the appfirewall enforcement mode i.e, block setting for bot protection is enforced if both bot and appfirewall enforcement modes are in block. In all other scenarios, bots will only be reported. Behavior based bot protection, which prevents large-scale fraud with account takeover protection and much more, is available as F5 Distributed Cloud Bot Defense and is an add-on subscription service.<br>Exactly one of `bot_protection_setting` or `default_bot_setting` must be specified when `bot_protection_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"bot_protection_setting",
 										"default_bot_setting",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"bot_protection_setting": schema.SingleNestedAttribute{
 										Description:         "Custom Settings Define custom Bot Protection settings",
-										MarkdownDescription: "Custom Settings Define custom Bot Protection settings",
+										MarkdownDescription: "Custom Settings Define custom Bot Protection settings<br>Conflicts with `default_bot_setting`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -974,7 +989,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 									},
 									"default_bot_setting": schema.BoolAttribute{
 										Description:         "Default Bot Settings Default Bot Protection settings will be applied. Malicious bots will be blocked, Suspicious and Good bots will be ignored.",
-										MarkdownDescription: "Default Bot Settings Default Bot Protection settings will be applied. Malicious bots will be blocked, Suspicious and Good bots will be ignored.",
+										MarkdownDescription: "Default Bot Settings Default Bot Protection settings will be applied. Malicious bots will be blocked, Suspicious and Good bots will be ignored.<br>Conflicts with `bot_protection_setting`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -986,20 +1001,23 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 							},
 							"false_positive_suppression_choice": schema.SingleNestedAttribute{
 								Description:         "Automatic Attack Signatures Tuning Self-learning probabilistic machine learning model that suppresses false positive triggers",
-								MarkdownDescription: "Automatic Attack Signatures Tuning Self-learning probabilistic machine learning model that suppresses false positive triggers",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Automatic Attack Signatures Tuning Self-learning probabilistic machine learning model that suppresses false positive triggers<br>Exactly one of `disable_suppression` or `enable_suppression` must be specified when `false_positive_suppression_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"disable_suppression",
 										"enable_suppression",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"disable_suppression": schema.BoolAttribute{
 										Description:         "Disable Suppression",
-										MarkdownDescription: "Disable Suppression",
+										MarkdownDescription: "Disable Suppression<br>Conflicts with `enable_suppression`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1009,7 +1027,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 									},
 									"enable_suppression": schema.BoolAttribute{
 										Description:         "Enable Suppression",
-										MarkdownDescription: "Enable Suppression",
+										MarkdownDescription: "Enable Suppression<br>Conflicts with `disable_suppression`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1028,20 +1046,23 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 								Attributes: map[string]schema.Attribute{
 									"attack_type_setting_choice": schema.SingleNestedAttribute{
 										Description:         "Attack Types The types of attacks that Attack Signatures can detect",
-										MarkdownDescription: "Attack Types The types of attacks that Attack Signatures can detect",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Attack Types The types of attacks that Attack Signatures can detect<br>Exactly one of `attack_type_settings` or `default_attack_type_settings` must be specified when `attack_type_setting_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"attack_type_settings",
 												"default_attack_type_settings",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"attack_type_settings": schema.SingleNestedAttribute{
 												Description:         "Custom Attack Type Settings Define Attack Types to be disabled for detection",
-												MarkdownDescription: "Custom Attack Type Settings Define Attack Types to be disabled for detection",
+												MarkdownDescription: "Custom Attack Type Settings Define Attack Types to be disabled for detection<br>Conflicts with `default_attack_type_settings`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1063,7 +1084,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 											},
 											"default_attack_type_settings": schema.BoolAttribute{
 												Description:         "Default Attack Type settings All Attack Types are enabled for detection",
-												MarkdownDescription: "Default Attack Type settings All Attack Types are enabled for detection",
+												MarkdownDescription: "Default Attack Type settings All Attack Types are enabled for detection<br>Conflicts with `attack_type_settings`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1075,7 +1096,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 									},
 									"signature_protection_choice": schema.SingleNestedAttribute{
 										Description:         "Signature Settings by Accuracy Accuracy indicates the ability of the Attack Signatures to identify the attack including susceptibility to false-positive alarms. Low: Indicates a high likelihood of false positives. Medium: Indicates some likelihood of false positives. High: Indicates a low likelihood of false positives.",
-										MarkdownDescription: "Signature Settings by Accuracy Accuracy indicates the ability of the Attack Signatures to identify the attack including susceptibility to false-positive alarms. Low: Indicates a high likelihood of false positives. Medium: Indicates some likelihood of false positives. High: Indicates a low likelihood of false positives.",
+										MarkdownDescription: "Signature Settings by Accuracy Accuracy indicates the ability of the Attack Signatures to identify the attack including susceptibility to false-positive alarms. Low: Indicates a high likelihood of false positives. Medium: Indicates some likelihood of false positives. High: Indicates a low likelihood of false positives.<br>Exactly one of `default_signature_setting` or `signature_settings_by_accuracy` must be specified when `signature_protection_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
@@ -1091,7 +1112,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 										Attributes: map[string]schema.Attribute{
 											"default_signature_setting": schema.BoolAttribute{
 												Description:         "Default Signature Settings Default Signature Protection settings will be applied. High and Medium accuracy signatures will be blocked, Low accuracy signatures will be ignored.",
-												MarkdownDescription: "Default Signature Settings Default Signature Protection settings will be applied. High and Medium accuracy signatures will be blocked, Low accuracy signatures will be ignored.",
+												MarkdownDescription: "Default Signature Settings Default Signature Protection settings will be applied. High and Medium accuracy signatures will be blocked, Low accuracy signatures will be ignored.<br>Conflicts with `signature_settings_by_accuracy`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1101,7 +1122,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 											},
 											"signature_settings_by_accuracy": schema.SingleNestedAttribute{
 												Description:         "Custom Signature Settings Define Custom Signature Protection settings by accuracy level.",
-												MarkdownDescription: "Custom Signature Settings Define Custom Signature Protection settings by accuracy level.",
+												MarkdownDescription: "Custom Signature Settings Define Custom Signature Protection settings by accuracy level.<br>Conflicts with `default_signature_setting`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1151,7 +1172,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 									},
 									"signature_selection_by_accuracy_choice": schema.SingleNestedAttribute{
 										Description:         "Signature selection by accuracy Accuracy indicates the ability of the Attack Signatures to identify the attack including susceptibility to false-positive alarms. Low: Indicates a high likelihood of false positives. Medium: Indicates some likelihood of false positives. High: Indicates a low likelihood of false positives.",
-										MarkdownDescription: "Signature selection by accuracy Accuracy indicates the ability of the Attack Signatures to identify the attack including susceptibility to false-positive alarms. Low: Indicates a high likelihood of false positives. Medium: Indicates some likelihood of false positives. High: Indicates a low likelihood of false positives.",
+										MarkdownDescription: "Signature selection by accuracy Accuracy indicates the ability of the Attack Signatures to identify the attack including susceptibility to false-positive alarms. Low: Indicates a high likelihood of false positives. Medium: Indicates some likelihood of false positives. High: Indicates a low likelihood of false positives.<br>Exactly one of `high_medium_accuracy_signatures`, `high_medium_low_accuracy_signatures`, or `only_high_accuracy_signatures` must be specified when `signature_selection_by_accuracy_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
@@ -1170,7 +1191,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 										Attributes: map[string]schema.Attribute{
 											"high_medium_accuracy_signatures": schema.BoolAttribute{
 												Description:         "High/Medium Accuracy Signatures Enables high and medium accuracy signatures",
-												MarkdownDescription: "High/Medium Accuracy Signatures Enables high and medium accuracy signatures",
+												MarkdownDescription: "High/Medium Accuracy Signatures Enables high and medium accuracy signatures<br>Conflicts with `high_medium_low_accuracy_signatures` and `only_high_accuracy_signatures`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1181,7 +1202,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 											},
 											"high_medium_low_accuracy_signatures": schema.BoolAttribute{
 												Description:         "High/Medium/Low Accuracy Signatures Enables high, medium and low accuracy signatures",
-												MarkdownDescription: "High/Medium/Low Accuracy Signatures Enables high, medium and low accuracy signatures",
+												MarkdownDescription: "High/Medium/Low Accuracy Signatures Enables high, medium and low accuracy signatures<br>Conflicts with `high_medium_accuracy_signatures` and `only_high_accuracy_signatures`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1192,7 +1213,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 											},
 											"only_high_accuracy_signatures": schema.BoolAttribute{
 												Description:         "Only High Accuracy Signatures Enables only high accuracy signatures",
-												MarkdownDescription: "Only High Accuracy Signatures Enables only high accuracy signatures",
+												MarkdownDescription: "Only High Accuracy Signatures Enables only high accuracy signatures<br>Conflicts with `high_medium_accuracy_signatures` and `high_medium_low_accuracy_signatures`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1207,7 +1228,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 							},
 							"signatures_staging_settings_choice": schema.SingleNestedAttribute{
 								Description:         "Attack Signatures Staging Settings Attack signatures are added/updated on the Distributed cloud platform on a regular cadence. This setting enables/disables staging process for new and modified attack signatures. Staging means that, when new signatures are added or existing signatures are updated on the platform, WAF applies the attack signature to web application traffic, but does not block an incoming request if it triggers this attack signature. The default staging period is 14 days",
-								MarkdownDescription: "Attack Signatures Staging Settings Attack signatures are added/updated on the Distributed cloud platform on a regular cadence. This setting enables/disables staging process for new and modified attack signatures. Staging means that, when new signatures are added or existing signatures are updated on the platform, WAF applies the attack signature to web application traffic, but does not block an incoming request if it triggers this attack signature. The default staging period is 14 days",
+								MarkdownDescription: "Attack Signatures Staging Settings Attack signatures are added/updated on the Distributed cloud platform on a regular cadence. This setting enables/disables staging process for new and modified attack signatures. Staging means that, when new signatures are added or existing signatures are updated on the platform, WAF applies the attack signature to web application traffic, but does not block an incoming request if it triggers this attack signature. The default staging period is 14 days<br>Exactly one of `disable_staging`, `stage_new_and_updated_signatures`, or `stage_new_signatures` must be specified when `signatures_staging_settings_choice` is configured.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1221,7 +1242,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 								Attributes: map[string]schema.Attribute{
 									"disable_staging": schema.BoolAttribute{
 										Description:         "Disable Attack Signatures Staging Enforce new and updated attack signatures",
-										MarkdownDescription: "Disable Attack Signatures Staging Enforce new and updated attack signatures",
+										MarkdownDescription: "Disable Attack Signatures Staging Enforce new and updated attack signatures<br>Conflicts with `stage_new_and_updated_signatures` and `stage_new_signatures`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1231,7 +1252,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 									},
 									"stage_new_and_updated_signatures": schema.SingleNestedAttribute{
 										Description:         "New and Updated Signatures Staging Settings Stage both new and updated attack signatures. Note: Staging updated signatures may lead to change in behaviour of those signatures and reduce the protection level of the App firewall policy. For example, if AppFirewall was in blocking mode and a signature was updated in a recent release, staging this signature would not enforce it i.e signature would be in monitoring mode for staging period (instead of blocking mode)",
-										MarkdownDescription: "New and Updated Signatures Staging Settings Stage both new and updated attack signatures. Note: Staging updated signatures may lead to change in behaviour of those signatures and reduce the protection level of the App firewall policy. For example, if AppFirewall was in blocking mode and a signature was updated in a recent release, staging this signature would not enforce it i.e signature would be in monitoring mode for staging period (instead of blocking mode)",
+										MarkdownDescription: "New and Updated Signatures Staging Settings Stage both new and updated attack signatures. Note: Staging updated signatures may lead to change in behaviour of those signatures and reduce the protection level of the App firewall policy. For example, if AppFirewall was in blocking mode and a signature was updated in a recent release, staging this signature would not enforce it i.e signature would be in monitoring mode for staging period (instead of blocking mode)<br>Conflicts with `disable_staging` and `stage_new_signatures`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1251,7 +1272,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 									},
 									"stage_new_signatures": schema.SingleNestedAttribute{
 										Description:         "New Signatures Staging Settings Stage new attack signatures only. Updated signatures will be enforced",
-										MarkdownDescription: "New Signatures Staging Settings Stage new attack signatures only. Updated signatures will be enforced",
+										MarkdownDescription: "New Signatures Staging Settings Stage new attack signatures only. Updated signatures will be enforced<br>Conflicts with `disable_staging` and `stage_new_and_updated_signatures`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1273,20 +1294,23 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 							},
 							"threat_campaign_choice": schema.SingleNestedAttribute{
 								Description:         "Threat Campaigns Threat Campaigns provide targeted signatures to protect organizations from sophisticated attacks",
-								MarkdownDescription: "Threat Campaigns Threat Campaigns provide targeted signatures to protect organizations from sophisticated attacks",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Threat Campaigns Threat Campaigns provide targeted signatures to protect organizations from sophisticated attacks<br>Exactly one of `disable_threat_campaigns` or `enable_threat_campaigns` must be specified when `threat_campaign_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"disable_threat_campaigns",
 										"enable_threat_campaigns",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"disable_threat_campaigns": schema.BoolAttribute{
 										Description:         "disable_threat_campaigns",
-										MarkdownDescription: "disable_threat_campaigns",
+										MarkdownDescription: "disable_threat_campaigns<br>Conflicts with `enable_threat_campaigns`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1296,7 +1320,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 									},
 									"enable_threat_campaigns": schema.BoolAttribute{
 										Description:         "enable_threat_campaigns",
-										MarkdownDescription: "enable_threat_campaigns",
+										MarkdownDescription: "enable_threat_campaigns<br>Conflicts with `disable_threat_campaigns`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1308,7 +1332,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 							},
 							"violation_detection_setting_choice": schema.SingleNestedAttribute{
 								Description:         "Violations Lists of validation checks that are performed on HTTP requests to ensure the requests are properly formatted, detection of evasion techniques and other violations",
-								MarkdownDescription: "Violations Lists of validation checks that are performed on HTTP requests to ensure the requests are properly formatted, detection of evasion techniques and other violations",
+								MarkdownDescription: "Violations Lists of validation checks that are performed on HTTP requests to ensure the requests are properly formatted, detection of evasion techniques and other violations<br>Exactly one of `default_violation_settings` or `violation_settings` must be specified when `violation_detection_setting_choice` is configured.",
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
@@ -1325,7 +1349,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 								Attributes: map[string]schema.Attribute{
 									"default_violation_settings": schema.BoolAttribute{
 										Description:         "Default Violation Settings All violations are enabled for detection",
-										MarkdownDescription: "Default Violation Settings All violations are enabled for detection",
+										MarkdownDescription: "Default Violation Settings All violations are enabled for detection<br>Conflicts with `violation_settings`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1336,7 +1360,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 									},
 									"violation_settings": schema.SingleNestedAttribute{
 										Description:         "Custom Violation Settings Define violations to be disabled for detection",
-										MarkdownDescription: "Custom Violation Settings Define violations to be disabled for detection",
+										MarkdownDescription: "Custom Violation Settings Define violations to be disabled for detection<br>Conflicts with `default_violation_settings`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1366,20 +1390,23 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 			},
 			"enforcement_mode_choice": schema.SingleNestedAttribute{
 				Description:         "Enforcement Mode Monitoring mode will identify and log threats, whereas Blocking mode will both log and block threats",
-				MarkdownDescription: "Enforcement Mode Monitoring mode will identify and log threats, whereas Blocking mode will both log and block threats",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Enforcement Mode Monitoring mode will identify and log threats, whereas Blocking mode will both log and block threats<br>Exactly one of `blocking` or `monitoring` must be specified when `enforcement_mode_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"blocking",
 						"monitoring",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"blocking": schema.BoolAttribute{
 						Description:         "Blocking Log and block threats",
-						MarkdownDescription: "Blocking Log and block threats",
+						MarkdownDescription: "Blocking Log and block threats<br>Conflicts with `monitoring`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1389,7 +1416,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 					},
 					"monitoring": schema.BoolAttribute{
 						Description:         "Monitoring Log threats",
-						MarkdownDescription: "Monitoring Log threats",
+						MarkdownDescription: "Monitoring Log threats<br>Conflicts with `blocking`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1401,20 +1428,23 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 			},
 			"enhance_with_ai_choice": schema.SingleNestedAttribute{
 				Description:         "Enhance with AI This setting controls whether enforcement decisions consider AI-powered risk evaluations. When activated, machine learning models provide additional context to improve detection accuracy and help prioritize responses based on the assessed threat level. When inactive, enforcement relies solely on traditional, signature-based policy evaluations.",
-				MarkdownDescription: "Enhance with AI This setting controls whether enforcement decisions consider AI-powered risk evaluations. When activated, machine learning models provide additional context to improve detection accuracy and help prioritize responses based on the assessed threat level. When inactive, enforcement relies solely on traditional, signature-based policy evaluations.",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Enhance with AI This setting controls whether enforcement decisions consider AI-powered risk evaluations. When activated, machine learning models provide additional context to improve detection accuracy and help prioritize responses based on the assessed threat level. When inactive, enforcement relies solely on traditional, signature-based policy evaluations.<br>Exactly one of `disable_ai_enhancements` or `enable_ai_enhancements` must be specified when `enhance_with_ai_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"disable_ai_enhancements",
 						"enable_ai_enhancements",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"disable_ai_enhancements": schema.BoolAttribute{
 						Description:         "Disable AI Enhancements Risk-base AI evaluations will not factor into enforcement actions",
-						MarkdownDescription: "Disable AI Enhancements Risk-base AI evaluations will not factor into enforcement actions",
+						MarkdownDescription: "Disable AI Enhancements Risk-base AI evaluations will not factor into enforcement actions<br>Conflicts with `enable_ai_enhancements`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1424,27 +1454,30 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 					},
 					"enable_ai_enhancements": schema.SingleNestedAttribute{
 						Description:         "Enable AI Enhancements Evaluations for enforcement actions will be complimented by the additional intelligence of the F5 AI Powered Risk-based analysis",
-						MarkdownDescription: "Enable AI Enhancements Evaluations for enforcement actions will be complimented by the additional intelligence of the F5 AI Powered Risk-based analysis",
+						MarkdownDescription: "Enable AI Enhancements Evaluations for enforcement actions will be complimented by the additional intelligence of the F5 AI Powered Risk-based analysis<br>Conflicts with `disable_ai_enhancements`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"risk_score_action_choice": schema.SingleNestedAttribute{
 								Description:         "Action By Risk Score Determines which risk levels will trigger mitigation when AI-based risk evaluation is enabled",
-								MarkdownDescription: "Action By Risk Score Determines which risk levels will trigger mitigation when AI-based risk evaluation is enabled",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Action By Risk Score Determines which risk levels will trigger mitigation when AI-based risk evaluation is enabled<br>Exactly one of `mitigate_high_medium_risk_action` or `mitigate_high_risk_action` must be specified when `risk_score_action_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"mitigate_high_medium_risk_action",
 										"mitigate_high_risk_action",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"mitigate_high_medium_risk_action": schema.BoolAttribute{
 										Description:         "Mitigate High and Medium Risk Mitigate requests if the risk score is High or Medium",
-										MarkdownDescription: "Mitigate High and Medium Risk Mitigate requests if the risk score is High or Medium",
+										MarkdownDescription: "Mitigate High and Medium Risk Mitigate requests if the risk score is High or Medium<br>Conflicts with `mitigate_high_risk_action`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1454,7 +1487,7 @@ func (r *ResourceF5XCAppFirewall) Schema(ctx context.Context, request resource.S
 									},
 									"mitigate_high_risk_action": schema.BoolAttribute{
 										Description:         "Mitigate High Risk Only Mitigate requests only if the risk score is classified as High",
-										MarkdownDescription: "Mitigate High Risk Only Mitigate requests only if the risk score is classified as High",
+										MarkdownDescription: "Mitigate High Risk Only Mitigate requests only if the risk score is classified as High<br>Conflicts with `mitigate_high_medium_risk_action`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -1621,7 +1654,7 @@ func (r *ResourceF5XCAppFirewall) Create(ctx context.Context, request resource.C
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> AllowedResponseCodesChoice
+	// resource modelToSpecRoot OneOfField --> AllowedResponseCodesChoice
 	if !data.AllowedResponseCodesChoice.IsNull() && !data.AllowedResponseCodesChoice.IsUnknown() {
 		allowedResponseCodesChoiceModel := AppFirewallAllowedRespCodesChoice{}
 		response.Diagnostics.Append(data.AllowedResponseCodesChoice.As(ctx, &allowedResponseCodesChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1659,9 +1692,13 @@ func (r *ResourceF5XCAppFirewall) Create(ctx context.Context, request resource.C
 
 		}
 
+	} else {
+		spec.AllowedResponseCodesChoice = &ves_io_schema_app_firewall.CreateSpecType_AllowAllResponseCodes{
+			AllowAllResponseCodes: &ves_io_schema.Empty{},
+		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> AnonymizationSetting
+	// resource modelToSpecRoot OneOfField --> AnonymizationSetting
 	if !data.AnonymizationSettingChoice.IsNull() && !data.AnonymizationSettingChoice.IsUnknown() {
 		anonymizationSettingChoiceModel := AppFirewallAnonymizationSettingChoice{}
 		response.Diagnostics.Append(data.AnonymizationSettingChoice.As(ctx, &anonymizationSettingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1783,9 +1820,13 @@ func (r *ResourceF5XCAppFirewall) Create(ctx context.Context, request resource.C
 			spec.AnonymizationSetting = disableAnonymizationSpecBool
 		}
 
+	} else {
+		spec.AnonymizationSetting = &ves_io_schema_app_firewall.CreateSpecType_DefaultAnonymization{
+			DefaultAnonymization: &ves_io_schema.Empty{},
+		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> BlockingPageChoice
+	// resource modelToSpecRoot OneOfField --> BlockingPageChoice
 	if !data.BlockingPageChoice.IsNull() && !data.BlockingPageChoice.IsUnknown() {
 		blockingPageChoiceModel := AppFirewallBlockingPageChoice{}
 		response.Diagnostics.Append(data.BlockingPageChoice.As(ctx, &blockingPageChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1844,9 +1885,13 @@ func (r *ResourceF5XCAppFirewall) Create(ctx context.Context, request resource.C
 			spec.BlockingPageChoice = useDefaultBlockingPageSpecBool
 		}
 
+	} else {
+		spec.BlockingPageChoice = &ves_io_schema_app_firewall.CreateSpecType_UseDefaultBlockingPage{
+			UseDefaultBlockingPage: &ves_io_schema.Empty{},
+		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> DetectionSettingChoice
+	// resource modelToSpecRoot OneOfField --> DetectionSettingChoice
 	if !data.DetectionSettingChoice.IsNull() && !data.DetectionSettingChoice.IsUnknown() {
 		detectionSettingChoiceModel := AppFirewallDetectionSettingChoice{}
 		response.Diagnostics.Append(data.DetectionSettingChoice.As(ctx, &detectionSettingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1873,9 +1918,18 @@ func (r *ResourceF5XCAppFirewall) Create(ctx context.Context, request resource.C
 			detectionSettingsOneOfSpec.DetectionSettings.ViolationDetectionSetting = &ves_io_schema_app_firewall.DetectionSetting_DefaultViolationSettings{
 				DefaultViolationSettings: &ves_io_schema.Empty{},
 			}
+			detectionSettingsOneOfSpec.DetectionSettings.BotProtectionChoice = &ves_io_schema_app_firewall.DetectionSetting_DefaultBotSetting{
+				DefaultBotSetting: &ves_io_schema.Empty{},
+			}
+			detectionSettingsOneOfSpec.DetectionSettings.FalsePositiveSuppression = &ves_io_schema_app_firewall.DetectionSetting_EnableSuppression{
+				EnableSuppression: &ves_io_schema.Empty{},
+			}
+			detectionSettingsOneOfSpec.DetectionSettings.ThreatCampaignChoice = &ves_io_schema_app_firewall.DetectionSetting_EnableThreatCampaigns{
+				EnableThreatCampaigns: &ves_io_schema.Empty{},
+			}
 			spec.DetectionSettingChoice = detectionSettingsOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> BotProtectionChoice
+			// resource modelToSpecNested OneOfField --> BotProtectionChoice
 			if !appFirewallDetectionSettingsModel.BotProtectionChoice.IsNull() && !appFirewallDetectionSettingsModel.BotProtectionChoice.IsUnknown() {
 				detectionSettingsBotProtectionChoiceModel := AppFirewallBotProtectionChoice{}
 				response.Diagnostics.Append(appFirewallDetectionSettingsModel.BotProtectionChoice.As(ctx, &detectionSettingsBotProtectionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1977,7 +2031,7 @@ func (r *ResourceF5XCAppFirewall) Create(ctx context.Context, request resource.C
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> FalsePositiveSuppression
+			// resource modelToSpecNested OneOfField --> FalsePositiveSuppression
 			if !appFirewallDetectionSettingsModel.FalsePositiveSuppressionChoice.IsNull() && !appFirewallDetectionSettingsModel.FalsePositiveSuppressionChoice.IsUnknown() {
 				detectionSettingsFalsePositiveSuppressionChoiceModel := AppFirewallFalsePositiveSuppressionChoice{}
 				response.Diagnostics.Append(appFirewallDetectionSettingsModel.FalsePositiveSuppressionChoice.As(ctx, &detectionSettingsFalsePositiveSuppressionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2013,9 +2067,12 @@ func (r *ResourceF5XCAppFirewall) Create(ctx context.Context, request resource.C
 				signatureSelectionSettingSpec.SignatureSelectionByAccuracy = &ves_io_schema_app_firewall.SignatureSelectionSetting_HighMediumAccuracySignatures{
 					HighMediumAccuracySignatures: &ves_io_schema.Empty{},
 				}
+				signatureSelectionSettingSpec.AttackTypeSetting = &ves_io_schema_app_firewall.SignatureSelectionSetting_DefaultAttackTypeSettings{
+					DefaultAttackTypeSettings: &ves_io_schema.Empty{},
+				}
 				detectionSettingsOneOfSpec.DetectionSettings.SignatureSelectionSetting = signatureSelectionSettingSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> AttackTypeSetting
+				// resource modelToSpecNested OneOfField --> AttackTypeSetting
 				if !signatureSelectionSettingModel.AttackTypeSettingChoice.IsNull() && !signatureSelectionSettingModel.AttackTypeSettingChoice.IsUnknown() {
 					signatureSelectionSettingAttackTypeSettingChoiceModel := AppFirewallAttackTypeSettingChoice{}
 					response.Diagnostics.Append(signatureSelectionSettingModel.AttackTypeSettingChoice.As(ctx, &signatureSelectionSettingAttackTypeSettingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2252,7 +2309,7 @@ func (r *ResourceF5XCAppFirewall) Create(ctx context.Context, request resource.C
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ThreatCampaignChoice
+			// resource modelToSpecNested OneOfField --> ThreatCampaignChoice
 			if !appFirewallDetectionSettingsModel.ThreatCampaignChoice.IsNull() && !appFirewallDetectionSettingsModel.ThreatCampaignChoice.IsUnknown() {
 				detectionSettingsThreatCampaignChoiceModel := AppFirewallThreatCampaignChoice{}
 				response.Diagnostics.Append(appFirewallDetectionSettingsModel.ThreatCampaignChoice.As(ctx, &detectionSettingsThreatCampaignChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2331,9 +2388,13 @@ func (r *ResourceF5XCAppFirewall) Create(ctx context.Context, request resource.C
 
 		}
 
+	} else {
+		spec.DetectionSettingChoice = &ves_io_schema_app_firewall.CreateSpecType_DefaultDetectionSettings{
+			DefaultDetectionSettings: &ves_io_schema.Empty{},
+		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> EnforcementModeChoice
+	// resource modelToSpecRoot OneOfField --> EnforcementModeChoice
 	if !data.EnforcementModeChoice.IsNull() && !data.EnforcementModeChoice.IsUnknown() {
 		enforcementModeChoiceModel := AppFirewallEnforcementModeChoice{}
 		response.Diagnostics.Append(data.EnforcementModeChoice.As(ctx, &enforcementModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2355,9 +2416,13 @@ func (r *ResourceF5XCAppFirewall) Create(ctx context.Context, request resource.C
 			spec.EnforcementModeChoice = monitoringSpecBool
 		}
 
+	} else {
+		spec.EnforcementModeChoice = &ves_io_schema_app_firewall.CreateSpecType_Monitoring{
+			Monitoring: &ves_io_schema.Empty{},
+		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> EnhanceWithAiChoice
+	// resource modelToSpecRoot OneOfField --> EnhanceWithAiChoice
 	if !data.EnhanceWithAiChoice.IsNull() && !data.EnhanceWithAiChoice.IsUnknown() {
 		enhanceWithAiChoiceModel := AppFirewallEnhanceWithAiChoice{}
 		response.Diagnostics.Append(data.EnhanceWithAiChoice.As(ctx, &enhanceWithAiChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2381,9 +2446,12 @@ func (r *ResourceF5XCAppFirewall) Create(ctx context.Context, request resource.C
 			}
 			enableAiEnhancementsOneOfSpec := &ves_io_schema_app_firewall.CreateSpecType_EnableAiEnhancements{}
 			enableAiEnhancementsOneOfSpec.EnableAiEnhancements = &ves_io_schema_app_firewall.AIEnhancementsConfig{}
+			enableAiEnhancementsOneOfSpec.EnableAiEnhancements.RiskScoreActionChoice = &ves_io_schema_app_firewall.AIEnhancementsConfig_MitigateHighRiskAction{
+				MitigateHighRiskAction: &ves_io_schema.Empty{},
+			}
 			spec.EnhanceWithAiChoice = enableAiEnhancementsOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> RiskScoreActionChoice
+			// resource modelToSpecNested OneOfField --> RiskScoreActionChoice
 			if !appFirewallEnableAiEnhancementsModel.RiskScoreActionChoice.IsNull() && !appFirewallEnableAiEnhancementsModel.RiskScoreActionChoice.IsUnknown() {
 				enableAiEnhancementsRiskScoreActionChoiceModel := AppFirewallRiskScoreActionChoice{}
 				response.Diagnostics.Append(appFirewallEnableAiEnhancementsModel.RiskScoreActionChoice.As(ctx, &enableAiEnhancementsRiskScoreActionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2409,7 +2477,12 @@ func (r *ResourceF5XCAppFirewall) Create(ctx context.Context, request resource.C
 
 		}
 
+	} else {
+		spec.EnhanceWithAiChoice = &ves_io_schema_app_firewall.CreateSpecType_DisableAiEnhancements{
+			DisableAiEnhancements: &ves_io_schema.Empty{},
+		}
 	}
+
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
@@ -2554,7 +2627,7 @@ func (r *ResourceF5XCAppFirewall) Create(ctx context.Context, request resource.C
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> AllowedResponseCodesChoice
+	// resource SpecToModelRoot OneOfField --> AllowedResponseCodesChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -2629,12 +2702,10 @@ func (r *ResourceF5XCAppFirewall) Create(ctx context.Context, request resource.C
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.AllowedResponseCodesChoice = types.ObjectNull(AppFirewallAllowedResponseCodesChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> AnonymizationSetting
+	// resource SpecToModelRoot OneOfField --> AnonymizationSetting
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -2846,12 +2917,10 @@ func (r *ResourceF5XCAppFirewall) Create(ctx context.Context, request resource.C
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.AnonymizationSettingChoice = types.ObjectNull(AppFirewallAnonymizationSettingModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> BlockingPageChoice
+	// resource SpecToModelRoot OneOfField --> BlockingPageChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -2935,12 +3004,10 @@ func (r *ResourceF5XCAppFirewall) Create(ctx context.Context, request resource.C
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.BlockingPageChoice = types.ObjectNull(AppFirewallBlockingPageChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> DetectionSettingChoice
+	// resource SpecToModelRoot OneOfField --> DetectionSettingChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -2972,8 +3039,7 @@ func (r *ResourceF5XCAppFirewall) Create(ctx context.Context, request resource.C
 			if isDetectionSettings && detectionSettingsOptionsWrapper != nil && detectionSettingsOptionsWrapper.DetectionSettings != nil {
 				detectionSettingsElement := detectionSettingsOptionsWrapper.DetectionSettings
 
-				// resource specToModelNested RequiredOneOfField --> BotProtectionChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> BotProtectionChoice
 				if detectionSettingsElement.GetBotProtectionChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					detectionSettingsbotProtectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3080,8 +3146,7 @@ func (r *ResourceF5XCAppFirewall) Create(ctx context.Context, request resource.C
 					detectionSettingsAttributeMap["bot_protection_choice"] = types.ObjectNull(AppFirewallDetectionSettingChoiceDetectionSettingsBotProtectionChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> FalsePositiveSuppression
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> FalsePositiveSuppression
 				if detectionSettingsElement.GetFalsePositiveSuppression() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					detectionSettingsfalsePositiveSuppressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3136,8 +3201,7 @@ func (r *ResourceF5XCAppFirewall) Create(ctx context.Context, request resource.C
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> AttackTypeSetting
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> AttackTypeSetting
 					if signatureSelectionSettingElement.GetAttackTypeSetting() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						signatureSelectionSettingattackTypeSettingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3522,8 +3586,7 @@ func (r *ResourceF5XCAppFirewall) Create(ctx context.Context, request resource.C
 					detectionSettingsAttributeMap["signatures_staging_settings_choice"] = types.ObjectNull(AppFirewallDetectionSettingChoiceDetectionSettingsSignaturesStagingSettingsModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ThreatCampaignChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> ThreatCampaignChoice
 				if detectionSettingsElement.GetThreatCampaignChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					detectionSettingsthreatCampaignChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3677,12 +3740,10 @@ func (r *ResourceF5XCAppFirewall) Create(ctx context.Context, request resource.C
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.DetectionSettingChoice = types.ObjectNull(AppFirewallDetectionSettingChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> EnforcementModeChoice
+	// resource SpecToModelRoot OneOfField --> EnforcementModeChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -3730,12 +3791,10 @@ func (r *ResourceF5XCAppFirewall) Create(ctx context.Context, request resource.C
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.EnforcementModeChoice = types.ObjectNull(AppFirewallEnforcementModeChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> EnhanceWithAiChoice
+	// resource SpecToModelRoot OneOfField --> EnhanceWithAiChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -3767,8 +3826,7 @@ func (r *ResourceF5XCAppFirewall) Create(ctx context.Context, request resource.C
 			if isEnableAiEnhancements && enableAiEnhancementsOptionsWrapper != nil && enableAiEnhancementsOptionsWrapper.EnableAiEnhancements != nil {
 				enableAiEnhancementsElement := enableAiEnhancementsOptionsWrapper.EnableAiEnhancements
 
-				// resource specToModelNested RequiredOneOfField --> RiskScoreActionChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> RiskScoreActionChoice
 				if enableAiEnhancementsElement.GetRiskScoreActionChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					enableAiEnhancementsriskScoreActionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3843,8 +3901,6 @@ func (r *ResourceF5XCAppFirewall) Create(ctx context.Context, request resource.C
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.EnhanceWithAiChoice = types.ObjectNull(AppFirewallEnhanceWithAiChoiceModelAttributeMap)
 	}
 
@@ -3891,11 +3947,7 @@ func (r *ResourceF5XCAppFirewall) Read(ctx context.Context, request resource.Rea
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_app_firewall.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_app_firewall.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "app_firewall", err),
@@ -4016,7 +4068,7 @@ func (r *ResourceF5XCAppFirewall) Read(ctx context.Context, request resource.Rea
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> AllowedResponseCodesChoice
+	// resource SpecToModelRoot OneOfField --> AllowedResponseCodesChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -4091,8 +4143,6 @@ func (r *ResourceF5XCAppFirewall) Read(ctx context.Context, request resource.Rea
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.AllowedResponseCodesChoice.IsNull() || data.AllowedResponseCodesChoice.IsUnknown() || ((data.AllowedResponseCodesChoice.Attributes()["allow_all_response_codes"].IsNull() || data.AllowedResponseCodesChoice.Attributes()["allow_all_response_codes"].IsUnknown()) && (data.AllowedResponseCodesChoice.Attributes()["allowed_response_codes"].(types.Object).IsNull() || data.AllowedResponseCodesChoice.Attributes()["allowed_response_codes"].(types.Object).IsUnknown() || (data.AllowedResponseCodesChoice.Attributes()["allowed_response_codes"].(types.Object).Attributes()["response_code"].IsNull() || data.AllowedResponseCodesChoice.Attributes()["allowed_response_codes"].(types.Object).Attributes()["response_code"].IsUnknown()))) {
 			data.AllowedResponseCodesChoice = types.ObjectValueMust(AppFirewallAllowedResponseCodesChoiceModelAttributeMap, map[string]attr.Value{
@@ -4102,7 +4152,7 @@ func (r *ResourceF5XCAppFirewall) Read(ctx context.Context, request resource.Rea
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> AnonymizationSetting
+	// resource SpecToModelRoot OneOfField --> AnonymizationSetting
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -4314,8 +4364,6 @@ func (r *ResourceF5XCAppFirewall) Read(ctx context.Context, request resource.Rea
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.AnonymizationSettingChoice.IsNull() || data.AnonymizationSettingChoice.IsUnknown() || ((data.AnonymizationSettingChoice.Attributes()["custom_anonymization"].(types.Object).IsNull() || data.AnonymizationSettingChoice.Attributes()["custom_anonymization"].(types.Object).IsUnknown() || (data.AnonymizationSettingChoice.Attributes()["custom_anonymization"].(types.Object).Attributes()["anonymization_config"].IsNull() || data.AnonymizationSettingChoice.Attributes()["custom_anonymization"].(types.Object).Attributes()["anonymization_config"].IsUnknown())) && (data.AnonymizationSettingChoice.Attributes()["default_anonymization"].IsNull() || data.AnonymizationSettingChoice.Attributes()["default_anonymization"].IsUnknown()) && (data.AnonymizationSettingChoice.Attributes()["disable_anonymization"].IsNull() || data.AnonymizationSettingChoice.Attributes()["disable_anonymization"].IsUnknown())) {
 			data.AnonymizationSettingChoice = types.ObjectValueMust(AppFirewallAnonymizationSettingModelAttributeMap, map[string]attr.Value{
@@ -4326,7 +4374,7 @@ func (r *ResourceF5XCAppFirewall) Read(ctx context.Context, request resource.Rea
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> BlockingPageChoice
+	// resource SpecToModelRoot OneOfField --> BlockingPageChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -4410,8 +4458,6 @@ func (r *ResourceF5XCAppFirewall) Read(ctx context.Context, request resource.Rea
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.BlockingPageChoice.IsNull() || data.BlockingPageChoice.IsUnknown() || ((data.BlockingPageChoice.Attributes()["blocking_page"].(types.Object).IsNull() || data.BlockingPageChoice.Attributes()["blocking_page"].(types.Object).IsUnknown() || ((data.BlockingPageChoice.Attributes()["blocking_page"].(types.Object).Attributes()["blocking_page"].IsNull() || data.BlockingPageChoice.Attributes()["blocking_page"].(types.Object).Attributes()["blocking_page"].IsUnknown()) && (data.BlockingPageChoice.Attributes()["blocking_page"].(types.Object).Attributes()["response_code"].IsNull() || data.BlockingPageChoice.Attributes()["blocking_page"].(types.Object).Attributes()["response_code"].IsUnknown()))) && (data.BlockingPageChoice.Attributes()["use_default_blocking_page"].IsNull() || data.BlockingPageChoice.Attributes()["use_default_blocking_page"].IsUnknown())) {
 			data.BlockingPageChoice = types.ObjectValueMust(AppFirewallBlockingPageChoiceModelAttributeMap, map[string]attr.Value{
@@ -4421,7 +4467,7 @@ func (r *ResourceF5XCAppFirewall) Read(ctx context.Context, request resource.Rea
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> DetectionSettingChoice
+	// resource SpecToModelRoot OneOfField --> DetectionSettingChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -4453,8 +4499,7 @@ func (r *ResourceF5XCAppFirewall) Read(ctx context.Context, request resource.Rea
 			if isDetectionSettings && detectionSettingsOptionsWrapper != nil && detectionSettingsOptionsWrapper.DetectionSettings != nil {
 				detectionSettingsElement := detectionSettingsOptionsWrapper.DetectionSettings
 
-				// resource specToModelNested RequiredOneOfField --> BotProtectionChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> BotProtectionChoice
 				if detectionSettingsElement.GetBotProtectionChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					detectionSettingsbotProtectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -4564,8 +4609,7 @@ func (r *ResourceF5XCAppFirewall) Read(ctx context.Context, request resource.Rea
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> FalsePositiveSuppression
-				// <no value>
+				// resource specToModelNested OneOfField --> FalsePositiveSuppression
 				if detectionSettingsElement.GetFalsePositiveSuppression() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					detectionSettingsfalsePositiveSuppressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -4623,8 +4667,7 @@ func (r *ResourceF5XCAppFirewall) Read(ctx context.Context, request resource.Rea
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> AttackTypeSetting
-					// <no value>
+					// resource specToModelNested OneOfField --> AttackTypeSetting
 					if signatureSelectionSettingElement.GetAttackTypeSetting() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						signatureSelectionSettingattackTypeSettingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5012,8 +5055,7 @@ func (r *ResourceF5XCAppFirewall) Read(ctx context.Context, request resource.Rea
 					detectionSettingsAttributeMap["signatures_staging_settings_choice"] = types.ObjectNull(AppFirewallDetectionSettingChoiceDetectionSettingsSignaturesStagingSettingsModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ThreatCampaignChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> ThreatCampaignChoice
 				if detectionSettingsElement.GetThreatCampaignChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					detectionSettingsthreatCampaignChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5170,8 +5212,6 @@ func (r *ResourceF5XCAppFirewall) Read(ctx context.Context, request resource.Rea
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.DetectionSettingChoice.IsNull() || data.DetectionSettingChoice.IsUnknown() || ((data.DetectionSettingChoice.Attributes()["default_detection_settings"].IsNull() || data.DetectionSettingChoice.Attributes()["default_detection_settings"].IsUnknown()) && (data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).IsUnknown() || ((data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["bot_protection_choice"].(types.Object).IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["bot_protection_choice"].(types.Object).IsUnknown() || ((data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["bot_protection_choice"].(types.Object).Attributes()["bot_protection_setting"].(types.Object).IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["bot_protection_choice"].(types.Object).Attributes()["bot_protection_setting"].(types.Object).IsUnknown() || ((data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["bot_protection_choice"].(types.Object).Attributes()["bot_protection_setting"].(types.Object).Attributes()["good_bot_action"].IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["bot_protection_choice"].(types.Object).Attributes()["bot_protection_setting"].(types.Object).Attributes()["good_bot_action"].IsUnknown()) && (data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["bot_protection_choice"].(types.Object).Attributes()["bot_protection_setting"].(types.Object).Attributes()["malicious_bot_action"].IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["bot_protection_choice"].(types.Object).Attributes()["bot_protection_setting"].(types.Object).Attributes()["malicious_bot_action"].IsUnknown()) && (data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["bot_protection_choice"].(types.Object).Attributes()["bot_protection_setting"].(types.Object).Attributes()["suspicious_bot_action"].IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["bot_protection_choice"].(types.Object).Attributes()["bot_protection_setting"].(types.Object).Attributes()["suspicious_bot_action"].IsUnknown()))) && (data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["bot_protection_choice"].(types.Object).Attributes()["default_bot_setting"].IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["bot_protection_choice"].(types.Object).Attributes()["default_bot_setting"].IsUnknown()))) && (data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["false_positive_suppression_choice"].(types.Object).IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["false_positive_suppression_choice"].(types.Object).IsUnknown() || ((data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["false_positive_suppression_choice"].(types.Object).Attributes()["disable_suppression"].IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["false_positive_suppression_choice"].(types.Object).Attributes()["disable_suppression"].IsUnknown()) && (data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["false_positive_suppression_choice"].(types.Object).Attributes()["enable_suppression"].IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["false_positive_suppression_choice"].(types.Object).Attributes()["enable_suppression"].IsUnknown()))) && (data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).IsUnknown() || ((data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["attack_type_setting_choice"].(types.Object).IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["attack_type_setting_choice"].(types.Object).IsUnknown() || ((data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["attack_type_setting_choice"].(types.Object).Attributes()["attack_type_settings"].(types.Object).IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["attack_type_setting_choice"].(types.Object).Attributes()["attack_type_settings"].(types.Object).IsUnknown() || (data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["attack_type_setting_choice"].(types.Object).Attributes()["attack_type_settings"].(types.Object).Attributes()["disabled_attack_types"].IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["attack_type_setting_choice"].(types.Object).Attributes()["attack_type_settings"].(types.Object).Attributes()["disabled_attack_types"].IsUnknown())) && (data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["attack_type_setting_choice"].(types.Object).Attributes()["default_attack_type_settings"].IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["attack_type_setting_choice"].(types.Object).Attributes()["default_attack_type_settings"].IsUnknown()))) && (data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["signature_protection_choice"].(types.Object).IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["signature_protection_choice"].(types.Object).IsUnknown() || ((data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["signature_protection_choice"].(types.Object).Attributes()["default_signature_setting"].IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["signature_protection_choice"].(types.Object).Attributes()["default_signature_setting"].IsUnknown()) && (data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["signature_protection_choice"].(types.Object).Attributes()["signature_settings_by_accuracy"].(types.Object).IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["signature_protection_choice"].(types.Object).Attributes()["signature_settings_by_accuracy"].(types.Object).IsUnknown() || ((data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["signature_protection_choice"].(types.Object).Attributes()["signature_settings_by_accuracy"].(types.Object).Attributes()["high_accuracy_action"].IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["signature_protection_choice"].(types.Object).Attributes()["signature_settings_by_accuracy"].(types.Object).Attributes()["high_accuracy_action"].IsUnknown()) && (data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["signature_protection_choice"].(types.Object).Attributes()["signature_settings_by_accuracy"].(types.Object).Attributes()["low_accuracy_action"].IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["signature_protection_choice"].(types.Object).Attributes()["signature_settings_by_accuracy"].(types.Object).Attributes()["low_accuracy_action"].IsUnknown()) && (data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["signature_protection_choice"].(types.Object).Attributes()["signature_settings_by_accuracy"].(types.Object).Attributes()["medium_accuracy_action"].IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["signature_protection_choice"].(types.Object).Attributes()["signature_settings_by_accuracy"].(types.Object).Attributes()["medium_accuracy_action"].IsUnknown()))))) && (data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["signature_selection_by_accuracy_choice"].(types.Object).IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["signature_selection_by_accuracy_choice"].(types.Object).IsUnknown() || ((data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["signature_selection_by_accuracy_choice"].(types.Object).Attributes()["high_medium_accuracy_signatures"].IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["signature_selection_by_accuracy_choice"].(types.Object).Attributes()["high_medium_accuracy_signatures"].IsUnknown()) && (data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["signature_selection_by_accuracy_choice"].(types.Object).Attributes()["high_medium_low_accuracy_signatures"].IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["signature_selection_by_accuracy_choice"].(types.Object).Attributes()["high_medium_low_accuracy_signatures"].IsUnknown()) && (data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["signature_selection_by_accuracy_choice"].(types.Object).Attributes()["only_high_accuracy_signatures"].IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signature_selection_setting"].(types.Object).Attributes()["signature_selection_by_accuracy_choice"].(types.Object).Attributes()["only_high_accuracy_signatures"].IsUnknown()))))) && (data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signatures_staging_settings_choice"].(types.Object).IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signatures_staging_settings_choice"].(types.Object).IsUnknown() || ((data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signatures_staging_settings_choice"].(types.Object).Attributes()["disable_staging"].IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signatures_staging_settings_choice"].(types.Object).Attributes()["disable_staging"].IsUnknown()) && (data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signatures_staging_settings_choice"].(types.Object).Attributes()["stage_new_and_updated_signatures"].(types.Object).IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signatures_staging_settings_choice"].(types.Object).Attributes()["stage_new_and_updated_signatures"].(types.Object).IsUnknown() || (data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signatures_staging_settings_choice"].(types.Object).Attributes()["stage_new_and_updated_signatures"].(types.Object).Attributes()["staging_period"].IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signatures_staging_settings_choice"].(types.Object).Attributes()["stage_new_and_updated_signatures"].(types.Object).Attributes()["staging_period"].IsUnknown())) && (data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signatures_staging_settings_choice"].(types.Object).Attributes()["stage_new_signatures"].(types.Object).IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signatures_staging_settings_choice"].(types.Object).Attributes()["stage_new_signatures"].(types.Object).IsUnknown() || (data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signatures_staging_settings_choice"].(types.Object).Attributes()["stage_new_signatures"].(types.Object).Attributes()["staging_period"].IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["signatures_staging_settings_choice"].(types.Object).Attributes()["stage_new_signatures"].(types.Object).Attributes()["staging_period"].IsUnknown())))) && (data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["threat_campaign_choice"].(types.Object).IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["threat_campaign_choice"].(types.Object).IsUnknown() || ((data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["threat_campaign_choice"].(types.Object).Attributes()["disable_threat_campaigns"].IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["threat_campaign_choice"].(types.Object).Attributes()["disable_threat_campaigns"].IsUnknown()) && (data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["threat_campaign_choice"].(types.Object).Attributes()["enable_threat_campaigns"].IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["threat_campaign_choice"].(types.Object).Attributes()["enable_threat_campaigns"].IsUnknown()))) && (data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["violation_detection_setting_choice"].(types.Object).IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["violation_detection_setting_choice"].(types.Object).IsUnknown() || ((data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["violation_detection_setting_choice"].(types.Object).Attributes()["default_violation_settings"].IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["violation_detection_setting_choice"].(types.Object).Attributes()["default_violation_settings"].IsUnknown()) && (data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["violation_detection_setting_choice"].(types.Object).Attributes()["violation_settings"].(types.Object).IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["violation_detection_setting_choice"].(types.Object).Attributes()["violation_settings"].(types.Object).IsUnknown() || (data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["violation_detection_setting_choice"].(types.Object).Attributes()["violation_settings"].(types.Object).Attributes()["disabled_violation_types"].IsNull() || data.DetectionSettingChoice.Attributes()["detection_settings"].(types.Object).Attributes()["violation_detection_setting_choice"].(types.Object).Attributes()["violation_settings"].(types.Object).Attributes()["disabled_violation_types"].IsUnknown()))))))) {
 			data.DetectionSettingChoice = types.ObjectValueMust(AppFirewallDetectionSettingChoiceModelAttributeMap, map[string]attr.Value{
@@ -5181,7 +5221,7 @@ func (r *ResourceF5XCAppFirewall) Read(ctx context.Context, request resource.Rea
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> EnforcementModeChoice
+	// resource SpecToModelRoot OneOfField --> EnforcementModeChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -5229,8 +5269,6 @@ func (r *ResourceF5XCAppFirewall) Read(ctx context.Context, request resource.Rea
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.EnforcementModeChoice.IsNull() || data.EnforcementModeChoice.IsUnknown() || ((data.EnforcementModeChoice.Attributes()["blocking"].IsNull() || data.EnforcementModeChoice.Attributes()["blocking"].IsUnknown()) && (data.EnforcementModeChoice.Attributes()["monitoring"].IsNull() || data.EnforcementModeChoice.Attributes()["monitoring"].IsUnknown())) {
 			data.EnforcementModeChoice = types.ObjectValueMust(AppFirewallEnforcementModeChoiceModelAttributeMap, map[string]attr.Value{
@@ -5240,7 +5278,7 @@ func (r *ResourceF5XCAppFirewall) Read(ctx context.Context, request resource.Rea
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> EnhanceWithAiChoice
+	// resource SpecToModelRoot OneOfField --> EnhanceWithAiChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -5272,8 +5310,7 @@ func (r *ResourceF5XCAppFirewall) Read(ctx context.Context, request resource.Rea
 			if isEnableAiEnhancements && enableAiEnhancementsOptionsWrapper != nil && enableAiEnhancementsOptionsWrapper.EnableAiEnhancements != nil {
 				enableAiEnhancementsElement := enableAiEnhancementsOptionsWrapper.EnableAiEnhancements
 
-				// resource specToModelNested RequiredOneOfField --> RiskScoreActionChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> RiskScoreActionChoice
 				if enableAiEnhancementsElement.GetRiskScoreActionChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					enableAiEnhancementsriskScoreActionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5351,8 +5388,6 @@ func (r *ResourceF5XCAppFirewall) Read(ctx context.Context, request resource.Rea
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.EnhanceWithAiChoice.IsNull() || data.EnhanceWithAiChoice.IsUnknown() || ((data.EnhanceWithAiChoice.Attributes()["disable_ai_enhancements"].IsNull() || data.EnhanceWithAiChoice.Attributes()["disable_ai_enhancements"].IsUnknown()) && (data.EnhanceWithAiChoice.Attributes()["enable_ai_enhancements"].(types.Object).IsNull() || data.EnhanceWithAiChoice.Attributes()["enable_ai_enhancements"].(types.Object).IsUnknown() || (data.EnhanceWithAiChoice.Attributes()["enable_ai_enhancements"].(types.Object).Attributes()["risk_score_action_choice"].(types.Object).IsNull() || data.EnhanceWithAiChoice.Attributes()["enable_ai_enhancements"].(types.Object).Attributes()["risk_score_action_choice"].(types.Object).IsUnknown() || ((data.EnhanceWithAiChoice.Attributes()["enable_ai_enhancements"].(types.Object).Attributes()["risk_score_action_choice"].(types.Object).Attributes()["mitigate_high_medium_risk_action"].IsNull() || data.EnhanceWithAiChoice.Attributes()["enable_ai_enhancements"].(types.Object).Attributes()["risk_score_action_choice"].(types.Object).Attributes()["mitigate_high_medium_risk_action"].IsUnknown()) && (data.EnhanceWithAiChoice.Attributes()["enable_ai_enhancements"].(types.Object).Attributes()["risk_score_action_choice"].(types.Object).Attributes()["mitigate_high_risk_action"].IsNull() || data.EnhanceWithAiChoice.Attributes()["enable_ai_enhancements"].(types.Object).Attributes()["risk_score_action_choice"].(types.Object).Attributes()["mitigate_high_risk_action"].IsUnknown()))))) {
 			data.EnhanceWithAiChoice = types.ObjectValueMust(AppFirewallEnhanceWithAiChoiceModelAttributeMap, map[string]attr.Value{
@@ -5477,7 +5512,7 @@ func (r *ResourceF5XCAppFirewall) Update(ctx context.Context, request resource.U
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> AllowedResponseCodesChoice
+	// resource modelToSpecRoot OneOfField --> AllowedResponseCodesChoice
 	if !data.AllowedResponseCodesChoice.IsNull() && !data.AllowedResponseCodesChoice.IsUnknown() {
 		allowedResponseCodesChoiceModel := AppFirewallAllowedRespCodesChoice{}
 		response.Diagnostics.Append(data.AllowedResponseCodesChoice.As(ctx, &allowedResponseCodesChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5515,9 +5550,13 @@ func (r *ResourceF5XCAppFirewall) Update(ctx context.Context, request resource.U
 
 		}
 
+	} else {
+		spec.AllowedResponseCodesChoice = &ves_io_schema_app_firewall.ReplaceSpecType_AllowAllResponseCodes{
+			AllowAllResponseCodes: &ves_io_schema.Empty{},
+		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> AnonymizationSetting
+	// resource modelToSpecRoot OneOfField --> AnonymizationSetting
 	if !data.AnonymizationSettingChoice.IsNull() && !data.AnonymizationSettingChoice.IsUnknown() {
 		anonymizationSettingChoiceModel := AppFirewallAnonymizationSettingChoice{}
 		response.Diagnostics.Append(data.AnonymizationSettingChoice.As(ctx, &anonymizationSettingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5639,9 +5678,13 @@ func (r *ResourceF5XCAppFirewall) Update(ctx context.Context, request resource.U
 			spec.AnonymizationSetting = disableAnonymizationSpecBool
 		}
 
+	} else {
+		spec.AnonymizationSetting = &ves_io_schema_app_firewall.ReplaceSpecType_DefaultAnonymization{
+			DefaultAnonymization: &ves_io_schema.Empty{},
+		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> BlockingPageChoice
+	// resource modelToSpecRoot OneOfField --> BlockingPageChoice
 	if !data.BlockingPageChoice.IsNull() && !data.BlockingPageChoice.IsUnknown() {
 		blockingPageChoiceModel := AppFirewallBlockingPageChoice{}
 		response.Diagnostics.Append(data.BlockingPageChoice.As(ctx, &blockingPageChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5700,9 +5743,13 @@ func (r *ResourceF5XCAppFirewall) Update(ctx context.Context, request resource.U
 			spec.BlockingPageChoice = useDefaultBlockingPageSpecBool
 		}
 
+	} else {
+		spec.BlockingPageChoice = &ves_io_schema_app_firewall.ReplaceSpecType_UseDefaultBlockingPage{
+			UseDefaultBlockingPage: &ves_io_schema.Empty{},
+		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> DetectionSettingChoice
+	// resource modelToSpecRoot OneOfField --> DetectionSettingChoice
 	if !data.DetectionSettingChoice.IsNull() && !data.DetectionSettingChoice.IsUnknown() {
 		detectionSettingChoiceModel := AppFirewallDetectionSettingChoice{}
 		response.Diagnostics.Append(data.DetectionSettingChoice.As(ctx, &detectionSettingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5729,9 +5776,18 @@ func (r *ResourceF5XCAppFirewall) Update(ctx context.Context, request resource.U
 			detectionSettingsOneOfSpec.DetectionSettings.ViolationDetectionSetting = &ves_io_schema_app_firewall.DetectionSetting_DefaultViolationSettings{
 				DefaultViolationSettings: &ves_io_schema.Empty{},
 			}
+			detectionSettingsOneOfSpec.DetectionSettings.BotProtectionChoice = &ves_io_schema_app_firewall.DetectionSetting_DefaultBotSetting{
+				DefaultBotSetting: &ves_io_schema.Empty{},
+			}
+			detectionSettingsOneOfSpec.DetectionSettings.FalsePositiveSuppression = &ves_io_schema_app_firewall.DetectionSetting_EnableSuppression{
+				EnableSuppression: &ves_io_schema.Empty{},
+			}
+			detectionSettingsOneOfSpec.DetectionSettings.ThreatCampaignChoice = &ves_io_schema_app_firewall.DetectionSetting_EnableThreatCampaigns{
+				EnableThreatCampaigns: &ves_io_schema.Empty{},
+			}
 			spec.DetectionSettingChoice = detectionSettingsOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> BotProtectionChoice
+			// resource modelToSpecNested OneOfField --> BotProtectionChoice
 			if !appFirewallDetectionSettingsModel.BotProtectionChoice.IsNull() && !appFirewallDetectionSettingsModel.BotProtectionChoice.IsUnknown() {
 				detectionSettingsBotProtectionChoiceModel := AppFirewallBotProtectionChoice{}
 				response.Diagnostics.Append(appFirewallDetectionSettingsModel.BotProtectionChoice.As(ctx, &detectionSettingsBotProtectionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5833,7 +5889,7 @@ func (r *ResourceF5XCAppFirewall) Update(ctx context.Context, request resource.U
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> FalsePositiveSuppression
+			// resource modelToSpecNested OneOfField --> FalsePositiveSuppression
 			if !appFirewallDetectionSettingsModel.FalsePositiveSuppressionChoice.IsNull() && !appFirewallDetectionSettingsModel.FalsePositiveSuppressionChoice.IsUnknown() {
 				detectionSettingsFalsePositiveSuppressionChoiceModel := AppFirewallFalsePositiveSuppressionChoice{}
 				response.Diagnostics.Append(appFirewallDetectionSettingsModel.FalsePositiveSuppressionChoice.As(ctx, &detectionSettingsFalsePositiveSuppressionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5869,9 +5925,12 @@ func (r *ResourceF5XCAppFirewall) Update(ctx context.Context, request resource.U
 				signatureSelectionSettingSpec.SignatureSelectionByAccuracy = &ves_io_schema_app_firewall.SignatureSelectionSetting_HighMediumAccuracySignatures{
 					HighMediumAccuracySignatures: &ves_io_schema.Empty{},
 				}
+				signatureSelectionSettingSpec.AttackTypeSetting = &ves_io_schema_app_firewall.SignatureSelectionSetting_DefaultAttackTypeSettings{
+					DefaultAttackTypeSettings: &ves_io_schema.Empty{},
+				}
 				detectionSettingsOneOfSpec.DetectionSettings.SignatureSelectionSetting = signatureSelectionSettingSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> AttackTypeSetting
+				// resource modelToSpecNested OneOfField --> AttackTypeSetting
 				if !signatureSelectionSettingModel.AttackTypeSettingChoice.IsNull() && !signatureSelectionSettingModel.AttackTypeSettingChoice.IsUnknown() {
 					signatureSelectionSettingAttackTypeSettingChoiceModel := AppFirewallAttackTypeSettingChoice{}
 					response.Diagnostics.Append(signatureSelectionSettingModel.AttackTypeSettingChoice.As(ctx, &signatureSelectionSettingAttackTypeSettingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6108,7 +6167,7 @@ func (r *ResourceF5XCAppFirewall) Update(ctx context.Context, request resource.U
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ThreatCampaignChoice
+			// resource modelToSpecNested OneOfField --> ThreatCampaignChoice
 			if !appFirewallDetectionSettingsModel.ThreatCampaignChoice.IsNull() && !appFirewallDetectionSettingsModel.ThreatCampaignChoice.IsUnknown() {
 				detectionSettingsThreatCampaignChoiceModel := AppFirewallThreatCampaignChoice{}
 				response.Diagnostics.Append(appFirewallDetectionSettingsModel.ThreatCampaignChoice.As(ctx, &detectionSettingsThreatCampaignChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6187,9 +6246,13 @@ func (r *ResourceF5XCAppFirewall) Update(ctx context.Context, request resource.U
 
 		}
 
+	} else {
+		spec.DetectionSettingChoice = &ves_io_schema_app_firewall.ReplaceSpecType_DefaultDetectionSettings{
+			DefaultDetectionSettings: &ves_io_schema.Empty{},
+		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> EnforcementModeChoice
+	// resource modelToSpecRoot OneOfField --> EnforcementModeChoice
 	if !data.EnforcementModeChoice.IsNull() && !data.EnforcementModeChoice.IsUnknown() {
 		enforcementModeChoiceModel := AppFirewallEnforcementModeChoice{}
 		response.Diagnostics.Append(data.EnforcementModeChoice.As(ctx, &enforcementModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6211,9 +6274,13 @@ func (r *ResourceF5XCAppFirewall) Update(ctx context.Context, request resource.U
 			spec.EnforcementModeChoice = monitoringSpecBool
 		}
 
+	} else {
+		spec.EnforcementModeChoice = &ves_io_schema_app_firewall.ReplaceSpecType_Monitoring{
+			Monitoring: &ves_io_schema.Empty{},
+		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> EnhanceWithAiChoice
+	// resource modelToSpecRoot OneOfField --> EnhanceWithAiChoice
 	if !data.EnhanceWithAiChoice.IsNull() && !data.EnhanceWithAiChoice.IsUnknown() {
 		enhanceWithAiChoiceModel := AppFirewallEnhanceWithAiChoice{}
 		response.Diagnostics.Append(data.EnhanceWithAiChoice.As(ctx, &enhanceWithAiChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6237,9 +6304,12 @@ func (r *ResourceF5XCAppFirewall) Update(ctx context.Context, request resource.U
 			}
 			enableAiEnhancementsOneOfSpec := &ves_io_schema_app_firewall.ReplaceSpecType_EnableAiEnhancements{}
 			enableAiEnhancementsOneOfSpec.EnableAiEnhancements = &ves_io_schema_app_firewall.AIEnhancementsConfig{}
+			enableAiEnhancementsOneOfSpec.EnableAiEnhancements.RiskScoreActionChoice = &ves_io_schema_app_firewall.AIEnhancementsConfig_MitigateHighRiskAction{
+				MitigateHighRiskAction: &ves_io_schema.Empty{},
+			}
 			spec.EnhanceWithAiChoice = enableAiEnhancementsOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> RiskScoreActionChoice
+			// resource modelToSpecNested OneOfField --> RiskScoreActionChoice
 			if !appFirewallEnableAiEnhancementsModel.RiskScoreActionChoice.IsNull() && !appFirewallEnableAiEnhancementsModel.RiskScoreActionChoice.IsUnknown() {
 				enableAiEnhancementsRiskScoreActionChoiceModel := AppFirewallRiskScoreActionChoice{}
 				response.Diagnostics.Append(appFirewallEnableAiEnhancementsModel.RiskScoreActionChoice.As(ctx, &enableAiEnhancementsRiskScoreActionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6265,7 +6335,12 @@ func (r *ResourceF5XCAppFirewall) Update(ctx context.Context, request resource.U
 
 		}
 
+	} else {
+		spec.EnhanceWithAiChoice = &ves_io_schema_app_firewall.ReplaceSpecType_DisableAiEnhancements{
+			DisableAiEnhancements: &ves_io_schema.Empty{},
+		}
 	}
+
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
@@ -6277,12 +6352,8 @@ func (r *ResourceF5XCAppFirewall) Update(ctx context.Context, request resource.U
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_app_firewall.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_app_firewall.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "app_firewall", err),
@@ -6291,7 +6362,7 @@ func (r *ResourceF5XCAppFirewall) Update(ctx context.Context, request resource.U
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_app_firewall.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_app_firewall.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "app_firewall", err),
@@ -6411,7 +6482,7 @@ func (r *ResourceF5XCAppFirewall) Update(ctx context.Context, request resource.U
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> AllowedResponseCodesChoice
+	// resource SpecToModelRoot OneOfField --> AllowedResponseCodesChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -6486,12 +6557,10 @@ func (r *ResourceF5XCAppFirewall) Update(ctx context.Context, request resource.U
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.AllowedResponseCodesChoice = types.ObjectNull(AppFirewallAllowedResponseCodesChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> AnonymizationSetting
+	// resource SpecToModelRoot OneOfField --> AnonymizationSetting
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -6703,12 +6772,10 @@ func (r *ResourceF5XCAppFirewall) Update(ctx context.Context, request resource.U
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.AnonymizationSettingChoice = types.ObjectNull(AppFirewallAnonymizationSettingModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> BlockingPageChoice
+	// resource SpecToModelRoot OneOfField --> BlockingPageChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -6792,12 +6859,10 @@ func (r *ResourceF5XCAppFirewall) Update(ctx context.Context, request resource.U
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.BlockingPageChoice = types.ObjectNull(AppFirewallBlockingPageChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> DetectionSettingChoice
+	// resource SpecToModelRoot OneOfField --> DetectionSettingChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -6829,8 +6894,7 @@ func (r *ResourceF5XCAppFirewall) Update(ctx context.Context, request resource.U
 			if isDetectionSettings && detectionSettingsOptionsWrapper != nil && detectionSettingsOptionsWrapper.DetectionSettings != nil {
 				detectionSettingsElement := detectionSettingsOptionsWrapper.DetectionSettings
 
-				// resource specToModelNested RequiredOneOfField --> BotProtectionChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> BotProtectionChoice
 				if detectionSettingsElement.GetBotProtectionChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					detectionSettingsbotProtectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -6937,8 +7001,7 @@ func (r *ResourceF5XCAppFirewall) Update(ctx context.Context, request resource.U
 					detectionSettingsAttributeMap["bot_protection_choice"] = types.ObjectNull(AppFirewallDetectionSettingChoiceDetectionSettingsBotProtectionChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> FalsePositiveSuppression
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> FalsePositiveSuppression
 				if detectionSettingsElement.GetFalsePositiveSuppression() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					detectionSettingsfalsePositiveSuppressionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -6993,8 +7056,7 @@ func (r *ResourceF5XCAppFirewall) Update(ctx context.Context, request resource.U
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> AttackTypeSetting
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> AttackTypeSetting
 					if signatureSelectionSettingElement.GetAttackTypeSetting() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						signatureSelectionSettingattackTypeSettingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -7379,8 +7441,7 @@ func (r *ResourceF5XCAppFirewall) Update(ctx context.Context, request resource.U
 					detectionSettingsAttributeMap["signatures_staging_settings_choice"] = types.ObjectNull(AppFirewallDetectionSettingChoiceDetectionSettingsSignaturesStagingSettingsModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ThreatCampaignChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> ThreatCampaignChoice
 				if detectionSettingsElement.GetThreatCampaignChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					detectionSettingsthreatCampaignChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -7534,12 +7595,10 @@ func (r *ResourceF5XCAppFirewall) Update(ctx context.Context, request resource.U
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.DetectionSettingChoice = types.ObjectNull(AppFirewallDetectionSettingChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> EnforcementModeChoice
+	// resource SpecToModelRoot OneOfField --> EnforcementModeChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -7587,12 +7646,10 @@ func (r *ResourceF5XCAppFirewall) Update(ctx context.Context, request resource.U
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.EnforcementModeChoice = types.ObjectNull(AppFirewallEnforcementModeChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> EnhanceWithAiChoice
+	// resource SpecToModelRoot OneOfField --> EnhanceWithAiChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -7624,8 +7681,7 @@ func (r *ResourceF5XCAppFirewall) Update(ctx context.Context, request resource.U
 			if isEnableAiEnhancements && enableAiEnhancementsOptionsWrapper != nil && enableAiEnhancementsOptionsWrapper.EnableAiEnhancements != nil {
 				enableAiEnhancementsElement := enableAiEnhancementsOptionsWrapper.EnableAiEnhancements
 
-				// resource specToModelNested RequiredOneOfField --> RiskScoreActionChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> RiskScoreActionChoice
 				if enableAiEnhancementsElement.GetRiskScoreActionChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					enableAiEnhancementsriskScoreActionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -7700,8 +7756,6 @@ func (r *ResourceF5XCAppFirewall) Update(ctx context.Context, request resource.U
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.EnhanceWithAiChoice = types.ObjectNull(AppFirewallEnhanceWithAiChoiceModelAttributeMap)
 	}
 

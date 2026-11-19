@@ -428,7 +428,7 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for RequiredOneOfField --> AdvertiseChoice
+// Attribute map for OneOfField --> AdvertiseChoice
 var TcpLoadbalancerAdvertiseChoiceModelAttributeMap = map[string]attr.Type{
 
 	"advertise_custom": types.ObjectType{
@@ -723,7 +723,7 @@ var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVk8SService
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> PortChoice
+// Attribute map for OneOfField --> PortChoice
 var TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWherePortChoiceModelAttributeMap = map[string]attr.Type{
 
 	"port":             types.Int64Type,
@@ -796,7 +796,7 @@ var TcpLoadbalancerDnsZonesObjectRefModelAttributeMap = map[string]attr.Type{
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> ClusterRetractChoice
+// Attribute map for OneOfField --> ClusterRetractChoice
 var TcpLoadbalancerClusterRetractChoiceModelAttributeMap = map[string]attr.Type{
 
 	"do_not_retract_cluster": types.BoolType,
@@ -810,7 +810,7 @@ var TcpLoadbalancerDnsInfoModelAttributeMap = map[string]attr.Type{
 	"ipv6_address": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> HashPolicyChoice
+// Attribute map for OneOfField --> HashPolicyChoice
 var TcpLoadbalancerHashPolicyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"hash_policy_choice_least_active":         types.BoolType,
@@ -987,7 +987,7 @@ var TcpLoadbalancerCertificatesObjectRefModelAttributeMap = map[string]attr.Type
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> MtlsChoice
+// Attribute map for OneOfField --> MtlsChoice
 var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsMtlsChoiceModelAttributeMap = map[string]attr.Type{
 
 	"no_mtls": types.BoolType,
@@ -1050,7 +1050,7 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsTlsCo
 	},
 }
 
-// Attribute map for RequiredOneOfField --> Choice
+// Attribute map for OneOfField --> Choice
 var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceModelAttributeMap = map[string]attr.Type{
 
 	"custom_security": types.ObjectType{
@@ -1105,7 +1105,7 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersModel
 	},
 }
 
-// Attribute map for RequiredOneOfField --> MtlsChoice
+// Attribute map for OneOfField --> MtlsChoice
 var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersMtlsChoiceModelAttributeMap = map[string]attr.Type{
 
 	"no_mtls": types.BoolType,
@@ -1236,7 +1236,7 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsCo
 	},
 }
 
-// Attribute map for RequiredOneOfField --> Choice
+// Attribute map for OneOfField --> Choice
 var TcpLoadbalancerLoadbalancerTypeTlsTcpTlsCertificatesChoiceTlsParametersTlsConfigChoiceModelAttributeMap = map[string]attr.Type{
 
 	"custom_security": types.ObjectType{
@@ -1274,7 +1274,7 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertModelAttributeMap = map[string]
 	},
 }
 
-// Attribute map for RequiredOneOfField --> MtlsChoice
+// Attribute map for OneOfField --> MtlsChoice
 var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertMtlsChoiceModelAttributeMap = map[string]attr.Type{
 
 	"no_mtls": types.BoolType,
@@ -1337,7 +1337,7 @@ var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigModelAttributeMap = ma
 	},
 }
 
-// Attribute map for RequiredOneOfField --> Choice
+// Attribute map for OneOfField --> Choice
 var TcpLoadbalancerLoadbalancerTypeTlsTcpAutoCertTlsConfigChoiceModelAttributeMap = map[string]attr.Type{
 
 	"custom_security": types.ObjectType{
@@ -1442,7 +1442,7 @@ var TcpLoadbalancerPoliciesObjectRefModelAttributeMap = map[string]attr.Type{
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> SniDefaultLbChoice
+// Attribute map for OneOfField --> SniDefaultLbChoice
 var TcpLoadbalancerSniDefaultLbChoiceModelAttributeMap = map[string]attr.Type{
 
 	"default_lb_with_sni": types.BoolType,
@@ -1530,22 +1530,25 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 			},
 			"advertise_choice": schema.SingleNestedAttribute{
 				Description:         "Advertise choice This is a choice to select method to advertise VIP.",
-				MarkdownDescription: "Advertise choice This is a choice to select method to advertise VIP.",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Advertise choice This is a choice to select method to advertise VIP.<br>Exactly one of `advertise_custom`, `advertise_on_public`, `advertise_on_public_default_vip`, or `do_not_advertise` must be specified when `advertise_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"advertise_custom",
 						"advertise_on_public",
 						"advertise_on_public_default_vip",
 						"do_not_advertise",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"advertise_custom": schema.SingleNestedAttribute{
 						Description:         "Advertise Custom Advertise this VIP on specific sites",
-						MarkdownDescription: "Advertise Custom Advertise this VIP on specific sites",
+						MarkdownDescription: "Advertise Custom Advertise this VIP on specific sites<br>Conflicts with `advertise_on_public`, `advertise_on_public_default_vip`, and `do_not_advertise`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1564,7 +1567,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 									Attributes: map[string]schema.Attribute{
 										"choice": schema.SingleNestedAttribute{
 											Description:         "Advertise choice This defines various options where a Loadbalancer could be advertised",
-											MarkdownDescription: "Advertise choice This defines various options where a Loadbalancer could be advertised",
+											MarkdownDescription: "Advertise choice This defines various options where a Loadbalancer could be advertised<br>Exactly one of `advertise_on_public`, `site`, `site_segment`, `virtual_network`, `virtual_site`, `virtual_site_segment`, `virtual_site_with_vip`, or `vk8s_service` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -1583,7 +1586,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 											Attributes: map[string]schema.Attribute{
 												"advertise_on_public": schema.SingleNestedAttribute{
 													Description:         "Advertise On Public Advertise this load balancer on public network",
-													MarkdownDescription: "Advertise On Public Advertise this load balancer on public network",
+													MarkdownDescription: "Advertise On Public Advertise this load balancer on public network<br>Conflicts with `site`, `site_segment`, `virtual_network`, `virtual_site`, `virtual_site_segment`, `virtual_site_with_vip`, and `vk8s_service`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1625,7 +1628,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"site": schema.SingleNestedAttribute{
 													Description:         "Site Advertise on a customer site and a given network.",
-													MarkdownDescription: "Site Advertise on a customer site and a given network.",
+													MarkdownDescription: "Site Advertise on a customer site and a given network.<br>Conflicts with `advertise_on_public`, `site_segment`, `virtual_network`, `virtual_site`, `virtual_site_segment`, `virtual_site_with_vip`, and `vk8s_service`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1705,7 +1708,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"site_segment": schema.SingleNestedAttribute{
 													Description:         "Segment on Site Advertise on a segment on a site",
-													MarkdownDescription: "Segment on Site Advertise on a segment on a site",
+													MarkdownDescription: "Segment on Site Advertise on a segment on a site<br>Conflicts with `advertise_on_public`, `site`, `virtual_network`, `virtual_site`, `virtual_site_segment`, `virtual_site_with_vip`, and `vk8s_service`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1806,14 +1809,14 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"virtual_network": schema.SingleNestedAttribute{
 													Description:         "Virtual Network Advertise on a virtual network",
-													MarkdownDescription: "Virtual Network Advertise on a virtual network",
+													MarkdownDescription: "Virtual Network Advertise on a virtual network<br>Conflicts with `advertise_on_public`, `site`, `site_segment`, `virtual_site`, `virtual_site_segment`, `virtual_site_with_vip`, and `vk8s_service`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"v6_vip_choice": schema.SingleNestedAttribute{
 															Description:         "Select V6 VIP Select default V6 VIP or specify IPv6 address",
-															MarkdownDescription: "Select V6 VIP Select default V6 VIP or specify IPv6 address",
+															MarkdownDescription: "Select V6 VIP Select default V6 VIP or specify IPv6 address<br>Exactly one of `default_v6_vip` or `specific_v6_vip` must be specified when `v6_vip_choice` is configured.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1826,7 +1829,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 															Attributes: map[string]schema.Attribute{
 																"default_v6_vip": schema.BoolAttribute{
 																	Description:         "Default V6 VIP for virtual Network Use the default VIP, system allocated or configured in the virtual network",
-																	MarkdownDescription: "Default V6 VIP for virtual Network Use the default VIP, system allocated or configured in the virtual network",
+																	MarkdownDescription: "Default V6 VIP for virtual Network Use the default VIP, system allocated or configured in the virtual network<br>Conflicts with `specific_v6_vip`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1836,7 +1839,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"specific_v6_vip": schema.StringAttribute{
 																	Description:         "Specific V6 VIP Use given IPV6 address as VIP on virtual Network",
-																	MarkdownDescription: "Specific V6 VIP Use given IPV6 address as VIP on virtual Network",
+																	MarkdownDescription: "Specific V6 VIP Use given IPV6 address as VIP on virtual Network<br>Conflicts with `default_v6_vip`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1851,7 +1854,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"vip_choice": schema.SingleNestedAttribute{
 															Description:         "Select VIP Select default V4 VIP or specify V4 ip address",
-															MarkdownDescription: "Select VIP Select default V4 VIP or specify V4 ip address",
+															MarkdownDescription: "Select VIP Select default V4 VIP or specify V4 ip address<br>Exactly one of `default_vip` or `specific_vip` must be specified when `vip_choice` is configured.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1864,7 +1867,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 															Attributes: map[string]schema.Attribute{
 																"default_vip": schema.BoolAttribute{
 																	Description:         "Default V4 VIP for Virtual Network Use the default VIP, system allocated or configured in the virtual network",
-																	MarkdownDescription: "Default V4 VIP for Virtual Network Use the default VIP, system allocated or configured in the virtual network",
+																	MarkdownDescription: "Default V4 VIP for Virtual Network Use the default VIP, system allocated or configured in the virtual network<br>Conflicts with `specific_vip`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1874,7 +1877,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"specific_vip": schema.StringAttribute{
 																	Description:         "Specific VIP Use given IPV4 address as VIP on virtual Network",
-																	MarkdownDescription: "Specific VIP Use given IPV4 address as VIP on virtual Network",
+																	MarkdownDescription: "Specific VIP Use given IPV4 address as VIP on virtual Network<br>Conflicts with `default_vip`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1924,7 +1927,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"virtual_site": schema.SingleNestedAttribute{
 													Description:         "Virtual Site Advertise on a customer virtual site and a given network.",
-													MarkdownDescription: "Virtual Site Advertise on a customer virtual site and a given network.",
+													MarkdownDescription: "Virtual Site Advertise on a customer virtual site and a given network.<br>Conflicts with `advertise_on_public`, `site`, `site_segment`, `virtual_network`, `virtual_site_segment`, `virtual_site_with_vip`, and `vk8s_service`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1978,7 +1981,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"virtual_site_segment": schema.SingleNestedAttribute{
 													Description:         "Segment on Virtual Site Advertise on a segment on a virtual site",
-													MarkdownDescription: "Segment on Virtual Site Advertise on a segment on a virtual site",
+													MarkdownDescription: "Segment on Virtual Site Advertise on a segment on a virtual site<br>Conflicts with `advertise_on_public`, `site`, `site_segment`, `virtual_network`, `virtual_site`, `virtual_site_with_vip`, and `vk8s_service`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -2079,7 +2082,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"virtual_site_with_vip": schema.SingleNestedAttribute{
 													Description:         "Virtual Site With Specified VIP Advertise on a customer virtual site and a given network and IP.",
-													MarkdownDescription: "Virtual Site With Specified VIP Advertise on a customer virtual site and a given network and IP.",
+													MarkdownDescription: "Virtual Site With Specified VIP Advertise on a customer virtual site and a given network and IP.<br>Conflicts with `advertise_on_public`, `site`, `site_segment`, `virtual_network`, `virtual_site`, `virtual_site_segment`, and `vk8s_service`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -2159,14 +2162,14 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"vk8s_service": schema.SingleNestedAttribute{
 													Description:         "vK8s services network Advertise on vK8s Service Network on RE.",
-													MarkdownDescription: "vK8s services network Advertise on vK8s Service Network on RE.",
+													MarkdownDescription: "vK8s services network Advertise on vK8s Service Network on RE.<br>Conflicts with `advertise_on_public`, `site`, `site_segment`, `virtual_network`, `virtual_site`, `virtual_site_segment`, and `virtual_site_with_vip`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"choice": schema.SingleNestedAttribute{
 															Description:         "RE or RE Virtual Site This defines a reference to a RE site or virtual site where a VIP could be advertised in the vK8s service network",
-															MarkdownDescription: "RE or RE Virtual Site This defines a reference to a RE site or virtual site where a VIP could be advertised in the vK8s service network",
+															MarkdownDescription: "RE or RE Virtual Site This defines a reference to a RE site or virtual site where a VIP could be advertised in the vK8s service network<br>Exactly one of `site` or `virtual_site` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -2179,7 +2182,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 															Attributes: map[string]schema.Attribute{
 																"site": schema.SingleNestedAttribute{
 																	Description:         "RE Site Reference to site object",
-																	MarkdownDescription: "RE Site Reference to site object",
+																	MarkdownDescription: "RE Site Reference to site object<br>Conflicts with `virtual_site`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -2212,7 +2215,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"virtual_site": schema.SingleNestedAttribute{
 																	Description:         "Virtual Site Reference to virtual site object",
-																	MarkdownDescription: "Virtual Site Reference to virtual site object",
+																	MarkdownDescription: "Virtual Site Reference to virtual site object<br>Conflicts with `site`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -2251,21 +2254,24 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 										},
 										"port_choice": schema.SingleNestedAttribute{
 											Description:         "Listen Port Choice Available options: user provided port or inherit from the load balancer configuration.",
-											MarkdownDescription: "Listen Port Choice Available options: user provided port or inherit from the load balancer configuration.",
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
+											MarkdownDescription: "Listen Port Choice Available options: user provided port or inherit from the load balancer configuration.<br>Exactly one of `port`, `port_ranges`, or `use_default_port` must be specified when `port_choice` is configured.",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
 											Validators: []validator.Object{
-												exactlyoneofvalidator.RequiredExactlyOneOf(
+												exactlyoneofvalidator.ExactlyOneOf(
 													"port",
 													"port_ranges",
 													"use_default_port",
 												),
 											},
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.UseNonNullStateForUnknown(),
+											},
 											Attributes: map[string]schema.Attribute{
 												"port": schema.Int64Attribute{
 													Description:         "Port to listen Port to Listen.",
-													MarkdownDescription: "Port to listen Port to Listen.",
+													MarkdownDescription: "Port to listen Port to Listen.<br>Conflicts with `port_ranges` and `use_default_port`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -2275,7 +2281,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"port_ranges": schema.StringAttribute{
 													Description:         "Port ranges to listen A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.",
-													MarkdownDescription: "Port ranges to listen A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.<br>**Validation:** `Length LengthBetween(1, 512)`",
+													MarkdownDescription: "Port ranges to listen A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.<br>**Validation:** `Length LengthBetween(1, 512)`<br>Conflicts with `port` and `use_default_port`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -2286,7 +2292,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"use_default_port": schema.BoolAttribute{
 													Description:         "Use Default port Inherit the Load Balancer's Listen Port.",
-													MarkdownDescription: "Use Default port Inherit the Load Balancer's Listen Port.",
+													MarkdownDescription: "Use Default port Inherit the Load Balancer's Listen Port.<br>Conflicts with `port` and `port_ranges`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -2303,7 +2309,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"advertise_on_public": schema.SingleNestedAttribute{
 						Description:         "Advertise On Public (Specified IPv4) Advertise this load balancer on specified IPv4 on public network",
-						MarkdownDescription: "Advertise On Public (Specified IPv4) Advertise this load balancer on specified IPv4 on public network",
+						MarkdownDescription: "Advertise On Public (Specified IPv4) Advertise this load balancer on specified IPv4 on public network<br>Conflicts with `advertise_custom`, `advertise_on_public_default_vip`, and `do_not_advertise`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2345,7 +2351,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"advertise_on_public_default_vip": schema.BoolAttribute{
 						Description:         "Advertise On Public Default VIP (IPv4) Advertise this load balancer on public network with default IPv4 VIP",
-						MarkdownDescription: "Advertise On Public Default VIP (IPv4) Advertise this load balancer on public network with default IPv4 VIP",
+						MarkdownDescription: "Advertise On Public Default VIP (IPv4) Advertise this load balancer on public network with default IPv4 VIP<br>Conflicts with `advertise_custom`, `advertise_on_public`, and `do_not_advertise`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2355,7 +2361,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"do_not_advertise": schema.BoolAttribute{
 						Description:         "Do Not Advertise Do not advertise this load balancer",
-						MarkdownDescription: "Do Not Advertise Do not advertise this load balancer",
+						MarkdownDescription: "Do Not Advertise Do not advertise this load balancer<br>Conflicts with `advertise_custom`, `advertise_on_public`, and `advertise_on_public_default_vip`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2488,20 +2494,23 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 			},
 			"cluster_retract_choice": schema.SingleNestedAttribute{
 				Description:         "Oneof for Cluster retraction Specifies whether retraction of cluster has to be enabled or disabled",
-				MarkdownDescription: "Oneof for Cluster retraction Specifies whether retraction of cluster has to be enabled or disabled",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Oneof for Cluster retraction Specifies whether retraction of cluster has to be enabled or disabled<br>Exactly one of `do_not_retract_cluster` or `retract_cluster` must be specified when `cluster_retract_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"do_not_retract_cluster",
 						"retract_cluster",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"do_not_retract_cluster": schema.BoolAttribute{
 						Description:         "do_not_retract_cluster When this option is configured, cluster with no healthy endpoints is not retracted from route having weighted cluster configuration.",
-						MarkdownDescription: "do_not_retract_cluster When this option is configured, cluster with no healthy endpoints is not retracted from route having weighted cluster configuration.",
+						MarkdownDescription: "do_not_retract_cluster When this option is configured, cluster with no healthy endpoints is not retracted from route having weighted cluster configuration.<br>Conflicts with `retract_cluster`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2511,7 +2520,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"retract_cluster": schema.BoolAttribute{
 						Description:         "retract_cluster When this option is enabled, weighted cluster will not be considered for load balancing, if all its endpoints are unhealthy. Since the cluster with all unhealthy endpoints is removed, the traffic will be distributed among remaining clusters as per their weight. Also panic-threshold configuration is ignored for retracted cluster. This option is ignored when single destination cluster is configured for route",
-						MarkdownDescription: "retract_cluster When this option is enabled, weighted cluster will not be considered for load balancing, if all its endpoints are unhealthy. Since the cluster with all unhealthy endpoints is removed, the traffic will be distributed among remaining clusters as per their weight. Also panic-threshold configuration is ignored for retracted cluster. This option is ignored when single destination cluster is configured for route",
+						MarkdownDescription: "retract_cluster When this option is enabled, weighted cluster will not be considered for load balancing, if all its endpoints are unhealthy. Since the cluster with all unhealthy endpoints is removed, the traffic will be distributed among remaining clusters as per their weight. Also panic-threshold configuration is ignored for retracted cluster. This option is ignored when single destination cluster is configured for route<br>Conflicts with `do_not_retract_cluster`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2575,22 +2584,25 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 			},
 			"hash_policy_choice": schema.SingleNestedAttribute{
 				Description:         "Load Balancing Control Select how the connections are load-balanced",
-				MarkdownDescription: "Load Balancing Control Select how the connections are load-balanced",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Load Balancing Control Select how the connections are load-balanced<br>Exactly one of `hash_policy_choice_least_active`, `hash_policy_choice_random`, `hash_policy_choice_round_robin`, or `hash_policy_choice_source_ip_stickiness` must be specified when `hash_policy_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"hash_policy_choice_least_active",
 						"hash_policy_choice_random",
 						"hash_policy_choice_round_robin",
 						"hash_policy_choice_source_ip_stickiness",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"hash_policy_choice_least_active": schema.BoolAttribute{
 						Description:         "Least Active Connections Connections are sent to origin server that has least active connections",
-						MarkdownDescription: "Least Active Connections Connections are sent to origin server that has least active connections",
+						MarkdownDescription: "Least Active Connections Connections are sent to origin server that has least active connections<br>Conflicts with `hash_policy_choice_random`, `hash_policy_choice_round_robin`, and `hash_policy_choice_source_ip_stickiness`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2600,7 +2612,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"hash_policy_choice_random": schema.BoolAttribute{
 						Description:         "Random Connections are sent to all eligible origin servers in random fashion",
-						MarkdownDescription: "Random Connections are sent to all eligible origin servers in random fashion",
+						MarkdownDescription: "Random Connections are sent to all eligible origin servers in random fashion<br>Conflicts with `hash_policy_choice_least_active`, `hash_policy_choice_round_robin`, and `hash_policy_choice_source_ip_stickiness`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2610,7 +2622,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"hash_policy_choice_round_robin": schema.BoolAttribute{
 						Description:         "Round Robin Connections are sent to all eligible origin servers in round robin fashion",
-						MarkdownDescription: "Round Robin Connections are sent to all eligible origin servers in round robin fashion",
+						MarkdownDescription: "Round Robin Connections are sent to all eligible origin servers in round robin fashion<br>Conflicts with `hash_policy_choice_least_active`, `hash_policy_choice_random`, and `hash_policy_choice_source_ip_stickiness`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2620,7 +2632,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"hash_policy_choice_source_ip_stickiness": schema.BoolAttribute{
 						Description:         "Source IP Stickiness Connections are sent to all eligible origin servers using hash of source ip. Consistent hashing algorithm, ring hash, is used to select origin server",
-						MarkdownDescription: "Source IP Stickiness Connections are sent to all eligible origin servers using hash of source ip. Consistent hashing algorithm, ring hash, is used to select origin server",
+						MarkdownDescription: "Source IP Stickiness Connections are sent to all eligible origin servers using hash of source ip. Consistent hashing algorithm, ring hash, is used to select origin server<br>Conflicts with `hash_policy_choice_least_active`, `hash_policy_choice_random`, and `hash_policy_choice_round_robin`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2815,7 +2827,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 			},
 			"loadbalancer_type_choice": schema.SingleNestedAttribute{
 				Description:         "Proxy choice The type of load balancer, can be 'tcp', 'tls_tcp' or 'tls_tcp_auto_cert'",
-				MarkdownDescription: "Proxy choice The type of load balancer, can be 'tcp', 'tls_tcp' or 'tls_tcp_auto_cert'",
+				MarkdownDescription: "Proxy choice The type of load balancer, can be 'tcp', 'tls_tcp' or 'tls_tcp_auto_cert'<br>Exactly one of `tcp`, `tls_tcp`, or `tls_tcp_auto_cert` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -2829,7 +2841,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 				Attributes: map[string]schema.Attribute{
 					"tcp": schema.BoolAttribute{
 						Description:         "TCP TCP Load Balancer.",
-						MarkdownDescription: "TCP TCP Load Balancer.",
+						MarkdownDescription: "TCP TCP Load Balancer.<br>Conflicts with `tls_tcp` and `tls_tcp_auto_cert`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2839,14 +2851,14 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"tls_tcp": schema.SingleNestedAttribute{
 						Description:         "TLS over TCP TLS over TCP load balancer with a custom public/private certificate. This is also known as BYOC (Bring Your Own Certificate). User is responsible for managing DNS to this load balancer.",
-						MarkdownDescription: "TLS over TCP TLS over TCP load balancer with a custom public/private certificate. This is also known as BYOC (Bring Your Own Certificate). User is responsible for managing DNS to this load balancer.",
+						MarkdownDescription: "TLS over TCP TLS over TCP load balancer with a custom public/private certificate. This is also known as BYOC (Bring Your Own Certificate). User is responsible for managing DNS to this load balancer.<br>Conflicts with `tcp` and `tls_tcp_auto_cert`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"tls_certificates_choice": schema.SingleNestedAttribute{
 								Description:         "TLS Configuration TLS Certificate Configuration for downstream connections",
-								MarkdownDescription: "TLS Configuration TLS Certificate Configuration for downstream connections",
+								MarkdownDescription: "TLS Configuration TLS Certificate Configuration for downstream connections<br>Exactly one of `tls_cert_params` or `tls_parameters` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -2859,7 +2871,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 								Attributes: map[string]schema.Attribute{
 									"tls_cert_params": schema.SingleNestedAttribute{
 										Description:         "TLS Certificates Select/Add one or more TLS Certificate objects to associate with this Load Balancer",
-										MarkdownDescription: "TLS Certificates Select/Add one or more TLS Certificate objects to associate with this Load Balancer",
+										MarkdownDescription: "TLS Certificates Select/Add one or more TLS Certificate objects to associate with this Load Balancer<br>Conflicts with `tls_parameters`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2905,20 +2917,23 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 											},
 											"mtls_choice": schema.SingleNestedAttribute{
 												Description:         "mTLS choice mTLS authentication between clients and HTTPS load balancer",
-												MarkdownDescription: "mTLS choice mTLS authentication between clients and HTTPS load balancer",
-												Required:            true,
-												Optional:            false,
-												Computed:            false,
+												MarkdownDescription: "mTLS choice mTLS authentication between clients and HTTPS load balancer<br>Exactly one of `no_mtls` or `use_mtls` must be specified when `mtls_choice` is configured.",
+												Required:            false,
+												Optional:            true,
+												Computed:            true,
 												Validators: []validator.Object{
-													exactlyoneofvalidator.RequiredExactlyOneOf(
+													exactlyoneofvalidator.ExactlyOneOf(
 														"no_mtls",
 														"use_mtls",
 													),
 												},
+												PlanModifiers: []planmodifier.Object{
+													objectplanmodifier.UseNonNullStateForUnknown(),
+												},
 												Attributes: map[string]schema.Attribute{
 													"no_mtls": schema.BoolAttribute{
 														Description:         "No mTLS",
-														MarkdownDescription: "No mTLS",
+														MarkdownDescription: "No mTLS<br>Conflicts with `use_mtls`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -2928,7 +2943,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 													},
 													"use_mtls": schema.SingleNestedAttribute{
 														Description:         "Use mTLS",
-														MarkdownDescription: "Use mTLS",
+														MarkdownDescription: "Use mTLS<br>Conflicts with `no_mtls`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -2943,7 +2958,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 															},
 															"crl_choice": schema.SingleNestedAttribute{
 																Description:         "crl choice Whether to verify client certificate revocation status with certificate revocation list",
-																MarkdownDescription: "crl choice Whether to verify client certificate revocation status with certificate revocation list",
+																MarkdownDescription: "crl choice Whether to verify client certificate revocation status with certificate revocation list<br>Exactly one of `crl` or `no_crl` must be specified when `crl_choice` is configured.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -2956,7 +2971,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																Attributes: map[string]schema.Attribute{
 																	"crl": schema.SingleNestedAttribute{
 																		Description:         "Verify client certificate with CRL Client certificate is verified against CRL. Specify the CRL server information to download the certificate revocation list",
-																		MarkdownDescription: "Verify client certificate with CRL Client certificate is verified against CRL. Specify the CRL server information to download the certificate revocation list",
+																		MarkdownDescription: "Verify client certificate with CRL Client certificate is verified against CRL. Specify the CRL server information to download the certificate revocation list<br>Conflicts with `no_crl`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -2989,7 +3004,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																	},
 																	"no_crl": schema.BoolAttribute{
 																		Description:         "No client certificate verification with CRL Client certificate revocation status is not verified",
-																		MarkdownDescription: "No client certificate verification with CRL Client certificate revocation status is not verified",
+																		MarkdownDescription: "No client certificate verification with CRL Client certificate revocation status is not verified<br>Conflicts with `crl`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -3001,7 +3016,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 															},
 															"trusted_ca_choice": schema.SingleNestedAttribute{
 																Description:         "trusted_ca_choice Root CA configuration for downstream TLS connections",
-																MarkdownDescription: "trusted_ca_choice Root CA configuration for downstream TLS connections",
+																MarkdownDescription: "trusted_ca_choice Root CA configuration for downstream TLS connections<br>Exactly one of `trusted_ca` or `trusted_ca_url` must be specified.",
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
@@ -3014,7 +3029,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																Attributes: map[string]schema.Attribute{
 																	"trusted_ca": schema.SingleNestedAttribute{
 																		Description:         "trusted_ca Select/Add a Root CA Certificate object to associate with this Load Balancer",
-																		MarkdownDescription: "trusted_ca Select/Add a Root CA Certificate object to associate with this Load Balancer",
+																		MarkdownDescription: "trusted_ca Select/Add a Root CA Certificate object to associate with this Load Balancer<br>Conflicts with `trusted_ca_url`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -3047,7 +3062,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																	},
 																	"trusted_ca_url": schema.StringAttribute{
 																		Description:         "trusted_ca_url Upload a Root CA Certificate specifically for this Load Balancer",
-																		MarkdownDescription: "trusted_ca_url Upload a Root CA Certificate specifically for this Load Balancer",
+																		MarkdownDescription: "trusted_ca_url Upload a Root CA Certificate specifically for this Load Balancer<br>Conflicts with `trusted_ca`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -3070,22 +3085,25 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 												Attributes: map[string]schema.Attribute{
 													"choice": schema.SingleNestedAttribute{
 														Description:         "TLS Security Level The security level for TLS handshake between client/server and the platform.",
-														MarkdownDescription: "TLS Security Level The security level for TLS handshake between client/server and the platform.",
-														Required:            true,
-														Optional:            false,
-														Computed:            false,
+														MarkdownDescription: "TLS Security Level The security level for TLS handshake between client/server and the platform.<br>Exactly one of `custom_security`, `default_security`, `low_security`, or `medium_security` must be specified when `choice` is configured.",
+														Required:            false,
+														Optional:            true,
+														Computed:            true,
 														Validators: []validator.Object{
-															exactlyoneofvalidator.RequiredExactlyOneOf(
+															exactlyoneofvalidator.ExactlyOneOf(
 																"custom_security",
 																"default_security",
 																"low_security",
 																"medium_security",
 															),
 														},
+														PlanModifiers: []planmodifier.Object{
+															objectplanmodifier.UseNonNullStateForUnknown(),
+														},
 														Attributes: map[string]schema.Attribute{
 															"custom_security": schema.SingleNestedAttribute{
 																Description:         "Custom Security Custom selection of TLS versions and cipher suites",
-																MarkdownDescription: "Custom Security Custom selection of TLS versions and cipher suites",
+																MarkdownDescription: "Custom Security Custom selection of TLS versions and cipher suites<br>Conflicts with `default_security`, `low_security`, and `medium_security`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -3132,7 +3150,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 															},
 															"default_security": schema.BoolAttribute{
 																Description:         "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.",
-																MarkdownDescription: "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.",
+																MarkdownDescription: "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.<br>Conflicts with `custom_security`, `low_security`, and `medium_security`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -3142,7 +3160,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 															},
 															"low_security": schema.BoolAttribute{
 																Description:         "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.",
-																MarkdownDescription: "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.",
+																MarkdownDescription: "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.<br>Conflicts with `custom_security`, `default_security`, and `medium_security`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -3152,7 +3170,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 															},
 															"medium_security": schema.BoolAttribute{
 																Description:         "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.",
-																MarkdownDescription: "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.",
+																MarkdownDescription: "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.<br>Conflicts with `custom_security`, `default_security`, and `low_security`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -3168,27 +3186,30 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 									},
 									"tls_parameters": schema.SingleNestedAttribute{
 										Description:         "Inline TLS Parameters (legacy) Upload a TLS certificate specifically for this Load Balancer (certificate must cover all Load Balancer domain names)",
-										MarkdownDescription: "Inline TLS Parameters (legacy) Upload a TLS certificate specifically for this Load Balancer (certificate must cover all Load Balancer domain names)",
+										MarkdownDescription: "Inline TLS Parameters (legacy) Upload a TLS certificate specifically for this Load Balancer (certificate must cover all Load Balancer domain names)<br>Conflicts with `tls_cert_params`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
 										Attributes: map[string]schema.Attribute{
 											"mtls_choice": schema.SingleNestedAttribute{
 												Description:         "mTLS choice mTLS authentication between clients and HTTPS load balancer",
-												MarkdownDescription: "mTLS choice mTLS authentication between clients and HTTPS load balancer",
-												Required:            true,
-												Optional:            false,
-												Computed:            false,
+												MarkdownDescription: "mTLS choice mTLS authentication between clients and HTTPS load balancer<br>Exactly one of `no_mtls` or `use_mtls` must be specified when `mtls_choice` is configured.",
+												Required:            false,
+												Optional:            true,
+												Computed:            true,
 												Validators: []validator.Object{
-													exactlyoneofvalidator.RequiredExactlyOneOf(
+													exactlyoneofvalidator.ExactlyOneOf(
 														"no_mtls",
 														"use_mtls",
 													),
 												},
+												PlanModifiers: []planmodifier.Object{
+													objectplanmodifier.UseNonNullStateForUnknown(),
+												},
 												Attributes: map[string]schema.Attribute{
 													"no_mtls": schema.BoolAttribute{
 														Description:         "No mTLS",
-														MarkdownDescription: "No mTLS",
+														MarkdownDescription: "No mTLS<br>Conflicts with `use_mtls`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -3198,7 +3219,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 													},
 													"use_mtls": schema.SingleNestedAttribute{
 														Description:         "Use mTLS",
-														MarkdownDescription: "Use mTLS",
+														MarkdownDescription: "Use mTLS<br>Conflicts with `no_mtls`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -3213,7 +3234,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 															},
 															"crl_choice": schema.SingleNestedAttribute{
 																Description:         "crl choice Whether to verify client certificate revocation status with certificate revocation list",
-																MarkdownDescription: "crl choice Whether to verify client certificate revocation status with certificate revocation list",
+																MarkdownDescription: "crl choice Whether to verify client certificate revocation status with certificate revocation list<br>Exactly one of `crl` or `no_crl` must be specified when `crl_choice` is configured.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -3226,7 +3247,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																Attributes: map[string]schema.Attribute{
 																	"crl": schema.SingleNestedAttribute{
 																		Description:         "Verify client certificate with CRL Client certificate is verified against CRL. Specify the CRL server information to download the certificate revocation list",
-																		MarkdownDescription: "Verify client certificate with CRL Client certificate is verified against CRL. Specify the CRL server information to download the certificate revocation list",
+																		MarkdownDescription: "Verify client certificate with CRL Client certificate is verified against CRL. Specify the CRL server information to download the certificate revocation list<br>Conflicts with `no_crl`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -3259,7 +3280,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																	},
 																	"no_crl": schema.BoolAttribute{
 																		Description:         "No client certificate verification with CRL Client certificate revocation status is not verified",
-																		MarkdownDescription: "No client certificate verification with CRL Client certificate revocation status is not verified",
+																		MarkdownDescription: "No client certificate verification with CRL Client certificate revocation status is not verified<br>Conflicts with `crl`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -3271,7 +3292,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 															},
 															"trusted_ca_choice": schema.SingleNestedAttribute{
 																Description:         "trusted_ca_choice Root CA configuration for downstream TLS connections",
-																MarkdownDescription: "trusted_ca_choice Root CA configuration for downstream TLS connections",
+																MarkdownDescription: "trusted_ca_choice Root CA configuration for downstream TLS connections<br>Exactly one of `trusted_ca` or `trusted_ca_url` must be specified.",
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
@@ -3284,7 +3305,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																Attributes: map[string]schema.Attribute{
 																	"trusted_ca": schema.SingleNestedAttribute{
 																		Description:         "trusted_ca Select/Add a Root CA Certificate object to associate with this Load Balancer",
-																		MarkdownDescription: "trusted_ca Select/Add a Root CA Certificate object to associate with this Load Balancer",
+																		MarkdownDescription: "trusted_ca Select/Add a Root CA Certificate object to associate with this Load Balancer<br>Conflicts with `trusted_ca_url`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -3317,7 +3338,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																	},
 																	"trusted_ca_url": schema.StringAttribute{
 																		Description:         "trusted_ca_url Upload a Root CA Certificate specifically for this Load Balancer",
-																		MarkdownDescription: "trusted_ca_url Upload a Root CA Certificate specifically for this Load Balancer",
+																		MarkdownDescription: "trusted_ca_url Upload a Root CA Certificate specifically for this Load Balancer<br>Conflicts with `trusted_ca`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -3365,7 +3386,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"ocsp_stapling_choice": schema.SingleNestedAttribute{
 															Description:         "OCSP Response choice OCSP Stapling choice",
-															MarkdownDescription: "OCSP Response choice OCSP Stapling choice",
+															MarkdownDescription: "OCSP Response choice OCSP Stapling choice<br>Exactly one of `custom_hash_algorithms`, `disable_ocsp_stapling`, or `use_system_defaults` must be specified when `ocsp_stapling_choice` is configured.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -3379,7 +3400,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 															Attributes: map[string]schema.Attribute{
 																"custom_hash_algorithms": schema.SingleNestedAttribute{
 																	Description:         "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.",
-																	MarkdownDescription: "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.",
+																	MarkdownDescription: "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.<br>Conflicts with `disable_ocsp_stapling` and `use_system_defaults`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3401,7 +3422,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"disable_ocsp_stapling": schema.BoolAttribute{
 																	Description:         "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.",
-																	MarkdownDescription: "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.",
+																	MarkdownDescription: "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.<br>Conflicts with `custom_hash_algorithms` and `use_system_defaults`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3411,7 +3432,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"use_system_defaults": schema.BoolAttribute{
 																	Description:         "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.",
-																	MarkdownDescription: "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.",
+																	MarkdownDescription: "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.<br>Conflicts with `custom_hash_algorithms` and `disable_ocsp_stapling`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3430,7 +3451,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 															Attributes: map[string]schema.Attribute{
 																"secret_info_choice": schema.SingleNestedAttribute{
 																	Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																	MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																	MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
@@ -3444,7 +3465,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																	Attributes: map[string]schema.Attribute{
 																		"blindfold_secret_info": schema.SingleNestedAttribute{
 																			Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																			MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																			MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3484,7 +3505,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																		},
 																		"clear_secret_info": schema.SingleNestedAttribute{
 																			Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																			MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																			MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3519,7 +3540,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 																		},
 																		"none": schema.BoolAttribute{
 																			Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																			MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																			MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3543,22 +3564,25 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 												Attributes: map[string]schema.Attribute{
 													"choice": schema.SingleNestedAttribute{
 														Description:         "TLS Security Level The security level for TLS handshake between client/server and the platform.",
-														MarkdownDescription: "TLS Security Level The security level for TLS handshake between client/server and the platform.",
-														Required:            true,
-														Optional:            false,
-														Computed:            false,
+														MarkdownDescription: "TLS Security Level The security level for TLS handshake between client/server and the platform.<br>Exactly one of `custom_security`, `default_security`, `low_security`, or `medium_security` must be specified when `choice` is configured.",
+														Required:            false,
+														Optional:            true,
+														Computed:            true,
 														Validators: []validator.Object{
-															exactlyoneofvalidator.RequiredExactlyOneOf(
+															exactlyoneofvalidator.ExactlyOneOf(
 																"custom_security",
 																"default_security",
 																"low_security",
 																"medium_security",
 															),
 														},
+														PlanModifiers: []planmodifier.Object{
+															objectplanmodifier.UseNonNullStateForUnknown(),
+														},
 														Attributes: map[string]schema.Attribute{
 															"custom_security": schema.SingleNestedAttribute{
 																Description:         "Custom Security Custom selection of TLS versions and cipher suites",
-																MarkdownDescription: "Custom Security Custom selection of TLS versions and cipher suites",
+																MarkdownDescription: "Custom Security Custom selection of TLS versions and cipher suites<br>Conflicts with `default_security`, `low_security`, and `medium_security`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -3605,7 +3629,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 															},
 															"default_security": schema.BoolAttribute{
 																Description:         "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.",
-																MarkdownDescription: "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.",
+																MarkdownDescription: "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.<br>Conflicts with `custom_security`, `low_security`, and `medium_security`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -3615,7 +3639,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 															},
 															"low_security": schema.BoolAttribute{
 																Description:         "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.",
-																MarkdownDescription: "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.",
+																MarkdownDescription: "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.<br>Conflicts with `custom_security`, `default_security`, and `medium_security`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -3625,7 +3649,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 															},
 															"medium_security": schema.BoolAttribute{
 																Description:         "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.",
-																MarkdownDescription: "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.",
+																MarkdownDescription: "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.<br>Conflicts with `custom_security`, `default_security`, and `low_security`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -3645,27 +3669,30 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"tls_tcp_auto_cert": schema.SingleNestedAttribute{
 						Description:         "TLS over TCP with automatic certificate TLS over TCP load balancer with automatic public certificate provisioning. DNS records for the domains will be automatically managed by F5 Distributed Cloud. As a prerequisite, the domain must be delegated to F5 Distributed Cloud (see the DNS Management section) or a DNS CNAME record should be created in your DNS provider's portal(only for Domains not managed by F5 Distributed Cloud).",
-						MarkdownDescription: "TLS over TCP with automatic certificate TLS over TCP load balancer with automatic public certificate provisioning. DNS records for the domains will be automatically managed by F5 Distributed Cloud. As a prerequisite, the domain must be delegated to F5 Distributed Cloud (see the DNS Management section) or a DNS CNAME record should be created in your DNS provider's portal(only for Domains not managed by F5 Distributed Cloud).",
+						MarkdownDescription: "TLS over TCP with automatic certificate TLS over TCP load balancer with automatic public certificate provisioning. DNS records for the domains will be automatically managed by F5 Distributed Cloud. As a prerequisite, the domain must be delegated to F5 Distributed Cloud (see the DNS Management section) or a DNS CNAME record should be created in your DNS provider's portal(only for Domains not managed by F5 Distributed Cloud).<br>Conflicts with `tcp` and `tls_tcp`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"mtls_choice": schema.SingleNestedAttribute{
 								Description:         "mTLS choice mTLS authentication between clients and HTTPS load balancer",
-								MarkdownDescription: "mTLS choice mTLS authentication between clients and HTTPS load balancer",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "mTLS choice mTLS authentication between clients and HTTPS load balancer<br>Exactly one of `no_mtls` or `use_mtls` must be specified when `mtls_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"no_mtls",
 										"use_mtls",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"no_mtls": schema.BoolAttribute{
 										Description:         "No mTLS",
-										MarkdownDescription: "No mTLS",
+										MarkdownDescription: "No mTLS<br>Conflicts with `use_mtls`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3675,7 +3702,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 									},
 									"use_mtls": schema.SingleNestedAttribute{
 										Description:         "Use mTLS",
-										MarkdownDescription: "Use mTLS",
+										MarkdownDescription: "Use mTLS<br>Conflicts with `no_mtls`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3690,7 +3717,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 											},
 											"crl_choice": schema.SingleNestedAttribute{
 												Description:         "crl choice Whether to verify client certificate revocation status with certificate revocation list",
-												MarkdownDescription: "crl choice Whether to verify client certificate revocation status with certificate revocation list",
+												MarkdownDescription: "crl choice Whether to verify client certificate revocation status with certificate revocation list<br>Exactly one of `crl` or `no_crl` must be specified when `crl_choice` is configured.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3703,7 +3730,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 												Attributes: map[string]schema.Attribute{
 													"crl": schema.SingleNestedAttribute{
 														Description:         "Verify client certificate with CRL Client certificate is verified against CRL. Specify the CRL server information to download the certificate revocation list",
-														MarkdownDescription: "Verify client certificate with CRL Client certificate is verified against CRL. Specify the CRL server information to download the certificate revocation list",
+														MarkdownDescription: "Verify client certificate with CRL Client certificate is verified against CRL. Specify the CRL server information to download the certificate revocation list<br>Conflicts with `no_crl`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -3736,7 +3763,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 													},
 													"no_crl": schema.BoolAttribute{
 														Description:         "No client certificate verification with CRL Client certificate revocation status is not verified",
-														MarkdownDescription: "No client certificate verification with CRL Client certificate revocation status is not verified",
+														MarkdownDescription: "No client certificate verification with CRL Client certificate revocation status is not verified<br>Conflicts with `crl`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -3748,7 +3775,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 											},
 											"trusted_ca_choice": schema.SingleNestedAttribute{
 												Description:         "trusted_ca_choice Root CA configuration for downstream TLS connections",
-												MarkdownDescription: "trusted_ca_choice Root CA configuration for downstream TLS connections",
+												MarkdownDescription: "trusted_ca_choice Root CA configuration for downstream TLS connections<br>Exactly one of `trusted_ca` or `trusted_ca_url` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -3761,7 +3788,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 												Attributes: map[string]schema.Attribute{
 													"trusted_ca": schema.SingleNestedAttribute{
 														Description:         "trusted_ca Select/Add a Root CA Certificate object to associate with this Load Balancer",
-														MarkdownDescription: "trusted_ca Select/Add a Root CA Certificate object to associate with this Load Balancer",
+														MarkdownDescription: "trusted_ca Select/Add a Root CA Certificate object to associate with this Load Balancer<br>Conflicts with `trusted_ca_url`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -3794,7 +3821,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 													},
 													"trusted_ca_url": schema.StringAttribute{
 														Description:         "trusted_ca_url Upload a Root CA Certificate specifically for this Load Balancer",
-														MarkdownDescription: "trusted_ca_url Upload a Root CA Certificate specifically for this Load Balancer",
+														MarkdownDescription: "trusted_ca_url Upload a Root CA Certificate specifically for this Load Balancer<br>Conflicts with `trusted_ca`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -3817,22 +3844,25 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 								Attributes: map[string]schema.Attribute{
 									"choice": schema.SingleNestedAttribute{
 										Description:         "TLS Security Level The security level for TLS handshake between client/server and the platform.",
-										MarkdownDescription: "TLS Security Level The security level for TLS handshake between client/server and the platform.",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "TLS Security Level The security level for TLS handshake between client/server and the platform.<br>Exactly one of `custom_security`, `default_security`, `low_security`, or `medium_security` must be specified when `choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"custom_security",
 												"default_security",
 												"low_security",
 												"medium_security",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"custom_security": schema.SingleNestedAttribute{
 												Description:         "Custom Security Custom selection of TLS versions and cipher suites",
-												MarkdownDescription: "Custom Security Custom selection of TLS versions and cipher suites",
+												MarkdownDescription: "Custom Security Custom selection of TLS versions and cipher suites<br>Conflicts with `default_security`, `low_security`, and `medium_security`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3879,7 +3909,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 											},
 											"default_security": schema.BoolAttribute{
 												Description:         "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.",
-												MarkdownDescription: "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.",
+												MarkdownDescription: "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.<br>Conflicts with `custom_security`, `low_security`, and `medium_security`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3889,7 +3919,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 											},
 											"low_security": schema.BoolAttribute{
 												Description:         "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.",
-												MarkdownDescription: "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.",
+												MarkdownDescription: "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.<br>Conflicts with `custom_security`, `default_security`, and `medium_security`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3899,7 +3929,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 											},
 											"medium_security": schema.BoolAttribute{
 												Description:         "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.",
-												MarkdownDescription: "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.",
+												MarkdownDescription: "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.<br>Conflicts with `custom_security`, `default_security`, and `low_security`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3944,7 +3974,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 						},
 						"pool_choice": schema.SingleNestedAttribute{
 							Description:         "Pool Choice Select origin pool method, simple origin pool method or more flexible cluster object.",
-							MarkdownDescription: "Pool Choice Select origin pool method, simple origin pool method or more flexible cluster object.",
+							MarkdownDescription: "Pool Choice Select origin pool method, simple origin pool method or more flexible cluster object.<br>Exactly one of `cluster` or `pool` must be specified.",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
@@ -3957,7 +3987,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 							Attributes: map[string]schema.Attribute{
 								"cluster": schema.SingleNestedAttribute{
 									Description:         "Cluster More flexible, advanced feature control with cluster",
-									MarkdownDescription: "Cluster More flexible, advanced feature control with cluster",
+									MarkdownDescription: "Cluster More flexible, advanced feature control with cluster<br>Conflicts with `pool`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -3990,7 +4020,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 								},
 								"pool": schema.SingleNestedAttribute{
 									Description:         "Pool Simple, commonly used pool parameters with origin pool",
-									MarkdownDescription: "Pool Simple, commonly used pool parameters with origin pool",
+									MarkdownDescription: "Pool Simple, commonly used pool parameters with origin pool<br>Conflicts with `cluster`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -4047,7 +4077,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 			},
 			"port_choice": schema.SingleNestedAttribute{
 				Description:         "Listen Port Listen Port for this load balancer",
-				MarkdownDescription: "Listen Port Listen Port for this load balancer",
+				MarkdownDescription: "Listen Port Listen Port for this load balancer<br>Exactly one of `listen_port` or `port_ranges` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -4060,7 +4090,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 				Attributes: map[string]schema.Attribute{
 					"listen_port": schema.Int64Attribute{
 						Description:         "Port Listen Port for this load balancer",
-						MarkdownDescription: "Port Listen Port for this load balancer",
+						MarkdownDescription: "Port Listen Port for this load balancer<br>Conflicts with `port_ranges`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -4073,7 +4103,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"port_ranges": schema.StringAttribute{
 						Description:         "Port_ranges A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.",
-						MarkdownDescription: "Port_ranges A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.<br>**Validation:** `Length LengthBetween(1, 512)`",
+						MarkdownDescription: "Port_ranges A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.<br>**Validation:** `Length LengthBetween(1, 512)`<br>Conflicts with `listen_port`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -4086,7 +4116,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 			},
 			"service_policy_choice": schema.SingleNestedAttribute{
 				Description:         "Service Policies Service policies provide the ability to configure security controls such as IP Allow/Deny lists, Geo IP filtering and Custom rules",
-				MarkdownDescription: "Service Policies Service policies provide the ability to configure security controls such as IP Allow/Deny lists, Geo IP filtering and Custom rules",
+				MarkdownDescription: "Service Policies Service policies provide the ability to configure security controls such as IP Allow/Deny lists, Geo IP filtering and Custom rules<br>Exactly one of `active_service_policies`, `no_service_policies`, or `service_policies_from_namespace` must be specified when `service_policy_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
@@ -4103,7 +4133,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 				Attributes: map[string]schema.Attribute{
 					"active_service_policies": schema.SingleNestedAttribute{
 						Description:         "Apply Specified Service Policies Apply the specified list of service policies and bypass the namespace service policy set",
-						MarkdownDescription: "Apply Specified Service Policies Apply the specified list of service policies and bypass the namespace service policy set",
+						MarkdownDescription: "Apply Specified Service Policies Apply the specified list of service policies and bypass the namespace service policy set<br>Conflicts with `no_service_policies` and `service_policies_from_namespace`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -4151,7 +4181,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"no_service_policies": schema.BoolAttribute{
 						Description:         "Do Not Apply Service Policies Do not apply any service policies i.e. bypass the namespace service policy set",
-						MarkdownDescription: "Do Not Apply Service Policies Do not apply any service policies i.e. bypass the namespace service policy set",
+						MarkdownDescription: "Do Not Apply Service Policies Do not apply any service policies i.e. bypass the namespace service policy set<br>Conflicts with `active_service_policies` and `service_policies_from_namespace`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -4161,7 +4191,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"service_policies_from_namespace": schema.BoolAttribute{
 						Description:         "Apply Namespace Service Policies Apply the active service policies configured as part of the namespace service policy set",
-						MarkdownDescription: "Apply Namespace Service Policies Apply the active service policies configured as part of the namespace service policy set",
+						MarkdownDescription: "Apply Namespace Service Policies Apply the active service policies configured as part of the namespace service policy set<br>Conflicts with `active_service_policies` and `no_service_policies`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -4173,21 +4203,24 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 			},
 			"sni_default_lb_choice": schema.SingleNestedAttribute{
 				Description:         "SNI and Default LB choice This is a choice to enable SNI and default LB options",
-				MarkdownDescription: "SNI and Default LB choice This is a choice to enable SNI and default LB options",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "SNI and Default LB choice This is a choice to enable SNI and default LB options<br>Exactly one of `default_lb_with_sni`, `no_sni`, or `sni` must be specified when `sni_default_lb_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"default_lb_with_sni",
 						"no_sni",
 						"sni",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"default_lb_with_sni": schema.BoolAttribute{
 						Description:         "SNI and Default LB Enables Server Name Indication for Loadbalancer Also enables usage as Default LB for Non SNI Clients",
-						MarkdownDescription: "SNI and Default LB Enables Server Name Indication for Loadbalancer Also enables usage as Default LB for Non SNI Clients",
+						MarkdownDescription: "SNI and Default LB Enables Server Name Indication for Loadbalancer Also enables usage as Default LB for Non SNI Clients<br>Conflicts with `no_sni` and `sni`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -4197,7 +4230,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"no_sni": schema.BoolAttribute{
 						Description:         "No SNI Loadbalancer without Server Name Indication support",
-						MarkdownDescription: "No SNI Loadbalancer without Server Name Indication support",
+						MarkdownDescription: "No SNI Loadbalancer without Server Name Indication support<br>Conflicts with `default_lb_with_sni` and `sni`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -4207,7 +4240,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"sni": schema.BoolAttribute{
 						Description:         "With SNI Enables Server Name Indication for Loadbalancer",
-						MarkdownDescription: "With SNI Enables Server Name Indication for Loadbalancer",
+						MarkdownDescription: "With SNI Enables Server Name Indication for Loadbalancer<br>Conflicts with `default_lb_with_sni` and `no_sni`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -4381,7 +4414,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> AdvertiseChoice
+	// resource modelToSpecRoot OneOfField --> AdvertiseChoice
 	if !data.AdvertiseChoice.IsNull() && !data.AdvertiseChoice.IsUnknown() {
 		advertiseChoiceModel := TcpLoadbalancerAdvertiseChoice{}
 		response.Diagnostics.Append(data.AdvertiseChoice.As(ctx, &advertiseChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4417,6 +4450,9 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 				for i, advertiseWhereElement := range advertiseWhereElements {
 					// Initialize the spec struct for the current element
 					advertiseCustomOneOfSpec.AdvertiseCustom.AdvertiseWhere[i] = &ves_io_schema_views.WhereType{}
+					advertiseCustomOneOfSpec.AdvertiseCustom.AdvertiseWhere[i].PortChoice = &ves_io_schema_views.WhereType_UseDefaultPort{
+						UseDefaultPort: &ves_io_schema.Empty{},
+					}
 
 					// Recursively process nested elements
 
@@ -4957,7 +4993,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> PortChoice
+					// resource modelToSpecNested OneOfField --> PortChoice
 					if !advertiseWhereElement.PortChoice.IsNull() && !advertiseWhereElement.PortChoice.IsUnknown() {
 						advertiseWherePortChoiceModel := TcpLoadbalancerPortChoice{}
 						response.Diagnostics.Append(advertiseWhereElement.PortChoice.As(ctx, &advertiseWherePortChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5043,9 +5079,13 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 			spec.AdvertiseChoice = doNotAdvertiseSpecBool
 		}
 
+	} else {
+		spec.AdvertiseChoice = &ves_io_schema_views_tcp_loadbalancer.CreateSpecType_AdvertiseOnPublicDefaultVip{
+			AdvertiseOnPublicDefaultVip: &ves_io_schema.Empty{},
+		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> ClusterRetractChoice
+	// resource modelToSpecRoot OneOfField --> ClusterRetractChoice
 	if !data.ClusterRetractChoice.IsNull() && !data.ClusterRetractChoice.IsUnknown() {
 		clusterRetractChoiceModel := TcpLoadbalancerClusterRetractChoice{}
 		response.Diagnostics.Append(data.ClusterRetractChoice.As(ctx, &clusterRetractChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5067,6 +5107,10 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 			spec.ClusterRetractChoice = retractClusterSpecBool
 		}
 
+	} else {
+		spec.ClusterRetractChoice = &ves_io_schema_views_tcp_loadbalancer.CreateSpecType_RetractCluster{
+			RetractCluster: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot Bool Field --> DnsVolterraManaged
@@ -5084,7 +5128,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> HashPolicyChoice
+	// resource modelToSpecRoot OneOfField --> HashPolicyChoice
 	if !data.HashPolicyChoice.IsNull() && !data.HashPolicyChoice.IsUnknown() {
 		hashPolicyChoiceModel := TcpLoadbalancerHashPolicyChoice{}
 		response.Diagnostics.Append(data.HashPolicyChoice.As(ctx, &hashPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5120,6 +5164,10 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 			spec.HashPolicyChoice = hashPolicyChoiceSourceIpStickinessSpecBool
 		}
 
+	} else {
+		spec.HashPolicyChoice = &ves_io_schema_views_tcp_loadbalancer.CreateSpecType_HashPolicyChoiceRoundRobin{
+			HashPolicyChoiceRoundRobin: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot UintField --> IdleTimeout
@@ -5170,6 +5218,9 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 					}
 					tlsCertParamsOneOfSpec := &ves_io_schema_views_tcp_loadbalancer.ProxyTypeTLSTCP_TlsCertParams{}
 					tlsCertParamsOneOfSpec.TlsCertParams = &ves_io_schema_views.DownstreamTLSCertsParams{}
+					tlsCertParamsOneOfSpec.TlsCertParams.MtlsChoice = &ves_io_schema_views.DownstreamTLSCertsParams_NoMtls{
+						NoMtls: &ves_io_schema.Empty{},
+					}
 					tlsTcpOneOfSpec.TlsTcp.TlsCertificatesChoice = tlsCertParamsOneOfSpec
 
 					// resource modelToSpecNested RequiredArrayOfPointerField --> Certificates
@@ -5205,7 +5256,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 						}
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> MtlsChoice
+					// resource modelToSpecNested OneOfField --> MtlsChoice
 					if !tcpLoadbalancerTlsCertParamsModel.MtlsChoice.IsNull() && !tcpLoadbalancerTlsCertParamsModel.MtlsChoice.IsUnknown() {
 						tlsCertParamsMtlsChoiceModel := TcpLoadbalancerMtlsChoice{}
 						response.Diagnostics.Append(tcpLoadbalancerTlsCertParamsModel.MtlsChoice.As(ctx, &tlsCertParamsMtlsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5334,9 +5385,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 						}
 
 						tlsConfigSpec := &ves_io_schema_views.TlsConfig{}
+						tlsConfigSpec.Choice = &ves_io_schema_views.TlsConfig_DefaultSecurity{
+							DefaultSecurity: &ves_io_schema.Empty{},
+						}
 						tlsCertParamsOneOfSpec.TlsCertParams.TlsConfig = tlsConfigSpec
 
-						// resource modelToSpecNested RequiredOneOfField --> Choice
+						// resource modelToSpecNested OneOfField --> Choice
 						if !tlsConfigModel.Choice.IsNull() && !tlsConfigModel.Choice.IsUnknown() {
 							tlsConfigChoiceModel := TcpLoadbalancerTlsConfigChoice{}
 							response.Diagnostics.Append(tlsConfigModel.Choice.As(ctx, &tlsConfigChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5452,9 +5506,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 					}
 					tlsParametersOneOfSpec := &ves_io_schema_views_tcp_loadbalancer.ProxyTypeTLSTCP_TlsParameters{}
 					tlsParametersOneOfSpec.TlsParameters = &ves_io_schema_views.DownstreamTlsParamsType{}
+					tlsParametersOneOfSpec.TlsParameters.MtlsChoice = &ves_io_schema_views.DownstreamTlsParamsType_NoMtls{
+						NoMtls: &ves_io_schema.Empty{},
+					}
 					tlsTcpOneOfSpec.TlsTcp.TlsCertificatesChoice = tlsParametersOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> MtlsChoice
+					// resource modelToSpecNested OneOfField --> MtlsChoice
 					if !tcpLoadbalancerTlsParametersModel.MtlsChoice.IsNull() && !tcpLoadbalancerTlsParametersModel.MtlsChoice.IsUnknown() {
 						tlsParametersMtlsChoiceModel := TcpLoadbalancerDownstreamTlsParamsTypeMtlsChoice{}
 						response.Diagnostics.Append(tcpLoadbalancerTlsParametersModel.MtlsChoice.As(ctx, &tlsParametersMtlsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5757,9 +5814,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 						}
 
 						tlsConfigSpec := &ves_io_schema_views.TlsConfig{}
+						tlsConfigSpec.Choice = &ves_io_schema_views.TlsConfig_DefaultSecurity{
+							DefaultSecurity: &ves_io_schema.Empty{},
+						}
 						tlsParametersOneOfSpec.TlsParameters.TlsConfig = tlsConfigSpec
 
-						// resource modelToSpecNested RequiredOneOfField --> Choice
+						// resource modelToSpecNested OneOfField --> Choice
 						if !tlsConfigModel.Choice.IsNull() && !tlsConfigModel.Choice.IsUnknown() {
 							tlsConfigChoiceModel := TcpLoadbalancerTlsConfigChoice{}
 							response.Diagnostics.Append(tlsConfigModel.Choice.As(ctx, &tlsConfigChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5879,9 +5939,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 			}
 			tlsTcpAutoCertOneOfSpec := &ves_io_schema_views_tcp_loadbalancer.CreateSpecType_TlsTcpAutoCert{}
 			tlsTcpAutoCertOneOfSpec.TlsTcpAutoCert = &ves_io_schema_views_tcp_loadbalancer.ProxyTypeTLSTCPAutoCerts{}
+			tlsTcpAutoCertOneOfSpec.TlsTcpAutoCert.MtlsChoice = &ves_io_schema_views_tcp_loadbalancer.ProxyTypeTLSTCPAutoCerts_NoMtls{
+				NoMtls: &ves_io_schema.Empty{},
+			}
 			spec.LoadbalancerType = tlsTcpAutoCertOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> MtlsChoice
+			// resource modelToSpecNested OneOfField --> MtlsChoice
 			if !tcpLoadbalancerTlsTcpAutoCertModel.MtlsChoice.IsNull() && !tcpLoadbalancerTlsTcpAutoCertModel.MtlsChoice.IsUnknown() {
 				tlsTcpAutoCertMtlsChoiceModel := TcpLoadbalancerProxyTypeTLSTCPAutoCertsMtlsChoice{}
 				response.Diagnostics.Append(tcpLoadbalancerTlsTcpAutoCertModel.MtlsChoice.As(ctx, &tlsTcpAutoCertMtlsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6010,9 +6073,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 				}
 
 				tlsConfigSpec := &ves_io_schema_views.TlsConfig{}
+				tlsConfigSpec.Choice = &ves_io_schema_views.TlsConfig_DefaultSecurity{
+					DefaultSecurity: &ves_io_schema.Empty{},
+				}
 				tlsTcpAutoCertOneOfSpec.TlsTcpAutoCert.TlsConfig = tlsConfigSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> Choice
+				// resource modelToSpecNested OneOfField --> Choice
 				if !tlsConfigModel.Choice.IsNull() && !tlsConfigModel.Choice.IsUnknown() {
 					tlsConfigChoiceModel := TcpLoadbalancerTlsConfigChoice{}
 					response.Diagnostics.Append(tlsConfigModel.Choice.As(ctx, &tlsConfigChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6310,7 +6376,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> SniDefaultLbChoice
+	// resource modelToSpecRoot OneOfField --> SniDefaultLbChoice
 	if !data.SniDefaultLbChoice.IsNull() && !data.SniDefaultLbChoice.IsUnknown() {
 		sniDefaultLbChoiceModel := TcpLoadbalancerSniDefaultLbChoice{}
 		response.Diagnostics.Append(data.SniDefaultLbChoice.As(ctx, &sniDefaultLbChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6339,7 +6405,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 			spec.SniDefaultLbChoice = sniSpecBool
 		}
 
+	} else {
+		spec.SniDefaultLbChoice = &ves_io_schema_views_tcp_loadbalancer.CreateSpecType_NoSni{
+			NoSni: &ves_io_schema.Empty{},
+		}
 	}
+
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
@@ -6484,7 +6555,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> AdvertiseChoice
+	// resource SpecToModelRoot OneOfField --> AdvertiseChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -7491,8 +7562,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 							tcpLoadbalancerWhereTypeModel.Choice = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceModelAttributeMap)
 						}
 
-						// resource specToModelNested RequiredOneOfField --> PortChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> PortChoice
 						if advertiseWhereElement.GetPortChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							advertiseWhereportChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -7685,8 +7755,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.AdvertiseChoice = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceModelAttributeMap)
 	}
 
@@ -7865,7 +7933,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> ClusterRetractChoice
+	// resource SpecToModelRoot OneOfField --> ClusterRetractChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -7913,8 +7981,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.ClusterRetractChoice = types.ObjectNull(TcpLoadbalancerClusterRetractChoiceModelAttributeMap)
 	}
 
@@ -7992,7 +8058,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> HashPolicyChoice
+	// resource SpecToModelRoot OneOfField --> HashPolicyChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -8058,8 +8124,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.HashPolicyChoice = types.ObjectNull(TcpLoadbalancerHashPolicyChoiceModelAttributeMap)
 	}
 
@@ -8435,8 +8499,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 								tlsCertParamsAttributeMap["certificates"] = types.ListNull(types.ObjectType{AttrTypes: TcpLoadbalancerCertificatesObjectRefModelAttributeMap})
 							}
 
-							// resource specToModelNested RequiredOneOfField --> MtlsChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> MtlsChoice
 							if tlsCertParamsElement.GetMtlsChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								tlsCertParamsmtlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -8674,8 +8737,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 
 								// Recursively populate the nested struct
 
-								// resource specToModelNested RequiredOneOfField --> Choice
-								// GlobalSpecType
+								// resource specToModelNested OneOfField --> Choice
 								if tlsConfigElement.GetChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -8837,8 +8899,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 						if isTlsParameters && tlsParametersOptionsWrapper != nil && tlsParametersOptionsWrapper.TlsParameters != nil {
 							tlsParametersElement := tlsParametersOptionsWrapper.TlsParameters
 
-							// resource specToModelNested RequiredOneOfField --> MtlsChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> MtlsChoice
 							if tlsParametersElement.GetMtlsChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								tlsParametersmtlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -9355,8 +9416,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 
 								// Recursively populate the nested struct
 
-								// resource specToModelNested RequiredOneOfField --> Choice
-								// GlobalSpecType
+								// resource specToModelNested OneOfField --> Choice
 								if tlsConfigElement.GetChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -9548,8 +9608,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 			if isTlsTcpAutoCert && tlsTcpAutoCertOptionsWrapper != nil && tlsTcpAutoCertOptionsWrapper.TlsTcpAutoCert != nil {
 				tlsTcpAutoCertElement := tlsTcpAutoCertOptionsWrapper.TlsTcpAutoCert
 
-				// resource specToModelNested RequiredOneOfField --> MtlsChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> MtlsChoice
 				if tlsTcpAutoCertElement.GetMtlsChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					tlsTcpAutoCertmtlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -9787,8 +9846,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> Choice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> Choice
 					if tlsConfigElement.GetChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -10323,7 +10381,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 		data.ServicePolicyChoice = types.ObjectNull(TcpLoadbalancerServicePolicyChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> SniDefaultLbChoice
+	// resource SpecToModelRoot OneOfField --> SniDefaultLbChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -10380,8 +10438,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Create(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.SniDefaultLbChoice = types.ObjectNull(TcpLoadbalancerSniDefaultLbChoiceModelAttributeMap)
 	}
 
@@ -10429,11 +10485,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 	defer cancel()
 	priorLoadbalancerTypeChoice := data.LoadbalancerTypeChoice
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_tcp_loadbalancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_tcp_loadbalancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "tcp_loadbalancer", err),
@@ -10554,7 +10606,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> AdvertiseChoice
+	// resource SpecToModelRoot OneOfField --> AdvertiseChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -11561,8 +11613,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 							tcpLoadbalancerWhereTypeModel.Choice = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceModelAttributeMap)
 						}
 
-						// resource specToModelNested RequiredOneOfField --> PortChoice
-						// <no value>
+						// resource specToModelNested OneOfField --> PortChoice
 						if advertiseWhereElement.GetPortChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							advertiseWhereportChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -11759,8 +11810,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.AdvertiseChoice.IsNull() || data.AdvertiseChoice.IsUnknown() || ((data.AdvertiseChoice.Attributes()["advertise_custom"].(types.Object).IsNull() || data.AdvertiseChoice.Attributes()["advertise_custom"].(types.Object).IsUnknown() || (data.AdvertiseChoice.Attributes()["advertise_custom"].(types.Object).Attributes()["advertise_where"].IsNull() || data.AdvertiseChoice.Attributes()["advertise_custom"].(types.Object).Attributes()["advertise_where"].IsUnknown())) && (data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).IsNull() || data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).IsUnknown() || (data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).Attributes()["public_ip"].(types.Object).IsNull() || data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).Attributes()["public_ip"].(types.Object).IsUnknown() || ((data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).Attributes()["public_ip"].(types.Object).Attributes()["name"].IsNull() || data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).Attributes()["public_ip"].(types.Object).Attributes()["name"].IsUnknown()) && (data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).Attributes()["public_ip"].(types.Object).Attributes()["namespace"].IsNull() || data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).Attributes()["public_ip"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).Attributes()["public_ip"].(types.Object).Attributes()["tenant"].IsNull() || data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).Attributes()["public_ip"].(types.Object).Attributes()["tenant"].IsUnknown())))) && (data.AdvertiseChoice.Attributes()["advertise_on_public_default_vip"].IsNull() || data.AdvertiseChoice.Attributes()["advertise_on_public_default_vip"].IsUnknown()) && (data.AdvertiseChoice.Attributes()["do_not_advertise"].IsNull() || data.AdvertiseChoice.Attributes()["do_not_advertise"].IsUnknown())) {
 			data.AdvertiseChoice = types.ObjectValueMust(TcpLoadbalancerAdvertiseChoiceModelAttributeMap, map[string]attr.Value{
@@ -11947,7 +11996,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> ClusterRetractChoice
+	// resource SpecToModelRoot OneOfField --> ClusterRetractChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -11995,8 +12044,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.ClusterRetractChoice.IsNull() || data.ClusterRetractChoice.IsUnknown() || ((data.ClusterRetractChoice.Attributes()["do_not_retract_cluster"].IsNull() || data.ClusterRetractChoice.Attributes()["do_not_retract_cluster"].IsUnknown()) && (data.ClusterRetractChoice.Attributes()["retract_cluster"].IsNull() || data.ClusterRetractChoice.Attributes()["retract_cluster"].IsUnknown())) {
 			data.ClusterRetractChoice = types.ObjectValueMust(TcpLoadbalancerClusterRetractChoiceModelAttributeMap, map[string]attr.Value{
@@ -12080,7 +12127,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> HashPolicyChoice
+	// resource SpecToModelRoot OneOfField --> HashPolicyChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -12146,8 +12193,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.HashPolicyChoice.IsNull() || data.HashPolicyChoice.IsUnknown() || ((data.HashPolicyChoice.Attributes()["hash_policy_choice_least_active"].IsNull() || data.HashPolicyChoice.Attributes()["hash_policy_choice_least_active"].IsUnknown()) && (data.HashPolicyChoice.Attributes()["hash_policy_choice_random"].IsNull() || data.HashPolicyChoice.Attributes()["hash_policy_choice_random"].IsUnknown()) && (data.HashPolicyChoice.Attributes()["hash_policy_choice_round_robin"].IsNull() || data.HashPolicyChoice.Attributes()["hash_policy_choice_round_robin"].IsUnknown()) && (data.HashPolicyChoice.Attributes()["hash_policy_choice_source_ip_stickiness"].IsNull() || data.HashPolicyChoice.Attributes()["hash_policy_choice_source_ip_stickiness"].IsUnknown())) {
 			data.HashPolicyChoice = types.ObjectValueMust(TcpLoadbalancerHashPolicyChoiceModelAttributeMap, map[string]attr.Value{
@@ -12531,8 +12576,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 								tlsCertParamsAttributeMap["certificates"] = types.ListNull(types.ObjectType{AttrTypes: TcpLoadbalancerCertificatesObjectRefModelAttributeMap})
 							}
 
-							// resource specToModelNested RequiredOneOfField --> MtlsChoice
-							// <no value>
+							// resource specToModelNested OneOfField --> MtlsChoice
 							if tlsCertParamsElement.GetMtlsChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								tlsCertParamsmtlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -12773,8 +12817,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 
 								// Recursively populate the nested struct
 
-								// resource specToModelNested RequiredOneOfField --> Choice
-								// <no value>
+								// resource specToModelNested OneOfField --> Choice
 								if tlsConfigElement.GetChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -12941,8 +12984,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 						if isTlsParameters && tlsParametersOptionsWrapper != nil && tlsParametersOptionsWrapper.TlsParameters != nil {
 							tlsParametersElement := tlsParametersOptionsWrapper.TlsParameters
 
-							// resource specToModelNested RequiredOneOfField --> MtlsChoice
-							// <no value>
+							// resource specToModelNested OneOfField --> MtlsChoice
 							if tlsParametersElement.GetMtlsChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								tlsParametersmtlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -13474,8 +13516,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 
 								// Recursively populate the nested struct
 
-								// resource specToModelNested RequiredOneOfField --> Choice
-								// <no value>
+								// resource specToModelNested OneOfField --> Choice
 								if tlsConfigElement.GetChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -13672,8 +13713,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 			if isTlsTcpAutoCert && tlsTcpAutoCertOptionsWrapper != nil && tlsTcpAutoCertOptionsWrapper.TlsTcpAutoCert != nil {
 				tlsTcpAutoCertElement := tlsTcpAutoCertOptionsWrapper.TlsTcpAutoCert
 
-				// resource specToModelNested RequiredOneOfField --> MtlsChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> MtlsChoice
 				if tlsTcpAutoCertElement.GetMtlsChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					tlsTcpAutoCertmtlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -13914,8 +13954,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> Choice
-					// <no value>
+					// resource specToModelNested OneOfField --> Choice
 					if tlsConfigElement.GetChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -14462,7 +14501,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 		data.ServicePolicyChoice = types.ObjectNull(TcpLoadbalancerServicePolicyChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> SniDefaultLbChoice
+	// resource SpecToModelRoot OneOfField --> SniDefaultLbChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -14519,8 +14558,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Read(ctx context.Context, request resource
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.SniDefaultLbChoice.IsNull() || data.SniDefaultLbChoice.IsUnknown() || ((data.SniDefaultLbChoice.Attributes()["default_lb_with_sni"].IsNull() || data.SniDefaultLbChoice.Attributes()["default_lb_with_sni"].IsUnknown()) && (data.SniDefaultLbChoice.Attributes()["no_sni"].IsNull() || data.SniDefaultLbChoice.Attributes()["no_sni"].IsUnknown()) && (data.SniDefaultLbChoice.Attributes()["sni"].IsNull() || data.SniDefaultLbChoice.Attributes()["sni"].IsUnknown())) {
 			data.SniDefaultLbChoice = types.ObjectValueMust(TcpLoadbalancerSniDefaultLbChoiceModelAttributeMap, map[string]attr.Value{
@@ -14658,7 +14695,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> AdvertiseChoice
+	// resource modelToSpecRoot OneOfField --> AdvertiseChoice
 	if !data.AdvertiseChoice.IsNull() && !data.AdvertiseChoice.IsUnknown() {
 		advertiseChoiceModel := TcpLoadbalancerAdvertiseChoice{}
 		response.Diagnostics.Append(data.AdvertiseChoice.As(ctx, &advertiseChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -14694,6 +14731,9 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 				for i, advertiseWhereElement := range advertiseWhereElements {
 					// Initialize the spec struct for the current element
 					advertiseCustomOneOfSpec.AdvertiseCustom.AdvertiseWhere[i] = &ves_io_schema_views.WhereType{}
+					advertiseCustomOneOfSpec.AdvertiseCustom.AdvertiseWhere[i].PortChoice = &ves_io_schema_views.WhereType_UseDefaultPort{
+						UseDefaultPort: &ves_io_schema.Empty{},
+					}
 
 					// Recursively process nested elements
 
@@ -15234,7 +15274,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> PortChoice
+					// resource modelToSpecNested OneOfField --> PortChoice
 					if !advertiseWhereElement.PortChoice.IsNull() && !advertiseWhereElement.PortChoice.IsUnknown() {
 						advertiseWherePortChoiceModel := TcpLoadbalancerPortChoice{}
 						response.Diagnostics.Append(advertiseWhereElement.PortChoice.As(ctx, &advertiseWherePortChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15320,9 +15360,13 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 			spec.AdvertiseChoice = doNotAdvertiseSpecBool
 		}
 
+	} else {
+		spec.AdvertiseChoice = &ves_io_schema_views_tcp_loadbalancer.ReplaceSpecType_AdvertiseOnPublicDefaultVip{
+			AdvertiseOnPublicDefaultVip: &ves_io_schema.Empty{},
+		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> ClusterRetractChoice
+	// resource modelToSpecRoot OneOfField --> ClusterRetractChoice
 	if !data.ClusterRetractChoice.IsNull() && !data.ClusterRetractChoice.IsUnknown() {
 		clusterRetractChoiceModel := TcpLoadbalancerClusterRetractChoice{}
 		response.Diagnostics.Append(data.ClusterRetractChoice.As(ctx, &clusterRetractChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15344,6 +15388,10 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 			spec.ClusterRetractChoice = retractClusterSpecBool
 		}
 
+	} else {
+		spec.ClusterRetractChoice = &ves_io_schema_views_tcp_loadbalancer.ReplaceSpecType_RetractCluster{
+			RetractCluster: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot Bool Field --> DnsVolterraManaged
@@ -15361,7 +15409,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> HashPolicyChoice
+	// resource modelToSpecRoot OneOfField --> HashPolicyChoice
 	if !data.HashPolicyChoice.IsNull() && !data.HashPolicyChoice.IsUnknown() {
 		hashPolicyChoiceModel := TcpLoadbalancerHashPolicyChoice{}
 		response.Diagnostics.Append(data.HashPolicyChoice.As(ctx, &hashPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15397,6 +15445,10 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 			spec.HashPolicyChoice = hashPolicyChoiceSourceIpStickinessSpecBool
 		}
 
+	} else {
+		spec.HashPolicyChoice = &ves_io_schema_views_tcp_loadbalancer.ReplaceSpecType_HashPolicyChoiceRoundRobin{
+			HashPolicyChoiceRoundRobin: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot UintField --> IdleTimeout
@@ -15447,6 +15499,9 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 					}
 					tlsCertParamsOneOfSpec := &ves_io_schema_views_tcp_loadbalancer.ProxyTypeTLSTCP_TlsCertParams{}
 					tlsCertParamsOneOfSpec.TlsCertParams = &ves_io_schema_views.DownstreamTLSCertsParams{}
+					tlsCertParamsOneOfSpec.TlsCertParams.MtlsChoice = &ves_io_schema_views.DownstreamTLSCertsParams_NoMtls{
+						NoMtls: &ves_io_schema.Empty{},
+					}
 					tlsTcpOneOfSpec.TlsTcp.TlsCertificatesChoice = tlsCertParamsOneOfSpec
 
 					// resource modelToSpecNested RequiredArrayOfPointerField --> Certificates
@@ -15482,7 +15537,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 						}
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> MtlsChoice
+					// resource modelToSpecNested OneOfField --> MtlsChoice
 					if !tcpLoadbalancerTlsCertParamsModel.MtlsChoice.IsNull() && !tcpLoadbalancerTlsCertParamsModel.MtlsChoice.IsUnknown() {
 						tlsCertParamsMtlsChoiceModel := TcpLoadbalancerMtlsChoice{}
 						response.Diagnostics.Append(tcpLoadbalancerTlsCertParamsModel.MtlsChoice.As(ctx, &tlsCertParamsMtlsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15611,9 +15666,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 						}
 
 						tlsConfigSpec := &ves_io_schema_views.TlsConfig{}
+						tlsConfigSpec.Choice = &ves_io_schema_views.TlsConfig_DefaultSecurity{
+							DefaultSecurity: &ves_io_schema.Empty{},
+						}
 						tlsCertParamsOneOfSpec.TlsCertParams.TlsConfig = tlsConfigSpec
 
-						// resource modelToSpecNested RequiredOneOfField --> Choice
+						// resource modelToSpecNested OneOfField --> Choice
 						if !tlsConfigModel.Choice.IsNull() && !tlsConfigModel.Choice.IsUnknown() {
 							tlsConfigChoiceModel := TcpLoadbalancerTlsConfigChoice{}
 							response.Diagnostics.Append(tlsConfigModel.Choice.As(ctx, &tlsConfigChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15729,9 +15787,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 					}
 					tlsParametersOneOfSpec := &ves_io_schema_views_tcp_loadbalancer.ProxyTypeTLSTCP_TlsParameters{}
 					tlsParametersOneOfSpec.TlsParameters = &ves_io_schema_views.DownstreamTlsParamsType{}
+					tlsParametersOneOfSpec.TlsParameters.MtlsChoice = &ves_io_schema_views.DownstreamTlsParamsType_NoMtls{
+						NoMtls: &ves_io_schema.Empty{},
+					}
 					tlsTcpOneOfSpec.TlsTcp.TlsCertificatesChoice = tlsParametersOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> MtlsChoice
+					// resource modelToSpecNested OneOfField --> MtlsChoice
 					if !tcpLoadbalancerTlsParametersModel.MtlsChoice.IsNull() && !tcpLoadbalancerTlsParametersModel.MtlsChoice.IsUnknown() {
 						tlsParametersMtlsChoiceModel := TcpLoadbalancerDownstreamTlsParamsTypeMtlsChoice{}
 						response.Diagnostics.Append(tcpLoadbalancerTlsParametersModel.MtlsChoice.As(ctx, &tlsParametersMtlsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16034,9 +16095,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 						}
 
 						tlsConfigSpec := &ves_io_schema_views.TlsConfig{}
+						tlsConfigSpec.Choice = &ves_io_schema_views.TlsConfig_DefaultSecurity{
+							DefaultSecurity: &ves_io_schema.Empty{},
+						}
 						tlsParametersOneOfSpec.TlsParameters.TlsConfig = tlsConfigSpec
 
-						// resource modelToSpecNested RequiredOneOfField --> Choice
+						// resource modelToSpecNested OneOfField --> Choice
 						if !tlsConfigModel.Choice.IsNull() && !tlsConfigModel.Choice.IsUnknown() {
 							tlsConfigChoiceModel := TcpLoadbalancerTlsConfigChoice{}
 							response.Diagnostics.Append(tlsConfigModel.Choice.As(ctx, &tlsConfigChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16156,9 +16220,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 			}
 			tlsTcpAutoCertOneOfSpec := &ves_io_schema_views_tcp_loadbalancer.ReplaceSpecType_TlsTcpAutoCert{}
 			tlsTcpAutoCertOneOfSpec.TlsTcpAutoCert = &ves_io_schema_views_tcp_loadbalancer.ProxyTypeTLSTCPAutoCerts{}
+			tlsTcpAutoCertOneOfSpec.TlsTcpAutoCert.MtlsChoice = &ves_io_schema_views_tcp_loadbalancer.ProxyTypeTLSTCPAutoCerts_NoMtls{
+				NoMtls: &ves_io_schema.Empty{},
+			}
 			spec.LoadbalancerType = tlsTcpAutoCertOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> MtlsChoice
+			// resource modelToSpecNested OneOfField --> MtlsChoice
 			if !tcpLoadbalancerTlsTcpAutoCertModel.MtlsChoice.IsNull() && !tcpLoadbalancerTlsTcpAutoCertModel.MtlsChoice.IsUnknown() {
 				tlsTcpAutoCertMtlsChoiceModel := TcpLoadbalancerProxyTypeTLSTCPAutoCertsMtlsChoice{}
 				response.Diagnostics.Append(tcpLoadbalancerTlsTcpAutoCertModel.MtlsChoice.As(ctx, &tlsTcpAutoCertMtlsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16287,9 +16354,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 				}
 
 				tlsConfigSpec := &ves_io_schema_views.TlsConfig{}
+				tlsConfigSpec.Choice = &ves_io_schema_views.TlsConfig_DefaultSecurity{
+					DefaultSecurity: &ves_io_schema.Empty{},
+				}
 				tlsTcpAutoCertOneOfSpec.TlsTcpAutoCert.TlsConfig = tlsConfigSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> Choice
+				// resource modelToSpecNested OneOfField --> Choice
 				if !tlsConfigModel.Choice.IsNull() && !tlsConfigModel.Choice.IsUnknown() {
 					tlsConfigChoiceModel := TcpLoadbalancerTlsConfigChoice{}
 					response.Diagnostics.Append(tlsConfigModel.Choice.As(ctx, &tlsConfigChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16587,7 +16657,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> SniDefaultLbChoice
+	// resource modelToSpecRoot OneOfField --> SniDefaultLbChoice
 	if !data.SniDefaultLbChoice.IsNull() && !data.SniDefaultLbChoice.IsUnknown() {
 		sniDefaultLbChoiceModel := TcpLoadbalancerSniDefaultLbChoice{}
 		response.Diagnostics.Append(data.SniDefaultLbChoice.As(ctx, &sniDefaultLbChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16616,7 +16686,12 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 			spec.SniDefaultLbChoice = sniSpecBool
 		}
 
+	} else {
+		spec.SniDefaultLbChoice = &ves_io_schema_views_tcp_loadbalancer.ReplaceSpecType_NoSni{
+			NoSni: &ves_io_schema.Empty{},
+		}
 	}
+
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
@@ -16628,12 +16703,8 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_views_tcp_loadbalancer.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_views_tcp_loadbalancer.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "tcp_loadbalancer", err),
@@ -16642,7 +16713,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_tcp_loadbalancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_tcp_loadbalancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "tcp_loadbalancer", err),
@@ -16762,7 +16833,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> AdvertiseChoice
+	// resource SpecToModelRoot OneOfField --> AdvertiseChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -17769,8 +17840,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 							tcpLoadbalancerWhereTypeModel.Choice = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceModelAttributeMap)
 						}
 
-						// resource specToModelNested RequiredOneOfField --> PortChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> PortChoice
 						if advertiseWhereElement.GetPortChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							advertiseWhereportChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -17963,8 +18033,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.AdvertiseChoice = types.ObjectNull(TcpLoadbalancerAdvertiseChoiceModelAttributeMap)
 	}
 
@@ -18143,7 +18211,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> ClusterRetractChoice
+	// resource SpecToModelRoot OneOfField --> ClusterRetractChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -18191,8 +18259,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.ClusterRetractChoice = types.ObjectNull(TcpLoadbalancerClusterRetractChoiceModelAttributeMap)
 	}
 
@@ -18270,7 +18336,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> HashPolicyChoice
+	// resource SpecToModelRoot OneOfField --> HashPolicyChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -18336,8 +18402,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.HashPolicyChoice = types.ObjectNull(TcpLoadbalancerHashPolicyChoiceModelAttributeMap)
 	}
 
@@ -18713,8 +18777,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 								tlsCertParamsAttributeMap["certificates"] = types.ListNull(types.ObjectType{AttrTypes: TcpLoadbalancerCertificatesObjectRefModelAttributeMap})
 							}
 
-							// resource specToModelNested RequiredOneOfField --> MtlsChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> MtlsChoice
 							if tlsCertParamsElement.GetMtlsChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								tlsCertParamsmtlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -18952,8 +19015,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 
 								// Recursively populate the nested struct
 
-								// resource specToModelNested RequiredOneOfField --> Choice
-								// GlobalSpecType
+								// resource specToModelNested OneOfField --> Choice
 								if tlsConfigElement.GetChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -19115,8 +19177,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 						if isTlsParameters && tlsParametersOptionsWrapper != nil && tlsParametersOptionsWrapper.TlsParameters != nil {
 							tlsParametersElement := tlsParametersOptionsWrapper.TlsParameters
 
-							// resource specToModelNested RequiredOneOfField --> MtlsChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> MtlsChoice
 							if tlsParametersElement.GetMtlsChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								tlsParametersmtlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -19633,8 +19694,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 
 								// Recursively populate the nested struct
 
-								// resource specToModelNested RequiredOneOfField --> Choice
-								// GlobalSpecType
+								// resource specToModelNested OneOfField --> Choice
 								if tlsConfigElement.GetChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -19826,8 +19886,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 			if isTlsTcpAutoCert && tlsTcpAutoCertOptionsWrapper != nil && tlsTcpAutoCertOptionsWrapper.TlsTcpAutoCert != nil {
 				tlsTcpAutoCertElement := tlsTcpAutoCertOptionsWrapper.TlsTcpAutoCert
 
-				// resource specToModelNested RequiredOneOfField --> MtlsChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> MtlsChoice
 				if tlsTcpAutoCertElement.GetMtlsChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					tlsTcpAutoCertmtlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -20065,8 +20124,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> Choice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> Choice
 					if tlsConfigElement.GetChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -20601,7 +20659,7 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 		data.ServicePolicyChoice = types.ObjectNull(TcpLoadbalancerServicePolicyChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> SniDefaultLbChoice
+	// resource SpecToModelRoot OneOfField --> SniDefaultLbChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -20658,8 +20716,6 @@ func (r *ResourceF5XCTcpLoadbalancer) Update(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.SniDefaultLbChoice = types.ObjectNull(TcpLoadbalancerSniDefaultLbChoiceModelAttributeMap)
 	}
 

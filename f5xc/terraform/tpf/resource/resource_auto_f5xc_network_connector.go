@@ -31,6 +31,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -43,6 +44,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/requiredifvalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -166,13 +168,13 @@ var NetworkConnectorConnectorChoiceSliToSloSnatModelAttributeMap = map[string]at
 	},
 }
 
-// Attribute map for RequiredOneOfField --> PoolChoice
+// Attribute map for OneOfField --> PoolChoice
 var NetworkConnectorConnectorChoiceSliToSloSnatPoolChoiceModelAttributeMap = map[string]attr.Type{
 
 	"interface_ip": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> RoutingChoice
+// Attribute map for OneOfField --> RoutingChoice
 var NetworkConnectorConnectorChoiceSliToSloSnatRoutingChoiceModelAttributeMap = map[string]attr.Type{
 
 	"default_gw_snat": types.BoolType,
@@ -196,7 +198,7 @@ var NetworkConnectorConnectorChoiceSloToGlobalDrGlobalVnModelAttributeMap = map[
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> ForwardProxyChoice
+// Attribute map for OneOfField --> ForwardProxyChoice
 var NetworkConnectorForwardProxyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disable_forward_proxy": types.BoolType,
@@ -301,7 +303,7 @@ func (r *ResourceF5XCNetworkConnector) Schema(ctx context.Context, request resou
 			},
 			"connector_choice": schema.SingleNestedAttribute{
 				Description:         "Connector Choice Select the networks and method in which they are connected.",
-				MarkdownDescription: "Connector Choice Select the networks and method in which they are connected.",
+				MarkdownDescription: "Connector Choice Select the networks and method in which they are connected.<br>Exactly one of `sli_to_global_dr`, `sli_to_slo_snat`, or `slo_to_global_dr` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -315,7 +317,7 @@ func (r *ResourceF5XCNetworkConnector) Schema(ctx context.Context, request resou
 				Attributes: map[string]schema.Attribute{
 					"sli_to_global_dr": schema.SingleNestedAttribute{
 						Description:         "Site Local Inside to a Global Network' Site local inside is connected directly to a given global network",
-						MarkdownDescription: "Site Local Inside to a Global Network' Site local inside is connected directly to a given global network",
+						MarkdownDescription: "Site Local Inside to a Global Network' Site local inside is connected directly to a given global network<br>Conflicts with `sli_to_slo_snat` and `slo_to_global_dr`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -347,8 +349,12 @@ func (r *ResourceF5XCNetworkConnector) Schema(ctx context.Context, request resou
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
+										Validators: []validator.String{
+											requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+										},
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseNonNullStateForUnknown(),
+											requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 										},
 									},
 								},
@@ -357,21 +363,24 @@ func (r *ResourceF5XCNetworkConnector) Schema(ctx context.Context, request resou
 					},
 					"sli_to_slo_snat": schema.SingleNestedAttribute{
 						Description:         "Site Local Inside to Site Local Outside SNAT' Site local inside is connected to site local outside, using SNAT",
-						MarkdownDescription: "Site Local Inside to Site Local Outside SNAT' Site local inside is connected to site local outside, using SNAT",
+						MarkdownDescription: "Site Local Inside to Site Local Outside SNAT' Site local inside is connected to site local outside, using SNAT<br>Conflicts with `sli_to_global_dr` and `slo_to_global_dr`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"pool_choice": schema.SingleNestedAttribute{
 								Description:         "SNAT SIP Selection Select ip will be used for SNAT from SNATed Network",
-								MarkdownDescription: "SNAT SIP Selection Select ip will be used for SNAT from SNATed Network",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "SNAT SIP Selection Select ip will be used for SNAT from SNATed Network<br>`interface_ip` must be specified when `pool_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"interface_ip",
 									),
+								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
 								},
 								Attributes: map[string]schema.Attribute{
 									"interface_ip": schema.BoolAttribute{
@@ -388,14 +397,17 @@ func (r *ResourceF5XCNetworkConnector) Schema(ctx context.Context, request resou
 							},
 							"routing_choice": schema.SingleNestedAttribute{
 								Description:         "Routing mode Select how is the traffic sent to SNATed network",
-								MarkdownDescription: "Routing mode Select how is the traffic sent to SNATed network",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Routing mode Select how is the traffic sent to SNATed network<br>`default_gw_snat` must be specified when `routing_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"default_gw_snat",
 									),
+								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
 								},
 								Attributes: map[string]schema.Attribute{
 									"default_gw_snat": schema.BoolAttribute{
@@ -414,7 +426,7 @@ func (r *ResourceF5XCNetworkConnector) Schema(ctx context.Context, request resou
 					},
 					"slo_to_global_dr": schema.SingleNestedAttribute{
 						Description:         "Site Local Outside to a Global Network' Site local outside is connected directly to a given global network",
-						MarkdownDescription: "Site Local Outside to a Global Network' Site local outside is connected directly to a given global network",
+						MarkdownDescription: "Site Local Outside to a Global Network' Site local outside is connected directly to a given global network<br>Conflicts with `sli_to_global_dr` and `sli_to_slo_snat`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -446,8 +458,12 @@ func (r *ResourceF5XCNetworkConnector) Schema(ctx context.Context, request resou
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
+										Validators: []validator.String{
+											requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+										},
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseNonNullStateForUnknown(),
+											requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 										},
 									},
 								},
@@ -458,20 +474,23 @@ func (r *ResourceF5XCNetworkConnector) Schema(ctx context.Context, request resou
 			},
 			"forward_proxy_choice": schema.SingleNestedAttribute{
 				Description:         "Select Forward Proxy Select to enable forward proxy",
-				MarkdownDescription: "Select Forward Proxy Select to enable forward proxy",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Select Forward Proxy Select to enable forward proxy<br>Exactly one of `disable_forward_proxy` or `enable_forward_proxy` must be specified when `forward_proxy_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"disable_forward_proxy",
 						"enable_forward_proxy",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"disable_forward_proxy": schema.BoolAttribute{
 						Description:         "Disable Forward Proxy Forward Proxy is disabled for this connector",
-						MarkdownDescription: "Disable Forward Proxy Forward Proxy is disabled for this connector",
+						MarkdownDescription: "Disable Forward Proxy Forward Proxy is disabled for this connector<br>Conflicts with `enable_forward_proxy`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -481,7 +500,7 @@ func (r *ResourceF5XCNetworkConnector) Schema(ctx context.Context, request resou
 					},
 					"enable_forward_proxy": schema.SingleNestedAttribute{
 						Description:         "Enable Forward Proxy Forward Proxy is enabled for this connector",
-						MarkdownDescription: "Enable Forward Proxy Forward Proxy is enabled for this connector",
+						MarkdownDescription: "Enable Forward Proxy Forward Proxy is enabled for this connector<br>Conflicts with `disable_forward_proxy`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -751,9 +770,15 @@ func (r *ResourceF5XCNetworkConnector) Create(ctx context.Context, request resou
 			}
 			sliToSloSnatOneOfSpec := &ves_io_schema_network_connector.CreateSpecType_SliToSloSnat{}
 			sliToSloSnatOneOfSpec.SliToSloSnat = &ves_io_schema_network_connector.SnatConnectorType{}
+			sliToSloSnatOneOfSpec.SliToSloSnat.PoolChoice = &ves_io_schema_network_connector.SnatConnectorType_InterfaceIp{
+				InterfaceIp: &ves_io_schema.Empty{},
+			}
+			sliToSloSnatOneOfSpec.SliToSloSnat.RoutingChoice = &ves_io_schema_network_connector.SnatConnectorType_DefaultGwSnat{
+				DefaultGwSnat: &ves_io_schema.Empty{},
+			}
 			spec.ConnectorChoice = sliToSloSnatOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> PoolChoice
+			// resource modelToSpecNested OneOfField --> PoolChoice
 			if !netConnectorSliToSloSnatModel.PoolChoice.IsNull() && !netConnectorSliToSloSnatModel.PoolChoice.IsUnknown() {
 				sliToSloSnatPoolChoiceModel := NetConnectorPoolChoice{}
 				response.Diagnostics.Append(netConnectorSliToSloSnatModel.PoolChoice.As(ctx, &sliToSloSnatPoolChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -770,7 +795,7 @@ func (r *ResourceF5XCNetworkConnector) Create(ctx context.Context, request resou
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> RoutingChoice
+			// resource modelToSpecNested OneOfField --> RoutingChoice
 			if !netConnectorSliToSloSnatModel.RoutingChoice.IsNull() && !netConnectorSliToSloSnatModel.RoutingChoice.IsUnknown() {
 				sliToSloSnatRoutingChoiceModel := NetConnectorRoutingChoice{}
 				response.Diagnostics.Append(netConnectorSliToSloSnatModel.RoutingChoice.As(ctx, &sliToSloSnatRoutingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -832,7 +857,7 @@ func (r *ResourceF5XCNetworkConnector) Create(ctx context.Context, request resou
 
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> ForwardProxyChoice
+	// resource modelToSpecRoot OneOfField --> ForwardProxyChoice
 	if !data.ForwardProxyChoice.IsNull() && !data.ForwardProxyChoice.IsUnknown() {
 		forwardProxyChoiceModel := NetConnectorForwardProxyChoice{}
 		response.Diagnostics.Append(data.ForwardProxyChoice.As(ctx, &forwardProxyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -903,7 +928,12 @@ func (r *ResourceF5XCNetworkConnector) Create(ctx context.Context, request resou
 
 		}
 
+	} else {
+		spec.ForwardProxyChoice = &ves_io_schema_network_connector.CreateSpecType_DisableForwardProxy{
+			DisableForwardProxy: &ves_io_schema.Empty{},
+		}
 	}
+
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
@@ -1251,8 +1281,7 @@ func (r *ResourceF5XCNetworkConnector) Create(ctx context.Context, request resou
 			if isSliToSloSnat && sliToSloSnatOptionsWrapper != nil && sliToSloSnatOptionsWrapper.SliToSloSnat != nil {
 				sliToSloSnatElement := sliToSloSnatOptionsWrapper.SliToSloSnat
 
-				// resource specToModelNested RequiredOneOfField --> PoolChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> PoolChoice
 				// CreateSpecType: GetPoolChoice() returns the oneof interface value.
 				if sliToSloSnatElement.GetPoolChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -1305,8 +1334,7 @@ func (r *ResourceF5XCNetworkConnector) Create(ctx context.Context, request resou
 					sliToSloSnatAttributeMap["pool_choice"] = types.ObjectNull(NetworkConnectorConnectorChoiceSliToSloSnatPoolChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> RoutingChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> RoutingChoice
 				// CreateSpecType: GetRoutingChoice() returns the oneof interface value.
 				if sliToSloSnatElement.GetRoutingChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -1461,7 +1489,7 @@ func (r *ResourceF5XCNetworkConnector) Create(ctx context.Context, request resou
 		data.ConnectorChoice = types.ObjectNull(NetworkConnectorConnectorChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> ForwardProxyChoice
+	// resource SpecToModelRoot OneOfField --> ForwardProxyChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -1493,8 +1521,8 @@ func (r *ResourceF5XCNetworkConnector) Create(ctx context.Context, request resou
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var forwardProxyChoiceChoices interface{}
 		if v := rawSpecMap["forward_proxy_choice"]; v != nil {
 			forwardProxyChoiceChoices = v
@@ -1646,15 +1674,14 @@ func (r *ResourceF5XCNetworkConnector) Read(ctx context.Context, request resourc
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
 	readGetRspType := strings.Replace(ves_io_schema_network_connector.ObjectType, "Object", "GetResponse", 1)
 	readGetProtoMsgType := proto.MessageType(readGetRspType).Elem()
 	readCallRsp := &server.CallResponse{
 		ProtoMsg: reflect.New(readGetProtoMsgType).Interface().(proto.Message),
 	}
-	opts = append(opts, vesapi.WithOutCallResponse(readCallRsp))
+	opts := []vesapi.CallOpt{
+		vesapi.WithOutCallResponse(readCallRsp),
+	}
 
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_network_connector.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
@@ -1974,8 +2001,7 @@ func (r *ResourceF5XCNetworkConnector) Read(ctx context.Context, request resourc
 			if isSliToSloSnat && sliToSloSnatOptionsWrapper != nil && sliToSloSnatOptionsWrapper.SliToSloSnat != nil {
 				sliToSloSnatElement := sliToSloSnatOptionsWrapper.SliToSloSnat
 
-				// resource specToModelNested RequiredOneOfField --> PoolChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> PoolChoice
 				// CreateSpecType: GetPoolChoice() returns the oneof interface value.
 				if sliToSloSnatElement.GetPoolChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -2030,8 +2056,7 @@ func (r *ResourceF5XCNetworkConnector) Read(ctx context.Context, request resourc
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> RoutingChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> RoutingChoice
 				// CreateSpecType: GetRoutingChoice() returns the oneof interface value.
 				if sliToSloSnatElement.GetRoutingChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -2188,7 +2213,7 @@ func (r *ResourceF5XCNetworkConnector) Read(ctx context.Context, request resourc
 		data.ConnectorChoice = types.ObjectNull(NetworkConnectorConnectorChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> ForwardProxyChoice
+	// resource SpecToModelRoot OneOfField --> ForwardProxyChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -2220,8 +2245,8 @@ func (r *ResourceF5XCNetworkConnector) Read(ctx context.Context, request resourc
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var forwardProxyChoiceChoices interface{}
 		if v := rawSpecMap["forward_proxy_choice"]; v != nil {
 			forwardProxyChoiceChoices = v
@@ -2509,9 +2534,15 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 			}
 			sliToSloSnatOneOfSpec := &ves_io_schema_network_connector.ReplaceSpecType_SliToSloSnat{}
 			sliToSloSnatOneOfSpec.SliToSloSnat = &ves_io_schema_network_connector.SnatConnectorType{}
+			sliToSloSnatOneOfSpec.SliToSloSnat.PoolChoice = &ves_io_schema_network_connector.SnatConnectorType_InterfaceIp{
+				InterfaceIp: &ves_io_schema.Empty{},
+			}
+			sliToSloSnatOneOfSpec.SliToSloSnat.RoutingChoice = &ves_io_schema_network_connector.SnatConnectorType_DefaultGwSnat{
+				DefaultGwSnat: &ves_io_schema.Empty{},
+			}
 			spec.ConnectorChoice = sliToSloSnatOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> PoolChoice
+			// resource modelToSpecNested OneOfField --> PoolChoice
 			if !netConnectorSliToSloSnatModel.PoolChoice.IsNull() && !netConnectorSliToSloSnatModel.PoolChoice.IsUnknown() {
 				sliToSloSnatPoolChoiceModel := NetConnectorPoolChoice{}
 				response.Diagnostics.Append(netConnectorSliToSloSnatModel.PoolChoice.As(ctx, &sliToSloSnatPoolChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2528,7 +2559,7 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> RoutingChoice
+			// resource modelToSpecNested OneOfField --> RoutingChoice
 			if !netConnectorSliToSloSnatModel.RoutingChoice.IsNull() && !netConnectorSliToSloSnatModel.RoutingChoice.IsUnknown() {
 				sliToSloSnatRoutingChoiceModel := NetConnectorRoutingChoice{}
 				response.Diagnostics.Append(netConnectorSliToSloSnatModel.RoutingChoice.As(ctx, &sliToSloSnatRoutingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2590,7 +2621,7 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> ForwardProxyChoice
+	// resource modelToSpecRoot OneOfField --> ForwardProxyChoice
 	if !data.ForwardProxyChoice.IsNull() && !data.ForwardProxyChoice.IsUnknown() {
 		forwardProxyChoiceModel := NetConnectorForwardProxyChoice{}
 		response.Diagnostics.Append(data.ForwardProxyChoice.As(ctx, &forwardProxyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2661,7 +2692,12 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 
 		}
 
+	} else {
+		spec.ForwardProxyChoice = &ves_io_schema_network_connector.ReplaceSpecType_DisableForwardProxy{
+			DisableForwardProxy: &ves_io_schema.Empty{},
+		}
 	}
+
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
@@ -2673,12 +2709,8 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_network_connector.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_network_connector.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "network_connector", err),
@@ -2690,7 +2722,9 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 	updateCallRsp := &server.CallResponse{
 		ProtoMsg: reflect.New(updateGetProtoMsgType).Interface().(proto.Message),
 	}
-	opts = append(opts, vesapi.WithOutCallResponse(updateCallRsp))
+	opts := []vesapi.CallOpt{
+		vesapi.WithOutCallResponse(updateCallRsp),
+	}
 
 	// Read the replaced object
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_network_connector.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
@@ -3010,8 +3044,7 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 			if isSliToSloSnat && sliToSloSnatOptionsWrapper != nil && sliToSloSnatOptionsWrapper.SliToSloSnat != nil {
 				sliToSloSnatElement := sliToSloSnatOptionsWrapper.SliToSloSnat
 
-				// resource specToModelNested RequiredOneOfField --> PoolChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> PoolChoice
 				// CreateSpecType: GetPoolChoice() returns the oneof interface value.
 				if sliToSloSnatElement.GetPoolChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -3064,8 +3097,7 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 					sliToSloSnatAttributeMap["pool_choice"] = types.ObjectNull(NetworkConnectorConnectorChoiceSliToSloSnatPoolChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> RoutingChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> RoutingChoice
 				// CreateSpecType: GetRoutingChoice() returns the oneof interface value.
 				if sliToSloSnatElement.GetRoutingChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -3220,7 +3252,7 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 		data.ConnectorChoice = types.ObjectNull(NetworkConnectorConnectorChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> ForwardProxyChoice
+	// resource SpecToModelRoot OneOfField --> ForwardProxyChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -3252,8 +3284,8 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var forwardProxyChoiceChoices interface{}
 		if v := rawSpecMap["forward_proxy_choice"]; v != nil {
 			forwardProxyChoiceChoices = v

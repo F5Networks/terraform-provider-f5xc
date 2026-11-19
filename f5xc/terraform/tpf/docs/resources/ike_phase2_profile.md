@@ -65,7 +65,6 @@ resource "f5xc_ike_phase2_profile" "example" {
 
 ### Required
 
-- `ike_key_lifetime_choice` (Attributes) Key LifeTime Amount of time before the IKE Security Association (SA) key needs to be renegotiated (see [below for nested schema](#nestedatt--ike_key_lifetime_choice))
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
 
@@ -75,8 +74,9 @@ resource "f5xc_ike_phase2_profile" "example" {
 - `authentication_algos` (List of String) Authentication Algorithms Choose one or more Authentication Algorithm. Use None option when using the aes-gcm or aes-ccm encryption algorithms.<br>**Valid Options:** `['AUTH_ALG_NONE', 'SHA256_HMAC', 'SHA384_HMAC', 'SHA512_HMAC']` (Multiple selection allowed)<br>**Default:** `AUTH_ALG_NONE`
 - `description` (String) description Human readable description for the object
 - `encryption_algos` (List of String) Encryption Algorithms Choose one or more encryption algorithms.<br>**Valid Options:** `['AES128_CBC', 'AES128_GCM', 'AES192_CBC', 'AES192_GCM', 'AES256_CBC', 'AES256_GCM', 'TRIPLE_DES_CBC']` (Multiple selection allowed)<br>**Default:** `AES256_GCM`
+- `ike_key_lifetime_choice` (Attributes) Key LifeTime Amount of time before the IKE Security Association (SA) key needs to be renegotiated<br>Exactly one of `ike_keylifetime_hours`, `ike_keylifetime_minutes`, or `use_default_keylifetime` must be specified when `ike_key_lifetime_choice` is configured. (see [below for nested schema](#nestedatt--ike_key_lifetime_choice))
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
-- `pfs_mode_choice` (Attributes) Perfect Forward Secrecy (PFS) Configure Perfect Forward Secrecy for this tunnel (see [below for nested schema](#nestedatt--pfs_mode_choice))
+- `pfs_mode_choice` (Attributes) Perfect Forward Secrecy (PFS) Configure Perfect Forward Secrecy for this tunnel<br>Exactly one of `dh_group_set` or `disable_pfs` must be specified when `pfs_mode_choice` is configured. (see [below for nested schema](#nestedatt--pfs_mode_choice))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
@@ -88,9 +88,9 @@ resource "f5xc_ike_phase2_profile" "example" {
 
 Optional:
 
-- `ike_keylifetime_hours` (Attributes) Hours Set IKE Key Lifetime in Hours (see [below for nested schema](#nestedatt--ike_key_lifetime_choice--ike_keylifetime_hours))
-- `ike_keylifetime_minutes` (Attributes) Minutes Set IKE Key Lifetime in minutes (see [below for nested schema](#nestedatt--ike_key_lifetime_choice--ike_keylifetime_minutes))
-- `use_default_keylifetime` (Boolean) Default Use default key lifetime (4Hrs)
+- `ike_keylifetime_hours` (Attributes) Hours Set IKE Key Lifetime in Hours<br>Conflicts with `ike_keylifetime_minutes` and `use_default_keylifetime`. (see [below for nested schema](#nestedatt--ike_key_lifetime_choice--ike_keylifetime_hours))
+- `ike_keylifetime_minutes` (Attributes) Minutes Set IKE Key Lifetime in minutes<br>Conflicts with `ike_keylifetime_hours` and `use_default_keylifetime`. (see [below for nested schema](#nestedatt--ike_key_lifetime_choice--ike_keylifetime_minutes))
+- `use_default_keylifetime` (Boolean) Default Use default key lifetime (4Hrs)<br>Conflicts with `ike_keylifetime_hours` and `ike_keylifetime_minutes`.
 
 <a id="nestedatt--ike_key_lifetime_choice--ike_keylifetime_hours"></a>
 ### Nested Schema for `ike_key_lifetime_choice.ike_keylifetime_hours`
@@ -114,8 +114,8 @@ Optional:
 
 Optional:
 
-- `dh_group_set` (Attributes) Enabled Choose the acceptable Diffie Hellman(DH) Group or Groups that you are willing to accept as part of this profile. (see [below for nested schema](#nestedatt--pfs_mode_choice--dh_group_set))
-- `disable_pfs` (Boolean) Disabled Disable PFS for this tunnel
+- `dh_group_set` (Attributes) Enabled Choose the acceptable Diffie Hellman(DH) Group or Groups that you are willing to accept as part of this profile.<br>Conflicts with `disable_pfs`. (see [below for nested schema](#nestedatt--pfs_mode_choice--dh_group_set))
+- `disable_pfs` (Boolean) Disabled Disable PFS for this tunnel<br>Conflicts with `dh_group_set`.
 
 <a id="nestedatt--pfs_mode_choice--dh_group_set"></a>
 ### Nested Schema for `pfs_mode_choice.dh_group_set`
@@ -156,6 +156,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_ike_phase2_profile.example"
+	to = f5xc_ike_phase2_profile.example
 }
 ```

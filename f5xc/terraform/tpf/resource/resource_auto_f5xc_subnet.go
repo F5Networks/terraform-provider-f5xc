@@ -309,7 +309,7 @@ func (r *ResourceF5XCSubnet) Schema(ctx context.Context, request resource.Schema
 			},
 			"connection_choice": schema.SingleNestedAttribute{
 				Description:         "Connection Choice Select the network this subnet should optionally be conected to",
-				MarkdownDescription: "Connection Choice Select the network this subnet should optionally be conected to",
+				MarkdownDescription: "Connection Choice Select the network this subnet should optionally be conected to<br>Exactly one of `connect_to_layer2`, `connect_to_slo`, or `isolated_nw` must be specified when `connection_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -326,7 +326,7 @@ func (r *ResourceF5XCSubnet) Schema(ctx context.Context, request resource.Schema
 				Attributes: map[string]schema.Attribute{
 					"connect_to_layer2": schema.SingleNestedAttribute{
 						Description:         "Connect to Layer2 interface",
-						MarkdownDescription: "Connect to Layer2 interface",
+						MarkdownDescription: "Connect to Layer2 interface<br>Conflicts with `connect_to_slo` and `isolated_nw`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -380,7 +380,7 @@ func (r *ResourceF5XCSubnet) Schema(ctx context.Context, request resource.Schema
 					},
 					"connect_to_slo": schema.BoolAttribute{
 						Description:         "Connect to site-local-outside-network",
-						MarkdownDescription: "Connect to site-local-outside-network",
+						MarkdownDescription: "Connect to site-local-outside-network<br>Conflicts with `connect_to_layer2` and `isolated_nw`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -393,7 +393,7 @@ func (r *ResourceF5XCSubnet) Schema(ctx context.Context, request resource.Schema
 					},
 					"isolated_nw": schema.BoolAttribute{
 						Description:         "Isolated network",
-						MarkdownDescription: "Isolated network",
+						MarkdownDescription: "Isolated network<br>Conflicts with `connect_to_layer2` and `connect_to_slo`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -422,7 +422,7 @@ func (r *ResourceF5XCSubnet) Schema(ctx context.Context, request resource.Schema
 					Attributes: map[string]schema.Attribute{
 						"address_choice": schema.SingleNestedAttribute{
 							Description:         "Subnet IP Addressing Select whether IP addresses are allocated statically or using DHCP",
-							MarkdownDescription: "Subnet IP Addressing Select whether IP addresses are allocated statically or using DHCP",
+							MarkdownDescription: "Subnet IP Addressing Select whether IP addresses are allocated statically or using DHCP<br>Exactly one of `dhcp` or `static_ip` must be specified when `address_choice` is configured.",
 							Required:            false,
 							Optional:            true,
 							Computed:            false,
@@ -438,7 +438,7 @@ func (r *ResourceF5XCSubnet) Schema(ctx context.Context, request resource.Schema
 							Attributes: map[string]schema.Attribute{
 								"dhcp": schema.BoolAttribute{
 									Description:         "DHCP Subnet uses DHCP for address allocation",
-									MarkdownDescription: "DHCP Subnet uses DHCP for address allocation",
+									MarkdownDescription: "DHCP Subnet uses DHCP for address allocation<br>Conflicts with `static_ip`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -451,7 +451,7 @@ func (r *ResourceF5XCSubnet) Schema(ctx context.Context, request resource.Schema
 								},
 								"static_ip": schema.BoolAttribute{
 									Description:         "Static IP Subnet uses static IP addresses",
-									MarkdownDescription: "Static IP Subnet uses static IP addresses",
+									MarkdownDescription: "Static IP Subnet uses static IP addresses<br>Conflicts with `dhcp`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -533,7 +533,7 @@ func (r *ResourceF5XCSubnet) Schema(ctx context.Context, request resource.Schema
 										Attributes: map[string]schema.Attribute{
 											"network_prefix_choice": schema.SingleNestedAttribute{
 												Description:         "Network Prefix choice DHCP network prefix for subnet",
-												MarkdownDescription: "Network Prefix choice DHCP network prefix for subnet",
+												MarkdownDescription: "Network Prefix choice DHCP network prefix for subnet<br>Exactly one of `network_prefix` or `network_prefix_ipv6` must be specified when `network_prefix_choice` is configured.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -549,7 +549,7 @@ func (r *ResourceF5XCSubnet) Schema(ctx context.Context, request resource.Schema
 												Attributes: map[string]schema.Attribute{
 													"network_prefix": schema.StringAttribute{
 														Description:         "Network Prefix Network prefix for subnet",
-														MarkdownDescription: "Network Prefix Network prefix for subnet",
+														MarkdownDescription: "Network Prefix Network prefix for subnet<br>Conflicts with `network_prefix_ipv6`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -565,7 +565,7 @@ func (r *ResourceF5XCSubnet) Schema(ctx context.Context, request resource.Schema
 													},
 													"network_prefix_ipv6": schema.StringAttribute{
 														Description:         "Network IPV6 Prefix Network prefix for IPV6 subnet",
-														MarkdownDescription: "Network IPV6 Prefix Network prefix for IPV6 subnet",
+														MarkdownDescription: "Network IPV6 Prefix Network prefix for IPV6 subnet<br>Conflicts with `network_prefix`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1457,11 +1457,7 @@ func (r *ResourceF5XCSubnet) Read(ctx context.Context, request resource.ReadRequ
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_subnet.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_subnet.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "subnet", err),

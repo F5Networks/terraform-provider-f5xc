@@ -108,17 +108,17 @@ resource "f5xc_dns_proxy" "example" {
 <a id="nestedatt--cache_profile"></a>
 ### Nested Schema for `cache_profile`
 
-Required:
+Optional:
 
-- `cache_profile_choice` (Attributes) DNS Cache Choice Options for enabling and disabling the DNS cache profile for the DNS Proxy. On enabling this feature, a default cache profile is applied to the DNS proxy which caches DNS replies from the origin DNS servers. (see [below for nested schema](#nestedatt--cache_profile--cache_profile_choice))
+- `cache_profile_choice` (Attributes) DNS Cache Choice Options for enabling and disabling the DNS cache profile for the DNS Proxy. On enabling this feature, a default cache profile is applied to the DNS proxy which caches DNS replies from the origin DNS servers.<br>Exactly one of `cache_size` or `disable_cache_profile` must be specified when `cache_profile_choice` is configured. (see [below for nested schema](#nestedatt--cache_profile--cache_profile_choice))
 
 <a id="nestedatt--cache_profile--cache_profile_choice"></a>
 ### Nested Schema for `cache_profile.cache_profile_choice`
 
 Optional:
 
-- `cache_size` (Number) Cache size cache size
-- `disable_cache_profile` (Boolean) Disable DNS Cache
+- `cache_size` (Number) Cache size cache size<br>Conflicts with `disable_cache_profile`.
+- `disable_cache_profile` (Boolean) Disable DNS Cache<br>Conflicts with `cache_size`.
 
 
 
@@ -127,15 +127,15 @@ Optional:
 
 Optional:
 
-- `ddos_mitigation_choice` (Attributes) DDoS Protection Choice Options for enabling and disabling the DNS DDoS profile for the DNS Proxy. On enabling this feature, a default DDoS profile is applied to the DNS proxy to protect the origin DNS servers from external DDoS attacks. (see [below for nested schema](#nestedatt--ddos_profile--ddos_mitigation_choice))
+- `ddos_mitigation_choice` (Attributes) DDoS Protection Choice Options for enabling and disabling the DNS DDoS profile for the DNS Proxy. On enabling this feature, a default DDoS profile is applied to the DNS proxy to protect the origin DNS servers from external DDoS attacks.<br>Exactly one of `disable_ddos_mitigation` or `enable_ddos_mitigation` must be specified when `ddos_mitigation_choice` is configured. (see [below for nested schema](#nestedatt--ddos_profile--ddos_mitigation_choice))
 
 <a id="nestedatt--ddos_profile--ddos_mitigation_choice"></a>
 ### Nested Schema for `ddos_profile.ddos_mitigation_choice`
 
 Optional:
 
-- `disable_ddos_mitigation` (Boolean) Disable DDoS Protection
-- `enable_ddos_mitigation` (Boolean) Enable DDoS Protection
+- `disable_ddos_mitigation` (Boolean) Disable DDoS Protection<br>Conflicts with `enable_ddos_mitigation`.
+- `enable_ddos_mitigation` (Boolean) Enable DDoS Protection<br>Conflicts with `disable_ddos_mitigation`.
 
 
 
@@ -166,16 +166,16 @@ Optional:
 
 Optional:
 
-- `choice` (Attributes) DNS Server Health check Options for including the Server Health check (see [below for nested schema](#nestedatt--origin_servers--health_checks--health_check--choice))
+- `choice` (Attributes) DNS Server Health check Options for including the Server Health check<br>Exactly one of `dns_health_check`, `icmp_health_check`, or `tcp_health_check` must be specified when `choice` is configured. (see [below for nested schema](#nestedatt--origin_servers--health_checks--health_check--choice))
 
 <a id="nestedatt--origin_servers--health_checks--health_check--choice"></a>
 ### Nested Schema for `origin_servers.health_checks.health_check.choice`
 
 Optional:
 
-- `dns_health_check` (Attributes) DNS Health Check DNS Health Check (see [below for nested schema](#nestedatt--origin_servers--health_checks--health_check--choice--dns_health_check))
-- `icmp_health_check` (Boolean) ICMP Health Check ICMP Health Check
-- `tcp_health_check` (Attributes) TCP Health Check TCP Health Check (see [below for nested schema](#nestedatt--origin_servers--health_checks--health_check--choice--tcp_health_check))
+- `dns_health_check` (Attributes) DNS Health Check DNS Health Check<br>Conflicts with `icmp_health_check` and `tcp_health_check`. (see [below for nested schema](#nestedatt--origin_servers--health_checks--health_check--choice--dns_health_check))
+- `icmp_health_check` (Boolean) ICMP Health Check ICMP Health Check<br>Conflicts with `dns_health_check` and `tcp_health_check`.
+- `tcp_health_check` (Attributes) TCP Health Check TCP Health Check<br>Conflicts with `dns_health_check` and `icmp_health_check`. (see [below for nested schema](#nestedatt--origin_servers--health_checks--health_check--choice--tcp_health_check))
 
 <a id="nestedatt--origin_servers--health_checks--health_check--choice--dns_health_check"></a>
 ### Nested Schema for `origin_servers.health_checks.health_check.choice.dns_health_check`
@@ -210,44 +210,34 @@ Required:
 
 Required:
 
-- `choice` (Attributes) Origin Server Type Various options to specify the origin server (see [below for nested schema](#nestedatt--origin_servers--origin_servers--choice))
+- `choice` (Attributes) Origin Server Type Various options to specify the origin server<br>Exactly one of `k8s_service`, `public_ip`, or `public_name` must be specified. (see [below for nested schema](#nestedatt--origin_servers--origin_servers--choice))
 
 Optional:
 
-- `proximity_choice` (Attributes) Preference Rules Preference rules define how the origins are selected as part of LB Proximity Rules??? (see [below for nested schema](#nestedatt--origin_servers--origin_servers--proximity_choice))
+- `proximity_choice` (Attributes) Preference Rules Preference rules define how the origins are selected as part of LB Proximity Rules???<br>Exactly one of `no_preference` or `site_preferences` must be specified when `proximity_choice` is configured. (see [below for nested schema](#nestedatt--origin_servers--origin_servers--proximity_choice))
 
 <a id="nestedatt--origin_servers--origin_servers--choice"></a>
 ### Nested Schema for `origin_servers.origin_servers.choice`
 
 Optional:
 
-- `k8s_service` (Attributes) OriginServerK8SService Specify origin server with K8s service name and site information (see [below for nested schema](#nestedatt--origin_servers--origin_servers--choice--k8s_service))
-- `public_ip` (Attributes) OriginServerPublicIP Specify origin server with public IP (see [below for nested schema](#nestedatt--origin_servers--origin_servers--choice--public_ip))
-- `public_name` (Attributes) OriginServerPublicName Specify origin server with public DNS name (see [below for nested schema](#nestedatt--origin_servers--origin_servers--choice--public_name))
+- `k8s_service` (Attributes) OriginServerK8SService Specify origin server with K8s service name and site information<br>Conflicts with `public_ip` and `public_name`. (see [below for nested schema](#nestedatt--origin_servers--origin_servers--choice--k8s_service))
+- `public_ip` (Attributes) OriginServerPublicIP Specify origin server with public IP<br>Conflicts with `k8s_service` and `public_name`. (see [below for nested schema](#nestedatt--origin_servers--origin_servers--choice--public_ip))
+- `public_name` (Attributes) OriginServerPublicName Specify origin server with public DNS name<br>Conflicts with `k8s_service` and `public_ip`. (see [below for nested schema](#nestedatt--origin_servers--origin_servers--choice--public_name))
 
 <a id="nestedatt--origin_servers--origin_servers--choice--k8s_service"></a>
 ### Nested Schema for `origin_servers.origin_servers.choice.k8s_service`
 
 Required:
 
-- `network_choice` (Attributes) Site Network Inside or Outside Network (see [below for nested schema](#nestedatt--origin_servers--origin_servers--choice--k8s_service--network_choice))
-- `service_info_choice` (Attributes) service_info Specifies whether service discovery has to be done using service name or labels (see [below for nested schema](#nestedatt--origin_servers--origin_servers--choice--k8s_service--service_info_choice))
+- `service_info_choice` (Attributes) service_info Specifies whether service discovery has to be done using service name or labels<br>`service_name` must be specified. (see [below for nested schema](#nestedatt--origin_servers--origin_servers--choice--k8s_service--service_info_choice))
 - `site_locator` (Attributes) Site Locator Site or Virtual site where this origin server is located (see [below for nested schema](#nestedatt--origin_servers--origin_servers--choice--k8s_service--site_locator))
 
 Optional:
 
+- `network_choice` (Attributes) Site Network Inside or Outside Network<br>Exactly one of `inside_network`, `outside_network`, or `vk8s_networks` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--origin_servers--origin_servers--choice--k8s_service--network_choice))
 - `protocol` (List of String) Protocol Protocol to be used in the discovery.<br>**Allowed Values (choose one):** `['PROTOCOL_TCP', 'PROTOCOL_UDP']`<br>**Default:** `PROTOCOL_TCP`
 - `snat_pool` (Attributes) SNAT Pool Configuration (see [below for nested schema](#nestedatt--origin_servers--origin_servers--choice--k8s_service--snat_pool))
-
-<a id="nestedatt--origin_servers--origin_servers--choice--k8s_service--network_choice"></a>
-### Nested Schema for `origin_servers.origin_servers.choice.k8s_service.network_choice`
-
-Optional:
-
-- `inside_network` (Boolean) Inside Network Inside network on the site
-- `outside_network` (Boolean) Outside Network Outside network on the site
-- `vk8s_networks` (Boolean) vK8s Networks on site origin server are on vK8s network on the site
-
 
 <a id="nestedatt--origin_servers--origin_servers--choice--k8s_service--service_info_choice"></a>
 ### Nested Schema for `origin_servers.origin_servers.choice.k8s_service.service_info_choice`
@@ -262,15 +252,15 @@ Optional:
 
 Required:
 
-- `choice` (Attributes) SiteLocator (see [below for nested schema](#nestedatt--origin_servers--origin_servers--choice--k8s_service--site_locator--choice))
+- `choice` (Attributes) SiteLocator<br>Exactly one of `site` or `virtual_site` must be specified. (see [below for nested schema](#nestedatt--origin_servers--origin_servers--choice--k8s_service--site_locator--choice))
 
 <a id="nestedatt--origin_servers--origin_servers--choice--k8s_service--site_locator--choice"></a>
 ### Nested Schema for `origin_servers.origin_servers.choice.k8s_service.site_locator.choice`
 
 Optional:
 
-- `site` (Attributes) site Reference to site object (see [below for nested schema](#nestedatt--origin_servers--origin_servers--choice--k8s_service--site_locator--choice--site))
-- `virtual_site` (Attributes) Virtual Site Reference to virtual site object (see [below for nested schema](#nestedatt--origin_servers--origin_servers--choice--k8s_service--site_locator--choice--virtual_site))
+- `site` (Attributes) site Reference to site object<br>Conflicts with `virtual_site`. (see [below for nested schema](#nestedatt--origin_servers--origin_servers--choice--k8s_service--site_locator--choice--site))
+- `virtual_site` (Attributes) Virtual Site Reference to virtual site object<br>Conflicts with `site`. (see [below for nested schema](#nestedatt--origin_servers--origin_servers--choice--k8s_service--site_locator--choice--virtual_site))
 
 <a id="nestedatt--origin_servers--origin_servers--choice--k8s_service--site_locator--choice--site"></a>
 ### Nested Schema for `origin_servers.origin_servers.choice.k8s_service.site_locator.choice.site`
@@ -300,20 +290,30 @@ Read-Only:
 
 
 
+<a id="nestedatt--origin_servers--origin_servers--choice--k8s_service--network_choice"></a>
+### Nested Schema for `origin_servers.origin_servers.choice.k8s_service.network_choice`
+
+Optional:
+
+- `inside_network` (Boolean) Inside Network Inside network on the site<br>Conflicts with `outside_network` and `vk8s_networks`.
+- `outside_network` (Boolean) Outside Network Outside network on the site<br>Conflicts with `inside_network` and `vk8s_networks`.
+- `vk8s_networks` (Boolean) vK8s Networks on site origin server are on vK8s network on the site<br>Conflicts with `inside_network` and `outside_network`.
+
+
 <a id="nestedatt--origin_servers--origin_servers--choice--k8s_service--snat_pool"></a>
 ### Nested Schema for `origin_servers.origin_servers.choice.k8s_service.snat_pool`
 
 Optional:
 
-- `snat_pool_choice` (Attributes) Snat Pool Choice Snat Pool for the origin server (see [below for nested schema](#nestedatt--origin_servers--origin_servers--choice--k8s_service--snat_pool--snat_pool_choice))
+- `snat_pool_choice` (Attributes) Snat Pool Choice Snat Pool for the origin server<br>Exactly one of `no_snat_pool` or `snat_pool` must be specified when `snat_pool_choice` is configured. (see [below for nested schema](#nestedatt--origin_servers--origin_servers--choice--k8s_service--snat_pool--snat_pool_choice))
 
 <a id="nestedatt--origin_servers--origin_servers--choice--k8s_service--snat_pool--snat_pool_choice"></a>
 ### Nested Schema for `origin_servers.origin_servers.choice.k8s_service.snat_pool.snat_pool_choice`
 
 Optional:
 
-- `no_snat_pool` (Boolean) No SNAT Pool No configured SNAT Pool to reach Origin Server
-- `snat_pool` (Attributes) SNAT Pool Configure SNAT Pool to reach Origin Server (see [below for nested schema](#nestedatt--origin_servers--origin_servers--choice--k8s_service--snat_pool--snat_pool_choice--snat_pool))
+- `no_snat_pool` (Boolean) No SNAT Pool No configured SNAT Pool to reach Origin Server<br>Conflicts with `snat_pool`.
+- `snat_pool` (Attributes) SNAT Pool Configure SNAT Pool to reach Origin Server<br>Conflicts with `no_snat_pool`. (see [below for nested schema](#nestedatt--origin_servers--origin_servers--choice--k8s_service--snat_pool--snat_pool_choice--snat_pool))
 
 <a id="nestedatt--origin_servers--origin_servers--choice--k8s_service--snat_pool--snat_pool_choice--snat_pool"></a>
 ### Nested Schema for `origin_servers.origin_servers.choice.k8s_service.snat_pool.snat_pool_choice.snat_pool`
@@ -332,15 +332,15 @@ Optional:
 
 Required:
 
-- `public_ip_choice` (Attributes) Public IP Choice Origin server public IP - either V4 or V6 (see [below for nested schema](#nestedatt--origin_servers--origin_servers--choice--public_ip--public_ip_choice))
+- `public_ip_choice` (Attributes) Public IP Choice Origin server public IP - either V4 or V6<br>Exactly one of `ip` or `ipv6` must be specified. (see [below for nested schema](#nestedatt--origin_servers--origin_servers--choice--public_ip--public_ip_choice))
 
 <a id="nestedatt--origin_servers--origin_servers--choice--public_ip--public_ip_choice"></a>
 ### Nested Schema for `origin_servers.origin_servers.choice.public_ip.public_ip_choice`
 
 Optional:
 
-- `ip` (String) IP Public IPV4 address
-- `ipv6` (String) IPV6 Public IPV6 address
+- `ip` (String) IP Public IPV4 address<br>Conflicts with `ipv6`.
+- `ipv6` (String) IPV6 Public IPV6 address<br>Conflicts with `ip`.
 
 
 
@@ -362,8 +362,8 @@ Optional:
 
 Optional:
 
-- `no_preference` (Boolean) NoChoice Use all the discovered origins
-- `site_preferences` (Attributes) Site Preference List of sites where this origin is preferred over others From a set of origins, LB on a site prefers origin containing the site If site is not in preference list of any origins, then it will use all discovered origins (see [below for nested schema](#nestedatt--origin_servers--origin_servers--proximity_choice--site_preferences))
+- `no_preference` (Boolean) NoChoice Use all the discovered origins<br>Conflicts with `site_preferences`.
+- `site_preferences` (Attributes) Site Preference List of sites where this origin is preferred over others From a set of origins, LB on a site prefers origin containing the site If site is not in preference list of any origins, then it will use all discovered origins<br>Conflicts with `no_preference`. (see [below for nested schema](#nestedatt--origin_servers--origin_servers--proximity_choice--site_preferences))
 
 <a id="nestedatt--origin_servers--origin_servers--proximity_choice--site_preferences"></a>
 ### Nested Schema for `origin_servers.origin_servers.proximity_choice.site_preferences`
@@ -405,9 +405,9 @@ Read-Only:
 <a id="nestedatt--lb_algorithm"></a>
 ### Nested Schema for `lb_algorithm`
 
-Required:
+Optional:
 
-- `lb_algorithm_choice` (Attributes) Type of Load Balancing Algorithm The load balancing algorithm can be 'Round Robin' (see [below for nested schema](#nestedatt--lb_algorithm--lb_algorithm_choice))
+- `lb_algorithm_choice` (Attributes) Type of Load Balancing Algorithm The load balancing algorithm can be 'Round Robin'<br>`round_robin` must be specified when `lb_algorithm_choice` is configured. (see [below for nested schema](#nestedatt--lb_algorithm--lb_algorithm_choice))
 
 <a id="nestedatt--lb_algorithm--lb_algorithm_choice"></a>
 ### Nested Schema for `lb_algorithm.lb_algorithm_choice`
@@ -434,23 +434,23 @@ Read-Only:
 <a id="nestedatt--proxy_advertisement"></a>
 ### Nested Schema for `proxy_advertisement`
 
-Required:
+Optional:
 
-- `advertise_choice` (Attributes) Proxy Advertisement choice Proxy Advertisement choice, Internet or Custom. (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice))
+- `advertise_choice` (Attributes) Proxy Advertisement choice Proxy Advertisement choice, Internet or Custom.<br>Exactly one of `advertise_custom`, `advertise_dualstack_on_public`, `advertise_on_public`, `advertise_on_public_default_dualstack_vip`, `advertise_on_public_default_ipv6_vip`, `advertise_on_public_default_vip`, `advertise_v6_on_public`, or `do_not_advertise` must be specified when `advertise_choice` is configured. (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice))
 
 <a id="nestedatt--proxy_advertisement--advertise_choice"></a>
 ### Nested Schema for `proxy_advertisement.advertise_choice`
 
 Optional:
 
-- `advertise_custom` (Attributes) Advertise Custom Advertise this load balancer on specific sites (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom))
-- `advertise_dualstack_on_public` (Attributes) Advertise Dualstack On Public Advertise this Dualstack load balancer address on public network (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_dualstack_on_public))
-- `advertise_on_public` (Attributes) Advertise IPv4 On Public Advertise this IPv4 proxy address on public network (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_on_public))
-- `advertise_on_public_default_dualstack_vip` (Boolean) Advertise On Public Default VIP (Dualstack) Advertise this proxy on public network with default Dualstack VIP
-- `advertise_on_public_default_ipv6_vip` (Boolean) Advertise On Public Default VIP (IPv6) Advertise this proxy on public network with default IPv6 VIP
-- `advertise_on_public_default_vip` (Boolean) Advertise On Public Default VIP Advertise this proxy on public network with default VIP Advertise this load balancer on public network with default VIP
-- `advertise_v6_on_public` (Attributes) Advertise IPv6 On Public Advertise this IPv6 proxy address on public network (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_v6_on_public))
-- `do_not_advertise` (Boolean) Do Not Advertise this proxy Do not advertise this proxy
+- `advertise_custom` (Attributes) Advertise Custom Advertise this load balancer on specific sites<br>Conflicts with `advertise_dualstack_on_public`, `advertise_on_public`, `advertise_on_public_default_dualstack_vip`, `advertise_on_public_default_ipv6_vip`, `advertise_on_public_default_vip`, `advertise_v6_on_public`, and `do_not_advertise`. (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom))
+- `advertise_dualstack_on_public` (Attributes) Advertise Dualstack On Public Advertise this Dualstack load balancer address on public network<br>Conflicts with `advertise_custom`, `advertise_on_public`, `advertise_on_public_default_dualstack_vip`, `advertise_on_public_default_ipv6_vip`, `advertise_on_public_default_vip`, `advertise_v6_on_public`, and `do_not_advertise`. (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_dualstack_on_public))
+- `advertise_on_public` (Attributes) Advertise IPv4 On Public Advertise this IPv4 proxy address on public network<br>Conflicts with `advertise_custom`, `advertise_dualstack_on_public`, `advertise_on_public_default_dualstack_vip`, `advertise_on_public_default_ipv6_vip`, `advertise_on_public_default_vip`, `advertise_v6_on_public`, and `do_not_advertise`. (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_on_public))
+- `advertise_on_public_default_dualstack_vip` (Boolean) Advertise On Public Default VIP (Dualstack) Advertise this proxy on public network with default Dualstack VIP<br>Conflicts with `advertise_custom`, `advertise_dualstack_on_public`, `advertise_on_public`, `advertise_on_public_default_ipv6_vip`, `advertise_on_public_default_vip`, `advertise_v6_on_public`, and `do_not_advertise`.
+- `advertise_on_public_default_ipv6_vip` (Boolean) Advertise On Public Default VIP (IPv6) Advertise this proxy on public network with default IPv6 VIP<br>Conflicts with `advertise_custom`, `advertise_dualstack_on_public`, `advertise_on_public`, `advertise_on_public_default_dualstack_vip`, `advertise_on_public_default_vip`, `advertise_v6_on_public`, and `do_not_advertise`.
+- `advertise_on_public_default_vip` (Boolean) Advertise On Public Default VIP Advertise this proxy on public network with default VIP Advertise this load balancer on public network with default VIP<br>Conflicts with `advertise_custom`, `advertise_dualstack_on_public`, `advertise_on_public`, `advertise_on_public_default_dualstack_vip`, `advertise_on_public_default_ipv6_vip`, `advertise_v6_on_public`, and `do_not_advertise`.
+- `advertise_v6_on_public` (Attributes) Advertise IPv6 On Public Advertise this IPv6 proxy address on public network<br>Conflicts with `advertise_custom`, `advertise_dualstack_on_public`, `advertise_on_public`, `advertise_on_public_default_dualstack_vip`, `advertise_on_public_default_ipv6_vip`, `advertise_on_public_default_vip`, and `do_not_advertise`. (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_v6_on_public))
+- `do_not_advertise` (Boolean) Do Not Advertise this proxy Do not advertise this proxy<br>Conflicts with `advertise_custom`, `advertise_dualstack_on_public`, `advertise_on_public`, `advertise_on_public_default_dualstack_vip`, `advertise_on_public_default_ipv6_vip`, `advertise_on_public_default_vip`, and `advertise_v6_on_public`.
 
 <a id="nestedatt--proxy_advertisement--advertise_choice--advertise_custom"></a>
 ### Nested Schema for `proxy_advertisement.advertise_choice.advertise_custom`
@@ -464,20 +464,23 @@ Required:
 
 Required:
 
-- `choice` (Attributes) Advertise choice This defines various options where a Loadbalancer could be advertised (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice))
-- `port_choice` (Attributes) Listen Port Choice Available options: user provided port or inherit from the load balancer configuration. (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--port_choice))
+- `choice` (Attributes) Advertise choice This defines various options where a Loadbalancer could be advertised<br>Exactly one of `site`, `site_segment`, `virtual_network`, `virtual_site`, `virtual_site_segment`, or `vk8s_service` must be specified. (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice))
+
+Optional:
+
+- `port_choice` (Attributes) Listen Port Choice Available options: user provided port or inherit from the load balancer configuration.<br>Exactly one of `port`, `port_ranges`, or `use_default_port` must be specified when `port_choice` is configured. (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--port_choice))
 
 <a id="nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice"></a>
 ### Nested Schema for `proxy_advertisement.advertise_choice.advertise_custom.advertise_where.choice`
 
 Optional:
 
-- `site` (Attributes) Site Advertise on a customer site and a given network. (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--site))
-- `site_segment` (Attributes) Segment on Site Advertise on a segment on a site (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--site_segment))
-- `virtual_network` (Attributes) Virtual Network Advertise on a virtual network (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--virtual_network))
-- `virtual_site` (Attributes) Virtual Site Advertise on a customer virtual site and a given network. (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--virtual_site))
-- `virtual_site_segment` (Attributes) Segment on Virtual Site Advertise on a segment on a virtual site (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--virtual_site_segment))
-- `vk8s_service` (Attributes) vK8s services network Advertise on vK8s Service Network on RE. (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--vk8s_service))
+- `site` (Attributes) Site Advertise on a customer site and a given network.<br>Conflicts with `site_segment`, `virtual_network`, `virtual_site`, `virtual_site_segment`, and `vk8s_service`. (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--site))
+- `site_segment` (Attributes) Segment on Site Advertise on a segment on a site<br>Conflicts with `site`, `virtual_network`, `virtual_site`, `virtual_site_segment`, and `vk8s_service`. (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--site_segment))
+- `virtual_network` (Attributes) Virtual Network Advertise on a virtual network<br>Conflicts with `site`, `site_segment`, `virtual_site`, `virtual_site_segment`, and `vk8s_service`. (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--virtual_network))
+- `virtual_site` (Attributes) Virtual Site Advertise on a customer virtual site and a given network.<br>Conflicts with `site`, `site_segment`, `virtual_network`, `virtual_site_segment`, and `vk8s_service`. (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--virtual_site))
+- `virtual_site_segment` (Attributes) Segment on Virtual Site Advertise on a segment on a virtual site<br>Conflicts with `site`, `site_segment`, `virtual_network`, `virtual_site`, and `vk8s_service`. (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--virtual_site_segment))
+- `vk8s_service` (Attributes) vK8s services network Advertise on vK8s Service Network on RE.<br>Conflicts with `site`, `site_segment`, `virtual_network`, `virtual_site`, and `virtual_site_segment`. (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--vk8s_service))
 
 <a id="nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--site"></a>
 ### Nested Schema for `proxy_advertisement.advertise_choice.advertise_custom.advertise_where.choice.site`
@@ -555,8 +558,8 @@ Required:
 
 Optional:
 
-- `v6_vip_choice` (Attributes) Select V6 VIP Select default V6 VIP or specify IPv6 address (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--virtual_network--v6_vip_choice))
-- `vip_choice` (Attributes) Select VIP Select default V4 VIP or specify V4 ip address (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--virtual_network--vip_choice))
+- `v6_vip_choice` (Attributes) Select V6 VIP Select default V6 VIP or specify IPv6 address<br>Exactly one of `default_v6_vip` or `specific_v6_vip` must be specified when `v6_vip_choice` is configured. (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--virtual_network--v6_vip_choice))
+- `vip_choice` (Attributes) Select VIP Select default V4 VIP or specify V4 ip address<br>Exactly one of `default_vip` or `specific_vip` must be specified when `vip_choice` is configured. (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--virtual_network--vip_choice))
 
 <a id="nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--virtual_network--virtual_network"></a>
 ### Nested Schema for `proxy_advertisement.advertise_choice.advertise_custom.advertise_where.choice.virtual_network.virtual_network`
@@ -576,8 +579,8 @@ Read-Only:
 
 Optional:
 
-- `default_v6_vip` (Boolean) Default V6 VIP for virtual Network Use the default VIP, system allocated or configured in the virtual network
-- `specific_v6_vip` (String) Specific V6 VIP Use given IPV6 address as VIP on virtual Network
+- `default_v6_vip` (Boolean) Default V6 VIP for virtual Network Use the default VIP, system allocated or configured in the virtual network<br>Conflicts with `specific_v6_vip`.
+- `specific_v6_vip` (String) Specific V6 VIP Use given IPV6 address as VIP on virtual Network<br>Conflicts with `default_v6_vip`.
 
 
 <a id="nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--virtual_network--vip_choice"></a>
@@ -585,8 +588,8 @@ Optional:
 
 Optional:
 
-- `default_vip` (Boolean) Default V4 VIP for Virtual Network Use the default VIP, system allocated or configured in the virtual network
-- `specific_vip` (String) Specific VIP Use given IPV4 address as VIP on virtual Network
+- `default_vip` (Boolean) Default V4 VIP for Virtual Network Use the default VIP, system allocated or configured in the virtual network<br>Conflicts with `specific_vip`.
+- `specific_vip` (String) Specific VIP Use given IPV4 address as VIP on virtual Network<br>Conflicts with `default_vip`.
 
 
 
@@ -657,15 +660,15 @@ Read-Only:
 
 Required:
 
-- `choice` (Attributes) RE or RE Virtual Site This defines a reference to a RE site or virtual site where a VIP could be advertised in the vK8s service network (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--vk8s_service--choice))
+- `choice` (Attributes) RE or RE Virtual Site This defines a reference to a RE site or virtual site where a VIP could be advertised in the vK8s service network<br>Exactly one of `site` or `virtual_site` must be specified. (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--vk8s_service--choice))
 
 <a id="nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--vk8s_service--choice"></a>
 ### Nested Schema for `proxy_advertisement.advertise_choice.advertise_custom.advertise_where.choice.vk8s_service.choice`
 
 Optional:
 
-- `site` (Attributes) RE Site Reference to site object (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--vk8s_service--choice--site))
-- `virtual_site` (Attributes) Virtual Site Reference to virtual site object (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--vk8s_service--choice--virtual_site))
+- `site` (Attributes) RE Site Reference to site object<br>Conflicts with `virtual_site`. (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--vk8s_service--choice--site))
+- `virtual_site` (Attributes) Virtual Site Reference to virtual site object<br>Conflicts with `site`. (see [below for nested schema](#nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--vk8s_service--choice--virtual_site))
 
 <a id="nestedatt--proxy_advertisement--advertise_choice--advertise_custom--advertise_where--choice--vk8s_service--choice--site"></a>
 ### Nested Schema for `proxy_advertisement.advertise_choice.advertise_custom.advertise_where.choice.vk8s_service.choice.site`
@@ -701,9 +704,9 @@ Read-Only:
 
 Optional:
 
-- `port` (Number) Port to listen Port to Listen.
-- `port_ranges` (String) Port ranges to listen A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.<br>**Validation:** `Length LengthBetween(1, 512)`
-- `use_default_port` (Boolean) Use Default port Inherit the Load Balancer's Listen Port.
+- `port` (Number) Port to listen Port to Listen.<br>Conflicts with `port_ranges` and `use_default_port`.
+- `port_ranges` (String) Port ranges to listen A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.<br>**Validation:** `Length LengthBetween(1, 512)`<br>Conflicts with `port` and `use_default_port`.
+- `use_default_port` (Boolean) Use Default port Inherit the Load Balancer's Listen Port.<br>Conflicts with `port` and `port_ranges`.
 
 
 
@@ -803,6 +806,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_dns_proxy.example"
+	to = f5xc_dns_proxy.example
 }
 ```

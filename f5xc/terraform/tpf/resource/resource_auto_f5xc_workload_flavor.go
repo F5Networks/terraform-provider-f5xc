@@ -562,11 +562,7 @@ func (r *ResourceF5XCWorkloadFlavor) Read(ctx context.Context, request resource.
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_workload_flavor.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_workload_flavor.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "workload_flavor", err),
@@ -852,12 +848,8 @@ func (r *ResourceF5XCWorkloadFlavor) Update(ctx context.Context, request resourc
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_workload_flavor.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_workload_flavor.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "workload_flavor", err),
@@ -866,7 +858,7 @@ func (r *ResourceF5XCWorkloadFlavor) Update(ctx context.Context, request resourc
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_workload_flavor.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_workload_flavor.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "workload_flavor", err),

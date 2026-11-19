@@ -130,61 +130,12 @@ resource "f5xc_cdn_cache_rule" "example" {
 
 Required:
 
-- `cache_actions_choice` (Attributes) Cache Actions Configure the Cache Actions for a rule. (see [below for nested schema](#nestedatt--cache_rules--cache_actions_choice))
 - `rule_expression_list` (Attributes List) Expression List Expressions are evaluated in the order in which they are specified. The evaluation stops when the first rule match occurs.. (see [below for nested schema](#nestedatt--cache_rules--rule_expression_list))
 - `rule_name` (String) Rule Name Name of the Cache Rule<br>**Validation:** `Length LengthAtMost(128)`
 
-<a id="nestedatt--cache_rules--cache_actions_choice"></a>
-### Nested Schema for `cache_rules.cache_actions_choice`
-
 Optional:
 
-- `cache_bypass` (Boolean) Bypass Cache Do not cache content if rule match occurs
-- `eligible_for_cache` (Attributes) Eligible For Cache Cache content if rule match occurs (see [below for nested schema](#nestedatt--cache_rules--cache_actions_choice--eligible_for_cache))
-
-<a id="nestedatt--cache_rules--cache_actions_choice--eligible_for_cache"></a>
-### Nested Schema for `cache_rules.cache_actions_choice.eligible_for_cache`
-
-Required:
-
-- `eligible_for_cache_choice` (Attributes) Eligible For Cache Compose Eligible For Cache (see [below for nested schema](#nestedatt--cache_rules--cache_actions_choice--eligible_for_cache--eligible_for_cache_choice))
-
-<a id="nestedatt--cache_rules--cache_actions_choice--eligible_for_cache--eligible_for_cache_choice"></a>
-### Nested Schema for `cache_rules.cache_actions_choice.eligible_for_cache.eligible_for_cache_choice`
-
-Optional:
-
-- `scheme_proxy_host_request_uri` (Attributes) Scheme + Proxy Host + Request URI (see [below for nested schema](#nestedatt--cache_rules--cache_actions_choice--eligible_for_cache--eligible_for_cache_choice--scheme_proxy_host_request_uri))
-- `scheme_proxy_host_uri` (Attributes) Scheme + Proxy Host + URI (see [below for nested schema](#nestedatt--cache_rules--cache_actions_choice--eligible_for_cache--eligible_for_cache_choice--scheme_proxy_host_uri))
-
-<a id="nestedatt--cache_rules--cache_actions_choice--eligible_for_cache--eligible_for_cache_choice--scheme_proxy_host_request_uri"></a>
-### Nested Schema for `cache_rules.cache_actions_choice.eligible_for_cache.eligible_for_cache_choice.scheme_proxy_host_request_uri`
-
-Required:
-
-- `cache_ttl` (String) Cache TTL Key Cache TTL value is used to cache the resource/content for the specified amount of time Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days
-
-Optional:
-
-- `cache_override` (Boolean) Cache Override Honour Cache Override<br>**Default:** `false`
-- `ignore_response_cookie` (Boolean) Set Cookie By default, response will not be cached if set-cookie header is present. This option will override the behavior and cache response even with set-cookie header present.<br>**Default:** `false`
-
-
-<a id="nestedatt--cache_rules--cache_actions_choice--eligible_for_cache--eligible_for_cache_choice--scheme_proxy_host_uri"></a>
-### Nested Schema for `cache_rules.cache_actions_choice.eligible_for_cache.eligible_for_cache_choice.scheme_proxy_host_uri`
-
-Required:
-
-- `cache_ttl` (String) Cache TTL Key Cache TTL value is used to cache the resource/content for the specified amount of time Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days
-
-Optional:
-
-- `cache_override` (Boolean) Cache Override Honour Cache Override<br>**Default:** `false`
-- `ignore_response_cookie` (Boolean) Set Cookie By default, response will not be cached if set-cookie header is present. This option will override the behavior and cache response even with set-cookie header present.<br>**Default:** `false`
-
-
-
-
+- `cache_actions_choice` (Attributes) Cache Actions Configure the Cache Actions for a rule.<br>Exactly one of `cache_bypass` or `eligible_for_cache` must be specified when `cache_actions_choice` is configured. (see [below for nested schema](#nestedatt--cache_rules--cache_actions_choice))
 
 <a id="nestedatt--cache_rules--rule_expression_list"></a>
 ### Nested Schema for `cache_rules.rule_expression_list`
@@ -220,22 +171,22 @@ Optional:
 
 Required:
 
-- `cache_operator_choice` (Attributes) Cache Operator Match Operator (see [below for nested schema](#nestedatt--cache_rules--rule_expression_list--cache_rule_expression--cache_headers--operator--cache_operator_choice))
+- `cache_operator_choice` (Attributes) Cache Operator Match Operator<br>Exactly one of `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, or `startswith` must be specified. (see [below for nested schema](#nestedatt--cache_rules--rule_expression_list--cache_rule_expression--cache_headers--operator--cache_operator_choice))
 
 <a id="nestedatt--cache_rules--rule_expression_list--cache_rule_expression--cache_headers--operator--cache_operator_choice"></a>
 ### Nested Schema for `cache_rules.rule_expression_list.cache_rule_expression.cache_headers.operator.cache_operator_choice`
 
 Optional:
 
-- `contains` (String) Contains The header value must include the specified value as a substring.
-- `does_not_contain` (String) Does Not Contain The header value must not include the specified value as a substring.
-- `does_not_end_with` (String) Does Not End With The header value must not end with the specified value.
-- `does_not_equal` (String) Does Not Equal The header value must not match the specified value.
-- `does_not_start_with` (String) Does Not Start With The header value must not begin with the specified value.
-- `endswith` (String) Ends With The header value must end with the specified value.
-- `equals` (String) Equals The header value must exactly match the specified value.
-- `match_regex` (String) Matches Regex The header value must match the specified regular expression pattern.<br>**Validation:** `Length LengthBetween(1, 256)`
-- `startswith` (String) Starts With The header value must begin with the specified value.
+- `contains` (String) Contains The header value must include the specified value as a substring.<br>Conflicts with `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.
+- `does_not_contain` (String) Does Not Contain The header value must not include the specified value as a substring.<br>Conflicts with `contains`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.
+- `does_not_end_with` (String) Does Not End With The header value must not end with the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.
+- `does_not_equal` (String) Does Not Equal The header value must not match the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.
+- `does_not_start_with` (String) Does Not Start With The header value must not begin with the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `endswith`, `equals`, `match_regex`, and `startswith`.
+- `endswith` (String) Ends With The header value must end with the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `equals`, `match_regex`, and `startswith`.
+- `equals` (String) Equals The header value must exactly match the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `match_regex`, and `startswith`.
+- `match_regex` (String) Matches Regex The header value must match the specified regular expression pattern.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, and `startswith`.
+- `startswith` (String) Starts With The header value must begin with the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, and `match_regex`.
 
 
 
@@ -256,22 +207,22 @@ Optional:
 
 Required:
 
-- `cache_operator_choice` (Attributes) Cache Operator Match Operator (see [below for nested schema](#nestedatt--cache_rules--rule_expression_list--cache_rule_expression--cookie_matcher--operator--cache_operator_choice))
+- `cache_operator_choice` (Attributes) Cache Operator Match Operator<br>Exactly one of `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, or `startswith` must be specified. (see [below for nested schema](#nestedatt--cache_rules--rule_expression_list--cache_rule_expression--cookie_matcher--operator--cache_operator_choice))
 
 <a id="nestedatt--cache_rules--rule_expression_list--cache_rule_expression--cookie_matcher--operator--cache_operator_choice"></a>
 ### Nested Schema for `cache_rules.rule_expression_list.cache_rule_expression.cookie_matcher.operator.cache_operator_choice`
 
 Optional:
 
-- `contains` (String) Contains The cookie value must include the specified value as a substring.
-- `does_not_contain` (String) Does Not Contain The cookie value must not include the specified value as a substring.
-- `does_not_end_with` (String) Does Not End With The cookie value must not end with the specified value.
-- `does_not_equal` (String) Does Not Equal The cookie value must not match the specified value.
-- `does_not_start_with` (String) Does Not Start With The cookie value must not begin with the specified value.
-- `endswith` (String) Ends With The cookie value must end with the specified value.
-- `equals` (String) Equals The cookie value must exactly match the specified value.
-- `match_regex` (String) Matches Regex The cookie value must match the specified regular expression pattern in PCRE format.<br>**Validation:** `Length LengthBetween(1, 256)`
-- `startswith` (String) Starts With The cookie value must begin with the specified value.
+- `contains` (String) Contains The cookie value must include the specified value as a substring.<br>Conflicts with `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.
+- `does_not_contain` (String) Does Not Contain The cookie value must not include the specified value as a substring.<br>Conflicts with `contains`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.
+- `does_not_end_with` (String) Does Not End With The cookie value must not end with the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.
+- `does_not_equal` (String) Does Not Equal The cookie value must not match the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.
+- `does_not_start_with` (String) Does Not Start With The cookie value must not begin with the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `endswith`, `equals`, `match_regex`, and `startswith`.
+- `endswith` (String) Ends With The cookie value must end with the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `equals`, `match_regex`, and `startswith`.
+- `equals` (String) Equals The cookie value must exactly match the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `match_regex`, and `startswith`.
+- `match_regex` (String) Matches Regex The cookie value must match the specified regular expression pattern in PCRE format.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, and `startswith`.
+- `startswith` (String) Starts With The cookie value must begin with the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, and `match_regex`.
 
 
 
@@ -288,22 +239,22 @@ Optional:
 
 Required:
 
-- `cache_operator_choice` (Attributes) Cache Operator Normalized URI path up to filename and extension but not including query parameters (see [below for nested schema](#nestedatt--cache_rules--rule_expression_list--cache_rule_expression--path_match--operator--cache_operator_choice))
+- `cache_operator_choice` (Attributes) Cache Operator Normalized URI path up to filename and extension but not including query parameters<br>Exactly one of `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, or `startswith` must be specified. (see [below for nested schema](#nestedatt--cache_rules--rule_expression_list--cache_rule_expression--path_match--operator--cache_operator_choice))
 
 <a id="nestedatt--cache_rules--rule_expression_list--cache_rule_expression--path_match--operator--cache_operator_choice"></a>
 ### Nested Schema for `cache_rules.rule_expression_list.cache_rule_expression.path_match.operator.cache_operator_choice`
 
 Optional:
 
-- `contains` (String) Contains The path must include the specified value as a substring, up to the filename.
-- `does_not_contain` (String) Does Not Contain The path must not include the specified value as a substring, up to the filename.
-- `does_not_end_with` (String) Does Not End With The path must not end with the specified value, up to the filename.
-- `does_not_equal` (String) Does Not Equal The path must not match the specified value, up to the filename.
-- `does_not_start_with` (String) Does Not Start With The path must not begin with the specified value, up to the filename.
-- `endswith` (String) Ends With The path must end with the specified value, up to the filename.
-- `equals` (String) Equals The path must exactly match the specified value, up to the filename.
-- `match_regex` (String) Matches Regex The path must match the specified regular expression pattern in PCRE format.<br>**Validation:** `Length LengthBetween(1, 256)`
-- `startswith` (String) Starts With The path must begin with the specified value, up to the filename.
+- `contains` (String) Contains The path must include the specified value as a substring, up to the filename.<br>Conflicts with `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.
+- `does_not_contain` (String) Does Not Contain The path must not include the specified value as a substring, up to the filename.<br>Conflicts with `contains`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.
+- `does_not_end_with` (String) Does Not End With The path must not end with the specified value, up to the filename.<br>Conflicts with `contains`, `does_not_contain`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.
+- `does_not_equal` (String) Does Not Equal The path must not match the specified value, up to the filename.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.
+- `does_not_start_with` (String) Does Not Start With The path must not begin with the specified value, up to the filename.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `endswith`, `equals`, `match_regex`, and `startswith`.
+- `endswith` (String) Ends With The path must end with the specified value, up to the filename.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `equals`, `match_regex`, and `startswith`.
+- `equals` (String) Equals The path must exactly match the specified value, up to the filename.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `match_regex`, and `startswith`.
+- `match_regex` (String) Matches Regex The path must match the specified regular expression pattern in PCRE format.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, and `startswith`.
+- `startswith` (String) Starts With The path must begin with the specified value, up to the filename.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, and `match_regex`.
 
 
 
@@ -324,23 +275,75 @@ Optional:
 
 Required:
 
-- `cache_operator_choice` (Attributes) Cache Operator Match Operator (see [below for nested schema](#nestedatt--cache_rules--rule_expression_list--cache_rule_expression--query_parameters--operator--cache_operator_choice))
+- `cache_operator_choice` (Attributes) Cache Operator Match Operator<br>Exactly one of `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, or `startswith` must be specified. (see [below for nested schema](#nestedatt--cache_rules--rule_expression_list--cache_rule_expression--query_parameters--operator--cache_operator_choice))
 
 <a id="nestedatt--cache_rules--rule_expression_list--cache_rule_expression--query_parameters--operator--cache_operator_choice"></a>
 ### Nested Schema for `cache_rules.rule_expression_list.cache_rule_expression.query_parameters.operator.cache_operator_choice`
 
 Optional:
 
-- `contains` (String) Contains The query parameter value must include the specified value as a substring.
-- `does_not_contain` (String) Does Not Contain The query parameter value must not include the specified value as a substring.
-- `does_not_end_with` (String) Does Not End With The query parameter value must not end with the specified value.
-- `does_not_equal` (String) Does Not Equal The query parameter value must not match the specified value.
-- `does_not_start_with` (String) Does Not Start With The query parameter value must not begin with the specified value.
-- `endswith` (String) Ends With The query parameter value must end with the specified value.
-- `equals` (String) Equals The query parameter value must exactly match the specified value.
-- `match_regex` (String) Matches Regex The query parameter value must match the specified regular expression pattern in PCRE format.<br>**Validation:** `Length LengthBetween(1, 256)`
-- `startswith` (String) Starts With The query parameter value must begin with the specified value.
+- `contains` (String) Contains The query parameter value must include the specified value as a substring.<br>Conflicts with `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.
+- `does_not_contain` (String) Does Not Contain The query parameter value must not include the specified value as a substring.<br>Conflicts with `contains`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.
+- `does_not_end_with` (String) Does Not End With The query parameter value must not end with the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.
+- `does_not_equal` (String) Does Not Equal The query parameter value must not match the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.
+- `does_not_start_with` (String) Does Not Start With The query parameter value must not begin with the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `endswith`, `equals`, `match_regex`, and `startswith`.
+- `endswith` (String) Ends With The query parameter value must end with the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `equals`, `match_regex`, and `startswith`.
+- `equals` (String) Equals The query parameter value must exactly match the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `match_regex`, and `startswith`.
+- `match_regex` (String) Matches Regex The query parameter value must match the specified regular expression pattern in PCRE format.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, and `startswith`.
+- `startswith` (String) Starts With The query parameter value must begin with the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, and `match_regex`.
 
+
+
+
+
+
+<a id="nestedatt--cache_rules--cache_actions_choice"></a>
+### Nested Schema for `cache_rules.cache_actions_choice`
+
+Optional:
+
+- `cache_bypass` (Boolean) Bypass Cache Do not cache content if rule match occurs<br>Conflicts with `eligible_for_cache`.
+- `eligible_for_cache` (Attributes) Eligible For Cache Cache content if rule match occurs<br>Conflicts with `cache_bypass`. (see [below for nested schema](#nestedatt--cache_rules--cache_actions_choice--eligible_for_cache))
+
+<a id="nestedatt--cache_rules--cache_actions_choice--eligible_for_cache"></a>
+### Nested Schema for `cache_rules.cache_actions_choice.eligible_for_cache`
+
+Required:
+
+- `eligible_for_cache_choice` (Attributes) Eligible For Cache Compose Eligible For Cache<br>Exactly one of `scheme_proxy_host_request_uri` or `scheme_proxy_host_uri` must be specified. (see [below for nested schema](#nestedatt--cache_rules--cache_actions_choice--eligible_for_cache--eligible_for_cache_choice))
+
+<a id="nestedatt--cache_rules--cache_actions_choice--eligible_for_cache--eligible_for_cache_choice"></a>
+### Nested Schema for `cache_rules.cache_actions_choice.eligible_for_cache.eligible_for_cache_choice`
+
+Optional:
+
+- `scheme_proxy_host_request_uri` (Attributes) Scheme + Proxy Host + Request URI<br>Conflicts with `scheme_proxy_host_uri`. (see [below for nested schema](#nestedatt--cache_rules--cache_actions_choice--eligible_for_cache--eligible_for_cache_choice--scheme_proxy_host_request_uri))
+- `scheme_proxy_host_uri` (Attributes) Scheme + Proxy Host + URI<br>Conflicts with `scheme_proxy_host_request_uri`. (see [below for nested schema](#nestedatt--cache_rules--cache_actions_choice--eligible_for_cache--eligible_for_cache_choice--scheme_proxy_host_uri))
+
+<a id="nestedatt--cache_rules--cache_actions_choice--eligible_for_cache--eligible_for_cache_choice--scheme_proxy_host_request_uri"></a>
+### Nested Schema for `cache_rules.cache_actions_choice.eligible_for_cache.eligible_for_cache_choice.scheme_proxy_host_request_uri`
+
+Required:
+
+- `cache_ttl` (String) Cache TTL Key Cache TTL value is used to cache the resource/content for the specified amount of time Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days
+
+Optional:
+
+- `cache_override` (Boolean) Cache Override Honour Cache Override<br>**Default:** `false`
+- `ignore_response_cookie` (Boolean) Set Cookie By default, response will not be cached if set-cookie header is present. This option will override the behavior and cache response even with set-cookie header present.<br>**Default:** `false`
+
+
+<a id="nestedatt--cache_rules--cache_actions_choice--eligible_for_cache--eligible_for_cache_choice--scheme_proxy_host_uri"></a>
+### Nested Schema for `cache_rules.cache_actions_choice.eligible_for_cache.eligible_for_cache_choice.scheme_proxy_host_uri`
+
+Required:
+
+- `cache_ttl` (String) Cache TTL Key Cache TTL value is used to cache the resource/content for the specified amount of time Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days
+
+Optional:
+
+- `cache_override` (Boolean) Cache Override Honour Cache Override<br>**Default:** `false`
+- `ignore_response_cookie` (Boolean) Set Cookie By default, response will not be cached if set-cookie header is present. This option will override the behavior and cache response even with set-cookie header present.<br>**Default:** `false`
 
 
 
@@ -377,6 +380,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_cdn_cache_rule.example"
+	to = f5xc_cdn_cache_rule.example
 }
 ```

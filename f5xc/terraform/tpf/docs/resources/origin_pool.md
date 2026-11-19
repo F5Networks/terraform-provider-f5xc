@@ -223,8 +223,8 @@ resource "f5xc_origin_pool" "example" {
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
 - `origin_servers` (Attributes List) List of Origin Servers List of origin servers in this pool (see [below for nested schema](#nestedatt--origin_servers))
-- `port_choice` (Attributes) Port Specify the port where origin server service is hosted. (see [below for nested schema](#nestedatt--port_choice))
-- `tls_choice` (Attributes) Enable TLS (see [below for nested schema](#nestedatt--tls_choice))
+- `port_choice` (Attributes) Port Specify the port where origin server service is hosted.<br>Exactly one of `automatic_port`, `lb_port`, or `port` must be specified. (see [below for nested schema](#nestedatt--port_choice))
+- `tls_choice` (Attributes) Enable TLS<br>Exactly one of `no_tls` or `use_tls` must be specified. (see [below for nested schema](#nestedatt--tls_choice))
 - `upstream_conn_pool_reuse_type` (Attributes) Select upstream connection pool reuse state Select upstream connection pool reuse state for every downstream connection This configuration choice is for HTTP(S) LB only. (see [below for nested schema](#nestedatt--upstream_conn_pool_reuse_type))
 
 ### Optional
@@ -232,7 +232,7 @@ resource "f5xc_origin_pool" "example" {
 - `advanced_options` (Attributes) advanced_options Advanced options configuration like timeouts, circuit breaker, subset load balancing (see [below for nested schema](#nestedatt--advanced_options))
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `description` (String) description Human readable description for the object
-- `health_check_port_choice` (Attributes) Health check Port By default the health check port of an endpoint is the same as the endpoint’s port. This option provides an alternative health check port. Setting this with a non-zero value allows an endpoint to have different health check port. (see [below for nested schema](#nestedatt--health_check_port_choice))
+- `health_check_port_choice` (Attributes) Health check Port By default the health check port of an endpoint is the same as the endpoint’s port. This option provides an alternative health check port. Setting this with a non-zero value allows an endpoint to have different health check port.<br>Exactly one of `health_check_port` or `same_as_endpoint_port` must be specified when `health_check_port_choice` is configured. (see [below for nested schema](#nestedatt--health_check_port_choice))
 - `healthcheck` (Attributes List) Health Check Reference to healthcheck configuration objects (see [below for nested schema](#nestedatt--healthcheck))
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
@@ -246,7 +246,7 @@ resource "f5xc_origin_pool" "example" {
 
 Required:
 
-- `choice` (Attributes) Origin Server Type Various options to specify origin server (see [below for nested schema](#nestedatt--origin_servers--choice))
+- `choice` (Attributes) Origin Server Type Various options to specify origin server<br>Exactly one of `cbip_service`, `consul_service`, `custom_endpoint_object`, `k8s_service`, `private_ip`, `private_name`, `public_ip`, `public_name`, `vn_private_ip`, or `vn_private_name` must be specified. (see [below for nested schema](#nestedatt--origin_servers--choice))
 
 Optional:
 
@@ -257,16 +257,16 @@ Optional:
 
 Optional:
 
-- `cbip_service` (Attributes) OriginServerCBIPService Specify origin server with BIG-IP service name (see [below for nested schema](#nestedatt--origin_servers--choice--cbip_service))
-- `consul_service` (Attributes) OriginServerConsulService Specify origin server with Hashi Corp Consul service name and site information (see [below for nested schema](#nestedatt--origin_servers--choice--consul_service))
-- `custom_endpoint_object` (Attributes) OriginServerCustomEndpoint Specify origin server with a reference to endpoint object (see [below for nested schema](#nestedatt--origin_servers--choice--custom_endpoint_object))
-- `k8s_service` (Attributes) OriginServerK8SService Specify origin server with K8s service name and site information (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service))
-- `private_ip` (Attributes) OriginServerPrivateIP Specify origin server with private or public IP address and site information (see [below for nested schema](#nestedatt--origin_servers--choice--private_ip))
-- `private_name` (Attributes) OriginServerPrivateName Specify origin server with private or public DNS name and site information (see [below for nested schema](#nestedatt--origin_servers--choice--private_name))
-- `public_ip` (Attributes) OriginServerPublicIP Specify origin server with public IP (see [below for nested schema](#nestedatt--origin_servers--choice--public_ip))
-- `public_name` (Attributes) OriginServerPublicName Specify origin server with public DNS name (see [below for nested schema](#nestedatt--origin_servers--choice--public_name))
-- `vn_private_ip` (Attributes) OriginServerVirtualNetworkIP Specify origin server IP address on virtual network other than inside or outside network (see [below for nested schema](#nestedatt--origin_servers--choice--vn_private_ip))
-- `vn_private_name` (Attributes) OriginServerVirtualNetworkName Specify origin server name on virtual network other than inside or outside network (see [below for nested schema](#nestedatt--origin_servers--choice--vn_private_name))
+- `cbip_service` (Attributes) OriginServerCBIPService Specify origin server with BIG-IP service name<br>Conflicts with `consul_service`, `custom_endpoint_object`, `k8s_service`, `private_ip`, `private_name`, `public_ip`, `public_name`, `vn_private_ip`, and `vn_private_name`. (see [below for nested schema](#nestedatt--origin_servers--choice--cbip_service))
+- `consul_service` (Attributes) OriginServerConsulService Specify origin server with Hashi Corp Consul service name and site information<br>Conflicts with `cbip_service`, `custom_endpoint_object`, `k8s_service`, `private_ip`, `private_name`, `public_ip`, `public_name`, `vn_private_ip`, and `vn_private_name`. (see [below for nested schema](#nestedatt--origin_servers--choice--consul_service))
+- `custom_endpoint_object` (Attributes) OriginServerCustomEndpoint Specify origin server with a reference to endpoint object<br>Conflicts with `cbip_service`, `consul_service`, `k8s_service`, `private_ip`, `private_name`, `public_ip`, `public_name`, `vn_private_ip`, and `vn_private_name`. (see [below for nested schema](#nestedatt--origin_servers--choice--custom_endpoint_object))
+- `k8s_service` (Attributes) OriginServerK8SService Specify origin server with K8s service name and site information<br>Conflicts with `cbip_service`, `consul_service`, `custom_endpoint_object`, `private_ip`, `private_name`, `public_ip`, `public_name`, `vn_private_ip`, and `vn_private_name`. (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service))
+- `private_ip` (Attributes) OriginServerPrivateIP Specify origin server with private or public IP address and site information<br>Conflicts with `cbip_service`, `consul_service`, `custom_endpoint_object`, `k8s_service`, `private_name`, `public_ip`, `public_name`, `vn_private_ip`, and `vn_private_name`. (see [below for nested schema](#nestedatt--origin_servers--choice--private_ip))
+- `private_name` (Attributes) OriginServerPrivateName Specify origin server with private or public DNS name and site information<br>Conflicts with `cbip_service`, `consul_service`, `custom_endpoint_object`, `k8s_service`, `private_ip`, `public_ip`, `public_name`, `vn_private_ip`, and `vn_private_name`. (see [below for nested schema](#nestedatt--origin_servers--choice--private_name))
+- `public_ip` (Attributes) OriginServerPublicIP Specify origin server with public IP<br>Conflicts with `cbip_service`, `consul_service`, `custom_endpoint_object`, `k8s_service`, `private_ip`, `private_name`, `public_name`, `vn_private_ip`, and `vn_private_name`. (see [below for nested schema](#nestedatt--origin_servers--choice--public_ip))
+- `public_name` (Attributes) OriginServerPublicName Specify origin server with public DNS name<br>Conflicts with `cbip_service`, `consul_service`, `custom_endpoint_object`, `k8s_service`, `private_ip`, `private_name`, `public_ip`, `vn_private_ip`, and `vn_private_name`. (see [below for nested schema](#nestedatt--origin_servers--choice--public_name))
+- `vn_private_ip` (Attributes) OriginServerVirtualNetworkIP Specify origin server IP address on virtual network other than inside or outside network<br>Conflicts with `cbip_service`, `consul_service`, `custom_endpoint_object`, `k8s_service`, `private_ip`, `private_name`, `public_ip`, `public_name`, and `vn_private_name`. (see [below for nested schema](#nestedatt--origin_servers--choice--vn_private_ip))
+- `vn_private_name` (Attributes) OriginServerVirtualNetworkName Specify origin server name on virtual network other than inside or outside network<br>Conflicts with `cbip_service`, `consul_service`, `custom_endpoint_object`, `k8s_service`, `private_ip`, `private_name`, `public_ip`, `public_name`, and `vn_private_ip`. (see [below for nested schema](#nestedatt--origin_servers--choice--vn_private_name))
 
 <a id="nestedatt--origin_servers--choice--cbip_service"></a>
 ### Nested Schema for `origin_servers.choice.cbip_service`
@@ -281,37 +281,28 @@ Required:
 
 Required:
 
-- `network_choice` (Attributes) Site Network Inside or Outside Network (see [below for nested schema](#nestedatt--origin_servers--choice--consul_service--network_choice))
 - `service_name` (String) Service Name Consul service name of this origin server will be listed, including cluster-id. The format is servicename:cluster-id.
 - `site_locator` (Attributes) Site Locator Site or Virtual site where this origin server is located (see [below for nested schema](#nestedatt--origin_servers--choice--consul_service--site_locator))
 
 Optional:
 
+- `network_choice` (Attributes) Site Network Inside or Outside Network<br>Exactly one of `inside_network` or `outside_network` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--origin_servers--choice--consul_service--network_choice))
 - `snat_pool` (Attributes) SNAT Pool Configuration (see [below for nested schema](#nestedatt--origin_servers--choice--consul_service--snat_pool))
-
-<a id="nestedatt--origin_servers--choice--consul_service--network_choice"></a>
-### Nested Schema for `origin_servers.choice.consul_service.network_choice`
-
-Optional:
-
-- `inside_network` (Boolean) Inside Network Inside network on the site
-- `outside_network` (Boolean) Outside Network Outside network on the site
-
 
 <a id="nestedatt--origin_servers--choice--consul_service--site_locator"></a>
 ### Nested Schema for `origin_servers.choice.consul_service.site_locator`
 
 Required:
 
-- `choice` (Attributes) SiteLocator (see [below for nested schema](#nestedatt--origin_servers--choice--consul_service--site_locator--choice))
+- `choice` (Attributes) SiteLocator<br>Exactly one of `site` or `virtual_site` must be specified. (see [below for nested schema](#nestedatt--origin_servers--choice--consul_service--site_locator--choice))
 
 <a id="nestedatt--origin_servers--choice--consul_service--site_locator--choice"></a>
 ### Nested Schema for `origin_servers.choice.consul_service.site_locator.choice`
 
 Optional:
 
-- `site` (Attributes) site Reference to site object (see [below for nested schema](#nestedatt--origin_servers--choice--consul_service--site_locator--choice--site))
-- `virtual_site` (Attributes) Virtual Site Reference to virtual site object (see [below for nested schema](#nestedatt--origin_servers--choice--consul_service--site_locator--choice--virtual_site))
+- `site` (Attributes) site Reference to site object<br>Conflicts with `virtual_site`. (see [below for nested schema](#nestedatt--origin_servers--choice--consul_service--site_locator--choice--site))
+- `virtual_site` (Attributes) Virtual Site Reference to virtual site object<br>Conflicts with `site`. (see [below for nested schema](#nestedatt--origin_servers--choice--consul_service--site_locator--choice--virtual_site))
 
 <a id="nestedatt--origin_servers--choice--consul_service--site_locator--choice--site"></a>
 ### Nested Schema for `origin_servers.choice.consul_service.site_locator.choice.site`
@@ -341,20 +332,29 @@ Read-Only:
 
 
 
+<a id="nestedatt--origin_servers--choice--consul_service--network_choice"></a>
+### Nested Schema for `origin_servers.choice.consul_service.network_choice`
+
+Optional:
+
+- `inside_network` (Boolean) Inside Network Inside network on the site<br>Conflicts with `outside_network`.
+- `outside_network` (Boolean) Outside Network Outside network on the site<br>Conflicts with `inside_network`.
+
+
 <a id="nestedatt--origin_servers--choice--consul_service--snat_pool"></a>
 ### Nested Schema for `origin_servers.choice.consul_service.snat_pool`
 
 Optional:
 
-- `snat_pool_choice` (Attributes) Snat Pool Choice Snat Pool for the origin server (see [below for nested schema](#nestedatt--origin_servers--choice--consul_service--snat_pool--snat_pool_choice))
+- `snat_pool_choice` (Attributes) Snat Pool Choice Snat Pool for the origin server<br>Exactly one of `no_snat_pool` or `snat_pool` must be specified when `snat_pool_choice` is configured. (see [below for nested schema](#nestedatt--origin_servers--choice--consul_service--snat_pool--snat_pool_choice))
 
 <a id="nestedatt--origin_servers--choice--consul_service--snat_pool--snat_pool_choice"></a>
 ### Nested Schema for `origin_servers.choice.consul_service.snat_pool.snat_pool_choice`
 
 Optional:
 
-- `no_snat_pool` (Boolean) No SNAT Pool No configured SNAT Pool to reach Origin Server
-- `snat_pool` (Attributes) SNAT Pool Configure SNAT Pool to reach Origin Server (see [below for nested schema](#nestedatt--origin_servers--choice--consul_service--snat_pool--snat_pool_choice--snat_pool))
+- `no_snat_pool` (Boolean) No SNAT Pool No configured SNAT Pool to reach Origin Server<br>Conflicts with `snat_pool`.
+- `snat_pool` (Attributes) SNAT Pool Configure SNAT Pool to reach Origin Server<br>Conflicts with `no_snat_pool`. (see [below for nested schema](#nestedatt--origin_servers--choice--consul_service--snat_pool--snat_pool_choice--snat_pool))
 
 <a id="nestedatt--origin_servers--choice--consul_service--snat_pool--snat_pool_choice--snat_pool"></a>
 ### Nested Schema for `origin_servers.choice.consul_service.snat_pool.snat_pool_choice.snat_pool`
@@ -394,24 +394,14 @@ Read-Only:
 
 Required:
 
-- `network_choice` (Attributes) Site Network Inside or Outside Network (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service--network_choice))
-- `service_info_choice` (Attributes) service_info Specifies whether service discovery has to be done using service name or labels (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service--service_info_choice))
+- `service_info_choice` (Attributes) service_info Specifies whether service discovery has to be done using service name or labels<br>`service_name` must be specified. (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service--service_info_choice))
 - `site_locator` (Attributes) Site Locator Site or Virtual site where this origin server is located (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service--site_locator))
 
 Optional:
 
+- `network_choice` (Attributes) Site Network Inside or Outside Network<br>Exactly one of `inside_network`, `outside_network`, or `vk8s_networks` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service--network_choice))
 - `protocol` (List of String) Protocol Protocol to be used in the discovery.<br>**Allowed Values (choose one):** `['PROTOCOL_TCP', 'PROTOCOL_UDP']`<br>**Default:** `PROTOCOL_TCP`
 - `snat_pool` (Attributes) SNAT Pool Configuration (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service--snat_pool))
-
-<a id="nestedatt--origin_servers--choice--k8s_service--network_choice"></a>
-### Nested Schema for `origin_servers.choice.k8s_service.network_choice`
-
-Optional:
-
-- `inside_network` (Boolean) Inside Network Inside network on the site
-- `outside_network` (Boolean) Outside Network Outside network on the site
-- `vk8s_networks` (Boolean) vK8s Networks on site origin server are on vK8s network on the site
-
 
 <a id="nestedatt--origin_servers--choice--k8s_service--service_info_choice"></a>
 ### Nested Schema for `origin_servers.choice.k8s_service.service_info_choice`
@@ -426,15 +416,15 @@ Optional:
 
 Required:
 
-- `choice` (Attributes) SiteLocator (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service--site_locator--choice))
+- `choice` (Attributes) SiteLocator<br>Exactly one of `site` or `virtual_site` must be specified. (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service--site_locator--choice))
 
 <a id="nestedatt--origin_servers--choice--k8s_service--site_locator--choice"></a>
 ### Nested Schema for `origin_servers.choice.k8s_service.site_locator.choice`
 
 Optional:
 
-- `site` (Attributes) site Reference to site object (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service--site_locator--choice--site))
-- `virtual_site` (Attributes) Virtual Site Reference to virtual site object (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service--site_locator--choice--virtual_site))
+- `site` (Attributes) site Reference to site object<br>Conflicts with `virtual_site`. (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service--site_locator--choice--site))
+- `virtual_site` (Attributes) Virtual Site Reference to virtual site object<br>Conflicts with `site`. (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service--site_locator--choice--virtual_site))
 
 <a id="nestedatt--origin_servers--choice--k8s_service--site_locator--choice--site"></a>
 ### Nested Schema for `origin_servers.choice.k8s_service.site_locator.choice.site`
@@ -464,20 +454,30 @@ Read-Only:
 
 
 
+<a id="nestedatt--origin_servers--choice--k8s_service--network_choice"></a>
+### Nested Schema for `origin_servers.choice.k8s_service.network_choice`
+
+Optional:
+
+- `inside_network` (Boolean) Inside Network Inside network on the site<br>Conflicts with `outside_network` and `vk8s_networks`.
+- `outside_network` (Boolean) Outside Network Outside network on the site<br>Conflicts with `inside_network` and `vk8s_networks`.
+- `vk8s_networks` (Boolean) vK8s Networks on site origin server are on vK8s network on the site<br>Conflicts with `inside_network` and `outside_network`.
+
+
 <a id="nestedatt--origin_servers--choice--k8s_service--snat_pool"></a>
 ### Nested Schema for `origin_servers.choice.k8s_service.snat_pool`
 
 Optional:
 
-- `snat_pool_choice` (Attributes) Snat Pool Choice Snat Pool for the origin server (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service--snat_pool--snat_pool_choice))
+- `snat_pool_choice` (Attributes) Snat Pool Choice Snat Pool for the origin server<br>Exactly one of `no_snat_pool` or `snat_pool` must be specified when `snat_pool_choice` is configured. (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service--snat_pool--snat_pool_choice))
 
 <a id="nestedatt--origin_servers--choice--k8s_service--snat_pool--snat_pool_choice"></a>
 ### Nested Schema for `origin_servers.choice.k8s_service.snat_pool.snat_pool_choice`
 
 Optional:
 
-- `no_snat_pool` (Boolean) No SNAT Pool No configured SNAT Pool to reach Origin Server
-- `snat_pool` (Attributes) SNAT Pool Configure SNAT Pool to reach Origin Server (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service--snat_pool--snat_pool_choice--snat_pool))
+- `no_snat_pool` (Boolean) No SNAT Pool No configured SNAT Pool to reach Origin Server<br>Conflicts with `snat_pool`.
+- `snat_pool` (Attributes) SNAT Pool Configure SNAT Pool to reach Origin Server<br>Conflicts with `no_snat_pool`. (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service--snat_pool--snat_pool_choice--snat_pool))
 
 <a id="nestedatt--origin_servers--choice--k8s_service--snat_pool--snat_pool_choice--snat_pool"></a>
 ### Nested Schema for `origin_servers.choice.k8s_service.snat_pool.snat_pool_choice.snat_pool`
@@ -496,44 +496,21 @@ Optional:
 
 Required:
 
-- `network_choice` (Attributes) Site Network Inside or Outside Network (see [below for nested schema](#nestedatt--origin_servers--choice--private_ip--network_choice))
-- `private_ip_choice` (Attributes) Private IP Choice Origin server Private IP - either V4 or V6 (see [below for nested schema](#nestedatt--origin_servers--choice--private_ip--private_ip_choice))
+- `private_ip_choice` (Attributes) Private IP Choice Origin server Private IP - either V4 or V6<br>Exactly one of `ip` or `ipv6` must be specified. (see [below for nested schema](#nestedatt--origin_servers--choice--private_ip--private_ip_choice))
 - `site_locator` (Attributes) Site Locator Site or Virtual site where this origin server is located (see [below for nested schema](#nestedatt--origin_servers--choice--private_ip--site_locator))
 
 Optional:
 
+- `network_choice` (Attributes) Site Network Inside or Outside Network<br>Exactly one of `inside_network`, `outside_network`, or `segment` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--origin_servers--choice--private_ip--network_choice))
 - `snat_pool` (Attributes) SNAT Pool Configuration (see [below for nested schema](#nestedatt--origin_servers--choice--private_ip--snat_pool))
-
-<a id="nestedatt--origin_servers--choice--private_ip--network_choice"></a>
-### Nested Schema for `origin_servers.choice.private_ip.network_choice`
-
-Optional:
-
-- `inside_network` (Boolean) Inside Network Inside network on the site
-- `outside_network` (Boolean) Outside Network Outside network on the site
-- `segment` (Attributes) Segment Segment where this origin server is located (see [below for nested schema](#nestedatt--origin_servers--choice--private_ip--network_choice--segment))
-
-<a id="nestedatt--origin_servers--choice--private_ip--network_choice--segment"></a>
-### Nested Schema for `origin_servers.choice.private_ip.network_choice.segment`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
 
 <a id="nestedatt--origin_servers--choice--private_ip--private_ip_choice"></a>
 ### Nested Schema for `origin_servers.choice.private_ip.private_ip_choice`
 
 Optional:
 
-- `ip` (String) IP Private IPV4 address
-- `ipv6` (String) IP6 Private IPV6 address
+- `ip` (String) IP Private IPV4 address<br>Conflicts with `ipv6`.
+- `ipv6` (String) IP6 Private IPV6 address<br>Conflicts with `ip`.
 
 
 <a id="nestedatt--origin_servers--choice--private_ip--site_locator"></a>
@@ -541,15 +518,15 @@ Optional:
 
 Required:
 
-- `choice` (Attributes) SiteLocator (see [below for nested schema](#nestedatt--origin_servers--choice--private_ip--site_locator--choice))
+- `choice` (Attributes) SiteLocator<br>Exactly one of `site` or `virtual_site` must be specified. (see [below for nested schema](#nestedatt--origin_servers--choice--private_ip--site_locator--choice))
 
 <a id="nestedatt--origin_servers--choice--private_ip--site_locator--choice"></a>
 ### Nested Schema for `origin_servers.choice.private_ip.site_locator.choice`
 
 Optional:
 
-- `site` (Attributes) site Reference to site object (see [below for nested schema](#nestedatt--origin_servers--choice--private_ip--site_locator--choice--site))
-- `virtual_site` (Attributes) Virtual Site Reference to virtual site object (see [below for nested schema](#nestedatt--origin_servers--choice--private_ip--site_locator--choice--virtual_site))
+- `site` (Attributes) site Reference to site object<br>Conflicts with `virtual_site`. (see [below for nested schema](#nestedatt--origin_servers--choice--private_ip--site_locator--choice--site))
+- `virtual_site` (Attributes) Virtual Site Reference to virtual site object<br>Conflicts with `site`. (see [below for nested schema](#nestedatt--origin_servers--choice--private_ip--site_locator--choice--virtual_site))
 
 <a id="nestedatt--origin_servers--choice--private_ip--site_locator--choice--site"></a>
 ### Nested Schema for `origin_servers.choice.private_ip.site_locator.choice.site`
@@ -579,20 +556,43 @@ Read-Only:
 
 
 
+<a id="nestedatt--origin_servers--choice--private_ip--network_choice"></a>
+### Nested Schema for `origin_servers.choice.private_ip.network_choice`
+
+Optional:
+
+- `inside_network` (Boolean) Inside Network Inside network on the site<br>Conflicts with `outside_network` and `segment`.
+- `outside_network` (Boolean) Outside Network Outside network on the site<br>Conflicts with `inside_network` and `segment`.
+- `segment` (Attributes) Segment Segment where this origin server is located<br>Conflicts with `inside_network` and `outside_network`. (see [below for nested schema](#nestedatt--origin_servers--choice--private_ip--network_choice--segment))
+
+<a id="nestedatt--origin_servers--choice--private_ip--network_choice--segment"></a>
+### Nested Schema for `origin_servers.choice.private_ip.network_choice.segment`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+
 <a id="nestedatt--origin_servers--choice--private_ip--snat_pool"></a>
 ### Nested Schema for `origin_servers.choice.private_ip.snat_pool`
 
 Optional:
 
-- `snat_pool_choice` (Attributes) Snat Pool Choice Snat Pool for the origin server (see [below for nested schema](#nestedatt--origin_servers--choice--private_ip--snat_pool--snat_pool_choice))
+- `snat_pool_choice` (Attributes) Snat Pool Choice Snat Pool for the origin server<br>Exactly one of `no_snat_pool` or `snat_pool` must be specified when `snat_pool_choice` is configured. (see [below for nested schema](#nestedatt--origin_servers--choice--private_ip--snat_pool--snat_pool_choice))
 
 <a id="nestedatt--origin_servers--choice--private_ip--snat_pool--snat_pool_choice"></a>
 ### Nested Schema for `origin_servers.choice.private_ip.snat_pool.snat_pool_choice`
 
 Optional:
 
-- `no_snat_pool` (Boolean) No SNAT Pool No configured SNAT Pool to reach Origin Server
-- `snat_pool` (Attributes) SNAT Pool Configure SNAT Pool to reach Origin Server (see [below for nested schema](#nestedatt--origin_servers--choice--private_ip--snat_pool--snat_pool_choice--snat_pool))
+- `no_snat_pool` (Boolean) No SNAT Pool No configured SNAT Pool to reach Origin Server<br>Conflicts with `snat_pool`.
+- `snat_pool` (Attributes) SNAT Pool Configure SNAT Pool to reach Origin Server<br>Conflicts with `no_snat_pool`. (see [below for nested schema](#nestedatt--origin_servers--choice--private_ip--snat_pool--snat_pool_choice--snat_pool))
 
 <a id="nestedatt--origin_servers--choice--private_ip--snat_pool--snat_pool_choice--snat_pool"></a>
 ### Nested Schema for `origin_servers.choice.private_ip.snat_pool.snat_pool_choice.snat_pool`
@@ -612,51 +612,28 @@ Optional:
 Required:
 
 - `dns_name` (String) DNS name DNS Name
-- `network_choice` (Attributes) Site Network Inside or Outside Network (see [below for nested schema](#nestedatt--origin_servers--choice--private_name--network_choice))
 - `site_locator` (Attributes) Site Locator Site or Virtual site where this origin server is located (see [below for nested schema](#nestedatt--origin_servers--choice--private_name--site_locator))
 
 Optional:
 
+- `network_choice` (Attributes) Site Network Inside or Outside Network<br>Exactly one of `inside_network`, `outside_network`, or `segment` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--origin_servers--choice--private_name--network_choice))
 - `refresh_interval` (Number) refresh_interval Interval for DNS refresh in seconds. Max value is 7 days as per https://datatracker.ietf.org/doc/html/rfc8767<br>**Default:** `300`
 - `snat_pool` (Attributes) SNAT Pool Configuration (see [below for nested schema](#nestedatt--origin_servers--choice--private_name--snat_pool))
-
-<a id="nestedatt--origin_servers--choice--private_name--network_choice"></a>
-### Nested Schema for `origin_servers.choice.private_name.network_choice`
-
-Optional:
-
-- `inside_network` (Boolean) Inside Network Inside network on the site
-- `outside_network` (Boolean) Outside Network Outside network on the site
-- `segment` (Attributes) Segment Segment where this origin server is located (see [below for nested schema](#nestedatt--origin_servers--choice--private_name--network_choice--segment))
-
-<a id="nestedatt--origin_servers--choice--private_name--network_choice--segment"></a>
-### Nested Schema for `origin_servers.choice.private_name.network_choice.segment`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
 
 <a id="nestedatt--origin_servers--choice--private_name--site_locator"></a>
 ### Nested Schema for `origin_servers.choice.private_name.site_locator`
 
 Required:
 
-- `choice` (Attributes) SiteLocator (see [below for nested schema](#nestedatt--origin_servers--choice--private_name--site_locator--choice))
+- `choice` (Attributes) SiteLocator<br>Exactly one of `site` or `virtual_site` must be specified. (see [below for nested schema](#nestedatt--origin_servers--choice--private_name--site_locator--choice))
 
 <a id="nestedatt--origin_servers--choice--private_name--site_locator--choice"></a>
 ### Nested Schema for `origin_servers.choice.private_name.site_locator.choice`
 
 Optional:
 
-- `site` (Attributes) site Reference to site object (see [below for nested schema](#nestedatt--origin_servers--choice--private_name--site_locator--choice--site))
-- `virtual_site` (Attributes) Virtual Site Reference to virtual site object (see [below for nested schema](#nestedatt--origin_servers--choice--private_name--site_locator--choice--virtual_site))
+- `site` (Attributes) site Reference to site object<br>Conflicts with `virtual_site`. (see [below for nested schema](#nestedatt--origin_servers--choice--private_name--site_locator--choice--site))
+- `virtual_site` (Attributes) Virtual Site Reference to virtual site object<br>Conflicts with `site`. (see [below for nested schema](#nestedatt--origin_servers--choice--private_name--site_locator--choice--virtual_site))
 
 <a id="nestedatt--origin_servers--choice--private_name--site_locator--choice--site"></a>
 ### Nested Schema for `origin_servers.choice.private_name.site_locator.choice.site`
@@ -686,20 +663,43 @@ Read-Only:
 
 
 
+<a id="nestedatt--origin_servers--choice--private_name--network_choice"></a>
+### Nested Schema for `origin_servers.choice.private_name.network_choice`
+
+Optional:
+
+- `inside_network` (Boolean) Inside Network Inside network on the site<br>Conflicts with `outside_network` and `segment`.
+- `outside_network` (Boolean) Outside Network Outside network on the site<br>Conflicts with `inside_network` and `segment`.
+- `segment` (Attributes) Segment Segment where this origin server is located<br>Conflicts with `inside_network` and `outside_network`. (see [below for nested schema](#nestedatt--origin_servers--choice--private_name--network_choice--segment))
+
+<a id="nestedatt--origin_servers--choice--private_name--network_choice--segment"></a>
+### Nested Schema for `origin_servers.choice.private_name.network_choice.segment`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+
 <a id="nestedatt--origin_servers--choice--private_name--snat_pool"></a>
 ### Nested Schema for `origin_servers.choice.private_name.snat_pool`
 
 Optional:
 
-- `snat_pool_choice` (Attributes) Snat Pool Choice Snat Pool for the origin server (see [below for nested schema](#nestedatt--origin_servers--choice--private_name--snat_pool--snat_pool_choice))
+- `snat_pool_choice` (Attributes) Snat Pool Choice Snat Pool for the origin server<br>Exactly one of `no_snat_pool` or `snat_pool` must be specified when `snat_pool_choice` is configured. (see [below for nested schema](#nestedatt--origin_servers--choice--private_name--snat_pool--snat_pool_choice))
 
 <a id="nestedatt--origin_servers--choice--private_name--snat_pool--snat_pool_choice"></a>
 ### Nested Schema for `origin_servers.choice.private_name.snat_pool.snat_pool_choice`
 
 Optional:
 
-- `no_snat_pool` (Boolean) No SNAT Pool No configured SNAT Pool to reach Origin Server
-- `snat_pool` (Attributes) SNAT Pool Configure SNAT Pool to reach Origin Server (see [below for nested schema](#nestedatt--origin_servers--choice--private_name--snat_pool--snat_pool_choice--snat_pool))
+- `no_snat_pool` (Boolean) No SNAT Pool No configured SNAT Pool to reach Origin Server<br>Conflicts with `snat_pool`.
+- `snat_pool` (Attributes) SNAT Pool Configure SNAT Pool to reach Origin Server<br>Conflicts with `no_snat_pool`. (see [below for nested schema](#nestedatt--origin_servers--choice--private_name--snat_pool--snat_pool_choice--snat_pool))
 
 <a id="nestedatt--origin_servers--choice--private_name--snat_pool--snat_pool_choice--snat_pool"></a>
 ### Nested Schema for `origin_servers.choice.private_name.snat_pool.snat_pool_choice.snat_pool`
@@ -718,7 +718,7 @@ Optional:
 
 Required:
 
-- `public_ip_choice` (Attributes) Public IP Choice Origin server public IP - either V4 or V6 (see [below for nested schema](#nestedatt--origin_servers--choice--public_ip--public_ip_choice))
+- `public_ip_choice` (Attributes) Public IP Choice Origin server public IP - either V4 or V6<br>`ip` must be specified. (see [below for nested schema](#nestedatt--origin_servers--choice--public_ip--public_ip_choice))
 
 <a id="nestedatt--origin_servers--choice--public_ip--public_ip_choice"></a>
 ### Nested Schema for `origin_servers.choice.public_ip.public_ip_choice`
@@ -747,7 +747,7 @@ Optional:
 Required:
 
 - `virtual_network` (Attributes) Virtual Network Virtual Network where this IP will be present (see [below for nested schema](#nestedatt--origin_servers--choice--vn_private_ip--virtual_network))
-- `virtual_network_ip_choice` (Attributes) Virtual Network IP Choice Origin server Virtual Network IP - either V4 or V6 (see [below for nested schema](#nestedatt--origin_servers--choice--vn_private_ip--virtual_network_ip_choice))
+- `virtual_network_ip_choice` (Attributes) Virtual Network IP Choice Origin server Virtual Network IP - either V4 or V6<br>Exactly one of `ip` or `ipv6` must be specified. (see [below for nested schema](#nestedatt--origin_servers--choice--vn_private_ip--virtual_network_ip_choice))
 
 <a id="nestedatt--origin_servers--choice--vn_private_ip--virtual_network"></a>
 ### Nested Schema for `origin_servers.choice.vn_private_ip.virtual_network`
@@ -767,8 +767,8 @@ Read-Only:
 
 Optional:
 
-- `ip` (String) IPV4 IPV4 address
-- `ipv6` (String) IPV6 IPV6 address
+- `ip` (String) IPV4 IPV4 address<br>Conflicts with `ipv6`.
+- `ipv6` (String) IPV6 IPV6 address<br>Conflicts with `ip`.
 
 
 
@@ -801,9 +801,9 @@ Read-Only:
 
 Optional:
 
-- `automatic_port` (Boolean) Automatic selection of endpoint port Automatic selection of port for endpoint For Consul and Classic BIG-IP service discovery, port will be discovered as part of service discovery. For other origin server types, port will be automatically set as 443 if TLS is enabled at Origin Pool and 80 if TLS is disabled
-- `lb_port` (Boolean) Same as Loadbalancer port Endpoint port is selected based on loadbalancer port
-- `port` (Number) Port Endpoint service is available on this port
+- `automatic_port` (Boolean) Automatic selection of endpoint port Automatic selection of port for endpoint For Consul and Classic BIG-IP service discovery, port will be discovered as part of service discovery. For other origin server types, port will be automatically set as 443 if TLS is enabled at Origin Pool and 80 if TLS is disabled<br>Conflicts with `lb_port` and `port`.
+- `lb_port` (Boolean) Same as Loadbalancer port Endpoint port is selected based on loadbalancer port<br>Conflicts with `automatic_port` and `port`.
+- `port` (Number) Port Endpoint service is available on this port<br>Conflicts with `automatic_port` and `lb_port`.
 
 
 <a id="nestedatt--tls_choice"></a>
@@ -811,38 +811,31 @@ Optional:
 
 Optional:
 
-- `no_tls` (Boolean) No TLS
-- `use_tls` (Attributes) Use TLS (see [below for nested schema](#nestedatt--tls_choice--use_tls))
+- `no_tls` (Boolean) No TLS<br>Conflicts with `use_tls`.
+- `use_tls` (Attributes) Use TLS<br>Conflicts with `no_tls`. (see [below for nested schema](#nestedatt--tls_choice--use_tls))
 
 <a id="nestedatt--tls_choice--use_tls"></a>
 ### Nested Schema for `tls_choice.use_tls`
 
 Required:
 
-- `max_session_keys_type_choice` (Attributes) Max Session Keys Maximum number of session keys (Pre-Shared Keys for TLSv1.3+, Session IDs and Session Tickets for TLSv1.2 and older) to store for the purpose of session resumption. (see [below for nested schema](#nestedatt--tls_choice--use_tls--max_session_keys_type_choice))
-- `mtls_choice` (Attributes) Server mTLS choice mTLS parameters such as certificate, min/max TLS version and ciphers (see [below for nested schema](#nestedatt--tls_choice--use_tls--mtls_choice))
-- `server_validation_choice` (Attributes) Server verification choice Choose whether to perform origin server verification. (see [below for nested schema](#nestedatt--tls_choice--use_tls--server_validation_choice))
-- `sni_choice` (Attributes) sni choice Select SNI to be used for upstream connection (see [below for nested schema](#nestedatt--tls_choice--use_tls--sni_choice))
+- `mtls_choice` (Attributes) Server mTLS choice mTLS parameters such as certificate, min/max TLS version and ciphers<br>Exactly one of `no_mtls`, `use_mtls`, or `use_mtls_obj` must be specified. (see [below for nested schema](#nestedatt--tls_choice--use_tls--mtls_choice))
 - `tls_config` (Attributes) TLS Config TLS parameters such as min/max TLS version and ciphers (see [below for nested schema](#nestedatt--tls_choice--use_tls--tls_config))
-
-<a id="nestedatt--tls_choice--use_tls--max_session_keys_type_choice"></a>
-### Nested Schema for `tls_choice.use_tls.max_session_keys_type_choice`
 
 Optional:
 
-- `default_session_key_caching` (Boolean) Default Session Key Caching Default session key caching. Only one session key will be cached.
-- `disable_session_key_caching` (Boolean) Disable Session Key Caching Disable session key caching. This will disable TLS session resumption.
-- `max_session_keys` (Number) Max Session Keys Cached Number of session keys that are cached.
-
+- `max_session_keys_type_choice` (Attributes) Max Session Keys Maximum number of session keys (Pre-Shared Keys for TLSv1.3+, Session IDs and Session Tickets for TLSv1.2 and older) to store for the purpose of session resumption.<br>Exactly one of `default_session_key_caching`, `disable_session_key_caching`, or `max_session_keys` must be specified when `max_session_keys_type_choice` is configured. (see [below for nested schema](#nestedatt--tls_choice--use_tls--max_session_keys_type_choice))
+- `server_validation_choice` (Attributes) Server verification choice Choose whether to perform origin server verification.<br>Exactly one of `skip_server_verification`, `use_server_verification`, or `volterra_trusted_ca` must be specified when `server_validation_choice` is configured. (see [below for nested schema](#nestedatt--tls_choice--use_tls--server_validation_choice))
+- `sni_choice` (Attributes) sni choice Select SNI to be used for upstream connection<br>Exactly one of `disable_sni`, `sni`, or `use_host_header_as_sni` must be specified when `sni_choice` is configured. (see [below for nested schema](#nestedatt--tls_choice--use_tls--sni_choice))
 
 <a id="nestedatt--tls_choice--use_tls--mtls_choice"></a>
 ### Nested Schema for `tls_choice.use_tls.mtls_choice`
 
 Optional:
 
-- `no_mtls` (Boolean) No mTLS
-- `use_mtls` (Attributes) Inline Certificate (legacy) (see [below for nested schema](#nestedatt--tls_choice--use_tls--mtls_choice--use_mtls))
-- `use_mtls_obj` (Attributes) Root CA Certificate (see [below for nested schema](#nestedatt--tls_choice--use_tls--mtls_choice--use_mtls_obj))
+- `no_mtls` (Boolean) No mTLS<br>Conflicts with `use_mtls` and `use_mtls_obj`.
+- `use_mtls` (Attributes) Inline Certificate (legacy)<br>Conflicts with `no_mtls` and `use_mtls_obj`. (see [below for nested schema](#nestedatt--tls_choice--use_tls--mtls_choice--use_mtls))
+- `use_mtls_obj` (Attributes) Root CA Certificate<br>Conflicts with `no_mtls` and `use_mtls`. (see [below for nested schema](#nestedatt--tls_choice--use_tls--mtls_choice--use_mtls_obj))
 
 <a id="nestedatt--tls_choice--use_tls--mtls_choice--use_mtls"></a>
 ### Nested Schema for `tls_choice.use_tls.mtls_choice.use_mtls`
@@ -862,23 +855,23 @@ Required:
 Optional:
 
 - `description` (String) description Description for the certificate
-- `ocsp_stapling_choice` (Attributes) OCSP Response choice OCSP Stapling choice (see [below for nested schema](#nestedatt--tls_choice--use_tls--mtls_choice--use_mtls--tls_certificates--ocsp_stapling_choice))
+- `ocsp_stapling_choice` (Attributes) OCSP Response choice OCSP Stapling choice<br>Exactly one of `custom_hash_algorithms`, `disable_ocsp_stapling`, or `use_system_defaults` must be specified when `ocsp_stapling_choice` is configured. (see [below for nested schema](#nestedatt--tls_choice--use_tls--mtls_choice--use_mtls--tls_certificates--ocsp_stapling_choice))
 
 <a id="nestedatt--tls_choice--use_tls--mtls_choice--use_mtls--tls_certificates--private_key"></a>
 ### Nested Schema for `tls_choice.use_tls.mtls_choice.use_mtls.tls_certificates.private_key`
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--tls_choice--use_tls--mtls_choice--use_mtls--tls_certificates--private_key--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--tls_choice--use_tls--mtls_choice--use_mtls--tls_certificates--private_key--secret_info_choice))
 
 <a id="nestedatt--tls_choice--use_tls--mtls_choice--use_mtls--tls_certificates--private_key--secret_info_choice"></a>
 ### Nested Schema for `tls_choice.use_tls.mtls_choice.use_mtls.tls_certificates.private_key.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--tls_choice--use_tls--mtls_choice--use_mtls--tls_certificates--private_key--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--tls_choice--use_tls--mtls_choice--use_mtls--tls_certificates--private_key--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--tls_choice--use_tls--mtls_choice--use_mtls--tls_certificates--private_key--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--tls_choice--use_tls--mtls_choice--use_mtls--tls_certificates--private_key--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--tls_choice--use_tls--mtls_choice--use_mtls--tls_certificates--private_key--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `tls_choice.use_tls.mtls_choice.use_mtls.tls_certificates.private_key.secret_info_choice.blindfold_secret_info`
@@ -912,9 +905,9 @@ Optional:
 
 Optional:
 
-- `custom_hash_algorithms` (Attributes) Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. (see [below for nested schema](#nestedatt--tls_choice--use_tls--mtls_choice--use_mtls--tls_certificates--ocsp_stapling_choice--custom_hash_algorithms))
-- `disable_ocsp_stapling` (Boolean) Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.
-- `use_system_defaults` (Boolean) Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.
+- `custom_hash_algorithms` (Attributes) Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.<br>Conflicts with `disable_ocsp_stapling` and `use_system_defaults`. (see [below for nested schema](#nestedatt--tls_choice--use_tls--mtls_choice--use_mtls--tls_certificates--ocsp_stapling_choice--custom_hash_algorithms))
+- `disable_ocsp_stapling` (Boolean) Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.<br>Conflicts with `custom_hash_algorithms` and `use_system_defaults`.
+- `use_system_defaults` (Boolean) Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.<br>Conflicts with `custom_hash_algorithms` and `disable_ocsp_stapling`.
 
 <a id="nestedatt--tls_choice--use_tls--mtls_choice--use_mtls--tls_certificates--ocsp_stapling_choice--custom_hash_algorithms"></a>
 ### Nested Schema for `tls_choice.use_tls.mtls_choice.use_mtls.tls_certificates.ocsp_stapling_choice.custom_hash_algorithms`
@@ -941,29 +934,71 @@ Read-Only:
 
 
 
+<a id="nestedatt--tls_choice--use_tls--tls_config"></a>
+### Nested Schema for `tls_choice.use_tls.tls_config`
+
+Optional:
+
+- `choice` (Attributes) TLS Security Level The security level for TLS handshake between client/server and the platform.<br>Exactly one of `custom_security`, `default_security`, `low_security`, or `medium_security` must be specified when `choice` is configured. (see [below for nested schema](#nestedatt--tls_choice--use_tls--tls_config--choice))
+
+<a id="nestedatt--tls_choice--use_tls--tls_config--choice"></a>
+### Nested Schema for `tls_choice.use_tls.tls_config.choice`
+
+Optional:
+
+- `custom_security` (Attributes) Custom Security Custom selection of TLS versions and cipher suites<br>Conflicts with `default_security`, `low_security`, and `medium_security`. (see [below for nested schema](#nestedatt--tls_choice--use_tls--tls_config--choice--custom_security))
+- `default_security` (Boolean) Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.<br>Conflicts with `custom_security`, `low_security`, and `medium_security`.
+- `low_security` (Boolean) Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.<br>Conflicts with `custom_security`, `default_security`, and `medium_security`.
+- `medium_security` (Boolean) Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.<br>Conflicts with `custom_security`, `default_security`, and `low_security`.
+
+<a id="nestedatt--tls_choice--use_tls--tls_config--choice--custom_security"></a>
+### Nested Schema for `tls_choice.use_tls.tls_config.choice.custom_security`
+
+Required:
+
+- `cipher_suites` (List of String) cipher_suites The TLS listener will only support the specified cipher list.<br>**Valid Options:** `['TLS_AES_128_GCM_SHA256', 'TLS_AES_256_GCM_SHA384', 'TLS_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_128_CBC_SHA', 'TLS_RSA_WITH_AES_128_GCM_SHA256', 'TLS_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_256_GCM_SHA384']` (Multiple selection allowed)
+
+Optional:
+
+- `max_version` (List of String) maximum_protocol_version Maximum TLS protocol version.<br>**Allowed Values (choose one):** `['TLS_AUTO', 'TLSv1_0', 'TLSv1_1', 'TLSv1_2', 'TLSv1_3']`<br>**Default:** `TLS_AUTO`
+- `min_version` (List of String) minimum_protocol_version Minimum TLS protocol version.<br>**Allowed Values (choose one):** `['TLS_AUTO', 'TLSv1_0', 'TLSv1_1', 'TLSv1_2', 'TLSv1_3']`<br>**Default:** `TLS_AUTO`
+
+
+
+
+<a id="nestedatt--tls_choice--use_tls--max_session_keys_type_choice"></a>
+### Nested Schema for `tls_choice.use_tls.max_session_keys_type_choice`
+
+Optional:
+
+- `default_session_key_caching` (Boolean) Default Session Key Caching Default session key caching. Only one session key will be cached.<br>Conflicts with `disable_session_key_caching` and `max_session_keys`.
+- `disable_session_key_caching` (Boolean) Disable Session Key Caching Disable session key caching. This will disable TLS session resumption.<br>Conflicts with `default_session_key_caching` and `max_session_keys`.
+- `max_session_keys` (Number) Max Session Keys Cached Number of session keys that are cached.<br>Conflicts with `default_session_key_caching` and `disable_session_key_caching`.
+
+
 <a id="nestedatt--tls_choice--use_tls--server_validation_choice"></a>
 ### Nested Schema for `tls_choice.use_tls.server_validation_choice`
 
 Optional:
 
-- `skip_server_verification` (Boolean) Skip Server Verification Skip origin server verification
-- `use_server_verification` (Attributes) Use Server Verification Perform origin server verification using the provided Root CA Certificate (see [below for nested schema](#nestedatt--tls_choice--use_tls--server_validation_choice--use_server_verification))
-- `volterra_trusted_ca` (Boolean) F5XC Root CA Perform origin server verification using F5XC Default Root CA Certificate
+- `skip_server_verification` (Boolean) Skip Server Verification Skip origin server verification<br>Conflicts with `use_server_verification` and `volterra_trusted_ca`.
+- `use_server_verification` (Attributes) Use Server Verification Perform origin server verification using the provided Root CA Certificate<br>Conflicts with `skip_server_verification` and `volterra_trusted_ca`. (see [below for nested schema](#nestedatt--tls_choice--use_tls--server_validation_choice--use_server_verification))
+- `volterra_trusted_ca` (Boolean) F5XC Root CA Perform origin server verification using F5XC Default Root CA Certificate<br>Conflicts with `skip_server_verification` and `use_server_verification`.
 
 <a id="nestedatt--tls_choice--use_tls--server_validation_choice--use_server_verification"></a>
 ### Nested Schema for `tls_choice.use_tls.server_validation_choice.use_server_verification`
 
 Required:
 
-- `trusted_ca_choice` (Attributes) trusted_ca_choice Root CA configuration for upstream TLS connections to origin servers (see [below for nested schema](#nestedatt--tls_choice--use_tls--server_validation_choice--use_server_verification--trusted_ca_choice))
+- `trusted_ca_choice` (Attributes) trusted_ca_choice Root CA configuration for upstream TLS connections to origin servers<br>Exactly one of `trusted_ca` or `trusted_ca_url` must be specified. (see [below for nested schema](#nestedatt--tls_choice--use_tls--server_validation_choice--use_server_verification--trusted_ca_choice))
 
 <a id="nestedatt--tls_choice--use_tls--server_validation_choice--use_server_verification--trusted_ca_choice"></a>
 ### Nested Schema for `tls_choice.use_tls.server_validation_choice.use_server_verification.trusted_ca_choice`
 
 Optional:
 
-- `trusted_ca` (Attributes) trusted_ca Select/Add a Root CA Certificate object to associate with this Origin Pool for verification of server's certificate (see [below for nested schema](#nestedatt--tls_choice--use_tls--server_validation_choice--use_server_verification--trusted_ca_choice--trusted_ca))
-- `trusted_ca_url` (String) trusted_ca_url Upload a Root CA Certificate specifically for this Origin Pool for verification of server's certificate
+- `trusted_ca` (Attributes) trusted_ca Select/Add a Root CA Certificate object to associate with this Origin Pool for verification of server's certificate<br>Conflicts with `trusted_ca_url`. (see [below for nested schema](#nestedatt--tls_choice--use_tls--server_validation_choice--use_server_verification--trusted_ca_choice--trusted_ca))
+- `trusted_ca_url` (String) trusted_ca_url Upload a Root CA Certificate specifically for this Origin Pool for verification of server's certificate<br>Conflicts with `trusted_ca`.
 
 <a id="nestedatt--tls_choice--use_tls--server_validation_choice--use_server_verification--trusted_ca_choice--trusted_ca"></a>
 ### Nested Schema for `tls_choice.use_tls.server_validation_choice.use_server_verification.trusted_ca_choice.trusted_ca`
@@ -986,41 +1021,9 @@ Read-Only:
 
 Optional:
 
-- `disable_sni` (Boolean) disable_sni Do not use SNI.
-- `sni` (String) sni SNI value to be used.<br>**Validation:** `Length LengthAtMost(256)`
-- `use_host_header_as_sni` (Boolean) use_host_header_as_sni Use the host header as SNI. The host header value is extracted after any configured rewrites have been applied.
-
-
-<a id="nestedatt--tls_choice--use_tls--tls_config"></a>
-### Nested Schema for `tls_choice.use_tls.tls_config`
-
-Required:
-
-- `choice` (Attributes) TLS Security Level The security level for TLS handshake between client/server and the platform. (see [below for nested schema](#nestedatt--tls_choice--use_tls--tls_config--choice))
-
-<a id="nestedatt--tls_choice--use_tls--tls_config--choice"></a>
-### Nested Schema for `tls_choice.use_tls.tls_config.choice`
-
-Optional:
-
-- `custom_security` (Attributes) Custom Security Custom selection of TLS versions and cipher suites (see [below for nested schema](#nestedatt--tls_choice--use_tls--tls_config--choice--custom_security))
-- `default_security` (Boolean) Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.
-- `low_security` (Boolean) Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.
-- `medium_security` (Boolean) Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.
-
-<a id="nestedatt--tls_choice--use_tls--tls_config--choice--custom_security"></a>
-### Nested Schema for `tls_choice.use_tls.tls_config.choice.custom_security`
-
-Required:
-
-- `cipher_suites` (List of String) cipher_suites The TLS listener will only support the specified cipher list.<br>**Valid Options:** `['TLS_AES_128_GCM_SHA256', 'TLS_AES_256_GCM_SHA384', 'TLS_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256', 'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384', 'TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256', 'TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA', 'TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_128_CBC_SHA', 'TLS_RSA_WITH_AES_128_GCM_SHA256', 'TLS_RSA_WITH_AES_256_CBC_SHA', 'TLS_RSA_WITH_AES_256_GCM_SHA384']` (Multiple selection allowed)
-
-Optional:
-
-- `max_version` (List of String) maximum_protocol_version Maximum TLS protocol version.<br>**Allowed Values (choose one):** `['TLS_AUTO', 'TLSv1_0', 'TLSv1_1', 'TLSv1_2', 'TLSv1_3']`<br>**Default:** `TLS_AUTO`
-- `min_version` (List of String) minimum_protocol_version Minimum TLS protocol version.<br>**Allowed Values (choose one):** `['TLS_AUTO', 'TLSv1_0', 'TLSv1_1', 'TLSv1_2', 'TLSv1_3']`<br>**Default:** `TLS_AUTO`
-
-
+- `disable_sni` (Boolean) disable_sni Do not use SNI.<br>Conflicts with `sni` and `use_host_header_as_sni`.
+- `sni` (String) sni SNI value to be used.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `disable_sni` and `use_host_header_as_sni`.
+- `use_host_header_as_sni` (Boolean) use_host_header_as_sni Use the host header as SNI. The host header value is extracted after any configured rewrites have been applied.<br>Conflicts with `disable_sni` and `sni`.
 
 
 
@@ -1028,47 +1031,44 @@ Optional:
 <a id="nestedatt--upstream_conn_pool_reuse_type"></a>
 ### Nested Schema for `upstream_conn_pool_reuse_type`
 
-Required:
+Optional:
 
-- `map_downstream_to_upstream_conn_pool_type_choice` (Attributes) Select upstream connection pool reuse state Select upstream connection pool reuse state for every downstream connection This configuration choice is for HTTP(S) LB only. (see [below for nested schema](#nestedatt--upstream_conn_pool_reuse_type--map_downstream_to_upstream_conn_pool_type_choice))
+- `map_downstream_to_upstream_conn_pool_type_choice` (Attributes) Select upstream connection pool reuse state Select upstream connection pool reuse state for every downstream connection This configuration choice is for HTTP(S) LB only.<br>Exactly one of `disable_conn_pool_reuse` or `enable_conn_pool_reuse` must be specified when `map_downstream_to_upstream_conn_pool_type_choice` is configured. (see [below for nested schema](#nestedatt--upstream_conn_pool_reuse_type--map_downstream_to_upstream_conn_pool_type_choice))
 
 <a id="nestedatt--upstream_conn_pool_reuse_type--map_downstream_to_upstream_conn_pool_type_choice"></a>
 ### Nested Schema for `upstream_conn_pool_reuse_type.map_downstream_to_upstream_conn_pool_type_choice`
 
 Optional:
 
-- `disable_conn_pool_reuse` (Boolean) disable_conn_pool_reuse Open new upstream connection pool for every new downstream connection
-- `enable_conn_pool_reuse` (Boolean) enable_conn_pool_reuse Reuse upstream connection pool for multiple downstream connections
+- `disable_conn_pool_reuse` (Boolean) disable_conn_pool_reuse Open new upstream connection pool for every new downstream connection<br>Conflicts with `enable_conn_pool_reuse`.
+- `enable_conn_pool_reuse` (Boolean) enable_conn_pool_reuse Reuse upstream connection pool for multiple downstream connections<br>Conflicts with `disable_conn_pool_reuse`.
 
 
 
 <a id="nestedatt--advanced_options"></a>
 ### Nested Schema for `advanced_options`
 
-Required:
-
-- `circuit_breaker_choice` (Attributes) Enable Circuit Breaker Select to enable or disable circuit breaker configuration (see [below for nested schema](#nestedatt--advanced_options--circuit_breaker_choice))
-- `http_protocol_type_choice` (Attributes) HTTP Protocol Configuration HTTP protocol configuration options for upstream connections (see [below for nested schema](#nestedatt--advanced_options--http_protocol_type_choice))
-- `max_requests_per_connection_choice` (Attributes) max_requests_per_connection Sets the maximum number of requests allowed per connection to the origin server. (see [below for nested schema](#nestedatt--advanced_options--max_requests_per_connection_choice))
-- `outlier_detection_choice` (Attributes) Enable Outlier Detection Select to enable or disable circuit breaker configuration (see [below for nested schema](#nestedatt--advanced_options--outlier_detection_choice))
-- `panic_threshold_type_choice` (Attributes) Panic threshold During load balancing, ADC will only consider healthy endpoints in an upstream cluster. However, if the percentage of healthy endpoints in the cluster becomes too low, ADC can disregard health status and load balance either amongst all endpoints or no endpoints. This is known as the panic threshold. (see [below for nested schema](#nestedatt--advanced_options--panic_threshold_type_choice))
-- `subset_choice` (Attributes) Enable Subset Load Balancing Select enable or disable subset load balancing. origin servers could be divided into subsets and chosen from routes. (see [below for nested schema](#nestedatt--advanced_options--subset_choice))
-
 Optional:
 
+- `circuit_breaker_choice` (Attributes) Enable Circuit Breaker Select to enable or disable circuit breaker configuration<br>Exactly one of `circuit_breaker`, `default_circuit_breaker`, or `disable_circuit_breaker` must be specified when `circuit_breaker_choice` is configured. (see [below for nested schema](#nestedatt--advanced_options--circuit_breaker_choice))
 - `connection_timeout` (Number) connection_timeout The timeout for new network connections to endpoints in the cluster. This is specified in milliseconds. The default value is 2 seconds<br>**Default:** `2000`
 - `http_idle_timeout` (Number) http_idle_timeout The idle timeout for upstream connection pool connections. The idle timeout is defined as the period in which there are no active requests. When the idle timeout is reached the connection will be closed. Note that request based timeouts mean that HTTP/2 PINGs will not keep the connection alive. This is specified in milliseconds. The default value is 5 minutes.<br>**Default:** `300000`
-- `lb_source_ip_persistance_choice` (Attributes) Loadbalancer source IP persistence Enable/Disable stickiness of source IP used by LB while connecting to origin server (see [below for nested schema](#nestedatt--advanced_options--lb_source_ip_persistance_choice))
-- `proxy_protocol_choice` (Attributes) Proxy Protocol Configuration Choose Proxy Protocol configuration options for upstream connections (see [below for nested schema](#nestedatt--advanced_options--proxy_protocol_choice))
+- `http_protocol_type_choice` (Attributes) HTTP Protocol Configuration HTTP protocol configuration options for upstream connections<br>Exactly one of `auto_http_config`, `http1_config`, or `http2_options` must be specified when `http_protocol_type_choice` is configured. (see [below for nested schema](#nestedatt--advanced_options--http_protocol_type_choice))
+- `lb_source_ip_persistance_choice` (Attributes) Loadbalancer source IP persistence Enable/Disable stickiness of source IP used by LB while connecting to origin server<br>Exactly one of `disable_lb_source_ip_persistance` or `enable_lb_source_ip_persistance` must be specified when `lb_source_ip_persistance_choice` is configured. (see [below for nested schema](#nestedatt--advanced_options--lb_source_ip_persistance_choice))
+- `max_requests_per_connection_choice` (Attributes) max_requests_per_connection Sets the maximum number of requests allowed per connection to the origin server.<br>Exactly one of `max_requests_per_connection` or `no_request_limit_per_connection` must be specified when `max_requests_per_connection_choice` is configured. (see [below for nested schema](#nestedatt--advanced_options--max_requests_per_connection_choice))
+- `outlier_detection_choice` (Attributes) Enable Outlier Detection Select to enable or disable circuit breaker configuration<br>Exactly one of `disable_outlier_detection` or `outlier_detection` must be specified when `outlier_detection_choice` is configured. (see [below for nested schema](#nestedatt--advanced_options--outlier_detection_choice))
+- `panic_threshold_type_choice` (Attributes) Panic threshold During load balancing, ADC will only consider healthy endpoints in an upstream cluster. However, if the percentage of healthy endpoints in the cluster becomes too low, ADC can disregard health status and load balance either amongst all endpoints or no endpoints. This is known as the panic threshold.<br>Exactly one of `no_panic_threshold` or `panic_threshold` must be specified when `panic_threshold_type_choice` is configured. (see [below for nested schema](#nestedatt--advanced_options--panic_threshold_type_choice))
+- `proxy_protocol_choice` (Attributes) Proxy Protocol Configuration Choose Proxy Protocol configuration options for upstream connections<br>Exactly one of `disable_proxy_protocol`, `proxy_protocol_v1`, or `proxy_protocol_v2` must be specified when `proxy_protocol_choice` is configured. (see [below for nested schema](#nestedatt--advanced_options--proxy_protocol_choice))
+- `subset_choice` (Attributes) Enable Subset Load Balancing Select enable or disable subset load balancing. origin servers could be divided into subsets and chosen from routes.<br>Exactly one of `disable_subsets` or `enable_subsets` must be specified when `subset_choice` is configured. (see [below for nested schema](#nestedatt--advanced_options--subset_choice))
 
 <a id="nestedatt--advanced_options--circuit_breaker_choice"></a>
 ### Nested Schema for `advanced_options.circuit_breaker_choice`
 
 Optional:
 
-- `circuit_breaker` (Attributes) circuit_breaker CircuitBreaker provides a mechanism for watching failures in upstream connections or requests and if the failures reach a certain threshold, automatically fail subsequent requests which allows to apply back pressure on downstream quickly. (see [below for nested schema](#nestedatt--advanced_options--circuit_breaker_choice--circuit_breaker))
-- `default_circuit_breaker` (Boolean) Default Circuit Breaker Circuit Breaker is enabled with default values The default values used for connections and requests are 1024 and the default value for retries is 3
-- `disable_circuit_breaker` (Boolean) Disable Circuit Breaker Circuit Breaker is disabled
+- `circuit_breaker` (Attributes) circuit_breaker CircuitBreaker provides a mechanism for watching failures in upstream connections or requests and if the failures reach a certain threshold, automatically fail subsequent requests which allows to apply back pressure on downstream quickly.<br>Conflicts with `default_circuit_breaker` and `disable_circuit_breaker`. (see [below for nested schema](#nestedatt--advanced_options--circuit_breaker_choice--circuit_breaker))
+- `default_circuit_breaker` (Boolean) Default Circuit Breaker Circuit Breaker is enabled with default values The default values used for connections and requests are 1024 and the default value for retries is 3<br>Conflicts with `circuit_breaker` and `disable_circuit_breaker`.
+- `disable_circuit_breaker` (Boolean) Disable Circuit Breaker Circuit Breaker is disabled<br>Conflicts with `circuit_breaker` and `default_circuit_breaker`.
 
 <a id="nestedatt--advanced_options--circuit_breaker_choice--circuit_breaker"></a>
 ### Nested Schema for `advanced_options.circuit_breaker_choice.circuit_breaker`
@@ -1088,9 +1088,9 @@ Optional:
 
 Optional:
 
-- `auto_http_config` (Boolean) auto_http_config This allows switching on protocol based on ALPN. It can use either HTTP/1.1 or HTTP/2, and will use whichever protocol is negotiated by ALPN with the upstream.
-- `http1_config` (Attributes) http1_config Enable HTTP/1.1 for upstream connections (see [below for nested schema](#nestedatt--advanced_options--http_protocol_type_choice--http1_config))
-- `http2_options` (Attributes) http2_options Enable HTTP/2 for upstream connections. (see [below for nested schema](#nestedatt--advanced_options--http_protocol_type_choice--http2_options))
+- `auto_http_config` (Boolean) auto_http_config This allows switching on protocol based on ALPN. It can use either HTTP/1.1 or HTTP/2, and will use whichever protocol is negotiated by ALPN with the upstream.<br>Conflicts with `http1_config` and `http2_options`.
+- `http1_config` (Attributes) http1_config Enable HTTP/1.1 for upstream connections<br>Conflicts with `auto_http_config` and `http2_options`. (see [below for nested schema](#nestedatt--advanced_options--http_protocol_type_choice--http1_config))
+- `http2_options` (Attributes) http2_options Enable HTTP/2 for upstream connections.<br>Conflicts with `auto_http_config` and `http1_config`. (see [below for nested schema](#nestedatt--advanced_options--http_protocol_type_choice--http2_options))
 
 <a id="nestedatt--advanced_options--http_protocol_type_choice--http1_config"></a>
 ### Nested Schema for `advanced_options.http_protocol_type_choice.http1_config`
@@ -1102,19 +1102,19 @@ Optional:
 <a id="nestedatt--advanced_options--http_protocol_type_choice--http1_config--header_transformation"></a>
 ### Nested Schema for `advanced_options.http_protocol_type_choice.http1_config.header_transformation`
 
-Required:
+Optional:
 
-- `header_transformation_choice` (Attributes) Header transformation Select header transformation options for HTTP/1.1 (see [below for nested schema](#nestedatt--advanced_options--http_protocol_type_choice--http1_config--header_transformation--header_transformation_choice))
+- `header_transformation_choice` (Attributes) Header transformation Select header transformation options for HTTP/1.1<br>Exactly one of `default_header_transformation`, `legacy_header_transformation`, `preserve_case_header_transformation`, or `proper_case_header_transformation` must be specified when `header_transformation_choice` is configured. (see [below for nested schema](#nestedatt--advanced_options--http_protocol_type_choice--http1_config--header_transformation--header_transformation_choice))
 
 <a id="nestedatt--advanced_options--http_protocol_type_choice--http1_config--header_transformation--header_transformation_choice"></a>
 ### Nested Schema for `advanced_options.http_protocol_type_choice.http1_config.header_transformation.header_transformation_choice`
 
 Optional:
 
-- `default_header_transformation` (Boolean) Default header transformation Normalize the headers to lower case
-- `legacy_header_transformation` (Boolean) Legacy header transformations Use old header transformation if configured earlier
-- `preserve_case_header_transformation` (Boolean) Preserve case header transformation Preserves the original case of headers without any modifications.
-- `proper_case_header_transformation` (Boolean) Proper case header transformation Normalize the headers to proper case words. The first character and any character following a special character will be capitalized if it’s an alpha character. For example, “content-type” becomes “Content-Type”, and “foo$b#$are” becomes “Foo$B#$Are”
+- `default_header_transformation` (Boolean) Default header transformation Normalize the headers to lower case<br>Conflicts with `legacy_header_transformation`, `preserve_case_header_transformation`, and `proper_case_header_transformation`.
+- `legacy_header_transformation` (Boolean) Legacy header transformations Use old header transformation if configured earlier<br>Conflicts with `default_header_transformation`, `preserve_case_header_transformation`, and `proper_case_header_transformation`.
+- `preserve_case_header_transformation` (Boolean) Preserve case header transformation Preserves the original case of headers without any modifications.<br>Conflicts with `default_header_transformation`, `legacy_header_transformation`, and `proper_case_header_transformation`.
+- `proper_case_header_transformation` (Boolean) Proper case header transformation Normalize the headers to proper case words. The first character and any character following a special character will be capitalized if it’s an alpha character. For example, “content-type” becomes “Content-Type”, and “foo$b#$are” becomes “Foo$B#$Are”<br>Conflicts with `default_header_transformation`, `legacy_header_transformation`, and `preserve_case_header_transformation`.
 
 
 
@@ -1128,13 +1128,22 @@ Optional:
 
 
 
+<a id="nestedatt--advanced_options--lb_source_ip_persistance_choice"></a>
+### Nested Schema for `advanced_options.lb_source_ip_persistance_choice`
+
+Optional:
+
+- `disable_lb_source_ip_persistance` (Boolean) disable_lb_source_ip_persistence Disable LB source IP persistence<br>Conflicts with `enable_lb_source_ip_persistance`.
+- `enable_lb_source_ip_persistance` (Boolean) enable_lb_source_ip_persistence Enable LB source IP persistence<br>Conflicts with `disable_lb_source_ip_persistance`.
+
+
 <a id="nestedatt--advanced_options--max_requests_per_connection_choice"></a>
 ### Nested Schema for `advanced_options.max_requests_per_connection_choice`
 
 Optional:
 
-- `max_requests_per_connection` (Number) Maximum Requests Per Connection Sets the maximum number of requests allowed per connection to the origin server. Enter a value >=1 to define the request limit per connection.
-- `no_request_limit_per_connection` (Boolean) Disable the max requests per connection option This option disables the maximum requests per connection limit. When selected, no limit is enforced, and connections can handle unlimited requests.
+- `max_requests_per_connection` (Number) Maximum Requests Per Connection Sets the maximum number of requests allowed per connection to the origin server. Enter a value >=1 to define the request limit per connection.<br>Conflicts with `no_request_limit_per_connection`.
+- `no_request_limit_per_connection` (Boolean) Disable the max requests per connection option This option disables the maximum requests per connection limit. When selected, no limit is enforced, and connections can handle unlimited requests.<br>Conflicts with `max_requests_per_connection`.
 
 
 <a id="nestedatt--advanced_options--outlier_detection_choice"></a>
@@ -1142,8 +1151,8 @@ Optional:
 
 Optional:
 
-- `disable_outlier_detection` (Boolean) Disable Outlier Detection Outlier detection is disabled
-- `outlier_detection` (Attributes) Enable Outlier Detection Outlier detection and ejection is the process of dynamically determining whether some number of hosts in an upstream cluster are performing unlike the others and removing them from the healthy load balancing set. Outlier detection is a form of passive health checking. (see [below for nested schema](#nestedatt--advanced_options--outlier_detection_choice--outlier_detection))
+- `disable_outlier_detection` (Boolean) Disable Outlier Detection Outlier detection is disabled<br>Conflicts with `outlier_detection`.
+- `outlier_detection` (Attributes) Enable Outlier Detection Outlier detection and ejection is the process of dynamically determining whether some number of hosts in an upstream cluster are performing unlike the others and removing them from the healthy load balancing set. Outlier detection is a form of passive health checking.<br>Conflicts with `disable_outlier_detection`. (see [below for nested schema](#nestedatt--advanced_options--outlier_detection_choice--outlier_detection))
 
 <a id="nestedatt--advanced_options--outlier_detection_choice--outlier_detection"></a>
 ### Nested Schema for `advanced_options.outlier_detection_choice.outlier_detection`
@@ -1163,8 +1172,18 @@ Optional:
 
 Optional:
 
-- `no_panic_threshold` (Boolean) Disable panic threshold Disable panic threshold. Only healthy endpoints are considered for load balancing.
-- `panic_threshold` (Number) Panic threshold Configure a threshold (percentage of unhealthy endpoints) below which all endpoints will be considered for load balancing ignoring its health status.
+- `no_panic_threshold` (Boolean) Disable panic threshold Disable panic threshold. Only healthy endpoints are considered for load balancing.<br>Conflicts with `panic_threshold`.
+- `panic_threshold` (Number) Panic threshold Configure a threshold (percentage of unhealthy endpoints) below which all endpoints will be considered for load balancing ignoring its health status.<br>Conflicts with `no_panic_threshold`.
+
+
+<a id="nestedatt--advanced_options--proxy_protocol_choice"></a>
+### Nested Schema for `advanced_options.proxy_protocol_choice`
+
+Optional:
+
+- `disable_proxy_protocol` (Boolean) Disable Proxy Protocol Disable Proxy Protocol for upstream connections<br>Conflicts with `proxy_protocol_v1` and `proxy_protocol_v2`.
+- `proxy_protocol_v1` (Boolean) Proxy Protocol V1 Enable Proxy Protocol Version 1 for upstream connections<br>Conflicts with `disable_proxy_protocol` and `proxy_protocol_v2`.
+- `proxy_protocol_v2` (Boolean) Proxy Protocol V2 Enable Proxy Protocol Version 2 for upstream connections<br>Conflicts with `disable_proxy_protocol` and `proxy_protocol_v1`.
 
 
 <a id="nestedatt--advanced_options--subset_choice"></a>
@@ -1172,8 +1191,8 @@ Optional:
 
 Optional:
 
-- `disable_subsets` (Boolean) Subset Load Balancing is Disabled Subset load balancing is disabled. All eligible origin servers will be considered for load balancing.
-- `enable_subsets` (Attributes) Subset Load Balancing is Enable Subset load balancing is enabled. Based on route, subset of origin servers will be considered for load balancing. (see [below for nested schema](#nestedatt--advanced_options--subset_choice--enable_subsets))
+- `disable_subsets` (Boolean) Subset Load Balancing is Disabled Subset load balancing is disabled. All eligible origin servers will be considered for load balancing.<br>Conflicts with `enable_subsets`.
+- `enable_subsets` (Attributes) Subset Load Balancing is Enable Subset load balancing is enabled. Based on route, subset of origin servers will be considered for load balancing.<br>Conflicts with `disable_subsets`. (see [below for nested schema](#nestedatt--advanced_options--subset_choice--enable_subsets))
 
 <a id="nestedatt--advanced_options--subset_choice--enable_subsets"></a>
 ### Nested Schema for `advanced_options.subset_choice.enable_subsets`
@@ -1181,7 +1200,10 @@ Optional:
 Required:
 
 - `endpoint_subsets` (Attributes List) Origin Server Subsets Classes List of subset class. Subsets class is defined using list of keys. Every unique combination of values of these keys form a subset withing the class. (see [below for nested schema](#nestedatt--advanced_options--subset_choice--enable_subsets--endpoint_subsets))
-- `fallback_policy_choice` (Attributes) Fallback Policy Choice Select subset fallback policy if no subset could be determined based on route. (see [below for nested schema](#nestedatt--advanced_options--subset_choice--enable_subsets--fallback_policy_choice))
+
+Optional:
+
+- `fallback_policy_choice` (Attributes) Fallback Policy Choice Select subset fallback policy if no subset could be determined based on route.<br>Exactly one of `any_endpoint`, `default_subset`, or `fail_request` must be specified when `fallback_policy_choice` is configured. (see [below for nested schema](#nestedatt--advanced_options--subset_choice--enable_subsets--fallback_policy_choice))
 
 <a id="nestedatt--advanced_options--subset_choice--enable_subsets--endpoint_subsets"></a>
 ### Nested Schema for `advanced_options.subset_choice.enable_subsets.endpoint_subsets`
@@ -1196,9 +1218,9 @@ Required:
 
 Optional:
 
-- `any_endpoint` (Boolean) Select Any Origin Server Select any origin server from available healthy origin servers in this pool
-- `default_subset` (Attributes) Use Default Subset Use the default subset provided here. Select endpoints matching default subset. (see [below for nested schema](#nestedatt--advanced_options--subset_choice--enable_subsets--fallback_policy_choice--default_subset))
-- `fail_request` (Boolean) Fail the Request Request will be failed and error returned, as if cluster has no origin servers.
+- `any_endpoint` (Boolean) Select Any Origin Server Select any origin server from available healthy origin servers in this pool<br>Conflicts with `default_subset` and `fail_request`.
+- `default_subset` (Attributes) Use Default Subset Use the default subset provided here. Select endpoints matching default subset.<br>Conflicts with `any_endpoint` and `fail_request`. (see [below for nested schema](#nestedatt--advanced_options--subset_choice--enable_subsets--fallback_policy_choice--default_subset))
+- `fail_request` (Boolean) Fail the Request Request will be failed and error returned, as if cluster has no origin servers.<br>Conflicts with `any_endpoint` and `default_subset`.
 
 <a id="nestedatt--advanced_options--subset_choice--enable_subsets--fallback_policy_choice--default_subset"></a>
 ### Nested Schema for `advanced_options.subset_choice.enable_subsets.fallback_policy_choice.default_subset`
@@ -1211,33 +1233,14 @@ Optional:
 
 
 
-<a id="nestedatt--advanced_options--lb_source_ip_persistance_choice"></a>
-### Nested Schema for `advanced_options.lb_source_ip_persistance_choice`
-
-Optional:
-
-- `disable_lb_source_ip_persistance` (Boolean) disable_lb_source_ip_persistence Disable LB source IP persistence
-- `enable_lb_source_ip_persistance` (Boolean) enable_lb_source_ip_persistence Enable LB source IP persistence
-
-
-<a id="nestedatt--advanced_options--proxy_protocol_choice"></a>
-### Nested Schema for `advanced_options.proxy_protocol_choice`
-
-Optional:
-
-- `disable_proxy_protocol` (Boolean) Disable Proxy Protocol Disable Proxy Protocol for upstream connections
-- `proxy_protocol_v1` (Boolean) Proxy Protocol V1 Enable Proxy Protocol Version 1 for upstream connections
-- `proxy_protocol_v2` (Boolean) Proxy Protocol V2 Enable Proxy Protocol Version 2 for upstream connections
-
-
 
 <a id="nestedatt--health_check_port_choice"></a>
 ### Nested Schema for `health_check_port_choice`
 
 Optional:
 
-- `health_check_port` (Number) Health check port Port used for performing health check
-- `same_as_endpoint_port` (Boolean) Same as endpoint port Health check is performed on endpoint port itself
+- `health_check_port` (Number) Health check port Port used for performing health check<br>Conflicts with `same_as_endpoint_port`.
+- `same_as_endpoint_port` (Boolean) Same as endpoint port Health check is performed on endpoint port itself<br>Conflicts with `health_check_port`.
 
 
 <a id="nestedatt--healthcheck"></a>
@@ -1283,6 +1286,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_origin_pool.example"
+	to = f5xc_origin_pool.example
 }
 ```

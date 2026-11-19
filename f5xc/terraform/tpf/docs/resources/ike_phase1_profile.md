@@ -67,8 +67,6 @@ resource "f5xc_ike_phase1_profile" "example" {
 
 ### Required
 
-- `ike_key_lifetime_choice` (Attributes) Key LifeTime Amount of time before the IKE Security Association (SA) key needs to be renegotiated (see [below for nested schema](#nestedatt--ike_key_lifetime_choice))
-- `ike_reauth_timeout_choice` (Attributes) IKE Reauthentication Amount of time for IKE peers to reauthenticate one another (see [below for nested schema](#nestedatt--ike_reauth_timeout_choice))
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
 
@@ -79,6 +77,8 @@ resource "f5xc_ike_phase1_profile" "example" {
 - `description` (String) description Human readable description for the object
 - `dh_group` (List of String) Diffie Hellman Groups Choose the acceptable Diffie Hellman (DH) Group or Groups that you are willing to accept as part of this profile.<br>**Valid Options:** `['DH_GROUP_14', 'DH_GROUP_15', 'DH_GROUP_16', 'DH_GROUP_17', 'DH_GROUP_18', 'DH_GROUP_19', 'DH_GROUP_20', 'DH_GROUP_21', 'DH_GROUP_26']` (Multiple selection allowed)<br>**Default:** `DH_GROUP_19`
 - `encryption_algos` (List of String) Encryption Algorithms Choose one or more encryption algorithms.<br>**Valid Options:** `['AES128_CBC', 'AES128_GCM', 'AES192_CBC', 'AES192_GCM', 'AES256_CBC', 'AES256_GCM', 'TRIPLE_DES_CBC']` (Multiple selection allowed)<br>**Default:** `AES256_GCM`
+- `ike_key_lifetime_choice` (Attributes) Key LifeTime Amount of time before the IKE Security Association (SA) key needs to be renegotiated<br>Exactly one of `ike_keylifetime_hours`, `ike_keylifetime_minutes`, or `use_default_keylifetime` must be specified when `ike_key_lifetime_choice` is configured. (see [below for nested schema](#nestedatt--ike_key_lifetime_choice))
+- `ike_reauth_timeout_choice` (Attributes) IKE Reauthentication Amount of time for IKE peers to reauthenticate one another<br>Exactly one of `reauth_disabled`, `reauth_timeout_days`, or `reauth_timeout_hours` must be specified when `ike_reauth_timeout_choice` is configured. (see [below for nested schema](#nestedatt--ike_reauth_timeout_choice))
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `prf` (List of String) PseudoRandomFunction Select PseudoRandomFunction for IKE SA.<br>**Valid Options:** `['PRFSHA256', 'PRFSHA384', 'PRFSHA512']` (Multiple selection allowed)<br>**Default:** `PRFSHA512`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
@@ -92,9 +92,9 @@ resource "f5xc_ike_phase1_profile" "example" {
 
 Optional:
 
-- `ike_keylifetime_hours` (Attributes) Hours Set IKE Key Lifetime in Hours (see [below for nested schema](#nestedatt--ike_key_lifetime_choice--ike_keylifetime_hours))
-- `ike_keylifetime_minutes` (Attributes) Minutes Set IKE Key Lifetime in minutes (see [below for nested schema](#nestedatt--ike_key_lifetime_choice--ike_keylifetime_minutes))
-- `use_default_keylifetime` (Boolean) Default Use default key lifetime (4Hrs)
+- `ike_keylifetime_hours` (Attributes) Hours Set IKE Key Lifetime in Hours<br>Conflicts with `ike_keylifetime_minutes` and `use_default_keylifetime`. (see [below for nested schema](#nestedatt--ike_key_lifetime_choice--ike_keylifetime_hours))
+- `ike_keylifetime_minutes` (Attributes) Minutes Set IKE Key Lifetime in minutes<br>Conflicts with `ike_keylifetime_hours` and `use_default_keylifetime`. (see [below for nested schema](#nestedatt--ike_key_lifetime_choice--ike_keylifetime_minutes))
+- `use_default_keylifetime` (Boolean) Default Use default key lifetime (4Hrs)<br>Conflicts with `ike_keylifetime_hours` and `ike_keylifetime_minutes`.
 
 <a id="nestedatt--ike_key_lifetime_choice--ike_keylifetime_hours"></a>
 ### Nested Schema for `ike_key_lifetime_choice.ike_keylifetime_hours`
@@ -118,9 +118,9 @@ Optional:
 
 Optional:
 
-- `reauth_disabled` (Boolean) Disabled The default is not use IKE reauthentication.
-- `reauth_timeout_days` (Attributes) Days Set Reauthentication timeout in Days (see [below for nested schema](#nestedatt--ike_reauth_timeout_choice--reauth_timeout_days))
-- `reauth_timeout_hours` (Attributes) Hours Set Reauthentication timeout in Hours (see [below for nested schema](#nestedatt--ike_reauth_timeout_choice--reauth_timeout_hours))
+- `reauth_disabled` (Boolean) Disabled The default is not use IKE reauthentication.<br>Conflicts with `reauth_timeout_days` and `reauth_timeout_hours`.
+- `reauth_timeout_days` (Attributes) Days Set Reauthentication timeout in Days<br>Conflicts with `reauth_disabled` and `reauth_timeout_hours`. (see [below for nested schema](#nestedatt--ike_reauth_timeout_choice--reauth_timeout_days))
+- `reauth_timeout_hours` (Attributes) Hours Set Reauthentication timeout in Hours<br>Conflicts with `reauth_disabled` and `reauth_timeout_days`. (see [below for nested schema](#nestedatt--ike_reauth_timeout_choice--reauth_timeout_hours))
 
 <a id="nestedatt--ike_reauth_timeout_choice--reauth_timeout_days"></a>
 ### Nested Schema for `ike_reauth_timeout_choice.reauth_timeout_days`
@@ -169,6 +169,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_ike_phase1_profile.example"
+	to = f5xc_ike_phase1_profile.example
 }
 ```

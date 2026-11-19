@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"gopkg.volterra.us/stdlib/codec"
 
@@ -40,7 +41,8 @@ type serviceCredentialNamespaceRoleModel struct {
 //     generated Update() path.
 //   - namespaceRoles: Terraform plan value for namespace_roles.
 //   - namespace: credential namespace.
-//   - credentialName: backend-assigned credential identifier.
+//   - credentialName: backend-assigned credential identifier; when non-empty it
+//     is also written to req.Name so the body matches the Update URI.
 //   - priorRenewTrigger: previous Terraform value of renew_trigger from state.
 //   - plannedRenewTrigger: planned Terraform value of renew_trigger.
 //   - expirationDays: requested expiration days from Terraform plan.
@@ -49,6 +51,10 @@ type serviceCredentialNamespaceRoleModel struct {
 //   - nil when no action is required or all calls succeed.
 //   - error when request marshaling fails, response types are unexpected, or a
 //     required API call returns an error.
+//
+// Example:
+//
+//	err := ServiceCredentialPreUpdateHook(ctx, r.client, req, data.NamespaceRoles, "system", "svc-1", false, true, 30)
 func ServiceCredentialPreUpdateHook(
 	ctx context.Context,
 	apiClient CustomAPIClient,
@@ -62,6 +68,16 @@ func ServiceCredentialPreUpdateHook(
 ) error {
 	if req == nil {
 		return fmt.Errorf("ServiceCredentialPreUpdateHook: replace request is nil")
+	}
+
+	namespace = ResolveEffectiveNamespace(namespace, "")
+	req.Namespace = namespace
+	// Keep the request body aligned with the Update URI path parameters
+	// (/public/namespaces/{namespace}/service_credentials/{name}). The generated
+	// Update() fills req.Name from the Terraform "name" attribute, but the backend
+	// identifies the credential by its backend-assigned credential_name.
+	if credentialName != "" {
+		req.Name = credentialName
 	}
 
 	namespaceAccess, hasNamespaceAccess, err := buildNamespaceAccessFromRoles(ctx, namespaceRoles)
@@ -175,6 +191,10 @@ func ServiceCredentialPreUpdateHook(
 //   - *ves_io_schema.NamespaceAccessType: converted namespace access payload.
 //   - bool: true when namespace_roles is known (including explicit empty list).
 //   - error: non-nil if Terraform list decoding fails.
+//
+// Example:
+//
+//	access, ok, err := buildNamespaceAccessFromRoles(ctx, data.NamespaceRoles)
 func buildNamespaceAccessFromRoles(ctx context.Context, namespaceRoles types.List) (*ves_io_schema.NamespaceAccessType, bool, error) {
 	if namespaceRoles.IsNull() || namespaceRoles.IsUnknown() {
 		return nil, false, nil
@@ -213,4 +233,33 @@ func buildNamespaceAccessFromRoles(ctx context.Context, namespaceRoles types.Lis
 	}
 
 	return &ves_io_schema.NamespaceAccessType{NamespaceRoleMap: namespaceRoleMap}, true, nil
+}
+
+// ServiceCredentialOverrideImportHook implements custom ImportState behavior for
+// f5xc_service_credential, supporting both system-scoped and vK8s kubeconfig
+// credentials.
+//
+// Why: Importing a vK8s service credential requires routing the subsequent Read
+// request to the vK8s namespace while keeping the top-level namespace attribute
+// set to "system".
+//
+// How: Delegates to overrideCredentialImportHook, which parses req.ID via
+// parseCredentialImportID, sets root "namespace" to
+// "system" and "credential_name" to the parsed name, and when vk8sNamespace is
+// non-empty populates "service_credential_choice.vk8s_kubeconfig.vk8s_namespace"
+// in state so Read resolves the vK8s namespace.
+//
+// Parameters:
+//   - ctx: request-scoped context from ImportState.
+//   - req: Terraform ImportStateRequest containing the raw import ID.
+//   - response: Terraform ImportStateResponse whose State and Diagnostics are updated in place.
+//
+// Returns:
+//   - None. Populates response.State or appends diagnostics on invalid import ID.
+//
+// Example:
+//
+//	hook.ServiceCredentialOverrideImportHook(ctx, req, response)
+func ServiceCredentialOverrideImportHook(ctx context.Context, req resource.ImportStateRequest, response *resource.ImportStateResponse) {
+	overrideCredentialImportHook(ctx, req, response, "service_credential_choice", []string{"vk8s_kubeconfig", "vk8s_namespace"})
 }

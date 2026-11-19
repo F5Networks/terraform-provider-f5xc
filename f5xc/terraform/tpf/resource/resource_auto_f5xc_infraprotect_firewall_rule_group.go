@@ -609,11 +609,7 @@ func (r *ResourceF5XCInfraprotectFirewallRuleGroup) Read(ctx context.Context, re
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_infraprotect_firewall_rule_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_infraprotect_firewall_rule_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "infraprotect_firewall_rule_group", err),
@@ -918,12 +914,8 @@ func (r *ResourceF5XCInfraprotectFirewallRuleGroup) Update(ctx context.Context, 
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_infraprotect_firewall_rule_group.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_infraprotect_firewall_rule_group.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "infraprotect_firewall_rule_group", err),
@@ -932,7 +924,7 @@ func (r *ResourceF5XCInfraprotectFirewallRuleGroup) Update(ctx context.Context, 
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_infraprotect_firewall_rule_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_infraprotect_firewall_rule_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "infraprotect_firewall_rule_group", err),

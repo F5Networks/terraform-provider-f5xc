@@ -189,7 +189,7 @@ func (r *ResourceF5XCDcClusterGroup) Schema(ctx context.Context, request resourc
 				Attributes: map[string]schema.Attribute{
 					"dc_cluster_group_mesh_choice": schema.SingleNestedAttribute{
 						Description:         "DC Cluster Group Mesh Choice Choice of data plane, data plane and control plane dc cluster mesh",
-						MarkdownDescription: "DC Cluster Group Mesh Choice Choice of data plane, data plane and control plane dc cluster mesh",
+						MarkdownDescription: "DC Cluster Group Mesh Choice Choice of data plane, data plane and control plane dc cluster mesh<br>Exactly one of `control_and_data_plane_mesh` or `data_plane_mesh` must be specified when `dc_cluster_group_mesh_choice` is configured.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -202,7 +202,7 @@ func (r *ResourceF5XCDcClusterGroup) Schema(ctx context.Context, request resourc
 						Attributes: map[string]schema.Attribute{
 							"control_and_data_plane_mesh": schema.BoolAttribute{
 								Description:         "Control and Data Plane Mesh Full Mesh of data plane connectivity across sites and control plane peering across sites",
-								MarkdownDescription: "Control and Data Plane Mesh Full Mesh of data plane connectivity across sites and control plane peering across sites",
+								MarkdownDescription: "Control and Data Plane Mesh Full Mesh of data plane connectivity across sites and control plane peering across sites<br>Conflicts with `data_plane_mesh`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -212,7 +212,7 @@ func (r *ResourceF5XCDcClusterGroup) Schema(ctx context.Context, request resourc
 							},
 							"data_plane_mesh": schema.BoolAttribute{
 								Description:         "Data Plane Mesh Full Mesh of Data plane connectivity across sites",
-								MarkdownDescription: "Data Plane Mesh Full Mesh of Data plane connectivity across sites",
+								MarkdownDescription: "Data Plane Mesh Full Mesh of Data plane connectivity across sites<br>Conflicts with `control_and_data_plane_mesh`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -671,11 +671,7 @@ func (r *ResourceF5XCDcClusterGroup) Read(ctx context.Context, request resource.
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dc_cluster_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dc_cluster_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "dc_cluster_group", err),
@@ -1029,12 +1025,8 @@ func (r *ResourceF5XCDcClusterGroup) Update(ctx context.Context, request resourc
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_dc_cluster_group.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_dc_cluster_group.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "dc_cluster_group", err),
@@ -1043,7 +1035,7 @@ func (r *ResourceF5XCDcClusterGroup) Update(ctx context.Context, request resourc
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dc_cluster_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dc_cluster_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "dc_cluster_group", err),

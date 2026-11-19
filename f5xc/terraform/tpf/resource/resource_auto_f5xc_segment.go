@@ -239,7 +239,7 @@ func (r *ResourceF5XCSegment) Schema(ctx context.Context, request resource.Schem
 			},
 			"internet_connection_choice": schema.SingleNestedAttribute{
 				Description:         "Connections to internet choice Allow traffic from this network segment to internet",
-				MarkdownDescription: "Connections to internet choice Allow traffic from this network segment to internet",
+				MarkdownDescription: "Connections to internet choice Allow traffic from this network segment to internet<br>Exactly one of `disable` or `enable` must be specified when `internet_connection_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -252,7 +252,7 @@ func (r *ResourceF5XCSegment) Schema(ctx context.Context, request resource.Schem
 				Attributes: map[string]schema.Attribute{
 					"disable": schema.BoolAttribute{
 						Description:         "Disable connections to internet",
-						MarkdownDescription: "Disable connections to internet",
+						MarkdownDescription: "Disable connections to internet<br>Conflicts with `enable`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -262,7 +262,7 @@ func (r *ResourceF5XCSegment) Schema(ctx context.Context, request resource.Schem
 					},
 					"enable": schema.BoolAttribute{
 						Description:         "Enable connections to internet",
-						MarkdownDescription: "Enable connections to internet",
+						MarkdownDescription: "Enable connections to internet<br>Conflicts with `disable`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -763,11 +763,7 @@ func (r *ResourceF5XCSegment) Read(ctx context.Context, request resource.ReadReq
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_segment.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_segment.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "segment", err),
@@ -1165,12 +1161,8 @@ func (r *ResourceF5XCSegment) Update(ctx context.Context, request resource.Updat
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_segment.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_segment.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "segment", err),
@@ -1179,7 +1171,7 @@ func (r *ResourceF5XCSegment) Update(ctx context.Context, request resource.Updat
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_segment.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_segment.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "segment", err),

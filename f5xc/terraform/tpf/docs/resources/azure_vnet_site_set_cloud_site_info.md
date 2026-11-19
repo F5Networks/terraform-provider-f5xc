@@ -212,7 +212,7 @@ Optional:
 Required:
 
 - `resource_group` (String) Existing Vnet Resource Group Resource group of existing Vnet<br>**Validation:** `Length LengthBetween(1, 64)`
-- `routing_type_choice` (Attributes) Choice of Routing This is choice of F5 Orchestrated Routing or Manual Routing for CE VPC/VNET (see [below for nested schema](#nestedatt--azure_vnet_info--spoke_vnet_prefix_info--vnet--routing_type_choice))
+- `routing_type_choice` (Attributes) Choice of Routing This is choice of F5 Orchestrated Routing or Manual Routing for CE VPC/VNET<br>Exactly one of `f5_orchestrated_routing` or `manual_routing` must be specified. (see [below for nested schema](#nestedatt--azure_vnet_info--spoke_vnet_prefix_info--vnet--routing_type_choice))
 - `vnet_name` (String) Existing Vnet Name Name of existing Vnet<br>**Validation:** `Length LengthBetween(1, 64)`
 
 <a id="nestedatt--azure_vnet_info--spoke_vnet_prefix_info--vnet--routing_type_choice"></a>
@@ -220,8 +220,8 @@ Required:
 
 Optional:
 
-- `f5_orchestrated_routing` (Boolean) F5 Orchestrated Routing F5 will orchestrate required routes for SLO Route Table towards Internet and SLI RT towards the CE.
-- `manual_routing` (Boolean) Manual Routing In this mode, F5 will not create nor alter any route tables or routes within the existing VPCs/Vnets providing better integration for existing environments.
+- `f5_orchestrated_routing` (Boolean) F5 Orchestrated Routing F5 will orchestrate required routes for SLO Route Table towards Internet and SLI RT towards the CE.<br>Conflicts with `manual_routing`.
+- `manual_routing` (Boolean) Manual Routing In this mode, F5 will not create nor alter any route tables or routes within the existing VPCs/Vnets providing better integration for existing environments.<br>Conflicts with `f5_orchestrated_routing`.
 
 
 

@@ -89,6 +89,7 @@ type ProviderConfig struct {
 	Url              string            // The base URL for the F5XC API endpoint.
 	Test             bool              // Indicates whether the provider is running in test mode.
 	TerraformVersion string            // The Terraform CLI version driving provider Configure.
+	ProviderVersion  string            // The provider version injected at build time (e.g., "2.1.0" or "dev").
 	Vesenv           bool              // Specifies if the provider is running in a Ves environment.
 	tenant           string            // The tenant identifier for API requests.
 	Timeout          string            // The timeout duration for API requests, as a string (e.g., "30s").
@@ -127,6 +128,16 @@ type ResourceF5XCApiDefinitionUploaderMetadataApiResponse struct {
 type ResourceF5XCApiDefinitionUploaderApiModel struct {
 	Metadata    ResourceF5XCApiDefinitionUploaderMetadataApiResponse `json:"metadata"`
 	StringValue string                                               `json:"string_value"`
+}
+
+// ResourceF5XCApiDefinitionUploaderCreateRequest represents the PUT request payload for F5 XC Object Store CreateObject.
+// Unlike CreateObjectResponse and GetObjectResponse (which nest StoredObjectDescriptor under metadata),
+// ves.io.schema.stored_object.CreateObjectRequest accepts description as a top-level JSON field and
+// accepts either string_value or bytes_value (Base64) under the contents oneof.
+type ResourceF5XCApiDefinitionUploaderCreateRequest struct {
+	Description string `json:"description,omitempty"`  // Human-readable description for the stored object version.
+	StringValue string `json:"string_value,omitempty"` // Raw OpenAPI specification content.
+	BytesValue  string `json:"bytes_value,omitempty"`  // Base64-encoded OpenAPI specification content.
 }
 
 // Supported CRUD operations
@@ -194,15 +205,14 @@ func providerBinaryInfo() (string, string) {
 	return name, defaultProviderVersion
 }
 
-// providerUserAgent constructs a User-Agent header value for API requests.
+// providerUserAgent constructs a User-Agent header value for API requests using binary path heuristics.
 //
 // Why: HTTP User-Agent headers identify the client making requests to the API.
 // This is essential for server-side logging, monitoring, and debugging to know
 // which version of the provider is making requests.
 //
-// How: It retrieves the provider name and version from providerBinaryInfo(), then
-// formats a User-Agent string combining the Terraform version with the provider
-// identity in the standard format: "terraform/X.Y.Z provider-name/provider-version".
+// How: It delegates to providerUserAgentWithVersion with an empty configured
+// provider version so that binary path extraction is used.
 //
 // Parameters:
 //   - terraformVersion: the Terraform CLI version string (may be empty or contain whitespace)
@@ -215,11 +225,41 @@ func providerBinaryInfo() (string, string) {
 //	userAgent := providerUserAgent("1.5.0")
 //	// Returns: "terraform/1.5.0 terraform-provider-f5xc/1.0.0"
 func providerUserAgent(terraformVersion string) string {
+	return providerUserAgentWithVersion(terraformVersion, "")
+}
+
+// providerUserAgentWithVersion constructs a User-Agent header value preferring an explicit provider version.
+//
+// Why: When the provider version is injected at build time via -ldflags, using it
+// directly is more reliable than parsing the executable file path, which fails in
+// local development builds, test binaries, or custom plugin cache layouts.
+//
+// How: It normalizes terraformVersion (falling back to defaultTerraformVersion if empty)
+// and queries providerBinaryInfo() for the binary name and path-derived version. If
+// configuredProviderVersion is non-empty and not equal to defaultProviderVersion ("dev"),
+// it strips any leading "v" prefix and overrides the path-derived version.
+//
+// Parameters:
+//   - terraformVersion:          the Terraform CLI version string
+//   - configuredProviderVersion: the build-time provider version from ProviderConfig
+//
+// Returns:
+//   - string: formatted User-Agent header ("terraform/<tfVersion> <providerName>/<providerVersion>")
+//
+// Example:
+//
+//	ua := providerUserAgentWithVersion("1.8.0", "v2.1.0")
+//	// ua == "terraform/1.8.0 terraform-provider-f5xc/2.1.0"
+func providerUserAgentWithVersion(terraformVersion, configuredProviderVersion string) string {
 	terraformVersion = strings.TrimSpace(terraformVersion)
 	if terraformVersion == "" {
 		terraformVersion = defaultTerraformVersion
 	}
 	providerName, providerVersion := providerBinaryInfo()
+	configured := strings.TrimPrefix(strings.TrimSpace(configuredProviderVersion), "v")
+	if configured != "" && configured != defaultProviderVersion {
+		providerVersion = configured
+	}
 	return fmt.Sprintf("terraform/%s %s/%s", terraformVersion, providerName, providerVersion)
 }
 
@@ -732,7 +772,7 @@ func uriRemapperFn(tenant, userAgent string, policy throttlingPolicy, registry *
 // Returns:
 //   - []VesAPIClientOpt: A slice of client options to be used when creating a VesAPI client.
 func getClientOpts(c *ProviderConfig, policy throttlingPolicy, registry *ResourceThrottleRegistry) ([]vesapi.ConfigOpt, error) {
-	userAgent := providerUserAgent(c.TerraformVersion)
+	userAgent := providerUserAgentWithVersion(c.TerraformVersion, c.ProviderVersion)
 	remapperFn, err := prismURIRemapperFn(c.Url, userAgent, policy, registry)
 	if err != nil {
 		return nil, err
@@ -801,7 +841,7 @@ func NewVesAPIClient(c *ProviderConfig) (*APIClient, error) {
 		return nil, errors.Wrap(err, "Building client options")
 	}
 
-	userAgent := providerUserAgent(c.TerraformVersion)
+	userAgent := providerUserAgentWithVersion(c.TerraformVersion, c.ProviderVersion)
 
 	if c.Test {
 		clOpts, err = getTestClientOpts(c.Url, c.tenant, userAgent)

@@ -27,6 +27,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -179,7 +180,7 @@ var SiteMeshGroupMeshChoiceSpokeMeshHubMeshGroupModelAttributeMap = map[string]a
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> ReFallback
+// Attribute map for OneOfField --> ReFallback
 var SiteMeshGroupReFallbackModelAttributeMap = map[string]attr.Type{
 
 	"disable_re_fallback": types.BoolType,
@@ -277,7 +278,7 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 			},
 			"bfd_choice": schema.SingleNestedAttribute{
 				Description:         "BFD Choice Options for enabling or disabling BFD for the Site Mesh Group. BFD is used for fast failure detection.",
-				MarkdownDescription: "BFD Choice Options for enabling or disabling BFD for the Site Mesh Group. BFD is used for fast failure detection.",
+				MarkdownDescription: "BFD Choice Options for enabling or disabling BFD for the Site Mesh Group. BFD is used for fast failure detection.<br>Exactly one of `bfd_disabled` or `bfd_enabled` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -290,7 +291,7 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 				Attributes: map[string]schema.Attribute{
 					"bfd_disabled": schema.BoolAttribute{
 						Description:         "BFD Disabled Disable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group.",
-						MarkdownDescription: "BFD Disabled Disable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group.",
+						MarkdownDescription: "BFD Disabled Disable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group.<br>Conflicts with `bfd_enabled`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -300,7 +301,7 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 					},
 					"bfd_enabled": schema.SingleNestedAttribute{
 						Description:         "BFD Enabled Enable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group.",
-						MarkdownDescription: "BFD Enabled Enable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group.",
+						MarkdownDescription: "BFD Enabled Enable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group.<br>Conflicts with `bfd_disabled`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -344,7 +345,7 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 			},
 			"mesh_choice": schema.SingleNestedAttribute{
 				Description:         "Mesh Choice Type of Site to Site connectivity (Spoke, Hub or Full Mesh)",
-				MarkdownDescription: "Mesh Choice Type of Site to Site connectivity (Spoke, Hub or Full Mesh)",
+				MarkdownDescription: "Mesh Choice Type of Site to Site connectivity (Spoke, Hub or Full Mesh)<br>Exactly one of `full_mesh`, `hub_mesh`, or `spoke_mesh` must be specified when `mesh_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -358,14 +359,14 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 				Attributes: map[string]schema.Attribute{
 					"full_mesh": schema.SingleNestedAttribute{
 						Description:         "full_mesh Full mesh of tunnels are created between all sites",
-						MarkdownDescription: "full_mesh Full mesh of tunnels are created between all sites",
+						MarkdownDescription: "full_mesh Full mesh of tunnels are created between all sites<br>Conflicts with `hub_mesh` and `spoke_mesh`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"full_mesh_choice": schema.SingleNestedAttribute{
 								Description:         "Full Mesh Choice Choice of data plane, data plane and control plane full mesh",
-								MarkdownDescription: "Full Mesh Choice Choice of data plane, data plane and control plane full mesh",
+								MarkdownDescription: "Full Mesh Choice Choice of data plane, data plane and control plane full mesh<br>Exactly one of `control_and_data_plane_mesh` or `data_plane_mesh` must be specified when `full_mesh_choice` is configured.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -378,7 +379,7 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 								Attributes: map[string]schema.Attribute{
 									"control_and_data_plane_mesh": schema.BoolAttribute{
 										Description:         "Control and Data Plane Mesh Full mesh of data plane tunnels across sites and control plane peering across sites",
-										MarkdownDescription: "Control and Data Plane Mesh Full mesh of data plane tunnels across sites and control plane peering across sites",
+										MarkdownDescription: "Control and Data Plane Mesh Full mesh of data plane tunnels across sites and control plane peering across sites<br>Conflicts with `data_plane_mesh`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -388,7 +389,7 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 									},
 									"data_plane_mesh": schema.BoolAttribute{
 										Description:         "Data Plane Mesh Full Mesh of data plane tunnels across sites",
-										MarkdownDescription: "Data Plane Mesh Full Mesh of data plane tunnels across sites",
+										MarkdownDescription: "Data Plane Mesh Full Mesh of data plane tunnels across sites<br>Conflicts with `control_and_data_plane_mesh`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -402,7 +403,7 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 					},
 					"hub_mesh": schema.BoolAttribute{
 						Description:         "hub Mesh of Type Hub",
-						MarkdownDescription: "hub Mesh of Type Hub",
+						MarkdownDescription: "hub Mesh of Type Hub<br>Conflicts with `full_mesh` and `spoke_mesh`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -412,7 +413,7 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 					},
 					"spoke_mesh": schema.SingleNestedAttribute{
 						Description:         "spoke Mesh of Type Spoke",
-						MarkdownDescription: "spoke Mesh of Type Spoke",
+						MarkdownDescription: "spoke Mesh of Type Spoke<br>Conflicts with `full_mesh` and `hub_mesh`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -456,20 +457,23 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 			},
 			"re_fallback_choice": schema.SingleNestedAttribute{
 				Description:         "RE Fallback Fallback to RE Connectivity when the SMG fails",
-				MarkdownDescription: "RE Fallback Fallback to RE Connectivity when the SMG fails",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "RE Fallback Fallback to RE Connectivity when the SMG fails<br>Exactly one of `disable_re_fallback` or `enable_re_fallback` must be specified when `re_fallback_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"disable_re_fallback",
 						"enable_re_fallback",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"disable_re_fallback": schema.BoolAttribute{
 						Description:         "disable Disable RE Fallback connectivity when SMG fails",
-						MarkdownDescription: "disable Disable RE Fallback connectivity when SMG fails",
+						MarkdownDescription: "disable Disable RE Fallback connectivity when SMG fails<br>Conflicts with `enable_re_fallback`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -479,7 +483,7 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 					},
 					"enable_re_fallback": schema.BoolAttribute{
 						Description:         "enable Enable RE Fallback connectivity when SMG fails",
-						MarkdownDescription: "enable Enable RE Fallback connectivity when SMG fails",
+						MarkdownDescription: "enable Enable RE Fallback connectivity when SMG fails<br>Conflicts with `disable_re_fallback`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -815,7 +819,7 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> ReFallback
+	// resource modelToSpecRoot OneOfField --> ReFallback
 	if !data.ReFallbackChoice.IsNull() && !data.ReFallbackChoice.IsUnknown() {
 		reFallbackChoiceModel := SiteMeshGroupReFallbackChoice{}
 		response.Diagnostics.Append(data.ReFallbackChoice.As(ctx, &reFallbackChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -837,6 +841,10 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 			spec.ReFallback = enableReFallbackSpecBool
 		}
 
+	} else {
+		spec.ReFallback = &ves_io_schema_site_mesh_group.CreateSpecType_EnableReFallback{
+			EnableReFallback: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -1269,7 +1277,7 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 		data.MeshChoice = types.ObjectNull(SiteMeshGroupMeshChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> ReFallback
+	// resource SpecToModelRoot OneOfField --> ReFallback
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -1317,8 +1325,6 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.ReFallbackChoice = types.ObjectNull(SiteMeshGroupReFallbackModelAttributeMap)
 	}
 
@@ -1425,11 +1431,7 @@ func (r *ResourceF5XCSiteMeshGroup) Read(ctx context.Context, request resource.R
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_site_mesh_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_site_mesh_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "site_mesh_group", err),
@@ -1805,7 +1807,7 @@ func (r *ResourceF5XCSiteMeshGroup) Read(ctx context.Context, request resource.R
 		data.MeshChoice = types.ObjectNull(SiteMeshGroupMeshChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> ReFallback
+	// resource SpecToModelRoot OneOfField --> ReFallback
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -1853,8 +1855,6 @@ func (r *ResourceF5XCSiteMeshGroup) Read(ctx context.Context, request resource.R
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.ReFallbackChoice.IsNull() || data.ReFallbackChoice.IsUnknown() || ((data.ReFallbackChoice.Attributes()["disable_re_fallback"].IsNull() || data.ReFallbackChoice.Attributes()["disable_re_fallback"].IsUnknown()) && (data.ReFallbackChoice.Attributes()["enable_re_fallback"].IsNull() || data.ReFallbackChoice.Attributes()["enable_re_fallback"].IsUnknown())) {
 			data.ReFallbackChoice = types.ObjectValueMust(SiteMeshGroupReFallbackModelAttributeMap, map[string]attr.Value{
@@ -2174,7 +2174,7 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> ReFallback
+	// resource modelToSpecRoot OneOfField --> ReFallback
 	if !data.ReFallbackChoice.IsNull() && !data.ReFallbackChoice.IsUnknown() {
 		reFallbackChoiceModel := SiteMeshGroupReFallbackChoice{}
 		response.Diagnostics.Append(data.ReFallbackChoice.As(ctx, &reFallbackChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2196,6 +2196,10 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 			spec.ReFallback = enableReFallbackSpecBool
 		}
 
+	} else {
+		spec.ReFallback = &ves_io_schema_site_mesh_group.ReplaceSpecType_EnableReFallback{
+			EnableReFallback: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -2240,12 +2244,8 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_site_mesh_group.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_site_mesh_group.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "site_mesh_group", err),
@@ -2254,7 +2254,7 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_site_mesh_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_site_mesh_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "site_mesh_group", err),
@@ -2629,7 +2629,7 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 		data.MeshChoice = types.ObjectNull(SiteMeshGroupMeshChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> ReFallback
+	// resource SpecToModelRoot OneOfField --> ReFallback
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -2677,8 +2677,6 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.ReFallbackChoice = types.ObjectNull(SiteMeshGroupReFallbackModelAttributeMap)
 	}
 

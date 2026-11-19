@@ -172,7 +172,7 @@ func (r *ResourceF5XCAuthorizationServer) Schema(ctx context.Context, request re
 			},
 			"issuer_validation_choice": schema.SingleNestedAttribute{
 				Description:         "issuer_validation Configure issuer validation for tokens issued by this Authorization Server.",
-				MarkdownDescription: "issuer_validation Configure issuer validation for tokens issued by this Authorization Server.",
+				MarkdownDescription: "issuer_validation Configure issuer validation for tokens issued by this Authorization Server.<br>Exactly one of `issuer` or `issuer_disable` must be specified when `issuer_validation_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -185,7 +185,7 @@ func (r *ResourceF5XCAuthorizationServer) Schema(ctx context.Context, request re
 				Attributes: map[string]schema.Attribute{
 					"issuer": schema.StringAttribute{
 						Description:         "issuer",
-						MarkdownDescription: "issuer<br>**Validation:** `Length LengthAtMost(512)`",
+						MarkdownDescription: "issuer<br>**Validation:** `Length LengthAtMost(512)`<br>Conflicts with `issuer_disable`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -196,7 +196,7 @@ func (r *ResourceF5XCAuthorizationServer) Schema(ctx context.Context, request re
 					},
 					"issuer_disable": schema.BoolAttribute{
 						Description:         "issuer_disable",
-						MarkdownDescription: "issuer_disable",
+						MarkdownDescription: "issuer_disable<br>Conflicts with `issuer`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -687,11 +687,7 @@ func (r *ResourceF5XCAuthorizationServer) Read(ctx context.Context, request reso
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_authorization_server.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_authorization_server.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "authorization_server", err),
@@ -1045,12 +1041,8 @@ func (r *ResourceF5XCAuthorizationServer) Update(ctx context.Context, request re
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_authorization_server.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_authorization_server.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "authorization_server", err),
@@ -1059,7 +1051,7 @@ func (r *ResourceF5XCAuthorizationServer) Update(ctx context.Context, request re
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_authorization_server.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_authorization_server.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "authorization_server", err),

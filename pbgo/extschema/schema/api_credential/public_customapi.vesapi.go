@@ -988,6 +988,7 @@ func (c *CustomAPIRestClient) doRPCCreate(ctx context.Context, callOpts *server.
 		q.Add("expiration_days", fmt.Sprintf("%v", req.ExpirationDays))
 		q.Add("name", fmt.Sprintf("%v", req.Name))
 		q.Add("namespace", fmt.Sprintf("%v", req.Namespace))
+		q.Add("self_credential_choice", fmt.Sprintf("%v", req.SelfCredentialChoice))
 		q.Add("spec", fmt.Sprintf("%v", req.Spec))
 
 		hReq.URL.RawQuery += q.Encode()
@@ -1073,7 +1074,6 @@ func (c *CustomAPIRestClient) doRPCCreateKubeConfig(ctx context.Context, callOpt
 		q.Add("name", fmt.Sprintf("%v", req.Name))
 		q.Add("namespace", fmt.Sprintf("%v", req.Namespace))
 		q.Add("vk8s_cluster_name", fmt.Sprintf("%v", req.Vk8SClusterName))
-		q.Add("vk8s_namespace", fmt.Sprintf("%v", req.Vk8SNamespace))
 
 		hReq.URL.RawQuery += q.Encode()
 	case "delete":
@@ -1163,7 +1163,7 @@ func (c *CustomAPIRestClient) doRPCCreateKubeConfigServiceCredentials(ctx contex
 		for _, item := range req.UserGroupNames {
 			q.Add("user_group_names", fmt.Sprintf("%v", item))
 		}
-		q.Add("vk8s_kubeconfig", fmt.Sprintf("%v", req.Vk8SKubeconfig))
+		q.Add("vk8s_cluster_name", fmt.Sprintf("%v", req.Vk8SClusterName))
 
 		hReq.URL.RawQuery += q.Encode()
 	case "delete":
@@ -1250,14 +1250,10 @@ func (c *CustomAPIRestClient) doRPCCreateServiceCredentials(ctx context.Context,
 		for _, item := range req.NamespaceRoles {
 			q.Add("namespace_roles", fmt.Sprintf("%v", item))
 		}
-		q.Add("password", fmt.Sprintf("%v", req.Password))
 		q.Add("service_credential_choice", fmt.Sprintf("%v", req.ServiceCredentialChoice))
-		q.Add("type", fmt.Sprintf("%v", req.Type))
 		for _, item := range req.UserGroupNames {
 			q.Add("user_group_names", fmt.Sprintf("%v", item))
 		}
-		q.Add("virtual_k8s_name", fmt.Sprintf("%v", req.VirtualK8SName))
-		q.Add("virtual_k8s_namespace", fmt.Sprintf("%v", req.VirtualK8SNamespace))
 
 		hReq.URL.RawQuery += q.Encode()
 	case "delete":
@@ -1340,7 +1336,6 @@ func (c *CustomAPIRestClient) doRPCCreateSiteGlobalKubeConfig(ctx context.Contex
 		_ = q
 		q.Add("expiration_days", fmt.Sprintf("%v", req.ExpirationDays))
 		q.Add("name", fmt.Sprintf("%v", req.Name))
-		q.Add("namespace", fmt.Sprintf("%v", req.Namespace))
 		for _, item := range req.NamespaceRoles {
 			q.Add("namespace_roles", fmt.Sprintf("%v", item))
 		}
@@ -4938,7 +4933,7 @@ var CustomAPISwaggerJSON string = `{
     ],
     "tags": [],
     "paths": {
-        "/public/namespaces/system/activate/site_global_kube_configs": {
+        "/public/namespaces/system/activate/site_global_kube_configs/{name}": {
             "post": {
                 "summary": "Activate Site Global KubeConfig",
                 "description": "This method is used for activating or deactivating a Site Global KubeConfig service credential.",
@@ -5007,6 +5002,14 @@ var CustomAPISwaggerJSON string = `{
                 },
                 "parameters": [
                     {
+                        "name": "name",
+                        "description": "Credential name\n\nx-required\nx-example: \"value\"\nName of API credential.",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "x-displayname": "Name"
+                    },
+                    {
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -5022,7 +5025,6 @@ var CustomAPISwaggerJSON string = `{
                     "description": "Examples of this operation",
                     "url": "https://docs.cloud.f5.com/docs-v2/platform/reference/api-ref/ves-io-schema-api_credential-customapi-activatesiteglobalkubeconfig"
                 },
-                "x-ves-in-development": "true",
                 "x-ves-proto-rpc": "ves.io.schema.api_credential.CustomAPI.ActivateSiteGlobalKubeConfig"
             },
             "x-displayname": "API Credential",
@@ -5209,7 +5211,7 @@ var CustomAPISwaggerJSON string = `{
             "x-ves-proto-service": "ves.io.schema.api_credential.CustomAPI",
             "x-ves-proto-service-type": "CUSTOM_PUBLIC"
         },
-        "/public/namespaces/system/revoke/site_global_kube_configs": {
+        "/public/namespaces/system/revoke/site_global_kube_configs/{name}": {
             "post": {
                 "summary": "Revoke Site Global KubeConfig",
                 "description": "This method revokes or deletes a Site Global KubeConfig service credential.",
@@ -5278,6 +5280,14 @@ var CustomAPISwaggerJSON string = `{
                 },
                 "parameters": [
                     {
+                        "name": "name",
+                        "description": "Credential name\n\nx-required\nx-example: \"value\"\nName of API credential.",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "x-displayname": "Name"
+                    },
+                    {
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -5293,7 +5303,6 @@ var CustomAPISwaggerJSON string = `{
                     "description": "Examples of this operation",
                     "url": "https://docs.cloud.f5.com/docs-v2/platform/reference/api-ref/ves-io-schema-api_credential-customapi-revokesiteglobalkubeconfig"
                 },
-                "x-ves-in-development": "true",
                 "x-ves-proto-rpc": "ves.io.schema.api_credential.CustomAPI.RevokeSiteGlobalKubeConfig"
             },
             "x-displayname": "API Credential",
@@ -5384,7 +5393,6 @@ var CustomAPISwaggerJSON string = `{
                     "description": "Examples of this operation",
                     "url": "https://docs.cloud.f5.com/docs-v2/platform/reference/api-ref/ves-io-schema-api_credential-customapi-listsiteglobalkubeconfig"
                 },
-                "x-ves-in-development": "true",
                 "x-ves-proto-rpc": "ves.io.schema.api_credential.CustomAPI.ListSiteGlobalKubeConfig"
             },
             "post": {
@@ -5470,7 +5478,6 @@ var CustomAPISwaggerJSON string = `{
                     "description": "Examples of this operation",
                     "url": "https://docs.cloud.f5.com/docs-v2/platform/reference/api-ref/ves-io-schema-api_credential-customapi-createsiteglobalkubeconfig"
                 },
-                "x-ves-in-development": "true",
                 "x-ves-proto-rpc": "ves.io.schema.api_credential.CustomAPI.CreateSiteGlobalKubeConfig"
             },
             "x-displayname": "API Credential",
@@ -5569,7 +5576,6 @@ var CustomAPISwaggerJSON string = `{
                     "description": "Examples of this operation",
                     "url": "https://docs.cloud.f5.com/docs-v2/platform/reference/api-ref/ves-io-schema-api_credential-customapi-getsiteglobalkubeconfig"
                 },
-                "x-ves-in-development": "true",
                 "x-ves-proto-rpc": "ves.io.schema.api_credential.CustomAPI.GetSiteGlobalKubeConfig"
             },
             "x-displayname": "API Credential",
@@ -5674,7 +5680,7 @@ var CustomAPISwaggerJSON string = `{
             "x-ves-proto-service": "ves.io.schema.api_credential.CustomAPI",
             "x-ves-proto-service-type": "CUSTOM_PUBLIC"
         },
-        "/public/namespaces/{namespace}/activate/kube_configs": {
+        "/public/namespaces/{namespace}/activate/kube_configs/{name}": {
             "post": {
                 "summary": "Activate KubeConfig",
                 "description": "For KubeConfig credential activation/deactivation.",
@@ -5751,6 +5757,14 @@ var CustomAPISwaggerJSON string = `{
                         "x-displayname": "Namespace"
                     },
                     {
+                        "name": "name",
+                        "description": "Credential name\n\nx-required\nx-example: \"value\"\nName of API credential.",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "x-displayname": "Name"
+                    },
+                    {
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -5766,7 +5780,6 @@ var CustomAPISwaggerJSON string = `{
                     "description": "Examples of this operation",
                     "url": "https://docs.cloud.f5.com/docs-v2/platform/reference/api-ref/ves-io-schema-api_credential-customapi-activatekubeconfig"
                 },
-                "x-ves-in-development": "true",
                 "x-ves-proto-rpc": "ves.io.schema.api_credential.CustomAPI.ActivateKubeConfig"
             },
             "x-displayname": "API Credential",
@@ -5871,7 +5884,7 @@ var CustomAPISwaggerJSON string = `{
             "x-ves-proto-service": "ves.io.schema.api_credential.CustomAPI",
             "x-ves-proto-service-type": "CUSTOM_PUBLIC"
         },
-        "/public/namespaces/{namespace}/activate/service_kube_configs": {
+        "/public/namespaces/{namespace}/activate/service_kube_configs/{name}": {
             "post": {
                 "summary": "Activate KubeConfig Service Credentials",
                 "description": "Activates or deactivates a KubeConfig service credential",
@@ -5948,6 +5961,14 @@ var CustomAPISwaggerJSON string = `{
                         "x-displayname": "Namespace"
                     },
                     {
+                        "name": "name",
+                        "description": "Credential name\n\nx-required\nx-example: \"value\"\nName of API credential.",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "x-displayname": "Name"
+                    },
+                    {
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -5963,7 +5984,6 @@ var CustomAPISwaggerJSON string = `{
                     "description": "Examples of this operation",
                     "url": "https://docs.cloud.f5.com/docs-v2/platform/reference/api-ref/ves-io-schema-api_credential-customapi-activatekubeconfigservicecredentials"
                 },
-                "x-ves-in-development": "true",
                 "x-ves-proto-rpc": "ves.io.schema.api_credential.CustomAPI.ActivateKubeConfigServiceCredentials"
             },
             "x-displayname": "API Credential",
@@ -6335,7 +6355,6 @@ var CustomAPISwaggerJSON string = `{
                     "description": "Examples of this operation",
                     "url": "https://docs.cloud.f5.com/docs-v2/platform/reference/api-ref/ves-io-schema-api_credential-customapi-listkubeconfig"
                 },
-                "x-ves-in-development": "true",
                 "x-ves-proto-rpc": "ves.io.schema.api_credential.CustomAPI.ListKubeConfig"
             },
             "post": {
@@ -6407,7 +6426,7 @@ var CustomAPISwaggerJSON string = `{
                 "parameters": [
                     {
                         "name": "namespace",
-                        "description": "Namespace\n\nx-example: \"system\"\nThe value of the namespace is always \"system\".",
+                        "description": "Namespace\n\nx-example: \"system\"\nSpecifies the virtual Kubernetes namespace name.",
                         "in": "path",
                         "required": true,
                         "type": "string",
@@ -6429,7 +6448,6 @@ var CustomAPISwaggerJSON string = `{
                     "description": "Examples of this operation",
                     "url": "https://docs.cloud.f5.com/docs-v2/platform/reference/api-ref/ves-io-schema-api_credential-customapi-createkubeconfig"
                 },
-                "x-ves-in-development": "true",
                 "x-ves-proto-rpc": "ves.io.schema.api_credential.CustomAPI.CreateKubeConfig"
             },
             "x-displayname": "API Credential",
@@ -6528,7 +6546,6 @@ var CustomAPISwaggerJSON string = `{
                     "description": "Examples of this operation",
                     "url": "https://docs.cloud.f5.com/docs-v2/platform/reference/api-ref/ves-io-schema-api_credential-customapi-getkubeconfig"
                 },
-                "x-ves-in-development": "true",
                 "x-ves-proto-rpc": "ves.io.schema.api_credential.CustomAPI.GetKubeConfig"
             },
             "x-displayname": "API Credential",
@@ -6829,7 +6846,7 @@ var CustomAPISwaggerJSON string = `{
             "x-ves-proto-service": "ves.io.schema.api_credential.CustomAPI",
             "x-ves-proto-service-type": "CUSTOM_PUBLIC"
         },
-        "/public/namespaces/{namespace}/revoke/kube_configs": {
+        "/public/namespaces/{namespace}/revoke/kube_configs/{name}": {
             "post": {
                 "summary": "Revoke KubeConfig",
                 "description": "For KubeConfig credential revoke/deletion.",
@@ -6906,6 +6923,14 @@ var CustomAPISwaggerJSON string = `{
                         "x-displayname": "Namespace"
                     },
                     {
+                        "name": "name",
+                        "description": "Credential name\n\nx-required\nx-example: \"value\"\nName of API credential.",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "x-displayname": "Name"
+                    },
+                    {
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -6921,7 +6946,6 @@ var CustomAPISwaggerJSON string = `{
                     "description": "Examples of this operation",
                     "url": "https://docs.cloud.f5.com/docs-v2/platform/reference/api-ref/ves-io-schema-api_credential-customapi-revokekubeconfig"
                 },
-                "x-ves-in-development": "true",
                 "x-ves-proto-rpc": "ves.io.schema.api_credential.CustomAPI.RevokeKubeConfig"
             },
             "x-displayname": "API Credential",
@@ -7124,7 +7148,7 @@ var CustomAPISwaggerJSON string = `{
             "x-ves-proto-service": "ves.io.schema.api_credential.CustomAPI",
             "x-ves-proto-service-type": "CUSTOM_PUBLIC"
         },
-        "/public/namespaces/{namespace}/revoke/service_kube_configs": {
+        "/public/namespaces/{namespace}/revoke/service_kube_configs/{name}": {
             "post": {
                 "summary": "Revoke KubeConfig Service Credentials",
                 "description": "Revokes or deletes a KubeConfig service credential.",
@@ -7201,6 +7225,14 @@ var CustomAPISwaggerJSON string = `{
                         "x-displayname": "Namespace"
                     },
                     {
+                        "name": "name",
+                        "description": "Credential name\n\nx-required\nx-example: \"value\"\nName of API credential.",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "x-displayname": "Name"
+                    },
+                    {
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -7216,7 +7248,6 @@ var CustomAPISwaggerJSON string = `{
                     "description": "Examples of this operation",
                     "url": "https://docs.cloud.f5.com/docs-v2/platform/reference/api-ref/ves-io-schema-api_credential-customapi-revokekubeconfigservicecredentials"
                 },
-                "x-ves-in-development": "true",
                 "x-ves-proto-rpc": "ves.io.schema.api_credential.CustomAPI.RevokeKubeConfigServiceCredentials"
             },
             "x-displayname": "API Credential",
@@ -7872,7 +7903,6 @@ var CustomAPISwaggerJSON string = `{
                     "description": "Examples of this operation",
                     "url": "https://docs.cloud.f5.com/docs-v2/platform/reference/api-ref/ves-io-schema-api_credential-customapi-listkubeconfigservicecredentials"
                 },
-                "x-ves-in-development": "true",
                 "x-ves-proto-rpc": "ves.io.schema.api_credential.CustomAPI.ListKubeConfigServiceCredentials"
             },
             "post": {
@@ -7944,7 +7974,7 @@ var CustomAPISwaggerJSON string = `{
                 "parameters": [
                     {
                         "name": "namespace",
-                        "description": "Namespace\n\nx-example: \"system\"\nValue of namespace is always \"system\".",
+                        "description": "Namespace\n\nx-example: \"system\"\nSpecifies the vk8s namespace name.",
                         "in": "path",
                         "required": true,
                         "type": "string",
@@ -7966,7 +7996,6 @@ var CustomAPISwaggerJSON string = `{
                     "description": "Examples of this operation",
                     "url": "https://docs.cloud.f5.com/docs-v2/platform/reference/api-ref/ves-io-schema-api_credential-customapi-createkubeconfigservicecredentials"
                 },
-                "x-ves-in-development": "true",
                 "x-ves-proto-rpc": "ves.io.schema.api_credential.CustomAPI.CreateKubeConfigServiceCredentials"
             },
             "x-displayname": "API Credential",
@@ -8065,7 +8094,6 @@ var CustomAPISwaggerJSON string = `{
                     "description": "Examples of this operation",
                     "url": "https://docs.cloud.f5.com/docs-v2/platform/reference/api-ref/ves-io-schema-api_credential-customapi-getkubeconfigservicecredentials"
                 },
-                "x-ves-in-development": "true",
                 "x-ves-proto-rpc": "ves.io.schema.api_credential.CustomAPI.GetKubeConfigServiceCredentials"
             },
             "x-displayname": "API Credential",
@@ -8182,15 +8210,11 @@ var CustomAPISwaggerJSON string = `{
             "properties": {
                 "expiration_days": {
                     "type": "integer",
-                    "description": "Qty of days of self credential expiration.\n\nExample: -\"30\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.gte: 1\n  ves.io.schema.rules.uint32.lte: 90\n",
+                    "description": "Qty of days of self credential expiration.\n\nExample: -\"30\"-",
                     "title": "Expiry in Days",
                     "format": "int64",
                     "x-displayname": "Expiry in Days",
-                    "x-ves-example": "30",
-                    "x-ves-validation-rules": {
-                        "ves.io.schema.rules.uint32.gte": "1",
-                        "ves.io.schema.rules.uint32.lte": "90"
-                    }
+                    "x-ves-example": "30"
                 },
                 "name": {
                     "type": "string",
@@ -8201,7 +8225,7 @@ var CustomAPISwaggerJSON string = `{
                 },
                 "namespace": {
                     "type": "string",
-                    "description": "The value of the namespace is always \"system\".\n\nExample: -\"system\"-",
+                    "description": "Specifies the virtual Kubernetes namespace name.\n\nExample: -\"system\"-",
                     "title": "Namespace",
                     "x-displayname": "Namespace",
                     "x-ves-example": "system"
@@ -8212,16 +8236,6 @@ var CustomAPISwaggerJSON string = `{
                     "title": "Virtual k8s Cluster Name",
                     "x-displayname": "vK8s Cluster",
                     "x-ves-example": "vk8s-product-app1",
-                    "x-ves-validation-rules": {
-                        "ves.io.schema.rules.string.ves_object_name": "true"
-                    }
-                },
-                "vk8s_namespace": {
-                    "type": "string",
-                    "description": "Specifies the virtual Kubernetes namespace name.\n\nExample: -\"app-ns1\"-\n\nValidation Rules:\n  ves.io.schema.rules.string.ves_object_name: true\n",
-                    "title": "Virtual k8s Namespace",
-                    "x-displayname": "vK8s Namespace",
-                    "x-ves-example": "app-ns1",
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.string.ves_object_name": "true"
                     }
@@ -8237,15 +8251,11 @@ var CustomAPISwaggerJSON string = `{
             "properties": {
                 "expiration_days": {
                     "type": "integer",
-                    "description": " The number of days before the KubeConfig service credential expires.\n\nExample: - \"30\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.gte: 1\n  ves.io.schema.rules.uint32.lte: 90\n",
+                    "description": " The number of days before the KubeConfig service credential expires.\n\nExample: - \"30\"-",
                     "title": "Expiry in Days",
                     "format": "int64",
                     "x-displayname": "Expiry in Days",
-                    "x-ves-example": "30",
-                    "x-ves-validation-rules": {
-                        "ves.io.schema.rules.uint32.gte": "1",
-                        "ves.io.schema.rules.uint32.lte": "90"
-                    }
+                    "x-ves-example": "30"
                 },
                 "name": {
                     "type": "string",
@@ -8256,7 +8266,7 @@ var CustomAPISwaggerJSON string = `{
                 },
                 "namespace": {
                     "type": "string",
-                    "description": " Value of namespace is always \"system\".\n\nExample: - \"system\"-",
+                    "description": " Specifies the vk8s namespace name.\n\nExample: - \"system\"-",
                     "title": "Namespace",
                     "x-displayname": "Namespace",
                     "x-ves-example": "system"
@@ -8281,11 +8291,15 @@ var CustomAPISwaggerJSON string = `{
                     "x-displayname": "Groups",
                     "x-ves-example": "[\"dev-group-1\"]"
                 },
-                "vk8s_kubeconfig": {
-                    "description": " Specifies the parameters for the Service KubeConfig.",
-                    "title": "vk8s_kubeconfig",
-                    "$ref": "#/definitions/api_credentialVk8sKubeconfigType",
-                    "x-displayname": "Service KubeConfig Specification"
+                "vk8s_cluster_name": {
+                    "type": "string",
+                    "description": " Name of the vk8s cluster.\n\nExample: - \"vk8s-product-app1\"-\n\nValidation Rules:\n  ves.io.schema.rules.string.ves_object_name: true\n",
+                    "title": "vk8s cluster name",
+                    "x-displayname": "vK8s Cluster",
+                    "x-ves-example": "vk8s-product-app1",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.string.ves_object_name": "true"
+                    }
                 }
             }
         },
@@ -8295,8 +8309,21 @@ var CustomAPISwaggerJSON string = `{
             "title": "Create Request",
             "x-displayname": "Create Request",
             "x-ves-displayorder": "1,2,3,5",
+            "x-ves-oneof-field-self_credential_choice": "[\"api_certificate\",\"api_token\"]",
             "x-ves-proto-message": "ves.io.schema.api_credential.CreateRequest",
             "properties": {
+                "api_certificate": {
+                    "description": "Exclusive with [api_token]\nAPI certificate parameters.",
+                    "title": "api_certificate",
+                    "$ref": "#/definitions/api_credentialApiCertificateType",
+                    "x-displayname": "API Certificate Specification"
+                },
+                "api_token": {
+                    "description": "Exclusive with [api_certificate]\nAPI token parameters.",
+                    "title": "api_token",
+                    "$ref": "#/definitions/schemaEmpty",
+                    "x-displayname": "API Token Specification"
+                },
                 "expiration_days": {
                     "type": "integer",
                     "description": "Qty of days of service credential expiration.\n\nExample: -\"value\"-",
@@ -8406,32 +8433,11 @@ var CustomAPISwaggerJSON string = `{
                     "x-displayname": "List of roles",
                     "x-ves-example": "value"
                 },
-                "password": {
-                    "type": "string",
-                    "description": " Password is used for generating an API certificate P12 bundle user can use to protect access to it.\n this password will not be saved/persisted anywhere in the system. Applicable for credential type API_CERTIFICATE\n Users have to use this password when they use the certificate, e.g. in curl or while adding to key chain.\n\nExample: - \"myPassw0rd123\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n",
-                    "title": "Password for API certificate",
-                    "x-displayname": "Password",
-                    "x-ves-example": "myPassw0rd123",
-                    "x-ves-required": "true",
-                    "x-ves-validation-rules": {
-                        "ves.io.schema.rules.message.required": "true"
-                    }
-                },
                 "site_kubeconfig": {
                     "description": "Exclusive with [api_certificate api_token vk8s_kubeconfig]\n Site Global Kube Config parameters",
                     "title": "site_kubeconfig",
                     "$ref": "#/definitions/api_credentialSiteKubeconfigType",
                     "x-displayname": "Site Global Kube Config Specification"
-                },
-                "type": {
-                    "description": " Type of API credential, API credentials, kubeconfig or token.\n Please move to the oneof 'service_credential_choice' field for providing the details.\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n",
-                    "title": "Type",
-                    "$ref": "#/definitions/api_credentialAPICredentialType",
-                    "x-displayname": "Credential Type",
-                    "x-ves-required": "true",
-                    "x-ves-validation-rules": {
-                        "ves.io.schema.rules.message.required": "true"
-                    }
                 },
                 "user_group_names": {
                     "type": "array",
@@ -8442,20 +8448,6 @@ var CustomAPISwaggerJSON string = `{
                     },
                     "x-displayname": "Groups",
                     "x-ves-example": "[\"dev-group-1\"]"
-                },
-                "virtual_k8s_name": {
-                    "type": "string",
-                    "description": " Name of virtual_k8s cluster. Applicable for KUBE_CONFIG.\n\nExample: - \"vk8s-product-app1\"-",
-                    "title": "virtual k8s cluster name",
-                    "x-displayname": "vK8s Cluster",
-                    "x-ves-example": "vk8s-product-app1"
-                },
-                "virtual_k8s_namespace": {
-                    "type": "string",
-                    "description": " Namespace of virtual_k8s cluster. Applicable for KUBE_CONFIG.\n\nExample: - \"app-ns1\"-",
-                    "title": "Virtual k8s namespace",
-                    "x-displayname": "vK8s Namespace",
-                    "x-ves-example": "app-ns1"
                 },
                 "vk8s_kubeconfig": {
                     "description": "Exclusive with [api_certificate api_token site_kubeconfig]\n Service Kube Config parameters",
@@ -8486,13 +8478,6 @@ var CustomAPISwaggerJSON string = `{
                     "title": "Name",
                     "x-displayname": "Name",
                     "x-ves-example": "svc-cred-app1"
-                },
-                "namespace": {
-                    "type": "string",
-                    "description": " Value of namespace is always \"system\".\n\nExample: - \"system\"-",
-                    "title": "Namespace",
-                    "x-displayname": "Namespace",
-                    "x-ves-example": "system"
                 },
                 "namespace_roles": {
                     "type": "array",

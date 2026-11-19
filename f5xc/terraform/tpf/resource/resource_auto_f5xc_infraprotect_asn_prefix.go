@@ -1035,11 +1035,7 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Read(ctx context.Context, request re
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_infraprotect_asn_prefix.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_infraprotect_asn_prefix.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "infraprotect_asn_prefix", err),
@@ -1552,12 +1548,8 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Update(ctx context.Context, request 
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_infraprotect_asn_prefix.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_infraprotect_asn_prefix.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "infraprotect_asn_prefix", err),
@@ -1566,7 +1558,7 @@ func (r *ResourceF5XCInfraprotectAsnPrefix) Update(ctx context.Context, request 
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_infraprotect_asn_prefix.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_infraprotect_asn_prefix.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "infraprotect_asn_prefix", err),

@@ -1605,7 +1605,7 @@ var CdnLoadbalancerChallengeTypePolicyBasedChallengeCaptchaChallengeParametersCh
 	"custom_page":   types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> ChallengeChoice
+// Attribute map for OneOfField --> ChallengeChoice
 var CdnLoadbalancerChallengeTypePolicyBasedChallengeChallengeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"always_enable_captcha_challenge": types.BoolType,
@@ -2085,7 +2085,7 @@ var CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecBodyMatcher
 	},
 }
 
-// Attribute map for RequiredOneOfField --> ChallengeAction
+// Attribute map for OneOfField --> ChallengeAction
 var CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecChallengeActionModelAttributeMap = map[string]attr.Type{
 
 	"disable_challenge":           types.BoolType,
@@ -2337,7 +2337,7 @@ var CdnLoadbalancerCsrfPolicyModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> AllowedDomains
+// Attribute map for OneOfField --> AllowedDomains
 var CdnLoadbalancerCsrfPolicyAllowedDomainsModelAttributeMap = map[string]attr.Type{
 
 	"all_load_balancer_domains": types.BoolType,
@@ -2398,14 +2398,14 @@ var CdnLoadbalancerDataGuardRulesModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> ActionChoice
+// Attribute map for OneOfField --> ActionChoice
 var CdnLoadbalancerDataGuardRulesActionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"apply_data_guard": types.BoolType,
 	"skip_data_guard":  types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> DomainChoice
+// Attribute map for OneOfField --> DomainChoice
 var CdnLoadbalancerDataGuardRulesDomainChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_domain":   types.BoolType,
@@ -2459,7 +2459,7 @@ var CdnLoadbalancerDdosMitigationRulesMetadataModelAttributeMap = map[string]att
 	"name":        types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> MitigationAction
+// Attribute map for OneOfField --> MitigationAction
 var CdnLoadbalancerDdosMitigationRulesMitigationActionModelAttributeMap = map[string]attr.Type{
 
 	"block": types.BoolType,
@@ -2594,7 +2594,7 @@ var CdnLoadbalancerGraphqlRulesModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DomainChoice
+// Attribute map for OneOfField --> DomainChoice
 var CdnLoadbalancerGraphqlRulesDomainChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_domain":   types.BoolType,
@@ -2613,7 +2613,7 @@ var CdnLoadbalancerGraphqlRulesGraphqlSettingsModelAttributeMap = map[string]att
 	"max_total_length":    types.Int64Type,
 }
 
-// Attribute map for RequiredOneOfField --> AllowIntrospectionQueriesChoice
+// Attribute map for OneOfField --> AllowIntrospectionQueriesChoice
 var CdnLoadbalancerGraphqlRulesGraphqlSettingsAllowIntrospectionQueriesChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disable_introspection": types.BoolType,
@@ -2627,7 +2627,7 @@ var CdnLoadbalancerGraphqlRulesMetadataModelAttributeMap = map[string]attr.Type{
 	"name":        types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> MethodChoice
+// Attribute map for OneOfField --> MethodChoice
 var CdnLoadbalancerGraphqlRulesMethodChoiceModelAttributeMap = map[string]attr.Type{
 
 	"method_get":  types.BoolType,
@@ -2682,7 +2682,7 @@ var CdnLoadbalancerJwtValidationActionModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> ActionChoice
+// Attribute map for OneOfField --> ActionChoice
 var CdnLoadbalancerJwtValidationActionActionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"block": types.BoolType,
@@ -2760,13 +2760,13 @@ var CdnLoadbalancerJwtValidationTokenLocationModelAttributeMap = map[string]attr
 	},
 }
 
-// Attribute map for RequiredOneOfField --> TokenLocation
+// Attribute map for OneOfField --> TokenLocation
 var CdnLoadbalancerJwtValidationTokenLocationTokenLocationModelAttributeMap = map[string]attr.Type{
 
 	"bearer_token": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> L7DdosAutoMitigationAction
+// Attribute map for OneOfField --> L7DdosAutoMitigationAction
 var CdnLoadbalancerL7DdosAutoMitigationActionModelAttributeMap = map[string]attr.Type{
 
 	"l7_ddos_action_block":   types.BoolType,
@@ -2871,7 +2871,7 @@ var CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCe
 	},
 }
 
-// Attribute map for RequiredOneOfField --> Choice
+// Attribute map for OneOfField --> Choice
 var CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsCertParamsTlsConfigChoiceModelAttributeMap = map[string]attr.Type{
 
 	"custom_security": types.ObjectType{
@@ -2999,7 +2999,7 @@ var CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsIn
 	},
 }
 
-// Attribute map for RequiredOneOfField --> Choice
+// Attribute map for OneOfField --> Choice
 var CdnLoadbalancerLoadbalancerTypeHttpsTlsCertOptionsTlsCertificatesChoiceTlsInlineParamsTlsConfigChoiceModelAttributeMap = map[string]attr.Type{
 
 	"custom_security": types.ObjectType{
@@ -3044,7 +3044,7 @@ var CdnLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigModelAttributeMap = map
 	},
 }
 
-// Attribute map for RequiredOneOfField --> Choice
+// Attribute map for OneOfField --> Choice
 var CdnLoadbalancerLoadbalancerTypeHttpsAutoCertTlsConfigChoiceModelAttributeMap = map[string]attr.Type{
 
 	"tls_11_plus": types.BoolType,
@@ -3141,7 +3141,7 @@ var CdnLoadbalancerOriginPoolPublicNameModelAttributeMap = map[string]attr.Type{
 	"refresh_interval": types.Int64Type,
 }
 
-// Attribute map for RequiredOneOfField --> TlsChoice
+// Attribute map for OneOfField --> TlsChoice
 var CdnLoadbalancerOriginPoolTlsChoiceModelAttributeMap = map[string]attr.Type{
 
 	"no_tls":  types.BoolType,
@@ -3384,7 +3384,7 @@ var CdnLoadbalancerProtectedCookiesModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> CookieTampering
+// Attribute map for OneOfField --> CookieTampering
 var CdnLoadbalancerProtectedCookiesCookieTamperingModelAttributeMap = map[string]attr.Type{
 
 	"disable_tampering_protection": types.BoolType,
@@ -3722,7 +3722,7 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesClientMatcherModel
 	},
 }
 
-// Attribute map for RequiredOneOfField --> ClientChoice
+// Attribute map for OneOfField --> ClientChoice
 var CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesClientMatcherClientChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_client": types.BoolType,
@@ -3750,7 +3750,7 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesClientMatcherClien
 	},
 }
 
-// Attribute map for RequiredOneOfField --> IpAsnChoice
+// Attribute map for OneOfField --> IpAsnChoice
 var CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesClientMatcherIpAsnChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_ip": types.BoolType,
@@ -3833,7 +3833,7 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesClientMatcherTlsFi
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DomainChoice
+// Attribute map for OneOfField --> DomainChoice
 var CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesDomainChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_domain":      types.BoolType,
@@ -3863,7 +3863,7 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRateLimiterChoiceI
 	},
 }
 
-// Attribute map for RequiredOneOfField --> CountByChoice
+// Attribute map for OneOfField --> CountByChoice
 var CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRateLimiterChoiceInlineRateLimiterCountByChoiceModelAttributeMap = map[string]attr.Type{
 
 	"ref_user_id": types.ObjectType{
@@ -4061,7 +4061,7 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesRequestMatcherQuer
 	},
 }
 
-// Attribute map for RequiredOneOfField --> IpAllowedListChoice
+// Attribute map for OneOfField --> IpAllowedListChoice
 var CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceModelAttributeMap = map[string]attr.Type{
 
 	"bypass_rate_limiting_rules": types.ObjectType{
@@ -4263,7 +4263,7 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimit
 	},
 }
 
-// Attribute map for RequiredOneOfField --> ClientChoice
+// Attribute map for OneOfField --> ClientChoice
 var CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesClientMatcherClientChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_client": types.BoolType,
@@ -4291,7 +4291,7 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimit
 	},
 }
 
-// Attribute map for RequiredOneOfField --> IpAsnChoice
+// Attribute map for OneOfField --> IpAsnChoice
 var CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesClientMatcherIpAsnChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_ip": types.BoolType,
@@ -4374,7 +4374,7 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimit
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DestinationType
+// Attribute map for OneOfField --> DestinationType
 var CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesDestinationTypeModelAttributeMap = map[string]attr.Type{
 
 	"any_url": types.BoolType,
@@ -4404,7 +4404,7 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimit
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DomainChoice
+// Attribute map for OneOfField --> DomainChoice
 var CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesDomainChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_domain":      types.BoolType,
@@ -4721,7 +4721,7 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesClientMatcherModelAt
 	},
 }
 
-// Attribute map for RequiredOneOfField --> ClientChoice
+// Attribute map for OneOfField --> ClientChoice
 var CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesClientMatcherClientChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_client": types.BoolType,
@@ -4749,7 +4749,7 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesClientMatcherClientC
 	},
 }
 
-// Attribute map for RequiredOneOfField --> IpAsnChoice
+// Attribute map for OneOfField --> IpAsnChoice
 var CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesClientMatcherIpAsnChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_ip": types.BoolType,
@@ -4832,7 +4832,7 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesClientMatcherTlsFing
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DomainChoice
+// Attribute map for OneOfField --> DomainChoice
 var CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesDomainChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_domain":      types.BoolType,
@@ -4862,7 +4862,7 @@ var CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRateLimiterChoiceInl
 	},
 }
 
-// Attribute map for RequiredOneOfField --> CountByChoice
+// Attribute map for OneOfField --> CountByChoice
 var CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesRateLimiterChoiceInlineRateLimiterCountByChoiceModelAttributeMap = map[string]attr.Type{
 
 	"ref_user_id": types.ObjectType{
@@ -5082,7 +5082,7 @@ var CdnLoadbalancerRateLimitChoiceRateLimitModelAttributeMap = map[string]attr.T
 	},
 }
 
-// Attribute map for RequiredOneOfField --> IpAllowedListChoice
+// Attribute map for OneOfField --> IpAllowedListChoice
 var CdnLoadbalancerRateLimitChoiceRateLimitIpAllowedListChoiceModelAttributeMap = map[string]attr.Type{
 
 	"custom_ip_allowed_list": types.ObjectType{
@@ -5120,7 +5120,7 @@ var CdnLoadbalancerRateLimitChoiceRateLimitIpAllowedListChoiceIpAllowedListModel
 	},
 }
 
-// Attribute map for RequiredOneOfField --> PolicyChoice
+// Attribute map for OneOfField --> PolicyChoice
 var CdnLoadbalancerRateLimitChoiceRateLimitPolicyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"no_policies": types.BoolType,
@@ -5247,7 +5247,7 @@ var CdnLoadbalancerServicePolicyChoiceActiveServicePoliciesModelAttributeMap = m
 	},
 }
 
-// Attribute map for RequiredOneOfField --> SlowDdosMitigationChoice
+// Attribute map for OneOfField --> SlowDdosMitigationChoice
 var CdnLoadbalancerSlowDdosMitigationChoiceModelAttributeMap = map[string]attr.Type{
 
 	"slow_ddos_mitigation": types.ObjectType{
@@ -5359,7 +5359,7 @@ var CdnLoadbalancerUserIdChoiceUserIdentificationModelAttributeMap = map[string]
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> WafChoice
+// Attribute map for OneOfField --> WafChoice
 var CdnLoadbalancerWafChoiceModelAttributeMap = map[string]attr.Type{
 
 	"app_firewall": types.ObjectType{
@@ -5443,7 +5443,7 @@ var CdnLoadbalancerWafExclusionWafExclusionChoiceWafExclusionInlineRulesRulesMod
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DomainChoice
+// Attribute map for OneOfField --> DomainChoice
 var CdnLoadbalancerWafExclusionWafExclusionChoiceWafExclusionInlineRulesRulesDomainChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_domain":   types.BoolType,
@@ -5458,7 +5458,7 @@ var CdnLoadbalancerWafExclusionWafExclusionChoiceWafExclusionInlineRulesRulesMet
 	"name":        types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> PathChoice
+// Attribute map for OneOfField --> PathChoice
 var CdnLoadbalancerWafExclusionWafExclusionChoiceWafExclusionInlineRulesRulesPathChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_path":    types.BoolType,
@@ -5781,7 +5781,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 						},
 						"client_source_choice": schema.SingleNestedAttribute{
 							Description:         "Client Identifier Client identifier that should be used for the client rule",
-							MarkdownDescription: "Client Identifier Client identifier that should be used for the client rule",
+							MarkdownDescription: "Client Identifier Client identifier that should be used for the client rule<br>Exactly one of `as_number`, `http_header`, `ip_prefix`, `ipv6_prefix`, or `user_identifier` must be specified.",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
@@ -5797,7 +5797,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 							Attributes: map[string]schema.Attribute{
 								"as_number": schema.Int64Attribute{
 									Description:         "as number RFC 6793 defined 4-byte AS number",
-									MarkdownDescription: "as number RFC 6793 defined 4-byte AS number",
+									MarkdownDescription: "as number RFC 6793 defined 4-byte AS number<br>Conflicts with `http_header`, `ip_prefix`, `ipv6_prefix`, and `user_identifier`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -5807,7 +5807,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								},
 								"http_header": schema.SingleNestedAttribute{
 									Description:         "HTTP Header Request header name and value pairs",
-									MarkdownDescription: "HTTP Header Request header name and value pairs",
+									MarkdownDescription: "HTTP Header Request header name and value pairs<br>Conflicts with `as_number`, `ip_prefix`, `ipv6_prefix`, and `user_identifier`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -5847,7 +5847,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 													},
 													"value_match_choice": schema.SingleNestedAttribute{
 														Description:         "value_match The variants of matching a header value",
-														MarkdownDescription: "value_match The variants of matching a header value",
+														MarkdownDescription: "value_match The variants of matching a header value<br>Exactly one of `exact`, `presence`, or `regex` must be specified when `value_match_choice` is configured.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -5861,7 +5861,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														Attributes: map[string]schema.Attribute{
 															"exact": schema.StringAttribute{
 																Description:         "exact Header value to match exactly",
-																MarkdownDescription: "exact Header value to match exactly",
+																MarkdownDescription: "exact Header value to match exactly<br>Conflicts with `presence` and `regex`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -5872,14 +5872,14 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 															},
 															"presence": schema.BoolAttribute{
 																Description:         "presence If true, check for presence of header",
-																MarkdownDescription: "presence If true, check for presence of header",
+																MarkdownDescription: "presence If true, check for presence of header<br>Conflicts with `exact` and `regex`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
 															},
 															"regex": schema.StringAttribute{
 																Description:         "regex Regex match of the header value in re2 format",
-																MarkdownDescription: "regex Regex match of the header value in re2 format",
+																MarkdownDescription: "regex Regex match of the header value in re2 format<br>Conflicts with `exact` and `presence`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -5896,7 +5896,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								},
 								"ip_prefix": schema.StringAttribute{
 									Description:         "ip prefix IPv4 prefix string.",
-									MarkdownDescription: "ip prefix IPv4 prefix string.",
+									MarkdownDescription: "ip prefix IPv4 prefix string.<br>Conflicts with `as_number`, `http_header`, `ipv6_prefix`, and `user_identifier`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -5909,7 +5909,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								},
 								"ipv6_prefix": schema.StringAttribute{
 									Description:         "ipv6 prefix IPv6 prefix string.",
-									MarkdownDescription: "ipv6 prefix IPv6 prefix string.",
+									MarkdownDescription: "ipv6 prefix IPv6 prefix string.<br>Conflicts with `as_number`, `http_header`, `ip_prefix`, and `user_identifier`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -5922,7 +5922,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								},
 								"user_identifier": schema.StringAttribute{
 									Description:         "user identifier Identify user based on user identifier. User identifier value needs to be copied from security event.",
-									MarkdownDescription: "user identifier Identify user based on user identifier. User identifier value needs to be copied from security event.<br>**Validation:** `Length LengthAtMost(256)`",
+									MarkdownDescription: "user identifier Identify user based on user identifier. User identifier value needs to be copied from security event.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `as_number`, `http_header`, `ip_prefix`, and `ipv6_prefix`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -5989,7 +5989,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 			},
 			"challenge_type_choice": schema.SingleNestedAttribute{
 				Description:         "Challenge Type Malicious User Mitigation is an adaptive response and risk-based challenge capability. Enabling this feature would automatically serve different challenges such as JavaScript challenge, Captcha challenge or block temporarily based on the threat level of the malicious user. Policy based challenge can be used to selectively enable or disable JavaScript or Captcha challenge on a specific client and request match criteria",
-				MarkdownDescription: "Challenge Type Malicious User Mitigation is an adaptive response and risk-based challenge capability. Enabling this feature would automatically serve different challenges such as JavaScript challenge, Captcha challenge or block temporarily based on the threat level of the malicious user. Policy based challenge can be used to selectively enable or disable JavaScript or Captcha challenge on a specific client and request match criteria",
+				MarkdownDescription: "Challenge Type Malicious User Mitigation is an adaptive response and risk-based challenge capability. Enabling this feature would automatically serve different challenges such as JavaScript challenge, Captcha challenge or block temporarily based on the threat level of the malicious user. Policy based challenge can be used to selectively enable or disable JavaScript or Captcha challenge on a specific client and request match criteria<br>Exactly one of `captcha_challenge`, `enable_challenge`, `js_challenge`, `no_challenge`, or `policy_based_challenge` must be specified when `challenge_type_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
@@ -6008,7 +6008,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 				Attributes: map[string]schema.Attribute{
 					"captcha_challenge": schema.SingleNestedAttribute{
 						Description:         "Captcha Challenge Configure Captcha challenge on this load balancer",
-						MarkdownDescription: "Captcha Challenge Configure Captcha challenge on this load balancer",
+						MarkdownDescription: "Captcha Challenge Configure Captcha challenge on this load balancer<br>Conflicts with `enable_challenge`, `js_challenge`, `no_challenge`, and `policy_based_challenge`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -6042,14 +6042,14 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"enable_challenge": schema.SingleNestedAttribute{
 						Description:         "Enable Configure auto mitigation i.e risk based challenges for malicious users for this load balancer",
-						MarkdownDescription: "Enable Configure auto mitigation i.e risk based challenges for malicious users for this load balancer",
+						MarkdownDescription: "Enable Configure auto mitigation i.e risk based challenges for malicious users for this load balancer<br>Conflicts with `captcha_challenge`, `js_challenge`, `no_challenge`, and `policy_based_challenge`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"captcha_challenge_parameters_choice": schema.SingleNestedAttribute{
 								Description:         "Captcha challenge parameters choice Select Default or Custom Parameters",
-								MarkdownDescription: "Captcha challenge parameters choice Select Default or Custom Parameters",
+								MarkdownDescription: "Captcha challenge parameters choice Select Default or Custom Parameters<br>Exactly one of `captcha_challenge_parameters` or `default_captcha_challenge_parameters` must be specified when `captcha_challenge_parameters_choice` is configured.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -6062,7 +6062,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								Attributes: map[string]schema.Attribute{
 									"captcha_challenge_parameters": schema.SingleNestedAttribute{
 										Description:         "Captcha Challenge Configure captcha challenge parameters",
-										MarkdownDescription: "Captcha Challenge Configure captcha challenge parameters",
+										MarkdownDescription: "Captcha Challenge Configure captcha challenge parameters<br>Conflicts with `default_captcha_challenge_parameters`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6096,7 +6096,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 									},
 									"default_captcha_challenge_parameters": schema.BoolAttribute{
 										Description:         "default parameters Use default parameters",
-										MarkdownDescription: "default parameters Use default parameters",
+										MarkdownDescription: "default parameters Use default parameters<br>Conflicts with `captcha_challenge_parameters`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6108,7 +6108,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 							},
 							"js_challenge_parameters_choice": schema.SingleNestedAttribute{
 								Description:         "JavaScript challenge parameters choice Select Default or Custom Parameters",
-								MarkdownDescription: "JavaScript challenge parameters choice Select Default or Custom Parameters",
+								MarkdownDescription: "JavaScript challenge parameters choice Select Default or Custom Parameters<br>Exactly one of `default_js_challenge_parameters` or `js_challenge_parameters` must be specified when `js_challenge_parameters_choice` is configured.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -6121,7 +6121,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								Attributes: map[string]schema.Attribute{
 									"default_js_challenge_parameters": schema.BoolAttribute{
 										Description:         "default parameters Use default parameters",
-										MarkdownDescription: "default parameters Use default parameters",
+										MarkdownDescription: "default parameters Use default parameters<br>Conflicts with `js_challenge_parameters`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6131,7 +6131,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 									},
 									"js_challenge_parameters": schema.SingleNestedAttribute{
 										Description:         "JavaScript Challenge Configure JavaScript challenge parameters",
-										MarkdownDescription: "JavaScript Challenge Configure JavaScript challenge parameters",
+										MarkdownDescription: "JavaScript Challenge Configure JavaScript challenge parameters<br>Conflicts with `default_js_challenge_parameters`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6178,7 +6178,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 							},
 							"malicious_user_mitigation_choice": schema.SingleNestedAttribute{
 								Description:         "Malicious user mitigation choice Settings that specify the actions to be taken when malicious users are determined to be at different threat levels. User's activity is monitored and continuously analyzed for malicious behavior. From this analysis, a threat-level is assigned to each user. The settings defined in malicious user mitigation specify what mitigation actions to take for user determined to be at different threat levels.",
-								MarkdownDescription: "Malicious user mitigation choice Settings that specify the actions to be taken when malicious users are determined to be at different threat levels. User's activity is monitored and continuously analyzed for malicious behavior. From this analysis, a threat-level is assigned to each user. The settings defined in malicious user mitigation specify what mitigation actions to take for user determined to be at different threat levels.",
+								MarkdownDescription: "Malicious user mitigation choice Settings that specify the actions to be taken when malicious users are determined to be at different threat levels. User's activity is monitored and continuously analyzed for malicious behavior. From this analysis, a threat-level is assigned to each user. The settings defined in malicious user mitigation specify what mitigation actions to take for user determined to be at different threat levels.<br>Exactly one of `default_mitigation_settings` or `malicious_user_mitigation` must be specified when `malicious_user_mitigation_choice` is configured.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -6191,7 +6191,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								Attributes: map[string]schema.Attribute{
 									"default_mitigation_settings": schema.BoolAttribute{
 										Description:         "default parameters For low threat level, JavaScript Challenge will be applied. For medium threat level, Captcha Challenge will be applied. For high level, users will be temporarily blocked.",
-										MarkdownDescription: "default parameters For low threat level, JavaScript Challenge will be applied. For medium threat level, Captcha Challenge will be applied. For high level, users will be temporarily blocked.",
+										MarkdownDescription: "default parameters For low threat level, JavaScript Challenge will be applied. For medium threat level, Captcha Challenge will be applied. For high level, users will be temporarily blocked.<br>Conflicts with `malicious_user_mitigation`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6201,7 +6201,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 									},
 									"malicious_user_mitigation": schema.SingleNestedAttribute{
 										Description:         "Malicious User Mitigation Define the mitigation actions to be taken for different threat levels",
-										MarkdownDescription: "Malicious User Mitigation Define the mitigation actions to be taken for different threat levels",
+										MarkdownDescription: "Malicious User Mitigation Define the mitigation actions to be taken for different threat levels<br>Conflicts with `default_mitigation_settings`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6238,7 +6238,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"js_challenge": schema.SingleNestedAttribute{
 						Description:         "JavaScript Challenge Configure JavaScript challenge on this load balancer",
-						MarkdownDescription: "JavaScript Challenge Configure JavaScript challenge on this load balancer",
+						MarkdownDescription: "JavaScript Challenge Configure JavaScript challenge on this load balancer<br>Conflicts with `captcha_challenge`, `enable_challenge`, `no_challenge`, and `policy_based_challenge`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -6283,7 +6283,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"no_challenge": schema.BoolAttribute{
 						Description:         "Disable No challenge is enabled for this load balancer",
-						MarkdownDescription: "Disable No challenge is enabled for this load balancer",
+						MarkdownDescription: "Disable No challenge is enabled for this load balancer<br>Conflicts with `captcha_challenge`, `enable_challenge`, `js_challenge`, and `policy_based_challenge`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -6293,14 +6293,14 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"policy_based_challenge": schema.SingleNestedAttribute{
 						Description:         "policy based challenge Specifies the settings for policy rule based challenge",
-						MarkdownDescription: "policy based challenge Specifies the settings for policy rule based challenge",
+						MarkdownDescription: "policy based challenge Specifies the settings for policy rule based challenge<br>Conflicts with `captcha_challenge`, `enable_challenge`, `js_challenge`, and `no_challenge`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"captcha_challenge_parameters_choice": schema.SingleNestedAttribute{
 								Description:         "Captcha challenge parameters choice Select Default or Custom Parameters",
-								MarkdownDescription: "Captcha challenge parameters choice Select Default or Custom Parameters",
+								MarkdownDescription: "Captcha challenge parameters choice Select Default or Custom Parameters<br>Exactly one of `captcha_challenge_parameters` or `default_captcha_challenge_parameters` must be specified when `captcha_challenge_parameters_choice` is configured.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -6313,7 +6313,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								Attributes: map[string]schema.Attribute{
 									"captcha_challenge_parameters": schema.SingleNestedAttribute{
 										Description:         "Captcha Challenge Configure captcha challenge parameters",
-										MarkdownDescription: "Captcha Challenge Configure captcha challenge parameters",
+										MarkdownDescription: "Captcha Challenge Configure captcha challenge parameters<br>Conflicts with `default_captcha_challenge_parameters`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6347,7 +6347,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 									},
 									"default_captcha_challenge_parameters": schema.BoolAttribute{
 										Description:         "default parameters Use default parameters",
-										MarkdownDescription: "default parameters Use default parameters",
+										MarkdownDescription: "default parameters Use default parameters<br>Conflicts with `captcha_challenge_parameters`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6359,21 +6359,24 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 							},
 							"challenge_choice": schema.SingleNestedAttribute{
 								Description:         "challenge choice Selection of different types of challenge. Selecting javascript or captcha shallenge will enable it for all traffic served by this load balancer. Policy based challenge can be used to define policy rules to enable or bypass challenge.",
-								MarkdownDescription: "challenge choice Selection of different types of challenge. Selecting javascript or captcha shallenge will enable it for all traffic served by this load balancer. Policy based challenge can be used to define policy rules to enable or bypass challenge.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "challenge choice Selection of different types of challenge. Selecting javascript or captcha shallenge will enable it for all traffic served by this load balancer. Policy based challenge can be used to define policy rules to enable or bypass challenge.<br>Exactly one of `always_enable_captcha_challenge`, `always_enable_js_challenge`, or `no_challenge` must be specified when `challenge_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"always_enable_captcha_challenge",
 										"always_enable_js_challenge",
 										"no_challenge",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"always_enable_captcha_challenge": schema.BoolAttribute{
 										Description:         "always enable captcha challenge Enable Captcha challenge for all requests. Challenge rules can be used to selectively disable Captcha challenge or enable JavaScript challenge for some requests.",
-										MarkdownDescription: "always enable captcha challenge Enable Captcha challenge for all requests. Challenge rules can be used to selectively disable Captcha challenge or enable JavaScript challenge for some requests.",
+										MarkdownDescription: "always enable captcha challenge Enable Captcha challenge for all requests. Challenge rules can be used to selectively disable Captcha challenge or enable JavaScript challenge for some requests.<br>Conflicts with `always_enable_js_challenge` and `no_challenge`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6383,7 +6386,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 									},
 									"always_enable_js_challenge": schema.BoolAttribute{
 										Description:         "always enable JS challenge Enable JavaScript challenge for all requests. Challenge rules can be used to selectively disable JavaScript challenge or enable Captcha challenge for some requests.",
-										MarkdownDescription: "always enable JS challenge Enable JavaScript challenge for all requests. Challenge rules can be used to selectively disable JavaScript challenge or enable Captcha challenge for some requests.",
+										MarkdownDescription: "always enable JS challenge Enable JavaScript challenge for all requests. Challenge rules can be used to selectively disable JavaScript challenge or enable Captcha challenge for some requests.<br>Conflicts with `always_enable_captcha_challenge` and `no_challenge`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6393,7 +6396,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 									},
 									"no_challenge": schema.BoolAttribute{
 										Description:         "no_challenge Disable JavaScript and Captcha challenge for all requests. Challenge rules can be used to selectively enable JavaScript or Captcha challenge for some requests.",
-										MarkdownDescription: "no_challenge Disable JavaScript and Captcha challenge for all requests. Challenge rules can be used to selectively enable JavaScript or Captcha challenge for some requests.",
+										MarkdownDescription: "no_challenge Disable JavaScript and Captcha challenge for all requests. Challenge rules can be used to selectively enable JavaScript or Captcha challenge for some requests.<br>Conflicts with `always_enable_captcha_challenge` and `always_enable_js_challenge`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6405,7 +6408,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 							},
 							"js_challenge_parameters_choice": schema.SingleNestedAttribute{
 								Description:         "JavaScript challenge parameters choice Select Default or Custom Parameters",
-								MarkdownDescription: "JavaScript challenge parameters choice Select Default or Custom Parameters",
+								MarkdownDescription: "JavaScript challenge parameters choice Select Default or Custom Parameters<br>Exactly one of `default_js_challenge_parameters` or `js_challenge_parameters` must be specified when `js_challenge_parameters_choice` is configured.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -6418,7 +6421,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								Attributes: map[string]schema.Attribute{
 									"default_js_challenge_parameters": schema.BoolAttribute{
 										Description:         "default parameters Use default parameters",
-										MarkdownDescription: "default parameters Use default parameters",
+										MarkdownDescription: "default parameters Use default parameters<br>Conflicts with `js_challenge_parameters`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6428,7 +6431,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 									},
 									"js_challenge_parameters": schema.SingleNestedAttribute{
 										Description:         "JavaScript Challenge Configure JavaScript challenge parameters",
-										MarkdownDescription: "JavaScript Challenge Configure JavaScript challenge parameters",
+										MarkdownDescription: "JavaScript Challenge Configure JavaScript challenge parameters<br>Conflicts with `default_js_challenge_parameters`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6475,7 +6478,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 							},
 							"malicious_user_mitigation_choice": schema.SingleNestedAttribute{
 								Description:         "Malicious user mitigation choice Settings that specify the actions to be taken when malicious users are determined to be at different threat levels. User's activity is monitored and continuously analyzed for malicious behavior. From this analysis, a threat-level is assigned to each user. The settings defined in malicious user mitigation specify what mitigation actions to take for user determined to be at different threat levels.",
-								MarkdownDescription: "Malicious user mitigation choice Settings that specify the actions to be taken when malicious users are determined to be at different threat levels. User's activity is monitored and continuously analyzed for malicious behavior. From this analysis, a threat-level is assigned to each user. The settings defined in malicious user mitigation specify what mitigation actions to take for user determined to be at different threat levels.",
+								MarkdownDescription: "Malicious user mitigation choice Settings that specify the actions to be taken when malicious users are determined to be at different threat levels. User's activity is monitored and continuously analyzed for malicious behavior. From this analysis, a threat-level is assigned to each user. The settings defined in malicious user mitigation specify what mitigation actions to take for user determined to be at different threat levels.<br>Exactly one of `default_mitigation_settings` or `malicious_user_mitigation` must be specified when `malicious_user_mitigation_choice` is configured.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -6488,7 +6491,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								Attributes: map[string]schema.Attribute{
 									"default_mitigation_settings": schema.BoolAttribute{
 										Description:         "default parameters For low threat level, JavaScript Challenge will be applied. For medium threat level, Captcha Challenge will be applied. For high level, users will be temporarily blocked.",
-										MarkdownDescription: "default parameters For low threat level, JavaScript Challenge will be applied. For medium threat level, Captcha Challenge will be applied. For high level, users will be temporarily blocked.",
+										MarkdownDescription: "default parameters For low threat level, JavaScript Challenge will be applied. For medium threat level, Captcha Challenge will be applied. For high level, users will be temporarily blocked.<br>Conflicts with `malicious_user_mitigation`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6498,7 +6501,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 									},
 									"malicious_user_mitigation": schema.SingleNestedAttribute{
 										Description:         "Malicious User Mitigation Define the mitigation actions to be taken for different threat levels",
-										MarkdownDescription: "Malicious User Mitigation Define the mitigation actions to be taken for different threat levels",
+										MarkdownDescription: "Malicious User Mitigation Define the mitigation actions to be taken for different threat levels<br>Conflicts with `default_mitigation_settings`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6610,7 +6613,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																	},
 																	"match_choice": schema.SingleNestedAttribute{
 																		Description:         "match Select Match Options.",
-																		MarkdownDescription: "match Select Match Options.",
+																		MarkdownDescription: "match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified.",
 																		Required:            true,
 																		Optional:            false,
 																		Computed:            false,
@@ -6624,7 +6627,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																		Attributes: map[string]schema.Attribute{
 																			"check_not_present": schema.BoolAttribute{
 																				Description:         "check_not_present Check that the argument is not present.",
-																				MarkdownDescription: "check_not_present Check that the argument is not present.",
+																				MarkdownDescription: "check_not_present Check that the argument is not present.<br>Conflicts with `check_present` and `item`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -6634,7 +6637,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																			},
 																			"check_present": schema.BoolAttribute{
 																				Description:         "check_present Check that the argument is present.",
-																				MarkdownDescription: "check_present Check that the argument is present.",
+																				MarkdownDescription: "check_present Check that the argument is present.<br>Conflicts with `check_not_present` and `item`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -6644,7 +6647,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																			},
 																			"item": schema.SingleNestedAttribute{
 																				Description:         "item Criteria for matching the values for the Arg. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
-																				MarkdownDescription: "item Criteria for matching the values for the Arg. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
+																				MarkdownDescription: "item Criteria for matching the values for the Arg. The match is successful if any of the values in the input satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -6696,7 +6699,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"asn_choice": schema.SingleNestedAttribute{
 															Description:         "",
-															MarkdownDescription: "",
+															MarkdownDescription: "Exactly one of `any_asn`, `asn_list`, or `asn_matcher` must be specified when `asn_choice` is configured.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -6710,7 +6713,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 															Attributes: map[string]schema.Attribute{
 																"any_asn": schema.BoolAttribute{
 																	Description:         "",
-																	MarkdownDescription: "",
+																	MarkdownDescription: "Conflicts with `asn_list` and `asn_matcher`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -6720,7 +6723,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"asn_list": schema.SingleNestedAttribute{
 																	Description:         "",
-																	MarkdownDescription: "",
+																	MarkdownDescription: "Conflicts with `any_asn` and `asn_matcher`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -6741,7 +6744,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"asn_matcher": schema.SingleNestedAttribute{
 																	Description:         "",
-																	MarkdownDescription: "",
+																	MarkdownDescription: "Conflicts with `any_asn` and `asn_list`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -6827,21 +6830,24 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"challenge_action_choice": schema.SingleNestedAttribute{
 															Description:         "Select Action Type Select challenge action, enable or disable challenge When enabled, the challenge type selected in PolicyBasedChallenge will be launched when match conditions in this challenge rule are met When the challenge type selected in PolicyBasedChallenge is always enable JS/Captcha challenge, the challenge can be disabled for certain requests which match the predicates defined in this rule by setting the action to disable_challenge",
-															MarkdownDescription: "Select Action Type Select challenge action, enable or disable challenge When enabled, the challenge type selected in PolicyBasedChallenge will be launched when match conditions in this challenge rule are met When the challenge type selected in PolicyBasedChallenge is always enable JS/Captcha challenge, the challenge can be disabled for certain requests which match the predicates defined in this rule by setting the action to disable_challenge",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
+															MarkdownDescription: "Select Action Type Select challenge action, enable or disable challenge When enabled, the challenge type selected in PolicyBasedChallenge will be launched when match conditions in this challenge rule are met When the challenge type selected in PolicyBasedChallenge is always enable JS/Captcha challenge, the challenge can be disabled for certain requests which match the predicates defined in this rule by setting the action to disable_challenge<br>Exactly one of `disable_challenge`, `enable_captcha_challenge`, or `enable_javascript_challenge` must be specified when `challenge_action_choice` is configured.",
+															Required:            false,
+															Optional:            true,
+															Computed:            true,
 															Validators: []validator.Object{
-																exactlyoneofvalidator.RequiredExactlyOneOf(
+																exactlyoneofvalidator.ExactlyOneOf(
 																	"disable_challenge",
 																	"enable_captcha_challenge",
 																	"enable_javascript_challenge",
 																),
 															},
+															PlanModifiers: []planmodifier.Object{
+																objectplanmodifier.UseNonNullStateForUnknown(),
+															},
 															Attributes: map[string]schema.Attribute{
 																"disable_challenge": schema.BoolAttribute{
 																	Description:         "Disable challenge Disable the challenge type selected in PolicyBasedChallenge",
-																	MarkdownDescription: "Disable challenge Disable the challenge type selected in PolicyBasedChallenge",
+																	MarkdownDescription: "Disable challenge Disable the challenge type selected in PolicyBasedChallenge<br>Conflicts with `enable_captcha_challenge` and `enable_javascript_challenge`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -6851,7 +6857,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"enable_captcha_challenge": schema.BoolAttribute{
 																	Description:         "Enable captcha challenge Enable captcha challenge",
-																	MarkdownDescription: "Enable captcha challenge Enable captcha challenge",
+																	MarkdownDescription: "Enable captcha challenge Enable captcha challenge<br>Conflicts with `disable_challenge` and `enable_javascript_challenge`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -6861,7 +6867,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"enable_javascript_challenge": schema.BoolAttribute{
 																	Description:         "Enable javascript challenge Enable javascript challenge",
-																	MarkdownDescription: "Enable javascript challenge Enable javascript challenge",
+																	MarkdownDescription: "Enable javascript challenge Enable javascript challenge<br>Conflicts with `disable_challenge` and `enable_captcha_challenge`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -6873,7 +6879,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"client_choice": schema.SingleNestedAttribute{
 															Description:         "",
-															MarkdownDescription: "",
+															MarkdownDescription: "Exactly one of `any_client` or `client_selector` must be specified when `client_choice` is configured.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -6886,7 +6892,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 															Attributes: map[string]schema.Attribute{
 																"any_client": schema.BoolAttribute{
 																	Description:         "",
-																	MarkdownDescription: "",
+																	MarkdownDescription: "Conflicts with `client_selector`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -6896,7 +6902,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"client_selector": schema.SingleNestedAttribute{
 																	Description:         "",
-																	MarkdownDescription: "",
+																	MarkdownDescription: "Conflicts with `any_client`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -6930,7 +6936,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																Attributes: map[string]schema.Attribute{
 																	"match_choice": schema.SingleNestedAttribute{
 																		Description:         "match Select Match Options.",
-																		MarkdownDescription: "match Select Match Options.",
+																		MarkdownDescription: "match Select Match Options.<br>`item` must be specified.",
 																		Required:            true,
 																		Optional:            false,
 																		Computed:            false,
@@ -7058,7 +7064,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																	},
 																	"match_choice": schema.SingleNestedAttribute{
 																		Description:         "match Select Match Options.",
-																		MarkdownDescription: "match Select Match Options.",
+																		MarkdownDescription: "match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified.",
 																		Required:            true,
 																		Optional:            false,
 																		Computed:            false,
@@ -7072,7 +7078,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																		Attributes: map[string]schema.Attribute{
 																			"check_not_present": schema.BoolAttribute{
 																				Description:         "check_not_present Check that the header is not present.",
-																				MarkdownDescription: "check_not_present Check that the header is not present.",
+																				MarkdownDescription: "check_not_present Check that the header is not present.<br>Conflicts with `check_present` and `item`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -7082,7 +7088,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																			},
 																			"check_present": schema.BoolAttribute{
 																				Description:         "check_present Check that the header is present.",
-																				MarkdownDescription: "check_present Check that the header is present.",
+																				MarkdownDescription: "check_present Check that the header is present.<br>Conflicts with `check_not_present` and `item`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -7092,7 +7098,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																			},
 																			"item": schema.SingleNestedAttribute{
 																				Description:         "item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
-																				MarkdownDescription: "item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
+																				MarkdownDescription: "item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -7178,7 +7184,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"ip_choice": schema.SingleNestedAttribute{
 															Description:         "",
-															MarkdownDescription: "",
+															MarkdownDescription: "Exactly one of `any_ip`, `ip_matcher`, or `ip_prefix_list` must be specified when `ip_choice` is configured.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -7192,7 +7198,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 															Attributes: map[string]schema.Attribute{
 																"any_ip": schema.BoolAttribute{
 																	Description:         "",
-																	MarkdownDescription: "",
+																	MarkdownDescription: "Conflicts with `ip_matcher` and `ip_prefix_list`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -7202,7 +7208,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"ip_matcher": schema.SingleNestedAttribute{
 																	Description:         "",
-																	MarkdownDescription: "",
+																	MarkdownDescription: "Conflicts with `any_ip` and `ip_prefix_list`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -7257,7 +7263,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"ip_prefix_list": schema.SingleNestedAttribute{
 																	Description:         "",
-																	MarkdownDescription: "",
+																	MarkdownDescription: "Conflicts with `any_ip` and `ip_matcher`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -7441,7 +7447,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																	},
 																	"match_choice": schema.SingleNestedAttribute{
 																		Description:         "match Select Match Options.",
-																		MarkdownDescription: "match Select Match Options.",
+																		MarkdownDescription: "match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified.",
 																		Required:            true,
 																		Optional:            false,
 																		Computed:            false,
@@ -7455,7 +7461,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																		Attributes: map[string]schema.Attribute{
 																			"check_not_present": schema.BoolAttribute{
 																				Description:         "check_not_present Check that the query parameter is not present.",
-																				MarkdownDescription: "check_not_present Check that the query parameter is not present.",
+																				MarkdownDescription: "check_not_present Check that the query parameter is not present.<br>Conflicts with `check_present` and `item`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -7465,7 +7471,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																			},
 																			"check_present": schema.BoolAttribute{
 																				Description:         "check_present Check that the query parameter is present.",
-																				MarkdownDescription: "check_present Check that the query parameter is present.",
+																				MarkdownDescription: "check_present Check that the query parameter is present.<br>Conflicts with `check_not_present` and `item`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -7475,7 +7481,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																			},
 																			"item": schema.SingleNestedAttribute{
 																				Description:         "item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher.",
-																				MarkdownDescription: "item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher.",
+																				MarkdownDescription: "item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -7517,7 +7523,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"tls_fingerprint_choice": schema.SingleNestedAttribute{
 															Description:         "",
-															MarkdownDescription: "",
+															MarkdownDescription: "`tls_fingerprint_matcher` must be specified when `tls_fingerprint_choice` is configured.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -7688,21 +7694,24 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 				Attributes: map[string]schema.Attribute{
 					"allowed_domains_choice": schema.SingleNestedAttribute{
 						Description:         "allowed_domains The list of source origin that should be allowed.",
-						MarkdownDescription: "allowed_domains The list of source origin that should be allowed.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "allowed_domains The list of source origin that should be allowed.<br>Exactly one of `all_load_balancer_domains`, `custom_domain_list`, or `disabled` must be specified when `allowed_domains_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"all_load_balancer_domains",
 								"custom_domain_list",
 								"disabled",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"all_load_balancer_domains": schema.BoolAttribute{
 								Description:         "all_load_balancer_domains Add All load balancer domains to source origin (allow) list.",
-								MarkdownDescription: "all_load_balancer_domains Add All load balancer domains to source origin (allow) list.",
+								MarkdownDescription: "all_load_balancer_domains Add All load balancer domains to source origin (allow) list.<br>Conflicts with `custom_domain_list` and `disabled`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -7712,7 +7721,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 							},
 							"custom_domain_list": schema.SingleNestedAttribute{
 								Description:         "custom_domain_list Add one or more domains to source origin (allow) list.",
-								MarkdownDescription: "custom_domain_list Add one or more domains to source origin (allow) list.",
+								MarkdownDescription: "custom_domain_list Add one or more domains to source origin (allow) list.<br>Conflicts with `all_load_balancer_domains` and `disabled`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -7738,7 +7747,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 							},
 							"disabled": schema.BoolAttribute{
 								Description:         "disabled Allow all source origin domains.",
-								MarkdownDescription: "disabled Allow all source origin domains.",
+								MarkdownDescription: "disabled Allow all source origin domains.<br>Conflicts with `all_load_balancer_domains` and `custom_domain_list`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -7807,20 +7816,23 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 					Attributes: map[string]schema.Attribute{
 						"action_choice": schema.SingleNestedAttribute{
 							Description:         "action choice Specify the action to be taken for the domain and path match condition.",
-							MarkdownDescription: "action choice Specify the action to be taken for the domain and path match condition.",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
+							MarkdownDescription: "action choice Specify the action to be taken for the domain and path match condition.<br>Exactly one of `apply_data_guard` or `skip_data_guard` must be specified when `action_choice` is configured.",
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
 							Validators: []validator.Object{
-								exactlyoneofvalidator.RequiredExactlyOneOf(
+								exactlyoneofvalidator.ExactlyOneOf(
 									"apply_data_guard",
 									"skip_data_guard",
 								),
 							},
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.UseNonNullStateForUnknown(),
+							},
 							Attributes: map[string]schema.Attribute{
 								"apply_data_guard": schema.BoolAttribute{
 									Description:         "apply_data_guard",
-									MarkdownDescription: "apply_data_guard",
+									MarkdownDescription: "apply_data_guard<br>Conflicts with `skip_data_guard`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -7830,7 +7842,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								},
 								"skip_data_guard": schema.BoolAttribute{
 									Description:         "skip_data_guard",
-									MarkdownDescription: "skip_data_guard",
+									MarkdownDescription: "skip_data_guard<br>Conflicts with `apply_data_guard`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -7842,21 +7854,24 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 						},
 						"domain_choice": schema.SingleNestedAttribute{
 							Description:         "Domain Domain to be matched",
-							MarkdownDescription: "Domain Domain to be matched",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
+							MarkdownDescription: "Domain Domain to be matched<br>Exactly one of `any_domain`, `exact_value`, or `suffix_value` must be specified when `domain_choice` is configured.",
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
 							Validators: []validator.Object{
-								exactlyoneofvalidator.RequiredExactlyOneOf(
+								exactlyoneofvalidator.ExactlyOneOf(
 									"any_domain",
 									"exact_value",
 									"suffix_value",
 								),
 							},
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.UseNonNullStateForUnknown(),
+							},
 							Attributes: map[string]schema.Attribute{
 								"any_domain": schema.BoolAttribute{
 									Description:         "Any domain Enable Data Guard for any domain",
-									MarkdownDescription: "Any domain Enable Data Guard for any domain",
+									MarkdownDescription: "Any domain Enable Data Guard for any domain<br>Conflicts with `exact_value` and `suffix_value`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -7866,7 +7881,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								},
 								"exact_value": schema.StringAttribute{
 									Description:         "exact value Exact domain name",
-									MarkdownDescription: "exact value Exact domain name<br>**Validation:** `Length LengthBetween(1, 256)`",
+									MarkdownDescription: "exact value Exact domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_domain` and `suffix_value`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -7880,7 +7895,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								},
 								"suffix_value": schema.StringAttribute{
 									Description:         "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'",
-									MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`",
+									MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_domain` and `exact_value`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -7936,7 +7951,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 							Attributes: map[string]schema.Attribute{
 								"path_match_choice": schema.SingleNestedAttribute{
 									Description:         "path_match A specification of path match",
-									MarkdownDescription: "path_match A specification of path match",
+									MarkdownDescription: "path_match A specification of path match<br>Exactly one of `path`, `prefix`, or `regex` must be specified.",
 									Required:            true,
 									Optional:            false,
 									Computed:            false,
@@ -7950,7 +7965,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 									Attributes: map[string]schema.Attribute{
 										"path": schema.StringAttribute{
 											Description:         "exact Exact path value to match",
-											MarkdownDescription: "exact Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`",
+											MarkdownDescription: "exact Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `prefix` and `regex`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -7964,7 +7979,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 										},
 										"prefix": schema.StringAttribute{
 											Description:         "prefix Path prefix to match (e.g. the value / will match on all paths)",
-											MarkdownDescription: "prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`",
+											MarkdownDescription: "prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `path` and `regex`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -7978,7 +7993,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 										},
 										"regex": schema.StringAttribute{
 											Description:         "regex Regular expression of path match (e.g. the value .* will match on all paths)",
-											MarkdownDescription: "regex Regular expression of path match (e.g. the value .* will match on all paths)",
+											MarkdownDescription: "regex Regular expression of path match (e.g. the value .* will match on all paths)<br>Conflicts with `path` and `prefix`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -8047,14 +8062,17 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 						},
 						"mitigation_action_choice": schema.SingleNestedAttribute{
 							Description:         "mitigation action The action to be taken for a specified mitigation choice",
-							MarkdownDescription: "mitigation action The action to be taken for a specified mitigation choice",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
+							MarkdownDescription: "mitigation action The action to be taken for a specified mitigation choice<br>`block` must be specified when `mitigation_action_choice` is configured.",
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
 							Validators: []validator.Object{
-								exactlyoneofvalidator.RequiredExactlyOneOf(
+								exactlyoneofvalidator.ExactlyOneOf(
 									"block",
 								),
+							},
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.UseNonNullStateForUnknown(),
 							},
 							Attributes: map[string]schema.Attribute{
 								"block": schema.BoolAttribute{
@@ -8071,7 +8089,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 						},
 						"mitigation_choice": schema.SingleNestedAttribute{
 							Description:         "Mitigation Choice Mitigation source to be matched",
-							MarkdownDescription: "Mitigation Choice Mitigation source to be matched",
+							MarkdownDescription: "Mitigation Choice Mitigation source to be matched<br>Exactly one of `ddos_client_source` or `ip_prefix_list` must be specified.",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
@@ -8084,7 +8102,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 							Attributes: map[string]schema.Attribute{
 								"ddos_client_source": schema.SingleNestedAttribute{
 									Description:         "ddos_client_source Combination of Region, ASN and TLS Fingerprints",
-									MarkdownDescription: "ddos_client_source Combination of Region, ASN and TLS Fingerprints",
+									MarkdownDescription: "ddos_client_source Combination of Region, ASN and TLS Fingerprints<br>Conflicts with `ip_prefix_list`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -8197,7 +8215,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								},
 								"ip_prefix_list": schema.SingleNestedAttribute{
 									Description:         "ip source IP prefix string.",
-									MarkdownDescription: "ip source IP prefix string.",
+									MarkdownDescription: "ip source IP prefix string.<br>Conflicts with `ddos_client_source`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -8260,7 +8278,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 				Attributes: map[string]schema.Attribute{
 					"cache_actions_choice": schema.SingleNestedAttribute{
 						Description:         "Cache TTL Behaviour Configure the Cache Actions for a rule.",
-						MarkdownDescription: "Cache TTL Behaviour Configure the Cache Actions for a rule.",
+						MarkdownDescription: "Cache TTL Behaviour Configure the Cache Actions for a rule.<br>Exactly one of `cache_disabled`, `cache_ttl_default`, or `cache_ttl_override` must be specified when `cache_actions_choice` is configured.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -8274,7 +8292,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 						Attributes: map[string]schema.Attribute{
 							"cache_disabled": schema.BoolAttribute{
 								Description:         "Disable Caching Ignore all caching specified by origin headers",
-								MarkdownDescription: "Disable Caching Ignore all caching specified by origin headers",
+								MarkdownDescription: "Disable Caching Ignore all caching specified by origin headers<br>Conflicts with `cache_ttl_default` and `cache_ttl_override`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -8284,7 +8302,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 							},
 							"cache_ttl_default": schema.StringAttribute{
 								Description:         "Use Cache TTL Provided by Origin Use Cache TTL Provided by Origin, and set a contigency TTL value in case one is not provided",
-								MarkdownDescription: "Use Cache TTL Provided by Origin Use Cache TTL Provided by Origin, and set a contigency TTL value in case one is not provided",
+								MarkdownDescription: "Use Cache TTL Provided by Origin Use Cache TTL Provided by Origin, and set a contigency TTL value in case one is not provided<br>Conflicts with `cache_disabled` and `cache_ttl_override`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -8297,7 +8315,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 							},
 							"cache_ttl_override": schema.StringAttribute{
 								Description:         "Override Cache TTL Provided by Origin Always override the Cahce TTL provided by Origin",
-								MarkdownDescription: "Override Cache TTL Provided by Origin Always override the Cahce TTL provided by Origin",
+								MarkdownDescription: "Override Cache TTL Provided by Origin Always override the Cahce TTL provided by Origin<br>Conflicts with `cache_disabled` and `cache_ttl_default`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -8374,21 +8392,24 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 					Attributes: map[string]schema.Attribute{
 						"domain_choice": schema.SingleNestedAttribute{
 							Description:         "Domain Domain to be matched",
-							MarkdownDescription: "Domain Domain to be matched",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
+							MarkdownDescription: "Domain Domain to be matched<br>Exactly one of `any_domain`, `exact_value`, or `suffix_value` must be specified when `domain_choice` is configured.",
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
 							Validators: []validator.Object{
-								exactlyoneofvalidator.RequiredExactlyOneOf(
+								exactlyoneofvalidator.ExactlyOneOf(
 									"any_domain",
 									"exact_value",
 									"suffix_value",
 								),
 							},
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.UseNonNullStateForUnknown(),
+							},
 							Attributes: map[string]schema.Attribute{
 								"any_domain": schema.BoolAttribute{
 									Description:         "Any domain Enable GraphQL inspection for any domain",
-									MarkdownDescription: "Any domain Enable GraphQL inspection for any domain",
+									MarkdownDescription: "Any domain Enable GraphQL inspection for any domain<br>Conflicts with `exact_value` and `suffix_value`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -8398,7 +8419,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								},
 								"exact_value": schema.StringAttribute{
 									Description:         "exact value Exact domain name",
-									MarkdownDescription: "exact value Exact domain name<br>**Validation:** `Length LengthBetween(1, 256)`",
+									MarkdownDescription: "exact value Exact domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_domain` and `suffix_value`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -8412,7 +8433,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								},
 								"suffix_value": schema.StringAttribute{
 									Description:         "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'",
-									MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`",
+									MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_domain` and `exact_value`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -8450,20 +8471,23 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 							Attributes: map[string]schema.Attribute{
 								"allow_introspection_queries_choice": schema.SingleNestedAttribute{
 									Description:         "Introspection Queries Introspection is the ability to query which resources are available in the current API schema. Enable access to the introspection endpoint.",
-									MarkdownDescription: "Introspection Queries Introspection is the ability to query which resources are available in the current API schema. Enable access to the introspection endpoint.",
-									Required:            true,
-									Optional:            false,
-									Computed:            false,
+									MarkdownDescription: "Introspection Queries Introspection is the ability to query which resources are available in the current API schema. Enable access to the introspection endpoint.<br>Exactly one of `disable_introspection` or `enable_introspection` must be specified when `allow_introspection_queries_choice` is configured.",
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
 									Validators: []validator.Object{
-										exactlyoneofvalidator.RequiredExactlyOneOf(
+										exactlyoneofvalidator.ExactlyOneOf(
 											"disable_introspection",
 											"enable_introspection",
 										),
 									},
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.UseNonNullStateForUnknown(),
+									},
 									Attributes: map[string]schema.Attribute{
 										"disable_introspection": schema.BoolAttribute{
 											Description:         "Disable Introspection Queries Disable introspection queries for the load balancer.",
-											MarkdownDescription: "Disable Introspection Queries Disable introspection queries for the load balancer.",
+											MarkdownDescription: "Disable Introspection Queries Disable introspection queries for the load balancer.<br>Conflicts with `enable_introspection`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -8473,7 +8497,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 										},
 										"enable_introspection": schema.BoolAttribute{
 											Description:         "Enable Introspection Queries Enable introspection queries for the load balancer.",
-											MarkdownDescription: "Enable Introspection Queries Enable introspection queries for the load balancer.",
+											MarkdownDescription: "Enable Introspection Queries Enable introspection queries for the load balancer.<br>Conflicts with `disable_introspection`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -8553,20 +8577,23 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 						},
 						"method_choice": schema.SingleNestedAttribute{
 							Description:         "Http Method Specifies the HTTP method used to access the GraphQL endpoint. Default value is GET.",
-							MarkdownDescription: "Http Method Specifies the HTTP method used to access the GraphQL endpoint. Default value is GET.",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
+							MarkdownDescription: "Http Method Specifies the HTTP method used to access the GraphQL endpoint. Default value is GET.<br>Exactly one of `method_get` or `method_post` must be specified when `method_choice` is configured.",
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
 							Validators: []validator.Object{
-								exactlyoneofvalidator.RequiredExactlyOneOf(
+								exactlyoneofvalidator.ExactlyOneOf(
 									"method_get",
 									"method_post",
 								),
 							},
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.UseNonNullStateForUnknown(),
+							},
 							Attributes: map[string]schema.Attribute{
 								"method_get": schema.BoolAttribute{
 									Description:         "Get",
-									MarkdownDescription: "Get",
+									MarkdownDescription: "Get<br>Conflicts with `method_post`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -8576,7 +8603,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								},
 								"method_post": schema.BoolAttribute{
 									Description:         "Post",
-									MarkdownDescription: "Post",
+									MarkdownDescription: "Post<br>Conflicts with `method_get`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -8599,7 +8626,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 			},
 			"ip_reputation_choice": schema.SingleNestedAttribute{
 				Description:         "ip_reputation IP reputation service analyzes IP threats and publishes a dynamic data set of millions of high-risk IP addresses, to protect users from inbound traffic from malicious IPs. IP threat categories include Spam Sources, Windows Exploits, Web Attacks, BotNets, Scanners, Denial of Service, Reputation, Phishing, Proxy, Mobile Threats, and TOR Proxy.",
-				MarkdownDescription: "ip_reputation IP reputation service analyzes IP threats and publishes a dynamic data set of millions of high-risk IP addresses, to protect users from inbound traffic from malicious IPs. IP threat categories include Spam Sources, Windows Exploits, Web Attacks, BotNets, Scanners, Denial of Service, Reputation, Phishing, Proxy, Mobile Threats, and TOR Proxy.",
+				MarkdownDescription: "ip_reputation IP reputation service analyzes IP threats and publishes a dynamic data set of millions of high-risk IP addresses, to protect users from inbound traffic from malicious IPs. IP threat categories include Spam Sources, Windows Exploits, Web Attacks, BotNets, Scanners, Denial of Service, Reputation, Phishing, Proxy, Mobile Threats, and TOR Proxy.<br>Exactly one of `disable_ip_reputation` or `enable_ip_reputation` must be specified when `ip_reputation_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -8612,7 +8639,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 				Attributes: map[string]schema.Attribute{
 					"disable_ip_reputation": schema.BoolAttribute{
 						Description:         "disable_ip_reputation No IP reputation configured this distribution",
-						MarkdownDescription: "disable_ip_reputation No IP reputation configured this distribution",
+						MarkdownDescription: "disable_ip_reputation No IP reputation configured this distribution<br>Conflicts with `enable_ip_reputation`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -8622,7 +8649,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"enable_ip_reputation": schema.SingleNestedAttribute{
 						Description:         "enable_ip_reputation Enable IP reputation for all requests in this distribution",
-						MarkdownDescription: "enable_ip_reputation Enable IP reputation for all requests in this distribution",
+						MarkdownDescription: "enable_ip_reputation Enable IP reputation for all requests in this distribution<br>Conflicts with `disable_ip_reputation`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -8660,14 +8687,17 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 						Attributes: map[string]schema.Attribute{
 							"action_choice": schema.SingleNestedAttribute{
 								Description:         "action Action to be taken",
-								MarkdownDescription: "action Action to be taken",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "action Action to be taken<br>`block` must be specified when `action_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"block",
 									),
+								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
 								},
 								Attributes: map[string]schema.Attribute{
 									"block": schema.BoolAttribute{
@@ -8686,7 +8716,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"jwks_configuration_choice": schema.SingleNestedAttribute{
 						Description:         "jwks_configuration Configuration of the encryption keys that are used for JWT signature validation. You can enter the JWKS locally or use a defined Authorization Server to remotely fetch JWKS automatically.",
-						MarkdownDescription: "jwks_configuration Configuration of the encryption keys that are used for JWT signature validation. You can enter the JWKS locally or use a defined Authorization Server to remotely fetch JWKS automatically.",
+						MarkdownDescription: "jwks_configuration Configuration of the encryption keys that are used for JWT signature validation. You can enter the JWKS locally or use a defined Authorization Server to remotely fetch JWKS automatically.<br>Exactly one of `authorization_server` or `jwks_config` must be specified.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -8699,7 +8729,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 						Attributes: map[string]schema.Attribute{
 							"authorization_server": schema.SingleNestedAttribute{
 								Description:         "authorization_server Automatically fetch JWKS from URI endpoint",
-								MarkdownDescription: "authorization_server Automatically fetch JWKS from URI endpoint",
+								MarkdownDescription: "authorization_server Automatically fetch JWKS from URI endpoint<br>Conflicts with `jwks_config`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -8743,7 +8773,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 							},
 							"jwks_config": schema.SingleNestedAttribute{
 								Description:         "jwks_config Manually provide JWKS",
-								MarkdownDescription: "jwks_config Manually provide JWKS",
+								MarkdownDescription: "jwks_config Manually provide JWKS<br>Conflicts with `authorization_server`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -8769,7 +8799,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 						Attributes: map[string]schema.Attribute{
 							"target_choice": schema.SingleNestedAttribute{
 								Description:         "target Define endpoints for which JWT token validation will be performed",
-								MarkdownDescription: "target Define endpoints for which JWT token validation will be performed",
+								MarkdownDescription: "target Define endpoints for which JWT token validation will be performed<br>`base_paths` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -8818,14 +8848,17 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 						Attributes: map[string]schema.Attribute{
 							"token_location_choice": schema.SingleNestedAttribute{
 								Description:         "token location Define where in the HTTP request the JWT token will be extracted",
-								MarkdownDescription: "token location Define where in the HTTP request the JWT token will be extracted",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "token location Define where in the HTTP request the JWT token will be extracted<br>`bearer_token` must be specified when `token_location_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"bearer_token",
 									),
+								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
 								},
 								Attributes: map[string]schema.Attribute{
 									"bearer_token": schema.BoolAttribute{
@@ -8846,21 +8879,24 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 			},
 			"l7_ddos_auto_mitigation_action_choice": schema.SingleNestedAttribute{
 				Description:         "L7 DDoS Auto Mitigation Action Select an action for auto mitigation",
-				MarkdownDescription: "L7 DDoS Auto Mitigation Action Select an action for auto mitigation",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "L7 DDoS Auto Mitigation Action Select an action for auto mitigation<br>Exactly one of `l7_ddos_action_block`, `l7_ddos_action_default`, or `l7_ddos_action_js_challenge` must be specified when `l7_ddos_auto_mitigation_action_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"l7_ddos_action_block",
 						"l7_ddos_action_default",
 						"l7_ddos_action_js_challenge",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"l7_ddos_action_block": schema.BoolAttribute{
 						Description:         "block Block suspicious sources",
-						MarkdownDescription: "block Block suspicious sources",
+						MarkdownDescription: "block Block suspicious sources<br>Conflicts with `l7_ddos_action_default` and `l7_ddos_action_js_challenge`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -8870,7 +8906,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"l7_ddos_action_default": schema.BoolAttribute{
 						Description:         "Default Block suspicious sources",
-						MarkdownDescription: "Default Block suspicious sources",
+						MarkdownDescription: "Default Block suspicious sources<br>Conflicts with `l7_ddos_action_block` and `l7_ddos_action_js_challenge`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -8880,7 +8916,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"l7_ddos_action_js_challenge": schema.SingleNestedAttribute{
 						Description:         "JavaScript Challenge Serve JavaScript challenge to suspicious sources",
-						MarkdownDescription: "JavaScript Challenge Serve JavaScript challenge to suspicious sources",
+						MarkdownDescription: "JavaScript Challenge Serve JavaScript challenge to suspicious sources<br>Conflicts with `l7_ddos_action_block` and `l7_ddos_action_default`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -8927,7 +8963,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 			},
 			"loadbalancer_type_choice": schema.SingleNestedAttribute{
 				Description:         "Proxy choice CDN Distribution type can be 'http' or 'https'",
-				MarkdownDescription: "Proxy choice CDN Distribution type can be 'http' or 'https'",
+				MarkdownDescription: "Proxy choice CDN Distribution type can be 'http' or 'https'<br>Exactly one of `http`, `https`, or `https_auto_cert` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -8941,7 +8977,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 				Attributes: map[string]schema.Attribute{
 					"http": schema.SingleNestedAttribute{
 						Description:         "HTTP CDN Distribution serving content over HTTP",
-						MarkdownDescription: "HTTP CDN Distribution serving content over HTTP",
+						MarkdownDescription: "HTTP CDN Distribution serving content over HTTP<br>Conflicts with `https` and `https_auto_cert`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -8958,7 +8994,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"https": schema.SingleNestedAttribute{
 						Description:         "HTTPS CDN Distribution with a custom public/private certificate. This is also known as BYOC (Bring Your Own Certificate). User is responsible for managing DNS.",
-						MarkdownDescription: "HTTPS CDN Distribution with a custom public/private certificate. This is also known as BYOC (Bring Your Own Certificate). User is responsible for managing DNS.",
+						MarkdownDescription: "HTTPS CDN Distribution with a custom public/private certificate. This is also known as BYOC (Bring Your Own Certificate). User is responsible for managing DNS.<br>Conflicts with `http` and `https_auto_cert`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -8988,7 +9024,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								Attributes: map[string]schema.Attribute{
 									"tls_certificates_choice": schema.SingleNestedAttribute{
 										Description:         "TLS Configuration TLS Certificate Configuration for downstream connections",
-										MarkdownDescription: "TLS Configuration TLS Certificate Configuration for downstream connections",
+										MarkdownDescription: "TLS Configuration TLS Certificate Configuration for downstream connections<br>Exactly one of `tls_cert_params` or `tls_inline_params` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -9001,7 +9037,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 										Attributes: map[string]schema.Attribute{
 											"tls_cert_params": schema.SingleNestedAttribute{
 												Description:         "TLS Certificates Select/Add one or more TLS Certificate objects to associate with this Load Balancer",
-												MarkdownDescription: "TLS Certificates Select/Add one or more TLS Certificate objects to associate with this Load Balancer",
+												MarkdownDescription: "TLS Certificates Select/Add one or more TLS Certificate objects to associate with this Load Balancer<br>Conflicts with `tls_inline_params`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -9054,22 +9090,25 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														Attributes: map[string]schema.Attribute{
 															"choice": schema.SingleNestedAttribute{
 																Description:         "TLS Security Level The security level for TLS handshake between client/server and the platform.",
-																MarkdownDescription: "TLS Security Level The security level for TLS handshake between client/server and the platform.",
-																Required:            true,
-																Optional:            false,
-																Computed:            false,
+																MarkdownDescription: "TLS Security Level The security level for TLS handshake between client/server and the platform.<br>Exactly one of `custom_security`, `default_security`, `low_security`, or `medium_security` must be specified when `choice` is configured.",
+																Required:            false,
+																Optional:            true,
+																Computed:            true,
 																Validators: []validator.Object{
-																	exactlyoneofvalidator.RequiredExactlyOneOf(
+																	exactlyoneofvalidator.ExactlyOneOf(
 																		"custom_security",
 																		"default_security",
 																		"low_security",
 																		"medium_security",
 																	),
 																},
+																PlanModifiers: []planmodifier.Object{
+																	objectplanmodifier.UseNonNullStateForUnknown(),
+																},
 																Attributes: map[string]schema.Attribute{
 																	"custom_security": schema.SingleNestedAttribute{
 																		Description:         "Custom Security Custom selection of TLS versions and cipher suites",
-																		MarkdownDescription: "Custom Security Custom selection of TLS versions and cipher suites",
+																		MarkdownDescription: "Custom Security Custom selection of TLS versions and cipher suites<br>Conflicts with `default_security`, `low_security`, and `medium_security`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -9116,7 +9155,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																	},
 																	"default_security": schema.BoolAttribute{
 																		Description:         "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.",
-																		MarkdownDescription: "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.",
+																		MarkdownDescription: "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.<br>Conflicts with `custom_security`, `low_security`, and `medium_security`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -9126,7 +9165,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																	},
 																	"low_security": schema.BoolAttribute{
 																		Description:         "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.",
-																		MarkdownDescription: "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.",
+																		MarkdownDescription: "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.<br>Conflicts with `custom_security`, `default_security`, and `medium_security`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -9136,7 +9175,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																	},
 																	"medium_security": schema.BoolAttribute{
 																		Description:         "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.",
-																		MarkdownDescription: "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.",
+																		MarkdownDescription: "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.<br>Conflicts with `custom_security`, `default_security`, and `low_security`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -9152,7 +9191,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 											},
 											"tls_inline_params": schema.SingleNestedAttribute{
 												Description:         "Inline TLS Parameters (legacy) Upload a TLS certificate covering all domain names for this Load Balancer",
-												MarkdownDescription: "Inline TLS Parameters (legacy) Upload a TLS certificate covering all domain names for this Load Balancer",
+												MarkdownDescription: "Inline TLS Parameters (legacy) Upload a TLS certificate covering all domain names for this Load Balancer<br>Conflicts with `tls_cert_params`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -9191,7 +9230,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"ocsp_stapling_choice": schema.SingleNestedAttribute{
 																	Description:         "OCSP Response choice OCSP Stapling choice",
-																	MarkdownDescription: "OCSP Response choice OCSP Stapling choice",
+																	MarkdownDescription: "OCSP Response choice OCSP Stapling choice<br>Exactly one of `custom_hash_algorithms`, `disable_ocsp_stapling`, or `use_system_defaults` must be specified when `ocsp_stapling_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -9205,7 +9244,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																	Attributes: map[string]schema.Attribute{
 																		"custom_hash_algorithms": schema.SingleNestedAttribute{
 																			Description:         "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.",
-																			MarkdownDescription: "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.",
+																			MarkdownDescription: "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.<br>Conflicts with `disable_ocsp_stapling` and `use_system_defaults`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -9227,7 +9266,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																		},
 																		"disable_ocsp_stapling": schema.BoolAttribute{
 																			Description:         "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.",
-																			MarkdownDescription: "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.",
+																			MarkdownDescription: "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.<br>Conflicts with `custom_hash_algorithms` and `use_system_defaults`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -9237,7 +9276,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																		},
 																		"use_system_defaults": schema.BoolAttribute{
 																			Description:         "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.",
-																			MarkdownDescription: "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.",
+																			MarkdownDescription: "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.<br>Conflicts with `custom_hash_algorithms` and `disable_ocsp_stapling`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -9256,7 +9295,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																	Attributes: map[string]schema.Attribute{
 																		"secret_info_choice": schema.SingleNestedAttribute{
 																			Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																			MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																			MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -9270,7 +9309,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																			Attributes: map[string]schema.Attribute{
 																				"blindfold_secret_info": schema.SingleNestedAttribute{
 																					Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																					MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																					MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -9310,7 +9349,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																				},
 																				"clear_secret_info": schema.SingleNestedAttribute{
 																					Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																					MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																					MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -9345,7 +9384,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																				},
 																				"none": schema.BoolAttribute{
 																					Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																					MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																					MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -9369,22 +9408,25 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														Attributes: map[string]schema.Attribute{
 															"choice": schema.SingleNestedAttribute{
 																Description:         "TLS Security Level The security level for TLS handshake between client/server and the platform.",
-																MarkdownDescription: "TLS Security Level The security level for TLS handshake between client/server and the platform.",
-																Required:            true,
-																Optional:            false,
-																Computed:            false,
+																MarkdownDescription: "TLS Security Level The security level for TLS handshake between client/server and the platform.<br>Exactly one of `custom_security`, `default_security`, `low_security`, or `medium_security` must be specified when `choice` is configured.",
+																Required:            false,
+																Optional:            true,
+																Computed:            true,
 																Validators: []validator.Object{
-																	exactlyoneofvalidator.RequiredExactlyOneOf(
+																	exactlyoneofvalidator.ExactlyOneOf(
 																		"custom_security",
 																		"default_security",
 																		"low_security",
 																		"medium_security",
 																	),
 																},
+																PlanModifiers: []planmodifier.Object{
+																	objectplanmodifier.UseNonNullStateForUnknown(),
+																},
 																Attributes: map[string]schema.Attribute{
 																	"custom_security": schema.SingleNestedAttribute{
 																		Description:         "Custom Security Custom selection of TLS versions and cipher suites",
-																		MarkdownDescription: "Custom Security Custom selection of TLS versions and cipher suites",
+																		MarkdownDescription: "Custom Security Custom selection of TLS versions and cipher suites<br>Conflicts with `default_security`, `low_security`, and `medium_security`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -9431,7 +9473,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																	},
 																	"default_security": schema.BoolAttribute{
 																		Description:         "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.",
-																		MarkdownDescription: "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.",
+																		MarkdownDescription: "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.<br>Conflicts with `custom_security`, `low_security`, and `medium_security`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -9441,7 +9483,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																	},
 																	"low_security": schema.BoolAttribute{
 																		Description:         "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.",
-																		MarkdownDescription: "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.",
+																		MarkdownDescription: "Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.<br>Conflicts with `custom_security`, `default_security`, and `medium_security`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -9451,7 +9493,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																	},
 																	"medium_security": schema.BoolAttribute{
 																		Description:         "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.",
-																		MarkdownDescription: "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.",
+																		MarkdownDescription: "Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.<br>Conflicts with `custom_security`, `default_security`, and `low_security`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -9473,7 +9515,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"https_auto_cert": schema.SingleNestedAttribute{
 						Description:         "HTTPS HTTPS based CDN Distribution serving with automatic public certificate provisioning. This requires the domains to be delegated to F5XC using Delegated Domain feature. DNS records will be managed by Volterra.",
-						MarkdownDescription: "HTTPS HTTPS based CDN Distribution serving with automatic public certificate provisioning. This requires the domains to be delegated to F5XC using Delegated Domain feature. DNS records will be managed by Volterra.",
+						MarkdownDescription: "HTTPS HTTPS based CDN Distribution serving with automatic public certificate provisioning. This requires the domains to be delegated to F5XC using Delegated Domain feature. DNS records will be managed by Volterra.<br>Conflicts with `http` and `https`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -9503,20 +9545,23 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								Attributes: map[string]schema.Attribute{
 									"choice": schema.SingleNestedAttribute{
 										Description:         "TLS Security Level The security level for TLS handshake between client/server and the platform.",
-										MarkdownDescription: "TLS Security Level The security level for TLS handshake between client/server and the platform.",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "TLS Security Level The security level for TLS handshake between client/server and the platform.<br>Exactly one of `tls_11_plus` or `tls_12_plus` must be specified when `choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"tls_11_plus",
 												"tls_12_plus",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"tls_11_plus": schema.BoolAttribute{
 												Description:         "Medium Security TLS v1.1+ with PFS ciphers and medium strength crypto algorithms.",
-												MarkdownDescription: "Medium Security TLS v1.1+ with PFS ciphers and medium strength crypto algorithms.",
+												MarkdownDescription: "Medium Security TLS v1.1+ with PFS ciphers and medium strength crypto algorithms.<br>Conflicts with `tls_12_plus`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -9526,7 +9571,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 											},
 											"tls_12_plus": schema.BoolAttribute{
 												Description:         "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.",
-												MarkdownDescription: "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.",
+												MarkdownDescription: "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.<br>Conflicts with `tls_11_plus`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -9544,7 +9589,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 			},
 			"malicious_user_detection_choice": schema.SingleNestedAttribute{
 				Description:         "Malicious User Detection Choice Malicious User Detection performs user behavior analysis and assigns a risk score and threat level of low, medium or high based on the suspicious activity of the user. The risk score of the user is decayed over time, if no further suspicious activity is noticed. The feature can be configured also via external app_type and labeling this HTTP Load Balancer. In this case external app_type configuration overrides internally disabled feature. Enabling the feature internally is allowed only when no labeling to external app_type.",
-				MarkdownDescription: "Malicious User Detection Choice Malicious User Detection performs user behavior analysis and assigns a risk score and threat level of low, medium or high based on the suspicious activity of the user. The risk score of the user is decayed over time, if no further suspicious activity is noticed. The feature can be configured also via external app_type and labeling this HTTP Load Balancer. In this case external app_type configuration overrides internally disabled feature. Enabling the feature internally is allowed only when no labeling to external app_type.",
+				MarkdownDescription: "Malicious User Detection Choice Malicious User Detection performs user behavior analysis and assigns a risk score and threat level of low, medium or high based on the suspicious activity of the user. The risk score of the user is decayed over time, if no further suspicious activity is noticed. The feature can be configured also via external app_type and labeling this HTTP Load Balancer. In this case external app_type configuration overrides internally disabled feature. Enabling the feature internally is allowed only when no labeling to external app_type.<br>Exactly one of `disable_malicious_user_detection` or `enable_malicious_user_detection` must be specified when `malicious_user_detection_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
@@ -9560,7 +9605,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 				Attributes: map[string]schema.Attribute{
 					"disable_malicious_user_detection": schema.BoolAttribute{
 						Description:         "Disable malicious user detection Disable malicious user detection for this distribution",
-						MarkdownDescription: "Disable malicious user detection Disable malicious user detection for this distribution",
+						MarkdownDescription: "Disable malicious user detection Disable malicious user detection for this distribution<br>Conflicts with `enable_malicious_user_detection`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -9570,7 +9615,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"enable_malicious_user_detection": schema.BoolAttribute{
 						Description:         "Enable malicious user detection Enable malicious user detection for all requests in this distribution",
-						MarkdownDescription: "Enable malicious user detection Enable malicious user detection for all requests in this distribution",
+						MarkdownDescription: "Enable malicious user detection Enable malicious user detection for all requests in this distribution<br>Conflicts with `disable_malicious_user_detection`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -9640,7 +9685,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 							Attributes: map[string]schema.Attribute{
 								"choice": schema.SingleNestedAttribute{
 									Description:         "Origin Server Type Various options to specify origin server",
-									MarkdownDescription: "Origin Server Type Various options to specify origin server",
+									MarkdownDescription: "Origin Server Type Various options to specify origin server<br>Exactly one of `public_ip` or `public_name` must be specified.",
 									Required:            true,
 									Optional:            false,
 									Computed:            false,
@@ -9653,14 +9698,14 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 									Attributes: map[string]schema.Attribute{
 										"public_ip": schema.SingleNestedAttribute{
 											Description:         "OriginServerPublicName Specify origin server with public IP",
-											MarkdownDescription: "OriginServerPublicName Specify origin server with public IP",
+											MarkdownDescription: "OriginServerPublicName Specify origin server with public IP<br>Conflicts with `public_name`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
 											Attributes: map[string]schema.Attribute{
 												"public_ip_choice": schema.SingleNestedAttribute{
 													Description:         "Public IP Choice Origin server public IP - either V4 or V6",
-													MarkdownDescription: "Public IP Choice Origin server public IP - either V4 or V6",
+													MarkdownDescription: "Public IP Choice Origin server public IP - either V4 or V6<br>`ip` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -9689,7 +9734,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 										},
 										"public_name": schema.SingleNestedAttribute{
 											Description:         "OriginServerPublicName Specify origin server with public DNS name",
-											MarkdownDescription: "OriginServerPublicName Specify origin server with public DNS name",
+											MarkdownDescription: "OriginServerPublicName Specify origin server with public DNS name<br>Conflicts with `public_ip`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -9781,20 +9826,23 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"tls_choice": schema.SingleNestedAttribute{
 						Description:         "Enable TLS Choice to enable TLS for origin servers",
-						MarkdownDescription: "Enable TLS Choice to enable TLS for origin servers",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "Enable TLS Choice to enable TLS for origin servers<br>Exactly one of `no_tls` or `use_tls` must be specified when `tls_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"no_tls",
 								"use_tls",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"no_tls": schema.BoolAttribute{
 								Description:         "No TLS Origin servers do not use TLS",
-								MarkdownDescription: "No TLS Origin servers do not use TLS",
+								MarkdownDescription: "No TLS Origin servers do not use TLS<br>Conflicts with `use_tls`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -9804,7 +9852,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 							},
 							"use_tls": schema.BoolAttribute{
 								Description:         "Use TLS Origin servers use TLS",
-								MarkdownDescription: "Use TLS Origin servers use TLS",
+								MarkdownDescription: "Use TLS Origin servers use TLS<br>Conflicts with `no_tls`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -9862,7 +9910,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 										},
 										"value_choice": schema.SingleNestedAttribute{
 											Description:         "value Enter Header value as string or blindfolded secret.",
-											MarkdownDescription: "value Enter Header value as string or blindfolded secret.",
+											MarkdownDescription: "value Enter Header value as string or blindfolded secret.<br>Exactly one of `secret_value` or `value` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -9875,14 +9923,14 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 											Attributes: map[string]schema.Attribute{
 												"secret_value": schema.SingleNestedAttribute{
 													Description:         "Secret Value Secret Value of the HTTP header.",
-													MarkdownDescription: "Secret Value Secret Value of the HTTP header.",
+													MarkdownDescription: "Secret Value Secret Value of the HTTP header.<br>Conflicts with `value`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"secret_info_choice": schema.SingleNestedAttribute{
 															Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-															MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+															MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -9896,7 +9944,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 															Attributes: map[string]schema.Attribute{
 																"blindfold_secret_info": schema.SingleNestedAttribute{
 																	Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																	MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																	MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -9936,7 +9984,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"clear_secret_info": schema.SingleNestedAttribute{
 																	Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																	MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																	MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -9971,7 +10019,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"none": schema.BoolAttribute{
 																	Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																	MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																	MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -9985,7 +10033,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"value": schema.StringAttribute{
 													Description:         "value Value of the HTTP header.",
-													MarkdownDescription: "value Value of the HTTP header.<br>**Validation:** `Length LengthAtMost(8096)`",
+													MarkdownDescription: "value Value of the HTTP header.<br>**Validation:** `Length LengthAtMost(8096)`<br>Conflicts with `secret_value`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -10039,7 +10087,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 										},
 										"value_choice": schema.SingleNestedAttribute{
 											Description:         "value Enter Header value as string or blindfolded secret.",
-											MarkdownDescription: "value Enter Header value as string or blindfolded secret.",
+											MarkdownDescription: "value Enter Header value as string or blindfolded secret.<br>Exactly one of `secret_value` or `value` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -10052,14 +10100,14 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 											Attributes: map[string]schema.Attribute{
 												"secret_value": schema.SingleNestedAttribute{
 													Description:         "Secret Value Secret Value of the HTTP header.",
-													MarkdownDescription: "Secret Value Secret Value of the HTTP header.",
+													MarkdownDescription: "Secret Value Secret Value of the HTTP header.<br>Conflicts with `value`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"secret_info_choice": schema.SingleNestedAttribute{
 															Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-															MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+															MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -10073,7 +10121,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 															Attributes: map[string]schema.Attribute{
 																"blindfold_secret_info": schema.SingleNestedAttribute{
 																	Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																	MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																	MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -10113,7 +10161,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"clear_secret_info": schema.SingleNestedAttribute{
 																	Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																	MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																	MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -10148,7 +10196,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"none": schema.BoolAttribute{
 																	Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																	MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																	MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -10162,7 +10210,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"value": schema.StringAttribute{
 													Description:         "value Value of the HTTP header.",
-													MarkdownDescription: "value Value of the HTTP header.<br>**Validation:** `Length LengthAtMost(8096)`",
+													MarkdownDescription: "value Value of the HTTP header.<br>**Validation:** `Length LengthAtMost(8096)`<br>Conflicts with `secret_value`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -10260,20 +10308,23 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 					Attributes: map[string]schema.Attribute{
 						"cookie_tampering_choice": schema.SingleNestedAttribute{
 							Description:         "cookie_tampering Cookie Tampering Protection prevents attackers from modifying the value of session cookies. To use this feature, Web Application Firewall must be enabled.",
-							MarkdownDescription: "cookie_tampering Cookie Tampering Protection prevents attackers from modifying the value of session cookies. To use this feature, Web Application Firewall must be enabled.",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
+							MarkdownDescription: "cookie_tampering Cookie Tampering Protection prevents attackers from modifying the value of session cookies. To use this feature, Web Application Firewall must be enabled.<br>Exactly one of `disable_tampering_protection` or `enable_tampering_protection` must be specified when `cookie_tampering_choice` is configured.",
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
 							Validators: []validator.Object{
-								exactlyoneofvalidator.RequiredExactlyOneOf(
+								exactlyoneofvalidator.ExactlyOneOf(
 									"disable_tampering_protection",
 									"enable_tampering_protection",
 								),
 							},
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.UseNonNullStateForUnknown(),
+							},
 							Attributes: map[string]schema.Attribute{
 								"disable_tampering_protection": schema.BoolAttribute{
 									Description:         "disable",
-									MarkdownDescription: "disable",
+									MarkdownDescription: "disable<br>Conflicts with `enable_tampering_protection`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -10283,7 +10334,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								},
 								"enable_tampering_protection": schema.BoolAttribute{
 									Description:         "enable",
-									MarkdownDescription: "enable",
+									MarkdownDescription: "enable<br>Conflicts with `disable_tampering_protection`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -10295,7 +10346,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 						},
 						"httponly_choice": schema.SingleNestedAttribute{
 							Description:         "httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript.",
-							MarkdownDescription: "httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript.",
+							MarkdownDescription: "httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript.<br>Exactly one of `add_httponly` or `ignore_httponly` must be specified when `httponly_choice` is configured.",
 							Required:            false,
 							Optional:            true,
 							Computed:            false,
@@ -10308,7 +10359,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 							Attributes: map[string]schema.Attribute{
 								"add_httponly": schema.BoolAttribute{
 									Description:         "add_httponly",
-									MarkdownDescription: "add_httponly",
+									MarkdownDescription: "add_httponly<br>Conflicts with `ignore_httponly`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -10318,7 +10369,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								},
 								"ignore_httponly": schema.BoolAttribute{
 									Description:         "ignore_httponly",
-									MarkdownDescription: "ignore_httponly",
+									MarkdownDescription: "ignore_httponly<br>Conflicts with `add_httponly`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -10340,7 +10391,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 						},
 						"samesite_choice": schema.SingleNestedAttribute{
 							Description:         "samesite Controls whether or not a cookie is sent with cross-site requests",
-							MarkdownDescription: "samesite Controls whether or not a cookie is sent with cross-site requests",
+							MarkdownDescription: "samesite Controls whether or not a cookie is sent with cross-site requests<br>Exactly one of `ignore_samesite`, `samesite_lax`, `samesite_none`, or `samesite_strict` must be specified when `samesite_choice` is configured.",
 							Required:            false,
 							Optional:            true,
 							Computed:            false,
@@ -10355,7 +10406,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 							Attributes: map[string]schema.Attribute{
 								"ignore_samesite": schema.BoolAttribute{
 									Description:         "ignore_samesite Ignore Samesite attribute",
-									MarkdownDescription: "ignore_samesite Ignore Samesite attribute",
+									MarkdownDescription: "ignore_samesite Ignore Samesite attribute<br>Conflicts with `samesite_lax`, `samesite_none`, and `samesite_strict`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -10365,7 +10416,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								},
 								"samesite_lax": schema.BoolAttribute{
 									Description:         "lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests",
-									MarkdownDescription: "lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests",
+									MarkdownDescription: "lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests<br>Conflicts with `ignore_samesite`, `samesite_none`, and `samesite_strict`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -10375,7 +10426,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								},
 								"samesite_none": schema.BoolAttribute{
 									Description:         "none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests",
-									MarkdownDescription: "none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests",
+									MarkdownDescription: "none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests<br>Conflicts with `ignore_samesite`, `samesite_lax`, and `samesite_strict`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -10385,7 +10436,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								},
 								"samesite_strict": schema.BoolAttribute{
 									Description:         "strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests",
-									MarkdownDescription: "strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests",
+									MarkdownDescription: "strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests<br>Conflicts with `ignore_samesite`, `samesite_lax`, and `samesite_none`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -10397,7 +10448,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 						},
 						"secure_choice": schema.SingleNestedAttribute{
 							Description:         "secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks.",
-							MarkdownDescription: "secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks.",
+							MarkdownDescription: "secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks.<br>Exactly one of `add_secure` or `ignore_secure` must be specified when `secure_choice` is configured.",
 							Required:            false,
 							Optional:            true,
 							Computed:            false,
@@ -10410,7 +10461,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 							Attributes: map[string]schema.Attribute{
 								"add_secure": schema.BoolAttribute{
 									Description:         "add_secure",
-									MarkdownDescription: "add_secure",
+									MarkdownDescription: "add_secure<br>Conflicts with `ignore_secure`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -10420,7 +10471,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								},
 								"ignore_secure": schema.BoolAttribute{
 									Description:         "ignore_secure",
-									MarkdownDescription: "ignore_secure",
+									MarkdownDescription: "ignore_secure<br>Conflicts with `add_secure`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -10435,7 +10486,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 			},
 			"rate_limit_choice": schema.SingleNestedAttribute{
 				Description:         "Enable Rate Limiting Rate Limiting allows you to control the rate of requests sent to your origin servers, protect against API traffic surge and denial of services attacks.",
-				MarkdownDescription: "Enable Rate Limiting Rate Limiting allows you to control the rate of requests sent to your origin servers, protect against API traffic surge and denial of services attacks.",
+				MarkdownDescription: "Enable Rate Limiting Rate Limiting allows you to control the rate of requests sent to your origin servers, protect against API traffic surge and denial of services attacks.<br>Exactly one of `api_rate_limit`, `disable_rate_limit`, or `rate_limit` must be specified when `rate_limit_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
@@ -10452,7 +10503,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 				Attributes: map[string]schema.Attribute{
 					"api_rate_limit": schema.SingleNestedAttribute{
 						Description:         "Rate Limiting Parameters Define rate limiting for one or more API endpoints",
-						MarkdownDescription: "Rate Limiting Parameters Define rate limiting for one or more API endpoints",
+						MarkdownDescription: "Rate Limiting Parameters Define rate limiting for one or more API endpoints<br>Conflicts with `disable_rate_limit` and `rate_limit`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -10517,21 +10568,24 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 											Attributes: map[string]schema.Attribute{
 												"client_choice": schema.SingleNestedAttribute{
 													Description:         "client choice Select clients for which the rule will be applied. The actual names of the client are extracted from its TLS certificate.",
-													MarkdownDescription: "client choice Select clients for which the rule will be applied. The actual names of the client are extracted from its TLS certificate.",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
+													MarkdownDescription: "client choice Select clients for which the rule will be applied. The actual names of the client are extracted from its TLS certificate.<br>Exactly one of `any_client`, `client_selector`, or `ip_threat_category_list` must be specified when `client_choice` is configured.",
+													Required:            false,
+													Optional:            true,
+													Computed:            true,
 													Validators: []validator.Object{
-														exactlyoneofvalidator.RequiredExactlyOneOf(
+														exactlyoneofvalidator.ExactlyOneOf(
 															"any_client",
 															"client_selector",
 															"ip_threat_category_list",
 														),
 													},
+													PlanModifiers: []planmodifier.Object{
+														objectplanmodifier.UseNonNullStateForUnknown(),
+													},
 													Attributes: map[string]schema.Attribute{
 														"any_client": schema.BoolAttribute{
 															Description:         "any ip Any Client",
-															MarkdownDescription: "any ip Any Client",
+															MarkdownDescription: "any ip Any Client<br>Conflicts with `client_selector` and `ip_threat_category_list`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -10541,7 +10595,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"client_selector": schema.SingleNestedAttribute{
 															Description:         "client selector A label selector that describes the expected set of clients. The labels associated with the client making the API request are used to evaluate the label expressions in the selector. These labels can be derived from the client TLS certificate or from the volterra internal control plane. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.",
-															MarkdownDescription: "client selector A label selector that describes the expected set of clients. The labels associated with the client making the API request are used to evaluate the label expressions in the selector. These labels can be derived from the client TLS certificate or from the volterra internal control plane. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.",
+															MarkdownDescription: "client selector A label selector that describes the expected set of clients. The labels associated with the client making the API request are used to evaluate the label expressions in the selector. These labels can be derived from the client TLS certificate or from the volterra internal control plane. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.<br>Conflicts with `any_client` and `ip_threat_category_list`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -10562,7 +10616,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"ip_threat_category_list": schema.SingleNestedAttribute{
 															Description:         "IP Threat Category List IP threat categories to choose from",
-															MarkdownDescription: "IP Threat Category List IP threat categories to choose from",
+															MarkdownDescription: "IP Threat Category List IP threat categories to choose from<br>Conflicts with `any_client` and `client_selector`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -10586,12 +10640,12 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"ip_asn_choice": schema.SingleNestedAttribute{
 													Description:         "ip asn choice Match source IP address/ASN  of the request",
-													MarkdownDescription: "ip asn choice Match source IP address/ASN  of the request",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
+													MarkdownDescription: "ip asn choice Match source IP address/ASN  of the request<br>Exactly one of `any_ip`, `asn_list`, `asn_matcher`, `ip_matcher`, or `ip_prefix_list` must be specified when `ip_asn_choice` is configured.",
+													Required:            false,
+													Optional:            true,
+													Computed:            true,
 													Validators: []validator.Object{
-														exactlyoneofvalidator.RequiredExactlyOneOf(
+														exactlyoneofvalidator.ExactlyOneOf(
 															"any_ip",
 															"asn_list",
 															"asn_matcher",
@@ -10599,10 +10653,13 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 															"ip_prefix_list",
 														),
 													},
+													PlanModifiers: []planmodifier.Object{
+														objectplanmodifier.UseNonNullStateForUnknown(),
+													},
 													Attributes: map[string]schema.Attribute{
 														"any_ip": schema.BoolAttribute{
 															Description:         "any ip Any Source IP",
-															MarkdownDescription: "any ip Any Source IP",
+															MarkdownDescription: "any ip Any Source IP<br>Conflicts with `asn_list`, `asn_matcher`, `ip_matcher`, and `ip_prefix_list`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -10612,7 +10669,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"asn_list": schema.SingleNestedAttribute{
 															Description:         "asn list List of 4-byte ASN values. The predicate evaluates to true if the origin ASN is present in the ASN list.",
-															MarkdownDescription: "asn list List of 4-byte ASN values. The predicate evaluates to true if the origin ASN is present in the ASN list.",
+															MarkdownDescription: "asn list List of 4-byte ASN values. The predicate evaluates to true if the origin ASN is present in the ASN list.<br>Conflicts with `any_ip`, `asn_matcher`, `ip_matcher`, and `ip_prefix_list`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -10633,7 +10690,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"asn_matcher": schema.SingleNestedAttribute{
 															Description:         "asn matcher List of references to BGP ASN Set objects. The predicate evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.",
-															MarkdownDescription: "asn matcher List of references to BGP ASN Set objects. The predicate evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.",
+															MarkdownDescription: "asn matcher List of references to BGP ASN Set objects. The predicate evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.<br>Conflicts with `any_ip`, `asn_list`, `ip_matcher`, and `ip_prefix_list`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -10680,7 +10737,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"ip_matcher": schema.SingleNestedAttribute{
 															Description:         "ip matcher List of references to IP Prefix Set objects. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes in the IP Prefix Sets.",
-															MarkdownDescription: "ip matcher List of references to IP Prefix Set objects. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes in the IP Prefix Sets.",
+															MarkdownDescription: "ip matcher List of references to IP Prefix Set objects. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes in the IP Prefix Sets.<br>Conflicts with `any_ip`, `asn_list`, `asn_matcher`, and `ip_prefix_list`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -10735,7 +10792,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"ip_prefix_list": schema.SingleNestedAttribute{
 															Description:         "ip prefix list List of IP Prefixes values. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes from the list.",
-															MarkdownDescription: "ip prefix list List of IP Prefixes values. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes from the list.",
+															MarkdownDescription: "ip prefix list List of IP Prefixes values. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes from the list.<br>Conflicts with `any_ip`, `asn_list`, `asn_matcher`, and `ip_matcher`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -10838,20 +10895,23 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 										},
 										"domain_choice": schema.SingleNestedAttribute{
 											Description:         "domain choices Choose if the rule will apply for all domains or a specific one.",
-											MarkdownDescription: "domain choices Choose if the rule will apply for all domains or a specific one.",
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
+											MarkdownDescription: "domain choices Choose if the rule will apply for all domains or a specific one.<br>Exactly one of `any_domain` or `specific_domain` must be specified when `domain_choice` is configured.",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
 											Validators: []validator.Object{
-												exactlyoneofvalidator.RequiredExactlyOneOf(
+												exactlyoneofvalidator.ExactlyOneOf(
 													"any_domain",
 													"specific_domain",
 												),
 											},
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.UseNonNullStateForUnknown(),
+											},
 											Attributes: map[string]schema.Attribute{
 												"any_domain": schema.BoolAttribute{
 													Description:         "any domain The rule will apply for all domains.",
-													MarkdownDescription: "any domain The rule will apply for all domains.",
+													MarkdownDescription: "any domain The rule will apply for all domains.<br>Conflicts with `specific_domain`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -10861,7 +10921,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"specific_domain": schema.StringAttribute{
 													Description:         "domain The rule will apply for a specific domain.",
-													MarkdownDescription: "domain The rule will apply for a specific domain.<br>**Validation:** `Length LengthAtMost(128)`",
+													MarkdownDescription: "domain The rule will apply for a specific domain.<br>**Validation:** `Length LengthAtMost(128)`<br>Conflicts with `any_domain`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -10877,7 +10937,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 										},
 										"rate_limiter_choice": schema.SingleNestedAttribute{
 											Description:         "Rate limit values This defines the values of the rate limiter.",
-											MarkdownDescription: "Rate limit values This defines the values of the rate limiter.",
+											MarkdownDescription: "Rate limit values This defines the values of the rate limiter.<br>Exactly one of `inline_rate_limiter` or `ref_rate_limiter` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -10890,27 +10950,30 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 											Attributes: map[string]schema.Attribute{
 												"inline_rate_limiter": schema.SingleNestedAttribute{
 													Description:         "Inline Rate Limiter Specify rate values for the rule.",
-													MarkdownDescription: "Inline Rate Limiter Specify rate values for the rule.",
+													MarkdownDescription: "Inline Rate Limiter Specify rate values for the rule.<br>Conflicts with `ref_rate_limiter`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"count_by_choice": schema.SingleNestedAttribute{
 															Description:         "Count by The classification criteria for requests counts.",
-															MarkdownDescription: "Count by The classification criteria for requests counts.",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
+															MarkdownDescription: "Count by The classification criteria for requests counts.<br>Exactly one of `ref_user_id` or `use_http_lb_user_id` must be specified when `count_by_choice` is configured.",
+															Required:            false,
+															Optional:            true,
+															Computed:            true,
 															Validators: []validator.Object{
-																exactlyoneofvalidator.RequiredExactlyOneOf(
+																exactlyoneofvalidator.ExactlyOneOf(
 																	"ref_user_id",
 																	"use_http_lb_user_id",
 																),
 															},
+															PlanModifiers: []planmodifier.Object{
+																objectplanmodifier.UseNonNullStateForUnknown(),
+															},
 															Attributes: map[string]schema.Attribute{
 																"ref_user_id": schema.SingleNestedAttribute{
 																	Description:         "ref_user_id A reference to user_identification object. The rules in the user_identification object are evaluated to determine the user identifier to be rate limited. If traffic cannot be identified by the rules in the user_identification object, by default it will be identified by the HTTP-LB User Identifier.",
-																	MarkdownDescription: "ref_user_id A reference to user_identification object. The rules in the user_identification object are evaluated to determine the user identifier to be rate limited. If traffic cannot be identified by the rules in the user_identification object, by default it will be identified by the HTTP-LB User Identifier.",
+																	MarkdownDescription: "ref_user_id A reference to user_identification object. The rules in the user_identification object are evaluated to determine the user identifier to be rate limited. If traffic cannot be identified by the rules in the user_identification object, by default it will be identified by the HTTP-LB User Identifier.<br>Conflicts with `use_http_lb_user_id`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -10943,7 +11006,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"use_http_lb_user_id": schema.BoolAttribute{
 																	Description:         "use_http_lb_user_id Defined in HTTP-LB Security Configuration -> User Identifier.",
-																	MarkdownDescription: "use_http_lb_user_id Defined in HTTP-LB Security Configuration -> User Identifier.",
+																	MarkdownDescription: "use_http_lb_user_id Defined in HTTP-LB Security Configuration -> User Identifier.<br>Conflicts with `ref_user_id`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -10981,7 +11044,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"ref_rate_limiter": schema.SingleNestedAttribute{
 													Description:         "External Rate Limiter Select external rate limiter.",
-													MarkdownDescription: "External Rate Limiter Select external rate limiter.",
+													MarkdownDescription: "External Rate Limiter Select external rate limiter.<br>Conflicts with `inline_rate_limiter`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -11034,7 +11097,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														Attributes: map[string]schema.Attribute{
 															"match_choice": schema.SingleNestedAttribute{
 																Description:         "match Select Match Options.",
-																MarkdownDescription: "match Select Match Options.",
+																MarkdownDescription: "match Select Match Options.<br>`item` must be specified.",
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
@@ -11117,7 +11180,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 															},
 															"match_choice": schema.SingleNestedAttribute{
 																Description:         "match Select Match Options.",
-																MarkdownDescription: "match Select Match Options.",
+																MarkdownDescription: "match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified.",
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
@@ -11131,7 +11194,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																Attributes: map[string]schema.Attribute{
 																	"check_not_present": schema.BoolAttribute{
 																		Description:         "check_not_present Check that the header is not present.",
-																		MarkdownDescription: "check_not_present Check that the header is not present.",
+																		MarkdownDescription: "check_not_present Check that the header is not present.<br>Conflicts with `check_present` and `item`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -11141,7 +11204,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																	},
 																	"check_present": schema.BoolAttribute{
 																		Description:         "check_present Check that the header is present.",
-																		MarkdownDescription: "check_present Check that the header is present.",
+																		MarkdownDescription: "check_present Check that the header is present.<br>Conflicts with `check_not_present` and `item`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -11151,7 +11214,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																	},
 																	"item": schema.SingleNestedAttribute{
 																		Description:         "item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
-																		MarkdownDescription: "item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
+																		MarkdownDescription: "item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -11226,7 +11289,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 															},
 															"match_choice": schema.SingleNestedAttribute{
 																Description:         "match Select Match Options.",
-																MarkdownDescription: "match Select Match Options.",
+																MarkdownDescription: "match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified.",
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
@@ -11240,7 +11303,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																Attributes: map[string]schema.Attribute{
 																	"check_not_present": schema.BoolAttribute{
 																		Description:         "check_not_present Check that the JWT Claim is not present.",
-																		MarkdownDescription: "check_not_present Check that the JWT Claim is not present.",
+																		MarkdownDescription: "check_not_present Check that the JWT Claim is not present.<br>Conflicts with `check_present` and `item`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -11250,7 +11313,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																	},
 																	"check_present": schema.BoolAttribute{
 																		Description:         "check_present Check that the JWT Claim is present.",
-																		MarkdownDescription: "check_present Check that the JWT Claim is present.",
+																		MarkdownDescription: "check_present Check that the JWT Claim is present.<br>Conflicts with `check_not_present` and `item`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -11260,7 +11323,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																	},
 																	"item": schema.SingleNestedAttribute{
 																		Description:         "item Criteria for matching the values for the JWT Claim. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
-																		MarkdownDescription: "item Criteria for matching the values for the JWT Claim. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
+																		MarkdownDescription: "item Criteria for matching the values for the JWT Claim. The match is successful if any of the values in the input satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -11341,7 +11404,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 															},
 															"match_choice": schema.SingleNestedAttribute{
 																Description:         "match Select Match Options.",
-																MarkdownDescription: "match Select Match Options.",
+																MarkdownDescription: "match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified.",
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
@@ -11355,7 +11418,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																Attributes: map[string]schema.Attribute{
 																	"check_not_present": schema.BoolAttribute{
 																		Description:         "check_not_present Check that the query parameter is not present.",
-																		MarkdownDescription: "check_not_present Check that the query parameter is not present.",
+																		MarkdownDescription: "check_not_present Check that the query parameter is not present.<br>Conflicts with `check_present` and `item`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -11365,7 +11428,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																	},
 																	"check_present": schema.BoolAttribute{
 																		Description:         "check_present Check that the query parameter is present.",
-																		MarkdownDescription: "check_present Check that the query parameter is present.",
+																		MarkdownDescription: "check_present Check that the query parameter is present.<br>Conflicts with `check_not_present` and `item`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -11375,7 +11438,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																	},
 																	"item": schema.SingleNestedAttribute{
 																		Description:         "item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher.",
-																		MarkdownDescription: "item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher.",
+																		MarkdownDescription: "item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -11422,22 +11485,25 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 							},
 							"ip_allowed_list_choice": schema.SingleNestedAttribute{
 								Description:         "IP Allowed List Allowed List of IPs for which rate limiting will be disabled.",
-								MarkdownDescription: "IP Allowed List Allowed List of IPs for which rate limiting will be disabled.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "IP Allowed List Allowed List of IPs for which rate limiting will be disabled.<br>Exactly one of `bypass_rate_limiting_rules`, `custom_ip_allowed_list`, `ip_allowed_list`, or `no_ip_allowed_list` must be specified when `ip_allowed_list_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"bypass_rate_limiting_rules",
 										"custom_ip_allowed_list",
 										"ip_allowed_list",
 										"no_ip_allowed_list",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"bypass_rate_limiting_rules": schema.SingleNestedAttribute{
 										Description:         "bypass_rate_limiting_policy This category defines rules per URL or API group. If request matches any of these rules, skip Rate Limiting.",
-										MarkdownDescription: "bypass_rate_limiting_policy This category defines rules per URL or API group. If request matches any of these rules, skip Rate Limiting.",
+										MarkdownDescription: "bypass_rate_limiting_policy This category defines rules per URL or API group. If request matches any of these rules, skip Rate Limiting.<br>Conflicts with `custom_ip_allowed_list`, `ip_allowed_list`, and `no_ip_allowed_list`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -11462,21 +11528,24 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 															Attributes: map[string]schema.Attribute{
 																"client_choice": schema.SingleNestedAttribute{
 																	Description:         "client choice Select clients for which the rule will be applied. The actual names of the client are extracted from its TLS certificate.",
-																	MarkdownDescription: "client choice Select clients for which the rule will be applied. The actual names of the client are extracted from its TLS certificate.",
-																	Required:            true,
-																	Optional:            false,
-																	Computed:            false,
+																	MarkdownDescription: "client choice Select clients for which the rule will be applied. The actual names of the client are extracted from its TLS certificate.<br>Exactly one of `any_client`, `client_selector`, or `ip_threat_category_list` must be specified when `client_choice` is configured.",
+																	Required:            false,
+																	Optional:            true,
+																	Computed:            true,
 																	Validators: []validator.Object{
-																		exactlyoneofvalidator.RequiredExactlyOneOf(
+																		exactlyoneofvalidator.ExactlyOneOf(
 																			"any_client",
 																			"client_selector",
 																			"ip_threat_category_list",
 																		),
 																	},
+																	PlanModifiers: []planmodifier.Object{
+																		objectplanmodifier.UseNonNullStateForUnknown(),
+																	},
 																	Attributes: map[string]schema.Attribute{
 																		"any_client": schema.BoolAttribute{
 																			Description:         "any ip Any Client",
-																			MarkdownDescription: "any ip Any Client",
+																			MarkdownDescription: "any ip Any Client<br>Conflicts with `client_selector` and `ip_threat_category_list`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -11486,7 +11555,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																		},
 																		"client_selector": schema.SingleNestedAttribute{
 																			Description:         "client selector A label selector that describes the expected set of clients. The labels associated with the client making the API request are used to evaluate the label expressions in the selector. These labels can be derived from the client TLS certificate or from the volterra internal control plane. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.",
-																			MarkdownDescription: "client selector A label selector that describes the expected set of clients. The labels associated with the client making the API request are used to evaluate the label expressions in the selector. These labels can be derived from the client TLS certificate or from the volterra internal control plane. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.",
+																			MarkdownDescription: "client selector A label selector that describes the expected set of clients. The labels associated with the client making the API request are used to evaluate the label expressions in the selector. These labels can be derived from the client TLS certificate or from the volterra internal control plane. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.<br>Conflicts with `any_client` and `ip_threat_category_list`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -11507,7 +11576,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																		},
 																		"ip_threat_category_list": schema.SingleNestedAttribute{
 																			Description:         "IP Threat Category List IP threat categories to choose from",
-																			MarkdownDescription: "IP Threat Category List IP threat categories to choose from",
+																			MarkdownDescription: "IP Threat Category List IP threat categories to choose from<br>Conflicts with `any_client` and `client_selector`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -11531,12 +11600,12 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"ip_asn_choice": schema.SingleNestedAttribute{
 																	Description:         "ip asn choice Match source IP address/ASN  of the request",
-																	MarkdownDescription: "ip asn choice Match source IP address/ASN  of the request",
-																	Required:            true,
-																	Optional:            false,
-																	Computed:            false,
+																	MarkdownDescription: "ip asn choice Match source IP address/ASN  of the request<br>Exactly one of `any_ip`, `asn_list`, `asn_matcher`, `ip_matcher`, or `ip_prefix_list` must be specified when `ip_asn_choice` is configured.",
+																	Required:            false,
+																	Optional:            true,
+																	Computed:            true,
 																	Validators: []validator.Object{
-																		exactlyoneofvalidator.RequiredExactlyOneOf(
+																		exactlyoneofvalidator.ExactlyOneOf(
 																			"any_ip",
 																			"asn_list",
 																			"asn_matcher",
@@ -11544,10 +11613,13 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																			"ip_prefix_list",
 																		),
 																	},
+																	PlanModifiers: []planmodifier.Object{
+																		objectplanmodifier.UseNonNullStateForUnknown(),
+																	},
 																	Attributes: map[string]schema.Attribute{
 																		"any_ip": schema.BoolAttribute{
 																			Description:         "any ip Any Source IP",
-																			MarkdownDescription: "any ip Any Source IP",
+																			MarkdownDescription: "any ip Any Source IP<br>Conflicts with `asn_list`, `asn_matcher`, `ip_matcher`, and `ip_prefix_list`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -11557,7 +11629,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																		},
 																		"asn_list": schema.SingleNestedAttribute{
 																			Description:         "asn list List of 4-byte ASN values. The predicate evaluates to true if the origin ASN is present in the ASN list.",
-																			MarkdownDescription: "asn list List of 4-byte ASN values. The predicate evaluates to true if the origin ASN is present in the ASN list.",
+																			MarkdownDescription: "asn list List of 4-byte ASN values. The predicate evaluates to true if the origin ASN is present in the ASN list.<br>Conflicts with `any_ip`, `asn_matcher`, `ip_matcher`, and `ip_prefix_list`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -11578,7 +11650,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																		},
 																		"asn_matcher": schema.SingleNestedAttribute{
 																			Description:         "asn matcher List of references to BGP ASN Set objects. The predicate evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.",
-																			MarkdownDescription: "asn matcher List of references to BGP ASN Set objects. The predicate evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.",
+																			MarkdownDescription: "asn matcher List of references to BGP ASN Set objects. The predicate evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.<br>Conflicts with `any_ip`, `asn_list`, `ip_matcher`, and `ip_prefix_list`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -11625,7 +11697,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																		},
 																		"ip_matcher": schema.SingleNestedAttribute{
 																			Description:         "ip matcher List of references to IP Prefix Set objects. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes in the IP Prefix Sets.",
-																			MarkdownDescription: "ip matcher List of references to IP Prefix Set objects. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes in the IP Prefix Sets.",
+																			MarkdownDescription: "ip matcher List of references to IP Prefix Set objects. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes in the IP Prefix Sets.<br>Conflicts with `any_ip`, `asn_list`, `asn_matcher`, and `ip_prefix_list`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -11680,7 +11752,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																		},
 																		"ip_prefix_list": schema.SingleNestedAttribute{
 																			Description:         "ip prefix list List of IP Prefixes values. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes from the list.",
-																			MarkdownDescription: "ip prefix list List of IP Prefixes values. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes from the list.",
+																			MarkdownDescription: "ip prefix list List of IP Prefixes values. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes from the list.<br>Conflicts with `any_ip`, `asn_list`, `asn_matcher`, and `ip_matcher`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -11783,22 +11855,25 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"destination_type_choice": schema.SingleNestedAttribute{
 															Description:         "TYpe",
-															MarkdownDescription: "TYpe",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
+															MarkdownDescription: "TYpe<br>Exactly one of `any_url`, `api_endpoint`, `api_groups`, or `base_path` must be specified when `destination_type_choice` is configured.",
+															Required:            false,
+															Optional:            true,
+															Computed:            true,
 															Validators: []validator.Object{
-																exactlyoneofvalidator.RequiredExactlyOneOf(
+																exactlyoneofvalidator.ExactlyOneOf(
 																	"any_url",
 																	"api_endpoint",
 																	"api_groups",
 																	"base_path",
 																),
 															},
+															PlanModifiers: []planmodifier.Object{
+																objectplanmodifier.UseNonNullStateForUnknown(),
+															},
 															Attributes: map[string]schema.Attribute{
 																"any_url": schema.BoolAttribute{
 																	Description:         "any_url Any URL",
-																	MarkdownDescription: "any_url Any URL",
+																	MarkdownDescription: "any_url Any URL<br>Conflicts with `api_endpoint`, `api_groups`, and `base_path`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -11808,7 +11883,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"api_endpoint": schema.SingleNestedAttribute{
 																	Description:         "api endpoint path The endpoint (path) of the request.",
-																	MarkdownDescription: "api endpoint path The endpoint (path) of the request.",
+																	MarkdownDescription: "api endpoint path The endpoint (path) of the request.<br>Conflicts with `any_url`, `api_groups`, and `base_path`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -11840,7 +11915,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"api_groups": schema.SingleNestedAttribute{
 																	Description:         "api group Validation will be performed for the endpoints mentioned in the API Groups",
-																	MarkdownDescription: "api group Validation will be performed for the endpoints mentioned in the API Groups",
+																	MarkdownDescription: "api group Validation will be performed for the endpoints mentioned in the API Groups<br>Conflicts with `any_url`, `api_endpoint`, and `base_path`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -11862,7 +11937,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"base_path": schema.StringAttribute{
 																	Description:         "base path The base path which this validation applies to",
-																	MarkdownDescription: "base path The base path which this validation applies to<br>**Validation:** `Length LengthAtMost(128)`",
+																	MarkdownDescription: "base path The base path which this validation applies to<br>**Validation:** `Length LengthAtMost(128)`<br>Conflicts with `any_url`, `api_endpoint`, and `api_groups`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -11878,20 +11953,23 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"domain_choice": schema.SingleNestedAttribute{
 															Description:         "domain choices Choose if the rule will apply for all domains or a specific one.",
-															MarkdownDescription: "domain choices Choose if the rule will apply for all domains or a specific one.",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
+															MarkdownDescription: "domain choices Choose if the rule will apply for all domains or a specific one.<br>Exactly one of `any_domain` or `specific_domain` must be specified when `domain_choice` is configured.",
+															Required:            false,
+															Optional:            true,
+															Computed:            true,
 															Validators: []validator.Object{
-																exactlyoneofvalidator.RequiredExactlyOneOf(
+																exactlyoneofvalidator.ExactlyOneOf(
 																	"any_domain",
 																	"specific_domain",
 																),
 															},
+															PlanModifiers: []planmodifier.Object{
+																objectplanmodifier.UseNonNullStateForUnknown(),
+															},
 															Attributes: map[string]schema.Attribute{
 																"any_domain": schema.BoolAttribute{
 																	Description:         "any domain The rule will apply for all domains.",
-																	MarkdownDescription: "any domain The rule will apply for all domains.",
+																	MarkdownDescription: "any domain The rule will apply for all domains.<br>Conflicts with `specific_domain`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -11901,7 +11979,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"specific_domain": schema.StringAttribute{
 																	Description:         "domain The rule will apply for a specific domain. For example: api.example.com",
-																	MarkdownDescription: "domain The rule will apply for a specific domain. For example: api.example.com<br>**Validation:** `Length LengthAtMost(128)`",
+																	MarkdownDescription: "domain The rule will apply for a specific domain. For example: api.example.com<br>**Validation:** `Length LengthAtMost(128)`<br>Conflicts with `any_domain`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -11935,7 +12013,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																		Attributes: map[string]schema.Attribute{
 																			"match_choice": schema.SingleNestedAttribute{
 																				Description:         "match Select Match Options.",
-																				MarkdownDescription: "match Select Match Options.",
+																				MarkdownDescription: "match Select Match Options.<br>`item` must be specified.",
 																				Required:            true,
 																				Optional:            false,
 																				Computed:            false,
@@ -12018,7 +12096,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																			},
 																			"match_choice": schema.SingleNestedAttribute{
 																				Description:         "match Select Match Options.",
-																				MarkdownDescription: "match Select Match Options.",
+																				MarkdownDescription: "match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified.",
 																				Required:            true,
 																				Optional:            false,
 																				Computed:            false,
@@ -12032,7 +12110,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																				Attributes: map[string]schema.Attribute{
 																					"check_not_present": schema.BoolAttribute{
 																						Description:         "check_not_present Check that the header is not present.",
-																						MarkdownDescription: "check_not_present Check that the header is not present.",
+																						MarkdownDescription: "check_not_present Check that the header is not present.<br>Conflicts with `check_present` and `item`.",
 																						Required:            false,
 																						Optional:            true,
 																						Computed:            false,
@@ -12042,7 +12120,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																					},
 																					"check_present": schema.BoolAttribute{
 																						Description:         "check_present Check that the header is present.",
-																						MarkdownDescription: "check_present Check that the header is present.",
+																						MarkdownDescription: "check_present Check that the header is present.<br>Conflicts with `check_not_present` and `item`.",
 																						Required:            false,
 																						Optional:            true,
 																						Computed:            false,
@@ -12052,7 +12130,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																					},
 																					"item": schema.SingleNestedAttribute{
 																						Description:         "item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
-																						MarkdownDescription: "item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
+																						MarkdownDescription: "item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`.",
 																						Required:            false,
 																						Optional:            true,
 																						Computed:            false,
@@ -12127,7 +12205,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																			},
 																			"match_choice": schema.SingleNestedAttribute{
 																				Description:         "match Select Match Options.",
-																				MarkdownDescription: "match Select Match Options.",
+																				MarkdownDescription: "match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified.",
 																				Required:            true,
 																				Optional:            false,
 																				Computed:            false,
@@ -12141,7 +12219,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																				Attributes: map[string]schema.Attribute{
 																					"check_not_present": schema.BoolAttribute{
 																						Description:         "check_not_present Check that the JWT Claim is not present.",
-																						MarkdownDescription: "check_not_present Check that the JWT Claim is not present.",
+																						MarkdownDescription: "check_not_present Check that the JWT Claim is not present.<br>Conflicts with `check_present` and `item`.",
 																						Required:            false,
 																						Optional:            true,
 																						Computed:            false,
@@ -12151,7 +12229,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																					},
 																					"check_present": schema.BoolAttribute{
 																						Description:         "check_present Check that the JWT Claim is present.",
-																						MarkdownDescription: "check_present Check that the JWT Claim is present.",
+																						MarkdownDescription: "check_present Check that the JWT Claim is present.<br>Conflicts with `check_not_present` and `item`.",
 																						Required:            false,
 																						Optional:            true,
 																						Computed:            false,
@@ -12161,7 +12239,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																					},
 																					"item": schema.SingleNestedAttribute{
 																						Description:         "item Criteria for matching the values for the JWT Claim. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
-																						MarkdownDescription: "item Criteria for matching the values for the JWT Claim. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
+																						MarkdownDescription: "item Criteria for matching the values for the JWT Claim. The match is successful if any of the values in the input satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`.",
 																						Required:            false,
 																						Optional:            true,
 																						Computed:            false,
@@ -12242,7 +12320,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																			},
 																			"match_choice": schema.SingleNestedAttribute{
 																				Description:         "match Select Match Options.",
-																				MarkdownDescription: "match Select Match Options.",
+																				MarkdownDescription: "match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified.",
 																				Required:            true,
 																				Optional:            false,
 																				Computed:            false,
@@ -12256,7 +12334,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																				Attributes: map[string]schema.Attribute{
 																					"check_not_present": schema.BoolAttribute{
 																						Description:         "check_not_present Check that the query parameter is not present.",
-																						MarkdownDescription: "check_not_present Check that the query parameter is not present.",
+																						MarkdownDescription: "check_not_present Check that the query parameter is not present.<br>Conflicts with `check_present` and `item`.",
 																						Required:            false,
 																						Optional:            true,
 																						Computed:            false,
@@ -12266,7 +12344,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																					},
 																					"check_present": schema.BoolAttribute{
 																						Description:         "check_present Check that the query parameter is present.",
-																						MarkdownDescription: "check_present Check that the query parameter is present.",
+																						MarkdownDescription: "check_present Check that the query parameter is present.<br>Conflicts with `check_not_present` and `item`.",
 																						Required:            false,
 																						Optional:            true,
 																						Computed:            false,
@@ -12276,7 +12354,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																					},
 																					"item": schema.SingleNestedAttribute{
 																						Description:         "item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher.",
-																						MarkdownDescription: "item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher.",
+																						MarkdownDescription: "item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`.",
 																						Required:            false,
 																						Optional:            true,
 																						Computed:            false,
@@ -12325,7 +12403,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 									},
 									"custom_ip_allowed_list": schema.SingleNestedAttribute{
 										Description:         "Custom IP list IP Allowed list using existing ip_prefix_set objects.",
-										MarkdownDescription: "Custom IP list IP Allowed list using existing ip_prefix_set objects.",
+										MarkdownDescription: "Custom IP list IP Allowed list using existing ip_prefix_set objects.<br>Conflicts with `bypass_rate_limiting_rules`, `ip_allowed_list`, and `no_ip_allowed_list`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -12372,7 +12450,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 									},
 									"ip_allowed_list": schema.SingleNestedAttribute{
 										Description:         "IP Allowed List List of IP(s) for which rate limiting will be disabled.",
-										MarkdownDescription: "IP Allowed List List of IP(s) for which rate limiting will be disabled.",
+										MarkdownDescription: "IP Allowed List List of IP(s) for which rate limiting will be disabled.<br>Conflicts with `bypass_rate_limiting_rules`, `custom_ip_allowed_list`, and `no_ip_allowed_list`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -12413,7 +12491,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 									},
 									"no_ip_allowed_list": schema.BoolAttribute{
 										Description:         "No IP Allowed List There is no ip allowed list for rate limiting, all clients go through rate limiting.",
-										MarkdownDescription: "No IP Allowed List There is no ip allowed list for rate limiting, all clients go through rate limiting.",
+										MarkdownDescription: "No IP Allowed List There is no ip allowed list for rate limiting, all clients go through rate limiting.<br>Conflicts with `bypass_rate_limiting_rules`, `custom_ip_allowed_list`, and `ip_allowed_list`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -12468,21 +12546,24 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 											Attributes: map[string]schema.Attribute{
 												"client_choice": schema.SingleNestedAttribute{
 													Description:         "client choice Select clients for which the rule will be applied. The actual names of the client are extracted from its TLS certificate.",
-													MarkdownDescription: "client choice Select clients for which the rule will be applied. The actual names of the client are extracted from its TLS certificate.",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
+													MarkdownDescription: "client choice Select clients for which the rule will be applied. The actual names of the client are extracted from its TLS certificate.<br>Exactly one of `any_client`, `client_selector`, or `ip_threat_category_list` must be specified when `client_choice` is configured.",
+													Required:            false,
+													Optional:            true,
+													Computed:            true,
 													Validators: []validator.Object{
-														exactlyoneofvalidator.RequiredExactlyOneOf(
+														exactlyoneofvalidator.ExactlyOneOf(
 															"any_client",
 															"client_selector",
 															"ip_threat_category_list",
 														),
 													},
+													PlanModifiers: []planmodifier.Object{
+														objectplanmodifier.UseNonNullStateForUnknown(),
+													},
 													Attributes: map[string]schema.Attribute{
 														"any_client": schema.BoolAttribute{
 															Description:         "any ip Any Client",
-															MarkdownDescription: "any ip Any Client",
+															MarkdownDescription: "any ip Any Client<br>Conflicts with `client_selector` and `ip_threat_category_list`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -12492,7 +12573,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"client_selector": schema.SingleNestedAttribute{
 															Description:         "client selector A label selector that describes the expected set of clients. The labels associated with the client making the API request are used to evaluate the label expressions in the selector. These labels can be derived from the client TLS certificate or from the volterra internal control plane. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.",
-															MarkdownDescription: "client selector A label selector that describes the expected set of clients. The labels associated with the client making the API request are used to evaluate the label expressions in the selector. These labels can be derived from the client TLS certificate or from the volterra internal control plane. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.",
+															MarkdownDescription: "client selector A label selector that describes the expected set of clients. The labels associated with the client making the API request are used to evaluate the label expressions in the selector. These labels can be derived from the client TLS certificate or from the volterra internal control plane. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.<br>Conflicts with `any_client` and `ip_threat_category_list`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -12513,7 +12594,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"ip_threat_category_list": schema.SingleNestedAttribute{
 															Description:         "IP Threat Category List IP threat categories to choose from",
-															MarkdownDescription: "IP Threat Category List IP threat categories to choose from",
+															MarkdownDescription: "IP Threat Category List IP threat categories to choose from<br>Conflicts with `any_client` and `client_selector`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -12537,12 +12618,12 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"ip_asn_choice": schema.SingleNestedAttribute{
 													Description:         "ip asn choice Match source IP address/ASN  of the request",
-													MarkdownDescription: "ip asn choice Match source IP address/ASN  of the request",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
+													MarkdownDescription: "ip asn choice Match source IP address/ASN  of the request<br>Exactly one of `any_ip`, `asn_list`, `asn_matcher`, `ip_matcher`, or `ip_prefix_list` must be specified when `ip_asn_choice` is configured.",
+													Required:            false,
+													Optional:            true,
+													Computed:            true,
 													Validators: []validator.Object{
-														exactlyoneofvalidator.RequiredExactlyOneOf(
+														exactlyoneofvalidator.ExactlyOneOf(
 															"any_ip",
 															"asn_list",
 															"asn_matcher",
@@ -12550,10 +12631,13 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 															"ip_prefix_list",
 														),
 													},
+													PlanModifiers: []planmodifier.Object{
+														objectplanmodifier.UseNonNullStateForUnknown(),
+													},
 													Attributes: map[string]schema.Attribute{
 														"any_ip": schema.BoolAttribute{
 															Description:         "any ip Any Source IP",
-															MarkdownDescription: "any ip Any Source IP",
+															MarkdownDescription: "any ip Any Source IP<br>Conflicts with `asn_list`, `asn_matcher`, `ip_matcher`, and `ip_prefix_list`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -12563,7 +12647,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"asn_list": schema.SingleNestedAttribute{
 															Description:         "asn list List of 4-byte ASN values. The predicate evaluates to true if the origin ASN is present in the ASN list.",
-															MarkdownDescription: "asn list List of 4-byte ASN values. The predicate evaluates to true if the origin ASN is present in the ASN list.",
+															MarkdownDescription: "asn list List of 4-byte ASN values. The predicate evaluates to true if the origin ASN is present in the ASN list.<br>Conflicts with `any_ip`, `asn_matcher`, `ip_matcher`, and `ip_prefix_list`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -12584,7 +12668,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"asn_matcher": schema.SingleNestedAttribute{
 															Description:         "asn matcher List of references to BGP ASN Set objects. The predicate evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.",
-															MarkdownDescription: "asn matcher List of references to BGP ASN Set objects. The predicate evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.",
+															MarkdownDescription: "asn matcher List of references to BGP ASN Set objects. The predicate evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.<br>Conflicts with `any_ip`, `asn_list`, `ip_matcher`, and `ip_prefix_list`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -12631,7 +12715,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"ip_matcher": schema.SingleNestedAttribute{
 															Description:         "ip matcher List of references to IP Prefix Set objects. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes in the IP Prefix Sets.",
-															MarkdownDescription: "ip matcher List of references to IP Prefix Set objects. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes in the IP Prefix Sets.",
+															MarkdownDescription: "ip matcher List of references to IP Prefix Set objects. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes in the IP Prefix Sets.<br>Conflicts with `any_ip`, `asn_list`, `asn_matcher`, and `ip_prefix_list`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -12686,7 +12770,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"ip_prefix_list": schema.SingleNestedAttribute{
 															Description:         "ip prefix list List of IP Prefixes values. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes from the list.",
-															MarkdownDescription: "ip prefix list List of IP Prefixes values. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes from the list.",
+															MarkdownDescription: "ip prefix list List of IP Prefixes values. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes from the list.<br>Conflicts with `any_ip`, `asn_list`, `asn_matcher`, and `ip_matcher`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -12789,20 +12873,23 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 										},
 										"domain_choice": schema.SingleNestedAttribute{
 											Description:         "domain choices Choose if the rule will apply for all domains or a specific one.",
-											MarkdownDescription: "domain choices Choose if the rule will apply for all domains or a specific one.",
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
+											MarkdownDescription: "domain choices Choose if the rule will apply for all domains or a specific one.<br>Exactly one of `any_domain` or `specific_domain` must be specified when `domain_choice` is configured.",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
 											Validators: []validator.Object{
-												exactlyoneofvalidator.RequiredExactlyOneOf(
+												exactlyoneofvalidator.ExactlyOneOf(
 													"any_domain",
 													"specific_domain",
 												),
 											},
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.UseNonNullStateForUnknown(),
+											},
 											Attributes: map[string]schema.Attribute{
 												"any_domain": schema.BoolAttribute{
 													Description:         "any domain The rule will apply for all domains.",
-													MarkdownDescription: "any domain The rule will apply for all domains.",
+													MarkdownDescription: "any domain The rule will apply for all domains.<br>Conflicts with `specific_domain`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -12812,7 +12899,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"specific_domain": schema.StringAttribute{
 													Description:         "domain The rule will apply for a specific domain.",
-													MarkdownDescription: "domain The rule will apply for a specific domain.<br>**Validation:** `Length LengthAtMost(128)`",
+													MarkdownDescription: "domain The rule will apply for a specific domain.<br>**Validation:** `Length LengthAtMost(128)`<br>Conflicts with `any_domain`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -12828,7 +12915,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 										},
 										"rate_limiter_choice": schema.SingleNestedAttribute{
 											Description:         "Rate limit values This defines the values of the rate limiter.",
-											MarkdownDescription: "Rate limit values This defines the values of the rate limiter.",
+											MarkdownDescription: "Rate limit values This defines the values of the rate limiter.<br>Exactly one of `inline_rate_limiter` or `ref_rate_limiter` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -12841,27 +12928,30 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 											Attributes: map[string]schema.Attribute{
 												"inline_rate_limiter": schema.SingleNestedAttribute{
 													Description:         "Inline Rate Limiter Specify rate values for the rule.",
-													MarkdownDescription: "Inline Rate Limiter Specify rate values for the rule.",
+													MarkdownDescription: "Inline Rate Limiter Specify rate values for the rule.<br>Conflicts with `ref_rate_limiter`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"count_by_choice": schema.SingleNestedAttribute{
 															Description:         "Count by The classification criteria for requests counts.",
-															MarkdownDescription: "Count by The classification criteria for requests counts.",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
+															MarkdownDescription: "Count by The classification criteria for requests counts.<br>Exactly one of `ref_user_id` or `use_http_lb_user_id` must be specified when `count_by_choice` is configured.",
+															Required:            false,
+															Optional:            true,
+															Computed:            true,
 															Validators: []validator.Object{
-																exactlyoneofvalidator.RequiredExactlyOneOf(
+																exactlyoneofvalidator.ExactlyOneOf(
 																	"ref_user_id",
 																	"use_http_lb_user_id",
 																),
 															},
+															PlanModifiers: []planmodifier.Object{
+																objectplanmodifier.UseNonNullStateForUnknown(),
+															},
 															Attributes: map[string]schema.Attribute{
 																"ref_user_id": schema.SingleNestedAttribute{
 																	Description:         "ref_user_id A reference to user_identification object. The rules in the user_identification object are evaluated to determine the user identifier to be rate limited. If traffic cannot be identified by the rules in the user_identification object, by default it will be identified by the HTTP-LB User Identifier.",
-																	MarkdownDescription: "ref_user_id A reference to user_identification object. The rules in the user_identification object are evaluated to determine the user identifier to be rate limited. If traffic cannot be identified by the rules in the user_identification object, by default it will be identified by the HTTP-LB User Identifier.",
+																	MarkdownDescription: "ref_user_id A reference to user_identification object. The rules in the user_identification object are evaluated to determine the user identifier to be rate limited. If traffic cannot be identified by the rules in the user_identification object, by default it will be identified by the HTTP-LB User Identifier.<br>Conflicts with `use_http_lb_user_id`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -12894,7 +12984,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"use_http_lb_user_id": schema.BoolAttribute{
 																	Description:         "use_http_lb_user_id Defined in HTTP-LB Security Configuration -> User Identifier.",
-																	MarkdownDescription: "use_http_lb_user_id Defined in HTTP-LB Security Configuration -> User Identifier.",
+																	MarkdownDescription: "use_http_lb_user_id Defined in HTTP-LB Security Configuration -> User Identifier.<br>Conflicts with `ref_user_id`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -12932,7 +13022,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"ref_rate_limiter": schema.SingleNestedAttribute{
 													Description:         "External Rate Limiter Use external rate limiter.",
-													MarkdownDescription: "External Rate Limiter Use external rate limiter.",
+													MarkdownDescription: "External Rate Limiter Use external rate limiter.<br>Conflicts with `inline_rate_limiter`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -12985,7 +13075,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														Attributes: map[string]schema.Attribute{
 															"match_choice": schema.SingleNestedAttribute{
 																Description:         "match Select Match Options.",
-																MarkdownDescription: "match Select Match Options.",
+																MarkdownDescription: "match Select Match Options.<br>`item` must be specified.",
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
@@ -13068,7 +13158,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 															},
 															"match_choice": schema.SingleNestedAttribute{
 																Description:         "match Select Match Options.",
-																MarkdownDescription: "match Select Match Options.",
+																MarkdownDescription: "match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified.",
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
@@ -13082,7 +13172,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																Attributes: map[string]schema.Attribute{
 																	"check_not_present": schema.BoolAttribute{
 																		Description:         "check_not_present Check that the header is not present.",
-																		MarkdownDescription: "check_not_present Check that the header is not present.",
+																		MarkdownDescription: "check_not_present Check that the header is not present.<br>Conflicts with `check_present` and `item`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -13092,7 +13182,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																	},
 																	"check_present": schema.BoolAttribute{
 																		Description:         "check_present Check that the header is present.",
-																		MarkdownDescription: "check_present Check that the header is present.",
+																		MarkdownDescription: "check_present Check that the header is present.<br>Conflicts with `check_not_present` and `item`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -13102,7 +13192,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																	},
 																	"item": schema.SingleNestedAttribute{
 																		Description:         "item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
-																		MarkdownDescription: "item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
+																		MarkdownDescription: "item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -13177,7 +13267,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 															},
 															"match_choice": schema.SingleNestedAttribute{
 																Description:         "match Select Match Options.",
-																MarkdownDescription: "match Select Match Options.",
+																MarkdownDescription: "match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified.",
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
@@ -13191,7 +13281,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																Attributes: map[string]schema.Attribute{
 																	"check_not_present": schema.BoolAttribute{
 																		Description:         "check_not_present Check that the JWT Claim is not present.",
-																		MarkdownDescription: "check_not_present Check that the JWT Claim is not present.",
+																		MarkdownDescription: "check_not_present Check that the JWT Claim is not present.<br>Conflicts with `check_present` and `item`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -13201,7 +13291,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																	},
 																	"check_present": schema.BoolAttribute{
 																		Description:         "check_present Check that the JWT Claim is present.",
-																		MarkdownDescription: "check_present Check that the JWT Claim is present.",
+																		MarkdownDescription: "check_present Check that the JWT Claim is present.<br>Conflicts with `check_not_present` and `item`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -13211,7 +13301,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																	},
 																	"item": schema.SingleNestedAttribute{
 																		Description:         "item Criteria for matching the values for the JWT Claim. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
-																		MarkdownDescription: "item Criteria for matching the values for the JWT Claim. The match is successful if any of the values in the input satisfies the criteria in the matcher.",
+																		MarkdownDescription: "item Criteria for matching the values for the JWT Claim. The match is successful if any of the values in the input satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -13292,7 +13382,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 															},
 															"match_choice": schema.SingleNestedAttribute{
 																Description:         "match Select Match Options.",
-																MarkdownDescription: "match Select Match Options.",
+																MarkdownDescription: "match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified.",
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
@@ -13306,7 +13396,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																Attributes: map[string]schema.Attribute{
 																	"check_not_present": schema.BoolAttribute{
 																		Description:         "check_not_present Check that the query parameter is not present.",
-																		MarkdownDescription: "check_not_present Check that the query parameter is not present.",
+																		MarkdownDescription: "check_not_present Check that the query parameter is not present.<br>Conflicts with `check_present` and `item`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -13316,7 +13406,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																	},
 																	"check_present": schema.BoolAttribute{
 																		Description:         "check_present Check that the query parameter is present.",
-																		MarkdownDescription: "check_present Check that the query parameter is present.",
+																		MarkdownDescription: "check_present Check that the query parameter is present.<br>Conflicts with `check_not_present` and `item`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -13326,7 +13416,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 																	},
 																	"item": schema.SingleNestedAttribute{
 																		Description:         "item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher.",
-																		MarkdownDescription: "item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher.",
+																		MarkdownDescription: "item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -13375,7 +13465,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"disable_rate_limit": schema.BoolAttribute{
 						Description:         "Disable Rate Limiting Rate limiting is not currently enabled for this load balancer",
-						MarkdownDescription: "Disable Rate Limiting Rate limiting is not currently enabled for this load balancer",
+						MarkdownDescription: "Disable Rate Limiting Rate limiting is not currently enabled for this load balancer<br>Conflicts with `api_rate_limit` and `rate_limit`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -13385,28 +13475,31 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"rate_limit": schema.SingleNestedAttribute{
 						Description:         "Custom Rate Limiting Parameters Define custom rate limiting parameters for this load balancer",
-						MarkdownDescription: "Custom Rate Limiting Parameters Define custom rate limiting parameters for this load balancer",
+						MarkdownDescription: "Custom Rate Limiting Parameters Define custom rate limiting parameters for this load balancer<br>Conflicts with `api_rate_limit` and `disable_rate_limit`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"ip_allowed_list_choice": schema.SingleNestedAttribute{
 								Description:         "IP Allowed List Allowed List of IPs for which rate limiting will be disabled.",
-								MarkdownDescription: "IP Allowed List Allowed List of IPs for which rate limiting will be disabled.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "IP Allowed List Allowed List of IPs for which rate limiting will be disabled.<br>Exactly one of `custom_ip_allowed_list`, `ip_allowed_list`, or `no_ip_allowed_list` must be specified when `ip_allowed_list_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"custom_ip_allowed_list",
 										"ip_allowed_list",
 										"no_ip_allowed_list",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"custom_ip_allowed_list": schema.SingleNestedAttribute{
 										Description:         "Custom IP list IP Allowed list using existing ip_prefix_set objects.",
-										MarkdownDescription: "Custom IP list IP Allowed list using existing ip_prefix_set objects.",
+										MarkdownDescription: "Custom IP list IP Allowed list using existing ip_prefix_set objects.<br>Conflicts with `ip_allowed_list` and `no_ip_allowed_list`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -13453,7 +13546,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 									},
 									"ip_allowed_list": schema.SingleNestedAttribute{
 										Description:         "IP Allowed List List of IP(s) for which rate limiting will be disabled.",
-										MarkdownDescription: "IP Allowed List List of IP(s) for which rate limiting will be disabled.",
+										MarkdownDescription: "IP Allowed List List of IP(s) for which rate limiting will be disabled.<br>Conflicts with `custom_ip_allowed_list` and `no_ip_allowed_list`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -13494,7 +13587,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 									},
 									"no_ip_allowed_list": schema.BoolAttribute{
 										Description:         "No IP Allowed List There is no ip allowed list for rate limiting, all clients go through rate limiting.",
-										MarkdownDescription: "No IP Allowed List There is no ip allowed list for rate limiting, all clients go through rate limiting.",
+										MarkdownDescription: "No IP Allowed List There is no ip allowed list for rate limiting, all clients go through rate limiting.<br>Conflicts with `custom_ip_allowed_list` and `ip_allowed_list`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -13506,20 +13599,23 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 							},
 							"policy_choice": schema.SingleNestedAttribute{
 								Description:         "policy choice Manage rate limiter policies. Note that an implicit policy based on the IP Allowed List is always applied as the first policy.",
-								MarkdownDescription: "policy choice Manage rate limiter policies. Note that an implicit policy based on the IP Allowed List is always applied as the first policy.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "policy choice Manage rate limiter policies. Note that an implicit policy based on the IP Allowed List is always applied as the first policy.<br>Exactly one of `no_policies` or `policies` must be specified when `policy_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"no_policies",
 										"policies",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"no_policies": schema.BoolAttribute{
 										Description:         "no_policies Do not apply additional rate limiter policies.",
-										MarkdownDescription: "no_policies Do not apply additional rate limiter policies.",
+										MarkdownDescription: "no_policies Do not apply additional rate limiter policies.<br>Conflicts with `policies`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -13529,7 +13625,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 									},
 									"policies": schema.SingleNestedAttribute{
 										Description:         "policies Apply rate limiter policies to requests that are not from the IP Allowed List. The policies are evaluated sequentially until a matching rule is identified. If there's a match, the rate limiting behavior is modified according to the action configured in the rule. If there's no match, the rate limiting configuration for the HTTP load balancer is honored.",
-										MarkdownDescription: "policies Apply rate limiter policies to requests that are not from the IP Allowed List. The policies are evaluated sequentially until a matching rule is identified. If there's a match, the rate limiting behavior is modified according to the action configured in the rule. If there's no match, the rate limiting configuration for the HTTP load balancer is honored.",
+										MarkdownDescription: "policies Apply rate limiter policies to requests that are not from the IP Allowed List. The policies are evaluated sequentially until a matching rule is identified. If there's a match, the rate limiting behavior is modified according to the action configured in the rule. If there's no match, the rate limiting configuration for the HTTP load balancer is honored.<br>Conflicts with `no_policies`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -13585,7 +13681,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								Attributes: map[string]schema.Attribute{
 									"action_choice": schema.SingleNestedAttribute{
 										Description:         "Rate Limiter Action Applies the specified action to the user after threshold is reached.",
-										MarkdownDescription: "Rate Limiter Action Applies the specified action to the user after threshold is reached.",
+										MarkdownDescription: "Rate Limiter Action Applies the specified action to the user after threshold is reached.<br>Exactly one of `action_block` or `disabled` must be specified when `action_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -13598,14 +13694,14 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 										Attributes: map[string]schema.Attribute{
 											"action_block": schema.SingleNestedAttribute{
 												Description:         "Block Action Blocks the user for a specified duration of time",
-												MarkdownDescription: "Block Action Blocks the user for a specified duration of time",
+												MarkdownDescription: "Block Action Blocks the user for a specified duration of time<br>Conflicts with `disabled`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
 												Attributes: map[string]schema.Attribute{
 													"block_duration_choice": schema.SingleNestedAttribute{
 														Description:         "block_duration_choice Period of time after rate limit threshold is exceeded where a user is blocked from making further requests.",
-														MarkdownDescription: "block_duration_choice Period of time after rate limit threshold is exceeded where a user is blocked from making further requests.",
+														MarkdownDescription: "block_duration_choice Period of time after rate limit threshold is exceeded where a user is blocked from making further requests.<br>Exactly one of `hours`, `minutes`, or `seconds` must be specified when `block_duration_choice` is configured.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -13619,7 +13715,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														Attributes: map[string]schema.Attribute{
 															"hours": schema.SingleNestedAttribute{
 																Description:         "Hours User block mitigation time in Hours",
-																MarkdownDescription: "Hours User block mitigation time in Hours",
+																MarkdownDescription: "Hours User block mitigation time in Hours<br>Conflicts with `minutes` and `seconds`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -13640,7 +13736,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 															},
 															"minutes": schema.SingleNestedAttribute{
 																Description:         "Minutes User block mitigation time in Minutes",
-																MarkdownDescription: "Minutes User block mitigation time in Minutes",
+																MarkdownDescription: "Minutes User block mitigation time in Minutes<br>Conflicts with `hours` and `seconds`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -13661,7 +13757,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 															},
 															"seconds": schema.SingleNestedAttribute{
 																Description:         "Seconds User block mitigation time in Seconds",
-																MarkdownDescription: "Seconds User block mitigation time in Seconds",
+																MarkdownDescription: "Seconds User block mitigation time in Seconds<br>Conflicts with `hours` and `minutes`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -13686,7 +13782,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 											},
 											"disabled": schema.BoolAttribute{
 												Description:         "Disabled",
-												MarkdownDescription: "Disabled",
+												MarkdownDescription: "Disabled<br>Conflicts with `action_block`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -13779,7 +13875,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 			},
 			"service_policy_choice": schema.SingleNestedAttribute{
 				Description:         "Service Policies Service policies provide the ability to configure security controls such as IP Allow/Deny lists, Geo IP filtering and Custom rules",
-				MarkdownDescription: "Service Policies Service policies provide the ability to configure security controls such as IP Allow/Deny lists, Geo IP filtering and Custom rules",
+				MarkdownDescription: "Service Policies Service policies provide the ability to configure security controls such as IP Allow/Deny lists, Geo IP filtering and Custom rules<br>Exactly one of `active_service_policies`, `no_service_policies`, or `service_policies_from_namespace` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -13793,7 +13889,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 				Attributes: map[string]schema.Attribute{
 					"active_service_policies": schema.SingleNestedAttribute{
 						Description:         "Apply Specified Service Policies Apply the specified list of service policies and bypass the namespace service policy set",
-						MarkdownDescription: "Apply Specified Service Policies Apply the specified list of service policies and bypass the namespace service policy set",
+						MarkdownDescription: "Apply Specified Service Policies Apply the specified list of service policies and bypass the namespace service policy set<br>Conflicts with `no_service_policies` and `service_policies_from_namespace`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -13841,7 +13937,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"no_service_policies": schema.BoolAttribute{
 						Description:         "Do Not Apply Service Policies Do not apply any service policies i.e. bypass the namespace service policy set",
-						MarkdownDescription: "Do Not Apply Service Policies Do not apply any service policies i.e. bypass the namespace service policy set",
+						MarkdownDescription: "Do Not Apply Service Policies Do not apply any service policies i.e. bypass the namespace service policy set<br>Conflicts with `active_service_policies` and `service_policies_from_namespace`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -13851,7 +13947,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"service_policies_from_namespace": schema.BoolAttribute{
 						Description:         "Apply Namespace Service Policies Apply the active service policies configured as part of the namespace service policy set",
-						MarkdownDescription: "Apply Namespace Service Policies Apply the active service policies configured as part of the namespace service policy set",
+						MarkdownDescription: "Apply Namespace Service Policies Apply the active service policies configured as part of the namespace service policy set<br>Conflicts with `active_service_policies` and `no_service_policies`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -13863,20 +13959,23 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 			},
 			"slow_ddos_mitigation_choice": schema.SingleNestedAttribute{
 				Description:         "Slow DDoS Mitigation 'Slow and low' attacks tie up server resources, leaving none available for servicing requests from actual users.Configuration that protects origins from slow and low attacks. In the case HTTP loadbalancer, only default settings can be applied. For HTTPS load balancer, the request timeout and request headers timeout value can be customized.",
-				MarkdownDescription: "Slow DDoS Mitigation 'Slow and low' attacks tie up server resources, leaving none available for servicing requests from actual users.Configuration that protects origins from slow and low attacks. In the case HTTP loadbalancer, only default settings can be applied. For HTTPS load balancer, the request timeout and request headers timeout value can be customized.",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Slow DDoS Mitigation 'Slow and low' attacks tie up server resources, leaving none available for servicing requests from actual users.Configuration that protects origins from slow and low attacks. In the case HTTP loadbalancer, only default settings can be applied. For HTTPS load balancer, the request timeout and request headers timeout value can be customized.<br>Exactly one of `slow_ddos_mitigation` or `system_default_timeouts` must be specified when `slow_ddos_mitigation_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"slow_ddos_mitigation",
 						"system_default_timeouts",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"slow_ddos_mitigation": schema.SingleNestedAttribute{
 						Description:         "Slow DDoS Mitigation Custom Settings for Slow DDoS Mitigation",
-						MarkdownDescription: "Slow DDoS Mitigation Custom Settings for Slow DDoS Mitigation",
+						MarkdownDescription: "Slow DDoS Mitigation Custom Settings for Slow DDoS Mitigation<br>Conflicts with `system_default_timeouts`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -13894,7 +13993,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 							},
 							"request_timeout_choice": schema.SingleNestedAttribute{
 								Description:         "Total Request Timeout The amount of time allowed for the entire request stream to be received from the client, in milliseconds. The stream is terminated with a HTTP 408 (Request Timeout) error code if request has not been completed. The default value is 60000 milliseconds. This setting provides protection against Slow POST attacks.",
-								MarkdownDescription: "Total Request Timeout The amount of time allowed for the entire request stream to be received from the client, in milliseconds. The stream is terminated with a HTTP 408 (Request Timeout) error code if request has not been completed. The default value is 60000 milliseconds. This setting provides protection against Slow POST attacks.",
+								MarkdownDescription: "Total Request Timeout The amount of time allowed for the entire request stream to be received from the client, in milliseconds. The stream is terminated with a HTTP 408 (Request Timeout) error code if request has not been completed. The default value is 60000 milliseconds. This setting provides protection against Slow POST attacks.<br>Exactly one of `disable_request_timeout` or `request_timeout` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -13907,7 +14006,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								Attributes: map[string]schema.Attribute{
 									"disable_request_timeout": schema.BoolAttribute{
 										Description:         "No Timeout",
-										MarkdownDescription: "No Timeout",
+										MarkdownDescription: "No Timeout<br>Conflicts with `request_timeout`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -13917,7 +14016,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 									},
 									"request_timeout": schema.Int64Attribute{
 										Description:         "Custom Timeout",
-										MarkdownDescription: "Custom Timeout",
+										MarkdownDescription: "Custom Timeout<br>Conflicts with `disable_request_timeout`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -13934,7 +14033,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"system_default_timeouts": schema.BoolAttribute{
 						Description:         "System Default Settings Default Settings for Slow DDoS Mitigation",
-						MarkdownDescription: "System Default Settings Default Settings for Slow DDoS Mitigation",
+						MarkdownDescription: "System Default Settings Default Settings for Slow DDoS Mitigation<br>Conflicts with `slow_ddos_mitigation`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -13970,7 +14069,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 						},
 						"client_source_choice": schema.SingleNestedAttribute{
 							Description:         "Client Identifier Client identifier that should be used for the client rule",
-							MarkdownDescription: "Client Identifier Client identifier that should be used for the client rule",
+							MarkdownDescription: "Client Identifier Client identifier that should be used for the client rule<br>Exactly one of `as_number`, `http_header`, `ip_prefix`, `ipv6_prefix`, or `user_identifier` must be specified.",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
@@ -13986,7 +14085,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 							Attributes: map[string]schema.Attribute{
 								"as_number": schema.Int64Attribute{
 									Description:         "as number RFC 6793 defined 4-byte AS number",
-									MarkdownDescription: "as number RFC 6793 defined 4-byte AS number",
+									MarkdownDescription: "as number RFC 6793 defined 4-byte AS number<br>Conflicts with `http_header`, `ip_prefix`, `ipv6_prefix`, and `user_identifier`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -13996,7 +14095,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								},
 								"http_header": schema.SingleNestedAttribute{
 									Description:         "HTTP Header Request header name and value pairs",
-									MarkdownDescription: "HTTP Header Request header name and value pairs",
+									MarkdownDescription: "HTTP Header Request header name and value pairs<br>Conflicts with `as_number`, `ip_prefix`, `ipv6_prefix`, and `user_identifier`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -14036,7 +14135,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 													},
 													"value_match_choice": schema.SingleNestedAttribute{
 														Description:         "value_match The variants of matching a header value",
-														MarkdownDescription: "value_match The variants of matching a header value",
+														MarkdownDescription: "value_match The variants of matching a header value<br>Exactly one of `exact`, `presence`, or `regex` must be specified when `value_match_choice` is configured.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -14050,7 +14149,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														Attributes: map[string]schema.Attribute{
 															"exact": schema.StringAttribute{
 																Description:         "exact Header value to match exactly",
-																MarkdownDescription: "exact Header value to match exactly",
+																MarkdownDescription: "exact Header value to match exactly<br>Conflicts with `presence` and `regex`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -14061,14 +14160,14 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 															},
 															"presence": schema.BoolAttribute{
 																Description:         "presence If true, check for presence of header",
-																MarkdownDescription: "presence If true, check for presence of header",
+																MarkdownDescription: "presence If true, check for presence of header<br>Conflicts with `exact` and `regex`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
 															},
 															"regex": schema.StringAttribute{
 																Description:         "regex Regex match of the header value in re2 format",
-																MarkdownDescription: "regex Regex match of the header value in re2 format",
+																MarkdownDescription: "regex Regex match of the header value in re2 format<br>Conflicts with `exact` and `presence`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -14085,7 +14184,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								},
 								"ip_prefix": schema.StringAttribute{
 									Description:         "ip prefix IPv4 prefix string.",
-									MarkdownDescription: "ip prefix IPv4 prefix string.",
+									MarkdownDescription: "ip prefix IPv4 prefix string.<br>Conflicts with `as_number`, `http_header`, `ipv6_prefix`, and `user_identifier`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -14098,7 +14197,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								},
 								"ipv6_prefix": schema.StringAttribute{
 									Description:         "ipv6 prefix IPv6 prefix string.",
-									MarkdownDescription: "ipv6 prefix IPv6 prefix string.",
+									MarkdownDescription: "ipv6 prefix IPv6 prefix string.<br>Conflicts with `as_number`, `http_header`, `ip_prefix`, and `user_identifier`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -14111,7 +14210,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 								},
 								"user_identifier": schema.StringAttribute{
 									Description:         "user identifier Identify user based on user identifier. User identifier value needs to be copied from security event.",
-									MarkdownDescription: "user identifier Identify user based on user identifier. User identifier value needs to be copied from security event.<br>**Validation:** `Length LengthAtMost(256)`",
+									MarkdownDescription: "user identifier Identify user based on user identifier. User identifier value needs to be copied from security event.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `as_number`, `http_header`, `ip_prefix`, and `ipv6_prefix`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -14167,7 +14266,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 			},
 			"user_id_choice": schema.SingleNestedAttribute{
 				Description:         "User Identifier Select user identifier for rate limiting and malicious user mitigation.",
-				MarkdownDescription: "User Identifier Select user identifier for rate limiting and malicious user mitigation.",
+				MarkdownDescription: "User Identifier Select user identifier for rate limiting and malicious user mitigation.<br>Exactly one of `user_id_client_ip` or `user_identification` must be specified when `user_id_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
@@ -14183,7 +14282,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 				Attributes: map[string]schema.Attribute{
 					"user_id_client_ip": schema.BoolAttribute{
 						Description:         "user_id_client_ip Use the Client IP address as the user identifier.",
-						MarkdownDescription: "user_id_client_ip Use the Client IP address as the user identifier.",
+						MarkdownDescription: "user_id_client_ip Use the Client IP address as the user identifier.<br>Conflicts with `user_identification`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -14193,7 +14292,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"user_identification": schema.SingleNestedAttribute{
 						Description:         "user_identification A reference to user_identification object. The rules in the user_identification object are evaluated to determine the user identifier.",
-						MarkdownDescription: "user_identification A reference to user_identification object. The rules in the user_identification object are evaluated to determine the user identifier.",
+						MarkdownDescription: "user_identification A reference to user_identification object. The rules in the user_identification object are evaluated to determine the user identifier.<br>Conflicts with `user_id_client_ip`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -14228,20 +14327,23 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 			},
 			"waf_choice": schema.SingleNestedAttribute{
 				Description:         "Enable the WAF (Web Application Firewall) functionality for VirtualHost F5 Distributed Cloud WAF is a next-gen web application firewall that provides signature-based and behavior-based threat detection to protect applications wherever they are deployed. WAF can be configured in Monitoring (log threats) or Blocking (log and block threats) mode.",
-				MarkdownDescription: "Enable the WAF (Web Application Firewall) functionality for VirtualHost F5 Distributed Cloud WAF is a next-gen web application firewall that provides signature-based and behavior-based threat detection to protect applications wherever they are deployed. WAF can be configured in Monitoring (log threats) or Blocking (log and block threats) mode.",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Enable the WAF (Web Application Firewall) functionality for VirtualHost F5 Distributed Cloud WAF is a next-gen web application firewall that provides signature-based and behavior-based threat detection to protect applications wherever they are deployed. WAF can be configured in Monitoring (log threats) or Blocking (log and block threats) mode.<br>Exactly one of `app_firewall` or `disable_waf` must be specified when `waf_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"app_firewall",
 						"disable_waf",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"app_firewall": schema.SingleNestedAttribute{
 						Description:         "Application Firewall for All Requests Enable WAF configuration for all requests in this distribution",
-						MarkdownDescription: "Application Firewall for All Requests Enable WAF configuration for all requests in this distribution",
+						MarkdownDescription: "Application Firewall for All Requests Enable WAF configuration for all requests in this distribution<br>Conflicts with `disable_waf`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -14274,7 +14376,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"disable_waf": schema.BoolAttribute{
 						Description:         "Disable WAF No WAF configuration for this load balancer",
-						MarkdownDescription: "Disable WAF No WAF configuration for this load balancer",
+						MarkdownDescription: "Disable WAF No WAF configuration for this load balancer<br>Conflicts with `app_firewall`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -14293,7 +14395,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 				Attributes: map[string]schema.Attribute{
 					"waf_exclusion_choice": schema.SingleNestedAttribute{
 						Description:         "WAF Exclusion Choice Define the Signatures, Violations, Attack Types, and Bot Names that should be excluded from WAF processing for HTTP requests matching specific domain, path, and method criteria. The WAF Exclusion is evaluated sequentially and can only be matched once per request.",
-						MarkdownDescription: "WAF Exclusion Choice Define the Signatures, Violations, Attack Types, and Bot Names that should be excluded from WAF processing for HTTP requests matching specific domain, path, and method criteria. The WAF Exclusion is evaluated sequentially and can only be matched once per request.",
+						MarkdownDescription: "WAF Exclusion Choice Define the Signatures, Violations, Attack Types, and Bot Names that should be excluded from WAF processing for HTTP requests matching specific domain, path, and method criteria. The WAF Exclusion is evaluated sequentially and can only be matched once per request.<br>`waf_exclusion_inline_rules` must be specified when `waf_exclusion_choice` is configured.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -14323,21 +14425,24 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 											Attributes: map[string]schema.Attribute{
 												"domain_choice": schema.SingleNestedAttribute{
 													Description:         "Domain Domain to be matched",
-													MarkdownDescription: "Domain Domain to be matched",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
+													MarkdownDescription: "Domain Domain to be matched<br>Exactly one of `any_domain`, `exact_value`, or `suffix_value` must be specified when `domain_choice` is configured.",
+													Required:            false,
+													Optional:            true,
+													Computed:            true,
 													Validators: []validator.Object{
-														exactlyoneofvalidator.RequiredExactlyOneOf(
+														exactlyoneofvalidator.ExactlyOneOf(
 															"any_domain",
 															"exact_value",
 															"suffix_value",
 														),
 													},
+													PlanModifiers: []planmodifier.Object{
+														objectplanmodifier.UseNonNullStateForUnknown(),
+													},
 													Attributes: map[string]schema.Attribute{
 														"any_domain": schema.BoolAttribute{
 															Description:         "Any domain Apply this WAF exclusion rule for any domain",
-															MarkdownDescription: "Any domain Apply this WAF exclusion rule for any domain",
+															MarkdownDescription: "Any domain Apply this WAF exclusion rule for any domain<br>Conflicts with `exact_value` and `suffix_value`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -14347,7 +14452,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"exact_value": schema.StringAttribute{
 															Description:         "exact value Exact domain name",
-															MarkdownDescription: "exact value Exact domain name<br>**Validation:** `Length LengthBetween(1, 256)`",
+															MarkdownDescription: "exact value Exact domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_domain` and `suffix_value`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -14361,7 +14466,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"suffix_value": schema.StringAttribute{
 															Description:         "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'",
-															MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`",
+															MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_domain` and `exact_value`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -14431,21 +14536,24 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"path_choice": schema.SingleNestedAttribute{
 													Description:         "Path Path to be matched",
-													MarkdownDescription: "Path Path to be matched",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
+													MarkdownDescription: "Path Path to be matched<br>Exactly one of `any_path`, `path_prefix`, or `path_regex` must be specified when `path_choice` is configured.",
+													Required:            false,
+													Optional:            true,
+													Computed:            true,
 													Validators: []validator.Object{
-														exactlyoneofvalidator.RequiredExactlyOneOf(
+														exactlyoneofvalidator.ExactlyOneOf(
 															"any_path",
 															"path_prefix",
 															"path_regex",
 														),
 													},
+													PlanModifiers: []planmodifier.Object{
+														objectplanmodifier.UseNonNullStateForUnknown(),
+													},
 													Attributes: map[string]schema.Attribute{
 														"any_path": schema.BoolAttribute{
 															Description:         "Any path Match all paths",
-															MarkdownDescription: "Any path Match all paths",
+															MarkdownDescription: "Any path Match all paths<br>Conflicts with `path_prefix` and `path_regex`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -14455,7 +14563,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"path_prefix": schema.StringAttribute{
 															Description:         "prefix Path prefix to match (e.g. the value / will match on all paths)",
-															MarkdownDescription: "prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`",
+															MarkdownDescription: "prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `any_path` and `path_regex`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -14469,7 +14577,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"path_regex": schema.StringAttribute{
 															Description:         "Path Regex Define the regex for the path. For example, the regex ^/.*$ will match on all paths",
-															MarkdownDescription: "Path Regex Define the regex for the path. For example, the regex ^/.*$ will match on all paths",
+															MarkdownDescription: "Path Regex Define the regex for the path. For example, the regex ^/.*$ will match on all paths<br>Conflicts with `any_path` and `path_prefix`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -14481,7 +14589,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"waf_advanced_configuration_choice": schema.SingleNestedAttribute{
 													Description:         "WAF Exclusion Rule Action WAF Exclusion Rule action to be enforced if the input request matches the rule.",
-													MarkdownDescription: "WAF Exclusion Rule Action WAF Exclusion Rule action to be enforced if the input request matches the rule.",
+													MarkdownDescription: "WAF Exclusion Rule Action WAF Exclusion Rule action to be enforced if the input request matches the rule.<br>Exactly one of `app_firewall_detection_control` or `waf_skip_processing` must be specified when `waf_advanced_configuration_choice` is configured.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -14494,7 +14602,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 													Attributes: map[string]schema.Attribute{
 														"app_firewall_detection_control": schema.SingleNestedAttribute{
 															Description:         "App Firewall Detection control Define the list of Signature IDs, Violations, Attack Types and Bot Names that should be excluded from triggering on the defined match criteria.",
-															MarkdownDescription: "App Firewall Detection control Define the list of Signature IDs, Violations, Attack Types and Bot Names that should be excluded from triggering on the defined match criteria.",
+															MarkdownDescription: "App Firewall Detection control Define the list of Signature IDs, Violations, Attack Types and Bot Names that should be excluded from triggering on the defined match criteria.<br>Conflicts with `waf_skip_processing`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -14670,7 +14778,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"waf_skip_processing": schema.BoolAttribute{
 															Description:         "Skip App Firewall Processing Skip all App Firewall processing for this request",
-															MarkdownDescription: "Skip App Firewall Processing Skip all App Firewall processing for this request",
+															MarkdownDescription: "Skip App Firewall Processing Skip all App Firewall processing for this request<br>Conflicts with `app_firewall_detection_control`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -15284,6 +15392,9 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 			policyBasedChallengeOneOfSpec.PolicyBasedChallenge.TemporaryBlockingParametersChoice = &ves_io_schema_views_common_waf.PolicyBasedChallenge_DefaultTemporaryBlockingParameters{
 				DefaultTemporaryBlockingParameters: &ves_io_schema.Empty{},
 			}
+			policyBasedChallengeOneOfSpec.PolicyBasedChallenge.ChallengeChoice = &ves_io_schema_views_common_waf.PolicyBasedChallenge_NoChallenge{
+				NoChallenge: &ves_io_schema.Empty{},
+			}
 			spec.ChallengeType = policyBasedChallengeOneOfSpec
 
 			// resource modelToSpecNested OneOfField --> CaptchaChallengeParametersChoice
@@ -15328,7 +15439,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ChallengeChoice
+			// resource modelToSpecNested OneOfField --> ChallengeChoice
 			if !cdnLoadbalancerPolicyBasedChallengeModel.ChallengeChoice.IsNull() && !cdnLoadbalancerPolicyBasedChallengeModel.ChallengeChoice.IsUnknown() {
 				policyBasedChallengeChallengeChoiceModel := CdnLoadbalancerChallengeChoice{}
 				response.Diagnostics.Append(cdnLoadbalancerPolicyBasedChallengeModel.ChallengeChoice.As(ctx, &policyBasedChallengeChallengeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15511,6 +15622,9 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 							}
 
 							specSpec := &ves_io_schema_service_policy_rule.ChallengeRuleSpec{}
+							specSpec.ChallengeAction = &ves_io_schema_service_policy_rule.ChallengeRuleSpec_DisableChallenge{
+								DisableChallenge: &ves_io_schema.Empty{},
+							}
 							rulesSpec[i].Spec = specSpec
 
 							// resource modelToSpecNested ArrayOfPointerField --> ArgMatchers
@@ -15736,7 +15850,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 							}
 
-							// resource modelToSpecNested RequiredOneOfField --> ChallengeAction
+							// resource modelToSpecNested OneOfField --> ChallengeAction
 							if !specModel.ChallengeActionChoice.IsNull() && !specModel.ChallengeActionChoice.IsUnknown() {
 								specChallengeActionChoiceModel := CdnLoadbalancerChallengeActionChoice{}
 								response.Diagnostics.Append(specModel.ChallengeActionChoice.As(ctx, &specChallengeActionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16570,6 +16684,9 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 		// resource modelToSpecRoot PointerField --> CsrfPolicy
 		if !data.CsrfPolicy.IsNull() && !data.CsrfPolicy.IsUnknown() {
 			csrfPolicySpec := &ves_io_schema.CsrfPolicy{}
+			csrfPolicySpec.AllowedDomains = &ves_io_schema.CsrfPolicy_AllLoadBalancerDomains{
+				AllLoadBalancerDomains: &ves_io_schema.Empty{},
+			}
 			spec.CsrfPolicy = csrfPolicySpec
 			var csrfPolicyModel CdnLoadbalancerCsrfPolicy
 
@@ -16580,7 +16697,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> AllowedDomains
+			// resource modelToSpecNested OneOfField --> AllowedDomains
 			if !csrfPolicyModel.AllowedDomainsChoice.IsNull() && !csrfPolicyModel.AllowedDomainsChoice.IsUnknown() {
 				csrfPolicyAllowedDomainsChoiceModel := CdnLoadbalancerAllowedDomainsChoice{}
 				response.Diagnostics.Append(csrfPolicyModel.AllowedDomainsChoice.As(ctx, &csrfPolicyAllowedDomainsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16695,8 +16812,14 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 			for i, dataGuardRulesElement := range dataGuardRulesElements {
 				dataGuardRulesSpec[i] = &ves_io_schema_policy.SimpleDataGuardRule{}
+				dataGuardRulesSpec[i].ActionChoice = &ves_io_schema_policy.SimpleDataGuardRule_ApplyDataGuard{
+					ApplyDataGuard: &ves_io_schema.Empty{},
+				}
+				dataGuardRulesSpec[i].DomainChoice = &ves_io_schema_policy.SimpleDataGuardRule_AnyDomain{
+					AnyDomain: &ves_io_schema.Empty{},
+				}
 
-				// resource modelToSpecNested RequiredOneOfField --> ActionChoice
+				// resource modelToSpecNested OneOfField --> ActionChoice
 				if !dataGuardRulesElement.ActionChoice.IsNull() && !dataGuardRulesElement.ActionChoice.IsUnknown() {
 					dataGuardRulesActionChoiceModel := CdnLoadbalancerActionChoice{}
 					response.Diagnostics.Append(dataGuardRulesElement.ActionChoice.As(ctx, &dataGuardRulesActionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16720,7 +16843,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 				}
 
-				// resource modelToSpecNested RequiredOneOfField --> DomainChoice
+				// resource modelToSpecNested OneOfField --> DomainChoice
 				if !dataGuardRulesElement.DomainChoice.IsNull() && !dataGuardRulesElement.DomainChoice.IsUnknown() {
 					dataGuardRulesDomainChoiceModel := CdnLoadbalancerDomainChoice{}
 					response.Diagnostics.Append(dataGuardRulesElement.DomainChoice.As(ctx, &dataGuardRulesDomainChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16838,6 +16961,9 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 			for i, ddosMitigationRulesElement := range ddosMitigationRulesElements {
 				ddosMitigationRulesSpec[i] = &ves_io_schema_views_common_security.DDoSMitigationRule{}
+				ddosMitigationRulesSpec[i].MitigationAction = &ves_io_schema_views_common_security.DDoSMitigationRule_Block{
+					Block: &ves_io_schema.Empty{},
+				}
 
 				// resource modelToSpecNested TimeStampField --> ExpirationTimestamp
 				if !ddosMitigationRulesElement.ExpirationTimestamp.IsNull() && !ddosMitigationRulesElement.ExpirationTimestamp.IsUnknown() {
@@ -16875,7 +17001,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 				}
 
-				// resource modelToSpecNested RequiredOneOfField --> MitigationAction
+				// resource modelToSpecNested OneOfField --> MitigationAction
 				if !ddosMitigationRulesElement.MitigationActionChoice.IsNull() && !ddosMitigationRulesElement.MitigationActionChoice.IsUnknown() {
 					ddosMitigationRulesMitigationActionChoiceModel := CdnLoadbalancerMitigationActionChoice{}
 					response.Diagnostics.Append(ddosMitigationRulesElement.MitigationActionChoice.As(ctx, &ddosMitigationRulesMitigationActionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -17178,8 +17304,14 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 			for i, graphqlRulesElement := range graphqlRulesElements {
 				graphqlRulesSpec[i] = &ves_io_schema_policy.GraphQLRule{}
+				graphqlRulesSpec[i].DomainChoice = &ves_io_schema_policy.GraphQLRule_AnyDomain{
+					AnyDomain: &ves_io_schema.Empty{},
+				}
+				graphqlRulesSpec[i].MethodChoice = &ves_io_schema_policy.GraphQLRule_MethodGet{
+					MethodGet: &ves_io_schema.Empty{},
+				}
 
-				// resource modelToSpecNested RequiredOneOfField --> DomainChoice
+				// resource modelToSpecNested OneOfField --> DomainChoice
 				if !graphqlRulesElement.DomainChoice.IsNull() && !graphqlRulesElement.DomainChoice.IsUnknown() {
 					graphqlRulesDomainChoiceModel := CdnLoadbalancerGraphQLRuleDomainChoice{}
 					response.Diagnostics.Append(graphqlRulesElement.DomainChoice.As(ctx, &graphqlRulesDomainChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -17224,9 +17356,12 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 					}
 
 					graphqlSettingsSpec := &ves_io_schema_policy.GraphQLSettingsType{}
+					graphqlSettingsSpec.AllowIntrospectionQueriesChoice = &ves_io_schema_policy.GraphQLSettingsType_DisableIntrospection{
+						DisableIntrospection: &ves_io_schema.Empty{},
+					}
 					graphqlRulesSpec[i].GraphqlSettings = graphqlSettingsSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> AllowIntrospectionQueriesChoice
+					// resource modelToSpecNested OneOfField --> AllowIntrospectionQueriesChoice
 					if !graphqlSettingsModel.AllowIntrospectionQueriesChoice.IsNull() && !graphqlSettingsModel.AllowIntrospectionQueriesChoice.IsUnknown() {
 						graphqlSettingsAllowIntrospectionQueriesChoiceModel := CdnLoadbalancerAllowIntrospectionQueriesChoice{}
 						response.Diagnostics.Append(graphqlSettingsModel.AllowIntrospectionQueriesChoice.As(ctx, &graphqlSettingsAllowIntrospectionQueriesChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -17284,7 +17419,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 				}
 
-				// resource modelToSpecNested RequiredOneOfField --> MethodChoice
+				// resource modelToSpecNested OneOfField --> MethodChoice
 				if !graphqlRulesElement.MethodChoice.IsNull() && !graphqlRulesElement.MethodChoice.IsUnknown() {
 					graphqlRulesMethodChoiceModel := CdnLoadbalancerMethodChoice{}
 					response.Diagnostics.Append(graphqlRulesElement.MethodChoice.As(ctx, &graphqlRulesMethodChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -17390,9 +17525,12 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 				}
 
 				actionSpec := &ves_io_schema.Action{}
+				actionSpec.ActionChoice = &ves_io_schema.Action_Block{
+					Block: &ves_io_schema.Empty{},
+				}
 				jwtValidationSpec.Action = actionSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> ActionChoice
+				// resource modelToSpecNested OneOfField --> ActionChoice
 				if !actionModel.ActionChoice.IsNull() && !actionModel.ActionChoice.IsUnknown() {
 					actionActionChoiceModel := CdnLoadbalancerActionActionChoice{}
 					response.Diagnostics.Append(actionModel.ActionChoice.As(ctx, &actionActionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -17541,9 +17679,12 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 				}
 
 				tokenLocationSpec := &ves_io_schema_views_common_waf.TokenLocation{}
+				tokenLocationSpec.TokenLocation = &ves_io_schema_views_common_waf.TokenLocation_BearerToken{
+					BearerToken: &ves_io_schema.Empty{},
+				}
 				jwtValidationSpec.TokenLocation = tokenLocationSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> TokenLocation
+				// resource modelToSpecNested OneOfField --> TokenLocation
 				if !tokenLocationModel.TokenLocationChoice.IsNull() && !tokenLocationModel.TokenLocationChoice.IsUnknown() {
 					tokenLocationTokenLocationChoiceModel := CdnLoadbalancerTokenLocationChoice{}
 					response.Diagnostics.Append(tokenLocationModel.TokenLocationChoice.As(ctx, &tokenLocationTokenLocationChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -17565,7 +17706,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> L7DdosAutoMitigationAction
+	// resource modelToSpecRoot OneOfField --> L7DdosAutoMitigationAction
 	if !data.L7DdosAutoMitigationActionChoice.IsNull() && !data.L7DdosAutoMitigationActionChoice.IsUnknown() {
 		l7DdosAutoMitigationActionChoiceModel := CdnLoadbalancerL7DdosAutoMitigationActionChoice{}
 		response.Diagnostics.Append(data.L7DdosAutoMitigationActionChoice.As(ctx, &l7DdosAutoMitigationActionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -17619,6 +17760,10 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 		}
 
+	} else {
+		spec.L7DdosAutoMitigationAction = &ves_io_schema_views_cdn_loadbalancer.CreateSpecType_L7DdosActionDefault{
+			L7DdosActionDefault: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredOneOfField --> LoadbalancerType
@@ -17752,9 +17897,12 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 							}
 
 							tlsConfigSpec := &ves_io_schema_views.TlsConfig{}
+							tlsConfigSpec.Choice = &ves_io_schema_views.TlsConfig_DefaultSecurity{
+								DefaultSecurity: &ves_io_schema.Empty{},
+							}
 							tlsCertParamsOneOfSpec.TlsCertParams.TlsConfig = tlsConfigSpec
 
-							// resource modelToSpecNested RequiredOneOfField --> Choice
+							// resource modelToSpecNested OneOfField --> Choice
 							if !tlsConfigModel.Choice.IsNull() && !tlsConfigModel.Choice.IsUnknown() {
 								tlsConfigChoiceModel := CdnLoadbalancerChoice{}
 								response.Diagnostics.Append(tlsConfigModel.Choice.As(ctx, &tlsConfigChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -18058,9 +18206,12 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 							}
 
 							tlsConfigSpec := &ves_io_schema_views.TlsConfig{}
+							tlsConfigSpec.Choice = &ves_io_schema_views.TlsConfig_DefaultSecurity{
+								DefaultSecurity: &ves_io_schema.Empty{},
+							}
 							tlsInlineParamsOneOfSpec.TlsInlineParams.TlsConfig = tlsConfigSpec
 
-							// resource modelToSpecNested RequiredOneOfField --> Choice
+							// resource modelToSpecNested OneOfField --> Choice
 							if !tlsConfigModel.Choice.IsNull() && !tlsConfigModel.Choice.IsUnknown() {
 								tlsConfigChoiceModel := CdnLoadbalancerChoice{}
 								response.Diagnostics.Append(tlsConfigModel.Choice.As(ctx, &tlsConfigChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -18207,9 +18358,12 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 				}
 
 				tlsConfigSpec := &ves_io_schema_views_cdn_loadbalancer.CDNTLSConfig{}
+				tlsConfigSpec.Choice = &ves_io_schema_views_cdn_loadbalancer.CDNTLSConfig_Tls_12Plus{
+					Tls_12Plus: &ves_io_schema.Empty{},
+				}
 				httpsAutoCertOneOfSpec.HttpsAutoCert.TlsConfig = tlsConfigSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> Choice
+				// resource modelToSpecNested OneOfField --> Choice
 				if !tlsConfigModel.Choice.IsNull() && !tlsConfigModel.Choice.IsUnknown() {
 					tlsConfigChoiceModel := CdnLoadbalancerCDNTLSConfigChoice{}
 					response.Diagnostics.Append(tlsConfigModel.Choice.As(ctx, &tlsConfigChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -18267,6 +18421,22 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 		// resource modelToSpecRoot RequiredPointerField --> OriginPool
 		if !data.OriginPool.IsNull() && !data.OriginPool.IsUnknown() {
 			originPoolSpec := &ves_io_schema_views_cdn_loadbalancer.CdnOriginPoolType{}
+			originPoolSpec.TlsChoice = &ves_io_schema_views_cdn_loadbalancer.CdnOriginPoolType_UseTls{
+				UseTls: &ves_io_schema_views_origin_pool.UpstreamTlsParameters{
+					MaxSessionKeysType: &ves_io_schema_views_origin_pool.UpstreamTlsParameters_DefaultSessionKeyCaching{
+						DefaultSessionKeyCaching: &ves_io_schema.Empty{},
+					},
+					MtlsChoice: &ves_io_schema_views_origin_pool.UpstreamTlsParameters_NoMtls{
+						NoMtls: &ves_io_schema.Empty{},
+					},
+					ServerValidationChoice: &ves_io_schema_views_origin_pool.UpstreamTlsParameters_VolterraTrustedCa{
+						VolterraTrustedCa: &ves_io_schema.Empty{},
+					},
+					SniChoice: &ves_io_schema_views_origin_pool.UpstreamTlsParameters_UseHostHeaderAsSni{
+						UseHostHeaderAsSni: &ves_io_schema.Empty{},
+					},
+				},
+			}
 			spec.OriginPool = originPoolSpec
 			var originPoolModel CdnLoadbalancerCdnOriginPoolType
 
@@ -18429,7 +18599,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> TlsChoice
+			// resource modelToSpecNested OneOfField --> TlsChoice
 			if !originPoolModel.TlsChoice.IsNull() && !originPoolModel.TlsChoice.IsUnknown() {
 				originPoolTlsChoiceModel := CdnLoadbalancerTlsChoice{}
 				response.Diagnostics.Append(originPoolModel.TlsChoice.As(ctx, &originPoolTlsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -18865,8 +19035,11 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 				protectedCookiesSpec[i].MaxAge = &ves_io_schema.CookieManipulationOptionType_IgnoreMaxAge{
 					IgnoreMaxAge: &ves_io_schema.Empty{},
 				}
+				protectedCookiesSpec[i].CookieTampering = &ves_io_schema.CookieManipulationOptionType_DisableTamperingProtection{
+					DisableTamperingProtection: &ves_io_schema.Empty{},
+				}
 
-				// resource modelToSpecNested RequiredOneOfField --> CookieTampering
+				// resource modelToSpecNested OneOfField --> CookieTampering
 				if !protectedCookiesElement.CookieTamperingChoice.IsNull() && !protectedCookiesElement.CookieTamperingChoice.IsUnknown() {
 					protectedCookiesCookieTamperingChoiceModel := CdnLoadbalancerCookieTamperingChoice{}
 					response.Diagnostics.Append(protectedCookiesElement.CookieTamperingChoice.As(ctx, &protectedCookiesCookieTamperingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -19004,6 +19177,9 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 			}
 			apiRateLimitOneOfSpec := &ves_io_schema_views_cdn_loadbalancer.CreateSpecType_ApiRateLimit{}
 			apiRateLimitOneOfSpec.ApiRateLimit = &ves_io_schema_views_common_waf.APIRateLimit{}
+			apiRateLimitOneOfSpec.ApiRateLimit.IpAllowedListChoice = &ves_io_schema_views_common_waf.APIRateLimit_NoIpAllowedList{
+				NoIpAllowedList: &ves_io_schema.Empty{},
+			}
 			spec.RateLimitChoice = apiRateLimitOneOfSpec
 
 			// resource modelToSpecNested ArrayOfPointerField --> ApiEndpointRules
@@ -19023,6 +19199,9 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 				for i, apiEndpointRulesElement := range apiEndpointRulesElements {
 					// Initialize the spec struct for the current element
 					apiRateLimitOneOfSpec.ApiRateLimit.ApiEndpointRules[i] = &ves_io_schema_views_common_waf.ApiEndpointRule{}
+					apiRateLimitOneOfSpec.ApiRateLimit.ApiEndpointRules[i].DomainChoice = &ves_io_schema_views_common_waf.ApiEndpointRule_AnyDomain{
+						AnyDomain: &ves_io_schema.Empty{},
+					}
 
 					// Recursively process nested elements
 
@@ -19085,9 +19264,15 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 						}
 
 						clientMatcherSpec := &ves_io_schema_policy.ClientMatcher{}
+						clientMatcherSpec.ClientChoice = &ves_io_schema_policy.ClientMatcher_AnyClient{
+							AnyClient: &ves_io_schema.Empty{},
+						}
+						clientMatcherSpec.IpAsnChoice = &ves_io_schema_policy.ClientMatcher_AnyIp{
+							AnyIp: &ves_io_schema.Empty{},
+						}
 						apiEndpointRulesSpec[i].ClientMatcher = clientMatcherSpec
 
-						// resource modelToSpecNested RequiredOneOfField --> ClientChoice
+						// resource modelToSpecNested OneOfField --> ClientChoice
 						if !clientMatcherModel.ClientChoice.IsNull() && !clientMatcherModel.ClientChoice.IsUnknown() {
 							clientMatcherClientChoiceModel := CdnLoadbalancerClientMatcherClientChoice{}
 							response.Diagnostics.Append(clientMatcherModel.ClientChoice.As(ctx, &clientMatcherClientChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -19164,7 +19349,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 						}
 
-						// resource modelToSpecNested RequiredOneOfField --> IpAsnChoice
+						// resource modelToSpecNested OneOfField --> IpAsnChoice
 						if !clientMatcherModel.IpAsnChoice.IsNull() && !clientMatcherModel.IpAsnChoice.IsUnknown() {
 							clientMatcherIpAsnChoiceModel := CdnLoadbalancerIpAsnChoice{}
 							response.Diagnostics.Append(clientMatcherModel.IpAsnChoice.As(ctx, &clientMatcherIpAsnChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -19415,7 +19600,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> DomainChoice
+					// resource modelToSpecNested OneOfField --> DomainChoice
 					if !apiEndpointRulesElement.DomainChoice.IsNull() && !apiEndpointRulesElement.DomainChoice.IsUnknown() {
 						apiEndpointRulesDomainChoiceModel := CdnLoadbalancerApiEndpointRuleDomainChoice{}
 						response.Diagnostics.Append(apiEndpointRulesElement.DomainChoice.As(ctx, &apiEndpointRulesDomainChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -19456,9 +19641,12 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 							}
 							inlineRateLimiterOneOfSpec := &ves_io_schema_views_common_waf.ApiEndpointRule_InlineRateLimiter{}
 							inlineRateLimiterOneOfSpec.InlineRateLimiter = &ves_io_schema_views_common_waf.InlineRateLimiter{}
+							inlineRateLimiterOneOfSpec.InlineRateLimiter.CountByChoice = &ves_io_schema_views_common_waf.InlineRateLimiter_UseHttpLbUserId{
+								UseHttpLbUserId: &ves_io_schema.Empty{},
+							}
 							apiRateLimitOneOfSpec.ApiRateLimit.ApiEndpointRules[i].RateLimiterChoice = inlineRateLimiterOneOfSpec
 
-							// resource modelToSpecNested RequiredOneOfField --> CountByChoice
+							// resource modelToSpecNested OneOfField --> CountByChoice
 							if !cdnLoadbalancerInlineRateLimiterModel.CountByChoice.IsNull() && !cdnLoadbalancerInlineRateLimiterModel.CountByChoice.IsUnknown() {
 								inlineRateLimiterCountByChoiceModel := CdnLoadbalancerCountByChoice{}
 								response.Diagnostics.Append(cdnLoadbalancerInlineRateLimiterModel.CountByChoice.As(ctx, &inlineRateLimiterCountByChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -19939,7 +20127,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 				}
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> IpAllowedListChoice
+			// resource modelToSpecNested OneOfField --> IpAllowedListChoice
 			if !cdnLoadbalancerApiRateLimitModel.IpAllowedListChoice.IsNull() && !cdnLoadbalancerApiRateLimitModel.IpAllowedListChoice.IsUnknown() {
 				apiRateLimitIpAllowedListChoiceModel := CdnLoadbalancerIpAllowedListChoice{}
 				response.Diagnostics.Append(cdnLoadbalancerApiRateLimitModel.IpAllowedListChoice.As(ctx, &apiRateLimitIpAllowedListChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -19975,6 +20163,12 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 						for i, bypassRateLimitingRulesElement := range bypassRateLimitingRulesElements {
 							// Initialize the spec struct for the current element
 							bypassRateLimitingRulesOneOfSpec.BypassRateLimitingRules.BypassRateLimitingRules[i] = &ves_io_schema_views_common_waf.BypassRateLimitingRule{}
+							bypassRateLimitingRulesOneOfSpec.BypassRateLimitingRules.BypassRateLimitingRules[i].DestinationType = &ves_io_schema_views_common_waf.BypassRateLimitingRule_AnyUrl{
+								AnyUrl: &ves_io_schema.Empty{},
+							}
+							bypassRateLimitingRulesOneOfSpec.BypassRateLimitingRules.BypassRateLimitingRules[i].DomainChoice = &ves_io_schema_views_common_waf.BypassRateLimitingRule_AnyDomain{
+								AnyDomain: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
@@ -19987,9 +20181,15 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 								}
 
 								clientMatcherSpec := &ves_io_schema_policy.ClientMatcher{}
+								clientMatcherSpec.ClientChoice = &ves_io_schema_policy.ClientMatcher_AnyClient{
+									AnyClient: &ves_io_schema.Empty{},
+								}
+								clientMatcherSpec.IpAsnChoice = &ves_io_schema_policy.ClientMatcher_AnyIp{
+									AnyIp: &ves_io_schema.Empty{},
+								}
 								bypassRateLimitingRulesSpec[i].ClientMatcher = clientMatcherSpec
 
-								// resource modelToSpecNested RequiredOneOfField --> ClientChoice
+								// resource modelToSpecNested OneOfField --> ClientChoice
 								if !clientMatcherModel.ClientChoice.IsNull() && !clientMatcherModel.ClientChoice.IsUnknown() {
 									clientMatcherClientChoiceModel := CdnLoadbalancerClientMatcherClientChoice{}
 									response.Diagnostics.Append(clientMatcherModel.ClientChoice.As(ctx, &clientMatcherClientChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -20066,7 +20266,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 								}
 
-								// resource modelToSpecNested RequiredOneOfField --> IpAsnChoice
+								// resource modelToSpecNested OneOfField --> IpAsnChoice
 								if !clientMatcherModel.IpAsnChoice.IsNull() && !clientMatcherModel.IpAsnChoice.IsUnknown() {
 									clientMatcherIpAsnChoiceModel := CdnLoadbalancerIpAsnChoice{}
 									response.Diagnostics.Append(clientMatcherModel.IpAsnChoice.As(ctx, &clientMatcherIpAsnChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -20317,7 +20517,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 							}
 
-							// resource modelToSpecNested RequiredOneOfField --> DestinationType
+							// resource modelToSpecNested OneOfField --> DestinationType
 							if !bypassRateLimitingRulesElement.DestinationTypeChoice.IsNull() && !bypassRateLimitingRulesElement.DestinationTypeChoice.IsUnknown() {
 								bypassRateLimitingRulesDestinationTypeChoiceModel := CdnLoadbalancerDestTypeChoice{}
 								response.Diagnostics.Append(bypassRateLimitingRulesElement.DestinationTypeChoice.As(ctx, &bypassRateLimitingRulesDestinationTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -20408,7 +20608,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 							}
 
-							// resource modelToSpecNested RequiredOneOfField --> DomainChoice
+							// resource modelToSpecNested OneOfField --> DomainChoice
 							if !bypassRateLimitingRulesElement.DomainChoice.IsNull() && !bypassRateLimitingRulesElement.DomainChoice.IsUnknown() {
 								bypassRateLimitingRulesDomainChoiceModel := CdnLoadbalancerBypassRateLimitingRuleDomainChoice{}
 								response.Diagnostics.Append(bypassRateLimitingRulesElement.DomainChoice.As(ctx, &bypassRateLimitingRulesDomainChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -20932,6 +21132,9 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 				for i, serverUrlRulesElement := range serverUrlRulesElements {
 					// Initialize the spec struct for the current element
 					apiRateLimitOneOfSpec.ApiRateLimit.ServerUrlRules[i] = &ves_io_schema_views_common_waf.ServerUrlRule{}
+					apiRateLimitOneOfSpec.ApiRateLimit.ServerUrlRules[i].DomainChoice = &ves_io_schema_views_common_waf.ServerUrlRule_AnyDomain{
+						AnyDomain: &ves_io_schema.Empty{},
+					}
 
 					// Recursively process nested elements
 
@@ -20954,9 +21157,15 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 						}
 
 						clientMatcherSpec := &ves_io_schema_policy.ClientMatcher{}
+						clientMatcherSpec.ClientChoice = &ves_io_schema_policy.ClientMatcher_AnyClient{
+							AnyClient: &ves_io_schema.Empty{},
+						}
+						clientMatcherSpec.IpAsnChoice = &ves_io_schema_policy.ClientMatcher_AnyIp{
+							AnyIp: &ves_io_schema.Empty{},
+						}
 						serverUrlRulesSpec[i].ClientMatcher = clientMatcherSpec
 
-						// resource modelToSpecNested RequiredOneOfField --> ClientChoice
+						// resource modelToSpecNested OneOfField --> ClientChoice
 						if !clientMatcherModel.ClientChoice.IsNull() && !clientMatcherModel.ClientChoice.IsUnknown() {
 							clientMatcherClientChoiceModel := CdnLoadbalancerClientMatcherClientChoice{}
 							response.Diagnostics.Append(clientMatcherModel.ClientChoice.As(ctx, &clientMatcherClientChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -21033,7 +21242,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 						}
 
-						// resource modelToSpecNested RequiredOneOfField --> IpAsnChoice
+						// resource modelToSpecNested OneOfField --> IpAsnChoice
 						if !clientMatcherModel.IpAsnChoice.IsNull() && !clientMatcherModel.IpAsnChoice.IsUnknown() {
 							clientMatcherIpAsnChoiceModel := CdnLoadbalancerIpAsnChoice{}
 							response.Diagnostics.Append(clientMatcherModel.IpAsnChoice.As(ctx, &clientMatcherIpAsnChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -21284,7 +21493,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> DomainChoice
+					// resource modelToSpecNested OneOfField --> DomainChoice
 					if !serverUrlRulesElement.DomainChoice.IsNull() && !serverUrlRulesElement.DomainChoice.IsUnknown() {
 						serverUrlRulesDomainChoiceModel := CdnLoadbalancerServerUrlRuleDomainChoice{}
 						response.Diagnostics.Append(serverUrlRulesElement.DomainChoice.As(ctx, &serverUrlRulesDomainChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -21325,9 +21534,12 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 							}
 							inlineRateLimiterOneOfSpec := &ves_io_schema_views_common_waf.ServerUrlRule_InlineRateLimiter{}
 							inlineRateLimiterOneOfSpec.InlineRateLimiter = &ves_io_schema_views_common_waf.InlineRateLimiter{}
+							inlineRateLimiterOneOfSpec.InlineRateLimiter.CountByChoice = &ves_io_schema_views_common_waf.InlineRateLimiter_UseHttpLbUserId{
+								UseHttpLbUserId: &ves_io_schema.Empty{},
+							}
 							apiRateLimitOneOfSpec.ApiRateLimit.ServerUrlRules[i].RateLimiterChoice = inlineRateLimiterOneOfSpec
 
-							// resource modelToSpecNested RequiredOneOfField --> CountByChoice
+							// resource modelToSpecNested OneOfField --> CountByChoice
 							if !cdnLoadbalancerServerUrlRuleInlineRateLimiterModel.CountByChoice.IsNull() && !cdnLoadbalancerServerUrlRuleInlineRateLimiterModel.CountByChoice.IsUnknown() {
 								inlineRateLimiterCountByChoiceModel := CdnLoadbalancerCountByChoice{}
 								response.Diagnostics.Append(cdnLoadbalancerServerUrlRuleInlineRateLimiterModel.CountByChoice.As(ctx, &inlineRateLimiterCountByChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -21826,9 +22038,15 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 			}
 			rateLimitOneOfSpec := &ves_io_schema_views_cdn_loadbalancer.CreateSpecType_RateLimit{}
 			rateLimitOneOfSpec.RateLimit = &ves_io_schema_views_common_waf.RateLimitConfigType{}
+			rateLimitOneOfSpec.RateLimit.IpAllowedListChoice = &ves_io_schema_views_common_waf.RateLimitConfigType_NoIpAllowedList{
+				NoIpAllowedList: &ves_io_schema.Empty{},
+			}
+			rateLimitOneOfSpec.RateLimit.PolicyChoice = &ves_io_schema_views_common_waf.RateLimitConfigType_NoPolicies{
+				NoPolicies: &ves_io_schema.Empty{},
+			}
 			spec.RateLimitChoice = rateLimitOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> IpAllowedListChoice
+			// resource modelToSpecNested OneOfField --> IpAllowedListChoice
 			if !cdnLoadbalancerRateLimitModel.IpAllowedListChoice.IsNull() && !cdnLoadbalancerRateLimitModel.IpAllowedListChoice.IsUnknown() {
 				rateLimitIpAllowedListChoiceModel := CdnLoadbalancerRateLimitConfigTypeIpAllowedListChoice{}
 				response.Diagnostics.Append(cdnLoadbalancerRateLimitModel.IpAllowedListChoice.As(ctx, &rateLimitIpAllowedListChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -21930,7 +22148,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> PolicyChoice
+			// resource modelToSpecNested OneOfField --> PolicyChoice
 			if !cdnLoadbalancerRateLimitModel.PolicyChoice.IsNull() && !cdnLoadbalancerRateLimitModel.PolicyChoice.IsUnknown() {
 				rateLimitPolicyChoiceModel := CdnLoadbalancerPolicyChoice{}
 				response.Diagnostics.Append(cdnLoadbalancerRateLimitModel.PolicyChoice.As(ctx, &rateLimitPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -22224,7 +22442,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> SlowDdosMitigationChoice
+	// resource modelToSpecRoot OneOfField --> SlowDdosMitigationChoice
 	if !data.SlowDdosMitigationChoice.IsNull() && !data.SlowDdosMitigationChoice.IsUnknown() {
 		slowDdosMitigationChoiceModel := CdnLoadbalancerSlowDdosMitigationChoice{}
 		response.Diagnostics.Append(data.SlowDdosMitigationChoice.As(ctx, &slowDdosMitigationChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -22283,6 +22501,10 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 			spec.SlowDdosMitigationChoice = systemDefaultTimeoutsSpecBool
 		}
 
+	} else {
+		spec.SlowDdosMitigationChoice = &ves_io_schema_views_cdn_loadbalancer.CreateSpecType_SystemDefaultTimeouts{
+			SystemDefaultTimeouts: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -22525,7 +22747,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> WafChoice
+	// resource modelToSpecRoot OneOfField --> WafChoice
 	if !data.WafChoice.IsNull() && !data.WafChoice.IsUnknown() {
 		wafChoiceModel := CdnLoadbalancerWafChoice{}
 		response.Diagnostics.Append(data.WafChoice.As(ctx, &wafChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -22563,6 +22785,10 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 			spec.WafChoice = disableWafSpecBool
 		}
 
+	} else {
+		spec.WafChoice = &ves_io_schema_views_cdn_loadbalancer.CreateSpecType_DisableWaf{
+			DisableWaf: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -22615,10 +22841,16 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 						for i, rulesElement := range rulesElements {
 							// Initialize the spec struct for the current element
 							wafExclusionInlineRulesOneOfSpec.WafExclusionInlineRules.Rules[i] = &ves_io_schema_policy.SimpleWafExclusionRule{}
+							wafExclusionInlineRulesOneOfSpec.WafExclusionInlineRules.Rules[i].DomainChoice = &ves_io_schema_policy.SimpleWafExclusionRule_AnyDomain{
+								AnyDomain: &ves_io_schema.Empty{},
+							}
+							wafExclusionInlineRulesOneOfSpec.WafExclusionInlineRules.Rules[i].PathChoice = &ves_io_schema_policy.SimpleWafExclusionRule_AnyPath{
+								AnyPath: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
-							// resource modelToSpecNested RequiredOneOfField --> DomainChoice
+							// resource modelToSpecNested OneOfField --> DomainChoice
 							if !rulesElement.DomainChoice.IsNull() && !rulesElement.DomainChoice.IsUnknown() {
 								rulesDomainChoiceModel := CdnLoadbalancerSimpleWafExclusionRuleDomainChoice{}
 								response.Diagnostics.Append(rulesElement.DomainChoice.As(ctx, &rulesDomainChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -22710,7 +22942,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 								rulesSpec[i].Methods = methodsSpec
 							}
 
-							// resource modelToSpecNested RequiredOneOfField --> PathChoice
+							// resource modelToSpecNested OneOfField --> PathChoice
 							if !rulesElement.PathChoice.IsNull() && !rulesElement.PathChoice.IsUnknown() {
 								rulesPathChoiceModel := CdnLoadbalancerPathChoice{}
 								response.Diagnostics.Append(rulesElement.PathChoice.As(ctx, &rulesPathChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -24042,8 +24274,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 					policyBasedChallengeAttributeMap["captcha_challenge_parameters_choice"] = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeCaptchaChallengeParametersChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ChallengeChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> ChallengeChoice
 				if policyBasedChallengeElement.GetChallengeChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					policyBasedChallengechallengeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -24655,8 +24886,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 									cdnLoadbalancerChallengeRuleSpecModel.BodyMatcher = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecBodyMatcherModelAttributeMap)
 								}
 
-								// resource specToModelNested RequiredOneOfField --> ChallengeAction
-								// GlobalSpecType
+								// resource specToModelNested OneOfField --> ChallengeAction
 								if specElement.GetChallengeAction() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									specchallengeActionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -25853,8 +26083,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 		var cdnLoadbalancerCsrfPolicyModel = &CdnLoadbalancerCsrfPolicy{}
 		csrfPolicyElement := specData.GetCsrfPolicy()
 
-		// resource specToModelNested RequiredOneOfField --> AllowedDomains
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> AllowedDomains
 		if csrfPolicyElement.GetAllowedDomains() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			csrfPolicyallowedDomainsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -26025,8 +26254,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 		for _, dataGuardRulesElement := range specData.GetDataGuardRules() {
 			cdnLoadbalancerSimpleDataGuardRuleModel := CdnLoadbalancerSimpleDataGuardRule{}
 
-			// resource specToModelNested RequiredOneOfField --> ActionChoice
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> ActionChoice
 			if dataGuardRulesElement.GetActionChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				dataGuardRulesactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -26073,8 +26301,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 				cdnLoadbalancerSimpleDataGuardRuleModel.ActionChoice = types.ObjectNull(CdnLoadbalancerDataGuardRulesActionChoiceModelAttributeMap)
 			}
 
-			// resource specToModelNested RequiredOneOfField --> DomainChoice
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> DomainChoice
 			if dataGuardRulesElement.GetDomainChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				dataGuardRulesdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -26346,8 +26573,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 				cdnLoadbalancerDDoSMitigationRuleModel.Metadata = types.ObjectNull(CdnLoadbalancerDdosMitigationRulesMetadataModelAttributeMap)
 			}
 
-			// resource specToModelNested RequiredOneOfField --> MitigationAction
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> MitigationAction
 			if ddosMitigationRulesElement.GetMitigationAction() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				ddosMitigationRulesmitigationActionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -26892,8 +27118,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 		for _, graphqlRulesElement := range specData.GetGraphqlRules() {
 			cdnLoadbalancerGraphQLRuleModel := CdnLoadbalancerGraphQLRule{}
 
-			// resource specToModelNested RequiredOneOfField --> DomainChoice
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> DomainChoice
 			if graphqlRulesElement.GetDomainChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				graphqlRulesdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -26967,8 +27192,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 				// Recursively populate the nested struct
 
-				// resource specToModelNested RequiredOneOfField --> AllowIntrospectionQueriesChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> AllowIntrospectionQueriesChoice
 				if graphqlSettingsElement.GetAllowIntrospectionQueriesChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					graphqlSettingsallowIntrospectionQueriesChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -27084,8 +27308,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 				cdnLoadbalancerGraphQLRuleModel.Metadata = types.ObjectNull(CdnLoadbalancerGraphqlRulesMetadataModelAttributeMap)
 			}
 
-			// resource specToModelNested RequiredOneOfField --> MethodChoice
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> MethodChoice
 			if graphqlRulesElement.GetMethodChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				graphqlRulesmethodChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -27262,8 +27485,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 			// Recursively populate the nested struct
 
-			// resource specToModelNested RequiredOneOfField --> ActionChoice
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> ActionChoice
 			if actionElement.GetActionChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				actionactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -27548,8 +27770,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 			// Recursively populate the nested struct
 
-			// resource specToModelNested RequiredOneOfField --> TokenLocation
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> TokenLocation
 			if tokenLocationElement.GetTokenLocation() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				tokenLocationtokenLocationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -27619,7 +27840,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 		data.JwtValidation = types.ObjectNull(CdnLoadbalancerJwtValidationModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> L7DdosAutoMitigationAction
+	// resource SpecToModelRoot OneOfField --> L7DdosAutoMitigationAction
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -27702,8 +27923,6 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.L7DdosAutoMitigationActionChoice = types.ObjectNull(CdnLoadbalancerL7DdosAutoMitigationActionModelAttributeMap)
 	}
 
@@ -27847,8 +28066,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 									// Recursively populate the nested struct
 
-									// resource specToModelNested RequiredOneOfField --> Choice
-									// GlobalSpecType
+									// resource specToModelNested OneOfField --> Choice
 									if tlsConfigElement.GetChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -28297,8 +28515,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 									// Recursively populate the nested struct
 
-									// resource specToModelNested RequiredOneOfField --> Choice
-									// GlobalSpecType
+									// resource specToModelNested OneOfField --> Choice
 									if tlsConfigElement.GetChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -28522,8 +28739,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> Choice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> Choice
 					if tlsConfigElement.GetChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -28906,8 +29122,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 			cdnLoadbalancerCdnOriginPoolTypeModel.PublicName = types.ObjectNull(CdnLoadbalancerOriginPoolPublicNameModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> TlsChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> TlsChoice
 		if originPoolElement.GetTlsChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			originPooltlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -29592,8 +29807,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 		for _, protectedCookiesElement := range specData.GetProtectedCookies() {
 			cdnLoadbalancerCookieManipulationOptionTypeModel := CdnLoadbalancerCookieManipulationOptionType{}
 
-			// resource specToModelNested RequiredOneOfField --> CookieTampering
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> CookieTampering
 			if protectedCookiesElement.GetCookieTampering() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				protectedCookiescookieTamperingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -29934,8 +30148,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 							// Recursively populate the nested struct
 
-							// resource specToModelNested RequiredOneOfField --> ClientChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> ClientChoice
 							if clientMatcherElement.GetClientChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								clientMatcherclientChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -30049,8 +30262,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 								cdnLoadbalancerClientMatcherModel.ClientChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesClientMatcherClientChoiceModelAttributeMap)
 							}
 
-							// resource specToModelNested RequiredOneOfField --> IpAsnChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> IpAsnChoice
 							if clientMatcherElement.GetIpAsnChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								clientMatcheripAsnChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -30457,8 +30669,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 							cdnLoadbalancerApiEndpointRuleModel.ClientMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesClientMatcherModelAttributeMap)
 						}
 
-						// resource specToModelNested RequiredOneOfField --> DomainChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> DomainChoice
 						if apiEndpointRulesElement.GetDomainChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							apiEndpointRulesdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -30527,8 +30738,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 								if isInlineRateLimiter && inlineRateLimiterOptionsWrapper != nil && inlineRateLimiterOptionsWrapper.InlineRateLimiter != nil {
 									inlineRateLimiterElement := inlineRateLimiterOptionsWrapper.InlineRateLimiter
 
-									// resource specToModelNested RequiredOneOfField --> CountByChoice
-									// GlobalSpecType
+									// resource specToModelNested OneOfField --> CountByChoice
 									if inlineRateLimiterElement.GetCountByChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										inlineRateLimitercountByChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -31265,8 +31475,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 					apiRateLimitAttributeMap["api_endpoint_rules"] = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesModelAttributeMap})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> IpAllowedListChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> IpAllowedListChoice
 				if apiRateLimitElement.GetIpAllowedListChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					apiRateLimitipAllowedListChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -31303,8 +31512,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 										// Recursively populate the nested struct
 
-										// resource specToModelNested RequiredOneOfField --> ClientChoice
-										// GlobalSpecType
+										// resource specToModelNested OneOfField --> ClientChoice
 										if clientMatcherElement.GetClientChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											clientMatcherclientChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -31418,8 +31626,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 											cdnLoadbalancerClientMatcherModel.ClientChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesClientMatcherClientChoiceModelAttributeMap)
 										}
 
-										// resource specToModelNested RequiredOneOfField --> IpAsnChoice
-										// GlobalSpecType
+										// resource specToModelNested OneOfField --> IpAsnChoice
 										if clientMatcherElement.GetIpAsnChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											clientMatcheripAsnChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -31826,8 +32033,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 										cdnLoadbalancerBypassRateLimitingRuleModel.ClientMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesClientMatcherModelAttributeMap)
 									}
 
-									// resource specToModelNested RequiredOneOfField --> DestinationType
-									// GlobalSpecType
+									// resource specToModelNested OneOfField --> DestinationType
 									if bypassRateLimitingRulesElement.GetDestinationType() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										bypassRateLimitingRulesdestinationTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -31958,8 +32164,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 										cdnLoadbalancerBypassRateLimitingRuleModel.DestinationTypeChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesDestinationTypeModelAttributeMap)
 									}
 
-									// resource specToModelNested RequiredOneOfField --> DomainChoice
-									// GlobalSpecType
+									// resource specToModelNested OneOfField --> DomainChoice
 									if bypassRateLimitingRulesElement.GetDomainChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										bypassRateLimitingRulesdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -32759,8 +32964,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 
 							// Recursively populate the nested struct
 
-							// resource specToModelNested RequiredOneOfField --> ClientChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> ClientChoice
 							if clientMatcherElement.GetClientChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								clientMatcherclientChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -32874,8 +33078,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 								cdnLoadbalancerClientMatcherModel.ClientChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesClientMatcherClientChoiceModelAttributeMap)
 							}
 
-							// resource specToModelNested RequiredOneOfField --> IpAsnChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> IpAsnChoice
 							if clientMatcherElement.GetIpAsnChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								clientMatcheripAsnChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -33282,8 +33485,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 							cdnLoadbalancerServerUrlRuleModel.ClientMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesClientMatcherModelAttributeMap)
 						}
 
-						// resource specToModelNested RequiredOneOfField --> DomainChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> DomainChoice
 						if serverUrlRulesElement.GetDomainChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							serverUrlRulesdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -33352,8 +33554,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 								if isInlineRateLimiter && inlineRateLimiterOptionsWrapper != nil && inlineRateLimiterOptionsWrapper.InlineRateLimiter != nil {
 									inlineRateLimiterElement := inlineRateLimiterOptionsWrapper.InlineRateLimiter
 
-									// resource specToModelNested RequiredOneOfField --> CountByChoice
-									// GlobalSpecType
+									// resource specToModelNested OneOfField --> CountByChoice
 									if inlineRateLimiterElement.GetCountByChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										inlineRateLimitercountByChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -34120,8 +34321,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 			if isRateLimit && rateLimitOptionsWrapper != nil && rateLimitOptionsWrapper.RateLimit != nil {
 				rateLimitElement := rateLimitOptionsWrapper.RateLimit
 
-				// resource specToModelNested RequiredOneOfField --> IpAllowedListChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> IpAllowedListChoice
 				if rateLimitElement.GetIpAllowedListChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					rateLimitipAllowedListChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -34279,8 +34479,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 					rateLimitAttributeMap["ip_allowed_list_choice"] = types.ObjectNull(CdnLoadbalancerRateLimitChoiceRateLimitIpAllowedListChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> PolicyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> PolicyChoice
 				if rateLimitElement.GetPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					rateLimitpolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -34805,7 +35004,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 		data.ServicePolicyChoice = types.ObjectNull(CdnLoadbalancerServicePolicyChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> SlowDdosMitigationChoice
+	// resource SpecToModelRoot OneOfField --> SlowDdosMitigationChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -34917,8 +35116,6 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.SlowDdosMitigationChoice = types.ObjectNull(CdnLoadbalancerSlowDdosMitigationChoiceModelAttributeMap)
 	}
 
@@ -35300,7 +35497,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 		data.UserIdChoice = types.ObjectNull(CdnLoadbalancerUserIdChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> WafChoice
+	// resource SpecToModelRoot OneOfField --> WafChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -35384,8 +35581,6 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.WafChoice = types.ObjectNull(CdnLoadbalancerWafChoiceModelAttributeMap)
 	}
 
@@ -35422,8 +35617,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 						for _, rulesElement := range wafExclusionInlineRulesElement.GetRules() {
 							cdnLoadbalancerSimpleWafExclusionRuleModel := CdnLoadbalancerSimpleWafExclusionRule{}
 
-							// resource specToModelNested RequiredOneOfField --> DomainChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> DomainChoice
 							if rulesElement.GetDomainChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								rulesdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -35550,8 +35744,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Create(ctx context.Context, request resour
 								}
 							}
 
-							// resource specToModelNested RequiredOneOfField --> PathChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> PathChoice
 							if rulesElement.GetPathChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								rulespathChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -35995,11 +36188,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 	priorLoadbalancerTypeChoice := data.LoadbalancerTypeChoice
 	priorOtherSettings := data.OtherSettings
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_cdn_loadbalancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_cdn_loadbalancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "cdn_loadbalancer", err),
@@ -37002,8 +37191,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 					policyBasedChallengeAttributeMap["captcha_challenge_parameters_choice"] = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeCaptchaChallengeParametersChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ChallengeChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> ChallengeChoice
 				if policyBasedChallengeElement.GetChallengeChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					policyBasedChallengechallengeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -37619,8 +37807,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 									cdnLoadbalancerChallengeRuleSpecModel.BodyMatcher = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecBodyMatcherModelAttributeMap)
 								}
 
-								// resource specToModelNested RequiredOneOfField --> ChallengeAction
-								// <no value>
+								// resource specToModelNested OneOfField --> ChallengeAction
 								if specElement.GetChallengeAction() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									specchallengeActionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -38839,8 +39026,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 		var cdnLoadbalancerCsrfPolicyModel = &CdnLoadbalancerCsrfPolicy{}
 		csrfPolicyElement := specData.GetCsrfPolicy()
 
-		// resource specToModelNested RequiredOneOfField --> AllowedDomains
-		// <no value>
+		// resource specToModelNested OneOfField --> AllowedDomains
 		if csrfPolicyElement.GetAllowedDomains() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			csrfPolicyallowedDomainsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -39015,8 +39201,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 		for _, dataGuardRulesElement := range specData.GetDataGuardRules() {
 			cdnLoadbalancerSimpleDataGuardRuleModel := CdnLoadbalancerSimpleDataGuardRule{}
 
-			// resource specToModelNested RequiredOneOfField --> ActionChoice
-			// <no value>
+			// resource specToModelNested OneOfField --> ActionChoice
 			if dataGuardRulesElement.GetActionChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				dataGuardRulesactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -39066,8 +39251,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 				})
 			}
 
-			// resource specToModelNested RequiredOneOfField --> DomainChoice
-			// <no value>
+			// resource specToModelNested OneOfField --> DomainChoice
 			if dataGuardRulesElement.GetDomainChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				dataGuardRulesdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -39343,8 +39527,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 				cdnLoadbalancerDDoSMitigationRuleModel.Metadata = types.ObjectNull(CdnLoadbalancerDdosMitigationRulesMetadataModelAttributeMap)
 			}
 
-			// resource specToModelNested RequiredOneOfField --> MitigationAction
-			// <no value>
+			// resource specToModelNested OneOfField --> MitigationAction
 			if ddosMitigationRulesElement.GetMitigationAction() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				ddosMitigationRulesmitigationActionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -39898,8 +40081,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 		for _, graphqlRulesElement := range specData.GetGraphqlRules() {
 			cdnLoadbalancerGraphQLRuleModel := CdnLoadbalancerGraphQLRule{}
 
-			// resource specToModelNested RequiredOneOfField --> DomainChoice
-			// <no value>
+			// resource specToModelNested OneOfField --> DomainChoice
 			if graphqlRulesElement.GetDomainChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				graphqlRulesdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -39977,8 +40159,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 
 				// Recursively populate the nested struct
 
-				// resource specToModelNested RequiredOneOfField --> AllowIntrospectionQueriesChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> AllowIntrospectionQueriesChoice
 				if graphqlSettingsElement.GetAllowIntrospectionQueriesChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					graphqlSettingsallowIntrospectionQueriesChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -40097,8 +40278,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 				cdnLoadbalancerGraphQLRuleModel.Metadata = types.ObjectNull(CdnLoadbalancerGraphqlRulesMetadataModelAttributeMap)
 			}
 
-			// resource specToModelNested RequiredOneOfField --> MethodChoice
-			// <no value>
+			// resource specToModelNested OneOfField --> MethodChoice
 			if graphqlRulesElement.GetMethodChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				graphqlRulesmethodChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -40278,8 +40458,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 
 			// Recursively populate the nested struct
 
-			// resource specToModelNested RequiredOneOfField --> ActionChoice
-			// <no value>
+			// resource specToModelNested OneOfField --> ActionChoice
 			if actionElement.GetActionChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				actionactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -40569,8 +40748,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 
 			// Recursively populate the nested struct
 
-			// resource specToModelNested RequiredOneOfField --> TokenLocation
-			// <no value>
+			// resource specToModelNested OneOfField --> TokenLocation
 			if tokenLocationElement.GetTokenLocation() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				tokenLocationtokenLocationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -40645,7 +40823,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 		data.JwtValidation = types.ObjectNull(CdnLoadbalancerJwtValidationModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> L7DdosAutoMitigationAction
+	// resource SpecToModelRoot OneOfField --> L7DdosAutoMitigationAction
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -40728,8 +40906,6 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.L7DdosAutoMitigationActionChoice.IsNull() || data.L7DdosAutoMitigationActionChoice.IsUnknown() || ((data.L7DdosAutoMitigationActionChoice.Attributes()["l7_ddos_action_block"].IsNull() || data.L7DdosAutoMitigationActionChoice.Attributes()["l7_ddos_action_block"].IsUnknown()) && (data.L7DdosAutoMitigationActionChoice.Attributes()["l7_ddos_action_default"].IsNull() || data.L7DdosAutoMitigationActionChoice.Attributes()["l7_ddos_action_default"].IsUnknown()) && (data.L7DdosAutoMitigationActionChoice.Attributes()["l7_ddos_action_js_challenge"].(types.Object).IsNull() || data.L7DdosAutoMitigationActionChoice.Attributes()["l7_ddos_action_js_challenge"].(types.Object).IsUnknown() || ((data.L7DdosAutoMitigationActionChoice.Attributes()["l7_ddos_action_js_challenge"].(types.Object).Attributes()["cookie_expiry"].IsNull() || data.L7DdosAutoMitigationActionChoice.Attributes()["l7_ddos_action_js_challenge"].(types.Object).Attributes()["cookie_expiry"].IsUnknown()) && (data.L7DdosAutoMitigationActionChoice.Attributes()["l7_ddos_action_js_challenge"].(types.Object).Attributes()["custom_page"].IsNull() || data.L7DdosAutoMitigationActionChoice.Attributes()["l7_ddos_action_js_challenge"].(types.Object).Attributes()["custom_page"].IsUnknown()) && (data.L7DdosAutoMitigationActionChoice.Attributes()["l7_ddos_action_js_challenge"].(types.Object).Attributes()["js_script_delay"].IsNull() || data.L7DdosAutoMitigationActionChoice.Attributes()["l7_ddos_action_js_challenge"].(types.Object).Attributes()["js_script_delay"].IsUnknown())))) {
 			data.L7DdosAutoMitigationActionChoice = types.ObjectValueMust(CdnLoadbalancerL7DdosAutoMitigationActionModelAttributeMap, map[string]attr.Value{
@@ -40880,8 +41056,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 
 									// Recursively populate the nested struct
 
-									// resource specToModelNested RequiredOneOfField --> Choice
-									// <no value>
+									// resource specToModelNested OneOfField --> Choice
 									if tlsConfigElement.GetChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -41347,8 +41522,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 
 									// Recursively populate the nested struct
 
-									// resource specToModelNested RequiredOneOfField --> Choice
-									// <no value>
+									// resource specToModelNested OneOfField --> Choice
 									if tlsConfigElement.GetChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -41577,8 +41751,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> Choice
-					// <no value>
+					// resource specToModelNested OneOfField --> Choice
 					if tlsConfigElement.GetChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -41964,8 +42137,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 			cdnLoadbalancerCdnOriginPoolTypeModel.PublicName = types.ObjectNull(CdnLoadbalancerOriginPoolPublicNameModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> TlsChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> TlsChoice
 		if originPoolElement.GetTlsChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			originPooltlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -42681,8 +42853,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 		for _, protectedCookiesElement := range specData.GetProtectedCookies() {
 			cdnLoadbalancerCookieManipulationOptionTypeModel := CdnLoadbalancerCookieManipulationOptionType{}
 
-			// resource specToModelNested RequiredOneOfField --> CookieTampering
-			// <no value>
+			// resource specToModelNested OneOfField --> CookieTampering
 			if protectedCookiesElement.GetCookieTampering() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				protectedCookiescookieTamperingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -43026,8 +43197,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 
 							// Recursively populate the nested struct
 
-							// resource specToModelNested RequiredOneOfField --> ClientChoice
-							// <no value>
+							// resource specToModelNested OneOfField --> ClientChoice
 							if clientMatcherElement.GetClientChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								clientMatcherclientChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -43145,8 +43315,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 								})
 							}
 
-							// resource specToModelNested RequiredOneOfField --> IpAsnChoice
-							// <no value>
+							// resource specToModelNested OneOfField --> IpAsnChoice
 							if clientMatcherElement.GetIpAsnChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								clientMatcheripAsnChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -43559,8 +43728,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 							cdnLoadbalancerApiEndpointRuleModel.ClientMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesClientMatcherModelAttributeMap)
 						}
 
-						// resource specToModelNested RequiredOneOfField --> DomainChoice
-						// <no value>
+						// resource specToModelNested OneOfField --> DomainChoice
 						if apiEndpointRulesElement.GetDomainChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							apiEndpointRulesdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -43632,8 +43800,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 								if isInlineRateLimiter && inlineRateLimiterOptionsWrapper != nil && inlineRateLimiterOptionsWrapper.InlineRateLimiter != nil {
 									inlineRateLimiterElement := inlineRateLimiterOptionsWrapper.InlineRateLimiter
 
-									// resource specToModelNested RequiredOneOfField --> CountByChoice
-									// <no value>
+									// resource specToModelNested OneOfField --> CountByChoice
 									if inlineRateLimiterElement.GetCountByChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										inlineRateLimitercountByChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -44373,8 +44540,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 					apiRateLimitAttributeMap["api_endpoint_rules"] = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesModelAttributeMap})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> IpAllowedListChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> IpAllowedListChoice
 				if apiRateLimitElement.GetIpAllowedListChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					apiRateLimitipAllowedListChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -44411,8 +44577,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 
 										// Recursively populate the nested struct
 
-										// resource specToModelNested RequiredOneOfField --> ClientChoice
-										// <no value>
+										// resource specToModelNested OneOfField --> ClientChoice
 										if clientMatcherElement.GetClientChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											clientMatcherclientChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -44530,8 +44695,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 											})
 										}
 
-										// resource specToModelNested RequiredOneOfField --> IpAsnChoice
-										// <no value>
+										// resource specToModelNested OneOfField --> IpAsnChoice
 										if clientMatcherElement.GetIpAsnChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											clientMatcheripAsnChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -44944,8 +45108,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 										cdnLoadbalancerBypassRateLimitingRuleModel.ClientMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesClientMatcherModelAttributeMap)
 									}
 
-									// resource specToModelNested RequiredOneOfField --> DestinationType
-									// <no value>
+									// resource specToModelNested OneOfField --> DestinationType
 									if bypassRateLimitingRulesElement.GetDestinationType() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										bypassRateLimitingRulesdestinationTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -45081,8 +45244,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 										})
 									}
 
-									// resource specToModelNested RequiredOneOfField --> DomainChoice
-									// <no value>
+									// resource specToModelNested OneOfField --> DomainChoice
 									if bypassRateLimitingRulesElement.GetDomainChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										bypassRateLimitingRulesdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -45890,8 +46052,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 
 							// Recursively populate the nested struct
 
-							// resource specToModelNested RequiredOneOfField --> ClientChoice
-							// <no value>
+							// resource specToModelNested OneOfField --> ClientChoice
 							if clientMatcherElement.GetClientChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								clientMatcherclientChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -46009,8 +46170,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 								})
 							}
 
-							// resource specToModelNested RequiredOneOfField --> IpAsnChoice
-							// <no value>
+							// resource specToModelNested OneOfField --> IpAsnChoice
 							if clientMatcherElement.GetIpAsnChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								clientMatcheripAsnChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -46423,8 +46583,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 							cdnLoadbalancerServerUrlRuleModel.ClientMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesClientMatcherModelAttributeMap)
 						}
 
-						// resource specToModelNested RequiredOneOfField --> DomainChoice
-						// <no value>
+						// resource specToModelNested OneOfField --> DomainChoice
 						if serverUrlRulesElement.GetDomainChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							serverUrlRulesdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -46496,8 +46655,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 								if isInlineRateLimiter && inlineRateLimiterOptionsWrapper != nil && inlineRateLimiterOptionsWrapper.InlineRateLimiter != nil {
 									inlineRateLimiterElement := inlineRateLimiterOptionsWrapper.InlineRateLimiter
 
-									// resource specToModelNested RequiredOneOfField --> CountByChoice
-									// <no value>
+									// resource specToModelNested OneOfField --> CountByChoice
 									if inlineRateLimiterElement.GetCountByChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										inlineRateLimitercountByChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -47267,8 +47425,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 			if isRateLimit && rateLimitOptionsWrapper != nil && rateLimitOptionsWrapper.RateLimit != nil {
 				rateLimitElement := rateLimitOptionsWrapper.RateLimit
 
-				// resource specToModelNested RequiredOneOfField --> IpAllowedListChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> IpAllowedListChoice
 				if rateLimitElement.GetIpAllowedListChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					rateLimitipAllowedListChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -47430,8 +47587,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> PolicyChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> PolicyChoice
 				if rateLimitElement.GetPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					rateLimitpolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -47959,7 +48115,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 		data.ServicePolicyChoice = types.ObjectNull(CdnLoadbalancerServicePolicyChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> SlowDdosMitigationChoice
+	// resource SpecToModelRoot OneOfField --> SlowDdosMitigationChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -48074,8 +48230,6 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.SlowDdosMitigationChoice.IsNull() || data.SlowDdosMitigationChoice.IsUnknown() || ((data.SlowDdosMitigationChoice.Attributes()["slow_ddos_mitigation"].(types.Object).IsNull() || data.SlowDdosMitigationChoice.Attributes()["slow_ddos_mitigation"].(types.Object).IsUnknown() || ((data.SlowDdosMitigationChoice.Attributes()["slow_ddos_mitigation"].(types.Object).Attributes()["request_headers_timeout"].IsNull() || data.SlowDdosMitigationChoice.Attributes()["slow_ddos_mitigation"].(types.Object).Attributes()["request_headers_timeout"].IsUnknown()) && (data.SlowDdosMitigationChoice.Attributes()["slow_ddos_mitigation"].(types.Object).Attributes()["request_timeout_choice"].(types.Object).IsNull() || data.SlowDdosMitigationChoice.Attributes()["slow_ddos_mitigation"].(types.Object).Attributes()["request_timeout_choice"].(types.Object).IsUnknown() || ((data.SlowDdosMitigationChoice.Attributes()["slow_ddos_mitigation"].(types.Object).Attributes()["request_timeout_choice"].(types.Object).Attributes()["disable_request_timeout"].IsNull() || data.SlowDdosMitigationChoice.Attributes()["slow_ddos_mitigation"].(types.Object).Attributes()["request_timeout_choice"].(types.Object).Attributes()["disable_request_timeout"].IsUnknown()) && (data.SlowDdosMitigationChoice.Attributes()["slow_ddos_mitigation"].(types.Object).Attributes()["request_timeout_choice"].(types.Object).Attributes()["request_timeout"].IsNull() || data.SlowDdosMitigationChoice.Attributes()["slow_ddos_mitigation"].(types.Object).Attributes()["request_timeout_choice"].(types.Object).Attributes()["request_timeout"].IsUnknown()))))) && (data.SlowDdosMitigationChoice.Attributes()["system_default_timeouts"].IsNull() || data.SlowDdosMitigationChoice.Attributes()["system_default_timeouts"].IsUnknown())) {
 			data.SlowDdosMitigationChoice = types.ObjectValueMust(CdnLoadbalancerSlowDdosMitigationChoiceModelAttributeMap, map[string]attr.Value{
@@ -48463,7 +48617,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 		data.UserIdChoice = types.ObjectNull(CdnLoadbalancerUserIdChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> WafChoice
+	// resource SpecToModelRoot OneOfField --> WafChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -48547,8 +48701,6 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.WafChoice.IsNull() || data.WafChoice.IsUnknown() || ((data.WafChoice.Attributes()["app_firewall"].(types.Object).IsNull() || data.WafChoice.Attributes()["app_firewall"].(types.Object).IsUnknown() || ((data.WafChoice.Attributes()["app_firewall"].(types.Object).Attributes()["name"].IsNull() || data.WafChoice.Attributes()["app_firewall"].(types.Object).Attributes()["name"].IsUnknown()) && (data.WafChoice.Attributes()["app_firewall"].(types.Object).Attributes()["namespace"].IsNull() || data.WafChoice.Attributes()["app_firewall"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.WafChoice.Attributes()["app_firewall"].(types.Object).Attributes()["tenant"].IsNull() || data.WafChoice.Attributes()["app_firewall"].(types.Object).Attributes()["tenant"].IsUnknown()))) && (data.WafChoice.Attributes()["disable_waf"].IsNull() || data.WafChoice.Attributes()["disable_waf"].IsUnknown())) {
 			data.WafChoice = types.ObjectValueMust(CdnLoadbalancerWafChoiceModelAttributeMap, map[string]attr.Value{
@@ -48591,8 +48743,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 						for _, rulesElement := range wafExclusionInlineRulesElement.GetRules() {
 							cdnLoadbalancerSimpleWafExclusionRuleModel := CdnLoadbalancerSimpleWafExclusionRule{}
 
-							// resource specToModelNested RequiredOneOfField --> DomainChoice
-							// <no value>
+							// resource specToModelNested OneOfField --> DomainChoice
 							if rulesElement.GetDomainChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								rulesdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -48723,8 +48874,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Read(ctx context.Context, request resource
 								}
 							}
 
-							// resource specToModelNested RequiredOneOfField --> PathChoice
-							// <no value>
+							// resource specToModelNested OneOfField --> PathChoice
 							if rulesElement.GetPathChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								rulespathChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -49696,6 +49846,9 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 			policyBasedChallengeOneOfSpec.PolicyBasedChallenge.TemporaryBlockingParametersChoice = &ves_io_schema_views_common_waf.PolicyBasedChallenge_DefaultTemporaryBlockingParameters{
 				DefaultTemporaryBlockingParameters: &ves_io_schema.Empty{},
 			}
+			policyBasedChallengeOneOfSpec.PolicyBasedChallenge.ChallengeChoice = &ves_io_schema_views_common_waf.PolicyBasedChallenge_NoChallenge{
+				NoChallenge: &ves_io_schema.Empty{},
+			}
 			spec.ChallengeType = policyBasedChallengeOneOfSpec
 
 			// resource modelToSpecNested OneOfField --> CaptchaChallengeParametersChoice
@@ -49740,7 +49893,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ChallengeChoice
+			// resource modelToSpecNested OneOfField --> ChallengeChoice
 			if !cdnLoadbalancerPolicyBasedChallengeModel.ChallengeChoice.IsNull() && !cdnLoadbalancerPolicyBasedChallengeModel.ChallengeChoice.IsUnknown() {
 				policyBasedChallengeChallengeChoiceModel := CdnLoadbalancerChallengeChoice{}
 				response.Diagnostics.Append(cdnLoadbalancerPolicyBasedChallengeModel.ChallengeChoice.As(ctx, &policyBasedChallengeChallengeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -49923,6 +50076,9 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 							}
 
 							specSpec := &ves_io_schema_service_policy_rule.ChallengeRuleSpec{}
+							specSpec.ChallengeAction = &ves_io_schema_service_policy_rule.ChallengeRuleSpec_DisableChallenge{
+								DisableChallenge: &ves_io_schema.Empty{},
+							}
 							rulesSpec[i].Spec = specSpec
 
 							// resource modelToSpecNested ArrayOfPointerField --> ArgMatchers
@@ -50148,7 +50304,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 							}
 
-							// resource modelToSpecNested RequiredOneOfField --> ChallengeAction
+							// resource modelToSpecNested OneOfField --> ChallengeAction
 							if !specModel.ChallengeActionChoice.IsNull() && !specModel.ChallengeActionChoice.IsUnknown() {
 								specChallengeActionChoiceModel := CdnLoadbalancerChallengeActionChoice{}
 								response.Diagnostics.Append(specModel.ChallengeActionChoice.As(ctx, &specChallengeActionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -50982,6 +51138,9 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 		// resource modelToSpecRoot PointerField --> CsrfPolicy
 		if !data.CsrfPolicy.IsNull() && !data.CsrfPolicy.IsUnknown() {
 			csrfPolicySpec := &ves_io_schema.CsrfPolicy{}
+			csrfPolicySpec.AllowedDomains = &ves_io_schema.CsrfPolicy_AllLoadBalancerDomains{
+				AllLoadBalancerDomains: &ves_io_schema.Empty{},
+			}
 			spec.CsrfPolicy = csrfPolicySpec
 			var csrfPolicyModel CdnLoadbalancerCsrfPolicy
 
@@ -50992,7 +51151,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> AllowedDomains
+			// resource modelToSpecNested OneOfField --> AllowedDomains
 			if !csrfPolicyModel.AllowedDomainsChoice.IsNull() && !csrfPolicyModel.AllowedDomainsChoice.IsUnknown() {
 				csrfPolicyAllowedDomainsChoiceModel := CdnLoadbalancerAllowedDomainsChoice{}
 				response.Diagnostics.Append(csrfPolicyModel.AllowedDomainsChoice.As(ctx, &csrfPolicyAllowedDomainsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -51107,8 +51266,14 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 			for i, dataGuardRulesElement := range dataGuardRulesElements {
 				dataGuardRulesSpec[i] = &ves_io_schema_policy.SimpleDataGuardRule{}
+				dataGuardRulesSpec[i].ActionChoice = &ves_io_schema_policy.SimpleDataGuardRule_ApplyDataGuard{
+					ApplyDataGuard: &ves_io_schema.Empty{},
+				}
+				dataGuardRulesSpec[i].DomainChoice = &ves_io_schema_policy.SimpleDataGuardRule_AnyDomain{
+					AnyDomain: &ves_io_schema.Empty{},
+				}
 
-				// resource modelToSpecNested RequiredOneOfField --> ActionChoice
+				// resource modelToSpecNested OneOfField --> ActionChoice
 				if !dataGuardRulesElement.ActionChoice.IsNull() && !dataGuardRulesElement.ActionChoice.IsUnknown() {
 					dataGuardRulesActionChoiceModel := CdnLoadbalancerActionChoice{}
 					response.Diagnostics.Append(dataGuardRulesElement.ActionChoice.As(ctx, &dataGuardRulesActionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -51132,7 +51297,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 				}
 
-				// resource modelToSpecNested RequiredOneOfField --> DomainChoice
+				// resource modelToSpecNested OneOfField --> DomainChoice
 				if !dataGuardRulesElement.DomainChoice.IsNull() && !dataGuardRulesElement.DomainChoice.IsUnknown() {
 					dataGuardRulesDomainChoiceModel := CdnLoadbalancerDomainChoice{}
 					response.Diagnostics.Append(dataGuardRulesElement.DomainChoice.As(ctx, &dataGuardRulesDomainChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -51250,6 +51415,9 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 			for i, ddosMitigationRulesElement := range ddosMitigationRulesElements {
 				ddosMitigationRulesSpec[i] = &ves_io_schema_views_common_security.DDoSMitigationRule{}
+				ddosMitigationRulesSpec[i].MitigationAction = &ves_io_schema_views_common_security.DDoSMitigationRule_Block{
+					Block: &ves_io_schema.Empty{},
+				}
 
 				// resource modelToSpecNested TimeStampField --> ExpirationTimestamp
 				if !ddosMitigationRulesElement.ExpirationTimestamp.IsNull() && !ddosMitigationRulesElement.ExpirationTimestamp.IsUnknown() {
@@ -51287,7 +51455,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 				}
 
-				// resource modelToSpecNested RequiredOneOfField --> MitigationAction
+				// resource modelToSpecNested OneOfField --> MitigationAction
 				if !ddosMitigationRulesElement.MitigationActionChoice.IsNull() && !ddosMitigationRulesElement.MitigationActionChoice.IsUnknown() {
 					ddosMitigationRulesMitigationActionChoiceModel := CdnLoadbalancerMitigationActionChoice{}
 					response.Diagnostics.Append(ddosMitigationRulesElement.MitigationActionChoice.As(ctx, &ddosMitigationRulesMitigationActionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -51590,8 +51758,14 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 			for i, graphqlRulesElement := range graphqlRulesElements {
 				graphqlRulesSpec[i] = &ves_io_schema_policy.GraphQLRule{}
+				graphqlRulesSpec[i].DomainChoice = &ves_io_schema_policy.GraphQLRule_AnyDomain{
+					AnyDomain: &ves_io_schema.Empty{},
+				}
+				graphqlRulesSpec[i].MethodChoice = &ves_io_schema_policy.GraphQLRule_MethodGet{
+					MethodGet: &ves_io_schema.Empty{},
+				}
 
-				// resource modelToSpecNested RequiredOneOfField --> DomainChoice
+				// resource modelToSpecNested OneOfField --> DomainChoice
 				if !graphqlRulesElement.DomainChoice.IsNull() && !graphqlRulesElement.DomainChoice.IsUnknown() {
 					graphqlRulesDomainChoiceModel := CdnLoadbalancerGraphQLRuleDomainChoice{}
 					response.Diagnostics.Append(graphqlRulesElement.DomainChoice.As(ctx, &graphqlRulesDomainChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -51636,9 +51810,12 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 					}
 
 					graphqlSettingsSpec := &ves_io_schema_policy.GraphQLSettingsType{}
+					graphqlSettingsSpec.AllowIntrospectionQueriesChoice = &ves_io_schema_policy.GraphQLSettingsType_DisableIntrospection{
+						DisableIntrospection: &ves_io_schema.Empty{},
+					}
 					graphqlRulesSpec[i].GraphqlSettings = graphqlSettingsSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> AllowIntrospectionQueriesChoice
+					// resource modelToSpecNested OneOfField --> AllowIntrospectionQueriesChoice
 					if !graphqlSettingsModel.AllowIntrospectionQueriesChoice.IsNull() && !graphqlSettingsModel.AllowIntrospectionQueriesChoice.IsUnknown() {
 						graphqlSettingsAllowIntrospectionQueriesChoiceModel := CdnLoadbalancerAllowIntrospectionQueriesChoice{}
 						response.Diagnostics.Append(graphqlSettingsModel.AllowIntrospectionQueriesChoice.As(ctx, &graphqlSettingsAllowIntrospectionQueriesChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -51696,7 +51873,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 				}
 
-				// resource modelToSpecNested RequiredOneOfField --> MethodChoice
+				// resource modelToSpecNested OneOfField --> MethodChoice
 				if !graphqlRulesElement.MethodChoice.IsNull() && !graphqlRulesElement.MethodChoice.IsUnknown() {
 					graphqlRulesMethodChoiceModel := CdnLoadbalancerMethodChoice{}
 					response.Diagnostics.Append(graphqlRulesElement.MethodChoice.As(ctx, &graphqlRulesMethodChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -51802,9 +51979,12 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 				}
 
 				actionSpec := &ves_io_schema.Action{}
+				actionSpec.ActionChoice = &ves_io_schema.Action_Block{
+					Block: &ves_io_schema.Empty{},
+				}
 				jwtValidationSpec.Action = actionSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> ActionChoice
+				// resource modelToSpecNested OneOfField --> ActionChoice
 				if !actionModel.ActionChoice.IsNull() && !actionModel.ActionChoice.IsUnknown() {
 					actionActionChoiceModel := CdnLoadbalancerActionActionChoice{}
 					response.Diagnostics.Append(actionModel.ActionChoice.As(ctx, &actionActionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -51953,9 +52133,12 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 				}
 
 				tokenLocationSpec := &ves_io_schema_views_common_waf.TokenLocation{}
+				tokenLocationSpec.TokenLocation = &ves_io_schema_views_common_waf.TokenLocation_BearerToken{
+					BearerToken: &ves_io_schema.Empty{},
+				}
 				jwtValidationSpec.TokenLocation = tokenLocationSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> TokenLocation
+				// resource modelToSpecNested OneOfField --> TokenLocation
 				if !tokenLocationModel.TokenLocationChoice.IsNull() && !tokenLocationModel.TokenLocationChoice.IsUnknown() {
 					tokenLocationTokenLocationChoiceModel := CdnLoadbalancerTokenLocationChoice{}
 					response.Diagnostics.Append(tokenLocationModel.TokenLocationChoice.As(ctx, &tokenLocationTokenLocationChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -51977,7 +52160,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> L7DdosAutoMitigationAction
+	// resource modelToSpecRoot OneOfField --> L7DdosAutoMitigationAction
 	if !data.L7DdosAutoMitigationActionChoice.IsNull() && !data.L7DdosAutoMitigationActionChoice.IsUnknown() {
 		l7DdosAutoMitigationActionChoiceModel := CdnLoadbalancerL7DdosAutoMitigationActionChoice{}
 		response.Diagnostics.Append(data.L7DdosAutoMitigationActionChoice.As(ctx, &l7DdosAutoMitigationActionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -52031,6 +52214,10 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 		}
 
+	} else {
+		spec.L7DdosAutoMitigationAction = &ves_io_schema_views_cdn_loadbalancer.ReplaceSpecType_L7DdosActionDefault{
+			L7DdosActionDefault: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredOneOfField --> LoadbalancerType
@@ -52164,9 +52351,12 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 							}
 
 							tlsConfigSpec := &ves_io_schema_views.TlsConfig{}
+							tlsConfigSpec.Choice = &ves_io_schema_views.TlsConfig_DefaultSecurity{
+								DefaultSecurity: &ves_io_schema.Empty{},
+							}
 							tlsCertParamsOneOfSpec.TlsCertParams.TlsConfig = tlsConfigSpec
 
-							// resource modelToSpecNested RequiredOneOfField --> Choice
+							// resource modelToSpecNested OneOfField --> Choice
 							if !tlsConfigModel.Choice.IsNull() && !tlsConfigModel.Choice.IsUnknown() {
 								tlsConfigChoiceModel := CdnLoadbalancerChoice{}
 								response.Diagnostics.Append(tlsConfigModel.Choice.As(ctx, &tlsConfigChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -52470,9 +52660,12 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 							}
 
 							tlsConfigSpec := &ves_io_schema_views.TlsConfig{}
+							tlsConfigSpec.Choice = &ves_io_schema_views.TlsConfig_DefaultSecurity{
+								DefaultSecurity: &ves_io_schema.Empty{},
+							}
 							tlsInlineParamsOneOfSpec.TlsInlineParams.TlsConfig = tlsConfigSpec
 
-							// resource modelToSpecNested RequiredOneOfField --> Choice
+							// resource modelToSpecNested OneOfField --> Choice
 							if !tlsConfigModel.Choice.IsNull() && !tlsConfigModel.Choice.IsUnknown() {
 								tlsConfigChoiceModel := CdnLoadbalancerChoice{}
 								response.Diagnostics.Append(tlsConfigModel.Choice.As(ctx, &tlsConfigChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -52619,9 +52812,12 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 				}
 
 				tlsConfigSpec := &ves_io_schema_views_cdn_loadbalancer.CDNTLSConfig{}
+				tlsConfigSpec.Choice = &ves_io_schema_views_cdn_loadbalancer.CDNTLSConfig_Tls_12Plus{
+					Tls_12Plus: &ves_io_schema.Empty{},
+				}
 				httpsAutoCertOneOfSpec.HttpsAutoCert.TlsConfig = tlsConfigSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> Choice
+				// resource modelToSpecNested OneOfField --> Choice
 				if !tlsConfigModel.Choice.IsNull() && !tlsConfigModel.Choice.IsUnknown() {
 					tlsConfigChoiceModel := CdnLoadbalancerCDNTLSConfigChoice{}
 					response.Diagnostics.Append(tlsConfigModel.Choice.As(ctx, &tlsConfigChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -52679,6 +52875,22 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 		// resource modelToSpecRoot RequiredPointerField --> OriginPool
 		if !data.OriginPool.IsNull() && !data.OriginPool.IsUnknown() {
 			originPoolSpec := &ves_io_schema_views_cdn_loadbalancer.CdnOriginPoolType{}
+			originPoolSpec.TlsChoice = &ves_io_schema_views_cdn_loadbalancer.CdnOriginPoolType_UseTls{
+				UseTls: &ves_io_schema_views_origin_pool.UpstreamTlsParameters{
+					MaxSessionKeysType: &ves_io_schema_views_origin_pool.UpstreamTlsParameters_DefaultSessionKeyCaching{
+						DefaultSessionKeyCaching: &ves_io_schema.Empty{},
+					},
+					MtlsChoice: &ves_io_schema_views_origin_pool.UpstreamTlsParameters_NoMtls{
+						NoMtls: &ves_io_schema.Empty{},
+					},
+					ServerValidationChoice: &ves_io_schema_views_origin_pool.UpstreamTlsParameters_VolterraTrustedCa{
+						VolterraTrustedCa: &ves_io_schema.Empty{},
+					},
+					SniChoice: &ves_io_schema_views_origin_pool.UpstreamTlsParameters_UseHostHeaderAsSni{
+						UseHostHeaderAsSni: &ves_io_schema.Empty{},
+					},
+				},
+			}
 			spec.OriginPool = originPoolSpec
 			var originPoolModel CdnLoadbalancerCdnOriginPoolType
 
@@ -52841,7 +53053,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> TlsChoice
+			// resource modelToSpecNested OneOfField --> TlsChoice
 			if !originPoolModel.TlsChoice.IsNull() && !originPoolModel.TlsChoice.IsUnknown() {
 				originPoolTlsChoiceModel := CdnLoadbalancerTlsChoice{}
 				response.Diagnostics.Append(originPoolModel.TlsChoice.As(ctx, &originPoolTlsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -53277,8 +53489,11 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 				protectedCookiesSpec[i].MaxAge = &ves_io_schema.CookieManipulationOptionType_IgnoreMaxAge{
 					IgnoreMaxAge: &ves_io_schema.Empty{},
 				}
+				protectedCookiesSpec[i].CookieTampering = &ves_io_schema.CookieManipulationOptionType_DisableTamperingProtection{
+					DisableTamperingProtection: &ves_io_schema.Empty{},
+				}
 
-				// resource modelToSpecNested RequiredOneOfField --> CookieTampering
+				// resource modelToSpecNested OneOfField --> CookieTampering
 				if !protectedCookiesElement.CookieTamperingChoice.IsNull() && !protectedCookiesElement.CookieTamperingChoice.IsUnknown() {
 					protectedCookiesCookieTamperingChoiceModel := CdnLoadbalancerCookieTamperingChoice{}
 					response.Diagnostics.Append(protectedCookiesElement.CookieTamperingChoice.As(ctx, &protectedCookiesCookieTamperingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -53416,6 +53631,9 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 			}
 			apiRateLimitOneOfSpec := &ves_io_schema_views_cdn_loadbalancer.ReplaceSpecType_ApiRateLimit{}
 			apiRateLimitOneOfSpec.ApiRateLimit = &ves_io_schema_views_common_waf.APIRateLimit{}
+			apiRateLimitOneOfSpec.ApiRateLimit.IpAllowedListChoice = &ves_io_schema_views_common_waf.APIRateLimit_NoIpAllowedList{
+				NoIpAllowedList: &ves_io_schema.Empty{},
+			}
 			spec.RateLimitChoice = apiRateLimitOneOfSpec
 
 			// resource modelToSpecNested ArrayOfPointerField --> ApiEndpointRules
@@ -53435,6 +53653,9 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 				for i, apiEndpointRulesElement := range apiEndpointRulesElements {
 					// Initialize the spec struct for the current element
 					apiRateLimitOneOfSpec.ApiRateLimit.ApiEndpointRules[i] = &ves_io_schema_views_common_waf.ApiEndpointRule{}
+					apiRateLimitOneOfSpec.ApiRateLimit.ApiEndpointRules[i].DomainChoice = &ves_io_schema_views_common_waf.ApiEndpointRule_AnyDomain{
+						AnyDomain: &ves_io_schema.Empty{},
+					}
 
 					// Recursively process nested elements
 
@@ -53497,9 +53718,15 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 						}
 
 						clientMatcherSpec := &ves_io_schema_policy.ClientMatcher{}
+						clientMatcherSpec.ClientChoice = &ves_io_schema_policy.ClientMatcher_AnyClient{
+							AnyClient: &ves_io_schema.Empty{},
+						}
+						clientMatcherSpec.IpAsnChoice = &ves_io_schema_policy.ClientMatcher_AnyIp{
+							AnyIp: &ves_io_schema.Empty{},
+						}
 						apiEndpointRulesSpec[i].ClientMatcher = clientMatcherSpec
 
-						// resource modelToSpecNested RequiredOneOfField --> ClientChoice
+						// resource modelToSpecNested OneOfField --> ClientChoice
 						if !clientMatcherModel.ClientChoice.IsNull() && !clientMatcherModel.ClientChoice.IsUnknown() {
 							clientMatcherClientChoiceModel := CdnLoadbalancerClientMatcherClientChoice{}
 							response.Diagnostics.Append(clientMatcherModel.ClientChoice.As(ctx, &clientMatcherClientChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -53576,7 +53803,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 						}
 
-						// resource modelToSpecNested RequiredOneOfField --> IpAsnChoice
+						// resource modelToSpecNested OneOfField --> IpAsnChoice
 						if !clientMatcherModel.IpAsnChoice.IsNull() && !clientMatcherModel.IpAsnChoice.IsUnknown() {
 							clientMatcherIpAsnChoiceModel := CdnLoadbalancerIpAsnChoice{}
 							response.Diagnostics.Append(clientMatcherModel.IpAsnChoice.As(ctx, &clientMatcherIpAsnChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -53827,7 +54054,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> DomainChoice
+					// resource modelToSpecNested OneOfField --> DomainChoice
 					if !apiEndpointRulesElement.DomainChoice.IsNull() && !apiEndpointRulesElement.DomainChoice.IsUnknown() {
 						apiEndpointRulesDomainChoiceModel := CdnLoadbalancerApiEndpointRuleDomainChoice{}
 						response.Diagnostics.Append(apiEndpointRulesElement.DomainChoice.As(ctx, &apiEndpointRulesDomainChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -53868,9 +54095,12 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 							}
 							inlineRateLimiterOneOfSpec := &ves_io_schema_views_common_waf.ApiEndpointRule_InlineRateLimiter{}
 							inlineRateLimiterOneOfSpec.InlineRateLimiter = &ves_io_schema_views_common_waf.InlineRateLimiter{}
+							inlineRateLimiterOneOfSpec.InlineRateLimiter.CountByChoice = &ves_io_schema_views_common_waf.InlineRateLimiter_UseHttpLbUserId{
+								UseHttpLbUserId: &ves_io_schema.Empty{},
+							}
 							apiRateLimitOneOfSpec.ApiRateLimit.ApiEndpointRules[i].RateLimiterChoice = inlineRateLimiterOneOfSpec
 
-							// resource modelToSpecNested RequiredOneOfField --> CountByChoice
+							// resource modelToSpecNested OneOfField --> CountByChoice
 							if !cdnLoadbalancerInlineRateLimiterModel.CountByChoice.IsNull() && !cdnLoadbalancerInlineRateLimiterModel.CountByChoice.IsUnknown() {
 								inlineRateLimiterCountByChoiceModel := CdnLoadbalancerCountByChoice{}
 								response.Diagnostics.Append(cdnLoadbalancerInlineRateLimiterModel.CountByChoice.As(ctx, &inlineRateLimiterCountByChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -54351,7 +54581,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 				}
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> IpAllowedListChoice
+			// resource modelToSpecNested OneOfField --> IpAllowedListChoice
 			if !cdnLoadbalancerApiRateLimitModel.IpAllowedListChoice.IsNull() && !cdnLoadbalancerApiRateLimitModel.IpAllowedListChoice.IsUnknown() {
 				apiRateLimitIpAllowedListChoiceModel := CdnLoadbalancerIpAllowedListChoice{}
 				response.Diagnostics.Append(cdnLoadbalancerApiRateLimitModel.IpAllowedListChoice.As(ctx, &apiRateLimitIpAllowedListChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -54387,6 +54617,12 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 						for i, bypassRateLimitingRulesElement := range bypassRateLimitingRulesElements {
 							// Initialize the spec struct for the current element
 							bypassRateLimitingRulesOneOfSpec.BypassRateLimitingRules.BypassRateLimitingRules[i] = &ves_io_schema_views_common_waf.BypassRateLimitingRule{}
+							bypassRateLimitingRulesOneOfSpec.BypassRateLimitingRules.BypassRateLimitingRules[i].DestinationType = &ves_io_schema_views_common_waf.BypassRateLimitingRule_AnyUrl{
+								AnyUrl: &ves_io_schema.Empty{},
+							}
+							bypassRateLimitingRulesOneOfSpec.BypassRateLimitingRules.BypassRateLimitingRules[i].DomainChoice = &ves_io_schema_views_common_waf.BypassRateLimitingRule_AnyDomain{
+								AnyDomain: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
@@ -54399,9 +54635,15 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 								}
 
 								clientMatcherSpec := &ves_io_schema_policy.ClientMatcher{}
+								clientMatcherSpec.ClientChoice = &ves_io_schema_policy.ClientMatcher_AnyClient{
+									AnyClient: &ves_io_schema.Empty{},
+								}
+								clientMatcherSpec.IpAsnChoice = &ves_io_schema_policy.ClientMatcher_AnyIp{
+									AnyIp: &ves_io_schema.Empty{},
+								}
 								bypassRateLimitingRulesSpec[i].ClientMatcher = clientMatcherSpec
 
-								// resource modelToSpecNested RequiredOneOfField --> ClientChoice
+								// resource modelToSpecNested OneOfField --> ClientChoice
 								if !clientMatcherModel.ClientChoice.IsNull() && !clientMatcherModel.ClientChoice.IsUnknown() {
 									clientMatcherClientChoiceModel := CdnLoadbalancerClientMatcherClientChoice{}
 									response.Diagnostics.Append(clientMatcherModel.ClientChoice.As(ctx, &clientMatcherClientChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -54478,7 +54720,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 								}
 
-								// resource modelToSpecNested RequiredOneOfField --> IpAsnChoice
+								// resource modelToSpecNested OneOfField --> IpAsnChoice
 								if !clientMatcherModel.IpAsnChoice.IsNull() && !clientMatcherModel.IpAsnChoice.IsUnknown() {
 									clientMatcherIpAsnChoiceModel := CdnLoadbalancerIpAsnChoice{}
 									response.Diagnostics.Append(clientMatcherModel.IpAsnChoice.As(ctx, &clientMatcherIpAsnChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -54729,7 +54971,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 							}
 
-							// resource modelToSpecNested RequiredOneOfField --> DestinationType
+							// resource modelToSpecNested OneOfField --> DestinationType
 							if !bypassRateLimitingRulesElement.DestinationTypeChoice.IsNull() && !bypassRateLimitingRulesElement.DestinationTypeChoice.IsUnknown() {
 								bypassRateLimitingRulesDestinationTypeChoiceModel := CdnLoadbalancerDestTypeChoice{}
 								response.Diagnostics.Append(bypassRateLimitingRulesElement.DestinationTypeChoice.As(ctx, &bypassRateLimitingRulesDestinationTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -54820,7 +55062,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 							}
 
-							// resource modelToSpecNested RequiredOneOfField --> DomainChoice
+							// resource modelToSpecNested OneOfField --> DomainChoice
 							if !bypassRateLimitingRulesElement.DomainChoice.IsNull() && !bypassRateLimitingRulesElement.DomainChoice.IsUnknown() {
 								bypassRateLimitingRulesDomainChoiceModel := CdnLoadbalancerBypassRateLimitingRuleDomainChoice{}
 								response.Diagnostics.Append(bypassRateLimitingRulesElement.DomainChoice.As(ctx, &bypassRateLimitingRulesDomainChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -55344,6 +55586,9 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 				for i, serverUrlRulesElement := range serverUrlRulesElements {
 					// Initialize the spec struct for the current element
 					apiRateLimitOneOfSpec.ApiRateLimit.ServerUrlRules[i] = &ves_io_schema_views_common_waf.ServerUrlRule{}
+					apiRateLimitOneOfSpec.ApiRateLimit.ServerUrlRules[i].DomainChoice = &ves_io_schema_views_common_waf.ServerUrlRule_AnyDomain{
+						AnyDomain: &ves_io_schema.Empty{},
+					}
 
 					// Recursively process nested elements
 
@@ -55366,9 +55611,15 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 						}
 
 						clientMatcherSpec := &ves_io_schema_policy.ClientMatcher{}
+						clientMatcherSpec.ClientChoice = &ves_io_schema_policy.ClientMatcher_AnyClient{
+							AnyClient: &ves_io_schema.Empty{},
+						}
+						clientMatcherSpec.IpAsnChoice = &ves_io_schema_policy.ClientMatcher_AnyIp{
+							AnyIp: &ves_io_schema.Empty{},
+						}
 						serverUrlRulesSpec[i].ClientMatcher = clientMatcherSpec
 
-						// resource modelToSpecNested RequiredOneOfField --> ClientChoice
+						// resource modelToSpecNested OneOfField --> ClientChoice
 						if !clientMatcherModel.ClientChoice.IsNull() && !clientMatcherModel.ClientChoice.IsUnknown() {
 							clientMatcherClientChoiceModel := CdnLoadbalancerClientMatcherClientChoice{}
 							response.Diagnostics.Append(clientMatcherModel.ClientChoice.As(ctx, &clientMatcherClientChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -55445,7 +55696,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 						}
 
-						// resource modelToSpecNested RequiredOneOfField --> IpAsnChoice
+						// resource modelToSpecNested OneOfField --> IpAsnChoice
 						if !clientMatcherModel.IpAsnChoice.IsNull() && !clientMatcherModel.IpAsnChoice.IsUnknown() {
 							clientMatcherIpAsnChoiceModel := CdnLoadbalancerIpAsnChoice{}
 							response.Diagnostics.Append(clientMatcherModel.IpAsnChoice.As(ctx, &clientMatcherIpAsnChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -55696,7 +55947,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> DomainChoice
+					// resource modelToSpecNested OneOfField --> DomainChoice
 					if !serverUrlRulesElement.DomainChoice.IsNull() && !serverUrlRulesElement.DomainChoice.IsUnknown() {
 						serverUrlRulesDomainChoiceModel := CdnLoadbalancerServerUrlRuleDomainChoice{}
 						response.Diagnostics.Append(serverUrlRulesElement.DomainChoice.As(ctx, &serverUrlRulesDomainChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -55737,9 +55988,12 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 							}
 							inlineRateLimiterOneOfSpec := &ves_io_schema_views_common_waf.ServerUrlRule_InlineRateLimiter{}
 							inlineRateLimiterOneOfSpec.InlineRateLimiter = &ves_io_schema_views_common_waf.InlineRateLimiter{}
+							inlineRateLimiterOneOfSpec.InlineRateLimiter.CountByChoice = &ves_io_schema_views_common_waf.InlineRateLimiter_UseHttpLbUserId{
+								UseHttpLbUserId: &ves_io_schema.Empty{},
+							}
 							apiRateLimitOneOfSpec.ApiRateLimit.ServerUrlRules[i].RateLimiterChoice = inlineRateLimiterOneOfSpec
 
-							// resource modelToSpecNested RequiredOneOfField --> CountByChoice
+							// resource modelToSpecNested OneOfField --> CountByChoice
 							if !cdnLoadbalancerServerUrlRuleInlineRateLimiterModel.CountByChoice.IsNull() && !cdnLoadbalancerServerUrlRuleInlineRateLimiterModel.CountByChoice.IsUnknown() {
 								inlineRateLimiterCountByChoiceModel := CdnLoadbalancerCountByChoice{}
 								response.Diagnostics.Append(cdnLoadbalancerServerUrlRuleInlineRateLimiterModel.CountByChoice.As(ctx, &inlineRateLimiterCountByChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -56238,9 +56492,15 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 			}
 			rateLimitOneOfSpec := &ves_io_schema_views_cdn_loadbalancer.ReplaceSpecType_RateLimit{}
 			rateLimitOneOfSpec.RateLimit = &ves_io_schema_views_common_waf.RateLimitConfigType{}
+			rateLimitOneOfSpec.RateLimit.IpAllowedListChoice = &ves_io_schema_views_common_waf.RateLimitConfigType_NoIpAllowedList{
+				NoIpAllowedList: &ves_io_schema.Empty{},
+			}
+			rateLimitOneOfSpec.RateLimit.PolicyChoice = &ves_io_schema_views_common_waf.RateLimitConfigType_NoPolicies{
+				NoPolicies: &ves_io_schema.Empty{},
+			}
 			spec.RateLimitChoice = rateLimitOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> IpAllowedListChoice
+			// resource modelToSpecNested OneOfField --> IpAllowedListChoice
 			if !cdnLoadbalancerRateLimitModel.IpAllowedListChoice.IsNull() && !cdnLoadbalancerRateLimitModel.IpAllowedListChoice.IsUnknown() {
 				rateLimitIpAllowedListChoiceModel := CdnLoadbalancerRateLimitConfigTypeIpAllowedListChoice{}
 				response.Diagnostics.Append(cdnLoadbalancerRateLimitModel.IpAllowedListChoice.As(ctx, &rateLimitIpAllowedListChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -56342,7 +56602,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> PolicyChoice
+			// resource modelToSpecNested OneOfField --> PolicyChoice
 			if !cdnLoadbalancerRateLimitModel.PolicyChoice.IsNull() && !cdnLoadbalancerRateLimitModel.PolicyChoice.IsUnknown() {
 				rateLimitPolicyChoiceModel := CdnLoadbalancerPolicyChoice{}
 				response.Diagnostics.Append(cdnLoadbalancerRateLimitModel.PolicyChoice.As(ctx, &rateLimitPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -56636,7 +56896,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> SlowDdosMitigationChoice
+	// resource modelToSpecRoot OneOfField --> SlowDdosMitigationChoice
 	if !data.SlowDdosMitigationChoice.IsNull() && !data.SlowDdosMitigationChoice.IsUnknown() {
 		slowDdosMitigationChoiceModel := CdnLoadbalancerSlowDdosMitigationChoice{}
 		response.Diagnostics.Append(data.SlowDdosMitigationChoice.As(ctx, &slowDdosMitigationChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -56695,6 +56955,10 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 			spec.SlowDdosMitigationChoice = systemDefaultTimeoutsSpecBool
 		}
 
+	} else {
+		spec.SlowDdosMitigationChoice = &ves_io_schema_views_cdn_loadbalancer.ReplaceSpecType_SystemDefaultTimeouts{
+			SystemDefaultTimeouts: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -56937,7 +57201,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> WafChoice
+	// resource modelToSpecRoot OneOfField --> WafChoice
 	if !data.WafChoice.IsNull() && !data.WafChoice.IsUnknown() {
 		wafChoiceModel := CdnLoadbalancerWafChoice{}
 		response.Diagnostics.Append(data.WafChoice.As(ctx, &wafChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -56975,6 +57239,10 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 			spec.WafChoice = disableWafSpecBool
 		}
 
+	} else {
+		spec.WafChoice = &ves_io_schema_views_cdn_loadbalancer.ReplaceSpecType_DisableWaf{
+			DisableWaf: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -57027,10 +57295,16 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 						for i, rulesElement := range rulesElements {
 							// Initialize the spec struct for the current element
 							wafExclusionInlineRulesOneOfSpec.WafExclusionInlineRules.Rules[i] = &ves_io_schema_policy.SimpleWafExclusionRule{}
+							wafExclusionInlineRulesOneOfSpec.WafExclusionInlineRules.Rules[i].DomainChoice = &ves_io_schema_policy.SimpleWafExclusionRule_AnyDomain{
+								AnyDomain: &ves_io_schema.Empty{},
+							}
+							wafExclusionInlineRulesOneOfSpec.WafExclusionInlineRules.Rules[i].PathChoice = &ves_io_schema_policy.SimpleWafExclusionRule_AnyPath{
+								AnyPath: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
-							// resource modelToSpecNested RequiredOneOfField --> DomainChoice
+							// resource modelToSpecNested OneOfField --> DomainChoice
 							if !rulesElement.DomainChoice.IsNull() && !rulesElement.DomainChoice.IsUnknown() {
 								rulesDomainChoiceModel := CdnLoadbalancerSimpleWafExclusionRuleDomainChoice{}
 								response.Diagnostics.Append(rulesElement.DomainChoice.As(ctx, &rulesDomainChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -57122,7 +57396,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 								rulesSpec[i].Methods = methodsSpec
 							}
 
-							// resource modelToSpecNested RequiredOneOfField --> PathChoice
+							// resource modelToSpecNested OneOfField --> PathChoice
 							if !rulesElement.PathChoice.IsNull() && !rulesElement.PathChoice.IsUnknown() {
 								rulesPathChoiceModel := CdnLoadbalancerPathChoice{}
 								response.Diagnostics.Append(rulesElement.PathChoice.As(ctx, &rulesPathChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -57439,12 +57713,8 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_views_cdn_loadbalancer.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_views_cdn_loadbalancer.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "cdn_loadbalancer", err),
@@ -57453,7 +57723,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_cdn_loadbalancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_cdn_loadbalancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "cdn_loadbalancer", err),
@@ -58455,8 +58725,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 					policyBasedChallengeAttributeMap["captcha_challenge_parameters_choice"] = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeCaptchaChallengeParametersChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ChallengeChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> ChallengeChoice
 				if policyBasedChallengeElement.GetChallengeChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					policyBasedChallengechallengeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -59068,8 +59337,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 									cdnLoadbalancerChallengeRuleSpecModel.BodyMatcher = types.ObjectNull(CdnLoadbalancerChallengeTypePolicyBasedChallengeRuleListRulesSpecBodyMatcherModelAttributeMap)
 								}
 
-								// resource specToModelNested RequiredOneOfField --> ChallengeAction
-								// GlobalSpecType
+								// resource specToModelNested OneOfField --> ChallengeAction
 								if specElement.GetChallengeAction() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									specchallengeActionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -60266,8 +60534,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 		var cdnLoadbalancerCsrfPolicyModel = &CdnLoadbalancerCsrfPolicy{}
 		csrfPolicyElement := specData.GetCsrfPolicy()
 
-		// resource specToModelNested RequiredOneOfField --> AllowedDomains
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> AllowedDomains
 		if csrfPolicyElement.GetAllowedDomains() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			csrfPolicyallowedDomainsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -60438,8 +60705,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 		for _, dataGuardRulesElement := range specData.GetDataGuardRules() {
 			cdnLoadbalancerSimpleDataGuardRuleModel := CdnLoadbalancerSimpleDataGuardRule{}
 
-			// resource specToModelNested RequiredOneOfField --> ActionChoice
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> ActionChoice
 			if dataGuardRulesElement.GetActionChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				dataGuardRulesactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -60486,8 +60752,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 				cdnLoadbalancerSimpleDataGuardRuleModel.ActionChoice = types.ObjectNull(CdnLoadbalancerDataGuardRulesActionChoiceModelAttributeMap)
 			}
 
-			// resource specToModelNested RequiredOneOfField --> DomainChoice
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> DomainChoice
 			if dataGuardRulesElement.GetDomainChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				dataGuardRulesdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -60759,8 +61024,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 				cdnLoadbalancerDDoSMitigationRuleModel.Metadata = types.ObjectNull(CdnLoadbalancerDdosMitigationRulesMetadataModelAttributeMap)
 			}
 
-			// resource specToModelNested RequiredOneOfField --> MitigationAction
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> MitigationAction
 			if ddosMitigationRulesElement.GetMitigationAction() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				ddosMitigationRulesmitigationActionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -61305,8 +61569,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 		for _, graphqlRulesElement := range specData.GetGraphqlRules() {
 			cdnLoadbalancerGraphQLRuleModel := CdnLoadbalancerGraphQLRule{}
 
-			// resource specToModelNested RequiredOneOfField --> DomainChoice
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> DomainChoice
 			if graphqlRulesElement.GetDomainChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				graphqlRulesdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -61380,8 +61643,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 				// Recursively populate the nested struct
 
-				// resource specToModelNested RequiredOneOfField --> AllowIntrospectionQueriesChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> AllowIntrospectionQueriesChoice
 				if graphqlSettingsElement.GetAllowIntrospectionQueriesChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					graphqlSettingsallowIntrospectionQueriesChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -61497,8 +61759,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 				cdnLoadbalancerGraphQLRuleModel.Metadata = types.ObjectNull(CdnLoadbalancerGraphqlRulesMetadataModelAttributeMap)
 			}
 
-			// resource specToModelNested RequiredOneOfField --> MethodChoice
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> MethodChoice
 			if graphqlRulesElement.GetMethodChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				graphqlRulesmethodChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -61675,8 +61936,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 			// Recursively populate the nested struct
 
-			// resource specToModelNested RequiredOneOfField --> ActionChoice
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> ActionChoice
 			if actionElement.GetActionChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				actionactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -61961,8 +62221,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 			// Recursively populate the nested struct
 
-			// resource specToModelNested RequiredOneOfField --> TokenLocation
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> TokenLocation
 			if tokenLocationElement.GetTokenLocation() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				tokenLocationtokenLocationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -62032,7 +62291,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 		data.JwtValidation = types.ObjectNull(CdnLoadbalancerJwtValidationModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> L7DdosAutoMitigationAction
+	// resource SpecToModelRoot OneOfField --> L7DdosAutoMitigationAction
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -62115,8 +62374,6 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.L7DdosAutoMitigationActionChoice = types.ObjectNull(CdnLoadbalancerL7DdosAutoMitigationActionModelAttributeMap)
 	}
 
@@ -62260,8 +62517,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 									// Recursively populate the nested struct
 
-									// resource specToModelNested RequiredOneOfField --> Choice
-									// GlobalSpecType
+									// resource specToModelNested OneOfField --> Choice
 									if tlsConfigElement.GetChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -62710,8 +62966,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 									// Recursively populate the nested struct
 
-									// resource specToModelNested RequiredOneOfField --> Choice
-									// GlobalSpecType
+									// resource specToModelNested OneOfField --> Choice
 									if tlsConfigElement.GetChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -62935,8 +63190,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> Choice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> Choice
 					if tlsConfigElement.GetChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						tlsConfigchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -63319,8 +63573,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 			cdnLoadbalancerCdnOriginPoolTypeModel.PublicName = types.ObjectNull(CdnLoadbalancerOriginPoolPublicNameModelAttributeMap)
 		}
 
-		// resource specToModelNested RequiredOneOfField --> TlsChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> TlsChoice
 		if originPoolElement.GetTlsChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			originPooltlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -64005,8 +64258,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 		for _, protectedCookiesElement := range specData.GetProtectedCookies() {
 			cdnLoadbalancerCookieManipulationOptionTypeModel := CdnLoadbalancerCookieManipulationOptionType{}
 
-			// resource specToModelNested RequiredOneOfField --> CookieTampering
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> CookieTampering
 			if protectedCookiesElement.GetCookieTampering() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				protectedCookiescookieTamperingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -64347,8 +64599,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 							// Recursively populate the nested struct
 
-							// resource specToModelNested RequiredOneOfField --> ClientChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> ClientChoice
 							if clientMatcherElement.GetClientChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								clientMatcherclientChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -64462,8 +64713,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 								cdnLoadbalancerClientMatcherModel.ClientChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesClientMatcherClientChoiceModelAttributeMap)
 							}
 
-							// resource specToModelNested RequiredOneOfField --> IpAsnChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> IpAsnChoice
 							if clientMatcherElement.GetIpAsnChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								clientMatcheripAsnChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -64870,8 +65120,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 							cdnLoadbalancerApiEndpointRuleModel.ClientMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesClientMatcherModelAttributeMap)
 						}
 
-						// resource specToModelNested RequiredOneOfField --> DomainChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> DomainChoice
 						if apiEndpointRulesElement.GetDomainChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							apiEndpointRulesdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -64940,8 +65189,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 								if isInlineRateLimiter && inlineRateLimiterOptionsWrapper != nil && inlineRateLimiterOptionsWrapper.InlineRateLimiter != nil {
 									inlineRateLimiterElement := inlineRateLimiterOptionsWrapper.InlineRateLimiter
 
-									// resource specToModelNested RequiredOneOfField --> CountByChoice
-									// GlobalSpecType
+									// resource specToModelNested OneOfField --> CountByChoice
 									if inlineRateLimiterElement.GetCountByChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										inlineRateLimitercountByChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -65678,8 +65926,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 					apiRateLimitAttributeMap["api_endpoint_rules"] = types.ListNull(types.ObjectType{AttrTypes: CdnLoadbalancerRateLimitChoiceApiRateLimitApiEndpointRulesModelAttributeMap})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> IpAllowedListChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> IpAllowedListChoice
 				if apiRateLimitElement.GetIpAllowedListChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					apiRateLimitipAllowedListChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -65716,8 +65963,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 										// Recursively populate the nested struct
 
-										// resource specToModelNested RequiredOneOfField --> ClientChoice
-										// GlobalSpecType
+										// resource specToModelNested OneOfField --> ClientChoice
 										if clientMatcherElement.GetClientChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											clientMatcherclientChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -65831,8 +66077,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 											cdnLoadbalancerClientMatcherModel.ClientChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesClientMatcherClientChoiceModelAttributeMap)
 										}
 
-										// resource specToModelNested RequiredOneOfField --> IpAsnChoice
-										// GlobalSpecType
+										// resource specToModelNested OneOfField --> IpAsnChoice
 										if clientMatcherElement.GetIpAsnChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											clientMatcheripAsnChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -66239,8 +66484,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 										cdnLoadbalancerBypassRateLimitingRuleModel.ClientMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesClientMatcherModelAttributeMap)
 									}
 
-									// resource specToModelNested RequiredOneOfField --> DestinationType
-									// GlobalSpecType
+									// resource specToModelNested OneOfField --> DestinationType
 									if bypassRateLimitingRulesElement.GetDestinationType() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										bypassRateLimitingRulesdestinationTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -66371,8 +66615,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 										cdnLoadbalancerBypassRateLimitingRuleModel.DestinationTypeChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitIpAllowedListChoiceBypassRateLimitingRulesBypassRateLimitingRulesDestinationTypeModelAttributeMap)
 									}
 
-									// resource specToModelNested RequiredOneOfField --> DomainChoice
-									// GlobalSpecType
+									// resource specToModelNested OneOfField --> DomainChoice
 									if bypassRateLimitingRulesElement.GetDomainChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										bypassRateLimitingRulesdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -67172,8 +67415,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 
 							// Recursively populate the nested struct
 
-							// resource specToModelNested RequiredOneOfField --> ClientChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> ClientChoice
 							if clientMatcherElement.GetClientChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								clientMatcherclientChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -67287,8 +67529,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 								cdnLoadbalancerClientMatcherModel.ClientChoice = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesClientMatcherClientChoiceModelAttributeMap)
 							}
 
-							// resource specToModelNested RequiredOneOfField --> IpAsnChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> IpAsnChoice
 							if clientMatcherElement.GetIpAsnChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								clientMatcheripAsnChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -67695,8 +67936,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 							cdnLoadbalancerServerUrlRuleModel.ClientMatcher = types.ObjectNull(CdnLoadbalancerRateLimitChoiceApiRateLimitServerUrlRulesClientMatcherModelAttributeMap)
 						}
 
-						// resource specToModelNested RequiredOneOfField --> DomainChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> DomainChoice
 						if serverUrlRulesElement.GetDomainChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							serverUrlRulesdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -67765,8 +68005,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 								if isInlineRateLimiter && inlineRateLimiterOptionsWrapper != nil && inlineRateLimiterOptionsWrapper.InlineRateLimiter != nil {
 									inlineRateLimiterElement := inlineRateLimiterOptionsWrapper.InlineRateLimiter
 
-									// resource specToModelNested RequiredOneOfField --> CountByChoice
-									// GlobalSpecType
+									// resource specToModelNested OneOfField --> CountByChoice
 									if inlineRateLimiterElement.GetCountByChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										inlineRateLimitercountByChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -68533,8 +68772,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 			if isRateLimit && rateLimitOptionsWrapper != nil && rateLimitOptionsWrapper.RateLimit != nil {
 				rateLimitElement := rateLimitOptionsWrapper.RateLimit
 
-				// resource specToModelNested RequiredOneOfField --> IpAllowedListChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> IpAllowedListChoice
 				if rateLimitElement.GetIpAllowedListChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					rateLimitipAllowedListChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -68692,8 +68930,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 					rateLimitAttributeMap["ip_allowed_list_choice"] = types.ObjectNull(CdnLoadbalancerRateLimitChoiceRateLimitIpAllowedListChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> PolicyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> PolicyChoice
 				if rateLimitElement.GetPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					rateLimitpolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -69218,7 +69455,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 		data.ServicePolicyChoice = types.ObjectNull(CdnLoadbalancerServicePolicyChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> SlowDdosMitigationChoice
+	// resource SpecToModelRoot OneOfField --> SlowDdosMitigationChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -69330,8 +69567,6 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.SlowDdosMitigationChoice = types.ObjectNull(CdnLoadbalancerSlowDdosMitigationChoiceModelAttributeMap)
 	}
 
@@ -69713,7 +69948,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 		data.UserIdChoice = types.ObjectNull(CdnLoadbalancerUserIdChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> WafChoice
+	// resource SpecToModelRoot OneOfField --> WafChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -69797,8 +70032,6 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.WafChoice = types.ObjectNull(CdnLoadbalancerWafChoiceModelAttributeMap)
 	}
 
@@ -69835,8 +70068,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 						for _, rulesElement := range wafExclusionInlineRulesElement.GetRules() {
 							cdnLoadbalancerSimpleWafExclusionRuleModel := CdnLoadbalancerSimpleWafExclusionRule{}
 
-							// resource specToModelNested RequiredOneOfField --> DomainChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> DomainChoice
 							if rulesElement.GetDomainChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								rulesdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -69963,8 +70195,7 @@ func (r *ResourceF5XCCdnLoadbalancer) Update(ctx context.Context, request resour
 								}
 							}
 
-							// resource specToModelNested RequiredOneOfField --> PathChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> PathChoice
 							if rulesElement.GetPathChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								rulespathChoiceChoicesAttributeMap := make(map[string]attr.Value)

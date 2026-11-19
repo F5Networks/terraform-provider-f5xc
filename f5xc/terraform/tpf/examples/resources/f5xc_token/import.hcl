@@ -1,4 +1,4 @@
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_token.example"
+	to = f5xc_token.example
 }

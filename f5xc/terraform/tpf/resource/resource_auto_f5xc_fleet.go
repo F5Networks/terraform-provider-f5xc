@@ -34,6 +34,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -656,7 +657,7 @@ var FleetBlockedServicesBlockedServicesValueTypeChoiceModelAttributeMap = map[st
 	"web_user_interface": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> BondChoice
+// Attribute map for OneOfField --> BondChoice
 var FleetBondChoiceModelAttributeMap = map[string]attr.Type{
 
 	"bond_device_list": types.ObjectType{
@@ -715,7 +716,7 @@ var FleetBondChoiceBondDeviceListBondDevicesLacpChoiceLacpModelAttributeMap = ma
 	"rate": types.Int64Type,
 }
 
-// Attribute map for RequiredOneOfField --> DcClusterGroupChoice
+// Attribute map for OneOfField --> DcClusterGroupChoice
 var FleetDcClusterGroupChoiceModelAttributeMap = map[string]attr.Type{
 
 	"dc_cluster_group": types.ObjectType{
@@ -743,7 +744,7 @@ var FleetDcClusterGroupChoiceDcClusterGroupInsideModelAttributeMap = map[string]
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> GpuChoice
+// Attribute map for OneOfField --> GpuChoice
 var FleetGpuChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disable_gpu": types.BoolType,
@@ -771,7 +772,7 @@ var FleetInsideVirtualNetworkObjectRefModelAttributeMap = map[string]attr.Type{
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> InterfaceChoice
+// Attribute map for OneOfField --> InterfaceChoice
 var FleetInterfaceChoiceModelAttributeMap = map[string]attr.Type{
 
 	"default_config": types.BoolType,
@@ -903,7 +904,7 @@ var FleetKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoiceEnableUpgradeDr
 	"drain_max_unavailable_node_count": types.Int64Type,
 }
 
-// Attribute map for RequiredOneOfField --> LogsReceiverChoice
+// Attribute map for OneOfField --> LogsReceiverChoice
 var FleetLogsReceiverChoiceModelAttributeMap = map[string]attr.Type{
 
 	"log_receiver": types.ObjectType{
@@ -971,7 +972,7 @@ var FleetPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedModelAttribut
 	},
 }
 
-// Attribute map for RequiredOneOfField --> PerfModeChoice
+// Attribute map for OneOfField --> PerfModeChoice
 var FleetPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"jumbo":    types.BoolType,
@@ -986,14 +987,14 @@ var FleetPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedModelAttribut
 	},
 }
 
-// Attribute map for RequiredOneOfField --> PerfModeChoice
+// Attribute map for OneOfField --> PerfModeChoice
 var FleetPerformanceEnhancementModePerfModeChoicePerfModeL7EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"jumbo_disabled": types.BoolType,
 	"jumbo_enabled":  types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> SriovInterfaceChoice
+// Attribute map for OneOfField --> SriovInterfaceChoice
 var FleetSriovInterfaceChoiceModelAttributeMap = map[string]attr.Type{
 
 	"default_sriov_interface": types.BoolType,
@@ -1025,7 +1026,7 @@ var FleetSriovInterfaceChoiceSriovInterfacesSriovInterfaceModelAttributeMap = ma
 	"number_of_vfs":      types.Int64Type,
 }
 
-// Attribute map for RequiredOneOfField --> StorageClassChoice
+// Attribute map for OneOfField --> StorageClassChoice
 var FleetStorageClassChoiceModelAttributeMap = map[string]attr.Type{
 
 	"default_storage_class": types.BoolType,
@@ -1522,7 +1523,7 @@ var FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTri
 	"unix_permissions": types.Int32Type,
 }
 
-// Attribute map for RequiredOneOfField --> QosPolicyChoice
+// Attribute map for OneOfField --> QosPolicyChoice
 var FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasStorageVolumeDefaultsQosPolicyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"adaptive_qos_policy": types.StringType,
@@ -1548,7 +1549,7 @@ var FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTri
 	"unix_permissions": types.Int32Type,
 }
 
-// Attribute map for RequiredOneOfField --> QosPolicyChoice
+// Attribute map for OneOfField --> QosPolicyChoice
 var FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapNasVolumeDefaultsQosPolicyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"adaptive_qos_policy": types.StringType,
@@ -1856,7 +1857,7 @@ var FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTri
 	"unix_permissions": types.Int32Type,
 }
 
-// Attribute map for RequiredOneOfField --> QosPolicyChoice
+// Attribute map for OneOfField --> QosPolicyChoice
 var FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanStorageVolumeDefaultsQosPolicyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"adaptive_qos_policy": types.StringType,
@@ -1882,7 +1883,7 @@ var FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTri
 	"unix_permissions": types.Int32Type,
 }
 
-// Attribute map for RequiredOneOfField --> QosPolicyChoice
+// Attribute map for OneOfField --> QosPolicyChoice
 var FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoiceNetappTridentBackendChoiceNetappBackendOntapSanVolumeDefaultsQosPolicyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"adaptive_qos_policy": types.StringType,
@@ -2196,7 +2197,7 @@ var FleetStorageDeviceChoiceStorageDeviceListStorageDevicesDeviceChoicePureServi
 	"nfs_endpoint_ip":       types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> StorageInterfaceChoice
+// Attribute map for OneOfField --> StorageInterfaceChoice
 var FleetStorageInterfaceChoiceModelAttributeMap = map[string]attr.Type{
 
 	"no_storage_interfaces": types.BoolType,
@@ -2220,7 +2221,7 @@ var FleetStorageInterfaceChoiceStorageInterfaceListModelAttributeMap = map[strin
 	},
 }
 
-// Attribute map for RequiredOneOfField --> StorageStaticRoutesChoice
+// Attribute map for OneOfField --> StorageStaticRoutesChoice
 var FleetStorageStaticRoutesChoiceModelAttributeMap = map[string]attr.Type{
 
 	"no_storage_static_routes": types.BoolType,
@@ -2431,7 +2432,7 @@ var FleetStorageStaticRoutesChoiceStorageStaticRoutesStorageRoutesSubnetsVerIpv6
 	"prefix": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> UsbPolicyChoice
+// Attribute map for OneOfField --> UsbPolicyChoice
 var FleetUsbPolicyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"allow_all_usb": types.BoolType,
@@ -2550,7 +2551,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 					Attributes: map[string]schema.Attribute{
 						"blocked_services_value_type_choice": schema.SingleNestedAttribute{
 							Description:         "blocked_services_type_choice Choose the Nodel Local Service to disable",
-							MarkdownDescription: "blocked_services_type_choice Choose the Nodel Local Service to disable",
+							MarkdownDescription: "blocked_services_type_choice Choose the Nodel Local Service to disable<br>Exactly one of `dns`, `ssh`, or `web_user_interface` must be specified when `blocked_services_value_type_choice` is configured.",
 							Required:            false,
 							Optional:            true,
 							Computed:            false,
@@ -2564,7 +2565,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 							Attributes: map[string]schema.Attribute{
 								"dns": schema.BoolAttribute{
 									Description:         "DNS Matches DNS port 53",
-									MarkdownDescription: "DNS Matches DNS port 53",
+									MarkdownDescription: "DNS Matches DNS port 53<br>Conflicts with `ssh` and `web_user_interface`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -2574,7 +2575,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 								},
 								"ssh": schema.BoolAttribute{
 									Description:         "SSH",
-									MarkdownDescription: "SSH",
+									MarkdownDescription: "SSH<br>Conflicts with `dns` and `web_user_interface`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -2584,7 +2585,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 								},
 								"web_user_interface": schema.BoolAttribute{
 									Description:         "Web UI",
-									MarkdownDescription: "Web UI",
+									MarkdownDescription: "Web UI<br>Conflicts with `dns` and `ssh`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -2612,20 +2613,23 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 			},
 			"bond_choice": schema.SingleNestedAttribute{
 				Description:         "Select Bond Configuration Add bond interface devices to the fleet",
-				MarkdownDescription: "Select Bond Configuration Add bond interface devices to the fleet",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Select Bond Configuration Add bond interface devices to the fleet<br>Exactly one of `bond_device_list` or `no_bond_devices` must be specified when `bond_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"bond_device_list",
 						"no_bond_devices",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"bond_device_list": schema.SingleNestedAttribute{
 						Description:         "Configure Bond Devices Configure Bond Devices for this fleet",
-						MarkdownDescription: "Configure Bond Devices Configure Bond Devices for this fleet",
+						MarkdownDescription: "Configure Bond Devices Configure Bond Devices for this fleet<br>Conflicts with `no_bond_devices`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2657,7 +2661,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 										},
 										"lacp_choice": schema.SingleNestedAttribute{
 											Description:         "Select Bond Mode Select how bonding will happen, Active/Backup or LACP",
-											MarkdownDescription: "Select Bond Mode Select how bonding will happen, Active/Backup or LACP",
+											MarkdownDescription: "Select Bond Mode Select how bonding will happen, Active/Backup or LACP<br>Exactly one of `active_backup` or `lacp` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -2670,7 +2674,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 											Attributes: map[string]schema.Attribute{
 												"active_backup": schema.BoolAttribute{
 													Description:         "Active/Backup Configure active/backup based bond device",
-													MarkdownDescription: "Active/Backup Configure active/backup based bond device",
+													MarkdownDescription: "Active/Backup Configure active/backup based bond device<br>Conflicts with `lacp`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -2680,7 +2684,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"lacp": schema.SingleNestedAttribute{
 													Description:         "LACP (802.3ad) Configure LACP (802.3ad) based bond device",
-													MarkdownDescription: "LACP (802.3ad) Configure LACP (802.3ad) based bond device",
+													MarkdownDescription: "LACP (802.3ad) Configure LACP (802.3ad) based bond device<br>Conflicts with `active_backup`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -2739,7 +2743,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 					},
 					"no_bond_devices": schema.BoolAttribute{
 						Description:         "No Bond Devices No Bond Devices configured for this Fleet",
-						MarkdownDescription: "No Bond Devices No Bond Devices configured for this Fleet",
+						MarkdownDescription: "No Bond Devices No Bond Devices configured for this Fleet<br>Conflicts with `bond_device_list`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2751,21 +2755,24 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 			},
 			"dc_cluster_group_choice": schema.SingleNestedAttribute{
 				Description:         "Select DC Cluster Group Configure DC cluster group for this fleet",
-				MarkdownDescription: "Select DC Cluster Group Configure DC cluster group for this fleet",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Select DC Cluster Group Configure DC cluster group for this fleet<br>Exactly one of `dc_cluster_group`, `dc_cluster_group_inside`, or `no_dc_cluster_group` must be specified when `dc_cluster_group_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"dc_cluster_group",
 						"dc_cluster_group_inside",
 						"no_dc_cluster_group",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"dc_cluster_group": schema.SingleNestedAttribute{
 						Description:         "Member of DC cluster Group This fleet is member of dc cluster group via site local network",
-						MarkdownDescription: "Member of DC cluster Group This fleet is member of dc cluster group via site local network",
+						MarkdownDescription: "Member of DC cluster Group This fleet is member of dc cluster group via site local network<br>Conflicts with `dc_cluster_group_inside` and `no_dc_cluster_group`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2798,7 +2805,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 					},
 					"dc_cluster_group_inside": schema.SingleNestedAttribute{
 						Description:         "Member of DC cluster Group This fleet is member of dc cluster group via site local inside network",
-						MarkdownDescription: "Member of DC cluster Group This fleet is member of dc cluster group via site local inside network",
+						MarkdownDescription: "Member of DC cluster Group This fleet is member of dc cluster group via site local inside network<br>Conflicts with `dc_cluster_group` and `no_dc_cluster_group`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2831,7 +2838,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 					},
 					"no_dc_cluster_group": schema.BoolAttribute{
 						Description:         "Not a Member This fleet is not a member of a DC cluster group",
-						MarkdownDescription: "Not a Member This fleet is not a member of a DC cluster group",
+						MarkdownDescription: "Not a Member This fleet is not a member of a DC cluster group<br>Conflicts with `dc_cluster_group` and `dc_cluster_group_inside`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2864,21 +2871,24 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 			},
 			"gpu_choice": schema.SingleNestedAttribute{
 				Description:         "Select GPU Enable/Disable Enable or Disable GPU for this fleet",
-				MarkdownDescription: "Select GPU Enable/Disable Enable or Disable GPU for this fleet",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Select GPU Enable/Disable Enable or Disable GPU for this fleet<br>Exactly one of `disable_gpu`, `enable_gpu`, or `enable_vgpu` must be specified when `gpu_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"disable_gpu",
 						"enable_gpu",
 						"enable_vgpu",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"disable_gpu": schema.BoolAttribute{
 						Description:         "GPU Disabled GPU is not enabled for this fleet",
-						MarkdownDescription: "GPU Disabled GPU is not enabled for this fleet",
+						MarkdownDescription: "GPU Disabled GPU is not enabled for this fleet<br>Conflicts with `enable_gpu` and `enable_vgpu`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2888,7 +2898,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 					},
 					"enable_gpu": schema.BoolAttribute{
 						Description:         "Member of DC cluster Group GPU is enabled for this fleet",
-						MarkdownDescription: "Member of DC cluster Group GPU is enabled for this fleet",
+						MarkdownDescription: "Member of DC cluster Group GPU is enabled for this fleet<br>Conflicts with `disable_gpu` and `enable_vgpu`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2898,7 +2908,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 					},
 					"enable_vgpu": schema.SingleNestedAttribute{
 						Description:         "vGPU Enabled Enable NVIDIA vGPU hosted on VMware",
-						MarkdownDescription: "vGPU Enabled Enable NVIDIA vGPU hosted on VMware",
+						MarkdownDescription: "vGPU Enabled Enable NVIDIA vGPU hosted on VMware<br>Conflicts with `disable_gpu` and `enable_gpu`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2983,21 +2993,24 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 			},
 			"interface_choice": schema.SingleNestedAttribute{
 				Description:         "Select Interface Config Select how interfaces are configured for this fleet",
-				MarkdownDescription: "Select Interface Config Select how interfaces are configured for this fleet",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Select Interface Config Select how interfaces are configured for this fleet<br>Exactly one of `default_config`, `device_list`, or `interface_list` must be specified when `interface_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"default_config",
 						"device_list",
 						"interface_list",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"default_config": schema.BoolAttribute{
 						Description:         "No Interfaces Use default configuration for interfaces belonging to this fleet",
-						MarkdownDescription: "No Interfaces Use default configuration for interfaces belonging to this fleet",
+						MarkdownDescription: "No Interfaces Use default configuration for interfaces belonging to this fleet<br>Conflicts with `device_list` and `interface_list`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -3007,7 +3020,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 					},
 					"device_list": schema.SingleNestedAttribute{
 						Description:         "Legacy Device Config Add device for all interfaces belonging to this fleet",
-						MarkdownDescription: "Legacy Device Config Add device for all interfaces belonging to this fleet",
+						MarkdownDescription: "Legacy Device Config Add device for all interfaces belonging to this fleet<br>Conflicts with `default_config` and `interface_list`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -3026,7 +3039,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 									Attributes: map[string]schema.Attribute{
 										"device_instance_choice": schema.SingleNestedAttribute{
 											Description:         "Device Instance Device Instance specifies the type of interface and its characteristics",
-											MarkdownDescription: "Device Instance Device Instance specifies the type of interface and its characteristics",
+											MarkdownDescription: "Device Instance Device Instance specifies the type of interface and its characteristics<br>`network_device` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -3123,7 +3136,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 					},
 					"interface_list": schema.SingleNestedAttribute{
 						Description:         "List of Interfaces Add all interfaces belonging to this fleet",
-						MarkdownDescription: "List of Interfaces Add all interfaces belonging to this fleet",
+						MarkdownDescription: "List of Interfaces Add all interfaces belonging to this fleet<br>Conflicts with `default_config` and `device_list`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -3180,7 +3193,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 				Attributes: map[string]schema.Attribute{
 					"kubernetes_upgrade_drain_enable_choice": schema.SingleNestedAttribute{
 						Description:         "F5XC Enable/Disable Node by Node Upgrade Specify how nodes within a site will be upgraded. If enabled, you can specify number of Worker nodes to be upgraded in parallel. Note: This does not influence Control nodes. This is benefitial for sites with large number of nodes.",
-						MarkdownDescription: "F5XC Enable/Disable Node by Node Upgrade Specify how nodes within a site will be upgraded. If enabled, you can specify number of Worker nodes to be upgraded in parallel. Note: This does not influence Control nodes. This is benefitial for sites with large number of nodes.",
+						MarkdownDescription: "F5XC Enable/Disable Node by Node Upgrade Specify how nodes within a site will be upgraded. If enabled, you can specify number of Worker nodes to be upgraded in parallel. Note: This does not influence Control nodes. This is benefitial for sites with large number of nodes.<br>Exactly one of `disable_upgrade_drain` or `enable_upgrade_drain` must be specified.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -3193,7 +3206,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 						Attributes: map[string]schema.Attribute{
 							"disable_upgrade_drain": schema.BoolAttribute{
 								Description:         "Disable upgrade drain",
-								MarkdownDescription: "Disable upgrade drain",
+								MarkdownDescription: "Disable upgrade drain<br>Conflicts with `enable_upgrade_drain`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -3203,14 +3216,14 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 							},
 							"enable_upgrade_drain": schema.SingleNestedAttribute{
 								Description:         "Enable Node by Node Upgrade",
-								MarkdownDescription: "Enable Node by Node Upgrade",
+								MarkdownDescription: "Enable Node by Node Upgrade<br>Conflicts with `disable_upgrade_drain`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
 								Attributes: map[string]schema.Attribute{
 									"drain_max_unavailable_choice": schema.SingleNestedAttribute{
 										Description:         "Node Batch Size Max number of worker nodes to be upgraded in parallel",
-										MarkdownDescription: "Node Batch Size Max number of worker nodes to be upgraded in parallel",
+										MarkdownDescription: "Node Batch Size Max number of worker nodes to be upgraded in parallel<br>`drain_max_unavailable_node_count` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -3254,20 +3267,23 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 			},
 			"logs_receiver_choice": schema.SingleNestedAttribute{
 				Description:         "Logs Streaming Select Logs receiver for logs streaming",
-				MarkdownDescription: "Logs Streaming Select Logs receiver for logs streaming",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Logs Streaming Select Logs receiver for logs streaming<br>Exactly one of `log_receiver` or `logs_streaming_disabled` must be specified when `logs_receiver_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"log_receiver",
 						"logs_streaming_disabled",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"log_receiver": schema.SingleNestedAttribute{
 						Description:         "Disable Logs Streaming Select log receiver for logs streaming",
-						MarkdownDescription: "Disable Logs Streaming Select log receiver for logs streaming",
+						MarkdownDescription: "Disable Logs Streaming Select log receiver for logs streaming<br>Conflicts with `logs_streaming_disabled`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -3300,7 +3316,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 					},
 					"logs_streaming_disabled": schema.BoolAttribute{
 						Description:         "Disable Logs Receiver Logs Streaming is disabled",
-						MarkdownDescription: "Disable Logs Receiver Logs Streaming is disabled",
+						MarkdownDescription: "Disable Logs Receiver Logs Streaming is disabled<br>Conflicts with `log_receiver`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -3444,7 +3460,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 				Attributes: map[string]schema.Attribute{
 					"perf_mode_choice": schema.SingleNestedAttribute{
 						Description:         "Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.",
-						MarkdownDescription: "Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.",
+						MarkdownDescription: "Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.<br>Exactly one of `perf_mode_l3_enhanced` or `perf_mode_l7_enhanced` must be specified.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -3457,27 +3473,30 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 						Attributes: map[string]schema.Attribute{
 							"perf_mode_l3_enhanced": schema.SingleNestedAttribute{
 								Description:         "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
-								MarkdownDescription: "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
+								MarkdownDescription: "L3 Mode Enhanced Performance Site optimized for L3 traffic processing<br>Conflicts with `perf_mode_l7_enhanced`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
 								Attributes: map[string]schema.Attribute{
 									"perf_mode_choice": schema.SingleNestedAttribute{
 										Description:         "L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads.",
-										MarkdownDescription: "L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads.",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads.<br>Exactly one of `jumbo` or `no_jumbo` must be specified when `perf_mode_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"jumbo",
 												"no_jumbo",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"jumbo": schema.BoolAttribute{
 												Description:         "L3 Mode Enhanced Performance with jumbo frame support(9000)",
-												MarkdownDescription: "L3 Mode Enhanced Performance with jumbo frame support(9000)",
+												MarkdownDescription: "L3 Mode Enhanced Performance with jumbo frame support(9000)<br>Conflicts with `no_jumbo`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3487,7 +3506,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 											},
 											"no_jumbo": schema.BoolAttribute{
 												Description:         "L3 Mode Enhanced Performance with no jumbo frame support",
-												MarkdownDescription: "L3 Mode Enhanced Performance with no jumbo frame support",
+												MarkdownDescription: "L3 Mode Enhanced Performance with no jumbo frame support<br>Conflicts with `jumbo`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3501,27 +3520,30 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 							},
 							"perf_mode_l7_enhanced": schema.SingleNestedAttribute{
 								Description:         "Default Performance Mode Site optimized for L7 traffic processing",
-								MarkdownDescription: "Default Performance Mode Site optimized for L7 traffic processing",
+								MarkdownDescription: "Default Performance Mode Site optimized for L7 traffic processing<br>Conflicts with `perf_mode_l3_enhanced`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
 								Attributes: map[string]schema.Attribute{
 									"perf_mode_choice": schema.SingleNestedAttribute{
 										Description:         "L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads.",
-										MarkdownDescription: "L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads.",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads.<br>Exactly one of `jumbo_disabled` or `jumbo_enabled` must be specified when `perf_mode_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"jumbo_disabled",
 												"jumbo_enabled",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"jumbo_disabled": schema.BoolAttribute{
 												Description:         "L7 Mode Enhanced Performance with no jumbo frame support",
-												MarkdownDescription: "L7 Mode Enhanced Performance with no jumbo frame support",
+												MarkdownDescription: "L7 Mode Enhanced Performance with no jumbo frame support<br>Conflicts with `jumbo_enabled`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3531,7 +3553,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 											},
 											"jumbo_enabled": schema.BoolAttribute{
 												Description:         "L7 Mode Enhanced Performance with jumbo frame support(9000)",
-												MarkdownDescription: "L7 Mode Enhanced Performance with jumbo frame support(9000)",
+												MarkdownDescription: "L7 Mode Enhanced Performance with jumbo frame support(9000)<br>Conflicts with `jumbo_disabled`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3549,20 +3571,23 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 			},
 			"sriov_interface_choice": schema.SingleNestedAttribute{
 				Description:         "Configure SR-IOV interfaces Select to use default or custom Single Root I/O Virtualization interfaces Configuration",
-				MarkdownDescription: "Configure SR-IOV interfaces Select to use default or custom Single Root I/O Virtualization interfaces Configuration",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Configure SR-IOV interfaces Select to use default or custom Single Root I/O Virtualization interfaces Configuration<br>Exactly one of `default_sriov_interface` or `sriov_interfaces` must be specified when `sriov_interface_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"default_sriov_interface",
 						"sriov_interfaces",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"default_sriov_interface": schema.BoolAttribute{
 						Description:         "Default SR-IOV interfaces Configuration Disable Single Root I/O Virtualization interfaces",
-						MarkdownDescription: "Default SR-IOV interfaces Configuration Disable Single Root I/O Virtualization interfaces",
+						MarkdownDescription: "Default SR-IOV interfaces Configuration Disable Single Root I/O Virtualization interfaces<br>Conflicts with `sriov_interfaces`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -3572,7 +3597,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 					},
 					"sriov_interfaces": schema.SingleNestedAttribute{
 						Description:         "Custom SR-IOV interfaces Configuration Use custom Single Root I/O Virtualization interfaces",
-						MarkdownDescription: "Custom SR-IOV interfaces Configuration Use custom Single Root I/O Virtualization interfaces",
+						MarkdownDescription: "Custom SR-IOV interfaces Configuration Use custom Single Root I/O Virtualization interfaces<br>Conflicts with `default_sriov_interface`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -3618,20 +3643,23 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 			},
 			"storage_class_choice": schema.SingleNestedAttribute{
 				Description:         "Storage Class Configuration Configure custom storage classes in kubernetes for this fleet",
-				MarkdownDescription: "Storage Class Configuration Configure custom storage classes in kubernetes for this fleet",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Storage Class Configuration Configure custom storage classes in kubernetes for this fleet<br>Exactly one of `default_storage_class` or `storage_class_list` must be specified when `storage_class_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"default_storage_class",
 						"storage_class_list",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"default_storage_class": schema.BoolAttribute{
 						Description:         "Default Storage Class Use only default storage class in kubernetes",
-						MarkdownDescription: "Default Storage Class Use only default storage class in kubernetes",
+						MarkdownDescription: "Default Storage Class Use only default storage class in kubernetes<br>Conflicts with `storage_class_list`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -3641,7 +3669,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 					},
 					"storage_class_list": schema.SingleNestedAttribute{
 						Description:         "Custom Storage Class Add additional custom storage classes in kubernetes for this fleet",
-						MarkdownDescription: "Custom Storage Class Add additional custom storage classes in kubernetes for this fleet",
+						MarkdownDescription: "Custom Storage Class Add additional custom storage classes in kubernetes for this fleet<br>Conflicts with `default_storage_class`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -3700,7 +3728,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 										},
 										"device_choice": schema.SingleNestedAttribute{
 											Description:         "Select Storage Class Configuration Select storage Class configuration",
-											MarkdownDescription: "Select Storage Class Configuration Select storage Class configuration",
+											MarkdownDescription: "Select Storage Class Configuration Select storage Class configuration<br>Exactly one of `custom_storage`, `hpe_storage`, `netapp_trident`, or `pure_service_orchestrator` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -3715,7 +3743,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 											Attributes: map[string]schema.Attribute{
 												"custom_storage": schema.SingleNestedAttribute{
 													Description:         "Custom Storage Storage configuration for Custom Storage",
-													MarkdownDescription: "Custom Storage Storage configuration for Custom Storage",
+													MarkdownDescription: "Custom Storage Storage configuration for Custom Storage<br>Conflicts with `hpe_storage`, `netapp_trident`, and `pure_service_orchestrator`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -3738,7 +3766,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"hpe_storage": schema.SingleNestedAttribute{
 													Description:         "HPE Storage Storage configuration for HPE Storage",
-													MarkdownDescription: "HPE Storage Storage configuration for HPE Storage",
+													MarkdownDescription: "HPE Storage Storage configuration for HPE Storage<br>Conflicts with `custom_storage`, `netapp_trident`, and `pure_service_orchestrator`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -3891,7 +3919,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"netapp_trident": schema.SingleNestedAttribute{
 													Description:         "NetApp Trident Storage class Device configuration for NetApp Trident",
-													MarkdownDescription: "NetApp Trident Storage class Device configuration for NetApp Trident",
+													MarkdownDescription: "NetApp Trident Storage class Device configuration for NetApp Trident<br>Conflicts with `custom_storage`, `hpe_storage`, and `pure_service_orchestrator`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -3918,7 +3946,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"pure_service_orchestrator": schema.SingleNestedAttribute{
 													Description:         "Pure Storage Service Orchestrator Storage class Device configuration for Pure Service Orchestrator",
-													MarkdownDescription: "Pure Storage Service Orchestrator Storage class Device configuration for Pure Service Orchestrator",
+													MarkdownDescription: "Pure Storage Service Orchestrator Storage class Device configuration for Pure Service Orchestrator<br>Conflicts with `custom_storage`, `hpe_storage`, and `netapp_trident`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -4004,7 +4032,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 			},
 			"storage_device_choice": schema.SingleNestedAttribute{
 				Description:         "Storage Device Configuration Configure external storage devices for this fleet",
-				MarkdownDescription: "Storage Device Configuration Configure external storage devices for this fleet",
+				MarkdownDescription: "Storage Device Configuration Configure external storage devices for this fleet<br>Exactly one of `no_storage_device` or `storage_device_list` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -4017,7 +4045,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 				Attributes: map[string]schema.Attribute{
 					"no_storage_device": schema.BoolAttribute{
 						Description:         "No Storage Devices This fleet does not have any storage devices",
-						MarkdownDescription: "No Storage Devices This fleet does not have any storage devices",
+						MarkdownDescription: "No Storage Devices This fleet does not have any storage devices<br>Conflicts with `storage_device_list`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -4027,7 +4055,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 					},
 					"storage_device_list": schema.SingleNestedAttribute{
 						Description:         "List of Storage Interfaces Add all storage devices belonging to this fleet",
-						MarkdownDescription: "List of Storage Interfaces Add all storage devices belonging to this fleet",
+						MarkdownDescription: "List of Storage Interfaces Add all storage devices belonging to this fleet<br>Conflicts with `no_storage_device`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -4060,7 +4088,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 										},
 										"device_choice": schema.SingleNestedAttribute{
 											Description:         "Select Storage Device Configuration Select type of storage device driver to configure",
-											MarkdownDescription: "Select Storage Device Configuration Select type of storage device driver to configure",
+											MarkdownDescription: "Select Storage Device Configuration Select type of storage device driver to configure<br>Exactly one of `custom_storage`, `hpe_storage`, `netapp_trident`, or `pure_service_orchestrator` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -4075,7 +4103,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 											Attributes: map[string]schema.Attribute{
 												"custom_storage": schema.BoolAttribute{
 													Description:         "Custom Storage Device configuration for Custom Storage",
-													MarkdownDescription: "Custom Storage Device configuration for Custom Storage",
+													MarkdownDescription: "Custom Storage Device configuration for Custom Storage<br>Conflicts with `hpe_storage`, `netapp_trident`, and `pure_service_orchestrator`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -4085,7 +4113,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"hpe_storage": schema.SingleNestedAttribute{
 													Description:         "HPE Storage Device configuration for HPE Storage",
-													MarkdownDescription: "HPE Storage Device configuration for HPE Storage",
+													MarkdownDescription: "HPE Storage Device configuration for HPE Storage<br>Conflicts with `custom_storage`, `netapp_trident`, and `pure_service_orchestrator`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -4109,7 +4137,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 															Attributes: map[string]schema.Attribute{
 																"secret_info_choice": schema.SingleNestedAttribute{
 																	Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																	MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																	MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
@@ -4123,7 +4151,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"blindfold_secret_info": schema.SingleNestedAttribute{
 																			Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																			MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																			MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4163,7 +4191,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"clear_secret_info": schema.SingleNestedAttribute{
 																			Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																			MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																			MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4198,7 +4226,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"none": schema.BoolAttribute{
 																			Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																			MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																			MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4229,7 +4257,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 															Attributes: map[string]schema.Attribute{
 																"secret_info_choice": schema.SingleNestedAttribute{
 																	Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																	MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																	MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
@@ -4243,7 +4271,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																	Attributes: map[string]schema.Attribute{
 																		"blindfold_secret_info": schema.SingleNestedAttribute{
 																			Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																			MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																			MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4283,7 +4311,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"clear_secret_info": schema.SingleNestedAttribute{
 																			Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																			MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																			MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4318,7 +4346,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"none": schema.BoolAttribute{
 																			Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																			MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																			MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4370,14 +4398,14 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"netapp_trident": schema.SingleNestedAttribute{
 													Description:         "NetApp Trident Device configuration for NetApp Trident",
-													MarkdownDescription: "NetApp Trident Device configuration for NetApp Trident",
+													MarkdownDescription: "NetApp Trident Device configuration for NetApp Trident<br>Conflicts with `custom_storage`, `hpe_storage`, and `pure_service_orchestrator`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"backend_choice": schema.SingleNestedAttribute{
 															Description:         "Select NetApp Trident Backend Select type of backend to configure",
-															MarkdownDescription: "Select NetApp Trident Backend Select type of backend to configure",
+															MarkdownDescription: "Select NetApp Trident Backend Select type of backend to configure<br>Exactly one of `netapp_backend_ontap_nas` or `netapp_backend_ontap_san` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -4390,7 +4418,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 															Attributes: map[string]schema.Attribute{
 																"netapp_backend_ontap_nas": schema.SingleNestedAttribute{
 																	Description:         "ONTAP NAS Backend configuration for ONTAP NAS",
-																	MarkdownDescription: "ONTAP NAS Backend configuration for ONTAP NAS",
+																	MarkdownDescription: "ONTAP NAS Backend configuration for ONTAP NAS<br>Conflicts with `netapp_backend_ontap_san`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4473,7 +4501,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																			Attributes: map[string]schema.Attribute{
 																				"secret_info_choice": schema.SingleNestedAttribute{
 																					Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																					Required:            true,
 																					Optional:            false,
 																					Computed:            false,
@@ -4487,7 +4515,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																					Attributes: map[string]schema.Attribute{
 																						"blindfold_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -4527,7 +4555,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"clear_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -4562,7 +4590,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"none": schema.BoolAttribute{
 																							Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -4576,7 +4604,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"data_lif_choice": schema.SingleNestedAttribute{
 																			Description:         "Backend Data LIF FQDN or IP address of protocol LIF. Use square brackets for IPv6. Once set this cannot be updated. Derived by the SVM unless specified.",
-																			MarkdownDescription: "Backend Data LIF FQDN or IP address of protocol LIF. Use square brackets for IPv6. Once set this cannot be updated. Derived by the SVM unless specified.",
+																			MarkdownDescription: "Backend Data LIF FQDN or IP address of protocol LIF. Use square brackets for IPv6. Once set this cannot be updated. Derived by the SVM unless specified.<br>Exactly one of `data_lif_dns_name` or `data_lif_ip` must be specified when `data_lif_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4589,7 +4617,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																			Attributes: map[string]schema.Attribute{
 																				"data_lif_dns_name": schema.StringAttribute{
 																					Description:         "Backend Data LIF Name Backend Data LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.",
-																					MarkdownDescription: "Backend Data LIF Name Backend Data LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`",
+																					MarkdownDescription: "Backend Data LIF Name Backend Data LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `data_lif_ip`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4603,7 +4631,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																				},
 																				"data_lif_ip": schema.StringAttribute{
 																					Description:         "Backend Data LIF IP Address Backend Data LIF IP Address is reachable at the given ip address",
-																					MarkdownDescription: "Backend Data LIF IP Address Backend Data LIF IP Address is reachable at the given ip address",
+																					MarkdownDescription: "Backend Data LIF IP Address Backend Data LIF IP Address is reachable at the given ip address<br>Conflicts with `data_lif_dns_name`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4646,7 +4674,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"management_lif_choice": schema.SingleNestedAttribute{
 																			Description:         "Backend Management LIF FQDN or IP address of a cluster or SVM management LIF",
-																			MarkdownDescription: "Backend Management LIF FQDN or IP address of a cluster or SVM management LIF",
+																			MarkdownDescription: "Backend Management LIF FQDN or IP address of a cluster or SVM management LIF<br>Exactly one of `management_lif_dns_name` or `management_lif_ip` must be specified.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -4659,7 +4687,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																			Attributes: map[string]schema.Attribute{
 																				"management_lif_dns_name": schema.StringAttribute{
 																					Description:         "Backend Management LIF Name Backend Management LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.",
-																					MarkdownDescription: "Backend Management LIF Name Backend Management LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`",
+																					MarkdownDescription: "Backend Management LIF Name Backend Management LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `management_lif_ip`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4673,7 +4701,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																				},
 																				"management_lif_ip": schema.StringAttribute{
 																					Description:         "Backend Management LIF IP Address Backend Management LIF IP Address is reachable at the given ip address",
-																					MarkdownDescription: "Backend Management LIF IP Address Backend Management LIF IP Address is reachable at the given ip address",
+																					MarkdownDescription: "Backend Management LIF IP Address Backend Management LIF IP Address is reachable at the given ip address<br>Conflicts with `management_lif_dns_name`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4702,7 +4730,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																			Attributes: map[string]schema.Attribute{
 																				"secret_info_choice": schema.SingleNestedAttribute{
 																					Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																					Required:            true,
 																					Optional:            false,
 																					Computed:            false,
@@ -4716,7 +4744,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																					Attributes: map[string]schema.Attribute{
 																						"blindfold_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -4756,7 +4784,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"clear_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -4791,7 +4819,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"none": schema.BoolAttribute{
 																							Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -4860,21 +4888,24 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																							},
 																							"qos_policy_choice": schema.SingleNestedAttribute{
 																								Description:         "QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.",
-																								MarkdownDescription: "QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.",
-																								Required:            true,
-																								Optional:            false,
-																								Computed:            false,
+																								MarkdownDescription: "QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.<br>Exactly one of `adaptive_qos_policy`, `no_qos`, or `qos_policy` must be specified when `qos_policy_choice` is configured.",
+																								Required:            false,
+																								Optional:            true,
+																								Computed:            true,
 																								Validators: []validator.Object{
-																									exactlyoneofvalidator.RequiredExactlyOneOf(
+																									exactlyoneofvalidator.ExactlyOneOf(
 																										"adaptive_qos_policy",
 																										"no_qos",
 																										"qos_policy",
 																									),
 																								},
+																								PlanModifiers: []planmodifier.Object{
+																									objectplanmodifier.UseNonNullStateForUnknown(),
+																								},
 																								Attributes: map[string]schema.Attribute{
 																									"adaptive_qos_policy": schema.StringAttribute{
 																										Description:         "Storage Server IP address Enter Adaptive QoS Policy Name",
-																										MarkdownDescription: "Storage Server IP address Enter Adaptive QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`",
+																										MarkdownDescription: "Storage Server IP address Enter Adaptive QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`<br>Conflicts with `no_qos` and `qos_policy`.",
 																										Required:            false,
 																										Optional:            true,
 																										Computed:            false,
@@ -4884,7 +4915,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																									},
 																									"no_qos": schema.BoolAttribute{
 																										Description:         "No QoS No QoS configured",
-																										MarkdownDescription: "No QoS No QoS configured",
+																										MarkdownDescription: "No QoS No QoS configured<br>Conflicts with `adaptive_qos_policy` and `qos_policy`.",
 																										Required:            false,
 																										Optional:            true,
 																										Computed:            false,
@@ -4894,7 +4925,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																									},
 																									"qos_policy": schema.StringAttribute{
 																										Description:         "QoS Policy Name Enter QoS Policy Name",
-																										MarkdownDescription: "QoS Policy Name Enter QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`",
+																										MarkdownDescription: "QoS Policy Name Enter QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`<br>Conflicts with `adaptive_qos_policy` and `no_qos`.",
 																										Required:            false,
 																										Optional:            true,
 																										Computed:            false,
@@ -5050,21 +5081,24 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																				},
 																				"qos_policy_choice": schema.SingleNestedAttribute{
 																					Description:         "QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.",
-																					MarkdownDescription: "QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.",
-																					Required:            true,
-																					Optional:            false,
-																					Computed:            false,
+																					MarkdownDescription: "QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.<br>Exactly one of `adaptive_qos_policy`, `no_qos`, or `qos_policy` must be specified when `qos_policy_choice` is configured.",
+																					Required:            false,
+																					Optional:            true,
+																					Computed:            true,
 																					Validators: []validator.Object{
-																						exactlyoneofvalidator.RequiredExactlyOneOf(
+																						exactlyoneofvalidator.ExactlyOneOf(
 																							"adaptive_qos_policy",
 																							"no_qos",
 																							"qos_policy",
 																						),
 																					},
+																					PlanModifiers: []planmodifier.Object{
+																						objectplanmodifier.UseNonNullStateForUnknown(),
+																					},
 																					Attributes: map[string]schema.Attribute{
 																						"adaptive_qos_policy": schema.StringAttribute{
 																							Description:         "Storage Server IP address Enter Adaptive QoS Policy Name",
-																							MarkdownDescription: "Storage Server IP address Enter Adaptive QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`",
+																							MarkdownDescription: "Storage Server IP address Enter Adaptive QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`<br>Conflicts with `no_qos` and `qos_policy`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -5074,7 +5108,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"no_qos": schema.BoolAttribute{
 																							Description:         "No QoS No QoS configured",
-																							MarkdownDescription: "No QoS No QoS configured",
+																							MarkdownDescription: "No QoS No QoS configured<br>Conflicts with `adaptive_qos_policy` and `qos_policy`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -5084,7 +5118,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"qos_policy": schema.StringAttribute{
 																							Description:         "QoS Policy Name Enter QoS Policy Name",
-																							MarkdownDescription: "QoS Policy Name Enter QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`",
+																							MarkdownDescription: "QoS Policy Name Enter QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`<br>Conflicts with `adaptive_qos_policy` and `no_qos`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -5162,14 +5196,14 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"netapp_backend_ontap_san": schema.SingleNestedAttribute{
 																	Description:         "ONTAP SAN Backend configuration for ONTAP SAN",
-																	MarkdownDescription: "ONTAP SAN Backend configuration for ONTAP SAN",
+																	MarkdownDescription: "ONTAP SAN Backend configuration for ONTAP SAN<br>Conflicts with `netapp_backend_ontap_nas`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"chap_choice": schema.SingleNestedAttribute{
 																			Description:         "Use CHAP Use CHAP to authenticate iSCSI for ONTAP SAN drivers.",
-																			MarkdownDescription: "Use CHAP Use CHAP to authenticate iSCSI for ONTAP SAN drivers.",
+																			MarkdownDescription: "Use CHAP Use CHAP to authenticate iSCSI for ONTAP SAN drivers.<br>Exactly one of `no_chap` or `use_chap` must be specified when `chap_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -5182,7 +5216,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																			Attributes: map[string]schema.Attribute{
 																				"no_chap": schema.BoolAttribute{
 																					Description:         "CHAP Disabled CHAP disabled",
-																					MarkdownDescription: "CHAP Disabled CHAP disabled",
+																					MarkdownDescription: "CHAP Disabled CHAP disabled<br>Conflicts with `use_chap`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5192,7 +5226,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																				},
 																				"use_chap": schema.SingleNestedAttribute{
 																					Description:         "Use Device NetApp Backend ONTAP SAN CHAP configuration Device NetApp Backend ONTAP SAN CHAP configuration options for enabled CHAP",
-																					MarkdownDescription: "Use Device NetApp Backend ONTAP SAN CHAP configuration Device NetApp Backend ONTAP SAN CHAP configuration options for enabled CHAP",
+																					MarkdownDescription: "Use Device NetApp Backend ONTAP SAN CHAP configuration Device NetApp Backend ONTAP SAN CHAP configuration options for enabled CHAP<br>Conflicts with `no_chap`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5206,7 +5240,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																							Attributes: map[string]schema.Attribute{
 																								"secret_info_choice": schema.SingleNestedAttribute{
 																									Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																									MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																									MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																									Required:            true,
 																									Optional:            false,
 																									Computed:            false,
@@ -5220,7 +5254,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																									Attributes: map[string]schema.Attribute{
 																										"blindfold_secret_info": schema.SingleNestedAttribute{
 																											Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																											MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																											MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -5260,7 +5294,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																										},
 																										"clear_secret_info": schema.SingleNestedAttribute{
 																											Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																											MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																											MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -5295,7 +5329,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																										},
 																										"none": schema.BoolAttribute{
 																											Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																											MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -5316,7 +5350,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																							Attributes: map[string]schema.Attribute{
 																								"secret_info_choice": schema.SingleNestedAttribute{
 																									Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																									MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																									MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																									Required:            true,
 																									Optional:            false,
 																									Computed:            false,
@@ -5330,7 +5364,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																									Attributes: map[string]schema.Attribute{
 																										"blindfold_secret_info": schema.SingleNestedAttribute{
 																											Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																											MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																											MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -5370,7 +5404,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																										},
 																										"clear_secret_info": schema.SingleNestedAttribute{
 																											Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																											MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																											MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -5405,7 +5439,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																										},
 																										"none": schema.BoolAttribute{
 																											Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																											MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -5460,7 +5494,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																			Attributes: map[string]schema.Attribute{
 																				"secret_info_choice": schema.SingleNestedAttribute{
 																					Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																					Required:            true,
 																					Optional:            false,
 																					Computed:            false,
@@ -5474,7 +5508,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																					Attributes: map[string]schema.Attribute{
 																						"blindfold_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -5514,7 +5548,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"clear_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -5549,7 +5583,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"none": schema.BoolAttribute{
 																							Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -5563,7 +5597,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"data_lif_choice": schema.SingleNestedAttribute{
 																			Description:         "Backend Data LIF FQDN or IP address of protocol LIF. Use square brackets for IPv6. Once set this cannot be updated. Derived by the SVM unless specified.",
-																			MarkdownDescription: "Backend Data LIF FQDN or IP address of protocol LIF. Use square brackets for IPv6. Once set this cannot be updated. Derived by the SVM unless specified.",
+																			MarkdownDescription: "Backend Data LIF FQDN or IP address of protocol LIF. Use square brackets for IPv6. Once set this cannot be updated. Derived by the SVM unless specified.<br>Exactly one of `data_lif_dns_name` or `data_lif_ip` must be specified when `data_lif_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -5576,7 +5610,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																			Attributes: map[string]schema.Attribute{
 																				"data_lif_dns_name": schema.StringAttribute{
 																					Description:         "Backend Data LIF Name Backend Data LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.",
-																					MarkdownDescription: "Backend Data LIF Name Backend Data LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`",
+																					MarkdownDescription: "Backend Data LIF Name Backend Data LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `data_lif_ip`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5590,7 +5624,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																				},
 																				"data_lif_ip": schema.StringAttribute{
 																					Description:         "Backend Data LIF IP Address Backend Data LIF IP Address is reachable at the given ip address",
-																					MarkdownDescription: "Backend Data LIF IP Address Backend Data LIF IP Address is reachable at the given ip address",
+																					MarkdownDescription: "Backend Data LIF IP Address Backend Data LIF IP Address is reachable at the given ip address<br>Conflicts with `data_lif_dns_name`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5646,7 +5680,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																		},
 																		"management_lif_choice": schema.SingleNestedAttribute{
 																			Description:         "Backend Management LIF FQDN or IP address of a cluster or SVM management LIF",
-																			MarkdownDescription: "Backend Management LIF FQDN or IP address of a cluster or SVM management LIF",
+																			MarkdownDescription: "Backend Management LIF FQDN or IP address of a cluster or SVM management LIF<br>Exactly one of `management_lif_dns_name` or `management_lif_ip` must be specified.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -5659,7 +5693,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																			Attributes: map[string]schema.Attribute{
 																				"management_lif_dns_name": schema.StringAttribute{
 																					Description:         "Backend Management LIF Name Backend Management LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.",
-																					MarkdownDescription: "Backend Management LIF Name Backend Management LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`",
+																					MarkdownDescription: "Backend Management LIF Name Backend Management LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `management_lif_ip`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5673,7 +5707,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																				},
 																				"management_lif_ip": schema.StringAttribute{
 																					Description:         "Backend Management LIF IP Address Backend Management LIF IP Address is reachable at the given ip address",
-																					MarkdownDescription: "Backend Management LIF IP Address Backend Management LIF IP Address is reachable at the given ip address",
+																					MarkdownDescription: "Backend Management LIF IP Address Backend Management LIF IP Address is reachable at the given ip address<br>Conflicts with `management_lif_dns_name`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5695,7 +5729,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																			Attributes: map[string]schema.Attribute{
 																				"secret_info_choice": schema.SingleNestedAttribute{
 																					Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																					MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																					Required:            true,
 																					Optional:            false,
 																					Computed:            false,
@@ -5709,7 +5743,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																					Attributes: map[string]schema.Attribute{
 																						"blindfold_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																							MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -5749,7 +5783,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"clear_secret_info": schema.SingleNestedAttribute{
 																							Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																							MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -5784,7 +5818,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"none": schema.BoolAttribute{
 																							Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																							MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -5853,21 +5887,24 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																							},
 																							"qos_policy_choice": schema.SingleNestedAttribute{
 																								Description:         "QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.",
-																								MarkdownDescription: "QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.",
-																								Required:            true,
-																								Optional:            false,
-																								Computed:            false,
+																								MarkdownDescription: "QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.<br>Exactly one of `adaptive_qos_policy`, `no_qos`, or `qos_policy` must be specified when `qos_policy_choice` is configured.",
+																								Required:            false,
+																								Optional:            true,
+																								Computed:            true,
 																								Validators: []validator.Object{
-																									exactlyoneofvalidator.RequiredExactlyOneOf(
+																									exactlyoneofvalidator.ExactlyOneOf(
 																										"adaptive_qos_policy",
 																										"no_qos",
 																										"qos_policy",
 																									),
 																								},
+																								PlanModifiers: []planmodifier.Object{
+																									objectplanmodifier.UseNonNullStateForUnknown(),
+																								},
 																								Attributes: map[string]schema.Attribute{
 																									"adaptive_qos_policy": schema.StringAttribute{
 																										Description:         "Storage Server IP address Enter Adaptive QoS Policy Name",
-																										MarkdownDescription: "Storage Server IP address Enter Adaptive QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`",
+																										MarkdownDescription: "Storage Server IP address Enter Adaptive QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`<br>Conflicts with `no_qos` and `qos_policy`.",
 																										Required:            false,
 																										Optional:            true,
 																										Computed:            false,
@@ -5877,7 +5914,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																									},
 																									"no_qos": schema.BoolAttribute{
 																										Description:         "No QoS No QoS configured",
-																										MarkdownDescription: "No QoS No QoS configured",
+																										MarkdownDescription: "No QoS No QoS configured<br>Conflicts with `adaptive_qos_policy` and `qos_policy`.",
 																										Required:            false,
 																										Optional:            true,
 																										Computed:            false,
@@ -5887,7 +5924,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																									},
 																									"qos_policy": schema.StringAttribute{
 																										Description:         "QoS Policy Name Enter QoS Policy Name",
-																										MarkdownDescription: "QoS Policy Name Enter QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`",
+																										MarkdownDescription: "QoS Policy Name Enter QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`<br>Conflicts with `adaptive_qos_policy` and `no_qos`.",
 																										Required:            false,
 																										Optional:            true,
 																										Computed:            false,
@@ -6046,21 +6083,24 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																				},
 																				"qos_policy_choice": schema.SingleNestedAttribute{
 																					Description:         "QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.",
-																					MarkdownDescription: "QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.",
-																					Required:            true,
-																					Optional:            false,
-																					Computed:            false,
+																					MarkdownDescription: "QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.<br>Exactly one of `adaptive_qos_policy`, `no_qos`, or `qos_policy` must be specified when `qos_policy_choice` is configured.",
+																					Required:            false,
+																					Optional:            true,
+																					Computed:            true,
 																					Validators: []validator.Object{
-																						exactlyoneofvalidator.RequiredExactlyOneOf(
+																						exactlyoneofvalidator.ExactlyOneOf(
 																							"adaptive_qos_policy",
 																							"no_qos",
 																							"qos_policy",
 																						),
 																					},
+																					PlanModifiers: []planmodifier.Object{
+																						objectplanmodifier.UseNonNullStateForUnknown(),
+																					},
 																					Attributes: map[string]schema.Attribute{
 																						"adaptive_qos_policy": schema.StringAttribute{
 																							Description:         "Storage Server IP address Enter Adaptive QoS Policy Name",
-																							MarkdownDescription: "Storage Server IP address Enter Adaptive QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`",
+																							MarkdownDescription: "Storage Server IP address Enter Adaptive QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`<br>Conflicts with `no_qos` and `qos_policy`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -6070,7 +6110,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"no_qos": schema.BoolAttribute{
 																							Description:         "No QoS No QoS configured",
-																							MarkdownDescription: "No QoS No QoS configured",
+																							MarkdownDescription: "No QoS No QoS configured<br>Conflicts with `adaptive_qos_policy` and `qos_policy`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -6080,7 +6120,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																						},
 																						"qos_policy": schema.StringAttribute{
 																							Description:         "QoS Policy Name Enter QoS Policy Name",
-																							MarkdownDescription: "QoS Policy Name Enter QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`",
+																							MarkdownDescription: "QoS Policy Name Enter QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`<br>Conflicts with `adaptive_qos_policy` and `no_qos`.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -6162,7 +6202,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"pure_service_orchestrator": schema.SingleNestedAttribute{
 													Description:         "Pure Storage Service Orchestrator Device configuration for Pure Storage Service Orchestrator",
-													MarkdownDescription: "Pure Storage Service Orchestrator Device configuration for Pure Storage Service Orchestrator",
+													MarkdownDescription: "Pure Storage Service Orchestrator Device configuration for Pure Storage Service Orchestrator<br>Conflicts with `custom_storage`, `hpe_storage`, and `netapp_trident`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -6243,7 +6283,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																						Attributes: map[string]schema.Attribute{
 																							"secret_info_choice": schema.SingleNestedAttribute{
 																								Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																								MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																								MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																								Required:            true,
 																								Optional:            false,
 																								Computed:            false,
@@ -6257,7 +6297,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																								Attributes: map[string]schema.Attribute{
 																									"blindfold_secret_info": schema.SingleNestedAttribute{
 																										Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																										MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																										MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																										Required:            false,
 																										Optional:            true,
 																										Computed:            false,
@@ -6297,7 +6337,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																									},
 																									"clear_secret_info": schema.SingleNestedAttribute{
 																										Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																										MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																										MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																										Required:            false,
 																										Optional:            true,
 																										Computed:            false,
@@ -6332,7 +6372,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																									},
 																									"none": schema.BoolAttribute{
 																										Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																										MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																										MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																										Required:            false,
 																										Optional:            true,
 																										Computed:            false,
@@ -6360,7 +6400,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																					},
 																					"mgmt_endpoint_choice": schema.SingleNestedAttribute{
 																						Description:         "Management Endpoint FQDN or IP address of PSO Management endpoint",
-																						MarkdownDescription: "Management Endpoint FQDN or IP address of PSO Management endpoint",
+																						MarkdownDescription: "Management Endpoint FQDN or IP address of PSO Management endpoint<br>Exactly one of `mgmt_dns_name` or `mgmt_ip` must be specified.",
 																						Required:            true,
 																						Optional:            false,
 																						Computed:            false,
@@ -6373,7 +6413,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																						Attributes: map[string]schema.Attribute{
 																							"mgmt_dns_name": schema.StringAttribute{
 																								Description:         "dns_name Management Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.",
-																								MarkdownDescription: "dns_name Management Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`",
+																								MarkdownDescription: "dns_name Management Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `mgmt_ip`.",
 																								Required:            false,
 																								Optional:            true,
 																								Computed:            false,
@@ -6387,7 +6427,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																							},
 																							"mgmt_ip": schema.StringAttribute{
 																								Description:         "Management Endpoint IP Address Management Endpoint is reachable at the given ip address",
-																								MarkdownDescription: "Management Endpoint IP Address Management Endpoint is reachable at the given ip address",
+																								MarkdownDescription: "Management Endpoint IP Address Management Endpoint is reachable at the given ip address<br>Conflicts with `mgmt_dns_name`.",
 																								Required:            false,
 																								Optional:            true,
 																								Computed:            false,
@@ -6470,7 +6510,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																						Attributes: map[string]schema.Attribute{
 																							"secret_info_choice": schema.SingleNestedAttribute{
 																								Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																								MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																								MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																								Required:            true,
 																								Optional:            false,
 																								Computed:            false,
@@ -6484,7 +6524,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																								Attributes: map[string]schema.Attribute{
 																									"blindfold_secret_info": schema.SingleNestedAttribute{
 																										Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																										MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																										MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																										Required:            false,
 																										Optional:            true,
 																										Computed:            false,
@@ -6524,7 +6564,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																									},
 																									"clear_secret_info": schema.SingleNestedAttribute{
 																										Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																										MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																										MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																										Required:            false,
 																										Optional:            true,
 																										Computed:            false,
@@ -6559,7 +6599,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																									},
 																									"none": schema.BoolAttribute{
 																										Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																										MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																										MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																										Required:            false,
 																										Optional:            true,
 																										Computed:            false,
@@ -6587,7 +6627,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																					},
 																					"mgmt_endpoint_choice": schema.SingleNestedAttribute{
 																						Description:         "Management Endpoint FQDN or IP address of PSO Management endpoint",
-																						MarkdownDescription: "Management Endpoint FQDN or IP address of PSO Management endpoint",
+																						MarkdownDescription: "Management Endpoint FQDN or IP address of PSO Management endpoint<br>Exactly one of `mgmt_dns_name` or `mgmt_ip` must be specified.",
 																						Required:            true,
 																						Optional:            false,
 																						Computed:            false,
@@ -6600,7 +6640,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																						Attributes: map[string]schema.Attribute{
 																							"mgmt_dns_name": schema.StringAttribute{
 																								Description:         "dns_name Management Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.",
-																								MarkdownDescription: "dns_name Management Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`",
+																								MarkdownDescription: "dns_name Management Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `mgmt_ip`.",
 																								Required:            false,
 																								Optional:            true,
 																								Computed:            false,
@@ -6614,7 +6654,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																							},
 																							"mgmt_ip": schema.StringAttribute{
 																								Description:         "Management Endpoint IP Address Management Endpoint is reachable at the given ip address",
-																								MarkdownDescription: "Management Endpoint IP Address Management Endpoint is reachable at the given ip address",
+																								MarkdownDescription: "Management Endpoint IP Address Management Endpoint is reachable at the given ip address<br>Conflicts with `mgmt_dns_name`.",
 																								Required:            false,
 																								Optional:            true,
 																								Computed:            false,
@@ -6629,7 +6669,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																					},
 																					"nfs_endpoint_choice": schema.SingleNestedAttribute{
 																						Description:         "NFS Endpoint FQDN or IP address of PSO NFS endpoint",
-																						MarkdownDescription: "NFS Endpoint FQDN or IP address of PSO NFS endpoint",
+																						MarkdownDescription: "NFS Endpoint FQDN or IP address of PSO NFS endpoint<br>Exactly one of `nfs_endpoint_dns_name` or `nfs_endpoint_ip` must be specified.",
 																						Required:            true,
 																						Optional:            false,
 																						Computed:            false,
@@ -6642,7 +6682,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																						Attributes: map[string]schema.Attribute{
 																							"nfs_endpoint_dns_name": schema.StringAttribute{
 																								Description:         "NFS DNS Name Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.",
-																								MarkdownDescription: "NFS DNS Name Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`",
+																								MarkdownDescription: "NFS DNS Name Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `nfs_endpoint_ip`.",
 																								Required:            false,
 																								Optional:            true,
 																								Computed:            false,
@@ -6656,7 +6696,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																							},
 																							"nfs_endpoint_ip": schema.StringAttribute{
 																								Description:         "NFS IP Address Endpoint is reachable at the given ip address",
-																								MarkdownDescription: "NFS IP Address Endpoint is reachable at the given ip address",
+																								MarkdownDescription: "NFS IP Address Endpoint is reachable at the given ip address<br>Conflicts with `nfs_endpoint_dns_name`.",
 																								Required:            false,
 																								Optional:            true,
 																								Computed:            false,
@@ -6729,20 +6769,23 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 			},
 			"storage_interface_choice": schema.SingleNestedAttribute{
 				Description:         "Storage Interfaces Select if storage interfaces are configured",
-				MarkdownDescription: "Storage Interfaces Select if storage interfaces are configured",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Storage Interfaces Select if storage interfaces are configured<br>Exactly one of `no_storage_interfaces` or `storage_interface_list` must be specified when `storage_interface_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"no_storage_interfaces",
 						"storage_interface_list",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"no_storage_interfaces": schema.BoolAttribute{
 						Description:         "No Storage Interfaces This fleet does not have any storage interfaces",
-						MarkdownDescription: "No Storage Interfaces This fleet does not have any storage interfaces",
+						MarkdownDescription: "No Storage Interfaces This fleet does not have any storage interfaces<br>Conflicts with `storage_interface_list`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -6752,7 +6795,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 					},
 					"storage_interface_list": schema.SingleNestedAttribute{
 						Description:         "List of Storage Interfaces Add all storage interfaces belonging to this fleet",
-						MarkdownDescription: "List of Storage Interfaces Add all storage interfaces belonging to this fleet",
+						MarkdownDescription: "List of Storage Interfaces Add all storage interfaces belonging to this fleet<br>Conflicts with `no_storage_interfaces`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -6802,20 +6845,23 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 			},
 			"storage_static_routes_choice": schema.SingleNestedAttribute{
 				Description:         "Storage Static Routes Select Storage Static Routes",
-				MarkdownDescription: "Storage Static Routes Select Storage Static Routes",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Storage Static Routes Select Storage Static Routes<br>Exactly one of `no_storage_static_routes` or `storage_static_routes` must be specified when `storage_static_routes_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"no_storage_static_routes",
 						"storage_static_routes",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"no_storage_static_routes": schema.BoolAttribute{
 						Description:         "No Storage Static Routes This fleet does not have any storage static routes",
-						MarkdownDescription: "No Storage Static Routes This fleet does not have any storage static routes",
+						MarkdownDescription: "No Storage Static Routes This fleet does not have any storage static routes<br>Conflicts with `storage_static_routes`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -6825,7 +6871,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 					},
 					"storage_static_routes": schema.SingleNestedAttribute{
 						Description:         "List of Storage Interfaces Add all storage storage static routes",
-						MarkdownDescription: "List of Storage Interfaces Add all storage storage static routes",
+						MarkdownDescription: "List of Storage Interfaces Add all storage storage static routes<br>Conflicts with `no_storage_static_routes`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -6916,7 +6962,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 													Attributes: map[string]schema.Attribute{
 														"ver_choice": schema.SingleNestedAttribute{
 															Description:         "Version IP Address version. Can be IPv4 Address or IPv6 Address",
-															MarkdownDescription: "Version IP Address version. Can be IPv4 Address or IPv6 Address",
+															MarkdownDescription: "Version IP Address version. Can be IPv4 Address or IPv6 Address<br>Exactly one of `dual_stack`, `ipv4`, or `ipv6` must be specified when `ver_choice` is configured.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -6930,7 +6976,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 															Attributes: map[string]schema.Attribute{
 																"dual_stack": schema.SingleNestedAttribute{
 																	Description:         "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together",
-																	MarkdownDescription: "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together",
+																	MarkdownDescription: "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together<br>Conflicts with `ipv4` and `ipv6`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -6983,7 +7029,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"ipv4": schema.SingleNestedAttribute{
 																	Description:         "IPv4 Address IPv4 Address",
-																	MarkdownDescription: "IPv4 Address IPv4 Address",
+																	MarkdownDescription: "IPv4 Address IPv4 Address<br>Conflicts with `dual_stack` and `ipv6`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -7005,7 +7051,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 																},
 																"ipv6": schema.SingleNestedAttribute{
 																	Description:         "IPv6 ADDRESS IPv6 Address",
-																	MarkdownDescription: "IPv6 ADDRESS IPv6 Address",
+																	MarkdownDescription: "IPv6 ADDRESS IPv6 Address<br>Conflicts with `dual_stack` and `ipv4`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -7057,7 +7103,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 												Attributes: map[string]schema.Attribute{
 													"ver_choice": schema.SingleNestedAttribute{
 														Description:         "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address",
-														MarkdownDescription: "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address",
+														MarkdownDescription: "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address<br>Exactly one of `ipv4` or `ipv6` must be specified.",
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
@@ -7070,7 +7116,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 														Attributes: map[string]schema.Attribute{
 															"ipv4": schema.SingleNestedAttribute{
 																Description:         "IPv4 Subnet IPv4 Subnet Address",
-																MarkdownDescription: "IPv4 Subnet IPv4 Subnet Address",
+																MarkdownDescription: "IPv4 Subnet IPv4 Subnet Address<br>Conflicts with `ipv6`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -7102,7 +7148,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 															},
 															"ipv6": schema.SingleNestedAttribute{
 																Description:         "IPv6 Subnet IPv6 Subnet Address",
-																MarkdownDescription: "IPv6 Subnet IPv6 Subnet Address",
+																MarkdownDescription: "IPv6 Subnet IPv6 Subnet Address<br>Conflicts with `ipv4`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -7146,21 +7192,24 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 			},
 			"usb_policy_choice": schema.SingleNestedAttribute{
 				Description:         "USB Device Policy Select USB device policy",
-				MarkdownDescription: "USB Device Policy Select USB device policy",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "USB Device Policy Select USB device policy<br>Exactly one of `allow_all_usb`, `deny_all_usb`, or `usb_policy` must be specified when `usb_policy_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"allow_all_usb",
 						"deny_all_usb",
 						"usb_policy",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"allow_all_usb": schema.BoolAttribute{
 						Description:         "Allow All USB Devices All USB devices are allowed",
-						MarkdownDescription: "Allow All USB Devices All USB devices are allowed",
+						MarkdownDescription: "Allow All USB Devices All USB devices are allowed<br>Conflicts with `deny_all_usb` and `usb_policy`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -7170,7 +7219,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 					},
 					"deny_all_usb": schema.BoolAttribute{
 						Description:         "Deny All USB Devices All USB devices are denied",
-						MarkdownDescription: "Deny All USB Devices All USB devices are denied",
+						MarkdownDescription: "Deny All USB Devices All USB devices are denied<br>Conflicts with `allow_all_usb` and `usb_policy`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -7180,7 +7229,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 					},
 					"usb_policy": schema.SingleNestedAttribute{
 						Description:         "USB Device Policy Allow only specific USB devices",
-						MarkdownDescription: "USB Device Policy Allow only specific USB devices",
+						MarkdownDescription: "USB Device Policy Allow only specific USB devices<br>Conflicts with `allow_all_usb` and `deny_all_usb`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -7215,7 +7264,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 			},
 			"vm_choice": schema.SingleNestedAttribute{
 				Description:         "Select VMs support Enable/Disable Enable or Disable VM support for this fleet",
-				MarkdownDescription: "Select VMs support Enable/Disable Enable or Disable VM support for this fleet",
+				MarkdownDescription: "Select VMs support Enable/Disable Enable or Disable VM support for this fleet<br>Exactly one of `disable_vm` or `enable_vm` must be specified when `vm_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -7228,7 +7277,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 				Attributes: map[string]schema.Attribute{
 					"disable_vm": schema.BoolAttribute{
 						Description:         "VMs support Disabled VMs support is not enabled for this fleet",
-						MarkdownDescription: "VMs support Disabled VMs support is not enabled for this fleet",
+						MarkdownDescription: "VMs support Disabled VMs support is not enabled for this fleet<br>Conflicts with `enable_vm`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -7238,7 +7287,7 @@ func (r *ResourceF5XCFleet) Schema(ctx context.Context, request resource.SchemaR
 					},
 					"enable_vm": schema.BoolAttribute{
 						Description:         "Member of DC cluster Group VMs support is enabled for this fleet",
-						MarkdownDescription: "Member of DC cluster Group VMs support is enabled for this fleet",
+						MarkdownDescription: "Member of DC cluster Group VMs support is enabled for this fleet<br>Conflicts with `disable_vm`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -7499,7 +7548,7 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> BondChoice
+	// resource modelToSpecRoot OneOfField --> BondChoice
 	if !data.BondChoice.IsNull() && !data.BondChoice.IsUnknown() {
 		bondChoiceModel := FleetBondChoice{}
 		response.Diagnostics.Append(data.BondChoice.As(ctx, &bondChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7609,9 +7658,13 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 			spec.BondChoice = noBondDevicesSpecBool
 		}
 
+	} else {
+		spec.BondChoice = &ves_io_schema_fleet.CreateSpecType_NoBondDevices{
+			NoBondDevices: &ves_io_schema.Empty{},
+		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> DcClusterGroupChoice
+	// resource modelToSpecRoot OneOfField --> DcClusterGroupChoice
 	if !data.DcClusterGroupChoice.IsNull() && !data.DcClusterGroupChoice.IsUnknown() {
 		dcClusterGroupChoiceModel := FleetDcClusterGroupChoice{}
 		response.Diagnostics.Append(data.DcClusterGroupChoice.As(ctx, &dcClusterGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7672,6 +7725,10 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 			spec.DcClusterGroupChoice = noDcClusterGroupSpecBool
 		}
 
+	} else {
+		spec.DcClusterGroupChoice = &ves_io_schema_fleet.CreateSpecType_NoDcClusterGroup{
+			NoDcClusterGroup: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot Bool Field --> EnableDefaultFleetConfigDownload
@@ -7682,7 +7739,7 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 	// resource modelToSpecRoot RequiredStringField --> FleetLabel
 	spec.FleetLabel = string(data.FleetLabel.ValueString())
 
-	// resource modelToSpecRoot RequiredOneOfField --> GpuChoice
+	// resource modelToSpecRoot OneOfField --> GpuChoice
 	if !data.GpuChoice.IsNull() && !data.GpuChoice.IsUnknown() {
 		gpuChoiceModel := FleetGpuChoice{}
 		response.Diagnostics.Append(data.GpuChoice.As(ctx, &gpuChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7753,6 +7810,10 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 
 		}
 
+	} else {
+		spec.GpuChoice = &ves_io_schema_fleet.CreateSpecType_DisableGpu{
+			DisableGpu: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -7786,7 +7847,7 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> InterfaceChoice
+	// resource modelToSpecRoot OneOfField --> InterfaceChoice
 	if !data.InterfaceChoice.IsNull() && !data.InterfaceChoice.IsUnknown() {
 		interfaceChoiceModel := FleetIfaceChoice{}
 		response.Diagnostics.Append(data.InterfaceChoice.As(ctx, &interfaceChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7992,6 +8053,10 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 
 		}
 
+	} else {
+		spec.InterfaceChoice = &ves_io_schema_fleet.CreateSpecType_DefaultConfig{
+			DefaultConfig: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -8064,7 +8129,7 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> LogsReceiverChoice
+	// resource modelToSpecRoot OneOfField --> LogsReceiverChoice
 	if !data.LogsReceiverChoice.IsNull() && !data.LogsReceiverChoice.IsUnknown() {
 		logsReceiverChoiceModel := FleetLogsReceiverChoice{}
 		response.Diagnostics.Append(data.LogsReceiverChoice.As(ctx, &logsReceiverChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8102,6 +8167,10 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 			spec.LogsReceiverChoice = logsStreamingDisabledSpecBool
 		}
 
+	} else {
+		spec.LogsReceiverChoice = &ves_io_schema_fleet.CreateSpecType_LogsStreamingDisabled{
+			LogsStreamingDisabled: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -8233,9 +8302,12 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 					}
 					perfModeL3EnhancedOneOfSpec := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced{}
 					perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced = &ves_io_schema_views.L3PerformanceEnhancementType{}
+					perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced.PerfModeChoice = &ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo{
+						NoJumbo: &ves_io_schema.Empty{},
+					}
 					performanceEnhancementModeSpec.PerfModeChoice = perfModeL3EnhancedOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
+					// resource modelToSpecNested OneOfField --> PerfModeChoice
 					if !fleetPerfModeL3EnhancedModel.PerfModeChoice.IsNull() && !fleetPerfModeL3EnhancedModel.PerfModeChoice.IsUnknown() {
 						perfModeL3EnhancedPerfModeChoiceModel := FleetL3PerformanceEnhancementTypePerfModeChoice{}
 						response.Diagnostics.Append(fleetPerfModeL3EnhancedModel.PerfModeChoice.As(ctx, &perfModeL3EnhancedPerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8270,9 +8342,12 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 					}
 					perfModeL7EnhancedOneOfSpec := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{}
 					perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced = &ves_io_schema_views.L7PerformanceEnhancementType{}
+					perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced.PerfModeChoice = &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{
+						JumboDisabled: &ves_io_schema.Empty{},
+					}
 					performanceEnhancementModeSpec.PerfModeChoice = perfModeL7EnhancedOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
+					// resource modelToSpecNested OneOfField --> PerfModeChoice
 					if !fleetPerfModeL7EnhancedModel.PerfModeChoice.IsNull() && !fleetPerfModeL7EnhancedModel.PerfModeChoice.IsUnknown() {
 						perfModeL7EnhancedPerfModeChoiceModel := FleetL7PerformanceEnhancementTypePerfModeChoice{}
 						response.Diagnostics.Append(fleetPerfModeL7EnhancedModel.PerfModeChoice.As(ctx, &perfModeL7EnhancedPerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8303,7 +8378,7 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> SriovInterfaceChoice
+	// resource modelToSpecRoot OneOfField --> SriovInterfaceChoice
 	if !data.SriovInterfaceChoice.IsNull() && !data.SriovInterfaceChoice.IsUnknown() {
 		sriovInterfaceChoiceModel := FleetSriovIfaceChoice{}
 		response.Diagnostics.Append(data.SriovInterfaceChoice.As(ctx, &sriovInterfaceChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8367,9 +8442,13 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 
 		}
 
+	} else {
+		spec.SriovInterfaceChoice = &ves_io_schema_fleet.CreateSpecType_DefaultSriovInterface{
+			DefaultSriovInterface: &ves_io_schema.Empty{},
+		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> StorageClassChoice
+	// resource modelToSpecRoot OneOfField --> StorageClassChoice
 	if !data.StorageClassChoice.IsNull() && !data.StorageClassChoice.IsUnknown() {
 		storageClassChoiceModel := FleetStorageClassChoice{}
 		response.Diagnostics.Append(data.StorageClassChoice.As(ctx, &storageClassChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8663,6 +8742,10 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 
 		}
 
+	} else {
+		spec.StorageClassChoice = &ves_io_schema_fleet.CreateSpecType_DefaultStorageClass{
+			DefaultStorageClass: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredOneOfField --> StorageDeviceChoice
@@ -9327,6 +9410,9 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 												}
 
 												volumeDefaultsSpec := &ves_io_schema_fleet.OntapVolumeDefaults{}
+												volumeDefaultsSpec.QosPolicyChoice = &ves_io_schema_fleet.OntapVolumeDefaults_NoQos{
+													NoQos: &ves_io_schema.Empty{},
+												}
 												storageSpec[ii].VolumeDefaults = volumeDefaultsSpec
 
 												// resource modelToSpecNested BoolField --> Encryption
@@ -9341,7 +9427,7 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 													volumeDefaultsSpec.ExportPolicy = string(volumeDefaultsModel.ExportPolicy.ValueString())
 												}
 
-												// resource modelToSpecNested RequiredOneOfField --> QosPolicyChoice
+												// resource modelToSpecNested OneOfField --> QosPolicyChoice
 												if !volumeDefaultsModel.QosPolicyChoice.IsNull() && !volumeDefaultsModel.QosPolicyChoice.IsUnknown() {
 													volumeDefaultsQosPolicyChoiceModel := FleetQosPolicyChoice{}
 													response.Diagnostics.Append(volumeDefaultsModel.QosPolicyChoice.As(ctx, &volumeDefaultsQosPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -9462,6 +9548,9 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 										}
 
 										volumeDefaultsSpec := &ves_io_schema_fleet.OntapVolumeDefaults{}
+										volumeDefaultsSpec.QosPolicyChoice = &ves_io_schema_fleet.OntapVolumeDefaults_NoQos{
+											NoQos: &ves_io_schema.Empty{},
+										}
 										netappBackendOntapNasOneOfSpec.NetappBackendOntapNas.VolumeDefaults = volumeDefaultsSpec
 
 										// resource modelToSpecNested BoolField --> Encryption
@@ -9476,7 +9565,7 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 											volumeDefaultsSpec.ExportPolicy = string(volumeDefaultsModel.ExportPolicy.ValueString())
 										}
 
-										// resource modelToSpecNested RequiredOneOfField --> QosPolicyChoice
+										// resource modelToSpecNested OneOfField --> QosPolicyChoice
 										if !volumeDefaultsModel.QosPolicyChoice.IsNull() && !volumeDefaultsModel.QosPolicyChoice.IsUnknown() {
 											volumeDefaultsQosPolicyChoiceModel := FleetQosPolicyChoice{}
 											response.Diagnostics.Append(volumeDefaultsModel.QosPolicyChoice.As(ctx, &volumeDefaultsQosPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -10076,6 +10165,9 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 												}
 
 												volumeDefaultsSpec := &ves_io_schema_fleet.OntapVolumeDefaults{}
+												volumeDefaultsSpec.QosPolicyChoice = &ves_io_schema_fleet.OntapVolumeDefaults_NoQos{
+													NoQos: &ves_io_schema.Empty{},
+												}
 												storageSpec[ii].VolumeDefaults = volumeDefaultsSpec
 
 												// resource modelToSpecNested BoolField --> Encryption
@@ -10090,7 +10182,7 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 													volumeDefaultsSpec.ExportPolicy = string(volumeDefaultsModel.ExportPolicy.ValueString())
 												}
 
-												// resource modelToSpecNested RequiredOneOfField --> QosPolicyChoice
+												// resource modelToSpecNested OneOfField --> QosPolicyChoice
 												if !volumeDefaultsModel.QosPolicyChoice.IsNull() && !volumeDefaultsModel.QosPolicyChoice.IsUnknown() {
 													volumeDefaultsQosPolicyChoiceModel := FleetQosPolicyChoice{}
 													response.Diagnostics.Append(volumeDefaultsModel.QosPolicyChoice.As(ctx, &volumeDefaultsQosPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -10211,6 +10303,9 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 										}
 
 										volumeDefaultsSpec := &ves_io_schema_fleet.OntapVolumeDefaults{}
+										volumeDefaultsSpec.QosPolicyChoice = &ves_io_schema_fleet.OntapVolumeDefaults_NoQos{
+											NoQos: &ves_io_schema.Empty{},
+										}
 										netappBackendOntapSanOneOfSpec.NetappBackendOntapSan.VolumeDefaults = volumeDefaultsSpec
 
 										// resource modelToSpecNested BoolField --> Encryption
@@ -10225,7 +10320,7 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 											volumeDefaultsSpec.ExportPolicy = string(volumeDefaultsModel.ExportPolicy.ValueString())
 										}
 
-										// resource modelToSpecNested RequiredOneOfField --> QosPolicyChoice
+										// resource modelToSpecNested OneOfField --> QosPolicyChoice
 										if !volumeDefaultsModel.QosPolicyChoice.IsNull() && !volumeDefaultsModel.QosPolicyChoice.IsUnknown() {
 											volumeDefaultsQosPolicyChoiceModel := FleetQosPolicyChoice{}
 											response.Diagnostics.Append(volumeDefaultsModel.QosPolicyChoice.As(ctx, &volumeDefaultsQosPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -10760,7 +10855,7 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> StorageInterfaceChoice
+	// resource modelToSpecRoot OneOfField --> StorageInterfaceChoice
 	if !data.StorageInterfaceChoice.IsNull() && !data.StorageInterfaceChoice.IsUnknown() {
 		storageInterfaceChoiceModel := FleetStorageIfaceChoice{}
 		response.Diagnostics.Append(data.StorageInterfaceChoice.As(ctx, &storageInterfaceChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -10821,9 +10916,13 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 
 		}
 
+	} else {
+		spec.StorageInterfaceChoice = &ves_io_schema_fleet.CreateSpecType_NoStorageInterfaces{
+			NoStorageInterfaces: &ves_io_schema.Empty{},
+		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> StorageStaticRoutesChoice
+	// resource modelToSpecRoot OneOfField --> StorageStaticRoutesChoice
 	if !data.StorageStaticRoutesChoice.IsNull() && !data.StorageStaticRoutesChoice.IsUnknown() {
 		storageStaticRoutesChoiceModel := FleetStorageStaticRoutesChoice{}
 		response.Diagnostics.Append(data.StorageStaticRoutesChoice.As(ctx, &storageStaticRoutesChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -11177,9 +11276,13 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 
 		}
 
+	} else {
+		spec.StorageStaticRoutesChoice = &ves_io_schema_fleet.CreateSpecType_NoStorageStaticRoutes{
+			NoStorageStaticRoutes: &ves_io_schema.Empty{},
+		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> UsbPolicyChoice
+	// resource modelToSpecRoot OneOfField --> UsbPolicyChoice
 	if !data.UsbPolicyChoice.IsNull() && !data.UsbPolicyChoice.IsUnknown() {
 		usbPolicyChoiceModel := FleetUsbPolicyChoice{}
 		response.Diagnostics.Append(data.UsbPolicyChoice.As(ctx, &usbPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -11224,6 +11327,10 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 
 		}
 
+	} else {
+		spec.UsbPolicyChoice = &ves_io_schema_fleet.CreateSpecType_DenyAllUsb{
+			DenyAllUsb: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot OneOfField --> VmChoice
@@ -11620,7 +11727,7 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> BondChoice
+	// resource SpecToModelRoot OneOfField --> BondChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -11652,8 +11759,8 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var bondChoiceChoices interface{}
 		if v := rawSpecMap["bond_choice"]; v != nil {
 			bondChoiceChoices = v
@@ -11861,7 +11968,7 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 		data.BondChoice = types.ObjectNull(FleetBondChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> DcClusterGroupChoice
+	// resource SpecToModelRoot OneOfField --> DcClusterGroupChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -11897,8 +12004,8 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var dcClusterGroupChoiceChoices interface{}
 		if v := rawSpecMap["dc_cluster_group_choice"]; v != nil {
 			dcClusterGroupChoiceChoices = v
@@ -12054,7 +12161,7 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 		data.FleetLabel = types.StringNull()
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> GpuChoice
+	// resource SpecToModelRoot OneOfField --> GpuChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -12090,8 +12197,8 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var gpuChoiceChoices interface{}
 		if v := rawSpecMap["gpu_choice"]; v != nil {
 			gpuChoiceChoices = v
@@ -12276,7 +12383,7 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> InterfaceChoice
+	// resource SpecToModelRoot OneOfField --> InterfaceChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -12312,8 +12419,8 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var interfaceChoiceChoices interface{}
 		if v := rawSpecMap["interface_choice"]; v != nil {
 			interfaceChoiceChoices = v
@@ -12768,7 +12875,7 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 		data.KubernetesUpgradeDrain = types.ObjectNull(FleetKubernetesUpgradeDrainModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> LogsReceiverChoice
+	// resource SpecToModelRoot OneOfField --> LogsReceiverChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -12800,8 +12907,8 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var logsReceiverChoiceChoices interface{}
 		if v := rawSpecMap["logs_receiver_choice"]; v != nil {
 			logsReceiverChoiceChoices = v
@@ -13113,8 +13220,7 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 				if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
 					perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
 
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// CreateSpecType
+					// resource specToModelNested OneOfField --> PerfModeChoice
 					// CreateSpecType: GetPerfModeChoice() returns the oneof interface value.
 					if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
@@ -13210,8 +13316,7 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 				if isPerfModeL7Enhanced && perfModeL7EnhancedOptionsWrapper != nil && perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced != nil {
 					perfModeL7EnhancedElement := perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced
 
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// CreateSpecType
+					// resource specToModelNested OneOfField --> PerfModeChoice
 					// CreateSpecType: GetPerfModeChoice() returns the oneof interface value.
 					if perfModeL7EnhancedElement.GetPerfModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
@@ -13330,7 +13435,7 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 		data.PerformanceEnhancementMode = types.ObjectNull(FleetPerformanceEnhancementModeModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> SriovInterfaceChoice
+	// resource SpecToModelRoot OneOfField --> SriovInterfaceChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -13362,8 +13467,8 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var sriovInterfaceChoiceChoices interface{}
 		if v := rawSpecMap["sriov_interface_choice"]; v != nil {
 			sriovInterfaceChoiceChoices = v
@@ -13479,7 +13584,7 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 		data.SriovInterfaceChoice = types.ObjectNull(FleetSriovInterfaceChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> StorageClassChoice
+	// resource SpecToModelRoot OneOfField --> StorageClassChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -13511,8 +13616,8 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var storageClassChoiceChoices interface{}
 		if v := rawSpecMap["storage_class_choice"]; v != nil {
 			storageClassChoiceChoices = v
@@ -15097,8 +15202,7 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 																fleetOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 															}
 
-															// resource specToModelNested RequiredOneOfField --> QosPolicyChoice
-															// CreateSpecType
+															// resource specToModelNested OneOfField --> QosPolicyChoice
 															// CreateSpecType: GetQosPolicyChoice() returns the oneof interface value.
 															if volumeDefaultsElement.GetQosPolicyChoice() != nil {
 																// Create a temporary attribute map for the choices within this OneOf
@@ -15323,8 +15427,7 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 														fleetOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 													}
 
-													// resource specToModelNested RequiredOneOfField --> QosPolicyChoice
-													// CreateSpecType
+													// resource specToModelNested OneOfField --> QosPolicyChoice
 													// CreateSpecType: GetQosPolicyChoice() returns the oneof interface value.
 													if volumeDefaultsElement.GetQosPolicyChoice() != nil {
 														// Create a temporary attribute map for the choices within this OneOf
@@ -16439,8 +16542,7 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 																fleetOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 															}
 
-															// resource specToModelNested RequiredOneOfField --> QosPolicyChoice
-															// CreateSpecType
+															// resource specToModelNested OneOfField --> QosPolicyChoice
 															// CreateSpecType: GetQosPolicyChoice() returns the oneof interface value.
 															if volumeDefaultsElement.GetQosPolicyChoice() != nil {
 																// Create a temporary attribute map for the choices within this OneOf
@@ -16665,8 +16767,7 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 														fleetOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 													}
 
-													// resource specToModelNested RequiredOneOfField --> QosPolicyChoice
-													// CreateSpecType
+													// resource specToModelNested OneOfField --> QosPolicyChoice
 													// CreateSpecType: GetQosPolicyChoice() returns the oneof interface value.
 													if volumeDefaultsElement.GetQosPolicyChoice() != nil {
 														// Create a temporary attribute map for the choices within this OneOf
@@ -17673,7 +17774,7 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 		data.StorageDeviceChoice = types.ObjectNull(FleetStorageDeviceChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> StorageInterfaceChoice
+	// resource SpecToModelRoot OneOfField --> StorageInterfaceChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -17705,8 +17806,8 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var storageInterfaceChoiceChoices interface{}
 		if v := rawSpecMap["storage_interface_choice"]; v != nil {
 			storageInterfaceChoiceChoices = v
@@ -17832,7 +17933,7 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 		data.StorageInterfaceChoice = types.ObjectNull(FleetStorageInterfaceChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> StorageStaticRoutesChoice
+	// resource SpecToModelRoot OneOfField --> StorageStaticRoutesChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -17864,8 +17965,8 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var storageStaticRoutesChoiceChoices interface{}
 		if v := rawSpecMap["storage_static_routes_choice"]; v != nil {
 			storageStaticRoutesChoiceChoices = v
@@ -18433,7 +18534,7 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 		data.StorageStaticRoutesChoice = types.ObjectNull(FleetStorageStaticRoutesChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> UsbPolicyChoice
+	// resource SpecToModelRoot OneOfField --> UsbPolicyChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -18469,8 +18570,8 @@ func (r *ResourceF5XCFleet) Create(ctx context.Context, request resource.CreateR
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var usbPolicyChoiceChoices interface{}
 		if v := rawSpecMap["usb_policy_choice"]; v != nil {
 			usbPolicyChoiceChoices = v
@@ -18750,15 +18851,14 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 	defer cancel()
 	priorStorageDeviceChoice := data.StorageDeviceChoice
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
 	readGetRspType := strings.Replace(ves_io_schema_fleet.ObjectType, "Object", "GetResponse", 1)
 	readGetProtoMsgType := proto.MessageType(readGetRspType).Elem()
 	readCallRsp := &server.CallResponse{
 		ProtoMsg: reflect.New(readGetProtoMsgType).Interface().(proto.Message),
 	}
-	opts = append(opts, vesapi.WithOutCallResponse(readCallRsp))
+	opts := []vesapi.CallOpt{
+		vesapi.WithOutCallResponse(readCallRsp),
+	}
 
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_fleet.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
@@ -19096,7 +19196,7 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> BondChoice
+	// resource SpecToModelRoot OneOfField --> BondChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -19128,8 +19228,8 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var bondChoiceChoices interface{}
 		if v := rawSpecMap["bond_choice"]; v != nil {
 			bondChoiceChoices = v
@@ -19348,7 +19448,7 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> DcClusterGroupChoice
+	// resource SpecToModelRoot OneOfField --> DcClusterGroupChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -19384,8 +19484,8 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var dcClusterGroupChoiceChoices interface{}
 		if v := rawSpecMap["dc_cluster_group_choice"]; v != nil {
 			dcClusterGroupChoiceChoices = v
@@ -19548,7 +19648,7 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 		data.FleetLabel = types.StringNull()
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> GpuChoice
+	// resource SpecToModelRoot OneOfField --> GpuChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -19584,8 +19684,8 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var gpuChoiceChoices interface{}
 		if v := rawSpecMap["gpu_choice"]; v != nil {
 			gpuChoiceChoices = v
@@ -19777,7 +19877,7 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> InterfaceChoice
+	// resource SpecToModelRoot OneOfField --> InterfaceChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -19813,8 +19913,8 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var interfaceChoiceChoices interface{}
 		if v := rawSpecMap["interface_choice"]; v != nil {
 			interfaceChoiceChoices = v
@@ -20278,7 +20378,7 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 		data.KubernetesUpgradeDrain = types.ObjectNull(FleetKubernetesUpgradeDrainModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> LogsReceiverChoice
+	// resource SpecToModelRoot OneOfField --> LogsReceiverChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -20310,8 +20410,8 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var logsReceiverChoiceChoices interface{}
 		if v := rawSpecMap["logs_receiver_choice"]; v != nil {
 			logsReceiverChoiceChoices = v
@@ -20629,8 +20729,7 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 				if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
 					perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
 
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// CreateSpecType
+					// resource specToModelNested OneOfField --> PerfModeChoice
 					// CreateSpecType: GetPerfModeChoice() returns the oneof interface value.
 					if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
@@ -20729,8 +20828,7 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 				if isPerfModeL7Enhanced && perfModeL7EnhancedOptionsWrapper != nil && perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced != nil {
 					perfModeL7EnhancedElement := perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced
 
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// CreateSpecType
+					// resource specToModelNested OneOfField --> PerfModeChoice
 					// CreateSpecType: GetPerfModeChoice() returns the oneof interface value.
 					if perfModeL7EnhancedElement.GetPerfModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
@@ -20860,7 +20958,7 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 		data.PerformanceEnhancementMode = types.ObjectNull(FleetPerformanceEnhancementModeModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> SriovInterfaceChoice
+	// resource SpecToModelRoot OneOfField --> SriovInterfaceChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -20892,8 +20990,8 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var sriovInterfaceChoiceChoices interface{}
 		if v := rawSpecMap["sriov_interface_choice"]; v != nil {
 			sriovInterfaceChoiceChoices = v
@@ -21015,7 +21113,7 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> StorageClassChoice
+	// resource SpecToModelRoot OneOfField --> StorageClassChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -21047,8 +21145,8 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var storageClassChoiceChoices interface{}
 		if v := rawSpecMap["storage_class_choice"]; v != nil {
 			storageClassChoiceChoices = v
@@ -22687,8 +22785,7 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 																fleetOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 															}
 
-															// resource specToModelNested RequiredOneOfField --> QosPolicyChoice
-															// CreateSpecType
+															// resource specToModelNested OneOfField --> QosPolicyChoice
 															// CreateSpecType: GetQosPolicyChoice() returns the oneof interface value.
 															if volumeDefaultsElement.GetQosPolicyChoice() != nil {
 																// Create a temporary attribute map for the choices within this OneOf
@@ -22917,8 +23014,7 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 														fleetOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 													}
 
-													// resource specToModelNested RequiredOneOfField --> QosPolicyChoice
-													// CreateSpecType
+													// resource specToModelNested OneOfField --> QosPolicyChoice
 													// CreateSpecType: GetQosPolicyChoice() returns the oneof interface value.
 													if volumeDefaultsElement.GetQosPolicyChoice() != nil {
 														// Create a temporary attribute map for the choices within this OneOf
@@ -24085,8 +24181,7 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 																fleetOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 															}
 
-															// resource specToModelNested RequiredOneOfField --> QosPolicyChoice
-															// CreateSpecType
+															// resource specToModelNested OneOfField --> QosPolicyChoice
 															// CreateSpecType: GetQosPolicyChoice() returns the oneof interface value.
 															if volumeDefaultsElement.GetQosPolicyChoice() != nil {
 																// Create a temporary attribute map for the choices within this OneOf
@@ -24315,8 +24410,7 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 														fleetOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 													}
 
-													// resource specToModelNested RequiredOneOfField --> QosPolicyChoice
-													// CreateSpecType
+													// resource specToModelNested OneOfField --> QosPolicyChoice
 													// CreateSpecType: GetQosPolicyChoice() returns the oneof interface value.
 													if volumeDefaultsElement.GetQosPolicyChoice() != nil {
 														// Create a temporary attribute map for the choices within this OneOf
@@ -25357,7 +25451,7 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> StorageInterfaceChoice
+	// resource SpecToModelRoot OneOfField --> StorageInterfaceChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -25389,8 +25483,8 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var storageInterfaceChoiceChoices interface{}
 		if v := rawSpecMap["storage_interface_choice"]; v != nil {
 			storageInterfaceChoiceChoices = v
@@ -25522,7 +25616,7 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> StorageStaticRoutesChoice
+	// resource SpecToModelRoot OneOfField --> StorageStaticRoutesChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -25554,8 +25648,8 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var storageStaticRoutesChoiceChoices interface{}
 		if v := rawSpecMap["storage_static_routes_choice"]; v != nil {
 			storageStaticRoutesChoiceChoices = v
@@ -26129,7 +26223,7 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> UsbPolicyChoice
+	// resource SpecToModelRoot OneOfField --> UsbPolicyChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -26165,8 +26259,8 @@ func (r *ResourceF5XCFleet) Read(ctx context.Context, request resource.ReadReque
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var usbPolicyChoiceChoices interface{}
 		if v := rawSpecMap["usb_policy_choice"]; v != nil {
 			usbPolicyChoiceChoices = v
@@ -26612,7 +26706,7 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> BondChoice
+	// resource modelToSpecRoot OneOfField --> BondChoice
 	if !data.BondChoice.IsNull() && !data.BondChoice.IsUnknown() {
 		bondChoiceModel := FleetBondChoice{}
 		response.Diagnostics.Append(data.BondChoice.As(ctx, &bondChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -26722,9 +26816,13 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 			spec.BondChoice = noBondDevicesSpecBool
 		}
 
+	} else {
+		spec.BondChoice = &ves_io_schema_fleet.ReplaceSpecType_NoBondDevices{
+			NoBondDevices: &ves_io_schema.Empty{},
+		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> DcClusterGroupChoice
+	// resource modelToSpecRoot OneOfField --> DcClusterGroupChoice
 	if !data.DcClusterGroupChoice.IsNull() && !data.DcClusterGroupChoice.IsUnknown() {
 		dcClusterGroupChoiceModel := FleetDcClusterGroupChoice{}
 		response.Diagnostics.Append(data.DcClusterGroupChoice.As(ctx, &dcClusterGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -26785,6 +26883,10 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 			spec.DcClusterGroupChoice = noDcClusterGroupSpecBool
 		}
 
+	} else {
+		spec.DcClusterGroupChoice = &ves_io_schema_fleet.ReplaceSpecType_NoDcClusterGroup{
+			NoDcClusterGroup: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot Bool Field --> EnableDefaultFleetConfigDownload
@@ -26792,7 +26894,7 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 		spec.EnableDefaultFleetConfigDownload = bool(data.EnableDefaultFleetConfigDownload.ValueBool())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> GpuChoice
+	// resource modelToSpecRoot OneOfField --> GpuChoice
 	if !data.GpuChoice.IsNull() && !data.GpuChoice.IsUnknown() {
 		gpuChoiceModel := FleetGpuChoice{}
 		response.Diagnostics.Append(data.GpuChoice.As(ctx, &gpuChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -26863,6 +26965,10 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 
 		}
 
+	} else {
+		spec.GpuChoice = &ves_io_schema_fleet.ReplaceSpecType_DisableGpu{
+			DisableGpu: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -26896,7 +27002,7 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> InterfaceChoice
+	// resource modelToSpecRoot OneOfField --> InterfaceChoice
 	if !data.InterfaceChoice.IsNull() && !data.InterfaceChoice.IsUnknown() {
 		interfaceChoiceModel := FleetIfaceChoice{}
 		response.Diagnostics.Append(data.InterfaceChoice.As(ctx, &interfaceChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -27102,6 +27208,10 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 
 		}
 
+	} else {
+		spec.InterfaceChoice = &ves_io_schema_fleet.ReplaceSpecType_DefaultConfig{
+			DefaultConfig: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -27174,7 +27284,7 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> LogsReceiverChoice
+	// resource modelToSpecRoot OneOfField --> LogsReceiverChoice
 	if !data.LogsReceiverChoice.IsNull() && !data.LogsReceiverChoice.IsUnknown() {
 		logsReceiverChoiceModel := FleetLogsReceiverChoice{}
 		response.Diagnostics.Append(data.LogsReceiverChoice.As(ctx, &logsReceiverChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -27212,6 +27322,10 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 			spec.LogsReceiverChoice = logsStreamingDisabledSpecBool
 		}
 
+	} else {
+		spec.LogsReceiverChoice = &ves_io_schema_fleet.ReplaceSpecType_LogsStreamingDisabled{
+			LogsStreamingDisabled: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -27343,9 +27457,12 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 					}
 					perfModeL3EnhancedOneOfSpec := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced{}
 					perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced = &ves_io_schema_views.L3PerformanceEnhancementType{}
+					perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced.PerfModeChoice = &ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo{
+						NoJumbo: &ves_io_schema.Empty{},
+					}
 					performanceEnhancementModeSpec.PerfModeChoice = perfModeL3EnhancedOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
+					// resource modelToSpecNested OneOfField --> PerfModeChoice
 					if !fleetPerfModeL3EnhancedModel.PerfModeChoice.IsNull() && !fleetPerfModeL3EnhancedModel.PerfModeChoice.IsUnknown() {
 						perfModeL3EnhancedPerfModeChoiceModel := FleetL3PerformanceEnhancementTypePerfModeChoice{}
 						response.Diagnostics.Append(fleetPerfModeL3EnhancedModel.PerfModeChoice.As(ctx, &perfModeL3EnhancedPerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -27380,9 +27497,12 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 					}
 					perfModeL7EnhancedOneOfSpec := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{}
 					perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced = &ves_io_schema_views.L7PerformanceEnhancementType{}
+					perfModeL7EnhancedOneOfSpec.PerfModeL7Enhanced.PerfModeChoice = &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{
+						JumboDisabled: &ves_io_schema.Empty{},
+					}
 					performanceEnhancementModeSpec.PerfModeChoice = perfModeL7EnhancedOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
+					// resource modelToSpecNested OneOfField --> PerfModeChoice
 					if !fleetPerfModeL7EnhancedModel.PerfModeChoice.IsNull() && !fleetPerfModeL7EnhancedModel.PerfModeChoice.IsUnknown() {
 						perfModeL7EnhancedPerfModeChoiceModel := FleetL7PerformanceEnhancementTypePerfModeChoice{}
 						response.Diagnostics.Append(fleetPerfModeL7EnhancedModel.PerfModeChoice.As(ctx, &perfModeL7EnhancedPerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -27413,7 +27533,7 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> SriovInterfaceChoice
+	// resource modelToSpecRoot OneOfField --> SriovInterfaceChoice
 	if !data.SriovInterfaceChoice.IsNull() && !data.SriovInterfaceChoice.IsUnknown() {
 		sriovInterfaceChoiceModel := FleetSriovIfaceChoice{}
 		response.Diagnostics.Append(data.SriovInterfaceChoice.As(ctx, &sriovInterfaceChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -27477,9 +27597,13 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 
 		}
 
+	} else {
+		spec.SriovInterfaceChoice = &ves_io_schema_fleet.ReplaceSpecType_DefaultSriovInterface{
+			DefaultSriovInterface: &ves_io_schema.Empty{},
+		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> StorageClassChoice
+	// resource modelToSpecRoot OneOfField --> StorageClassChoice
 	if !data.StorageClassChoice.IsNull() && !data.StorageClassChoice.IsUnknown() {
 		storageClassChoiceModel := FleetStorageClassChoice{}
 		response.Diagnostics.Append(data.StorageClassChoice.As(ctx, &storageClassChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -27773,6 +27897,10 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 
 		}
 
+	} else {
+		spec.StorageClassChoice = &ves_io_schema_fleet.ReplaceSpecType_DefaultStorageClass{
+			DefaultStorageClass: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredOneOfField --> StorageDeviceChoice
@@ -28437,6 +28565,9 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 												}
 
 												volumeDefaultsSpec := &ves_io_schema_fleet.OntapVolumeDefaults{}
+												volumeDefaultsSpec.QosPolicyChoice = &ves_io_schema_fleet.OntapVolumeDefaults_NoQos{
+													NoQos: &ves_io_schema.Empty{},
+												}
 												storageSpec[ii].VolumeDefaults = volumeDefaultsSpec
 
 												// resource modelToSpecNested BoolField --> Encryption
@@ -28451,7 +28582,7 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 													volumeDefaultsSpec.ExportPolicy = string(volumeDefaultsModel.ExportPolicy.ValueString())
 												}
 
-												// resource modelToSpecNested RequiredOneOfField --> QosPolicyChoice
+												// resource modelToSpecNested OneOfField --> QosPolicyChoice
 												if !volumeDefaultsModel.QosPolicyChoice.IsNull() && !volumeDefaultsModel.QosPolicyChoice.IsUnknown() {
 													volumeDefaultsQosPolicyChoiceModel := FleetQosPolicyChoice{}
 													response.Diagnostics.Append(volumeDefaultsModel.QosPolicyChoice.As(ctx, &volumeDefaultsQosPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -28572,6 +28703,9 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 										}
 
 										volumeDefaultsSpec := &ves_io_schema_fleet.OntapVolumeDefaults{}
+										volumeDefaultsSpec.QosPolicyChoice = &ves_io_schema_fleet.OntapVolumeDefaults_NoQos{
+											NoQos: &ves_io_schema.Empty{},
+										}
 										netappBackendOntapNasOneOfSpec.NetappBackendOntapNas.VolumeDefaults = volumeDefaultsSpec
 
 										// resource modelToSpecNested BoolField --> Encryption
@@ -28586,7 +28720,7 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 											volumeDefaultsSpec.ExportPolicy = string(volumeDefaultsModel.ExportPolicy.ValueString())
 										}
 
-										// resource modelToSpecNested RequiredOneOfField --> QosPolicyChoice
+										// resource modelToSpecNested OneOfField --> QosPolicyChoice
 										if !volumeDefaultsModel.QosPolicyChoice.IsNull() && !volumeDefaultsModel.QosPolicyChoice.IsUnknown() {
 											volumeDefaultsQosPolicyChoiceModel := FleetQosPolicyChoice{}
 											response.Diagnostics.Append(volumeDefaultsModel.QosPolicyChoice.As(ctx, &volumeDefaultsQosPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -29186,6 +29320,9 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 												}
 
 												volumeDefaultsSpec := &ves_io_schema_fleet.OntapVolumeDefaults{}
+												volumeDefaultsSpec.QosPolicyChoice = &ves_io_schema_fleet.OntapVolumeDefaults_NoQos{
+													NoQos: &ves_io_schema.Empty{},
+												}
 												storageSpec[ii].VolumeDefaults = volumeDefaultsSpec
 
 												// resource modelToSpecNested BoolField --> Encryption
@@ -29200,7 +29337,7 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 													volumeDefaultsSpec.ExportPolicy = string(volumeDefaultsModel.ExportPolicy.ValueString())
 												}
 
-												// resource modelToSpecNested RequiredOneOfField --> QosPolicyChoice
+												// resource modelToSpecNested OneOfField --> QosPolicyChoice
 												if !volumeDefaultsModel.QosPolicyChoice.IsNull() && !volumeDefaultsModel.QosPolicyChoice.IsUnknown() {
 													volumeDefaultsQosPolicyChoiceModel := FleetQosPolicyChoice{}
 													response.Diagnostics.Append(volumeDefaultsModel.QosPolicyChoice.As(ctx, &volumeDefaultsQosPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -29321,6 +29458,9 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 										}
 
 										volumeDefaultsSpec := &ves_io_schema_fleet.OntapVolumeDefaults{}
+										volumeDefaultsSpec.QosPolicyChoice = &ves_io_schema_fleet.OntapVolumeDefaults_NoQos{
+											NoQos: &ves_io_schema.Empty{},
+										}
 										netappBackendOntapSanOneOfSpec.NetappBackendOntapSan.VolumeDefaults = volumeDefaultsSpec
 
 										// resource modelToSpecNested BoolField --> Encryption
@@ -29335,7 +29475,7 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 											volumeDefaultsSpec.ExportPolicy = string(volumeDefaultsModel.ExportPolicy.ValueString())
 										}
 
-										// resource modelToSpecNested RequiredOneOfField --> QosPolicyChoice
+										// resource modelToSpecNested OneOfField --> QosPolicyChoice
 										if !volumeDefaultsModel.QosPolicyChoice.IsNull() && !volumeDefaultsModel.QosPolicyChoice.IsUnknown() {
 											volumeDefaultsQosPolicyChoiceModel := FleetQosPolicyChoice{}
 											response.Diagnostics.Append(volumeDefaultsModel.QosPolicyChoice.As(ctx, &volumeDefaultsQosPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -29870,7 +30010,7 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> StorageInterfaceChoice
+	// resource modelToSpecRoot OneOfField --> StorageInterfaceChoice
 	if !data.StorageInterfaceChoice.IsNull() && !data.StorageInterfaceChoice.IsUnknown() {
 		storageInterfaceChoiceModel := FleetStorageIfaceChoice{}
 		response.Diagnostics.Append(data.StorageInterfaceChoice.As(ctx, &storageInterfaceChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -29931,9 +30071,13 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 
 		}
 
+	} else {
+		spec.StorageInterfaceChoice = &ves_io_schema_fleet.ReplaceSpecType_NoStorageInterfaces{
+			NoStorageInterfaces: &ves_io_schema.Empty{},
+		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> StorageStaticRoutesChoice
+	// resource modelToSpecRoot OneOfField --> StorageStaticRoutesChoice
 	if !data.StorageStaticRoutesChoice.IsNull() && !data.StorageStaticRoutesChoice.IsUnknown() {
 		storageStaticRoutesChoiceModel := FleetStorageStaticRoutesChoice{}
 		response.Diagnostics.Append(data.StorageStaticRoutesChoice.As(ctx, &storageStaticRoutesChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -30287,9 +30431,13 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 
 		}
 
+	} else {
+		spec.StorageStaticRoutesChoice = &ves_io_schema_fleet.ReplaceSpecType_NoStorageStaticRoutes{
+			NoStorageStaticRoutes: &ves_io_schema.Empty{},
+		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> UsbPolicyChoice
+	// resource modelToSpecRoot OneOfField --> UsbPolicyChoice
 	if !data.UsbPolicyChoice.IsNull() && !data.UsbPolicyChoice.IsUnknown() {
 		usbPolicyChoiceModel := FleetUsbPolicyChoice{}
 		response.Diagnostics.Append(data.UsbPolicyChoice.As(ctx, &usbPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -30334,6 +30482,10 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 
 		}
 
+	} else {
+		spec.UsbPolicyChoice = &ves_io_schema_fleet.ReplaceSpecType_DenyAllUsb{
+			DenyAllUsb: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot OneOfField --> VmChoice
@@ -30376,12 +30528,8 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_fleet.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_fleet.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "fleet", err),
@@ -30393,7 +30541,9 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 	updateCallRsp := &server.CallResponse{
 		ProtoMsg: reflect.New(updateGetProtoMsgType).Interface().(proto.Message),
 	}
-	opts = append(opts, vesapi.WithOutCallResponse(updateCallRsp))
+	opts := []vesapi.CallOpt{
+		vesapi.WithOutCallResponse(updateCallRsp),
+	}
 
 	// Read the replaced object
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_fleet.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
@@ -30731,7 +30881,7 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> BondChoice
+	// resource SpecToModelRoot OneOfField --> BondChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -30763,8 +30913,8 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var bondChoiceChoices interface{}
 		if v := rawSpecMap["bond_choice"]; v != nil {
 			bondChoiceChoices = v
@@ -30972,7 +31122,7 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 		data.BondChoice = types.ObjectNull(FleetBondChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> DcClusterGroupChoice
+	// resource SpecToModelRoot OneOfField --> DcClusterGroupChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -31008,8 +31158,8 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var dcClusterGroupChoiceChoices interface{}
 		if v := rawSpecMap["dc_cluster_group_choice"]; v != nil {
 			dcClusterGroupChoiceChoices = v
@@ -31165,7 +31315,7 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 		data.FleetLabel = types.StringNull()
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> GpuChoice
+	// resource SpecToModelRoot OneOfField --> GpuChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -31201,8 +31351,8 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var gpuChoiceChoices interface{}
 		if v := rawSpecMap["gpu_choice"]; v != nil {
 			gpuChoiceChoices = v
@@ -31387,7 +31537,7 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> InterfaceChoice
+	// resource SpecToModelRoot OneOfField --> InterfaceChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -31423,8 +31573,8 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var interfaceChoiceChoices interface{}
 		if v := rawSpecMap["interface_choice"]; v != nil {
 			interfaceChoiceChoices = v
@@ -31879,7 +32029,7 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 		data.KubernetesUpgradeDrain = types.ObjectNull(FleetKubernetesUpgradeDrainModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> LogsReceiverChoice
+	// resource SpecToModelRoot OneOfField --> LogsReceiverChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -31911,8 +32061,8 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var logsReceiverChoiceChoices interface{}
 		if v := rawSpecMap["logs_receiver_choice"]; v != nil {
 			logsReceiverChoiceChoices = v
@@ -32224,8 +32374,7 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 				if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
 					perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
 
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// CreateSpecType
+					// resource specToModelNested OneOfField --> PerfModeChoice
 					// CreateSpecType: GetPerfModeChoice() returns the oneof interface value.
 					if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
@@ -32321,8 +32470,7 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 				if isPerfModeL7Enhanced && perfModeL7EnhancedOptionsWrapper != nil && perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced != nil {
 					perfModeL7EnhancedElement := perfModeL7EnhancedOptionsWrapper.PerfModeL7Enhanced
 
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// CreateSpecType
+					// resource specToModelNested OneOfField --> PerfModeChoice
 					// CreateSpecType: GetPerfModeChoice() returns the oneof interface value.
 					if perfModeL7EnhancedElement.GetPerfModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
@@ -32441,7 +32589,7 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 		data.PerformanceEnhancementMode = types.ObjectNull(FleetPerformanceEnhancementModeModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> SriovInterfaceChoice
+	// resource SpecToModelRoot OneOfField --> SriovInterfaceChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -32473,8 +32621,8 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var sriovInterfaceChoiceChoices interface{}
 		if v := rawSpecMap["sriov_interface_choice"]; v != nil {
 			sriovInterfaceChoiceChoices = v
@@ -32590,7 +32738,7 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 		data.SriovInterfaceChoice = types.ObjectNull(FleetSriovInterfaceChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> StorageClassChoice
+	// resource SpecToModelRoot OneOfField --> StorageClassChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -32622,8 +32770,8 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var storageClassChoiceChoices interface{}
 		if v := rawSpecMap["storage_class_choice"]; v != nil {
 			storageClassChoiceChoices = v
@@ -34208,8 +34356,7 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 																fleetOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 															}
 
-															// resource specToModelNested RequiredOneOfField --> QosPolicyChoice
-															// CreateSpecType
+															// resource specToModelNested OneOfField --> QosPolicyChoice
 															// CreateSpecType: GetQosPolicyChoice() returns the oneof interface value.
 															if volumeDefaultsElement.GetQosPolicyChoice() != nil {
 																// Create a temporary attribute map for the choices within this OneOf
@@ -34434,8 +34581,7 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 														fleetOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 													}
 
-													// resource specToModelNested RequiredOneOfField --> QosPolicyChoice
-													// CreateSpecType
+													// resource specToModelNested OneOfField --> QosPolicyChoice
 													// CreateSpecType: GetQosPolicyChoice() returns the oneof interface value.
 													if volumeDefaultsElement.GetQosPolicyChoice() != nil {
 														// Create a temporary attribute map for the choices within this OneOf
@@ -35550,8 +35696,7 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 																fleetOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 															}
 
-															// resource specToModelNested RequiredOneOfField --> QosPolicyChoice
-															// CreateSpecType
+															// resource specToModelNested OneOfField --> QosPolicyChoice
 															// CreateSpecType: GetQosPolicyChoice() returns the oneof interface value.
 															if volumeDefaultsElement.GetQosPolicyChoice() != nil {
 																// Create a temporary attribute map for the choices within this OneOf
@@ -35776,8 +35921,7 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 														fleetOntapVolumeDefaultsModel.ExportPolicy = types.StringNull()
 													}
 
-													// resource specToModelNested RequiredOneOfField --> QosPolicyChoice
-													// CreateSpecType
+													// resource specToModelNested OneOfField --> QosPolicyChoice
 													// CreateSpecType: GetQosPolicyChoice() returns the oneof interface value.
 													if volumeDefaultsElement.GetQosPolicyChoice() != nil {
 														// Create a temporary attribute map for the choices within this OneOf
@@ -36784,7 +36928,7 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 		data.StorageDeviceChoice = types.ObjectNull(FleetStorageDeviceChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> StorageInterfaceChoice
+	// resource SpecToModelRoot OneOfField --> StorageInterfaceChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -36816,8 +36960,8 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var storageInterfaceChoiceChoices interface{}
 		if v := rawSpecMap["storage_interface_choice"]; v != nil {
 			storageInterfaceChoiceChoices = v
@@ -36943,7 +37087,7 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 		data.StorageInterfaceChoice = types.ObjectNull(FleetStorageInterfaceChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> StorageStaticRoutesChoice
+	// resource SpecToModelRoot OneOfField --> StorageStaticRoutesChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -36975,8 +37119,8 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var storageStaticRoutesChoiceChoices interface{}
 		if v := rawSpecMap["storage_static_routes_choice"]; v != nil {
 			storageStaticRoutesChoiceChoices = v
@@ -37544,7 +37688,7 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 		data.StorageStaticRoutesChoice = types.ObjectNull(FleetStorageStaticRoutesChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> UsbPolicyChoice
+	// resource SpecToModelRoot OneOfField --> UsbPolicyChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -37580,8 +37724,8 @@ func (r *ResourceF5XCFleet) Update(ctx context.Context, request resource.UpdateR
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var usbPolicyChoiceChoices interface{}
 		if v := rawSpecMap["usb_policy_choice"]; v != nil {
 			usbPolicyChoiceChoices = v

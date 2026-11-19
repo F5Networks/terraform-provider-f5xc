@@ -108,7 +108,7 @@ resource "f5xc_alert_receiver" "example" {
 
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
-- `receiver_choice` (Attributes) Receiver Receiver Config (see [below for nested schema](#nestedatt--receiver_choice))
+- `receiver_choice` (Attributes) Receiver Receiver Config<br>Exactly one of `email`, `opsgenie`, `pagerduty`, `slack`, `sms`, or `webhook` must be specified. (see [below for nested schema](#nestedatt--receiver_choice))
 
 ### Optional
 
@@ -126,12 +126,12 @@ resource "f5xc_alert_receiver" "example" {
 
 Optional:
 
-- `email` (Attributes) Email Send alert notifications as Email (see [below for nested schema](#nestedatt--receiver_choice--email))
-- `opsgenie` (Attributes) OpsGenie Send alert notifications to OpsGenie (see [below for nested schema](#nestedatt--receiver_choice--opsgenie))
-- `pagerduty` (Attributes) PagerDuty Send alert notifications to PagerDuty (see [below for nested schema](#nestedatt--receiver_choice--pagerduty))
-- `slack` (Attributes) Slack Send alert notifications to Slack (see [below for nested schema](#nestedatt--receiver_choice--slack))
-- `sms` (Attributes) SMS Send alert notifications as SMS (see [below for nested schema](#nestedatt--receiver_choice--sms))
-- `webhook` (Attributes) Webhook Send alert notifications to Webhook (see [below for nested schema](#nestedatt--receiver_choice--webhook))
+- `email` (Attributes) Email Send alert notifications as Email<br>Conflicts with `opsgenie`, `pagerduty`, `slack`, `sms`, and `webhook`. (see [below for nested schema](#nestedatt--receiver_choice--email))
+- `opsgenie` (Attributes) OpsGenie Send alert notifications to OpsGenie<br>Conflicts with `email`, `pagerduty`, `slack`, `sms`, and `webhook`. (see [below for nested schema](#nestedatt--receiver_choice--opsgenie))
+- `pagerduty` (Attributes) PagerDuty Send alert notifications to PagerDuty<br>Conflicts with `email`, `opsgenie`, `slack`, `sms`, and `webhook`. (see [below for nested schema](#nestedatt--receiver_choice--pagerduty))
+- `slack` (Attributes) Slack Send alert notifications to Slack<br>Conflicts with `email`, `opsgenie`, `pagerduty`, `sms`, and `webhook`. (see [below for nested schema](#nestedatt--receiver_choice--slack))
+- `sms` (Attributes) SMS Send alert notifications as SMS<br>Conflicts with `email`, `opsgenie`, `pagerduty`, `slack`, and `webhook`. (see [below for nested schema](#nestedatt--receiver_choice--sms))
+- `webhook` (Attributes) Webhook Send alert notifications to Webhook<br>Conflicts with `email`, `opsgenie`, `pagerduty`, `slack`, and `sms`. (see [below for nested schema](#nestedatt--receiver_choice--webhook))
 
 <a id="nestedatt--receiver_choice--email"></a>
 ### Nested Schema for `receiver_choice.email`
@@ -154,16 +154,16 @@ Required:
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--receiver_choice--opsgenie--api_key--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--receiver_choice--opsgenie--api_key--secret_info_choice))
 
 <a id="nestedatt--receiver_choice--opsgenie--api_key--secret_info_choice"></a>
 ### Nested Schema for `receiver_choice.opsgenie.api_key.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--receiver_choice--opsgenie--api_key--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--receiver_choice--opsgenie--api_key--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--receiver_choice--opsgenie--api_key--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--receiver_choice--opsgenie--api_key--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--receiver_choice--opsgenie--api_key--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `receiver_choice.opsgenie.api_key.secret_info_choice.blindfold_secret_info`
@@ -206,16 +206,16 @@ Required:
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--receiver_choice--pagerduty--routing_key--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--receiver_choice--pagerduty--routing_key--secret_info_choice))
 
 <a id="nestedatt--receiver_choice--pagerduty--routing_key--secret_info_choice"></a>
 ### Nested Schema for `receiver_choice.pagerduty.routing_key.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--receiver_choice--pagerduty--routing_key--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--receiver_choice--pagerduty--routing_key--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--receiver_choice--pagerduty--routing_key--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--receiver_choice--pagerduty--routing_key--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--receiver_choice--pagerduty--routing_key--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `receiver_choice.pagerduty.routing_key.secret_info_choice.blindfold_secret_info`
@@ -258,16 +258,16 @@ Required:
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--receiver_choice--slack--url--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--receiver_choice--slack--url--secret_info_choice))
 
 <a id="nestedatt--receiver_choice--slack--url--secret_info_choice"></a>
 ### Nested Schema for `receiver_choice.slack.url.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--receiver_choice--slack--url--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--receiver_choice--slack--url--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--receiver_choice--slack--url--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--receiver_choice--slack--url--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--receiver_choice--slack--url--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `receiver_choice.slack.url.secret_info_choice.blindfold_secret_info`
@@ -318,8 +318,8 @@ Required:
 
 Required:
 
-- `auth_choice` (Attributes) HTTP Authentication header HTTP Authentication header controls how to authenticate to the HTTP endpoint (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--auth_choice))
-- `tls_choice` (Attributes) Enable TLS (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--tls_choice))
+- `auth_choice` (Attributes) HTTP Authentication header HTTP Authentication header controls how to authenticate to the HTTP endpoint<br>Exactly one of `auth_token`, `basic_auth`, `client_cert_obj`, or `no_authorization` must be specified. (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--auth_choice))
+- `tls_choice` (Attributes) Enable TLS<br>Exactly one of `no_tls` or `use_tls` must be specified. (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--tls_choice))
 
 Optional:
 
@@ -331,10 +331,10 @@ Optional:
 
 Optional:
 
-- `auth_token` (Attributes) Token Authentication Configure an Access Token for authentication to the HTTP(s) server (such as a Bearer Token) (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--auth_choice--auth_token))
-- `basic_auth` (Attributes) Basic Authentication Use HTTP Basic Auth for authentication to the HTTP(s) server (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--auth_choice--basic_auth))
-- `client_cert_obj` (Attributes) Enable TLS Auth With Certificate Object Use certificate and key files for client cert authentication to the server. (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--auth_choice--client_cert_obj))
-- `no_authorization` (Boolean) No Authentication Do not use authentication to the HTTP(s) server
+- `auth_token` (Attributes) Token Authentication Configure an Access Token for authentication to the HTTP(s) server (such as a Bearer Token)<br>Conflicts with `basic_auth`, `client_cert_obj`, and `no_authorization`. (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--auth_choice--auth_token))
+- `basic_auth` (Attributes) Basic Authentication Use HTTP Basic Auth for authentication to the HTTP(s) server<br>Conflicts with `auth_token`, `client_cert_obj`, and `no_authorization`. (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--auth_choice--basic_auth))
+- `client_cert_obj` (Attributes) Enable TLS Auth With Certificate Object Use certificate and key files for client cert authentication to the server.<br>Conflicts with `auth_token`, `basic_auth`, and `no_authorization`. (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--auth_choice--client_cert_obj))
+- `no_authorization` (Boolean) No Authentication Do not use authentication to the HTTP(s) server<br>Conflicts with `auth_token`, `basic_auth`, and `client_cert_obj`.
 
 <a id="nestedatt--receiver_choice--webhook--http_config--auth_choice--auth_token"></a>
 ### Nested Schema for `receiver_choice.webhook.http_config.auth_choice.auth_token`
@@ -348,16 +348,16 @@ Required:
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--auth_choice--auth_token--token--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--auth_choice--auth_token--token--secret_info_choice))
 
 <a id="nestedatt--receiver_choice--webhook--http_config--auth_choice--auth_token--token--secret_info_choice"></a>
 ### Nested Schema for `receiver_choice.webhook.http_config.auth_choice.auth_token.token.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--auth_choice--auth_token--token--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--auth_choice--auth_token--token--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--auth_choice--auth_token--token--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--auth_choice--auth_token--token--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--receiver_choice--webhook--http_config--auth_choice--auth_token--token--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `receiver_choice.webhook.http_config.auth_choice.auth_token.token.secret_info_choice.blindfold_secret_info`
@@ -400,16 +400,16 @@ Required:
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--auth_choice--basic_auth--password--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--auth_choice--basic_auth--password--secret_info_choice))
 
 <a id="nestedatt--receiver_choice--webhook--http_config--auth_choice--basic_auth--password--secret_info_choice"></a>
 ### Nested Schema for `receiver_choice.webhook.http_config.auth_choice.basic_auth.password.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--auth_choice--basic_auth--password--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--auth_choice--basic_auth--password--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--auth_choice--basic_auth--password--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--auth_choice--basic_auth--password--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--receiver_choice--webhook--http_config--auth_choice--basic_auth--password--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `receiver_choice.webhook.http_config.auth_choice.basic_auth.password.secret_info_choice.blindfold_secret_info`
@@ -466,29 +466,38 @@ Read-Only:
 
 Optional:
 
-- `no_tls` (Boolean) No TLS
-- `use_tls` (Attributes) Use TLS (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--tls_choice--use_tls))
+- `no_tls` (Boolean) No TLS<br>Conflicts with `use_tls`.
+- `use_tls` (Attributes) Use TLS<br>Conflicts with `no_tls`. (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--tls_choice--use_tls))
 
 <a id="nestedatt--receiver_choice--webhook--http_config--tls_choice--use_tls"></a>
 ### Nested Schema for `receiver_choice.webhook.http_config.tls_choice.use_tls`
 
 Required:
 
-- `server_validation_choice` (Attributes) Server verification choice Choose whether to perform server verification. (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--tls_choice--use_tls--server_validation_choice))
-- `sni_choice` (Attributes) sni choice Select SNI to be used for upstream connection (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--tls_choice--use_tls--sni_choice))
+- `sni_choice` (Attributes) sni choice Select SNI to be used for upstream connection<br>Exactly one of `disable_sni` or `sni` must be specified. (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--tls_choice--use_tls--sni_choice))
 
 Optional:
 
 - `max_version` (List of String) maximum_protocol_version Maximum TLS protocol version.<br>**Allowed Values (choose one):** `['TLS_AUTO', 'TLSv1_0', 'TLSv1_1', 'TLSv1_2', 'TLSv1_3']`<br>**Default:** `TLS_AUTO`
 - `min_version` (List of String) minimum_protocol_version Minimum TLS protocol version.<br>**Allowed Values (choose one):** `['TLS_AUTO', 'TLSv1_0', 'TLSv1_1', 'TLSv1_2', 'TLSv1_3']`<br>**Default:** `TLS_AUTO`
+- `server_validation_choice` (Attributes) Server verification choice Choose whether to perform server verification.<br>Exactly one of `use_server_verification` or `volterra_trusted_ca` must be specified when `server_validation_choice` is configured. (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--tls_choice--use_tls--server_validation_choice))
+
+<a id="nestedatt--receiver_choice--webhook--http_config--tls_choice--use_tls--sni_choice"></a>
+### Nested Schema for `receiver_choice.webhook.http_config.tls_choice.use_tls.sni_choice`
+
+Optional:
+
+- `disable_sni` (Boolean) disable_sni Do not use SNI.<br>Conflicts with `sni`.
+- `sni` (String) sni SNI value to be used.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `disable_sni`.
+
 
 <a id="nestedatt--receiver_choice--webhook--http_config--tls_choice--use_tls--server_validation_choice"></a>
 ### Nested Schema for `receiver_choice.webhook.http_config.tls_choice.use_tls.server_validation_choice`
 
 Optional:
 
-- `use_server_verification` (Attributes) Use Server Verification Perform server verification using the provided trusted CA list (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--tls_choice--use_tls--server_validation_choice--use_server_verification))
-- `volterra_trusted_ca` (Boolean) F5XC Trusted CA Perform server verification using F5XC default trusted CA list
+- `use_server_verification` (Attributes) Use Server Verification Perform server verification using the provided trusted CA list<br>Conflicts with `volterra_trusted_ca`. (see [below for nested schema](#nestedatt--receiver_choice--webhook--http_config--tls_choice--use_tls--server_validation_choice--use_server_verification))
+- `volterra_trusted_ca` (Boolean) F5XC Trusted CA Perform server verification using F5XC default trusted CA list<br>Conflicts with `use_server_verification`.
 
 <a id="nestedatt--receiver_choice--webhook--http_config--tls_choice--use_tls--server_validation_choice--use_server_verification"></a>
 ### Nested Schema for `receiver_choice.webhook.http_config.tls_choice.use_tls.server_validation_choice.use_server_verification`
@@ -520,15 +529,6 @@ Read-Only:
 
 
 
-<a id="nestedatt--receiver_choice--webhook--http_config--tls_choice--use_tls--sni_choice"></a>
-### Nested Schema for `receiver_choice.webhook.http_config.tls_choice.use_tls.sni_choice`
-
-Optional:
-
-- `disable_sni` (Boolean) disable_sni Do not use SNI.
-- `sni` (String) sni SNI value to be used.<br>**Validation:** `Length LengthAtMost(256)`
-
-
 
 
 
@@ -537,16 +537,16 @@ Optional:
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--receiver_choice--webhook--url--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--receiver_choice--webhook--url--secret_info_choice))
 
 <a id="nestedatt--receiver_choice--webhook--url--secret_info_choice"></a>
 ### Nested Schema for `receiver_choice.webhook.url.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--receiver_choice--webhook--url--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--receiver_choice--webhook--url--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--receiver_choice--webhook--url--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--receiver_choice--webhook--url--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--receiver_choice--webhook--url--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `receiver_choice.webhook.url.secret_info_choice.blindfold_secret_info`
@@ -607,6 +607,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_alert_receiver.example"
+	to = f5xc_alert_receiver.example
 }
 ```

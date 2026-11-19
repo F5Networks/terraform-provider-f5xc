@@ -334,7 +334,7 @@ func (r *ResourceF5XCBgpRoutingPolicy) Schema(ctx context.Context, request resou
 							Attributes: map[string]schema.Attribute{
 								"action_type_choice": schema.SingleNestedAttribute{
 									Description:         "Action Type Action to be enforced if the BGP route matches the rule.",
-									MarkdownDescription: "Action Type Action to be enforced if the BGP route matches the rule.",
+									MarkdownDescription: "Action Type Action to be enforced if the BGP route matches the rule.<br>Exactly one of `allow`, `as_path`, `community`, `deny`, `local_preference`, or `metric` must be specified when `action_type_choice` is configured.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -351,7 +351,7 @@ func (r *ResourceF5XCBgpRoutingPolicy) Schema(ctx context.Context, request resou
 									Attributes: map[string]schema.Attribute{
 										"allow": schema.BoolAttribute{
 											Description:         "Allow Allow routes being shared",
-											MarkdownDescription: "Allow Allow routes being shared",
+											MarkdownDescription: "Allow Allow routes being shared<br>Conflicts with `as_path`, `community`, `deny`, `local_preference`, and `metric`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -361,14 +361,14 @@ func (r *ResourceF5XCBgpRoutingPolicy) Schema(ctx context.Context, request resou
 										},
 										"as_path": schema.StringAttribute{
 											Description:         "AS path AS-Path Prepending is generally used to influence incoming traffic",
-											MarkdownDescription: "AS path AS-Path Prepending is generally used to influence incoming traffic",
+											MarkdownDescription: "AS path AS-Path Prepending is generally used to influence incoming traffic<br>Conflicts with `allow`, `community`, `deny`, `local_preference`, and `metric`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
 										},
 										"community": schema.SingleNestedAttribute{
 											Description:         "BGP Community BGP communities are tags used to group routes to apply routing policies",
-											MarkdownDescription: "BGP Community BGP communities are tags used to group routes to apply routing policies",
+											MarkdownDescription: "BGP Community BGP communities are tags used to group routes to apply routing policies<br>Conflicts with `allow`, `as_path`, `deny`, `local_preference`, and `metric`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -393,7 +393,7 @@ func (r *ResourceF5XCBgpRoutingPolicy) Schema(ctx context.Context, request resou
 										},
 										"deny": schema.BoolAttribute{
 											Description:         "Deny Generally used for route filtering purposes",
-											MarkdownDescription: "Deny Generally used for route filtering purposes",
+											MarkdownDescription: "Deny Generally used for route filtering purposes<br>Conflicts with `allow`, `as_path`, `community`, `local_preference`, and `metric`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -403,14 +403,14 @@ func (r *ResourceF5XCBgpRoutingPolicy) Schema(ctx context.Context, request resou
 										},
 										"local_preference": schema.Int64Attribute{
 											Description:         "Local preference BGP Local Preference is generally used to influence outgoing traffic",
-											MarkdownDescription: "Local preference BGP Local Preference is generally used to influence outgoing traffic",
+											MarkdownDescription: "Local preference BGP Local Preference is generally used to influence outgoing traffic<br>Conflicts with `allow`, `as_path`, `community`, `deny`, and `metric`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
 										},
 										"metric": schema.Int64Attribute{
 											Description:         "Metric The Multi-Exit Discriminator metric to indicate the preferred path to AS",
-											MarkdownDescription: "Metric The Multi-Exit Discriminator metric to indicate the preferred path to AS",
+											MarkdownDescription: "Metric The Multi-Exit Discriminator metric to indicate the preferred path to AS<br>Conflicts with `allow`, `as_path`, `community`, `deny`, and `local_preference`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -428,7 +428,7 @@ func (r *ResourceF5XCBgpRoutingPolicy) Schema(ctx context.Context, request resou
 							Attributes: map[string]schema.Attribute{
 								"type_of_match_choice": schema.SingleNestedAttribute{
 									Description:         "Type of Match",
-									MarkdownDescription: "Type of Match",
+									MarkdownDescription: "Type of Match<br>Exactly one of `as_path`, `community`, or `ip_prefixes` must be specified.",
 									Required:            true,
 									Optional:            false,
 									Computed:            false,
@@ -442,14 +442,14 @@ func (r *ResourceF5XCBgpRoutingPolicy) Schema(ctx context.Context, request resou
 									Attributes: map[string]schema.Attribute{
 										"as_path": schema.StringAttribute{
 											Description:         "AS path AS path can also be a regex, which will be matched against route information",
-											MarkdownDescription: "AS path AS path can also be a regex, which will be matched against route information",
+											MarkdownDescription: "AS path AS path can also be a regex, which will be matched against route information<br>Conflicts with `community` and `ip_prefixes`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
 										},
 										"community": schema.SingleNestedAttribute{
 											Description:         "BGP Community List of BGP communities to match in route information",
-											MarkdownDescription: "BGP Community List of BGP communities to match in route information",
+											MarkdownDescription: "BGP Community List of BGP communities to match in route information<br>Conflicts with `as_path` and `ip_prefixes`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -474,7 +474,7 @@ func (r *ResourceF5XCBgpRoutingPolicy) Schema(ctx context.Context, request resou
 										},
 										"ip_prefixes": schema.SingleNestedAttribute{
 											Description:         "ip_prefixes Select a prefix or group of prefix",
-											MarkdownDescription: "ip_prefixes Select a prefix or group of prefix",
+											MarkdownDescription: "ip_prefixes Select a prefix or group of prefix<br>Conflicts with `as_path` and `community`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -505,7 +505,7 @@ func (r *ResourceF5XCBgpRoutingPolicy) Schema(ctx context.Context, request resou
 															},
 															"prefix_length_match_choice": schema.SingleNestedAttribute{
 																Description:         "prefix_length_match Match criteria for prefix length",
-																MarkdownDescription: "prefix_length_match Match criteria for prefix length",
+																MarkdownDescription: "prefix_length_match Match criteria for prefix length<br>Exactly one of `equal_or_longer_than`, `exact_match`, or `longer_than` must be specified when `prefix_length_match_choice` is configured.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -519,7 +519,7 @@ func (r *ResourceF5XCBgpRoutingPolicy) Schema(ctx context.Context, request resou
 																Attributes: map[string]schema.Attribute{
 																	"equal_or_longer_than": schema.BoolAttribute{
 																		Description:         "ge_match Choose a prefix equal orlonger than a particular prefix. For example if you choose 10.1.1.0/20 this encompasses a range from 10.1.0.0 to to 10.1.15.255. Any prefix in the routing table that falls within this range will be matched e.g. 10.1.2.0/24, 10.1.3.0/24. This would also match the 10.1.1.0/20.",
-																		MarkdownDescription: "ge_match Choose a prefix equal orlonger than a particular prefix. For example if you choose 10.1.1.0/20 this encompasses a range from 10.1.0.0 to to 10.1.15.255. Any prefix in the routing table that falls within this range will be matched e.g. 10.1.2.0/24, 10.1.3.0/24. This would also match the 10.1.1.0/20.",
+																		MarkdownDescription: "ge_match Choose a prefix equal orlonger than a particular prefix. For example if you choose 10.1.1.0/20 this encompasses a range from 10.1.0.0 to to 10.1.15.255. Any prefix in the routing table that falls within this range will be matched e.g. 10.1.2.0/24, 10.1.3.0/24. This would also match the 10.1.1.0/20.<br>Conflicts with `exact_match` and `longer_than`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -529,7 +529,7 @@ func (r *ResourceF5XCBgpRoutingPolicy) Schema(ctx context.Context, request resou
 																	},
 																	"exact_match": schema.BoolAttribute{
 																		Description:         "exact_match Match the exact prefix length specified in IP prefix",
-																		MarkdownDescription: "exact_match Match the exact prefix length specified in IP prefix",
+																		MarkdownDescription: "exact_match Match the exact prefix length specified in IP prefix<br>Conflicts with `equal_or_longer_than` and `longer_than`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -539,7 +539,7 @@ func (r *ResourceF5XCBgpRoutingPolicy) Schema(ctx context.Context, request resou
 																	},
 																	"longer_than": schema.BoolAttribute{
 																		Description:         "longer_than Choose a prefix longer than a particular prefix. For example if you choose 10.1.1.0/20 this encompasses a range from 10.1.0.0 to to 10.1.15.255. Any prefix in the routing table that falls within this range will be matched e.g. 10.1.2.0/24, 10.1.3.0/24. This wouldn’t match the 10.1.1.0/20.",
-																		MarkdownDescription: "longer_than Choose a prefix longer than a particular prefix. For example if you choose 10.1.1.0/20 this encompasses a range from 10.1.0.0 to to 10.1.15.255. Any prefix in the routing table that falls within this range will be matched e.g. 10.1.2.0/24, 10.1.3.0/24. This wouldn’t match the 10.1.1.0/20.",
+																		MarkdownDescription: "longer_than Choose a prefix longer than a particular prefix. For example if you choose 10.1.1.0/20 this encompasses a range from 10.1.0.0 to to 10.1.15.255. Any prefix in the routing table that falls within this range will be matched e.g. 10.1.2.0/24, 10.1.3.0/24. This wouldn’t match the 10.1.1.0/20.<br>Conflicts with `equal_or_longer_than` and `exact_match`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -1500,11 +1500,7 @@ func (r *ResourceF5XCBgpRoutingPolicy) Read(ctx context.Context, request resourc
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_bgp_routing_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_bgp_routing_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "bgp_routing_policy", err),
@@ -2350,12 +2346,8 @@ func (r *ResourceF5XCBgpRoutingPolicy) Update(ctx context.Context, request resou
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_bgp_routing_policy.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_bgp_routing_policy.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "bgp_routing_policy", err),
@@ -2364,7 +2356,7 @@ func (r *ResourceF5XCBgpRoutingPolicy) Update(ctx context.Context, request resou
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_bgp_routing_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_bgp_routing_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "bgp_routing_policy", err),

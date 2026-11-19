@@ -86,7 +86,7 @@ Required:
 
 Optional:
 
-- `action_choice` (Attributes) Rate Limiter Action Applies the specified action to the user after threshold is reached. (see [below for nested schema](#nestedatt--limits--action_choice))
+- `action_choice` (Attributes) Rate Limiter Action Applies the specified action to the user after threshold is reached.<br>Exactly one of `action_block` or `disabled` must be specified when `action_choice` is configured. (see [below for nested schema](#nestedatt--limits--action_choice))
 - `burst_multiplier` (Number) burst_multiplier The maximum burst of requests to accommodate, expressed as a multiple of the rate.<br>**Default:** `1`
 - `period_multiplier` (Number) period_multiplier This setting, combined with Per Period units, provides a duration<br>**Default:** `1`
 - `total_number` (Number) total_number The total number of allowed requests per rate-limiting period.<br>**Default:** `1`
@@ -96,24 +96,24 @@ Optional:
 
 Optional:
 
-- `action_block` (Attributes) Block Action Blocks the user for a specified duration of time (see [below for nested schema](#nestedatt--limits--action_choice--action_block))
-- `disabled` (Boolean) Disabled
+- `action_block` (Attributes) Block Action Blocks the user for a specified duration of time<br>Conflicts with `disabled`. (see [below for nested schema](#nestedatt--limits--action_choice--action_block))
+- `disabled` (Boolean) Disabled<br>Conflicts with `action_block`.
 
 <a id="nestedatt--limits--action_choice--action_block"></a>
 ### Nested Schema for `limits.action_choice.action_block`
 
 Optional:
 
-- `block_duration_choice` (Attributes) block_duration_choice Period of time after rate limit threshold is exceeded where a user is blocked from making further requests. (see [below for nested schema](#nestedatt--limits--action_choice--action_block--block_duration_choice))
+- `block_duration_choice` (Attributes) block_duration_choice Period of time after rate limit threshold is exceeded where a user is blocked from making further requests.<br>Exactly one of `hours`, `minutes`, or `seconds` must be specified when `block_duration_choice` is configured. (see [below for nested schema](#nestedatt--limits--action_choice--action_block--block_duration_choice))
 
 <a id="nestedatt--limits--action_choice--action_block--block_duration_choice"></a>
 ### Nested Schema for `limits.action_choice.action_block.block_duration_choice`
 
 Optional:
 
-- `hours` (Attributes) Hours User block mitigation time in Hours (see [below for nested schema](#nestedatt--limits--action_choice--action_block--block_duration_choice--hours))
-- `minutes` (Attributes) Minutes User block mitigation time in Minutes (see [below for nested schema](#nestedatt--limits--action_choice--action_block--block_duration_choice--minutes))
-- `seconds` (Attributes) Seconds User block mitigation time in Seconds (see [below for nested schema](#nestedatt--limits--action_choice--action_block--block_duration_choice--seconds))
+- `hours` (Attributes) Hours User block mitigation time in Hours<br>Conflicts with `minutes` and `seconds`. (see [below for nested schema](#nestedatt--limits--action_choice--action_block--block_duration_choice--hours))
+- `minutes` (Attributes) Minutes User block mitigation time in Minutes<br>Conflicts with `hours` and `seconds`. (see [below for nested schema](#nestedatt--limits--action_choice--action_block--block_duration_choice--minutes))
+- `seconds` (Attributes) Seconds User block mitigation time in Seconds<br>Conflicts with `hours` and `minutes`. (see [below for nested schema](#nestedatt--limits--action_choice--action_block--block_duration_choice--seconds))
 
 <a id="nestedatt--limits--action_choice--action_block--block_duration_choice--hours"></a>
 ### Nested Schema for `limits.action_choice.action_block.block_duration_choice.hours`
@@ -186,6 +186,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_rate_limiter.example"
+	to = f5xc_rate_limiter.example
 }
 ```

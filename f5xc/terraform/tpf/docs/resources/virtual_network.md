@@ -80,13 +80,13 @@ resource "f5xc_virtual_network" "example" {
 
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
-- `network_choice` (Attributes) Network Type Choice Select network type, Global, inside or outside (see [below for nested schema](#nestedatt--network_choice))
 
 ### Optional
 
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `description` (String) description Human readable description for the object
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
+- `network_choice` (Attributes) Network Type Choice Select network type, Global, inside or outside<br>Exactly one of `global_network`, `legacy_type`, `site_local_inside_network`, or `site_local_network` must be specified when `network_choice` is configured. (see [below for nested schema](#nestedatt--network_choice))
 - `static_routes` (Attributes List) static_routes List of static routes on the virtual network (see [below for nested schema](#nestedatt--static_routes))
 - `static_v6_routes` (Attributes List) static_v6_routes List of static IPv6 routes on the virtual network (see [below for nested schema](#nestedatt--static_v6_routes))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
@@ -100,10 +100,10 @@ resource "f5xc_virtual_network" "example" {
 
 Optional:
 
-- `global_network` (Boolean) Global Network Global network can extend to multiple sites.
-- `legacy_type` (List of String) Legacy Network config Type of virtual network<br>**Allowed Values (choose one):** `['VIRTUAL_NETWORK_GLOBAL', 'VIRTUAL_NETWORK_MANAGEMENT', 'VIRTUAL_NETWORK_PER_SITE', 'VIRTUAL_NETWORK_SEGMENT', 'VIRTUAL_NETWORK_SITE_LOCAL', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE', 'VIRTUAL_NETWORK_SITE_SERVICE']`
-- `site_local_inside_network` (Boolean) Site Local Inside Network Site local Inside network, also known as inside network
-- `site_local_network` (Boolean) Site Local Network (outside) Site local network, also known as outside network
+- `global_network` (Boolean) Global Network Global network can extend to multiple sites.<br>Conflicts with `legacy_type`, `site_local_inside_network`, and `site_local_network`.
+- `legacy_type` (List of String) Legacy Network config Type of virtual network<br>**Allowed Values (choose one):** `['VIRTUAL_NETWORK_GLOBAL', 'VIRTUAL_NETWORK_MANAGEMENT', 'VIRTUAL_NETWORK_PER_SITE', 'VIRTUAL_NETWORK_SEGMENT', 'VIRTUAL_NETWORK_SITE_LOCAL', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE', 'VIRTUAL_NETWORK_SITE_SERVICE']`<br>Conflicts with `global_network`, `site_local_inside_network`, and `site_local_network`.
+- `site_local_inside_network` (Boolean) Site Local Inside Network Site local Inside network, also known as inside network<br>Conflicts with `global_network`, `legacy_type`, and `site_local_network`.
+- `site_local_network` (Boolean) Site Local Network (outside) Site local network, also known as outside network<br>Conflicts with `global_network`, `legacy_type`, and `site_local_inside_network`.
 
 
 <a id="nestedatt--static_routes"></a>
@@ -112,7 +112,7 @@ Optional:
 Required:
 
 - `ip_prefixes` (List of String) IP Prefixes List of route prefixes that have common next hop and attributes
-- `next_hop_choice` (Attributes) Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface. (see [below for nested schema](#nestedatt--static_routes--next_hop_choice))
+- `next_hop_choice` (Attributes) Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface.<br>Exactly one of `default_gateway`, `ip_address`, or `node_interface` must be specified. (see [below for nested schema](#nestedatt--static_routes--next_hop_choice))
 
 Optional:
 
@@ -123,9 +123,9 @@ Optional:
 
 Optional:
 
-- `default_gateway` (Boolean) Default Gateway Traffic matching the ip prefixes is sent to the default gateway
-- `ip_address` (String) IP Address Traffic matching the ip prefixes is sent to this IP Address
-- `node_interface` (Attributes) Node Interface Traffic matching the ip prefixes is sent to this interface (see [below for nested schema](#nestedatt--static_routes--next_hop_choice--node_interface))
+- `default_gateway` (Boolean) Default Gateway Traffic matching the ip prefixes is sent to the default gateway<br>Conflicts with `ip_address` and `node_interface`.
+- `ip_address` (String) IP Address Traffic matching the ip prefixes is sent to this IP Address<br>Conflicts with `default_gateway` and `node_interface`.
+- `node_interface` (Attributes) Node Interface Traffic matching the ip prefixes is sent to this interface<br>Conflicts with `default_gateway` and `ip_address`. (see [below for nested schema](#nestedatt--static_routes--next_hop_choice--node_interface))
 
 <a id="nestedatt--static_routes--next_hop_choice--node_interface"></a>
 ### Nested Schema for `static_routes.next_hop_choice.node_interface`
@@ -165,7 +165,7 @@ Read-Only:
 Required:
 
 - `ip_prefixes` (List of String) IPv6 Prefixes List of IPv6 route prefixes that have common next hop and attributes
-- `next_hop_choice` (Attributes) Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface. (see [below for nested schema](#nestedatt--static_v6_routes--next_hop_choice))
+- `next_hop_choice` (Attributes) Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface.<br>Exactly one of `default_gateway`, `ip_address`, or `node_interface` must be specified. (see [below for nested schema](#nestedatt--static_v6_routes--next_hop_choice))
 
 Optional:
 
@@ -176,9 +176,9 @@ Optional:
 
 Optional:
 
-- `default_gateway` (Boolean) Default Gateway Traffic matching the ip prefixes is sent to the default gateway
-- `ip_address` (String) IP Address Traffic matching the ip prefixes is sent to this IP Address
-- `node_interface` (Attributes) Node Interface Traffic matching the ip prefixes is sent to this interface (see [below for nested schema](#nestedatt--static_v6_routes--next_hop_choice--node_interface))
+- `default_gateway` (Boolean) Default Gateway Traffic matching the ip prefixes is sent to the default gateway<br>Conflicts with `ip_address` and `node_interface`.
+- `ip_address` (String) IP Address Traffic matching the ip prefixes is sent to this IP Address<br>Conflicts with `default_gateway` and `node_interface`.
+- `node_interface` (Attributes) Node Interface Traffic matching the ip prefixes is sent to this interface<br>Conflicts with `default_gateway` and `ip_address`. (see [below for nested schema](#nestedatt--static_v6_routes--next_hop_choice--node_interface))
 
 <a id="nestedatt--static_v6_routes--next_hop_choice--node_interface"></a>
 ### Nested Schema for `static_v6_routes.next_hop_choice.node_interface`
@@ -242,6 +242,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_virtual_network.example"
+	to = f5xc_virtual_network.example
 }
 ```

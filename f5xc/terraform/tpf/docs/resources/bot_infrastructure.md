@@ -80,8 +80,8 @@ resource "f5xc_bot_infrastructure" "example" {
 
 ### Required
 
-- `bot_infra_choice` (Attributes) choice Identifies if this is an F5 Cloud Hosted, F5 Hosted, Kubernetes or On-Premises infrastructure. (see [below for nested schema](#nestedatt--bot_infra_choice))
-- `create_bot_infra_choice` (Attributes) choice Identifies if this is an F5 Cloud Hosted infrastructure. (see [below for nested schema](#nestedatt--create_bot_infra_choice))
+- `bot_infra_choice` (Attributes) choice Identifies if this is an F5 Cloud Hosted, F5 Hosted, Kubernetes or On-Premises infrastructure.<br>Exactly one of `cloud_hosted`, `kubernetes`, `on_prem`, or `physical_hosted` must be specified. (see [below for nested schema](#nestedatt--bot_infra_choice))
+- `create_bot_infra_choice` (Attributes) choice Identifies if this is an F5 Cloud Hosted infrastructure.<br>`create_cloud_hosted` must be specified. (see [below for nested schema](#nestedatt--create_bot_infra_choice))
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
 
@@ -109,10 +109,10 @@ resource "f5xc_bot_infrastructure" "example" {
 
 Optional:
 
-- `cloud_hosted` (Attributes) F5 Cloud Hosted Associates an F5 Cloud Hosted service node to the Bot Defense infrastructure (see [below for nested schema](#nestedatt--bot_infra_choice--cloud_hosted))
-- `kubernetes` (Attributes) Containerized Hosted Kubernetes is coSSE automated deploying, scaling and managing containers. (see [below for nested schema](#nestedatt--bot_infra_choice--kubernetes))
-- `on_prem` (Attributes) F5 On Premises (see [below for nested schema](#nestedatt--bot_infra_choice--on_prem))
-- `physical_hosted` (Attributes) F5 Hosted (see [below for nested schema](#nestedatt--bot_infra_choice--physical_hosted))
+- `cloud_hosted` (Attributes) F5 Cloud Hosted Associates an F5 Cloud Hosted service node to the Bot Defense infrastructure<br>Conflicts with `kubernetes`, `on_prem`, and `physical_hosted`. (see [below for nested schema](#nestedatt--bot_infra_choice--cloud_hosted))
+- `kubernetes` (Attributes) Containerized Hosted Kubernetes is coSSE automated deploying, scaling and managing containers.<br>Conflicts with `cloud_hosted`, `on_prem`, and `physical_hosted`. (see [below for nested schema](#nestedatt--bot_infra_choice--kubernetes))
+- `on_prem` (Attributes) F5 On Premises<br>Conflicts with `cloud_hosted`, `kubernetes`, and `physical_hosted`. (see [below for nested schema](#nestedatt--bot_infra_choice--on_prem))
+- `physical_hosted` (Attributes) F5 Hosted<br>Conflicts with `cloud_hosted`, `kubernetes`, and `on_prem`. (see [below for nested schema](#nestedatt--bot_infra_choice--physical_hosted))
 
 <a id="nestedatt--bot_infra_choice--cloud_hosted"></a>
 ### Nested Schema for `bot_infra_choice.cloud_hosted`
@@ -146,7 +146,7 @@ Required:
 Required:
 
 - `region` (List of String) Location Bot infrastructure region<br>**Allowed Values (choose one):** `['AF_SOUTH_1', 'AP_NORTHEAST_1', 'AP_NORTHEAST_3', 'AP_SOUTHEAST_1', 'AP_SOUTHEAST_2', 'AP_SOUTHEAST_3', 'AP_SOUTH_1', 'AP_SOUTH_2', 'EU_CENTRAL_1', 'EU_NORTH_1', 'EU_WEST_1', 'GCP_ASIA_EAST1', 'GCP_ASIA_EAST2', 'GCP_ASIA_NORTHEAST1', 'GCP_ASIA_NORTHEAST2', 'GCP_ASIA_NORTHEAST3', 'GCP_ASIA_SOUTH1', 'GCP_ASIA_SOUTHEAST1', 'GCP_ASIA_SOUTHEAST2', 'GCP_AUSTRALIA_SOUTHEAST1', 'GCP_EUROPE_WEST1', 'GCP_EUROPE_WEST2', 'GCP_EUROPE_WEST3', 'GCP_NORTHAMERICA_NORTHEAST1', 'GCP_NORTHAMERICA_NORTHEAST2', 'GCP_SOUTHAMERICA_EAST1', 'GCP_SOUTHAMERICA_WEST1', 'GCP_US_CENTRAL1', 'GCP_US_EAST1', 'GCP_US_EAST4', 'GCP_US_WEST1', 'GCP_US_WEST2', 'ME_CENTRAL_1', 'ME_SOUTH_1', 'SA_EAST_1', 'US_EAST_1', 'US_EAST_2', 'US_WEST_1', 'US_WEST_2']`
-- `type_choice` (Attributes) Type Choice Hostname or IP (see [below for nested schema](#nestedatt--bot_infra_choice--cloud_hosted--ingress--type_choice))
+- `type_choice` (Attributes) Type Choice Hostname or IP<br>Exactly one of `host_name` or `ip_address` must be specified. (see [below for nested schema](#nestedatt--bot_infra_choice--cloud_hosted--ingress--type_choice))
 
 Optional:
 
@@ -158,8 +158,8 @@ Optional:
 
 Optional:
 
-- `host_name` (String) Host Name
-- `ip_address` (String) IP Address Ingress IP Address
+- `host_name` (String) Host Name<br>Conflicts with `ip_address`.
+- `ip_address` (String) IP Address Ingress IP Address<br>Conflicts with `host_name`.
 
 
 
@@ -291,7 +291,7 @@ Optional:
 Required:
 
 - `ip_address_list` (Attributes) IP Addresses Access Control List - IP Addresses (see [below for nested schema](#nestedatt--create_bot_infra_choice--create_cloud_hosted--ip_address_list))
-- `type_choice` (Attributes) Type Choice Identifies the environment as either Production or Testing. Production environments have two infrastructure regions in an Active-Active configuration where traffic is routed equally between the two regions. Test environments have a single infrastructure region. (see [below for nested schema](#nestedatt--create_bot_infra_choice--create_cloud_hosted--type_choice))
+- `type_choice` (Attributes) Type Choice Identifies the environment as either Production or Testing. Production environments have two infrastructure regions in an Active-Active configuration where traffic is routed equally between the two regions. Test environments have a single infrastructure region.<br>Exactly one of `production_v2` or `testing_v2` must be specified. (see [below for nested schema](#nestedatt--create_bot_infra_choice--create_cloud_hosted--type_choice))
 
 Optional:
 
@@ -310,24 +310,24 @@ Required:
 
 Optional:
 
-- `production_v2` (Attributes) Production Production Protect live production applications and services from automated attacks. (see [below for nested schema](#nestedatt--create_bot_infra_choice--create_cloud_hosted--type_choice--production_v2))
-- `testing_v2` (Attributes) Testing Test Evaluate new features, settings, and system performance. (see [below for nested schema](#nestedatt--create_bot_infra_choice--create_cloud_hosted--type_choice--testing_v2))
+- `production_v2` (Attributes) Production Production Protect live production applications and services from automated attacks.<br>Conflicts with `testing_v2`. (see [below for nested schema](#nestedatt--create_bot_infra_choice--create_cloud_hosted--type_choice--production_v2))
+- `testing_v2` (Attributes) Testing Test Evaluate new features, settings, and system performance.<br>Conflicts with `production_v2`. (see [below for nested schema](#nestedatt--create_bot_infra_choice--create_cloud_hosted--type_choice--testing_v2))
 
 <a id="nestedatt--create_bot_infra_choice--create_cloud_hosted--type_choice--production_v2"></a>
 ### Nested Schema for `create_bot_infra_choice.create_cloud_hosted.type_choice.production_v2`
 
 Optional:
 
-- `type_choice_production_choice` (Attributes) Type Choice Select the desired disaster recovery  configuration mode for your Bot Defense Infrastructure. (see [below for nested schema](#nestedatt--create_bot_infra_choice--create_cloud_hosted--type_choice--production_v2--type_choice_production_choice))
+- `type_choice_production_choice` (Attributes) Type Choice Select the desired disaster recovery  configuration mode for your Bot Defense Infrastructure.<br>Exactly one of `active_active_region`, `active_passive_region`, or `single_active_region` must be specified when `type_choice_production_choice` is configured. (see [below for nested schema](#nestedatt--create_bot_infra_choice--create_cloud_hosted--type_choice--production_v2--type_choice_production_choice))
 
 <a id="nestedatt--create_bot_infra_choice--create_cloud_hosted--type_choice--production_v2--type_choice_production_choice"></a>
 ### Nested Schema for `create_bot_infra_choice.create_cloud_hosted.type_choice.production_v2.type_choice_production_choice`
 
 Optional:
 
-- `active_active_region` (Attributes) Active - Active Traffic routed equally to both regions. (see [below for nested schema](#nestedatt--create_bot_infra_choice--create_cloud_hosted--type_choice--production_v2--type_choice_production_choice--active_active_region))
-- `active_passive_region` (Attributes) Active - Passive Traffic routed to Active region with failover to Passive on health failure. (see [below for nested schema](#nestedatt--create_bot_infra_choice--create_cloud_hosted--type_choice--production_v2--type_choice_production_choice--active_passive_region))
-- `single_active_region` (Attributes) Single Active Only one region serves traffic. (see [below for nested schema](#nestedatt--create_bot_infra_choice--create_cloud_hosted--type_choice--production_v2--type_choice_production_choice--single_active_region))
+- `active_active_region` (Attributes) Active - Active Traffic routed equally to both regions.<br>Conflicts with `active_passive_region` and `single_active_region`. (see [below for nested schema](#nestedatt--create_bot_infra_choice--create_cloud_hosted--type_choice--production_v2--type_choice_production_choice--active_active_region))
+- `active_passive_region` (Attributes) Active - Passive Traffic routed to Active region with failover to Passive on health failure.<br>Conflicts with `active_active_region` and `single_active_region`. (see [below for nested schema](#nestedatt--create_bot_infra_choice--create_cloud_hosted--type_choice--production_v2--type_choice_production_choice--active_passive_region))
+- `single_active_region` (Attributes) Single Active Only one region serves traffic.<br>Conflicts with `active_active_region` and `active_passive_region`. (see [below for nested schema](#nestedatt--create_bot_infra_choice--create_cloud_hosted--type_choice--production_v2--type_choice_production_choice--single_active_region))
 
 <a id="nestedatt--create_bot_infra_choice--create_cloud_hosted--type_choice--production_v2--type_choice_production_choice--active_active_region"></a>
 ### Nested Schema for `create_bot_infra_choice.create_cloud_hosted.type_choice.production_v2.type_choice_production_choice.active_active_region`
@@ -362,7 +362,7 @@ Required:
 
 Optional:
 
-- `type_choice_testing_choice` (Attributes) Type Choice Select the desired disaster recovery  configuration mode for your Bot Defense Infrastructure. (see [below for nested schema](#nestedatt--create_bot_infra_choice--create_cloud_hosted--type_choice--testing_v2--type_choice_testing_choice))
+- `type_choice_testing_choice` (Attributes) Type Choice Select the desired disaster recovery  configuration mode for your Bot Defense Infrastructure.<br>`single_active_region` must be specified when `type_choice_testing_choice` is configured. (see [below for nested schema](#nestedatt--create_bot_infra_choice--create_cloud_hosted--type_choice--testing_v2--type_choice_testing_choice))
 
 <a id="nestedatt--create_bot_infra_choice--create_cloud_hosted--type_choice--testing_v2--type_choice_testing_choice"></a>
 ### Nested Schema for `create_bot_infra_choice.create_cloud_hosted.type_choice.testing_v2.type_choice_testing_choice`
@@ -457,6 +457,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_bot_infrastructure.example"
+	to = f5xc_bot_infrastructure.example
 }
 ```

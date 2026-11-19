@@ -399,7 +399,7 @@ func (r *ResourceF5XCEndpoint) Schema(ctx context.Context, request resource.Sche
 			},
 			"endpoint_address_choice": schema.SingleNestedAttribute{
 				Description:         "Endpoint Address Endpoint address can be specified in multiple ways. It can be configured as ip address or DNS name. It can be discovered using a service discovery method. This field represents any one of method by which this endpoint is addressed or discovered.",
-				MarkdownDescription: "Endpoint Address Endpoint address can be specified in multiple ways. It can be configured as ip address or DNS name. It can be discovered using a service discovery method. This field represents any one of method by which this endpoint is addressed or discovered.",
+				MarkdownDescription: "Endpoint Address Endpoint address can be specified in multiple ways. It can be configured as ip address or DNS name. It can be discovered using a service discovery method. This field represents any one of method by which this endpoint is addressed or discovered.<br>Exactly one of `dns_name`, `dns_name_advanced`, `ip`, or `service_info` must be specified when `endpoint_address_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -414,7 +414,7 @@ func (r *ResourceF5XCEndpoint) Schema(ctx context.Context, request resource.Sche
 				Attributes: map[string]schema.Attribute{
 					"dns_name": schema.StringAttribute{
 						Description:         "dns_name Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.",
-						MarkdownDescription: "dns_name Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`",
+						MarkdownDescription: "dns_name Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `dns_name_advanced`, `ip`, and `service_info`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -428,7 +428,7 @@ func (r *ResourceF5XCEndpoint) Schema(ctx context.Context, request resource.Sche
 					},
 					"dns_name_advanced": schema.SingleNestedAttribute{
 						Description:         "dns_name_advanced Specifies name and TTL used for DNS resolution.",
-						MarkdownDescription: "dns_name_advanced Specifies name and TTL used for DNS resolution.",
+						MarkdownDescription: "dns_name_advanced Specifies name and TTL used for DNS resolution.<br>Conflicts with `dns_name`, `ip`, and `service_info`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -449,7 +449,7 @@ func (r *ResourceF5XCEndpoint) Schema(ctx context.Context, request resource.Sche
 							},
 							"ttl_choice": schema.SingleNestedAttribute{
 								Description:         "ttl_choice Time to live parameter",
-								MarkdownDescription: "ttl_choice Time to live parameter",
+								MarkdownDescription: "ttl_choice Time to live parameter<br>`refresh_interval` must be specified when `ttl_choice` is configured.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -478,7 +478,7 @@ func (r *ResourceF5XCEndpoint) Schema(ctx context.Context, request resource.Sche
 					},
 					"ip": schema.StringAttribute{
 						Description:         "Endpoint IP Address Endpoint is reachable at the given ipv4/ipv6 address",
-						MarkdownDescription: "Endpoint IP Address Endpoint is reachable at the given ipv4/ipv6 address",
+						MarkdownDescription: "Endpoint IP Address Endpoint is reachable at the given ipv4/ipv6 address<br>Conflicts with `dns_name`, `dns_name_advanced`, and `service_info`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -491,7 +491,7 @@ func (r *ResourceF5XCEndpoint) Schema(ctx context.Context, request resource.Sche
 					},
 					"service_info": schema.SingleNestedAttribute{
 						Description:         "Service Selector Info It contains information about how the service is selected (either by service name or label selector) and where the service is discovered (either in K8s or Consul) Service Name. String represent name of the service. System will perform discovery based on the discovery method. In case of K8S, System will watch K8s API server and automatically discover services and endpoints of interest. In case Virtual K8s cluster, system already has access to it. In case K8s cluster outside ves.io, K8s cluster credentials come from the site configuration. In case of Consul, System will watch the consul server and automatically discover the services and endpoints of interest. Label selector for selecting the services Label selector expression for selecting services or serverless functions to automatically discover services and endpoint of interest. discovery_type specifies where endpoint will be discovered Endpoint can be discovered in K8S or Consul In case of K8S, labels on the service is matched against service_selector In case of Consul, tags on the service is matched against service_selector",
-						MarkdownDescription: "Service Selector Info It contains information about how the service is selected (either by service name or label selector) and where the service is discovered (either in K8s or Consul) Service Name. String represent name of the service. System will perform discovery based on the discovery method. In case of K8S, System will watch K8s API server and automatically discover services and endpoints of interest. In case Virtual K8s cluster, system already has access to it. In case K8s cluster outside ves.io, K8s cluster credentials come from the site configuration. In case of Consul, System will watch the consul server and automatically discover the services and endpoints of interest. Label selector for selecting the services Label selector expression for selecting services or serverless functions to automatically discover services and endpoint of interest. discovery_type specifies where endpoint will be discovered Endpoint can be discovered in K8S or Consul In case of K8S, labels on the service is matched against service_selector In case of Consul, tags on the service is matched against service_selector",
+						MarkdownDescription: "Service Selector Info It contains information about how the service is selected (either by service name or label selector) and where the service is discovered (either in K8s or Consul) Service Name. String represent name of the service. System will perform discovery based on the discovery method. In case of K8S, System will watch K8s API server and automatically discover services and endpoints of interest. In case Virtual K8s cluster, system already has access to it. In case K8s cluster outside ves.io, K8s cluster credentials come from the site configuration. In case of Consul, System will watch the consul server and automatically discover the services and endpoints of interest. Label selector for selecting the services Label selector expression for selecting services or serverless functions to automatically discover services and endpoint of interest. discovery_type specifies where endpoint will be discovered Endpoint can be discovered in K8S or Consul In case of K8S, labels on the service is matched against service_selector In case of Consul, tags on the service is matched against service_selector<br>Conflicts with `dns_name`, `dns_name_advanced`, and `ip`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -510,7 +510,7 @@ func (r *ResourceF5XCEndpoint) Schema(ctx context.Context, request resource.Sche
 							},
 							"service_info_choice": schema.SingleNestedAttribute{
 								Description:         "service_info Specifies whether service discovery has to be done using service name or labels",
-								MarkdownDescription: "service_info Specifies whether service discovery has to be done using service name or labels",
+								MarkdownDescription: "service_info Specifies whether service discovery has to be done using service name or labels<br>Exactly one of `service_name` or `service_selector` must be specified when `service_info_choice` is configured.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -523,7 +523,7 @@ func (r *ResourceF5XCEndpoint) Schema(ctx context.Context, request resource.Sche
 								Attributes: map[string]schema.Attribute{
 									"service_name": schema.StringAttribute{
 										Description:         "service_name Name of the service to discover with an optional namespace and cluster identifier. The format is service_name.namespace_name:cluster_identifier for K8S and service_name:cluster_identifier for Consul Endpoint will be discovered in all discovery objects where the cluster identifier matches. If cluster identifier is not specified then discovery will be done in all discovery objects of the site.",
-										MarkdownDescription: "service_name Name of the service to discover with an optional namespace and cluster identifier. The format is service_name.namespace_name:cluster_identifier for K8S and service_name:cluster_identifier for Consul Endpoint will be discovered in all discovery objects where the cluster identifier matches. If cluster identifier is not specified then discovery will be done in all discovery objects of the site.",
+										MarkdownDescription: "service_name Name of the service to discover with an optional namespace and cluster identifier. The format is service_name.namespace_name:cluster_identifier for K8S and service_name:cluster_identifier for Consul Endpoint will be discovered in all discovery objects where the cluster identifier matches. If cluster identifier is not specified then discovery will be done in all discovery objects of the site.<br>Conflicts with `service_selector`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -533,7 +533,7 @@ func (r *ResourceF5XCEndpoint) Schema(ctx context.Context, request resource.Sche
 									},
 									"service_selector": schema.SingleNestedAttribute{
 										Description:         "service_selector Labels of the service to discover By default services will be discovered from all discovery objects for the site. If user want to restrict discovery from specific discovery object, then he can configure implicit label with 'name.ves.io/discovery-cluster' as key and the value as the cluster identifier of the discovery object in which discovery has to happen. This implicit label is added to service_selector",
-										MarkdownDescription: "service_selector Labels of the service to discover By default services will be discovered from all discovery objects for the site. If user want to restrict discovery from specific discovery object, then he can configure implicit label with 'name.ves.io/discovery-cluster' as key and the value as the cluster identifier of the discovery object in which discovery has to happen. This implicit label is added to service_selector",
+										MarkdownDescription: "service_selector Labels of the service to discover By default services will be discovered from all discovery objects for the site. If user want to restrict discovery from specific discovery object, then he can configure implicit label with 'name.ves.io/discovery-cluster' as key and the value as the cluster identifier of the discovery object in which discovery has to happen. This implicit label is added to service_selector<br>Conflicts with `service_name`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -600,7 +600,7 @@ func (r *ResourceF5XCEndpoint) Schema(ctx context.Context, request resource.Sche
 				Attributes: map[string]schema.Attribute{
 					"snat_pool_choice": schema.SingleNestedAttribute{
 						Description:         "Snat Pool Choice Snat Pool for the origin server",
-						MarkdownDescription: "Snat Pool Choice Snat Pool for the origin server",
+						MarkdownDescription: "Snat Pool Choice Snat Pool for the origin server<br>Exactly one of `no_snat_pool` or `snat_pool` must be specified when `snat_pool_choice` is configured.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -613,7 +613,7 @@ func (r *ResourceF5XCEndpoint) Schema(ctx context.Context, request resource.Sche
 						Attributes: map[string]schema.Attribute{
 							"no_snat_pool": schema.BoolAttribute{
 								Description:         "No SNAT Pool No configured SNAT Pool to reach Origin Server",
-								MarkdownDescription: "No SNAT Pool No configured SNAT Pool to reach Origin Server",
+								MarkdownDescription: "No SNAT Pool No configured SNAT Pool to reach Origin Server<br>Conflicts with `snat_pool`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -623,7 +623,7 @@ func (r *ResourceF5XCEndpoint) Schema(ctx context.Context, request resource.Sche
 							},
 							"snat_pool": schema.SingleNestedAttribute{
 								Description:         "SNAT Pool Configure SNAT Pool to reach Origin Server",
-								MarkdownDescription: "SNAT Pool Configure SNAT Pool to reach Origin Server",
+								MarkdownDescription: "SNAT Pool Configure SNAT Pool to reach Origin Server<br>Conflicts with `no_snat_pool`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -675,7 +675,7 @@ func (r *ResourceF5XCEndpoint) Schema(ctx context.Context, request resource.Sche
 				Attributes: map[string]schema.Attribute{
 					"ref_or_selector_choice": schema.SingleNestedAttribute{
 						Description:         "ref_or_selector One of following",
-						MarkdownDescription: "ref_or_selector One of following",
+						MarkdownDescription: "ref_or_selector One of following<br>Exactly one of `site`, `virtual_network`, or `virtual_site` must be specified.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -689,7 +689,7 @@ func (r *ResourceF5XCEndpoint) Schema(ctx context.Context, request resource.Sche
 						Attributes: map[string]schema.Attribute{
 							"site": schema.SingleNestedAttribute{
 								Description:         "site Direct reference to site object",
-								MarkdownDescription: "site Direct reference to site object",
+								MarkdownDescription: "site Direct reference to site object<br>Conflicts with `virtual_network` and `virtual_site`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -746,7 +746,7 @@ func (r *ResourceF5XCEndpoint) Schema(ctx context.Context, request resource.Sche
 							},
 							"virtual_network": schema.SingleNestedAttribute{
 								Description:         "virtual_network Direct reference to virtual network object",
-								MarkdownDescription: "virtual_network Direct reference to virtual network object",
+								MarkdownDescription: "virtual_network Direct reference to virtual network object<br>Conflicts with `site` and `virtual_site`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -790,7 +790,7 @@ func (r *ResourceF5XCEndpoint) Schema(ctx context.Context, request resource.Sche
 							},
 							"virtual_site": schema.SingleNestedAttribute{
 								Description:         "virtual_site Direct reference to virtual site object",
-								MarkdownDescription: "virtual_site Direct reference to virtual site object",
+								MarkdownDescription: "virtual_site Direct reference to virtual site object<br>Conflicts with `site` and `virtual_network`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2304,11 +2304,7 @@ func (r *ResourceF5XCEndpoint) Read(ctx context.Context, request resource.ReadRe
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_endpoint.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_endpoint.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "endpoint", err),
@@ -3670,12 +3666,8 @@ func (r *ResourceF5XCEndpoint) Update(ctx context.Context, request resource.Upda
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_endpoint.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_endpoint.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "endpoint", err),
@@ -3684,7 +3676,7 @@ func (r *ResourceF5XCEndpoint) Update(ctx context.Context, request resource.Upda
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_endpoint.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_endpoint.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "endpoint", err),

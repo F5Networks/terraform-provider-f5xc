@@ -156,6 +156,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_network_firewall.example"
+	to = f5xc_network_firewall.example
 }
 ```

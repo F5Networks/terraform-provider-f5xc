@@ -615,7 +615,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 				Attributes: map[string]schema.Attribute{
 					"type_choice": schema.SingleNestedAttribute{
 						Description:         "Code Base Select the type of code base you want to integrate with such as GitHub, GitLab, Bitbucket or Azure.",
-						MarkdownDescription: "Code Base Select the type of code base you want to integrate with such as GitHub, GitLab, Bitbucket or Azure.",
+						MarkdownDescription: "Code Base Select the type of code base you want to integrate with such as GitHub, GitLab, Bitbucket or Azure.<br>Exactly one of `azure_repos`, `bitbucket`, `bitbucket_server`, `github`, `github_enterprise`, `gitlab`, or `gitlab_enterprise` must be specified.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -633,7 +633,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 						Attributes: map[string]schema.Attribute{
 							"azure_repos": schema.SingleNestedAttribute{
 								Description:         "Azure Repos Integration",
-								MarkdownDescription: "Azure Repos Integration",
+								MarkdownDescription: "Azure Repos Integration<br>Conflicts with `bitbucket`, `bitbucket_server`, `github`, `github_enterprise`, `gitlab`, and `gitlab_enterprise`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -647,7 +647,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 										Attributes: map[string]schema.Attribute{
 											"secret_info_choice": schema.SingleNestedAttribute{
 												Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-												MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+												MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -661,7 +661,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 												Attributes: map[string]schema.Attribute{
 													"blindfold_secret_info": schema.SingleNestedAttribute{
 														Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-														MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+														MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -701,7 +701,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 													},
 													"clear_secret_info": schema.SingleNestedAttribute{
 														Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-														MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+														MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -736,7 +736,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 													},
 													"none": schema.BoolAttribute{
 														Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-														MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+														MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -752,7 +752,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 							},
 							"bitbucket": schema.SingleNestedAttribute{
 								Description:         "BitBucket Cloud Integration",
-								MarkdownDescription: "BitBucket Cloud Integration",
+								MarkdownDescription: "BitBucket Cloud Integration<br>Conflicts with `azure_repos`, `bitbucket_server`, `github`, `github_enterprise`, `gitlab`, and `gitlab_enterprise`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -766,7 +766,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 										Attributes: map[string]schema.Attribute{
 											"secret_info_choice": schema.SingleNestedAttribute{
 												Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-												MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+												MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -780,7 +780,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 												Attributes: map[string]schema.Attribute{
 													"blindfold_secret_info": schema.SingleNestedAttribute{
 														Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-														MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+														MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -820,7 +820,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 													},
 													"clear_secret_info": schema.SingleNestedAttribute{
 														Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-														MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+														MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -855,7 +855,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 													},
 													"none": schema.BoolAttribute{
 														Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-														MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+														MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -878,7 +878,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 							},
 							"bitbucket_server": schema.SingleNestedAttribute{
 								Description:         "BitBucket Server Integration",
-								MarkdownDescription: "BitBucket Server Integration",
+								MarkdownDescription: "BitBucket Server Integration<br>Conflicts with `azure_repos`, `bitbucket`, `github`, `github_enterprise`, `gitlab`, and `gitlab_enterprise`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -892,7 +892,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 										Attributes: map[string]schema.Attribute{
 											"secret_info_choice": schema.SingleNestedAttribute{
 												Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-												MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+												MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -906,7 +906,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 												Attributes: map[string]schema.Attribute{
 													"blindfold_secret_info": schema.SingleNestedAttribute{
 														Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-														MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+														MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -946,7 +946,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 													},
 													"clear_secret_info": schema.SingleNestedAttribute{
 														Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-														MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+														MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -981,7 +981,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 													},
 													"none": schema.BoolAttribute{
 														Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-														MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+														MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1019,7 +1019,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 							},
 							"github": schema.SingleNestedAttribute{
 								Description:         "Github Integration",
-								MarkdownDescription: "Github Integration",
+								MarkdownDescription: "Github Integration<br>Conflicts with `azure_repos`, `bitbucket`, `bitbucket_server`, `github_enterprise`, `gitlab`, and `gitlab_enterprise`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1033,7 +1033,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 										Attributes: map[string]schema.Attribute{
 											"secret_info_choice": schema.SingleNestedAttribute{
 												Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-												MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+												MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -1047,7 +1047,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 												Attributes: map[string]schema.Attribute{
 													"blindfold_secret_info": schema.SingleNestedAttribute{
 														Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-														MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+														MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1087,7 +1087,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 													},
 													"clear_secret_info": schema.SingleNestedAttribute{
 														Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-														MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+														MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1122,7 +1122,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 													},
 													"none": schema.BoolAttribute{
 														Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-														MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+														MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1153,7 +1153,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 							},
 							"github_enterprise": schema.SingleNestedAttribute{
 								Description:         "Github Enterprise Integration",
-								MarkdownDescription: "Github Enterprise Integration",
+								MarkdownDescription: "Github Enterprise Integration<br>Conflicts with `azure_repos`, `bitbucket`, `bitbucket_server`, `github`, `gitlab`, and `gitlab_enterprise`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1167,7 +1167,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 										Attributes: map[string]schema.Attribute{
 											"secret_info_choice": schema.SingleNestedAttribute{
 												Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-												MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+												MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -1181,7 +1181,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 												Attributes: map[string]schema.Attribute{
 													"blindfold_secret_info": schema.SingleNestedAttribute{
 														Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-														MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+														MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1221,7 +1221,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 													},
 													"clear_secret_info": schema.SingleNestedAttribute{
 														Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-														MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+														MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1256,7 +1256,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 													},
 													"none": schema.BoolAttribute{
 														Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-														MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+														MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1286,7 +1286,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 							},
 							"gitlab": schema.SingleNestedAttribute{
 								Description:         "GitLab Cloud Integration",
-								MarkdownDescription: "GitLab Cloud Integration",
+								MarkdownDescription: "GitLab Cloud Integration<br>Conflicts with `azure_repos`, `bitbucket`, `bitbucket_server`, `github`, `github_enterprise`, and `gitlab_enterprise`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1300,7 +1300,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 										Attributes: map[string]schema.Attribute{
 											"secret_info_choice": schema.SingleNestedAttribute{
 												Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-												MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+												MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -1314,7 +1314,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 												Attributes: map[string]schema.Attribute{
 													"blindfold_secret_info": schema.SingleNestedAttribute{
 														Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-														MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+														MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1354,7 +1354,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 													},
 													"clear_secret_info": schema.SingleNestedAttribute{
 														Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-														MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+														MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1389,7 +1389,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 													},
 													"none": schema.BoolAttribute{
 														Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-														MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+														MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1405,7 +1405,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 							},
 							"gitlab_enterprise": schema.SingleNestedAttribute{
 								Description:         "GitLab Enterprise Integration",
-								MarkdownDescription: "GitLab Enterprise Integration",
+								MarkdownDescription: "GitLab Enterprise Integration<br>Conflicts with `azure_repos`, `bitbucket`, `bitbucket_server`, `github`, `github_enterprise`, and `gitlab`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1419,7 +1419,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 										Attributes: map[string]schema.Attribute{
 											"secret_info_choice": schema.SingleNestedAttribute{
 												Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-												MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+												MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -1433,7 +1433,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 												Attributes: map[string]schema.Attribute{
 													"blindfold_secret_info": schema.SingleNestedAttribute{
 														Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-														MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+														MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1473,7 +1473,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 													},
 													"clear_secret_info": schema.SingleNestedAttribute{
 														Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-														MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+														MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1508,7 +1508,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Schema(ctx context.Context, request re
 													},
 													"none": schema.BoolAttribute{
 														Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-														MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+														MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -4018,11 +4018,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Read(ctx context.Context, request reso
 	defer cancel()
 	priorCodeBaseIntegration := data.CodeBaseIntegration
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_api_sec_code_base_integration.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_api_sec_code_base_integration.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "code_base_integration", err),
@@ -6438,12 +6434,8 @@ func (r *ResourceF5XCCodeBaseIntegration) Update(ctx context.Context, request re
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_api_sec_code_base_integration.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_api_sec_code_base_integration.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "code_base_integration", err),
@@ -6452,7 +6444,7 @@ func (r *ResourceF5XCCodeBaseIntegration) Update(ctx context.Context, request re
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_api_sec_code_base_integration.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_api_sec_code_base_integration.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "code_base_integration", err),

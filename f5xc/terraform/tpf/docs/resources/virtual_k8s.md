@@ -96,7 +96,7 @@ resource "f5xc_virtual_k8s" "example" {
 - `default_flavor_ref` (Attributes) Default Workload Flavor Default workfload flavor for all workloads launched in this Virtual K8s (see [below for nested schema](#nestedatt--default_flavor_ref))
 - `description` (String) description Human readable description for the object
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
-- `service_isolation_choice` (Attributes) service_isolation_choice Service isolation choice (see [below for nested schema](#nestedatt--service_isolation_choice))
+- `service_isolation_choice` (Attributes) service_isolation_choice Service isolation choice<br>Exactly one of `disabled` or `isolated` must be specified when `service_isolation_choice` is configured. (see [below for nested schema](#nestedatt--service_isolation_choice))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 - `vsite_refs` (Attributes List) vsite_refs Reference to virtual-sites Default virtual-site of the Virtual K8s object. If no virtual-site is specified in the Kubernetes API resource object annotations via ves.io/virtual-sites, then this virtual-site is used select sites on which to instantiate the Kubernetes API resource object (see [below for nested schema](#nestedatt--vsite_refs))
 
@@ -122,8 +122,8 @@ Read-Only:
 
 Optional:
 
-- `disabled` (Boolean) Disabled K8s services are not restricted and communcation can happen across namespaces unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to true
-- `isolated` (Boolean) Isolated Isolated K8s services restrict any K8s services created in the Virtual K8s from communicating outside the namespace unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to false
+- `disabled` (Boolean) Disabled K8s services are not restricted and communcation can happen across namespaces unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to true<br>Conflicts with `isolated`.
+- `isolated` (Boolean) Isolated Isolated K8s services restrict any K8s services created in the Virtual K8s from communicating outside the namespace unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to false<br>Conflicts with `disabled`.
 
 
 <a id="nestedatt--timeouts"></a>
@@ -169,6 +169,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_virtual_k8s.example"
+	to = f5xc_virtual_k8s.example
 }
 ```

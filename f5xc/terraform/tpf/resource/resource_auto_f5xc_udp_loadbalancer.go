@@ -29,6 +29,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -267,7 +268,7 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for RequiredOneOfField --> AdvertiseChoice
+// Attribute map for OneOfField --> AdvertiseChoice
 var UdpLoadbalancerAdvertiseChoiceModelAttributeMap = map[string]attr.Type{
 
 	"advertise_custom": types.ObjectType{
@@ -562,7 +563,7 @@ var UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceVk8SService
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> PortChoice
+// Attribute map for OneOfField --> PortChoice
 var UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWherePortChoiceModelAttributeMap = map[string]attr.Type{
 
 	"port":             types.Int64Type,
@@ -595,7 +596,7 @@ var UdpLoadbalancerDnsInfoModelAttributeMap = map[string]attr.Type{
 	"ipv6_address": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> HashPolicyChoice
+// Attribute map for OneOfField --> HashPolicyChoice
 var UdpLoadbalancerHashPolicyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"hash_policy_choice_random":               types.BoolType,
@@ -709,7 +710,7 @@ var UdpLoadbalancerInternetVipInfoStatusTargetGroupStatusListenerStatusModelAttr
 	"status":   types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> LoadbalancerType
+// Attribute map for OneOfField --> LoadbalancerType
 var UdpLoadbalancerLoadbalancerTypeModelAttributeMap = map[string]attr.Type{
 
 	"udp": types.BoolType,
@@ -758,7 +759,7 @@ var UdpLoadbalancerPortChoiceModelAttributeMap = map[string]attr.Type{
 	"port_ranges": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> ServicePolicyChoice
+// Attribute map for OneOfField --> ServicePolicyChoice
 var UdpLoadbalancerServicePolicyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"active_service_policies": types.ObjectType{
@@ -871,22 +872,25 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 			},
 			"advertise_choice": schema.SingleNestedAttribute{
 				Description:         "Advertise choice This is a choice to select the method to advertise the VIP.",
-				MarkdownDescription: "Advertise choice This is a choice to select the method to advertise the VIP.",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Advertise choice This is a choice to select the method to advertise the VIP.<br>Exactly one of `advertise_custom`, `advertise_on_public`, `advertise_on_public_default_vip`, or `do_not_advertise` must be specified when `advertise_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"advertise_custom",
 						"advertise_on_public",
 						"advertise_on_public_default_vip",
 						"do_not_advertise",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"advertise_custom": schema.SingleNestedAttribute{
 						Description:         "Advertise Custom Advertise this VIP on specific sites",
-						MarkdownDescription: "Advertise Custom Advertise this VIP on specific sites",
+						MarkdownDescription: "Advertise Custom Advertise this VIP on specific sites<br>Conflicts with `advertise_on_public`, `advertise_on_public_default_vip`, and `do_not_advertise`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -905,7 +909,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 									Attributes: map[string]schema.Attribute{
 										"choice": schema.SingleNestedAttribute{
 											Description:         "Advertise choice This defines various options where a Loadbalancer could be advertised",
-											MarkdownDescription: "Advertise choice This defines various options where a Loadbalancer could be advertised",
+											MarkdownDescription: "Advertise choice This defines various options where a Loadbalancer could be advertised<br>Exactly one of `advertise_on_public`, `site`, `site_segment`, `virtual_network`, `virtual_site`, `virtual_site_segment`, `virtual_site_with_vip`, or `vk8s_service` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -924,7 +928,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 											Attributes: map[string]schema.Attribute{
 												"advertise_on_public": schema.SingleNestedAttribute{
 													Description:         "Advertise On Public Advertise this load balancer on public network",
-													MarkdownDescription: "Advertise On Public Advertise this load balancer on public network",
+													MarkdownDescription: "Advertise On Public Advertise this load balancer on public network<br>Conflicts with `site`, `site_segment`, `virtual_network`, `virtual_site`, `virtual_site_segment`, `virtual_site_with_vip`, and `vk8s_service`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -966,7 +970,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"site": schema.SingleNestedAttribute{
 													Description:         "Site Advertise on a customer site and a given network.",
-													MarkdownDescription: "Site Advertise on a customer site and a given network.",
+													MarkdownDescription: "Site Advertise on a customer site and a given network.<br>Conflicts with `advertise_on_public`, `site_segment`, `virtual_network`, `virtual_site`, `virtual_site_segment`, `virtual_site_with_vip`, and `vk8s_service`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1046,7 +1050,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"site_segment": schema.SingleNestedAttribute{
 													Description:         "Segment on Site Advertise on a segment on a site",
-													MarkdownDescription: "Segment on Site Advertise on a segment on a site",
+													MarkdownDescription: "Segment on Site Advertise on a segment on a site<br>Conflicts with `advertise_on_public`, `site`, `virtual_network`, `virtual_site`, `virtual_site_segment`, `virtual_site_with_vip`, and `vk8s_service`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1147,14 +1151,14 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"virtual_network": schema.SingleNestedAttribute{
 													Description:         "Virtual Network Advertise on a virtual network",
-													MarkdownDescription: "Virtual Network Advertise on a virtual network",
+													MarkdownDescription: "Virtual Network Advertise on a virtual network<br>Conflicts with `advertise_on_public`, `site`, `site_segment`, `virtual_site`, `virtual_site_segment`, `virtual_site_with_vip`, and `vk8s_service`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"v6_vip_choice": schema.SingleNestedAttribute{
 															Description:         "Select V6 VIP Select default V6 VIP or specify IPv6 address",
-															MarkdownDescription: "Select V6 VIP Select default V6 VIP or specify IPv6 address",
+															MarkdownDescription: "Select V6 VIP Select default V6 VIP or specify IPv6 address<br>Exactly one of `default_v6_vip` or `specific_v6_vip` must be specified when `v6_vip_choice` is configured.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1167,7 +1171,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 															Attributes: map[string]schema.Attribute{
 																"default_v6_vip": schema.BoolAttribute{
 																	Description:         "Default V6 VIP for virtual Network Use the default VIP, system allocated or configured in the virtual network",
-																	MarkdownDescription: "Default V6 VIP for virtual Network Use the default VIP, system allocated or configured in the virtual network",
+																	MarkdownDescription: "Default V6 VIP for virtual Network Use the default VIP, system allocated or configured in the virtual network<br>Conflicts with `specific_v6_vip`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1177,7 +1181,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"specific_v6_vip": schema.StringAttribute{
 																	Description:         "Specific V6 VIP Use given IPV6 address as VIP on virtual Network",
-																	MarkdownDescription: "Specific V6 VIP Use given IPV6 address as VIP on virtual Network",
+																	MarkdownDescription: "Specific V6 VIP Use given IPV6 address as VIP on virtual Network<br>Conflicts with `default_v6_vip`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1192,7 +1196,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 														},
 														"vip_choice": schema.SingleNestedAttribute{
 															Description:         "Select VIP Select default V4 VIP or specify V4 ip address",
-															MarkdownDescription: "Select VIP Select default V4 VIP or specify V4 ip address",
+															MarkdownDescription: "Select VIP Select default V4 VIP or specify V4 ip address<br>Exactly one of `default_vip` or `specific_vip` must be specified when `vip_choice` is configured.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1205,7 +1209,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 															Attributes: map[string]schema.Attribute{
 																"default_vip": schema.BoolAttribute{
 																	Description:         "Default V4 VIP for Virtual Network Use the default VIP, system allocated or configured in the virtual network",
-																	MarkdownDescription: "Default V4 VIP for Virtual Network Use the default VIP, system allocated or configured in the virtual network",
+																	MarkdownDescription: "Default V4 VIP for Virtual Network Use the default VIP, system allocated or configured in the virtual network<br>Conflicts with `specific_vip`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1215,7 +1219,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"specific_vip": schema.StringAttribute{
 																	Description:         "Specific VIP Use given IPV4 address as VIP on virtual Network",
-																	MarkdownDescription: "Specific VIP Use given IPV4 address as VIP on virtual Network",
+																	MarkdownDescription: "Specific VIP Use given IPV4 address as VIP on virtual Network<br>Conflicts with `default_vip`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1265,7 +1269,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"virtual_site": schema.SingleNestedAttribute{
 													Description:         "Virtual Site Advertise on a customer virtual site and a given network.",
-													MarkdownDescription: "Virtual Site Advertise on a customer virtual site and a given network.",
+													MarkdownDescription: "Virtual Site Advertise on a customer virtual site and a given network.<br>Conflicts with `advertise_on_public`, `site`, `site_segment`, `virtual_network`, `virtual_site_segment`, `virtual_site_with_vip`, and `vk8s_service`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1319,7 +1323,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"virtual_site_segment": schema.SingleNestedAttribute{
 													Description:         "Segment on Virtual Site Advertise on a segment on a virtual site",
-													MarkdownDescription: "Segment on Virtual Site Advertise on a segment on a virtual site",
+													MarkdownDescription: "Segment on Virtual Site Advertise on a segment on a virtual site<br>Conflicts with `advertise_on_public`, `site`, `site_segment`, `virtual_network`, `virtual_site`, `virtual_site_with_vip`, and `vk8s_service`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1420,7 +1424,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"virtual_site_with_vip": schema.SingleNestedAttribute{
 													Description:         "Virtual Site With Specified VIP Advertise on a customer virtual site and a given network and IP.",
-													MarkdownDescription: "Virtual Site With Specified VIP Advertise on a customer virtual site and a given network and IP.",
+													MarkdownDescription: "Virtual Site With Specified VIP Advertise on a customer virtual site and a given network and IP.<br>Conflicts with `advertise_on_public`, `site`, `site_segment`, `virtual_network`, `virtual_site`, `virtual_site_segment`, and `vk8s_service`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1500,14 +1504,14 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"vk8s_service": schema.SingleNestedAttribute{
 													Description:         "vK8s services network Advertise on vK8s Service Network on RE.",
-													MarkdownDescription: "vK8s services network Advertise on vK8s Service Network on RE.",
+													MarkdownDescription: "vK8s services network Advertise on vK8s Service Network on RE.<br>Conflicts with `advertise_on_public`, `site`, `site_segment`, `virtual_network`, `virtual_site`, `virtual_site_segment`, and `virtual_site_with_vip`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"choice": schema.SingleNestedAttribute{
 															Description:         "RE or RE Virtual Site This defines a reference to a RE site or virtual site where a VIP could be advertised in the vK8s service network",
-															MarkdownDescription: "RE or RE Virtual Site This defines a reference to a RE site or virtual site where a VIP could be advertised in the vK8s service network",
+															MarkdownDescription: "RE or RE Virtual Site This defines a reference to a RE site or virtual site where a VIP could be advertised in the vK8s service network<br>Exactly one of `site` or `virtual_site` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -1520,7 +1524,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 															Attributes: map[string]schema.Attribute{
 																"site": schema.SingleNestedAttribute{
 																	Description:         "RE Site Reference to site object",
-																	MarkdownDescription: "RE Site Reference to site object",
+																	MarkdownDescription: "RE Site Reference to site object<br>Conflicts with `virtual_site`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1553,7 +1557,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 																},
 																"virtual_site": schema.SingleNestedAttribute{
 																	Description:         "Virtual Site Reference to virtual site object",
-																	MarkdownDescription: "Virtual Site Reference to virtual site object",
+																	MarkdownDescription: "Virtual Site Reference to virtual site object<br>Conflicts with `site`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1592,21 +1596,24 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 										},
 										"port_choice": schema.SingleNestedAttribute{
 											Description:         "Listen Port Choice Available options: user provided port or inherit from the load balancer configuration.",
-											MarkdownDescription: "Listen Port Choice Available options: user provided port or inherit from the load balancer configuration.",
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
+											MarkdownDescription: "Listen Port Choice Available options: user provided port or inherit from the load balancer configuration.<br>Exactly one of `port`, `port_ranges`, or `use_default_port` must be specified when `port_choice` is configured.",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
 											Validators: []validator.Object{
-												exactlyoneofvalidator.RequiredExactlyOneOf(
+												exactlyoneofvalidator.ExactlyOneOf(
 													"port",
 													"port_ranges",
 													"use_default_port",
 												),
 											},
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.UseNonNullStateForUnknown(),
+											},
 											Attributes: map[string]schema.Attribute{
 												"port": schema.Int64Attribute{
 													Description:         "Port to listen Port to Listen.",
-													MarkdownDescription: "Port to listen Port to Listen.",
+													MarkdownDescription: "Port to listen Port to Listen.<br>Conflicts with `port_ranges` and `use_default_port`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1616,7 +1623,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"port_ranges": schema.StringAttribute{
 													Description:         "Port ranges to listen A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.",
-													MarkdownDescription: "Port ranges to listen A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.<br>**Validation:** `Length LengthBetween(1, 512)`",
+													MarkdownDescription: "Port ranges to listen A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.<br>**Validation:** `Length LengthBetween(1, 512)`<br>Conflicts with `port` and `use_default_port`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1627,7 +1634,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 												},
 												"use_default_port": schema.BoolAttribute{
 													Description:         "Use Default port Inherit the Load Balancer's Listen Port.",
-													MarkdownDescription: "Use Default port Inherit the Load Balancer's Listen Port.",
+													MarkdownDescription: "Use Default port Inherit the Load Balancer's Listen Port.<br>Conflicts with `port` and `port_ranges`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1644,7 +1651,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"advertise_on_public": schema.SingleNestedAttribute{
 						Description:         "Advertise On Public (Specified IPv4) Advertise this load balancer on specified IPv4 on public network",
-						MarkdownDescription: "Advertise On Public (Specified IPv4) Advertise this load balancer on specified IPv4 on public network",
+						MarkdownDescription: "Advertise On Public (Specified IPv4) Advertise this load balancer on specified IPv4 on public network<br>Conflicts with `advertise_custom`, `advertise_on_public_default_vip`, and `do_not_advertise`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1686,7 +1693,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"advertise_on_public_default_vip": schema.BoolAttribute{
 						Description:         "Advertise On Public Default VIP (IPv4) Advertise this load balancer on public network with default IPv4 VIP",
-						MarkdownDescription: "Advertise On Public Default VIP (IPv4) Advertise this load balancer on public network with default IPv4 VIP",
+						MarkdownDescription: "Advertise On Public Default VIP (IPv4) Advertise this load balancer on public network with default IPv4 VIP<br>Conflicts with `advertise_custom`, `advertise_on_public`, and `do_not_advertise`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1696,7 +1703,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"do_not_advertise": schema.BoolAttribute{
 						Description:         "Do Not Advertise Do not advertise this load balancer",
-						MarkdownDescription: "Do Not Advertise Do not advertise this load balancer",
+						MarkdownDescription: "Do Not Advertise Do not advertise this load balancer<br>Conflicts with `advertise_custom`, `advertise_on_public`, and `advertise_on_public_default_vip`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1760,21 +1767,24 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 			},
 			"hash_policy_choice": schema.SingleNestedAttribute{
 				Description:         "Load Balancing Control Selection for load balancing strategy.",
-				MarkdownDescription: "Load Balancing Control Selection for load balancing strategy.",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Load Balancing Control Selection for load balancing strategy.<br>Exactly one of `hash_policy_choice_random`, `hash_policy_choice_round_robin`, or `hash_policy_choice_source_ip_stickiness` must be specified when `hash_policy_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"hash_policy_choice_random",
 						"hash_policy_choice_round_robin",
 						"hash_policy_choice_source_ip_stickiness",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"hash_policy_choice_random": schema.BoolAttribute{
 						Description:         "Random Connections are sent to all eligible origin servers in random fashion",
-						MarkdownDescription: "Random Connections are sent to all eligible origin servers in random fashion",
+						MarkdownDescription: "Random Connections are sent to all eligible origin servers in random fashion<br>Conflicts with `hash_policy_choice_round_robin` and `hash_policy_choice_source_ip_stickiness`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1784,7 +1794,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"hash_policy_choice_round_robin": schema.BoolAttribute{
 						Description:         "Round Robin Connections are sent to all eligible origin servers in round robin fashion",
-						MarkdownDescription: "Round Robin Connections are sent to all eligible origin servers in round robin fashion",
+						MarkdownDescription: "Round Robin Connections are sent to all eligible origin servers in round robin fashion<br>Conflicts with `hash_policy_choice_random` and `hash_policy_choice_source_ip_stickiness`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1794,7 +1804,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"hash_policy_choice_source_ip_stickiness": schema.BoolAttribute{
 						Description:         "Source IP Stickiness Connections are sent to all eligible origin servers using hash of source ip. Consistent hashing algorithm, ring hash, is used to select origin server",
-						MarkdownDescription: "Source IP Stickiness Connections are sent to all eligible origin servers using hash of source ip. Consistent hashing algorithm, ring hash, is used to select origin server",
+						MarkdownDescription: "Source IP Stickiness Connections are sent to all eligible origin servers using hash of source ip. Consistent hashing algorithm, ring hash, is used to select origin server<br>Conflicts with `hash_policy_choice_random` and `hash_policy_choice_round_robin`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1989,14 +1999,17 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 			},
 			"loadbalancer_type_choice": schema.SingleNestedAttribute{
 				Description:         "Proxy choice Select a type of load balancer.",
-				MarkdownDescription: "Proxy choice Select a type of load balancer.",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Proxy choice Select a type of load balancer.<br>`udp` must be specified when `loadbalancer_type_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"udp",
 					),
+				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
 				},
 				Attributes: map[string]schema.Attribute{
 					"udp": schema.BoolAttribute{
@@ -2025,7 +2038,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 					Attributes: map[string]schema.Attribute{
 						"pool_choice": schema.SingleNestedAttribute{
 							Description:         "Pool Choice Select origin pool method, simple origin pool method or more flexible cluster object.",
-							MarkdownDescription: "Pool Choice Select origin pool method, simple origin pool method or more flexible cluster object.",
+							MarkdownDescription: "Pool Choice Select origin pool method, simple origin pool method or more flexible cluster object.<br>Exactly one of `cluster` or `pool` must be specified.",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
@@ -2038,7 +2051,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 							Attributes: map[string]schema.Attribute{
 								"cluster": schema.SingleNestedAttribute{
 									Description:         "Cluster More flexible, advanced feature control with cluster",
-									MarkdownDescription: "Cluster More flexible, advanced feature control with cluster",
+									MarkdownDescription: "Cluster More flexible, advanced feature control with cluster<br>Conflicts with `pool`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -2071,7 +2084,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 								},
 								"pool": schema.SingleNestedAttribute{
 									Description:         "Pool Simple, commonly used pool parameters with origin pool",
-									MarkdownDescription: "Pool Simple, commonly used pool parameters with origin pool",
+									MarkdownDescription: "Pool Simple, commonly used pool parameters with origin pool<br>Conflicts with `cluster`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -2120,7 +2133,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 			},
 			"port_choice": schema.SingleNestedAttribute{
 				Description:         "Listen Port Select a single Listen Port.",
-				MarkdownDescription: "Listen Port Select a single Listen Port.",
+				MarkdownDescription: "Listen Port Select a single Listen Port.<br>Exactly one of `listen_port` or `port_ranges` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -2133,7 +2146,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 				Attributes: map[string]schema.Attribute{
 					"listen_port": schema.Int64Attribute{
 						Description:         "Port Listen Port for this load balancer",
-						MarkdownDescription: "Port Listen Port for this load balancer",
+						MarkdownDescription: "Port Listen Port for this load balancer<br>Conflicts with `port_ranges`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2146,7 +2159,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"port_ranges": schema.StringAttribute{
 						Description:         "Port_ranges A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.",
-						MarkdownDescription: "Port_ranges A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.<br>**Validation:** `Length LengthBetween(1, 512)`",
+						MarkdownDescription: "Port_ranges A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.<br>**Validation:** `Length LengthBetween(1, 512)`<br>Conflicts with `listen_port`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2159,21 +2172,24 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 			},
 			"service_policy_choice": schema.SingleNestedAttribute{
 				Description:         "Service Policies Service policies provide the ability to configure security controls such as IP Allow/Deny lists, Geo IP filtering and Custom rules",
-				MarkdownDescription: "Service Policies Service policies provide the ability to configure security controls such as IP Allow/Deny lists, Geo IP filtering and Custom rules",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Service Policies Service policies provide the ability to configure security controls such as IP Allow/Deny lists, Geo IP filtering and Custom rules<br>Exactly one of `active_service_policies`, `no_service_policies`, or `service_policies_from_namespace` must be specified when `service_policy_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"active_service_policies",
 						"no_service_policies",
 						"service_policies_from_namespace",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"active_service_policies": schema.SingleNestedAttribute{
 						Description:         "Apply Specified Service Policies Apply the specified list of service policies and bypass the namespace service policy set",
-						MarkdownDescription: "Apply Specified Service Policies Apply the specified list of service policies and bypass the namespace service policy set",
+						MarkdownDescription: "Apply Specified Service Policies Apply the specified list of service policies and bypass the namespace service policy set<br>Conflicts with `no_service_policies` and `service_policies_from_namespace`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2221,7 +2237,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"no_service_policies": schema.BoolAttribute{
 						Description:         "Do Not Apply Service Policies Do not apply any service policies i.e. bypass the namespace service policy set",
-						MarkdownDescription: "Do Not Apply Service Policies Do not apply any service policies i.e. bypass the namespace service policy set",
+						MarkdownDescription: "Do Not Apply Service Policies Do not apply any service policies i.e. bypass the namespace service policy set<br>Conflicts with `active_service_policies` and `service_policies_from_namespace`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2231,7 +2247,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Schema(ctx context.Context, request resour
 					},
 					"service_policies_from_namespace": schema.BoolAttribute{
 						Description:         "Apply Namespace Service Policies Apply the active service policies configured as part of the namespace service policy set",
-						MarkdownDescription: "Apply Namespace Service Policies Apply the active service policies configured as part of the namespace service policy set",
+						MarkdownDescription: "Apply Namespace Service Policies Apply the active service policies configured as part of the namespace service policy set<br>Conflicts with `active_service_policies` and `no_service_policies`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2394,7 +2410,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Create(ctx context.Context, request resour
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> AdvertiseChoice
+	// resource modelToSpecRoot OneOfField --> AdvertiseChoice
 	if !data.AdvertiseChoice.IsNull() && !data.AdvertiseChoice.IsUnknown() {
 		advertiseChoiceModel := UdpLoadbalancerAdvertiseChoice{}
 		response.Diagnostics.Append(data.AdvertiseChoice.As(ctx, &advertiseChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2430,6 +2446,9 @@ func (r *ResourceF5XCUdpLoadbalancer) Create(ctx context.Context, request resour
 				for i, advertiseWhereElement := range advertiseWhereElements {
 					// Initialize the spec struct for the current element
 					advertiseCustomOneOfSpec.AdvertiseCustom.AdvertiseWhere[i] = &ves_io_schema_views.WhereType{}
+					advertiseCustomOneOfSpec.AdvertiseCustom.AdvertiseWhere[i].PortChoice = &ves_io_schema_views.WhereType_UseDefaultPort{
+						UseDefaultPort: &ves_io_schema.Empty{},
+					}
 
 					// Recursively process nested elements
 
@@ -2970,7 +2989,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Create(ctx context.Context, request resour
 
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> PortChoice
+					// resource modelToSpecNested OneOfField --> PortChoice
 					if !advertiseWhereElement.PortChoice.IsNull() && !advertiseWhereElement.PortChoice.IsUnknown() {
 						advertiseWherePortChoiceModel := UdpLoadbalancerPortChoice{}
 						response.Diagnostics.Append(advertiseWhereElement.PortChoice.As(ctx, &advertiseWherePortChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3056,6 +3075,10 @@ func (r *ResourceF5XCUdpLoadbalancer) Create(ctx context.Context, request resour
 			spec.AdvertiseChoice = doNotAdvertiseSpecBool
 		}
 
+	} else {
+		spec.AdvertiseChoice = &ves_io_schema_views_udp_loadbalancer.CreateSpecType_AdvertiseOnPublicDefaultVip{
+			AdvertiseOnPublicDefaultVip: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot Bool Field --> DnsVolterraManaged
@@ -3073,7 +3096,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Create(ctx context.Context, request resour
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> HashPolicyChoice
+	// resource modelToSpecRoot OneOfField --> HashPolicyChoice
 	if !data.HashPolicyChoice.IsNull() && !data.HashPolicyChoice.IsUnknown() {
 		hashPolicyChoiceModel := UdpLoadbalancerHashPolicyChoice{}
 		response.Diagnostics.Append(data.HashPolicyChoice.As(ctx, &hashPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3102,6 +3125,10 @@ func (r *ResourceF5XCUdpLoadbalancer) Create(ctx context.Context, request resour
 			spec.HashPolicyChoice = hashPolicyChoiceSourceIpStickinessSpecBool
 		}
 
+	} else {
+		spec.HashPolicyChoice = &ves_io_schema_views_udp_loadbalancer.CreateSpecType_HashPolicyChoiceRoundRobin{
+			HashPolicyChoiceRoundRobin: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot UintField --> IdleTimeout
@@ -3109,7 +3136,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Create(ctx context.Context, request resour
 		spec.IdleTimeout = uint32(data.IdleTimeout.ValueInt64())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> LoadbalancerType
+	// resource modelToSpecRoot OneOfField --> LoadbalancerType
 	if !data.LoadbalancerTypeChoice.IsNull() && !data.LoadbalancerTypeChoice.IsUnknown() {
 		loadbalancerTypeChoiceModel := UdpLoadbalancerLoadbalancerTypeChoice{}
 		response.Diagnostics.Append(data.LoadbalancerTypeChoice.As(ctx, &loadbalancerTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3124,6 +3151,10 @@ func (r *ResourceF5XCUdpLoadbalancer) Create(ctx context.Context, request resour
 			spec.LoadbalancerType = udpSpecBool
 		}
 
+	} else {
+		spec.LoadbalancerType = &ves_io_schema_views_udp_loadbalancer.CreateSpecType_Udp{
+			Udp: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -3234,7 +3265,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Create(ctx context.Context, request resour
 
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> ServicePolicyChoice
+	// resource modelToSpecRoot OneOfField --> ServicePolicyChoice
 	if !data.ServicePolicyChoice.IsNull() && !data.ServicePolicyChoice.IsUnknown() {
 		servicePolicyChoiceModel := UdpLoadbalancerSvcPolicyChoice{}
 		response.Diagnostics.Append(data.ServicePolicyChoice.As(ctx, &servicePolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3302,7 +3333,12 @@ func (r *ResourceF5XCUdpLoadbalancer) Create(ctx context.Context, request resour
 			spec.ServicePolicyChoice = servicePoliciesFromNamespaceSpecBool
 		}
 
+	} else {
+		spec.ServicePolicyChoice = &ves_io_schema_views_udp_loadbalancer.CreateSpecType_ServicePoliciesFromNamespace{
+			ServicePoliciesFromNamespace: &ves_io_schema.Empty{},
+		}
 	}
+
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
@@ -3447,7 +3483,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Create(ctx context.Context, request resour
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> AdvertiseChoice
+	// resource SpecToModelRoot OneOfField --> AdvertiseChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -4454,8 +4490,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Create(ctx context.Context, request resour
 							udpLoadbalancerWhereTypeModel.Choice = types.ObjectNull(UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceModelAttributeMap)
 						}
 
-						// resource specToModelNested RequiredOneOfField --> PortChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> PortChoice
 						if advertiseWhereElement.GetPortChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							advertiseWhereportChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -4648,8 +4683,6 @@ func (r *ResourceF5XCUdpLoadbalancer) Create(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.AdvertiseChoice = types.ObjectNull(UdpLoadbalancerAdvertiseChoiceModelAttributeMap)
 	}
 
@@ -4727,7 +4760,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Create(ctx context.Context, request resour
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> HashPolicyChoice
+	// resource SpecToModelRoot OneOfField --> HashPolicyChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -4784,8 +4817,6 @@ func (r *ResourceF5XCUdpLoadbalancer) Create(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.HashPolicyChoice = types.ObjectNull(UdpLoadbalancerHashPolicyChoiceModelAttributeMap)
 	}
 
@@ -5058,7 +5089,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Create(ctx context.Context, request resour
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> LoadbalancerType
+	// resource SpecToModelRoot OneOfField --> LoadbalancerType
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -5097,8 +5128,6 @@ func (r *ResourceF5XCUdpLoadbalancer) Create(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.LoadbalancerTypeChoice = types.ObjectNull(UdpLoadbalancerLoadbalancerTypeModelAttributeMap)
 	}
 
@@ -5316,7 +5345,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Create(ctx context.Context, request resour
 		data.PortChoice = types.ObjectNull(UdpLoadbalancerPortChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> ServicePolicyChoice
+	// resource SpecToModelRoot OneOfField --> ServicePolicyChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -5435,8 +5464,6 @@ func (r *ResourceF5XCUdpLoadbalancer) Create(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.ServicePolicyChoice = types.ObjectNull(UdpLoadbalancerServicePolicyChoiceModelAttributeMap)
 	}
 
@@ -5483,11 +5510,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Read(ctx context.Context, request resource
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_udp_loadbalancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_udp_loadbalancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "udp_loadbalancer", err),
@@ -5608,7 +5631,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Read(ctx context.Context, request resource
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> AdvertiseChoice
+	// resource SpecToModelRoot OneOfField --> AdvertiseChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -6615,8 +6638,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Read(ctx context.Context, request resource
 							udpLoadbalancerWhereTypeModel.Choice = types.ObjectNull(UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceModelAttributeMap)
 						}
 
-						// resource specToModelNested RequiredOneOfField --> PortChoice
-						// <no value>
+						// resource specToModelNested OneOfField --> PortChoice
 						if advertiseWhereElement.GetPortChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							advertiseWhereportChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -6813,8 +6835,6 @@ func (r *ResourceF5XCUdpLoadbalancer) Read(ctx context.Context, request resource
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.AdvertiseChoice.IsNull() || data.AdvertiseChoice.IsUnknown() || ((data.AdvertiseChoice.Attributes()["advertise_custom"].(types.Object).IsNull() || data.AdvertiseChoice.Attributes()["advertise_custom"].(types.Object).IsUnknown() || (data.AdvertiseChoice.Attributes()["advertise_custom"].(types.Object).Attributes()["advertise_where"].IsNull() || data.AdvertiseChoice.Attributes()["advertise_custom"].(types.Object).Attributes()["advertise_where"].IsUnknown())) && (data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).IsNull() || data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).IsUnknown() || (data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).Attributes()["public_ip"].(types.Object).IsNull() || data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).Attributes()["public_ip"].(types.Object).IsUnknown() || ((data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).Attributes()["public_ip"].(types.Object).Attributes()["name"].IsNull() || data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).Attributes()["public_ip"].(types.Object).Attributes()["name"].IsUnknown()) && (data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).Attributes()["public_ip"].(types.Object).Attributes()["namespace"].IsNull() || data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).Attributes()["public_ip"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).Attributes()["public_ip"].(types.Object).Attributes()["tenant"].IsNull() || data.AdvertiseChoice.Attributes()["advertise_on_public"].(types.Object).Attributes()["public_ip"].(types.Object).Attributes()["tenant"].IsUnknown())))) && (data.AdvertiseChoice.Attributes()["advertise_on_public_default_vip"].IsNull() || data.AdvertiseChoice.Attributes()["advertise_on_public_default_vip"].IsUnknown()) && (data.AdvertiseChoice.Attributes()["do_not_advertise"].IsNull() || data.AdvertiseChoice.Attributes()["do_not_advertise"].IsUnknown())) {
 			data.AdvertiseChoice = types.ObjectValueMust(UdpLoadbalancerAdvertiseChoiceModelAttributeMap, map[string]attr.Value{
@@ -6900,7 +6920,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Read(ctx context.Context, request resource
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> HashPolicyChoice
+	// resource SpecToModelRoot OneOfField --> HashPolicyChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -6957,8 +6977,6 @@ func (r *ResourceF5XCUdpLoadbalancer) Read(ctx context.Context, request resource
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.HashPolicyChoice.IsNull() || data.HashPolicyChoice.IsUnknown() || ((data.HashPolicyChoice.Attributes()["hash_policy_choice_random"].IsNull() || data.HashPolicyChoice.Attributes()["hash_policy_choice_random"].IsUnknown()) && (data.HashPolicyChoice.Attributes()["hash_policy_choice_round_robin"].IsNull() || data.HashPolicyChoice.Attributes()["hash_policy_choice_round_robin"].IsUnknown()) && (data.HashPolicyChoice.Attributes()["hash_policy_choice_source_ip_stickiness"].IsNull() || data.HashPolicyChoice.Attributes()["hash_policy_choice_source_ip_stickiness"].IsUnknown())) {
 			data.HashPolicyChoice = types.ObjectValueMust(UdpLoadbalancerHashPolicyChoiceModelAttributeMap, map[string]attr.Value{
@@ -7238,7 +7256,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Read(ctx context.Context, request resource
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> LoadbalancerType
+	// resource SpecToModelRoot OneOfField --> LoadbalancerType
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -7277,8 +7295,6 @@ func (r *ResourceF5XCUdpLoadbalancer) Read(ctx context.Context, request resource
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.LoadbalancerTypeChoice.IsNull() || data.LoadbalancerTypeChoice.IsUnknown() || (data.LoadbalancerTypeChoice.Attributes()["udp"].IsNull() || data.LoadbalancerTypeChoice.Attributes()["udp"].IsUnknown()) {
 			data.LoadbalancerTypeChoice = types.ObjectValueMust(UdpLoadbalancerLoadbalancerTypeModelAttributeMap, map[string]attr.Value{
@@ -7501,7 +7517,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Read(ctx context.Context, request resource
 		data.PortChoice = types.ObjectNull(UdpLoadbalancerPortChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> ServicePolicyChoice
+	// resource SpecToModelRoot OneOfField --> ServicePolicyChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -7620,8 +7636,6 @@ func (r *ResourceF5XCUdpLoadbalancer) Read(ctx context.Context, request resource
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.ServicePolicyChoice.IsNull() || data.ServicePolicyChoice.IsUnknown() || ((data.ServicePolicyChoice.Attributes()["active_service_policies"].(types.Object).IsNull() || data.ServicePolicyChoice.Attributes()["active_service_policies"].(types.Object).IsUnknown() || (data.ServicePolicyChoice.Attributes()["active_service_policies"].(types.Object).Attributes()["policies"].IsNull() || data.ServicePolicyChoice.Attributes()["active_service_policies"].(types.Object).Attributes()["policies"].IsUnknown())) && (data.ServicePolicyChoice.Attributes()["no_service_policies"].IsNull() || data.ServicePolicyChoice.Attributes()["no_service_policies"].IsUnknown()) && (data.ServicePolicyChoice.Attributes()["service_policies_from_namespace"].IsNull() || data.ServicePolicyChoice.Attributes()["service_policies_from_namespace"].IsUnknown())) {
 			data.ServicePolicyChoice = types.ObjectValueMust(UdpLoadbalancerServicePolicyChoiceModelAttributeMap, map[string]attr.Value{
@@ -7747,7 +7761,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Update(ctx context.Context, request resour
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> AdvertiseChoice
+	// resource modelToSpecRoot OneOfField --> AdvertiseChoice
 	if !data.AdvertiseChoice.IsNull() && !data.AdvertiseChoice.IsUnknown() {
 		advertiseChoiceModel := UdpLoadbalancerAdvertiseChoice{}
 		response.Diagnostics.Append(data.AdvertiseChoice.As(ctx, &advertiseChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7783,6 +7797,9 @@ func (r *ResourceF5XCUdpLoadbalancer) Update(ctx context.Context, request resour
 				for i, advertiseWhereElement := range advertiseWhereElements {
 					// Initialize the spec struct for the current element
 					advertiseCustomOneOfSpec.AdvertiseCustom.AdvertiseWhere[i] = &ves_io_schema_views.WhereType{}
+					advertiseCustomOneOfSpec.AdvertiseCustom.AdvertiseWhere[i].PortChoice = &ves_io_schema_views.WhereType_UseDefaultPort{
+						UseDefaultPort: &ves_io_schema.Empty{},
+					}
 
 					// Recursively process nested elements
 
@@ -8323,7 +8340,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Update(ctx context.Context, request resour
 
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> PortChoice
+					// resource modelToSpecNested OneOfField --> PortChoice
 					if !advertiseWhereElement.PortChoice.IsNull() && !advertiseWhereElement.PortChoice.IsUnknown() {
 						advertiseWherePortChoiceModel := UdpLoadbalancerPortChoice{}
 						response.Diagnostics.Append(advertiseWhereElement.PortChoice.As(ctx, &advertiseWherePortChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8409,6 +8426,10 @@ func (r *ResourceF5XCUdpLoadbalancer) Update(ctx context.Context, request resour
 			spec.AdvertiseChoice = doNotAdvertiseSpecBool
 		}
 
+	} else {
+		spec.AdvertiseChoice = &ves_io_schema_views_udp_loadbalancer.ReplaceSpecType_AdvertiseOnPublicDefaultVip{
+			AdvertiseOnPublicDefaultVip: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot Bool Field --> DnsVolterraManaged
@@ -8426,7 +8447,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Update(ctx context.Context, request resour
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> HashPolicyChoice
+	// resource modelToSpecRoot OneOfField --> HashPolicyChoice
 	if !data.HashPolicyChoice.IsNull() && !data.HashPolicyChoice.IsUnknown() {
 		hashPolicyChoiceModel := UdpLoadbalancerHashPolicyChoice{}
 		response.Diagnostics.Append(data.HashPolicyChoice.As(ctx, &hashPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8455,6 +8476,10 @@ func (r *ResourceF5XCUdpLoadbalancer) Update(ctx context.Context, request resour
 			spec.HashPolicyChoice = hashPolicyChoiceSourceIpStickinessSpecBool
 		}
 
+	} else {
+		spec.HashPolicyChoice = &ves_io_schema_views_udp_loadbalancer.ReplaceSpecType_HashPolicyChoiceRoundRobin{
+			HashPolicyChoiceRoundRobin: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot UintField --> IdleTimeout
@@ -8462,7 +8487,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Update(ctx context.Context, request resour
 		spec.IdleTimeout = uint32(data.IdleTimeout.ValueInt64())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> LoadbalancerType
+	// resource modelToSpecRoot OneOfField --> LoadbalancerType
 	if !data.LoadbalancerTypeChoice.IsNull() && !data.LoadbalancerTypeChoice.IsUnknown() {
 		loadbalancerTypeChoiceModel := UdpLoadbalancerLoadbalancerTypeChoice{}
 		response.Diagnostics.Append(data.LoadbalancerTypeChoice.As(ctx, &loadbalancerTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8477,6 +8502,10 @@ func (r *ResourceF5XCUdpLoadbalancer) Update(ctx context.Context, request resour
 			spec.LoadbalancerType = udpSpecBool
 		}
 
+	} else {
+		spec.LoadbalancerType = &ves_io_schema_views_udp_loadbalancer.ReplaceSpecType_Udp{
+			Udp: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -8587,7 +8616,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Update(ctx context.Context, request resour
 
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> ServicePolicyChoice
+	// resource modelToSpecRoot OneOfField --> ServicePolicyChoice
 	if !data.ServicePolicyChoice.IsNull() && !data.ServicePolicyChoice.IsUnknown() {
 		servicePolicyChoiceModel := UdpLoadbalancerSvcPolicyChoice{}
 		response.Diagnostics.Append(data.ServicePolicyChoice.As(ctx, &servicePolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8655,7 +8684,12 @@ func (r *ResourceF5XCUdpLoadbalancer) Update(ctx context.Context, request resour
 			spec.ServicePolicyChoice = servicePoliciesFromNamespaceSpecBool
 		}
 
+	} else {
+		spec.ServicePolicyChoice = &ves_io_schema_views_udp_loadbalancer.ReplaceSpecType_ServicePoliciesFromNamespace{
+			ServicePoliciesFromNamespace: &ves_io_schema.Empty{},
+		}
 	}
+
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
@@ -8667,12 +8701,8 @@ func (r *ResourceF5XCUdpLoadbalancer) Update(ctx context.Context, request resour
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_views_udp_loadbalancer.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_views_udp_loadbalancer.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "udp_loadbalancer", err),
@@ -8681,7 +8711,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Update(ctx context.Context, request resour
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_udp_loadbalancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_udp_loadbalancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "udp_loadbalancer", err),
@@ -8801,7 +8831,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Update(ctx context.Context, request resour
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> AdvertiseChoice
+	// resource SpecToModelRoot OneOfField --> AdvertiseChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -9808,8 +9838,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Update(ctx context.Context, request resour
 							udpLoadbalancerWhereTypeModel.Choice = types.ObjectNull(UdpLoadbalancerAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceModelAttributeMap)
 						}
 
-						// resource specToModelNested RequiredOneOfField --> PortChoice
-						// GlobalSpecType
+						// resource specToModelNested OneOfField --> PortChoice
 						if advertiseWhereElement.GetPortChoice() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
 							advertiseWhereportChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -10002,8 +10031,6 @@ func (r *ResourceF5XCUdpLoadbalancer) Update(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.AdvertiseChoice = types.ObjectNull(UdpLoadbalancerAdvertiseChoiceModelAttributeMap)
 	}
 
@@ -10081,7 +10108,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Update(ctx context.Context, request resour
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> HashPolicyChoice
+	// resource SpecToModelRoot OneOfField --> HashPolicyChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -10138,8 +10165,6 @@ func (r *ResourceF5XCUdpLoadbalancer) Update(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.HashPolicyChoice = types.ObjectNull(UdpLoadbalancerHashPolicyChoiceModelAttributeMap)
 	}
 
@@ -10412,7 +10437,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Update(ctx context.Context, request resour
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> LoadbalancerType
+	// resource SpecToModelRoot OneOfField --> LoadbalancerType
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -10451,8 +10476,6 @@ func (r *ResourceF5XCUdpLoadbalancer) Update(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.LoadbalancerTypeChoice = types.ObjectNull(UdpLoadbalancerLoadbalancerTypeModelAttributeMap)
 	}
 
@@ -10670,7 +10693,7 @@ func (r *ResourceF5XCUdpLoadbalancer) Update(ctx context.Context, request resour
 		data.PortChoice = types.ObjectNull(UdpLoadbalancerPortChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> ServicePolicyChoice
+	// resource SpecToModelRoot OneOfField --> ServicePolicyChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -10789,8 +10812,6 @@ func (r *ResourceF5XCUdpLoadbalancer) Update(ctx context.Context, request resour
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.ServicePolicyChoice = types.ObjectNull(UdpLoadbalancerServicePolicyChoiceModelAttributeMap)
 	}
 

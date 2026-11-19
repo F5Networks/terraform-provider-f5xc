@@ -96,6 +96,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<mitigated_domain>"
-	to = "f5xc_mitigated_domain.example"
+	to = f5xc_mitigated_domain.example
 }
 ```

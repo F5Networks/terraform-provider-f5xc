@@ -27,6 +27,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -223,7 +224,7 @@ var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingModelAttributeMap = map[
 	},
 }
 
-// Attribute map for RequiredOneOfField --> LearnFromNamespace
+// Attribute map for OneOfField --> LearnFromNamespace
 var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingLearnFromNamespaceModelAttributeMap = map[string]attr.Type{
 
 	"disable_learning": types.BoolType,
@@ -265,7 +266,7 @@ var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEn
 	},
 }
 
-// Attribute map for RequiredOneOfField --> BotDefenseActivityChoice
+// Attribute map for OneOfField --> BotDefenseActivityChoice
 var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionBotDefenseActivityChoiceModelAttributeMap = map[string]attr.Type{
 
 	"exclude_bot_defense_activity": types.BoolType,
@@ -308,21 +309,21 @@ var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEn
 	"forbidden_requests_threshold": types.Int64Type,
 }
 
-// Attribute map for RequiredOneOfField --> IpReputationChoice
+// Attribute map for OneOfField --> IpReputationChoice
 var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionIpReputationChoiceModelAttributeMap = map[string]attr.Type{
 
 	"exclude_ip_reputation": types.BoolType,
 	"include_ip_reputation": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> RateLimitChoice
+// Attribute map for OneOfField --> RateLimitChoice
 var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionRateLimitChoiceModelAttributeMap = map[string]attr.Type{
 
 	"exclude_rate_limit": types.BoolType,
 	"include_rate_limit": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> WafActivityChoice
+// Attribute map for OneOfField --> WafActivityChoice
 var AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionWafActivityChoiceModelAttributeMap = map[string]attr.Type{
 
 	"exclude_waf_activity": types.BoolType,
@@ -468,7 +469,7 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 							Attributes: map[string]schema.Attribute{
 								"learn_from_namespace_choice": schema.SingleNestedAttribute{
 									Description:         "Include or Exclude data generated from this namespace in learning By default, API Endpoints are discovered by inspecting logs generated from all namespaces where virtual_hosts and vK8s services that are labelled with a valid apptype. This configuration can be used to disable API Discovery in the namespace in which this app_setting object is created. On disabling this, the AI engine will skip discovering API Endpoints from this namespace.",
-									MarkdownDescription: "Include or Exclude data generated from this namespace in learning By default, API Endpoints are discovered by inspecting logs generated from all namespaces where virtual_hosts and vK8s services that are labelled with a valid apptype. This configuration can be used to disable API Discovery in the namespace in which this app_setting object is created. On disabling this, the AI engine will skip discovering API Endpoints from this namespace.",
+									MarkdownDescription: "Include or Exclude data generated from this namespace in learning By default, API Endpoints are discovered by inspecting logs generated from all namespaces where virtual_hosts and vK8s services that are labelled with a valid apptype. This configuration can be used to disable API Discovery in the namespace in which this app_setting object is created. On disabling this, the AI engine will skip discovering API Endpoints from this namespace.<br>Exactly one of `disable` or `enable` must be specified when `learn_from_namespace_choice` is configured.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -481,7 +482,7 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 									Attributes: map[string]schema.Attribute{
 										"disable": schema.BoolAttribute{
 											Description:         "Disable learning from this namespace API Endpoints are not discovered in this namespace",
-											MarkdownDescription: "Disable learning from this namespace API Endpoints are not discovered in this namespace",
+											MarkdownDescription: "Disable learning from this namespace API Endpoints are not discovered in this namespace<br>Conflicts with `enable`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -491,7 +492,7 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 										},
 										"enable": schema.BoolAttribute{
 											Description:         "Enable learning from this namespace API Endpoints are discovered in this namespace",
-											MarkdownDescription: "Enable learning from this namespace API Endpoints are discovered in this namespace",
+											MarkdownDescription: "Enable learning from this namespace API Endpoints are discovered in this namespace<br>Conflicts with `disable`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -512,20 +513,23 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 							Attributes: map[string]schema.Attribute{
 								"learn_from_namespace_choice": schema.SingleNestedAttribute{
 									Description:         "Include or Exclude data generated from this namespace in learning By default, the AI engine learns user behavior from traffic generated from all namespaces where virtual_hosts and vK8s services that are labelled with a valid apptype. This configuration can be used to disable learning from traffic generated by the namespace in which this app_setting object is created. On disabling this, the AI engine will skip learning user behavior patterns from this namespace.",
-									MarkdownDescription: "Include or Exclude data generated from this namespace in learning By default, the AI engine learns user behavior from traffic generated from all namespaces where virtual_hosts and vK8s services that are labelled with a valid apptype. This configuration can be used to disable learning from traffic generated by the namespace in which this app_setting object is created. On disabling this, the AI engine will skip learning user behavior patterns from this namespace.",
-									Required:            true,
-									Optional:            false,
-									Computed:            false,
+									MarkdownDescription: "Include or Exclude data generated from this namespace in learning By default, the AI engine learns user behavior from traffic generated from all namespaces where virtual_hosts and vK8s services that are labelled with a valid apptype. This configuration can be used to disable learning from traffic generated by the namespace in which this app_setting object is created. On disabling this, the AI engine will skip learning user behavior patterns from this namespace.<br>Exactly one of `disable_learning` or `enable_learning` must be specified when `learn_from_namespace_choice` is configured.",
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
 									Validators: []validator.Object{
-										exactlyoneofvalidator.RequiredExactlyOneOf(
+										exactlyoneofvalidator.ExactlyOneOf(
 											"disable_learning",
 											"enable_learning",
 										),
 									},
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.UseNonNullStateForUnknown(),
+									},
 									Attributes: map[string]schema.Attribute{
 										"disable_learning": schema.BoolAttribute{
 											Description:         "Disable learning from this namespace Disable learning user behavior patterns from this namespace",
-											MarkdownDescription: "Disable learning from this namespace Disable learning user behavior patterns from this namespace",
+											MarkdownDescription: "Disable learning from this namespace Disable learning user behavior patterns from this namespace<br>Conflicts with `enable_learning`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -535,7 +539,7 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 										},
 										"enable_learning": schema.BoolAttribute{
 											Description:         "Enable learning from this namespace Enable learning user behavior patterns from this namespace",
-											MarkdownDescription: "Enable learning from this namespace Enable learning user behavior patterns from this namespace",
+											MarkdownDescription: "Enable learning from this namespace Enable learning user behavior patterns from this namespace<br>Conflicts with `disable_learning`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -547,7 +551,7 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 								},
 								"malicious_user_detection_choice": schema.SingleNestedAttribute{
 									Description:         "Malicious User Detection Settings to configure malicious user detection",
-									MarkdownDescription: "Malicious User Detection Settings to configure malicious user detection",
+									MarkdownDescription: "Malicious User Detection Settings to configure malicious user detection<br>Exactly one of `disable_detection` or `enable_detection` must be specified.",
 									Required:            true,
 									Optional:            false,
 									Computed:            false,
@@ -560,7 +564,7 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 									Attributes: map[string]schema.Attribute{
 										"disable_detection": schema.BoolAttribute{
 											Description:         "Disable malicious user detection Disable malicious user detection",
-											MarkdownDescription: "Disable malicious user detection Disable malicious user detection",
+											MarkdownDescription: "Disable malicious user detection Disable malicious user detection<br>Conflicts with `enable_detection`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -570,27 +574,30 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 										},
 										"enable_detection": schema.SingleNestedAttribute{
 											Description:         "Enable AI based malicious user detection Enable AI based malicious user detection",
-											MarkdownDescription: "Enable AI based malicious user detection Enable AI based malicious user detection",
+											MarkdownDescription: "Enable AI based malicious user detection Enable AI based malicious user detection<br>Conflicts with `disable_detection`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
 											Attributes: map[string]schema.Attribute{
 												"bot_defense_activity_choice": schema.SingleNestedAttribute{
 													Description:         "Bot Defense activity choice Consider Bot Defense activity for Malicious User Detection",
-													MarkdownDescription: "Bot Defense activity choice Consider Bot Defense activity for Malicious User Detection",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
+													MarkdownDescription: "Bot Defense activity choice Consider Bot Defense activity for Malicious User Detection<br>Exactly one of `exclude_bot_defense_activity` or `include_bot_defense_activity` must be specified when `bot_defense_activity_choice` is configured.",
+													Required:            false,
+													Optional:            true,
+													Computed:            true,
 													Validators: []validator.Object{
-														exactlyoneofvalidator.RequiredExactlyOneOf(
+														exactlyoneofvalidator.ExactlyOneOf(
 															"exclude_bot_defense_activity",
 															"include_bot_defense_activity",
 														),
 													},
+													PlanModifiers: []planmodifier.Object{
+														objectplanmodifier.UseNonNullStateForUnknown(),
+													},
 													Attributes: map[string]schema.Attribute{
 														"exclude_bot_defense_activity": schema.BoolAttribute{
 															Description:         "exclude Bot Defense activity Exclude Bot Defense activity in malicious user detection",
-															MarkdownDescription: "exclude Bot Defense activity Exclude Bot Defense activity in malicious user detection",
+															MarkdownDescription: "exclude Bot Defense activity Exclude Bot Defense activity in malicious user detection<br>Conflicts with `include_bot_defense_activity`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -600,7 +607,7 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 														},
 														"include_bot_defense_activity": schema.BoolAttribute{
 															Description:         "include Bot Defense activity Include Bot Defense activity in malicious user detection",
-															MarkdownDescription: "include Bot Defense activity Include Bot Defense activity in malicious user detection",
+															MarkdownDescription: "include Bot Defense activity Include Bot Defense activity in malicious user detection<br>Conflicts with `exclude_bot_defense_activity`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -612,7 +619,7 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 												},
 												"cooling_off_period_setting_choice": schema.SingleNestedAttribute{
 													Description:         "Cooling off period settings Malicious user detection assigns a threat level to each user based on their activity. Once a threat level is assigned, the system continues tracking activity from this user and if no further malicious activity is seen, it gradually reduces the threat assessment to lower levels. This field specifies the time period, in minutes, used by the system to decay a user's threat level from a high to medium or medium to low or low to none.",
-													MarkdownDescription: "Cooling off period settings Malicious user detection assigns a threat level to each user based on their activity. Once a threat level is assigned, the system continues tracking activity from this user and if no further malicious activity is seen, it gradually reduces the threat assessment to lower levels. This field specifies the time period, in minutes, used by the system to decay a user's threat level from a high to medium or medium to low or low to none.",
+													MarkdownDescription: "Cooling off period settings Malicious user detection assigns a threat level to each user based on their activity. Once a threat level is assigned, the system continues tracking activity from this user and if no further malicious activity is seen, it gradually reduces the threat assessment to lower levels. This field specifies the time period, in minutes, used by the system to decay a user's threat level from a high to medium or medium to low or low to none.<br>`cooling_off_period` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -639,7 +646,7 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 												},
 												"failed_login_activity_choice": schema.SingleNestedAttribute{
 													Description:         "failed login activity choice Consider failed login activity for Malicious User Detection",
-													MarkdownDescription: "failed login activity choice Consider failed login activity for Malicious User Detection",
+													MarkdownDescription: "failed login activity choice Consider failed login activity for Malicious User Detection<br>Exactly one of `exclude_failed_login_activity` or `include_failed_login_activity` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -652,7 +659,7 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 													Attributes: map[string]schema.Attribute{
 														"exclude_failed_login_activity": schema.BoolAttribute{
 															Description:         "exclude failed login activity Exclude persistent login failures activity (401 response code) in malicious user detection",
-															MarkdownDescription: "exclude failed login activity Exclude persistent login failures activity (401 response code) in malicious user detection",
+															MarkdownDescription: "exclude failed login activity Exclude persistent login failures activity (401 response code) in malicious user detection<br>Conflicts with `include_failed_login_activity`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -662,7 +669,7 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 														},
 														"include_failed_login_activity": schema.SingleNestedAttribute{
 															Description:         "include failed login activity Include persistent login failures activity (401 response code) in malicious user detection",
-															MarkdownDescription: "include failed login activity Include persistent login failures activity (401 response code) in malicious user detection",
+															MarkdownDescription: "include failed login activity Include persistent login failures activity (401 response code) in malicious user detection<br>Conflicts with `exclude_failed_login_activity`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -684,7 +691,7 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 												},
 												"forbidden_activity_choice": schema.SingleNestedAttribute{
 													Description:         "forbidden activity choice Requests denied (i.e. 403 response code) by service policies and API protection rules are categorized as forbidden activity",
-													MarkdownDescription: "forbidden activity choice Requests denied (i.e. 403 response code) by service policies and API protection rules are categorized as forbidden activity",
+													MarkdownDescription: "forbidden activity choice Requests denied (i.e. 403 response code) by service policies and API protection rules are categorized as forbidden activity<br>Exactly one of `exclude_forbidden_activity` or `include_forbidden_activity` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -697,7 +704,7 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 													Attributes: map[string]schema.Attribute{
 														"exclude_forbidden_activity": schema.BoolAttribute{
 															Description:         "exclude disallowed activity Exclude forbidden activity by policy in malicious user detection",
-															MarkdownDescription: "exclude disallowed activity Exclude forbidden activity by policy in malicious user detection",
+															MarkdownDescription: "exclude disallowed activity Exclude forbidden activity by policy in malicious user detection<br>Conflicts with `include_forbidden_activity`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -707,7 +714,7 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 														},
 														"include_forbidden_activity": schema.SingleNestedAttribute{
 															Description:         "include forbidden activity Include forbidden activity by policy in malicious user detection",
-															MarkdownDescription: "include forbidden activity Include forbidden activity by policy in malicious user detection",
+															MarkdownDescription: "include forbidden activity Include forbidden activity by policy in malicious user detection<br>Conflicts with `exclude_forbidden_activity`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -729,20 +736,23 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 												},
 												"ip_reputation_choice": schema.SingleNestedAttribute{
 													Description:         "ip reputation choice Consider IP Reputation for Malicious User Detection",
-													MarkdownDescription: "ip reputation choice Consider IP Reputation for Malicious User Detection",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
+													MarkdownDescription: "ip reputation choice Consider IP Reputation for Malicious User Detection<br>Exactly one of `exclude_ip_reputation` or `include_ip_reputation` must be specified when `ip_reputation_choice` is configured.",
+													Required:            false,
+													Optional:            true,
+													Computed:            true,
 													Validators: []validator.Object{
-														exactlyoneofvalidator.RequiredExactlyOneOf(
+														exactlyoneofvalidator.ExactlyOneOf(
 															"exclude_ip_reputation",
 															"include_ip_reputation",
 														),
 													},
+													PlanModifiers: []planmodifier.Object{
+														objectplanmodifier.UseNonNullStateForUnknown(),
+													},
 													Attributes: map[string]schema.Attribute{
 														"exclude_ip_reputation": schema.BoolAttribute{
 															Description:         "exclude disallowed activity Exclude IP Reputation in malicious user detection",
-															MarkdownDescription: "exclude disallowed activity Exclude IP Reputation in malicious user detection",
+															MarkdownDescription: "exclude disallowed activity Exclude IP Reputation in malicious user detection<br>Conflicts with `include_ip_reputation`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -752,7 +762,7 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 														},
 														"include_ip_reputation": schema.BoolAttribute{
 															Description:         "include IP Reputation Include IP Reputation in malicious user detection",
-															MarkdownDescription: "include IP Reputation Include IP Reputation in malicious user detection",
+															MarkdownDescription: "include IP Reputation Include IP Reputation in malicious user detection<br>Conflicts with `exclude_ip_reputation`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -764,20 +774,23 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 												},
 												"rate_limit_choice": schema.SingleNestedAttribute{
 													Description:         "Rate Limiting choice Consider Rate Limiting activity for Malicious User Detection",
-													MarkdownDescription: "Rate Limiting choice Consider Rate Limiting activity for Malicious User Detection",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
+													MarkdownDescription: "Rate Limiting choice Consider Rate Limiting activity for Malicious User Detection<br>Exactly one of `exclude_rate_limit` or `include_rate_limit` must be specified when `rate_limit_choice` is configured.",
+													Required:            false,
+													Optional:            true,
+													Computed:            true,
 													Validators: []validator.Object{
-														exactlyoneofvalidator.RequiredExactlyOneOf(
+														exactlyoneofvalidator.ExactlyOneOf(
 															"exclude_rate_limit",
 															"include_rate_limit",
 														),
 													},
+													PlanModifiers: []planmodifier.Object{
+														objectplanmodifier.UseNonNullStateForUnknown(),
+													},
 													Attributes: map[string]schema.Attribute{
 														"exclude_rate_limit": schema.BoolAttribute{
 															Description:         "exclude Rate Limiting Exclude Rate Limiting in malicious user detection",
-															MarkdownDescription: "exclude Rate Limiting Exclude Rate Limiting in malicious user detection",
+															MarkdownDescription: "exclude Rate Limiting Exclude Rate Limiting in malicious user detection<br>Conflicts with `include_rate_limit`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -787,7 +800,7 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 														},
 														"include_rate_limit": schema.BoolAttribute{
 															Description:         "include Rate Limiting Include Rate Limiting in malicious user detection",
-															MarkdownDescription: "include Rate Limiting Include Rate Limiting in malicious user detection",
+															MarkdownDescription: "include Rate Limiting Include Rate Limiting in malicious user detection<br>Conflicts with `exclude_rate_limit`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -799,20 +812,23 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 												},
 												"waf_activity_choice": schema.SingleNestedAttribute{
 													Description:         "WAF activity choice Consider WAF activity for Malicious User Detection",
-													MarkdownDescription: "WAF activity choice Consider WAF activity for Malicious User Detection",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
+													MarkdownDescription: "WAF activity choice Consider WAF activity for Malicious User Detection<br>Exactly one of `exclude_waf_activity` or `include_waf_activity` must be specified when `waf_activity_choice` is configured.",
+													Required:            false,
+													Optional:            true,
+													Computed:            true,
 													Validators: []validator.Object{
-														exactlyoneofvalidator.RequiredExactlyOneOf(
+														exactlyoneofvalidator.ExactlyOneOf(
 															"exclude_waf_activity",
 															"include_waf_activity",
 														),
 													},
+													PlanModifiers: []planmodifier.Object{
+														objectplanmodifier.UseNonNullStateForUnknown(),
+													},
 													Attributes: map[string]schema.Attribute{
 														"exclude_waf_activity": schema.BoolAttribute{
 															Description:         "exclude WAF activity Exclude WAF activity in malicious user detection",
-															MarkdownDescription: "exclude WAF activity Exclude WAF activity in malicious user detection",
+															MarkdownDescription: "exclude WAF activity Exclude WAF activity in malicious user detection<br>Conflicts with `include_waf_activity`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -822,7 +838,7 @@ func (r *ResourceF5XCAppSetting) Schema(ctx context.Context, request resource.Sc
 														},
 														"include_waf_activity": schema.BoolAttribute{
 															Description:         "include WAF activity Include WAF activity in malicious user detection",
-															MarkdownDescription: "include WAF activity Include WAF activity in malicious user detection",
+															MarkdownDescription: "include WAF activity Include WAF activity in malicious user detection<br>Conflicts with `exclude_waf_activity`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1086,9 +1102,12 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 				}
 
 				userBehaviorAnalysisSettingSpec := &ves_io_schema_app_setting.UserBehaviorAnalysisSetting{}
+				userBehaviorAnalysisSettingSpec.LearnFromNamespace = &ves_io_schema_app_setting.UserBehaviorAnalysisSetting_EnableLearning{
+					EnableLearning: &ves_io_schema.Empty{},
+				}
 				appTypeSettingsSpec[i].UserBehaviorAnalysisSetting = userBehaviorAnalysisSettingSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> LearnFromNamespace
+				// resource modelToSpecNested OneOfField --> LearnFromNamespace
 				if !userBehaviorAnalysisSettingModel.LearnFromNamespaceChoice.IsNull() && !userBehaviorAnalysisSettingModel.LearnFromNamespaceChoice.IsUnknown() {
 					userBehaviorAnalysisSettingLearnFromNamespaceChoiceModel := AppSettingUserBehaviorAnalysisSettingLearnFromNsChoice{}
 					response.Diagnostics.Append(userBehaviorAnalysisSettingModel.LearnFromNamespaceChoice.As(ctx, &userBehaviorAnalysisSettingLearnFromNamespaceChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1142,9 +1161,21 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 						enableDetectionOneOfSpec.EnableDetection.NonExistentUrlActivityChoice = &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeNonExistentUrlActivityAutomatic{
 							IncludeNonExistentUrlActivityAutomatic: &ves_io_schema_app_setting.NonexistentUrlAutomaticActivitySetting{},
 						}
+						enableDetectionOneOfSpec.EnableDetection.BotDefenseActivityChoice = &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeBotDefenseActivity{
+							IncludeBotDefenseActivity: &ves_io_schema.Empty{},
+						}
+						enableDetectionOneOfSpec.EnableDetection.IpReputationChoice = &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeIpReputation{
+							IncludeIpReputation: &ves_io_schema.Empty{},
+						}
+						enableDetectionOneOfSpec.EnableDetection.RateLimitChoice = &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeRateLimit{
+							IncludeRateLimit: &ves_io_schema.Empty{},
+						}
+						enableDetectionOneOfSpec.EnableDetection.WafActivityChoice = &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeWafActivity{
+							IncludeWafActivity: &ves_io_schema.Empty{},
+						}
 						userBehaviorAnalysisSettingSpec.MaliciousUserDetection = enableDetectionOneOfSpec
 
-						// resource modelToSpecNested RequiredOneOfField --> BotDefenseActivityChoice
+						// resource modelToSpecNested OneOfField --> BotDefenseActivityChoice
 						if !appSettingEnableDetectionModel.BotDefenseActivityChoice.IsNull() && !appSettingEnableDetectionModel.BotDefenseActivityChoice.IsUnknown() {
 							enableDetectionBotDefenseActivityChoiceModel := AppSettingBotDefenseActivityChoice{}
 							response.Diagnostics.Append(appSettingEnableDetectionModel.BotDefenseActivityChoice.As(ctx, &enableDetectionBotDefenseActivityChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1251,7 +1282,7 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 
 						}
 
-						// resource modelToSpecNested RequiredOneOfField --> IpReputationChoice
+						// resource modelToSpecNested OneOfField --> IpReputationChoice
 						if !appSettingEnableDetectionModel.IpReputationChoice.IsNull() && !appSettingEnableDetectionModel.IpReputationChoice.IsUnknown() {
 							enableDetectionIpReputationChoiceModel := AppSettingIpReputationChoice{}
 							response.Diagnostics.Append(appSettingEnableDetectionModel.IpReputationChoice.As(ctx, &enableDetectionIpReputationChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1275,7 +1306,7 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 
 						}
 
-						// resource modelToSpecNested RequiredOneOfField --> RateLimitChoice
+						// resource modelToSpecNested OneOfField --> RateLimitChoice
 						if !appSettingEnableDetectionModel.RateLimitChoice.IsNull() && !appSettingEnableDetectionModel.RateLimitChoice.IsUnknown() {
 							enableDetectionRateLimitChoiceModel := AppSettingRateLimitChoice{}
 							response.Diagnostics.Append(appSettingEnableDetectionModel.RateLimitChoice.As(ctx, &enableDetectionRateLimitChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1299,7 +1330,7 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 
 						}
 
-						// resource modelToSpecNested RequiredOneOfField --> WafActivityChoice
+						// resource modelToSpecNested OneOfField --> WafActivityChoice
 						if !appSettingEnableDetectionModel.WafActivityChoice.IsNull() && !appSettingEnableDetectionModel.WafActivityChoice.IsUnknown() {
 							enableDetectionWafActivityChoiceModel := AppSettingWafActivityChoice{}
 							response.Diagnostics.Append(appSettingEnableDetectionModel.WafActivityChoice.As(ctx, &enableDetectionWafActivityChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1615,8 +1646,7 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 
 				// Recursively populate the nested struct
 
-				// resource specToModelNested RequiredOneOfField --> LearnFromNamespace
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> LearnFromNamespace
 				if userBehaviorAnalysisSettingElement.GetLearnFromNamespace() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -1693,8 +1723,7 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 						if isEnableDetection && enableDetectionOptionsWrapper != nil && enableDetectionOptionsWrapper.EnableDetection != nil {
 							enableDetectionElement := enableDetectionOptionsWrapper.EnableDetection
 
-							// resource specToModelNested RequiredOneOfField --> BotDefenseActivityChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> BotDefenseActivityChoice
 							if enableDetectionElement.GetBotDefenseActivityChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								enableDetectionbotDefenseActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -1907,8 +1936,7 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 								enableDetectionAttributeMap["forbidden_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceModelAttributeMap)
 							}
 
-							// resource specToModelNested RequiredOneOfField --> IpReputationChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> IpReputationChoice
 							if enableDetectionElement.GetIpReputationChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								enableDetectionipReputationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -1955,8 +1983,7 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 								enableDetectionAttributeMap["ip_reputation_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionIpReputationChoiceModelAttributeMap)
 							}
 
-							// resource specToModelNested RequiredOneOfField --> RateLimitChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> RateLimitChoice
 							if enableDetectionElement.GetRateLimitChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								enableDetectionrateLimitChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -2003,8 +2030,7 @@ func (r *ResourceF5XCAppSetting) Create(ctx context.Context, request resource.Cr
 								enableDetectionAttributeMap["rate_limit_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionRateLimitChoiceModelAttributeMap)
 							}
 
-							// resource specToModelNested RequiredOneOfField --> WafActivityChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> WafActivityChoice
 							if enableDetectionElement.GetWafActivityChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								enableDetectionwafActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -2159,11 +2185,7 @@ func (r *ResourceF5XCAppSetting) Read(ctx context.Context, request resource.Read
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_app_setting.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_app_setting.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "app_setting", err),
@@ -2421,8 +2443,7 @@ func (r *ResourceF5XCAppSetting) Read(ctx context.Context, request resource.Read
 
 				// Recursively populate the nested struct
 
-				// resource specToModelNested RequiredOneOfField --> LearnFromNamespace
-				// <no value>
+				// resource specToModelNested OneOfField --> LearnFromNamespace
 				if userBehaviorAnalysisSettingElement.GetLearnFromNamespace() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -2502,8 +2523,7 @@ func (r *ResourceF5XCAppSetting) Read(ctx context.Context, request resource.Read
 						if isEnableDetection && enableDetectionOptionsWrapper != nil && enableDetectionOptionsWrapper.EnableDetection != nil {
 							enableDetectionElement := enableDetectionOptionsWrapper.EnableDetection
 
-							// resource specToModelNested RequiredOneOfField --> BotDefenseActivityChoice
-							// <no value>
+							// resource specToModelNested OneOfField --> BotDefenseActivityChoice
 							if enableDetectionElement.GetBotDefenseActivityChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								enableDetectionbotDefenseActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -2731,8 +2751,7 @@ func (r *ResourceF5XCAppSetting) Read(ctx context.Context, request resource.Read
 								})
 							}
 
-							// resource specToModelNested RequiredOneOfField --> IpReputationChoice
-							// <no value>
+							// resource specToModelNested OneOfField --> IpReputationChoice
 							if enableDetectionElement.GetIpReputationChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								enableDetectionipReputationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -2782,8 +2801,7 @@ func (r *ResourceF5XCAppSetting) Read(ctx context.Context, request resource.Read
 								})
 							}
 
-							// resource specToModelNested RequiredOneOfField --> RateLimitChoice
-							// <no value>
+							// resource specToModelNested OneOfField --> RateLimitChoice
 							if enableDetectionElement.GetRateLimitChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								enableDetectionrateLimitChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -2833,8 +2851,7 @@ func (r *ResourceF5XCAppSetting) Read(ctx context.Context, request resource.Read
 								})
 							}
 
-							// resource specToModelNested RequiredOneOfField --> WafActivityChoice
-							// <no value>
+							// resource specToModelNested OneOfField --> WafActivityChoice
 							if enableDetectionElement.GetWafActivityChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								enableDetectionwafActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3156,9 +3173,12 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 				}
 
 				userBehaviorAnalysisSettingSpec := &ves_io_schema_app_setting.UserBehaviorAnalysisSetting{}
+				userBehaviorAnalysisSettingSpec.LearnFromNamespace = &ves_io_schema_app_setting.UserBehaviorAnalysisSetting_EnableLearning{
+					EnableLearning: &ves_io_schema.Empty{},
+				}
 				appTypeSettingsSpec[i].UserBehaviorAnalysisSetting = userBehaviorAnalysisSettingSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> LearnFromNamespace
+				// resource modelToSpecNested OneOfField --> LearnFromNamespace
 				if !userBehaviorAnalysisSettingModel.LearnFromNamespaceChoice.IsNull() && !userBehaviorAnalysisSettingModel.LearnFromNamespaceChoice.IsUnknown() {
 					userBehaviorAnalysisSettingLearnFromNamespaceChoiceModel := AppSettingUserBehaviorAnalysisSettingLearnFromNsChoice{}
 					response.Diagnostics.Append(userBehaviorAnalysisSettingModel.LearnFromNamespaceChoice.As(ctx, &userBehaviorAnalysisSettingLearnFromNamespaceChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3212,9 +3232,21 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 						enableDetectionOneOfSpec.EnableDetection.NonExistentUrlActivityChoice = &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeNonExistentUrlActivityAutomatic{
 							IncludeNonExistentUrlActivityAutomatic: &ves_io_schema_app_setting.NonexistentUrlAutomaticActivitySetting{},
 						}
+						enableDetectionOneOfSpec.EnableDetection.BotDefenseActivityChoice = &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeBotDefenseActivity{
+							IncludeBotDefenseActivity: &ves_io_schema.Empty{},
+						}
+						enableDetectionOneOfSpec.EnableDetection.IpReputationChoice = &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeIpReputation{
+							IncludeIpReputation: &ves_io_schema.Empty{},
+						}
+						enableDetectionOneOfSpec.EnableDetection.RateLimitChoice = &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeRateLimit{
+							IncludeRateLimit: &ves_io_schema.Empty{},
+						}
+						enableDetectionOneOfSpec.EnableDetection.WafActivityChoice = &ves_io_schema_app_setting.MaliciousUserDetectionSetting_IncludeWafActivity{
+							IncludeWafActivity: &ves_io_schema.Empty{},
+						}
 						userBehaviorAnalysisSettingSpec.MaliciousUserDetection = enableDetectionOneOfSpec
 
-						// resource modelToSpecNested RequiredOneOfField --> BotDefenseActivityChoice
+						// resource modelToSpecNested OneOfField --> BotDefenseActivityChoice
 						if !appSettingEnableDetectionModel.BotDefenseActivityChoice.IsNull() && !appSettingEnableDetectionModel.BotDefenseActivityChoice.IsUnknown() {
 							enableDetectionBotDefenseActivityChoiceModel := AppSettingBotDefenseActivityChoice{}
 							response.Diagnostics.Append(appSettingEnableDetectionModel.BotDefenseActivityChoice.As(ctx, &enableDetectionBotDefenseActivityChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3321,7 +3353,7 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 
 						}
 
-						// resource modelToSpecNested RequiredOneOfField --> IpReputationChoice
+						// resource modelToSpecNested OneOfField --> IpReputationChoice
 						if !appSettingEnableDetectionModel.IpReputationChoice.IsNull() && !appSettingEnableDetectionModel.IpReputationChoice.IsUnknown() {
 							enableDetectionIpReputationChoiceModel := AppSettingIpReputationChoice{}
 							response.Diagnostics.Append(appSettingEnableDetectionModel.IpReputationChoice.As(ctx, &enableDetectionIpReputationChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3345,7 +3377,7 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 
 						}
 
-						// resource modelToSpecNested RequiredOneOfField --> RateLimitChoice
+						// resource modelToSpecNested OneOfField --> RateLimitChoice
 						if !appSettingEnableDetectionModel.RateLimitChoice.IsNull() && !appSettingEnableDetectionModel.RateLimitChoice.IsUnknown() {
 							enableDetectionRateLimitChoiceModel := AppSettingRateLimitChoice{}
 							response.Diagnostics.Append(appSettingEnableDetectionModel.RateLimitChoice.As(ctx, &enableDetectionRateLimitChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3369,7 +3401,7 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 
 						}
 
-						// resource modelToSpecNested RequiredOneOfField --> WafActivityChoice
+						// resource modelToSpecNested OneOfField --> WafActivityChoice
 						if !appSettingEnableDetectionModel.WafActivityChoice.IsNull() && !appSettingEnableDetectionModel.WafActivityChoice.IsUnknown() {
 							enableDetectionWafActivityChoiceModel := AppSettingWafActivityChoice{}
 							response.Diagnostics.Append(appSettingEnableDetectionModel.WafActivityChoice.As(ctx, &enableDetectionWafActivityChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3415,12 +3447,8 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_app_setting.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_app_setting.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "app_setting", err),
@@ -3429,7 +3457,7 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_app_setting.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_app_setting.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "app_setting", err),
@@ -3686,8 +3714,7 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 
 				// Recursively populate the nested struct
 
-				// resource specToModelNested RequiredOneOfField --> LearnFromNamespace
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> LearnFromNamespace
 				if userBehaviorAnalysisSettingElement.GetLearnFromNamespace() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					userBehaviorAnalysisSettinglearnFromNamespaceChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3764,8 +3791,7 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 						if isEnableDetection && enableDetectionOptionsWrapper != nil && enableDetectionOptionsWrapper.EnableDetection != nil {
 							enableDetectionElement := enableDetectionOptionsWrapper.EnableDetection
 
-							// resource specToModelNested RequiredOneOfField --> BotDefenseActivityChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> BotDefenseActivityChoice
 							if enableDetectionElement.GetBotDefenseActivityChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								enableDetectionbotDefenseActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3978,8 +4004,7 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 								enableDetectionAttributeMap["forbidden_activity_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionForbiddenActivityChoiceModelAttributeMap)
 							}
 
-							// resource specToModelNested RequiredOneOfField --> IpReputationChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> IpReputationChoice
 							if enableDetectionElement.GetIpReputationChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								enableDetectionipReputationChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -4026,8 +4051,7 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 								enableDetectionAttributeMap["ip_reputation_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionIpReputationChoiceModelAttributeMap)
 							}
 
-							// resource specToModelNested RequiredOneOfField --> RateLimitChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> RateLimitChoice
 							if enableDetectionElement.GetRateLimitChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								enableDetectionrateLimitChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -4074,8 +4098,7 @@ func (r *ResourceF5XCAppSetting) Update(ctx context.Context, request resource.Up
 								enableDetectionAttributeMap["rate_limit_choice"] = types.ObjectNull(AppSettingAppTypeSettingsUserBehaviorAnalysisSettingMaliciousUserDetectionEnableDetectionRateLimitChoiceModelAttributeMap)
 							}
 
-							// resource specToModelNested RequiredOneOfField --> WafActivityChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> WafActivityChoice
 							if enableDetectionElement.GetWafActivityChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								enableDetectionwafActivityChoiceChoicesAttributeMap := make(map[string]attr.Value)

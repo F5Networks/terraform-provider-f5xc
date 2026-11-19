@@ -27,6 +27,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -84,7 +85,7 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for RequiredOneOfField --> DomainChoice
+// Attribute map for OneOfField --> DomainChoice
 var DnsDomainDomainChoiceModelAttributeMap = map[string]attr.Type{
 
 	"volterra_managed": types.BoolType,
@@ -192,14 +193,17 @@ func (r *ResourceF5XCDnsDomain) Schema(ctx context.Context, request resource.Sch
 			},
 			"domain_choice": schema.SingleNestedAttribute{
 				Description:         "Choice to Handle Domain Select method to handle this domain",
-				MarkdownDescription: "Choice to Handle Domain Select method to handle this domain",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Choice to Handle Domain Select method to handle this domain<br>`volterra_managed` must be specified when `domain_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"volterra_managed",
 					),
+				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
 				},
 				Attributes: map[string]schema.Attribute{
 					"volterra_managed": schema.BoolAttribute{
@@ -402,7 +406,7 @@ func (r *ResourceF5XCDnsDomain) Create(ctx context.Context, request resource.Cre
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> DomainChoice
+	// resource modelToSpecRoot OneOfField --> DomainChoice
 	if !data.DomainChoice.IsNull() && !data.DomainChoice.IsUnknown() {
 		domainChoiceModel := DnsDomainDomainChoice{}
 		response.Diagnostics.Append(data.DomainChoice.As(ctx, &domainChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -417,6 +421,10 @@ func (r *ResourceF5XCDnsDomain) Create(ctx context.Context, request resource.Cre
 			spec.DomainChoice = volterraManagedSpecBool
 		}
 
+	} else {
+		spec.DomainChoice = &ves_io_schema_dns_domain.CreateSpecType_VolterraManaged{
+			VolterraManaged: &ves_io_schema.Empty{},
+		}
 	}
 
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
@@ -580,7 +588,7 @@ func (r *ResourceF5XCDnsDomain) Create(ctx context.Context, request resource.Cre
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> DomainChoice
+	// resource SpecToModelRoot OneOfField --> DomainChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -619,8 +627,6 @@ func (r *ResourceF5XCDnsDomain) Create(ctx context.Context, request resource.Cre
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.DomainChoice = types.ObjectNull(DnsDomainDomainChoiceModelAttributeMap)
 	}
 
@@ -675,11 +681,7 @@ func (r *ResourceF5XCDnsDomain) Read(ctx context.Context, request resource.ReadR
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_domain.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_domain.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "dns_domain", err),
@@ -817,7 +819,7 @@ func (r *ResourceF5XCDnsDomain) Read(ctx context.Context, request resource.ReadR
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> DomainChoice
+	// resource SpecToModelRoot OneOfField --> DomainChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -856,8 +858,6 @@ func (r *ResourceF5XCDnsDomain) Read(ctx context.Context, request resource.ReadR
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.DomainChoice.IsNull() || data.DomainChoice.IsUnknown() || (data.DomainChoice.Attributes()["volterra_managed"].IsNull() || data.DomainChoice.Attributes()["volterra_managed"].IsUnknown()) {
 			data.DomainChoice = types.ObjectValueMust(DnsDomainDomainChoiceModelAttributeMap, map[string]attr.Value{
@@ -1014,7 +1014,7 @@ func (r *ResourceF5XCDnsDomain) Update(ctx context.Context, request resource.Upd
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> DomainChoice
+	// resource modelToSpecRoot OneOfField --> DomainChoice
 	if !data.DomainChoice.IsNull() && !data.DomainChoice.IsUnknown() {
 		domainChoiceModel := DnsDomainDomainChoice{}
 		response.Diagnostics.Append(data.DomainChoice.As(ctx, &domainChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1029,6 +1029,10 @@ func (r *ResourceF5XCDnsDomain) Update(ctx context.Context, request resource.Upd
 			spec.DomainChoice = volterraManagedSpecBool
 		}
 
+	} else {
+		spec.DomainChoice = &ves_io_schema_dns_domain.ReplaceSpecType_VolterraManaged{
+			VolterraManaged: &ves_io_schema.Empty{},
+		}
 	}
 
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
@@ -1042,12 +1046,8 @@ func (r *ResourceF5XCDnsDomain) Update(ctx context.Context, request resource.Upd
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_dns_domain.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_dns_domain.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "dns_domain", err),
@@ -1056,7 +1056,7 @@ func (r *ResourceF5XCDnsDomain) Update(ctx context.Context, request resource.Upd
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_domain.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_domain.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "dns_domain", err),
@@ -1193,7 +1193,7 @@ func (r *ResourceF5XCDnsDomain) Update(ctx context.Context, request resource.Upd
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> DomainChoice
+	// resource SpecToModelRoot OneOfField --> DomainChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -1232,8 +1232,6 @@ func (r *ResourceF5XCDnsDomain) Update(ctx context.Context, request resource.Upd
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.DomainChoice = types.ObjectNull(DnsDomainDomainChoiceModelAttributeMap)
 	}
 

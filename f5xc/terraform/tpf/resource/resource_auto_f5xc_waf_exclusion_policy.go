@@ -27,6 +27,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -163,7 +164,7 @@ var WafExclusionPolicyWafExclusionRulesModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DomainChoice
+// Attribute map for OneOfField --> DomainChoice
 var WafExclusionPolicyWafExclusionRulesDomainChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_domain":   types.BoolType,
@@ -178,7 +179,7 @@ var WafExclusionPolicyWafExclusionRulesMetadataModelAttributeMap = map[string]at
 	"name":        types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> PathChoice
+// Attribute map for OneOfField --> PathChoice
 var WafExclusionPolicyWafExclusionRulesPathChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_path":    types.BoolType,
@@ -379,21 +380,24 @@ func (r *ResourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request res
 					Attributes: map[string]schema.Attribute{
 						"domain_choice": schema.SingleNestedAttribute{
 							Description:         "Domain Domain to be matched",
-							MarkdownDescription: "Domain Domain to be matched",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
+							MarkdownDescription: "Domain Domain to be matched<br>Exactly one of `any_domain`, `exact_value`, or `suffix_value` must be specified when `domain_choice` is configured.",
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
 							Validators: []validator.Object{
-								exactlyoneofvalidator.RequiredExactlyOneOf(
+								exactlyoneofvalidator.ExactlyOneOf(
 									"any_domain",
 									"exact_value",
 									"suffix_value",
 								),
 							},
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.UseNonNullStateForUnknown(),
+							},
 							Attributes: map[string]schema.Attribute{
 								"any_domain": schema.BoolAttribute{
 									Description:         "Any domain Apply this WAF exclusion rule for any domain",
-									MarkdownDescription: "Any domain Apply this WAF exclusion rule for any domain",
+									MarkdownDescription: "Any domain Apply this WAF exclusion rule for any domain<br>Conflicts with `exact_value` and `suffix_value`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -403,7 +407,7 @@ func (r *ResourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request res
 								},
 								"exact_value": schema.StringAttribute{
 									Description:         "exact value Exact domain name",
-									MarkdownDescription: "exact value Exact domain name<br>**Validation:** `Length LengthBetween(1, 256)`",
+									MarkdownDescription: "exact value Exact domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_domain` and `suffix_value`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -417,7 +421,7 @@ func (r *ResourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request res
 								},
 								"suffix_value": schema.StringAttribute{
 									Description:         "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'",
-									MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`",
+									MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_domain` and `exact_value`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -487,21 +491,24 @@ func (r *ResourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request res
 						},
 						"path_choice": schema.SingleNestedAttribute{
 							Description:         "Path Path to be matched",
-							MarkdownDescription: "Path Path to be matched",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
+							MarkdownDescription: "Path Path to be matched<br>Exactly one of `any_path`, `path_prefix`, or `path_regex` must be specified when `path_choice` is configured.",
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
 							Validators: []validator.Object{
-								exactlyoneofvalidator.RequiredExactlyOneOf(
+								exactlyoneofvalidator.ExactlyOneOf(
 									"any_path",
 									"path_prefix",
 									"path_regex",
 								),
 							},
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.UseNonNullStateForUnknown(),
+							},
 							Attributes: map[string]schema.Attribute{
 								"any_path": schema.BoolAttribute{
 									Description:         "Any path Match all paths",
-									MarkdownDescription: "Any path Match all paths",
+									MarkdownDescription: "Any path Match all paths<br>Conflicts with `path_prefix` and `path_regex`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -511,7 +518,7 @@ func (r *ResourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request res
 								},
 								"path_prefix": schema.StringAttribute{
 									Description:         "prefix Path prefix to match (e.g. the value / will match on all paths)",
-									MarkdownDescription: "prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`",
+									MarkdownDescription: "prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `any_path` and `path_regex`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -525,7 +532,7 @@ func (r *ResourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request res
 								},
 								"path_regex": schema.StringAttribute{
 									Description:         "Path Regex Define the regex for the path. For example, the regex ^/.*$ will match on all paths",
-									MarkdownDescription: "Path Regex Define the regex for the path. For example, the regex ^/.*$ will match on all paths",
+									MarkdownDescription: "Path Regex Define the regex for the path. For example, the regex ^/.*$ will match on all paths<br>Conflicts with `any_path` and `path_prefix`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -537,7 +544,7 @@ func (r *ResourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request res
 						},
 						"waf_advanced_configuration_choice": schema.SingleNestedAttribute{
 							Description:         "WAF Exclusion Rule Action WAF Exclusion Rule action to be enforced if the input request matches the rule.",
-							MarkdownDescription: "WAF Exclusion Rule Action WAF Exclusion Rule action to be enforced if the input request matches the rule.",
+							MarkdownDescription: "WAF Exclusion Rule Action WAF Exclusion Rule action to be enforced if the input request matches the rule.<br>Exactly one of `app_firewall_detection_control` or `waf_skip_processing` must be specified when `waf_advanced_configuration_choice` is configured.",
 							Required:            false,
 							Optional:            true,
 							Computed:            false,
@@ -550,7 +557,7 @@ func (r *ResourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request res
 							Attributes: map[string]schema.Attribute{
 								"app_firewall_detection_control": schema.SingleNestedAttribute{
 									Description:         "App Firewall Detection control Define the list of Signature IDs, Violations, Attack Types and Bot Names that should be excluded from triggering on the defined match criteria.",
-									MarkdownDescription: "App Firewall Detection control Define the list of Signature IDs, Violations, Attack Types and Bot Names that should be excluded from triggering on the defined match criteria.",
+									MarkdownDescription: "App Firewall Detection control Define the list of Signature IDs, Violations, Attack Types and Bot Names that should be excluded from triggering on the defined match criteria.<br>Conflicts with `waf_skip_processing`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -726,7 +733,7 @@ func (r *ResourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request res
 								},
 								"waf_skip_processing": schema.BoolAttribute{
 									Description:         "Skip App Firewall Processing Skip all App Firewall processing for this request",
-									MarkdownDescription: "Skip App Firewall Processing Skip all App Firewall processing for this request",
+									MarkdownDescription: "Skip App Firewall Processing Skip all App Firewall processing for this request<br>Conflicts with `app_firewall_detection_control`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -904,8 +911,14 @@ func (r *ResourceF5XCWafExclusionPolicy) Create(ctx context.Context, request res
 
 		for i, wafExclusionRulesElement := range wafExclusionRulesElementsModelToSpec {
 			wafExclusionRulesSpec[i] = &ves_io_schema_policy.SimpleWafExclusionRule{}
+			wafExclusionRulesSpec[i].DomainChoice = &ves_io_schema_policy.SimpleWafExclusionRule_AnyDomain{
+				AnyDomain: &ves_io_schema.Empty{},
+			}
+			wafExclusionRulesSpec[i].PathChoice = &ves_io_schema_policy.SimpleWafExclusionRule_AnyPath{
+				AnyPath: &ves_io_schema.Empty{},
+			}
 
-			// resource modelToSpecNested RequiredOneOfField --> DomainChoice
+			// resource modelToSpecNested OneOfField --> DomainChoice
 			if !wafExclusionRulesElement.DomainChoice.IsNull() && !wafExclusionRulesElement.DomainChoice.IsUnknown() {
 				wafExclusionRulesDomainChoiceModel := WafExclusionPolicyDomainChoice{}
 				response.Diagnostics.Append(wafExclusionRulesElement.DomainChoice.As(ctx, &wafExclusionRulesDomainChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -997,7 +1010,7 @@ func (r *ResourceF5XCWafExclusionPolicy) Create(ctx context.Context, request res
 				wafExclusionRulesSpec[i].Methods = methodsSpec
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> PathChoice
+			// resource modelToSpecNested OneOfField --> PathChoice
 			if !wafExclusionRulesElement.PathChoice.IsNull() && !wafExclusionRulesElement.PathChoice.IsUnknown() {
 				wafExclusionRulesPathChoiceModel := WafExclusionPolicyPathChoice{}
 				response.Diagnostics.Append(wafExclusionRulesElement.PathChoice.As(ctx, &wafExclusionRulesPathChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1448,8 +1461,7 @@ func (r *ResourceF5XCWafExclusionPolicy) Create(ctx context.Context, request res
 		for _, wafExclusionRulesElement := range specData.GetWafExclusionRules() {
 			wafExclusionPolicySimpleWafExclusionRuleModel := WafExclusionPolicySimpleWafExclusionRule{}
 
-			// resource specToModelNested RequiredOneOfField --> DomainChoice
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> DomainChoice
 			if wafExclusionRulesElement.GetDomainChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				wafExclusionRulesdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -1576,8 +1588,7 @@ func (r *ResourceF5XCWafExclusionPolicy) Create(ctx context.Context, request res
 				}
 			}
 
-			// resource specToModelNested RequiredOneOfField --> PathChoice
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> PathChoice
 			if wafExclusionRulesElement.GetPathChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				wafExclusionRulespathChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -1973,11 +1984,7 @@ func (r *ResourceF5XCWafExclusionPolicy) Read(ctx context.Context, request resou
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_waf_exclusion_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_waf_exclusion_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "waf_exclusion_policy", err),
@@ -2104,8 +2111,7 @@ func (r *ResourceF5XCWafExclusionPolicy) Read(ctx context.Context, request resou
 		for _, wafExclusionRulesElement := range specData.GetWafExclusionRules() {
 			wafExclusionPolicySimpleWafExclusionRuleModel := WafExclusionPolicySimpleWafExclusionRule{}
 
-			// resource specToModelNested RequiredOneOfField --> DomainChoice
-			// <no value>
+			// resource specToModelNested OneOfField --> DomainChoice
 			if wafExclusionRulesElement.GetDomainChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				wafExclusionRulesdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -2236,8 +2242,7 @@ func (r *ResourceF5XCWafExclusionPolicy) Read(ctx context.Context, request resou
 				}
 			}
 
-			// resource specToModelNested RequiredOneOfField --> PathChoice
-			// <no value>
+			// resource specToModelNested OneOfField --> PathChoice
 			if wafExclusionRulesElement.GetPathChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				wafExclusionRulespathChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -2721,8 +2726,14 @@ func (r *ResourceF5XCWafExclusionPolicy) Update(ctx context.Context, request res
 
 		for i, wafExclusionRulesElement := range wafExclusionRulesElementsModelToSpec {
 			wafExclusionRulesSpec[i] = &ves_io_schema_policy.SimpleWafExclusionRule{}
+			wafExclusionRulesSpec[i].DomainChoice = &ves_io_schema_policy.SimpleWafExclusionRule_AnyDomain{
+				AnyDomain: &ves_io_schema.Empty{},
+			}
+			wafExclusionRulesSpec[i].PathChoice = &ves_io_schema_policy.SimpleWafExclusionRule_AnyPath{
+				AnyPath: &ves_io_schema.Empty{},
+			}
 
-			// resource modelToSpecNested RequiredOneOfField --> DomainChoice
+			// resource modelToSpecNested OneOfField --> DomainChoice
 			if !wafExclusionRulesElement.DomainChoice.IsNull() && !wafExclusionRulesElement.DomainChoice.IsUnknown() {
 				wafExclusionRulesDomainChoiceModel := WafExclusionPolicyDomainChoice{}
 				response.Diagnostics.Append(wafExclusionRulesElement.DomainChoice.As(ctx, &wafExclusionRulesDomainChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2814,7 +2825,7 @@ func (r *ResourceF5XCWafExclusionPolicy) Update(ctx context.Context, request res
 				wafExclusionRulesSpec[i].Methods = methodsSpec
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> PathChoice
+			// resource modelToSpecNested OneOfField --> PathChoice
 			if !wafExclusionRulesElement.PathChoice.IsNull() && !wafExclusionRulesElement.PathChoice.IsUnknown() {
 				wafExclusionRulesPathChoiceModel := WafExclusionPolicyPathChoice{}
 				response.Diagnostics.Append(wafExclusionRulesElement.PathChoice.As(ctx, &wafExclusionRulesPathChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3126,12 +3137,8 @@ func (r *ResourceF5XCWafExclusionPolicy) Update(ctx context.Context, request res
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_waf_exclusion_policy.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_waf_exclusion_policy.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "waf_exclusion_policy", err),
@@ -3140,7 +3147,7 @@ func (r *ResourceF5XCWafExclusionPolicy) Update(ctx context.Context, request res
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_waf_exclusion_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_waf_exclusion_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "waf_exclusion_policy", err),
@@ -3266,8 +3273,7 @@ func (r *ResourceF5XCWafExclusionPolicy) Update(ctx context.Context, request res
 		for _, wafExclusionRulesElement := range specData.GetWafExclusionRules() {
 			wafExclusionPolicySimpleWafExclusionRuleModel := WafExclusionPolicySimpleWafExclusionRule{}
 
-			// resource specToModelNested RequiredOneOfField --> DomainChoice
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> DomainChoice
 			if wafExclusionRulesElement.GetDomainChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				wafExclusionRulesdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3394,8 +3400,7 @@ func (r *ResourceF5XCWafExclusionPolicy) Update(ctx context.Context, request res
 				}
 			}
 
-			// resource specToModelNested RequiredOneOfField --> PathChoice
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> PathChoice
 			if wafExclusionRulesElement.GetPathChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				wafExclusionRulespathChoiceChoicesAttributeMap := make(map[string]attr.Value)

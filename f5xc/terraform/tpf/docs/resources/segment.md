@@ -62,7 +62,7 @@ resource "f5xc_segment" "example" {
 
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `description` (String) description Human readable description for the object
-- `internet_connection_choice` (Attributes) Connections to internet choice Allow traffic from this network segment to internet (see [below for nested schema](#nestedatt--internet_connection_choice))
+- `internet_connection_choice` (Attributes) Connections to internet choice Allow traffic from this network segment to internet<br>Exactly one of `disable` or `enable` must be specified when `internet_connection_choice` is configured. (see [below for nested schema](#nestedatt--internet_connection_choice))
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -76,8 +76,8 @@ resource "f5xc_segment" "example" {
 
 Optional:
 
-- `disable` (Boolean) Disable connections to internet
-- `enable` (Boolean) Enable connections to internet
+- `disable` (Boolean) Disable connections to internet<br>Conflicts with `enable`.
+- `enable` (Boolean) Enable connections to internet<br>Conflicts with `disable`.
 
 
 <a id="nestedatt--timeouts"></a>
@@ -122,6 +122,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_segment.example"
+	to = f5xc_segment.example
 }
 ```

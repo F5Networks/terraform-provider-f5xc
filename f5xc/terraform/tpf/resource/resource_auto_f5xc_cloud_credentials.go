@@ -439,7 +439,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 			},
 			"cloud_choice": schema.SingleNestedAttribute{
 				Description:         "One of cloud Select Cloud credential type for AWS, Azure or GCP",
-				MarkdownDescription: "One of cloud Select Cloud credential type for AWS, Azure or GCP",
+				MarkdownDescription: "One of cloud Select Cloud credential type for AWS, Azure or GCP<br>Exactly one of `aws_assume_role`, `aws_secret_key`, `azure_client_secret`, `azure_pfx_certificate`, or `gcp_cred_file` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -455,7 +455,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 				Attributes: map[string]schema.Attribute{
 					"aws_assume_role": schema.SingleNestedAttribute{
 						Description:         "AWS Assume Role F5XC will assume role designated by customer",
-						MarkdownDescription: "AWS Assume Role F5XC will assume role designated by customer",
+						MarkdownDescription: "AWS Assume Role F5XC will assume role designated by customer<br>Conflicts with `aws_secret_key`, `azure_client_secret`, `azure_pfx_certificate`, and `gcp_cred_file`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -517,7 +517,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 					},
 					"aws_secret_key": schema.SingleNestedAttribute{
 						Description:         "AWS Programmatic Access Credentials AWS authentication using access keys",
-						MarkdownDescription: "AWS Programmatic Access Credentials AWS authentication using access keys",
+						MarkdownDescription: "AWS Programmatic Access Credentials AWS authentication using access keys<br>Conflicts with `aws_assume_role`, `azure_client_secret`, `azure_pfx_certificate`, and `gcp_cred_file`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -541,7 +541,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 								Attributes: map[string]schema.Attribute{
 									"secret_info_choice": schema.SingleNestedAttribute{
 										Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -555,7 +555,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 										Attributes: map[string]schema.Attribute{
 											"blindfold_secret_info": schema.SingleNestedAttribute{
 												Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -595,7 +595,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 											},
 											"clear_secret_info": schema.SingleNestedAttribute{
 												Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -630,7 +630,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 											},
 											"none": schema.BoolAttribute{
 												Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -646,7 +646,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 					},
 					"azure_client_secret": schema.SingleNestedAttribute{
 						Description:         "Azure Credential Client Password Azure authentication using a service principal account with client secret",
-						MarkdownDescription: "Azure Credential Client Password Azure authentication using a service principal account with client secret",
+						MarkdownDescription: "Azure Credential Client Password Azure authentication using a service principal account with client secret<br>Conflicts with `aws_assume_role`, `aws_secret_key`, `azure_pfx_certificate`, and `gcp_cred_file`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -670,7 +670,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 								Attributes: map[string]schema.Attribute{
 									"secret_info_choice": schema.SingleNestedAttribute{
 										Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -684,7 +684,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 										Attributes: map[string]schema.Attribute{
 											"blindfold_secret_info": schema.SingleNestedAttribute{
 												Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -724,7 +724,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 											},
 											"clear_secret_info": schema.SingleNestedAttribute{
 												Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -759,7 +759,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 											},
 											"none": schema.BoolAttribute{
 												Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -795,7 +795,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 					},
 					"azure_pfx_certificate": schema.SingleNestedAttribute{
 						Description:         "Azure Credential Client Certificate Azure authentication using a service principal account with client certificate",
-						MarkdownDescription: "Azure Credential Client Certificate Azure authentication using a service principal account with client certificate",
+						MarkdownDescription: "Azure Credential Client Certificate Azure authentication using a service principal account with client certificate<br>Conflicts with `aws_assume_role`, `aws_secret_key`, `azure_client_secret`, and `gcp_cred_file`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -837,7 +837,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 								Attributes: map[string]schema.Attribute{
 									"secret_info_choice": schema.SingleNestedAttribute{
 										Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -851,7 +851,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 										Attributes: map[string]schema.Attribute{
 											"blindfold_secret_info": schema.SingleNestedAttribute{
 												Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -891,7 +891,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 											},
 											"clear_secret_info": schema.SingleNestedAttribute{
 												Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -926,7 +926,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 											},
 											"none": schema.BoolAttribute{
 												Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -962,7 +962,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 					},
 					"gcp_cred_file": schema.SingleNestedAttribute{
 						Description:         "GCP Credentials Google authentication using content of Google Credentials File",
-						MarkdownDescription: "GCP Credentials Google authentication using content of Google Credentials File",
+						MarkdownDescription: "GCP Credentials Google authentication using content of Google Credentials File<br>Conflicts with `aws_assume_role`, `aws_secret_key`, `azure_client_secret`, and `azure_pfx_certificate`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -976,7 +976,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 								Attributes: map[string]schema.Attribute{
 									"secret_info_choice": schema.SingleNestedAttribute{
 										Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+										MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -990,7 +990,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 										Attributes: map[string]schema.Attribute{
 											"blindfold_secret_info": schema.SingleNestedAttribute{
 												Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+												MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1030,7 +1030,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 											},
 											"clear_secret_info": schema.SingleNestedAttribute{
 												Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+												MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1065,7 +1065,7 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 											},
 											"none": schema.BoolAttribute{
 												Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+												MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2733,11 +2733,7 @@ func (r *ResourceF5XCCloudCredentials) Read(ctx context.Context, request resourc
 	defer cancel()
 	priorCloudChoice := data.CloudChoice
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cloud_credentials.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cloud_credentials.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "cloud_credentials", err),
@@ -4344,12 +4340,8 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_cloud_credentials.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_cloud_credentials.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "cloud_credentials", err),
@@ -4358,7 +4350,7 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cloud_credentials.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cloud_credentials.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "cloud_credentials", err),

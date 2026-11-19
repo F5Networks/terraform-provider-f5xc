@@ -372,6 +372,7 @@ func (p *F5XCProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	ctx = tflog.SetField(ctx, "throttlingEnabled", throttlingEnabled)
 	ctx = tflog.SetField(ctx, "throttlingMaxRetries", throttlingMaxRetries)
 	ctx = tflog.SetField(ctx, "terraformVersion", req.TerraformVersion)
+	ctx = tflog.SetField(ctx, "providerVersion", p.version)
 	tflog.Info(ctx, "Global Variables")
 
 	ctx = tflog.SetField(ctx, "Url", config.Url.ValueString())
@@ -393,6 +394,7 @@ func (p *F5XCProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 		Url:              url,
 		Test:             test,
 		TerraformVersion: req.TerraformVersion,
+		ProviderVersion:  p.version,
 		Vesenv:           vesenv,
 		Timeout:          timeout,
 		ApiKey:           api_key,
@@ -483,6 +485,10 @@ func (p *F5XCProvider) DataSources(_ context.Context) []func() datasource.DataSo
 		dataSources.NewDataSourceF5XCInfraprotectAsnPrefix,
 		dataSources.NewDataSourceF5XCInfraprotectFirewallRuleGroup,
 		dataSources.NewDataSourceF5XCIpPrefixSet,
+		dataSources.NewDataSourceF5XCK8SCluster,
+		dataSources.NewDataSourceF5XCK8SClusterRole,
+		dataSources.NewDataSourceF5XCK8SClusterRoleBinding,
+		dataSources.NewDataSourceF5XCK8SPodSecurityAdmission,
 		dataSources.NewDataSourceF5XCKnownLabel,
 		dataSources.NewDataSourceF5XCKnownLabelKey,
 		dataSources.NewDataSourceF5XCLogReceiver,
@@ -649,6 +655,10 @@ func (p *F5XCProvider) Resources(_ context.Context) []func() resource.Resource {
 		resources.NewResourceF5XCInfraprotectFirewallRuleGroup,
 		resources.NewResourceF5XCIpPrefixSet,
 		resources.NewResourceF5XCIrule,
+		resources.NewResourceF5XCK8SCluster,
+		resources.NewResourceF5XCK8SClusterRole,
+		resources.NewResourceF5XCK8SClusterRoleBinding,
+		resources.NewResourceF5XCK8SPodSecurityAdmission,
 		resources.NewResourceF5XCKnownLabel,
 		resources.NewResourceF5XCKnownLabelKey,
 		resources.NewResourceF5XCLogReceiver,

@@ -62,7 +62,7 @@ resource "f5xc_dns_lb_health_check" "example" {
 
 ### Required
 
-- `health_check_choice` (Attributes) Type of Health Check Select type of health check (see [below for nested schema](#nestedatt--health_check_choice))
+- `health_check_choice` (Attributes) Type of Health Check Select type of health check<br>Exactly one of `http_health_check`, `https_health_check`, `icmp_health_check`, `tcp_health_check`, `tcp_hex_health_check`, or `udp_health_check` must be specified. (see [below for nested schema](#nestedatt--health_check_choice))
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
 
@@ -83,12 +83,12 @@ resource "f5xc_dns_lb_health_check" "example" {
 
 Optional:
 
-- `http_health_check` (Attributes) HTTP Health Check HTTP Health Check (see [below for nested schema](#nestedatt--health_check_choice--http_health_check))
-- `https_health_check` (Attributes) HTTPS Health Check HTTPS Health Check (see [below for nested schema](#nestedatt--health_check_choice--https_health_check))
-- `icmp_health_check` (Boolean) ICMP Health Check ICMP Health Check
-- `tcp_health_check` (Attributes) TCP Health Check TCP Health Check (see [below for nested schema](#nestedatt--health_check_choice--tcp_health_check))
-- `tcp_hex_health_check` (Attributes) TCP Hex Health Check TCP Health Check with Hex Encoded Payload (see [below for nested schema](#nestedatt--health_check_choice--tcp_hex_health_check))
-- `udp_health_check` (Attributes) UDP Health Check UDP Health Check (see [below for nested schema](#nestedatt--health_check_choice--udp_health_check))
+- `http_health_check` (Attributes) HTTP Health Check HTTP Health Check<br>Conflicts with `https_health_check`, `icmp_health_check`, `tcp_health_check`, `tcp_hex_health_check`, and `udp_health_check`. (see [below for nested schema](#nestedatt--health_check_choice--http_health_check))
+- `https_health_check` (Attributes) HTTPS Health Check HTTPS Health Check<br>Conflicts with `http_health_check`, `icmp_health_check`, `tcp_health_check`, `tcp_hex_health_check`, and `udp_health_check`. (see [below for nested schema](#nestedatt--health_check_choice--https_health_check))
+- `icmp_health_check` (Boolean) ICMP Health Check ICMP Health Check<br>Conflicts with `http_health_check`, `https_health_check`, `tcp_health_check`, `tcp_hex_health_check`, and `udp_health_check`.
+- `tcp_health_check` (Attributes) TCP Health Check TCP Health Check<br>Conflicts with `http_health_check`, `https_health_check`, `icmp_health_check`, `tcp_hex_health_check`, and `udp_health_check`. (see [below for nested schema](#nestedatt--health_check_choice--tcp_health_check))
+- `tcp_hex_health_check` (Attributes) TCP Hex Health Check TCP Health Check with Hex Encoded Payload<br>Conflicts with `http_health_check`, `https_health_check`, `icmp_health_check`, `tcp_health_check`, and `udp_health_check`. (see [below for nested schema](#nestedatt--health_check_choice--tcp_hex_health_check))
+- `udp_health_check` (Attributes) UDP Health Check UDP Health Check<br>Conflicts with `http_health_check`, `https_health_check`, `icmp_health_check`, `tcp_health_check`, and `tcp_hex_health_check`. (see [below for nested schema](#nestedatt--health_check_choice--udp_health_check))
 
 <a id="nestedatt--health_check_choice--http_health_check"></a>
 ### Nested Schema for `health_check_choice.http_health_check`
@@ -96,22 +96,22 @@ Optional:
 Required:
 
 - `health_check_port` (Number) Health check port Port used for performing health check
-- `virtual_host_choice` (Attributes) Virtual Host (see [below for nested schema](#nestedatt--health_check_choice--http_health_check--virtual_host_choice))
 
 Optional:
 
 - `health_check_secondary_port` (Number) Health check secondary port Secondary port used for performing health check. If included, both ports must be healthy for the health check to pass<br>**Default:** `0`
 - `receive` (String) Receive String Regular expression used to match against the response to the health check's request. Mark node up upon receipt of a successful regular expression match. Uses re2 regular expression syntax.<br>**Default:** `HTTP/1.`<br>**Validation:** `Length LengthAtMost(2048)`
 - `send` (String) Send String HTTP payload to send to the target<br>**Default:** `HEAD / HTTP/1.0\r\n\r\n`<br>**Validation:** `Length LengthAtMost(2048)`
+- `virtual_host_choice` (Attributes) Virtual Host<br>Exactly one of `disable_virtual_host`, `inherit_load_balancer_fqdn`, or `virtual_host` must be specified when `virtual_host_choice` is configured. (see [below for nested schema](#nestedatt--health_check_choice--http_health_check--virtual_host_choice))
 
 <a id="nestedatt--health_check_choice--http_health_check--virtual_host_choice"></a>
 ### Nested Schema for `health_check_choice.http_health_check.virtual_host_choice`
 
 Optional:
 
-- `disable_virtual_host` (Boolean) Disable Virtual Host
-- `inherit_load_balancer_fqdn` (Boolean) Inherit From Load Balancer FQDN Inherit load balancer FQDN as the virtual host to use for SNI.
-- `virtual_host` (String) Enable Virtual Host Name of the virtual host to use for SNI.<br>**Validation:** `Length LengthAtMost(2048)`
+- `disable_virtual_host` (Boolean) Disable Virtual Host<br>Conflicts with `inherit_load_balancer_fqdn` and `virtual_host`.
+- `inherit_load_balancer_fqdn` (Boolean) Inherit From Load Balancer FQDN Inherit load balancer FQDN as the virtual host to use for SNI.<br>Conflicts with `disable_virtual_host` and `virtual_host`.
+- `virtual_host` (String) Enable Virtual Host Name of the virtual host to use for SNI.<br>**Validation:** `Length LengthAtMost(2048)`<br>Conflicts with `disable_virtual_host` and `inherit_load_balancer_fqdn`.
 
 
 
@@ -121,22 +121,22 @@ Optional:
 Required:
 
 - `health_check_port` (Number) Health check port Port used for performing health check
-- `virtual_host_choice` (Attributes) Virtual Host (see [below for nested schema](#nestedatt--health_check_choice--https_health_check--virtual_host_choice))
 
 Optional:
 
 - `health_check_secondary_port` (Number) Health check secondary port Secondary port used for performing health check. If included, both ports must be healthy for the health check to pass<br>**Default:** `0`
 - `receive` (String) Receive String Regular expression used to match against the response to the health check's request. Mark node up upon receipt of a successful regular expression match. Uses re2 regular expression syntax.<br>**Default:** `HTTP/1.`<br>**Validation:** `Length LengthAtMost(2048)`
 - `send` (String) Send String HTTP payload to send to the target<br>**Default:** `HEAD / HTTP/1.0\r\n\r\n`<br>**Validation:** `Length LengthAtMost(2048)`
+- `virtual_host_choice` (Attributes) Virtual Host<br>Exactly one of `disable_virtual_host`, `inherit_load_balancer_fqdn`, or `virtual_host` must be specified when `virtual_host_choice` is configured. (see [below for nested schema](#nestedatt--health_check_choice--https_health_check--virtual_host_choice))
 
 <a id="nestedatt--health_check_choice--https_health_check--virtual_host_choice"></a>
 ### Nested Schema for `health_check_choice.https_health_check.virtual_host_choice`
 
 Optional:
 
-- `disable_virtual_host` (Boolean) Disable Virtual Host
-- `inherit_load_balancer_fqdn` (Boolean) Inherit From Load Balancer FQDN Inherit load balancer FQDN as the virtual host to use for SNI.
-- `virtual_host` (String) Enable Virtual Host Name of the virtual host to use for SNI.<br>**Validation:** `Length LengthAtMost(2048)`
+- `disable_virtual_host` (Boolean) Disable Virtual Host<br>Conflicts with `inherit_load_balancer_fqdn` and `virtual_host`.
+- `inherit_load_balancer_fqdn` (Boolean) Inherit From Load Balancer FQDN Inherit load balancer FQDN as the virtual host to use for SNI.<br>Conflicts with `disable_virtual_host` and `virtual_host`.
+- `virtual_host` (String) Enable Virtual Host Name of the virtual host to use for SNI.<br>**Validation:** `Length LengthAtMost(2048)`<br>Conflicts with `disable_virtual_host` and `inherit_load_balancer_fqdn`.
 
 
 
@@ -223,6 +223,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_dns_lb_health_check.example"
+	to = f5xc_dns_lb_health_check.example
 }
 ```

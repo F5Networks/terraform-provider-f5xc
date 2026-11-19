@@ -113,7 +113,7 @@ resource "f5xc_secret_policy" "example" {
 - `decrypt_cache_timeout` (String) Decrypt Cache Timeout decrypt_cache_timeout contains the amount of time a decrypted secret is cached in wingman. Value for this parameter is a string ending in the suffix 's' (indicating seconds), suffix 'm' (indicating minutes) or suffix 'h' (indicating hours)
 - `description` (String) description Human readable description for the object
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
-- `rule_choice` (Attributes) rule choice Allowed/Denied Sources rules provide the ability to allow/deny lists of IP addresses, countries, TLS fingerprints and ASNs. Custom rules provide more flexibility to define your own logic to control incoming requests. (see [below for nested schema](#nestedatt--rule_choice))
+- `rule_choice` (Attributes) rule choice Allowed/Denied Sources rules provide the ability to allow/deny lists of IP addresses, countries, TLS fingerprints and ASNs. Custom rules provide more flexibility to define your own logic to control incoming requests.<br>Exactly one of `legacy_rule_list` or `rule_list` must be specified when `rule_choice` is configured. (see [below for nested schema](#nestedatt--rule_choice))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
@@ -125,8 +125,8 @@ resource "f5xc_secret_policy" "example" {
 
 Optional:
 
-- `legacy_rule_list` (Attributes) legacy_rule_list (see [below for nested schema](#nestedatt--rule_choice--legacy_rule_list))
-- `rule_list` (Attributes) rule_list (see [below for nested schema](#nestedatt--rule_choice--rule_list))
+- `legacy_rule_list` (Attributes) legacy_rule_list<br>Conflicts with `rule_list`. (see [below for nested schema](#nestedatt--rule_choice--legacy_rule_list))
+- `rule_list` (Attributes) rule_list<br>Conflicts with `legacy_rule_list`. (see [below for nested schema](#nestedatt--rule_choice--rule_list))
 
 <a id="nestedatt--rule_choice--legacy_rule_list"></a>
 ### Nested Schema for `rule_choice.legacy_rule_list`
@@ -182,16 +182,16 @@ Optional:
 Required:
 
 - `action` (List of String) action Action to be enforced if all the predicates evaluates to true.<br>**Allowed Values (choose one):** `['ALLOW', 'DENY', 'GOTO_POLICY', 'LAST_POLICY', 'NEXT_POLICY', 'NEXT_POLICY_SET']`
-- `client_choice` (Attributes) client choice Select clients for which the rule will be applied. The actual names/labels of the client are extracted from its TLS certificate. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--spec--client_choice))
+- `client_choice` (Attributes) client choice Select clients for which the rule will be applied. The actual names/labels of the client are extracted from its TLS certificate.<br>Exactly one of `client_name`, `client_name_matcher`, or `client_selector` must be specified. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--spec--client_choice))
 
 <a id="nestedatt--rule_choice--rule_list--rules--spec--client_choice"></a>
 ### Nested Schema for `rule_choice.rule_list.rules.spec.client_choice`
 
 Optional:
 
-- `client_name` (String) client name The name of the client trying to access the secret. Name of the client will be extracted from client TLS certificate. This predicate evaluates to true if client name matches the configured name
-- `client_name_matcher` (Attributes) client name matcher A list of exact values and/or regular expressions for the expected name of the client. The actual names of the client are extracted from its TLS certificate. This is a generalized version of the client name predicate that allows the same rule to be applicable to a set of clients rather than a single client. The predicate evaluates to true if any of the client's actual names match any of the exact values or regular expressions in the client name matcher. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--spec--client_choice--client_name_matcher))
-- `client_selector` (Attributes) client selector A label selector that describes the expected set of clients. The labels associated with the client trying to access the secret are used to evaluate the label expressions in the selector. These labels are derived from the client TLS certificate. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--spec--client_choice--client_selector))
+- `client_name` (String) client name The name of the client trying to access the secret. Name of the client will be extracted from client TLS certificate. This predicate evaluates to true if client name matches the configured name<br>Conflicts with `client_name_matcher` and `client_selector`.
+- `client_name_matcher` (Attributes) client name matcher A list of exact values and/or regular expressions for the expected name of the client. The actual names of the client are extracted from its TLS certificate. This is a generalized version of the client name predicate that allows the same rule to be applicable to a set of clients rather than a single client. The predicate evaluates to true if any of the client's actual names match any of the exact values or regular expressions in the client name matcher.<br>Conflicts with `client_name` and `client_selector`. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--spec--client_choice--client_name_matcher))
+- `client_selector` (Attributes) client selector A label selector that describes the expected set of clients. The labels associated with the client trying to access the secret are used to evaluate the label expressions in the selector. These labels are derived from the client TLS certificate. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.<br>Conflicts with `client_name` and `client_name_matcher`. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--spec--client_choice--client_selector))
 
 <a id="nestedatt--rule_choice--rule_list--rules--spec--client_choice--client_name_matcher"></a>
 ### Nested Schema for `rule_choice.rule_list.rules.spec.client_choice.client_name_matcher`
@@ -246,6 +246,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_secret_policy.example"
+	to = f5xc_secret_policy.example
 }
 ```

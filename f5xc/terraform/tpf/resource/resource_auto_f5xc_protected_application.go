@@ -34,6 +34,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -668,7 +669,7 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for RequiredOneOfField --> ConnectorTypeChoice
+// Attribute map for OneOfField --> ConnectorTypeChoice
 var ProtectedApplicationConnectorTypeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"adobe_commerce_connector": types.BoolType,
@@ -813,7 +814,7 @@ var ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertion
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DomainMatcherChoice
+// Attribute map for OneOfField --> DomainMatcherChoice
 var ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_domain": types.BoolType,
@@ -876,7 +877,7 @@ var ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertion
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DomainMatcherChoice
+// Attribute map for OneOfField --> DomainMatcherChoice
 var ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_domain": types.BoolType,
@@ -922,7 +923,7 @@ var ProtectedApplicationConnectorTypeChoiceCloudflareJavaScriptChoiceManualJsIns
 	"js_download_path": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> MobileSdkChoice
+// Attribute map for OneOfField --> MobileSdkChoice
 var ProtectedApplicationConnectorTypeChoiceCloudflareMobileSdkChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disable_mobile_sdk": types.BoolType,
@@ -1476,7 +1477,7 @@ var ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertion
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DomainMatcherChoice
+// Attribute map for OneOfField --> DomainMatcherChoice
 var ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesExcludeListDomainMatcherChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_domain": types.BoolType,
@@ -1539,7 +1540,7 @@ var ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertion
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DomainMatcherChoice
+// Attribute map for OneOfField --> DomainMatcherChoice
 var ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceJsInsertionRulesRulesDomainMatcherChoiceModelAttributeMap = map[string]attr.Type{
 
 	"any_domain": types.BoolType,
@@ -1588,7 +1589,7 @@ var ProtectedApplicationConnectorTypeChoiceCloudfrontJavaScriptChoiceManualJsIns
 	"js_download_path": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> MobileSdkChoice
+// Attribute map for OneOfField --> MobileSdkChoice
 var ProtectedApplicationConnectorTypeChoiceCloudfrontMobileSdkChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disable_mobile_sdk": types.BoolType,
@@ -2003,7 +2004,7 @@ var ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabel
 	},
 }
 
-// Attribute map for RequiredOneOfField --> LabelChoice
+// Attribute map for OneOfField --> LabelChoice
 var ProtectedApplicationConnectorTypeChoiceCloudfrontProtectedEndpointsFlowLabelChoiceFlowLabelFlowLabelChoiceFlightLabelChoiceModelAttributeMap = map[string]attr.Type{
 
 	"checkin": types.BoolType,
@@ -2214,12 +2215,12 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 			},
 			"connector_type_choice": schema.SingleNestedAttribute{
 				Description:         "connector_type_choice Select the type of connector the application uses to integrate with Integrated Bot Defense.",
-				MarkdownDescription: "connector_type_choice Select the type of connector the application uses to integrate with Integrated Bot Defense.",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "connector_type_choice Select the type of connector the application uses to integrate with Integrated Bot Defense.<br>Exactly one of `adobe_commerce_connector`, `big_ip_iapp`, `cloudflare`, `cloudfront`, `custom_connector`, `f5_big_ip`, or `salesforce_commerce_connector` must be specified when `connector_type_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"adobe_commerce_connector",
 						"big_ip_iapp",
 						"cloudflare",
@@ -2229,10 +2230,13 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 						"salesforce_commerce_connector",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"adobe_commerce_connector": schema.BoolAttribute{
 						Description:         "Adobe Commerce template connector Get credentials needed to configure on Adobe(Magento) Commerce.",
-						MarkdownDescription: "Adobe Commerce template connector Get credentials needed to configure on Adobe(Magento) Commerce.",
+						MarkdownDescription: "Adobe Commerce template connector Get credentials needed to configure on Adobe(Magento) Commerce.<br>Conflicts with `big_ip_iapp`, `cloudflare`, `cloudfront`, `custom_connector`, `f5_big_ip`, and `salesforce_commerce_connector`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2242,7 +2246,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 					},
 					"big_ip_iapp": schema.BoolAttribute{
 						Description:         "BIG-IP iApp connector iApp templates simplify the integration and configuration process.",
-						MarkdownDescription: "BIG-IP iApp connector iApp templates simplify the integration and configuration process.",
+						MarkdownDescription: "BIG-IP iApp connector iApp templates simplify the integration and configuration process.<br>Conflicts with `adobe_commerce_connector`, `cloudflare`, `cloudfront`, `custom_connector`, `f5_big_ip`, and `salesforce_commerce_connector`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2252,7 +2256,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 					},
 					"cloudflare": schema.SingleNestedAttribute{
 						Description:         "Cloudflare Configure Cloudflare connector properties",
-						MarkdownDescription: "Cloudflare Configure Cloudflare connector properties",
+						MarkdownDescription: "Cloudflare Configure Cloudflare connector properties<br>Conflicts with `adobe_commerce_connector`, `big_ip_iapp`, `cloudfront`, `custom_connector`, `f5_big_ip`, and `salesforce_commerce_connector`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2274,7 +2278,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 							},
 							"java_script_choice": schema.SingleNestedAttribute{
 								Description:         "JavaScript Choice For Manual JavaScript Insertion, add the JS tags to one of the recommended locations: Immediately After <Head>, Immediately After </title>, Before <script> (first script tag on the page). JS tags provided in documentation.",
-								MarkdownDescription: "JavaScript Choice For Manual JavaScript Insertion, add the JS tags to one of the recommended locations: Immediately After <Head>, Immediately After </title>, Before <script> (first script tag on the page). JS tags provided in documentation.",
+								MarkdownDescription: "JavaScript Choice For Manual JavaScript Insertion, add the JS tags to one of the recommended locations: Immediately After <Head>, Immediately After </title>, Before <script> (first script tag on the page). JS tags provided in documentation.<br>Exactly one of `disable_js_insert`, `js_insertion_rules`, or `manual_js_insert` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -2288,7 +2292,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 								Attributes: map[string]schema.Attribute{
 									"disable_js_insert": schema.BoolAttribute{
 										Description:         "disable_js_insert No web endpoints or to insert JavaScript manually",
-										MarkdownDescription: "disable_js_insert No web endpoints or to insert JavaScript manually",
+										MarkdownDescription: "disable_js_insert No web endpoints or to insert JavaScript manually<br>Conflicts with `js_insertion_rules` and `manual_js_insert`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2298,7 +2302,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 									},
 									"js_insertion_rules": schema.SingleNestedAttribute{
 										Description:         "Specify JavaScript Insertion Rules Specify pages to include or exclude JavaScript",
-										MarkdownDescription: "Specify JavaScript Insertion Rules Specify pages to include or exclude JavaScript",
+										MarkdownDescription: "Specify JavaScript Insertion Rules Specify pages to include or exclude JavaScript<br>Conflicts with `disable_js_insert` and `manual_js_insert`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2317,20 +2321,23 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 													Attributes: map[string]schema.Attribute{
 														"domain_matcher_choice": schema.SingleNestedAttribute{
 															Description:         "Domain Matcher This defines domain matcher.",
-															MarkdownDescription: "Domain Matcher This defines domain matcher.",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
+															MarkdownDescription: "Domain Matcher This defines domain matcher.<br>Exactly one of `any_domain` or `domain` must be specified when `domain_matcher_choice` is configured.",
+															Required:            false,
+															Optional:            true,
+															Computed:            true,
 															Validators: []validator.Object{
-																exactlyoneofvalidator.RequiredExactlyOneOf(
+																exactlyoneofvalidator.ExactlyOneOf(
 																	"any_domain",
 																	"domain",
 																),
 															},
+															PlanModifiers: []planmodifier.Object{
+																objectplanmodifier.UseNonNullStateForUnknown(),
+															},
 															Attributes: map[string]schema.Attribute{
 																"any_domain": schema.BoolAttribute{
 																	Description:         "Any domain Any Domain.",
-																	MarkdownDescription: "Any domain Any Domain.",
+																	MarkdownDescription: "Any domain Any Domain.<br>Conflicts with `domain`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -2340,14 +2347,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"domain": schema.SingleNestedAttribute{
 																	Description:         "Domain Domain matcher.",
-																	MarkdownDescription: "Domain Domain matcher.",
+																	MarkdownDescription: "Domain Domain matcher.<br>Conflicts with `any_domain`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"domain_choice": schema.SingleNestedAttribute{
 																			Description:         "Domain choice Method to specify domain part",
-																			MarkdownDescription: "Domain choice Method to specify domain part",
+																			MarkdownDescription: "Domain choice Method to specify domain part<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -2361,7 +2368,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"exact_value": schema.StringAttribute{
 																					Description:         "exact value Exact domain name.",
-																					MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`",
+																					MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -2375,7 +2382,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"regex_value": schema.StringAttribute{
 																					Description:         "regex values of Domains Regular Expression value for the domain name",
-																					MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`",
+																					MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -2385,7 +2392,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"suffix_value": schema.StringAttribute{
 																					Description:         "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'",
-																					MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`",
+																					MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -2445,7 +2452,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"path_match_choice": schema.SingleNestedAttribute{
 																	Description:         "path_match A specification of path match",
-																	MarkdownDescription: "path_match A specification of path match",
+																	MarkdownDescription: "path_match A specification of path match<br>Exactly one of `path`, `prefix`, or `regex` must be specified.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
@@ -2459,7 +2466,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																	Attributes: map[string]schema.Attribute{
 																		"path": schema.StringAttribute{
 																			Description:         "exact Exact path value to match",
-																			MarkdownDescription: "exact Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`",
+																			MarkdownDescription: "exact Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `prefix` and `regex`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -2473,7 +2480,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																		},
 																		"prefix": schema.StringAttribute{
 																			Description:         "prefix Path prefix to match (e.g. the value / will match on all paths)",
-																			MarkdownDescription: "prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`",
+																			MarkdownDescription: "prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `path` and `regex`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -2487,7 +2494,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																		},
 																		"regex": schema.StringAttribute{
 																			Description:         "regex Regular expression of path match (e.g. the value .* will match on all paths)",
-																			MarkdownDescription: "regex Regular expression of path match (e.g. the value .* will match on all paths)",
+																			MarkdownDescription: "regex Regular expression of path match (e.g. the value .* will match on all paths)<br>Conflicts with `path` and `prefix`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -2543,20 +2550,23 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 													Attributes: map[string]schema.Attribute{
 														"domain_matcher_choice": schema.SingleNestedAttribute{
 															Description:         "Domain Matcher This defines domain matcher.",
-															MarkdownDescription: "Domain Matcher This defines domain matcher.",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
+															MarkdownDescription: "Domain Matcher This defines domain matcher.<br>Exactly one of `any_domain` or `domain` must be specified when `domain_matcher_choice` is configured.",
+															Required:            false,
+															Optional:            true,
+															Computed:            true,
 															Validators: []validator.Object{
-																exactlyoneofvalidator.RequiredExactlyOneOf(
+																exactlyoneofvalidator.ExactlyOneOf(
 																	"any_domain",
 																	"domain",
 																),
 															},
+															PlanModifiers: []planmodifier.Object{
+																objectplanmodifier.UseNonNullStateForUnknown(),
+															},
 															Attributes: map[string]schema.Attribute{
 																"any_domain": schema.BoolAttribute{
 																	Description:         "Any domain Any Domain.",
-																	MarkdownDescription: "Any domain Any Domain.",
+																	MarkdownDescription: "Any domain Any Domain.<br>Conflicts with `domain`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -2566,14 +2576,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"domain": schema.SingleNestedAttribute{
 																	Description:         "Domain Domain matcher.",
-																	MarkdownDescription: "Domain Domain matcher.",
+																	MarkdownDescription: "Domain Domain matcher.<br>Conflicts with `any_domain`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"domain_choice": schema.SingleNestedAttribute{
 																			Description:         "Domain choice Method to specify domain part",
-																			MarkdownDescription: "Domain choice Method to specify domain part",
+																			MarkdownDescription: "Domain choice Method to specify domain part<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -2587,7 +2597,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"exact_value": schema.StringAttribute{
 																					Description:         "exact value Exact domain name.",
-																					MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`",
+																					MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -2601,7 +2611,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"regex_value": schema.StringAttribute{
 																					Description:         "regex values of Domains Regular Expression value for the domain name",
-																					MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`",
+																					MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -2611,7 +2621,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"suffix_value": schema.StringAttribute{
 																					Description:         "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'",
-																					MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`",
+																					MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -2664,7 +2674,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 														},
 														"uri_path_choice": schema.SingleNestedAttribute{
 															Description:         "Path URI path matcher.",
-															MarkdownDescription: "Path URI path matcher.",
+															MarkdownDescription: "Path URI path matcher.<br>Exactly one of `exact_path`, `glob`, or `prefix` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -2678,7 +2688,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"exact_path": schema.StringAttribute{
 																	Description:         "path Exact path value to match",
-																	MarkdownDescription: "path Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`",
+																	MarkdownDescription: "path Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `glob` and `prefix`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -2692,7 +2702,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"glob": schema.StringAttribute{
 																	Description:         "glob Accepts wildcards * to match multiple characters or ? to match a single character",
-																	MarkdownDescription: "glob Accepts wildcards * to match multiple characters or ? to match a single character",
+																	MarkdownDescription: "glob Accepts wildcards * to match multiple characters or ? to match a single character<br>Conflicts with `exact_path` and `prefix`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -2706,7 +2716,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"prefix": schema.StringAttribute{
 																	Description:         "prefix Path prefix to match (e.g. the value / will match on all paths)",
-																	MarkdownDescription: "prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`",
+																	MarkdownDescription: "prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `exact_path` and `glob`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -2727,7 +2737,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 									},
 									"manual_js_insert": schema.SingleNestedAttribute{
 										Description:         "manual_js_insert Insert JavaScript manually",
-										MarkdownDescription: "manual_js_insert Insert JavaScript manually",
+										MarkdownDescription: "manual_js_insert Insert JavaScript manually<br>Conflicts with `disable_js_insert` and `js_insertion_rules`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2765,20 +2775,23 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 							},
 							"mobile_sdk_choice": schema.SingleNestedAttribute{
 								Description:         "Mobile SDK Choice Configure Mobile SDK parameters to protect native mobile app endpoints. If you have selected client type as 'Mobile' or 'Web And Mobile' please Enable Mobile SDK. In the event that there is at least one protected endpoint marked with a client type of 'Web And Mobile', then also define Mobile Request Identifier(s) in advanced setting.",
-								MarkdownDescription: "Mobile SDK Choice Configure Mobile SDK parameters to protect native mobile app endpoints. If you have selected client type as 'Mobile' or 'Web And Mobile' please Enable Mobile SDK. In the event that there is at least one protected endpoint marked with a client type of 'Web And Mobile', then also define Mobile Request Identifier(s) in advanced setting.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Mobile SDK Choice Configure Mobile SDK parameters to protect native mobile app endpoints. If you have selected client type as 'Mobile' or 'Web And Mobile' please Enable Mobile SDK. In the event that there is at least one protected endpoint marked with a client type of 'Web And Mobile', then also define Mobile Request Identifier(s) in advanced setting.<br>Exactly one of `disable_mobile_sdk` or `mobile_sdk_config` must be specified when `mobile_sdk_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"disable_mobile_sdk",
 										"mobile_sdk_config",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"disable_mobile_sdk": schema.BoolAttribute{
 										Description:         "Disable Mobile SDK",
-										MarkdownDescription: "Disable Mobile SDK",
+										MarkdownDescription: "Disable Mobile SDK<br>Conflicts with `mobile_sdk_config`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2788,7 +2801,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 									},
 									"mobile_sdk_config": schema.SingleNestedAttribute{
 										Description:         "Mobile SDK configuration",
-										MarkdownDescription: "Mobile SDK configuration",
+										MarkdownDescription: "Mobile SDK configuration<br>Conflicts with `disable_mobile_sdk`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2827,7 +2840,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"value_match_choice": schema.SingleNestedAttribute{
 																	Description:         "value_match The variants of matching a header value",
-																	MarkdownDescription: "value_match The variants of matching a header value",
+																	MarkdownDescription: "value_match The variants of matching a header value<br>Exactly one of `exact` or `regex` must be specified when `value_match_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -2840,7 +2853,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																	Attributes: map[string]schema.Attribute{
 																		"exact": schema.StringAttribute{
 																			Description:         "exact Header value to match exactly",
-																			MarkdownDescription: "exact Header value to match exactly",
+																			MarkdownDescription: "exact Header value to match exactly<br>Conflicts with `regex`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -2851,7 +2864,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																		},
 																		"regex": schema.StringAttribute{
 																			Description:         "regex Regex match of the header value in re2 format",
-																			MarkdownDescription: "regex Regex match of the header value in re2 format",
+																			MarkdownDescription: "regex Regex match of the header value in re2 format<br>Conflicts with `exact`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -2885,7 +2898,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 									Attributes: map[string]schema.Attribute{
 										"client_type_choice": schema.SingleNestedAttribute{
 											Description:         "Client Type Select type of client(s) that will access this endpoint",
-											MarkdownDescription: "Client Type Select type of client(s) that will access this endpoint",
+											MarkdownDescription: "Client Type Select type of client(s) that will access this endpoint<br>Exactly one of `mobile_client`, `web_client`, or `web_mobile_client` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -2899,14 +2912,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 											Attributes: map[string]schema.Attribute{
 												"mobile_client": schema.SingleNestedAttribute{
 													Description:         "Mobile Client Mobile traffic channel.",
-													MarkdownDescription: "Mobile Client Mobile traffic channel.",
+													MarkdownDescription: "Mobile Client Mobile traffic channel.<br>Conflicts with `web_client` and `web_mobile_client`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"mitigation_choice": schema.SingleNestedAttribute{
 															Description:         "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
-															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
+															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic<br>Exactly one of `block` or `continue` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -2919,7 +2932,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"block": schema.SingleNestedAttribute{
 																	Description:         "Block Respond with a custom block message",
-																	MarkdownDescription: "Block Respond with a custom block message",
+																	MarkdownDescription: "Block Respond with a custom block message<br>Conflicts with `continue`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -2961,14 +2974,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"continue": schema.SingleNestedAttribute{
 																	Description:         "Continue Request is flagged and forwarded to the origin",
-																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin",
+																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin<br>Conflicts with `block`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"add_header_choice": schema.SingleNestedAttribute{
 																			Description:         "send_headers_choice Select either to include a header with automation information to the origin",
-																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin",
+																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin<br>Exactly one of `add_header` or `no_header` must be specified when `add_header_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -2981,7 +2994,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"add_header": schema.BoolAttribute{
 																					Description:         "add_header Add a header containing automation information",
-																					MarkdownDescription: "add_header Add a header containing automation information",
+																					MarkdownDescription: "add_header Add a header containing automation information<br>Conflicts with `no_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -2991,7 +3004,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"no_header": schema.BoolAttribute{
 																					Description:         "no_header Do not add a header containing automation information",
-																					MarkdownDescription: "no_header Do not add a header containing automation information",
+																					MarkdownDescription: "no_header Do not add a header containing automation information<br>Conflicts with `add_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -3009,14 +3022,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 												},
 												"web_client": schema.SingleNestedAttribute{
 													Description:         "Web Client Web traffic",
-													MarkdownDescription: "Web Client Web traffic",
+													MarkdownDescription: "Web Client Web traffic<br>Conflicts with `mobile_client` and `web_mobile_client`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"mitigation_choice": schema.SingleNestedAttribute{
 															Description:         "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
-															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
+															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic<br>Exactly one of `block`, `continue`, or `redirect` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -3030,7 +3043,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"block": schema.SingleNestedAttribute{
 																	Description:         "Block Respond with a custom block message",
-																	MarkdownDescription: "Block Respond with a custom block message",
+																	MarkdownDescription: "Block Respond with a custom block message<br>Conflicts with `continue` and `redirect`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3073,14 +3086,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"continue": schema.SingleNestedAttribute{
 																	Description:         "Continue Request is flagged and forwarded to the origin",
-																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin",
+																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin<br>Conflicts with `block` and `redirect`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"add_header_choice": schema.SingleNestedAttribute{
 																			Description:         "send_headers_choice Select either to include a header with automation information to the origin",
-																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin",
+																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin<br>Exactly one of `add_header` or `no_header` must be specified when `add_header_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3093,7 +3106,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"add_header": schema.BoolAttribute{
 																					Description:         "add_header Add a header containing automation information",
-																					MarkdownDescription: "add_header Add a header containing automation information",
+																					MarkdownDescription: "add_header Add a header containing automation information<br>Conflicts with `no_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -3103,7 +3116,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"no_header": schema.BoolAttribute{
 																					Description:         "no_header Do not add a header containing automation information",
-																					MarkdownDescription: "no_header Do not add a header containing automation information",
+																					MarkdownDescription: "no_header Do not add a header containing automation information<br>Conflicts with `add_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -3117,7 +3130,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"redirect": schema.SingleNestedAttribute{
 																	Description:         "Redirect Respond with a redirect",
-																	MarkdownDescription: "Redirect Respond with a redirect",
+																	MarkdownDescription: "Redirect Respond with a redirect<br>Conflicts with `block` and `continue`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3157,14 +3170,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 												},
 												"web_mobile_client": schema.SingleNestedAttribute{
 													Description:         "WebMobileTrafficChannel Web and mobile traffic channel.",
-													MarkdownDescription: "WebMobileTrafficChannel Web and mobile traffic channel.",
+													MarkdownDescription: "WebMobileTrafficChannel Web and mobile traffic channel.<br>Conflicts with `mobile_client` and `web_client`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"mobile_mitigation_choice": schema.SingleNestedAttribute{
 															Description:         "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
-															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
+															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic<br>Exactly one of `block_mobile` or `continue_mobile` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -3177,7 +3190,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"block_mobile": schema.SingleNestedAttribute{
 																	Description:         "Block Respond with a custom block message",
-																	MarkdownDescription: "Block Respond with a custom block message",
+																	MarkdownDescription: "Block Respond with a custom block message<br>Conflicts with `continue_mobile`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3219,14 +3232,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"continue_mobile": schema.SingleNestedAttribute{
 																	Description:         "Continue Request is flagged and forwarded to the origin",
-																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin",
+																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin<br>Conflicts with `block_mobile`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"add_header_choice": schema.SingleNestedAttribute{
 																			Description:         "send_headers_choice Select either to include a header with automation information to the origin",
-																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin",
+																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin<br>Exactly one of `add_header` or `no_header` must be specified when `add_header_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3239,7 +3252,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"add_header": schema.BoolAttribute{
 																					Description:         "add_header Add a header containing automation information",
-																					MarkdownDescription: "add_header Add a header containing automation information",
+																					MarkdownDescription: "add_header Add a header containing automation information<br>Conflicts with `no_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -3249,7 +3262,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"no_header": schema.BoolAttribute{
 																					Description:         "no_header Do not add a header containing automation information",
-																					MarkdownDescription: "no_header Do not add a header containing automation information",
+																					MarkdownDescription: "no_header Do not add a header containing automation information<br>Conflicts with `add_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -3265,7 +3278,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 														},
 														"web_mitigation_choice": schema.SingleNestedAttribute{
 															Description:         "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
-															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
+															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic<br>Exactly one of `block_web`, `continue_web`, or `redirect_web` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -3279,7 +3292,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"block_web": schema.SingleNestedAttribute{
 																	Description:         "Block Respond with a custom block message",
-																	MarkdownDescription: "Block Respond with a custom block message",
+																	MarkdownDescription: "Block Respond with a custom block message<br>Conflicts with `continue_web` and `redirect_web`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3322,14 +3335,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"continue_web": schema.SingleNestedAttribute{
 																	Description:         "Continue Request is flagged and forwarded to the origin",
-																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin",
+																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin<br>Conflicts with `block_web` and `redirect_web`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"add_header_choice": schema.SingleNestedAttribute{
 																			Description:         "send_headers_choice Select either to include a header with automation information to the origin",
-																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin",
+																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin<br>Exactly one of `add_header` or `no_header` must be specified when `add_header_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -3342,7 +3355,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"add_header": schema.BoolAttribute{
 																					Description:         "add_header Add a header containing automation information",
-																					MarkdownDescription: "add_header Add a header containing automation information",
+																					MarkdownDescription: "add_header Add a header containing automation information<br>Conflicts with `no_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -3352,7 +3365,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"no_header": schema.BoolAttribute{
 																					Description:         "no_header Do not add a header containing automation information",
-																					MarkdownDescription: "no_header Do not add a header containing automation information",
+																					MarkdownDescription: "no_header Do not add a header containing automation information<br>Conflicts with `add_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -3366,7 +3379,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"redirect_web": schema.SingleNestedAttribute{
 																	Description:         "Redirect Respond with a redirect",
-																	MarkdownDescription: "Redirect Respond with a redirect",
+																	MarkdownDescription: "Redirect Respond with a redirect<br>Conflicts with `block_web` and `continue_web`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3408,7 +3421,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 										},
 										"domain_matcher_choice": schema.SingleNestedAttribute{
 											Description:         "Domain Matcher This defines domain matcher.",
-											MarkdownDescription: "Domain Matcher This defines domain matcher.",
+											MarkdownDescription: "Domain Matcher This defines domain matcher.<br>Exactly one of `any_domain` or `domain` must be specified when `domain_matcher_choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -3421,7 +3434,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 											Attributes: map[string]schema.Attribute{
 												"any_domain": schema.BoolAttribute{
 													Description:         "Any domain Any Domain",
-													MarkdownDescription: "Any domain Any Domain",
+													MarkdownDescription: "Any domain Any Domain<br>Conflicts with `domain`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -3431,14 +3444,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 												},
 												"domain": schema.SingleNestedAttribute{
 													Description:         "Domain Select Domain matcher",
-													MarkdownDescription: "Domain Select Domain matcher",
+													MarkdownDescription: "Domain Select Domain matcher<br>Conflicts with `any_domain`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"domain_choice": schema.SingleNestedAttribute{
 															Description:         "Domain choice Method to specify domain part",
-															MarkdownDescription: "Domain choice Method to specify domain part",
+															MarkdownDescription: "Domain choice Method to specify domain part<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -3452,7 +3465,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"exact_value": schema.StringAttribute{
 																	Description:         "exact value Exact domain name.",
-																	MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`",
+																	MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3466,7 +3479,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"regex_value": schema.StringAttribute{
 																	Description:         "regex values of Domains Regular Expression value for the domain name",
-																	MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`",
+																	MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3476,7 +3489,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"suffix_value": schema.StringAttribute{
 																	Description:         "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'",
-																	MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`",
+																	MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3608,7 +3621,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 									Attributes: map[string]schema.Attribute{
 										"client_source_choice": schema.SingleNestedAttribute{
 											Description:         "Client Identifier Client identifier that should be used for the client rule",
-											MarkdownDescription: "Client Identifier Client identifier that should be used for the client rule",
+											MarkdownDescription: "Client Identifier Client identifier that should be used for the client rule<br>Exactly one of `http_header` or `ip_prefix` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -3621,7 +3634,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 											Attributes: map[string]schema.Attribute{
 												"http_header": schema.SingleNestedAttribute{
 													Description:         "HTTP Header Request header name and value pairs",
-													MarkdownDescription: "HTTP Header Request header name and value pairs",
+													MarkdownDescription: "HTTP Header Request header name and value pairs<br>Conflicts with `ip_prefix`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -3653,7 +3666,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																	},
 																	"value_match_choice": schema.SingleNestedAttribute{
 																		Description:         "value_match The variants of matching a header value",
-																		MarkdownDescription: "value_match The variants of matching a header value",
+																		MarkdownDescription: "value_match The variants of matching a header value<br>Exactly one of `exact` or `regex` must be specified when `value_match_choice` is configured.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -3666,7 +3679,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																		Attributes: map[string]schema.Attribute{
 																			"exact": schema.StringAttribute{
 																				Description:         "exact Header value to match exactly",
-																				MarkdownDescription: "exact Header value to match exactly",
+																				MarkdownDescription: "exact Header value to match exactly<br>Conflicts with `regex`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -3677,7 +3690,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			},
 																			"regex": schema.StringAttribute{
 																				Description:         "regex Regex match of the header value in re2 format",
-																				MarkdownDescription: "regex Regex match of the header value in re2 format",
+																				MarkdownDescription: "regex Regex match of the header value in re2 format<br>Conflicts with `exact`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -3695,7 +3708,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 												},
 												"ip_prefix": schema.StringAttribute{
 													Description:         "ip prefix IP prefix string",
-													MarkdownDescription: "ip prefix IP prefix string",
+													MarkdownDescription: "ip prefix IP prefix string<br>Conflicts with `http_header`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -3748,14 +3761,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 					},
 					"cloudfront": schema.SingleNestedAttribute{
 						Description:         "Amazon Cloudfront Configure Amazon CloudFront connector properties",
-						MarkdownDescription: "Amazon Cloudfront Configure Amazon CloudFront connector properties",
+						MarkdownDescription: "Amazon Cloudfront Configure Amazon CloudFront connector properties<br>Conflicts with `adobe_commerce_connector`, `big_ip_iapp`, `cloudflare`, `custom_connector`, `f5_big_ip`, and `salesforce_commerce_connector`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"aws_configuration_type_choice": schema.SingleNestedAttribute{
 								Description:         "AWS Configuration Choice AWS Configuration options",
-								MarkdownDescription: "AWS Configuration Choice AWS Configuration options",
+								MarkdownDescription: "AWS Configuration Choice AWS Configuration options<br>Exactly one of `aws_configuration_id_selector`, `aws_configuration_tag_selector`, or `disable_aws_configuration` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -3769,7 +3782,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 								Attributes: map[string]schema.Attribute{
 									"aws_configuration_id_selector": schema.SingleNestedAttribute{
 										Description:         "aws_configuration Associate your AWS CloudFront distribution(s) with protected endpoint(s) by specifing IDs",
-										MarkdownDescription: "aws_configuration Associate your AWS CloudFront distribution(s) with protected endpoint(s) by specifing IDs",
+										MarkdownDescription: "aws_configuration Associate your AWS CloudFront distribution(s) with protected endpoint(s) by specifing IDs<br>Conflicts with `aws_configuration_tag_selector` and `disable_aws_configuration`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3795,7 +3808,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 									},
 									"aws_configuration_tag_selector": schema.SingleNestedAttribute{
 										Description:         "aws_configuration Associate your AWS CloudFront distribution(s) with protected endpoint(s) by using tag selector",
-										MarkdownDescription: "aws_configuration Associate your AWS CloudFront distribution(s) with protected endpoint(s) by using tag selector",
+										MarkdownDescription: "aws_configuration Associate your AWS CloudFront distribution(s) with protected endpoint(s) by using tag selector<br>Conflicts with `aws_configuration_id_selector` and `disable_aws_configuration`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3815,7 +3828,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 									},
 									"disable_aws_configuration": schema.BoolAttribute{
 										Description:         "Disable AWS Configuration Check this box if you would prefer to manage distribution manaully",
-										MarkdownDescription: "Disable AWS Configuration Check this box if you would prefer to manage distribution manaully",
+										MarkdownDescription: "Disable AWS Configuration Check this box if you would prefer to manage distribution manaully<br>Conflicts with `aws_configuration_id_selector` and `aws_configuration_tag_selector`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3853,7 +3866,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 							},
 							"java_script_choice": schema.SingleNestedAttribute{
 								Description:         "JavaScript Choice For Manual JavaScript Insertion, add the JS tags to one of the recommended locations: Immediately After <Head>, Immediately After </title>, Before <script> (first script tag on the page). JS tags provided in documentation.",
-								MarkdownDescription: "JavaScript Choice For Manual JavaScript Insertion, add the JS tags to one of the recommended locations: Immediately After <Head>, Immediately After </title>, Before <script> (first script tag on the page). JS tags provided in documentation.",
+								MarkdownDescription: "JavaScript Choice For Manual JavaScript Insertion, add the JS tags to one of the recommended locations: Immediately After <Head>, Immediately After </title>, Before <script> (first script tag on the page). JS tags provided in documentation.<br>Exactly one of `disable_js_insert`, `js_insertion_rules`, or `manual_js_insert` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -3867,7 +3880,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 								Attributes: map[string]schema.Attribute{
 									"disable_js_insert": schema.BoolAttribute{
 										Description:         "disable_js_insert No web endpoints",
-										MarkdownDescription: "disable_js_insert No web endpoints",
+										MarkdownDescription: "disable_js_insert No web endpoints<br>Conflicts with `js_insertion_rules` and `manual_js_insert`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3877,7 +3890,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 									},
 									"js_insertion_rules": schema.SingleNestedAttribute{
 										Description:         "Specify JavaScript Insertion Rules Specify pages to include or exclude JavaScript",
-										MarkdownDescription: "Specify JavaScript Insertion Rules Specify pages to include or exclude JavaScript",
+										MarkdownDescription: "Specify JavaScript Insertion Rules Specify pages to include or exclude JavaScript<br>Conflicts with `disable_js_insert` and `manual_js_insert`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3896,20 +3909,23 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 													Attributes: map[string]schema.Attribute{
 														"domain_matcher_choice": schema.SingleNestedAttribute{
 															Description:         "Domain Matcher This defines domain matcher.",
-															MarkdownDescription: "Domain Matcher This defines domain matcher.",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
+															MarkdownDescription: "Domain Matcher This defines domain matcher.<br>Exactly one of `any_domain` or `domain` must be specified when `domain_matcher_choice` is configured.",
+															Required:            false,
+															Optional:            true,
+															Computed:            true,
 															Validators: []validator.Object{
-																exactlyoneofvalidator.RequiredExactlyOneOf(
+																exactlyoneofvalidator.ExactlyOneOf(
 																	"any_domain",
 																	"domain",
 																),
 															},
+															PlanModifiers: []planmodifier.Object{
+																objectplanmodifier.UseNonNullStateForUnknown(),
+															},
 															Attributes: map[string]schema.Attribute{
 																"any_domain": schema.BoolAttribute{
 																	Description:         "Any domain Any Domain.",
-																	MarkdownDescription: "Any domain Any Domain.",
+																	MarkdownDescription: "Any domain Any Domain.<br>Conflicts with `domain`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3919,14 +3935,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"domain": schema.SingleNestedAttribute{
 																	Description:         "Domain Domain matcher.",
-																	MarkdownDescription: "Domain Domain matcher.",
+																	MarkdownDescription: "Domain Domain matcher.<br>Conflicts with `any_domain`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"domain_choice": schema.SingleNestedAttribute{
 																			Description:         "Domain choice Method to specify domain part",
-																			MarkdownDescription: "Domain choice Method to specify domain part",
+																			MarkdownDescription: "Domain choice Method to specify domain part<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -3940,7 +3956,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"exact_value": schema.StringAttribute{
 																					Description:         "exact value Exact domain name.",
-																					MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`",
+																					MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -3954,7 +3970,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"regex_value": schema.StringAttribute{
 																					Description:         "regex values of Domains Regular Expression value for the domain name",
-																					MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`",
+																					MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -3964,7 +3980,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"suffix_value": schema.StringAttribute{
 																					Description:         "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'",
-																					MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`",
+																					MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4024,7 +4040,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"path_match_choice": schema.SingleNestedAttribute{
 																	Description:         "path_match A specification of path match",
-																	MarkdownDescription: "path_match A specification of path match",
+																	MarkdownDescription: "path_match A specification of path match<br>Exactly one of `path`, `prefix`, or `regex` must be specified.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
@@ -4038,7 +4054,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																	Attributes: map[string]schema.Attribute{
 																		"path": schema.StringAttribute{
 																			Description:         "exact Exact path value to match",
-																			MarkdownDescription: "exact Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`",
+																			MarkdownDescription: "exact Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `prefix` and `regex`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4052,7 +4068,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																		},
 																		"prefix": schema.StringAttribute{
 																			Description:         "prefix Path prefix to match (e.g. the value / will match on all paths)",
-																			MarkdownDescription: "prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`",
+																			MarkdownDescription: "prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `path` and `regex`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4066,7 +4082,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																		},
 																		"regex": schema.StringAttribute{
 																			Description:         "regex Regular expression of path match (e.g. the value .* will match on all paths)",
-																			MarkdownDescription: "regex Regular expression of path match (e.g. the value .* will match on all paths)",
+																			MarkdownDescription: "regex Regular expression of path match (e.g. the value .* will match on all paths)<br>Conflicts with `path` and `prefix`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4133,20 +4149,23 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 													Attributes: map[string]schema.Attribute{
 														"domain_matcher_choice": schema.SingleNestedAttribute{
 															Description:         "Domain Matcher This defines domain matcher.",
-															MarkdownDescription: "Domain Matcher This defines domain matcher.",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
+															MarkdownDescription: "Domain Matcher This defines domain matcher.<br>Exactly one of `any_domain` or `domain` must be specified when `domain_matcher_choice` is configured.",
+															Required:            false,
+															Optional:            true,
+															Computed:            true,
 															Validators: []validator.Object{
-																exactlyoneofvalidator.RequiredExactlyOneOf(
+																exactlyoneofvalidator.ExactlyOneOf(
 																	"any_domain",
 																	"domain",
 																),
 															},
+															PlanModifiers: []planmodifier.Object{
+																objectplanmodifier.UseNonNullStateForUnknown(),
+															},
 															Attributes: map[string]schema.Attribute{
 																"any_domain": schema.BoolAttribute{
 																	Description:         "Any domain Any Domain.",
-																	MarkdownDescription: "Any domain Any Domain.",
+																	MarkdownDescription: "Any domain Any Domain.<br>Conflicts with `domain`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4156,14 +4175,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"domain": schema.SingleNestedAttribute{
 																	Description:         "Domain Domain matcher.",
-																	MarkdownDescription: "Domain Domain matcher.",
+																	MarkdownDescription: "Domain Domain matcher.<br>Conflicts with `any_domain`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"domain_choice": schema.SingleNestedAttribute{
 																			Description:         "Domain choice Method to specify domain part",
-																			MarkdownDescription: "Domain choice Method to specify domain part",
+																			MarkdownDescription: "Domain choice Method to specify domain part<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -4177,7 +4196,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"exact_value": schema.StringAttribute{
 																					Description:         "exact value Exact domain name.",
-																					MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`",
+																					MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4191,7 +4210,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"regex_value": schema.StringAttribute{
 																					Description:         "regex values of Domains Regular Expression value for the domain name",
-																					MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`",
+																					MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4201,7 +4220,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"suffix_value": schema.StringAttribute{
 																					Description:         "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'",
-																					MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`",
+																					MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4254,7 +4273,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 														},
 														"uri_path_choice": schema.SingleNestedAttribute{
 															Description:         "Path URI path matcher.",
-															MarkdownDescription: "Path URI path matcher.",
+															MarkdownDescription: "Path URI path matcher.<br>Exactly one of `exact_path`, `glob`, or `prefix` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -4268,7 +4287,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"exact_path": schema.StringAttribute{
 																	Description:         "path Exact path value to match",
-																	MarkdownDescription: "path Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`",
+																	MarkdownDescription: "path Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `glob` and `prefix`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4282,7 +4301,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"glob": schema.StringAttribute{
 																	Description:         "glob Accepts wildcards * to match multiple characters or ? to match a single character",
-																	MarkdownDescription: "glob Accepts wildcards * to match multiple characters or ? to match a single character",
+																	MarkdownDescription: "glob Accepts wildcards * to match multiple characters or ? to match a single character<br>Conflicts with `exact_path` and `prefix`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4296,7 +4315,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"prefix": schema.StringAttribute{
 																	Description:         "prefix Path prefix to match (e.g. the value / will match on all paths)",
-																	MarkdownDescription: "prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`",
+																	MarkdownDescription: "prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `exact_path` and `glob`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4317,7 +4336,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 									},
 									"manual_js_insert": schema.SingleNestedAttribute{
 										Description:         "manual_js_insert Insert JavaScript manually",
-										MarkdownDescription: "manual_js_insert Insert JavaScript manually",
+										MarkdownDescription: "manual_js_insert Insert JavaScript manually<br>Conflicts with `disable_js_insert` and `js_insertion_rules`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4367,20 +4386,23 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 							},
 							"mobile_sdk_choice": schema.SingleNestedAttribute{
 								Description:         "Mobile SDK Choice Configure Mobile SDK parameters to protect native mobile app endpoints. If you have selected client type as 'Mobile' or 'Web And Mobile' please Enable Mobile SDK. In the event that there is at least one protected endpoint marked with a client type of 'Web And Mobile', then also define Mobile Request Identifier(s) in advanced setting.",
-								MarkdownDescription: "Mobile SDK Choice Configure Mobile SDK parameters to protect native mobile app endpoints. If you have selected client type as 'Mobile' or 'Web And Mobile' please Enable Mobile SDK. In the event that there is at least one protected endpoint marked with a client type of 'Web And Mobile', then also define Mobile Request Identifier(s) in advanced setting.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Mobile SDK Choice Configure Mobile SDK parameters to protect native mobile app endpoints. If you have selected client type as 'Mobile' or 'Web And Mobile' please Enable Mobile SDK. In the event that there is at least one protected endpoint marked with a client type of 'Web And Mobile', then also define Mobile Request Identifier(s) in advanced setting.<br>Exactly one of `disable_mobile_sdk` or `mobile_sdk_config` must be specified when `mobile_sdk_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"disable_mobile_sdk",
 										"mobile_sdk_config",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"disable_mobile_sdk": schema.BoolAttribute{
 										Description:         "Disable Mobile SDK",
-										MarkdownDescription: "Disable Mobile SDK",
+										MarkdownDescription: "Disable Mobile SDK<br>Conflicts with `mobile_sdk_config`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4390,7 +4412,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 									},
 									"mobile_sdk_config": schema.SingleNestedAttribute{
 										Description:         "Mobile SDK configuration",
-										MarkdownDescription: "Mobile SDK configuration",
+										MarkdownDescription: "Mobile SDK configuration<br>Conflicts with `disable_mobile_sdk`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4429,7 +4451,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"value_match_choice": schema.SingleNestedAttribute{
 																	Description:         "value_match The variants of matching a header value",
-																	MarkdownDescription: "value_match The variants of matching a header value",
+																	MarkdownDescription: "value_match The variants of matching a header value<br>Exactly one of `exact` or `regex` must be specified when `value_match_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4442,7 +4464,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																	Attributes: map[string]schema.Attribute{
 																		"exact": schema.StringAttribute{
 																			Description:         "exact Header value to match exactly",
-																			MarkdownDescription: "exact Header value to match exactly",
+																			MarkdownDescription: "exact Header value to match exactly<br>Conflicts with `regex`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4453,7 +4475,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																		},
 																		"regex": schema.StringAttribute{
 																			Description:         "regex Regex match of the header value in re2 format",
-																			MarkdownDescription: "regex Regex match of the header value in re2 format",
+																			MarkdownDescription: "regex Regex match of the header value in re2 format<br>Conflicts with `exact`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4487,7 +4509,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 									Attributes: map[string]schema.Attribute{
 										"client_type_choice": schema.SingleNestedAttribute{
 											Description:         "Client Type Select type of client(s) that will access this endpoint",
-											MarkdownDescription: "Client Type Select type of client(s) that will access this endpoint",
+											MarkdownDescription: "Client Type Select type of client(s) that will access this endpoint<br>Exactly one of `mobile_client`, `web_client`, or `web_mobile_client` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -4501,14 +4523,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 											Attributes: map[string]schema.Attribute{
 												"mobile_client": schema.SingleNestedAttribute{
 													Description:         "Mobile Client Mobile traffic channel.",
-													MarkdownDescription: "Mobile Client Mobile traffic channel.",
+													MarkdownDescription: "Mobile Client Mobile traffic channel.<br>Conflicts with `web_client` and `web_mobile_client`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"mitigation_choice": schema.SingleNestedAttribute{
 															Description:         "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
-															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
+															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic<br>Exactly one of `block` or `continue` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -4521,7 +4543,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"block": schema.SingleNestedAttribute{
 																	Description:         "Block Respond with a custom block message",
-																	MarkdownDescription: "Block Respond with a custom block message",
+																	MarkdownDescription: "Block Respond with a custom block message<br>Conflicts with `continue`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4563,14 +4585,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"continue": schema.SingleNestedAttribute{
 																	Description:         "Continue Request is flagged and forwarded to the origin",
-																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin",
+																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin<br>Conflicts with `block`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"add_header_choice": schema.SingleNestedAttribute{
 																			Description:         "send_headers_choice Select either to include a header with automation information to the origin",
-																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin",
+																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin<br>Exactly one of `add_header` or `no_header` must be specified when `add_header_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4583,7 +4605,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"add_header": schema.BoolAttribute{
 																					Description:         "add_header Add a header containing automation information",
-																					MarkdownDescription: "add_header Add a header containing automation information",
+																					MarkdownDescription: "add_header Add a header containing automation information<br>Conflicts with `no_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4593,7 +4615,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"no_header": schema.BoolAttribute{
 																					Description:         "no_header Do not add a header containing automation information",
-																					MarkdownDescription: "no_header Do not add a header containing automation information",
+																					MarkdownDescription: "no_header Do not add a header containing automation information<br>Conflicts with `add_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4611,14 +4633,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 												},
 												"web_client": schema.SingleNestedAttribute{
 													Description:         "Web Client Web traffic",
-													MarkdownDescription: "Web Client Web traffic",
+													MarkdownDescription: "Web Client Web traffic<br>Conflicts with `mobile_client` and `web_mobile_client`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"mitigation_choice": schema.SingleNestedAttribute{
 															Description:         "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
-															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
+															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic<br>Exactly one of `block`, `continue`, or `redirect` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -4632,7 +4654,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"block": schema.SingleNestedAttribute{
 																	Description:         "Block Respond with a custom block message",
-																	MarkdownDescription: "Block Respond with a custom block message",
+																	MarkdownDescription: "Block Respond with a custom block message<br>Conflicts with `continue` and `redirect`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4675,14 +4697,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"continue": schema.SingleNestedAttribute{
 																	Description:         "Continue Request is flagged and forwarded to the origin",
-																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin",
+																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin<br>Conflicts with `block` and `redirect`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"add_header_choice": schema.SingleNestedAttribute{
 																			Description:         "send_headers_choice Select either to include a header with automation information to the origin",
-																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin",
+																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin<br>Exactly one of `add_header` or `no_header` must be specified when `add_header_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4695,7 +4717,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"add_header": schema.BoolAttribute{
 																					Description:         "add_header Add a header containing automation information",
-																					MarkdownDescription: "add_header Add a header containing automation information",
+																					MarkdownDescription: "add_header Add a header containing automation information<br>Conflicts with `no_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4705,7 +4727,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"no_header": schema.BoolAttribute{
 																					Description:         "no_header Do not add a header containing automation information",
-																					MarkdownDescription: "no_header Do not add a header containing automation information",
+																					MarkdownDescription: "no_header Do not add a header containing automation information<br>Conflicts with `add_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4719,7 +4741,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"redirect": schema.SingleNestedAttribute{
 																	Description:         "Redirect Respond with a redirect",
-																	MarkdownDescription: "Redirect Respond with a redirect",
+																	MarkdownDescription: "Redirect Respond with a redirect<br>Conflicts with `block` and `continue`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4759,14 +4781,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 												},
 												"web_mobile_client": schema.SingleNestedAttribute{
 													Description:         "WebMobileTrafficChannel Web and mobile traffic channel.",
-													MarkdownDescription: "WebMobileTrafficChannel Web and mobile traffic channel.",
+													MarkdownDescription: "WebMobileTrafficChannel Web and mobile traffic channel.<br>Conflicts with `mobile_client` and `web_client`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"mobile_mitigation_choice": schema.SingleNestedAttribute{
 															Description:         "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
-															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
+															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic<br>Exactly one of `block_mobile` or `continue_mobile` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -4779,7 +4801,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"block_mobile": schema.SingleNestedAttribute{
 																	Description:         "Block Respond with a custom block message",
-																	MarkdownDescription: "Block Respond with a custom block message",
+																	MarkdownDescription: "Block Respond with a custom block message<br>Conflicts with `continue_mobile`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4821,14 +4843,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"continue_mobile": schema.SingleNestedAttribute{
 																	Description:         "Continue Request is flagged and forwarded to the origin",
-																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin",
+																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin<br>Conflicts with `block_mobile`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"add_header_choice": schema.SingleNestedAttribute{
 																			Description:         "send_headers_choice Select either to include a header with automation information to the origin",
-																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin",
+																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin<br>Exactly one of `add_header` or `no_header` must be specified when `add_header_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4841,7 +4863,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"add_header": schema.BoolAttribute{
 																					Description:         "add_header Add a header containing automation information",
-																					MarkdownDescription: "add_header Add a header containing automation information",
+																					MarkdownDescription: "add_header Add a header containing automation information<br>Conflicts with `no_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4851,7 +4873,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"no_header": schema.BoolAttribute{
 																					Description:         "no_header Do not add a header containing automation information",
-																					MarkdownDescription: "no_header Do not add a header containing automation information",
+																					MarkdownDescription: "no_header Do not add a header containing automation information<br>Conflicts with `add_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4867,7 +4889,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 														},
 														"web_mitigation_choice": schema.SingleNestedAttribute{
 															Description:         "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
-															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic",
+															MarkdownDescription: "Bot Traffic Mitigation This defines mitigation actions to take for bot traffic<br>Exactly one of `block_web`, `continue_web`, or `redirect_web` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -4881,7 +4903,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"block_web": schema.SingleNestedAttribute{
 																	Description:         "Block Respond with a custom block message",
-																	MarkdownDescription: "Block Respond with a custom block message",
+																	MarkdownDescription: "Block Respond with a custom block message<br>Conflicts with `continue_web` and `redirect_web`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4924,14 +4946,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"continue_web": schema.SingleNestedAttribute{
 																	Description:         "Continue Request is flagged and forwarded to the origin",
-																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin",
+																	MarkdownDescription: "Continue Request is flagged and forwarded to the origin<br>Conflicts with `block_web` and `redirect_web`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"add_header_choice": schema.SingleNestedAttribute{
 																			Description:         "send_headers_choice Select either to include a header with automation information to the origin",
-																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin",
+																			MarkdownDescription: "send_headers_choice Select either to include a header with automation information to the origin<br>Exactly one of `add_header` or `no_header` must be specified when `add_header_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -4944,7 +4966,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"add_header": schema.BoolAttribute{
 																					Description:         "add_header Add a header containing automation information",
-																					MarkdownDescription: "add_header Add a header containing automation information",
+																					MarkdownDescription: "add_header Add a header containing automation information<br>Conflicts with `no_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4954,7 +4976,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"no_header": schema.BoolAttribute{
 																					Description:         "no_header Do not add a header containing automation information",
-																					MarkdownDescription: "no_header Do not add a header containing automation information",
+																					MarkdownDescription: "no_header Do not add a header containing automation information<br>Conflicts with `add_header`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -4968,7 +4990,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"redirect_web": schema.SingleNestedAttribute{
 																	Description:         "Redirect Respond with a redirect",
-																	MarkdownDescription: "Redirect Respond with a redirect",
+																	MarkdownDescription: "Redirect Respond with a redirect<br>Conflicts with `block_web` and `continue_web`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -5010,7 +5032,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 										},
 										"domain_matcher_choice": schema.SingleNestedAttribute{
 											Description:         "Domain Matcher This defines domain matcher.",
-											MarkdownDescription: "Domain Matcher This defines domain matcher.",
+											MarkdownDescription: "Domain Matcher This defines domain matcher.<br>Exactly one of `any_domain` or `domain` must be specified when `domain_matcher_choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -5023,7 +5045,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 											Attributes: map[string]schema.Attribute{
 												"any_domain": schema.BoolAttribute{
 													Description:         "Any domain Any Domain",
-													MarkdownDescription: "Any domain Any Domain",
+													MarkdownDescription: "Any domain Any Domain<br>Conflicts with `domain`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -5033,14 +5055,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 												},
 												"domain": schema.SingleNestedAttribute{
 													Description:         "Domain Select Domain matcher",
-													MarkdownDescription: "Domain Select Domain matcher",
+													MarkdownDescription: "Domain Select Domain matcher<br>Conflicts with `any_domain`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"domain_choice": schema.SingleNestedAttribute{
 															Description:         "Domain choice Method to specify domain part",
-															MarkdownDescription: "Domain choice Method to specify domain part",
+															MarkdownDescription: "Domain choice Method to specify domain part<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -5054,7 +5076,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"exact_value": schema.StringAttribute{
 																	Description:         "exact value Exact domain name.",
-																	MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`",
+																	MarkdownDescription: "exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -5068,7 +5090,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"regex_value": schema.StringAttribute{
 																	Description:         "regex values of Domains Regular Expression value for the domain name",
-																	MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`",
+																	MarkdownDescription: "regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -5078,7 +5100,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"suffix_value": schema.StringAttribute{
 																	Description:         "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'",
-																	MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`",
+																	MarkdownDescription: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -5098,7 +5120,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 										},
 										"flow_label_choice": schema.SingleNestedAttribute{
 											Description:         "Flow label Endpoint label category",
-											MarkdownDescription: "Flow label Endpoint label category",
+											MarkdownDescription: "Flow label Endpoint label category<br>Exactly one of `flow_label` or `undefined_flow_label` must be specified when `flow_label_choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -5111,14 +5133,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 											Attributes: map[string]schema.Attribute{
 												"flow_label": schema.SingleNestedAttribute{
 													Description:         "flow_label",
-													MarkdownDescription: "flow_label",
+													MarkdownDescription: "flow_label<br>Conflicts with `undefined_flow_label`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"flow_label_choice": schema.SingleNestedAttribute{
 															Description:         "Flow label category Select flow label category",
-															MarkdownDescription: "Flow label category Select flow label category",
+															MarkdownDescription: "Flow label category Select flow label category<br>Exactly one of `account_management`, `authentication`, `financial_services`, `flight`, `profile_management`, `search`, or `shopping_gift_cards` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -5136,14 +5158,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 															Attributes: map[string]schema.Attribute{
 																"account_management": schema.SingleNestedAttribute{
 																	Description:         "Account Management",
-																	MarkdownDescription: "Account Management",
+																	MarkdownDescription: "Account Management<br>Conflicts with `authentication`, `financial_services`, `flight`, `profile_management`, `search`, and `shopping_gift_cards`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
 																			Description:         "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
-																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
+																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.<br>Exactly one of `create` or `password_reset` must be specified.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -5156,7 +5178,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"create": schema.BoolAttribute{
 																					Description:         "Create",
-																					MarkdownDescription: "Create",
+																					MarkdownDescription: "Create<br>Conflicts with `password_reset`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5166,7 +5188,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"password_reset": schema.BoolAttribute{
 																					Description:         "Password Reset",
-																					MarkdownDescription: "Password Reset",
+																					MarkdownDescription: "Password Reset<br>Conflicts with `create`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5180,14 +5202,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"authentication": schema.SingleNestedAttribute{
 																	Description:         "Authentication",
-																	MarkdownDescription: "Authentication",
+																	MarkdownDescription: "Authentication<br>Conflicts with `account_management`, `financial_services`, `flight`, `profile_management`, `search`, and `shopping_gift_cards`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
 																			Description:         "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
-																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
+																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.<br>Exactly one of `login`, `login_mfa`, `login_partner`, `logout`, or `token_refresh` must be specified.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -5203,7 +5225,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"login": schema.BoolAttribute{
 																					Description:         "Login",
-																					MarkdownDescription: "Login",
+																					MarkdownDescription: "Login<br>Conflicts with `login_mfa`, `login_partner`, `logout`, and `token_refresh`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5213,7 +5235,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"login_mfa": schema.BoolAttribute{
 																					Description:         "LoginMFA",
-																					MarkdownDescription: "LoginMFA",
+																					MarkdownDescription: "LoginMFA<br>Conflicts with `login`, `login_partner`, `logout`, and `token_refresh`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5223,7 +5245,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"login_partner": schema.BoolAttribute{
 																					Description:         "login_partner",
-																					MarkdownDescription: "login_partner",
+																					MarkdownDescription: "login_partner<br>Conflicts with `login`, `login_mfa`, `logout`, and `token_refresh`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5233,7 +5255,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"logout": schema.BoolAttribute{
 																					Description:         "logout",
-																					MarkdownDescription: "logout",
+																					MarkdownDescription: "logout<br>Conflicts with `login`, `login_mfa`, `login_partner`, and `token_refresh`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5243,7 +5265,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"token_refresh": schema.BoolAttribute{
 																					Description:         "token_refresh",
-																					MarkdownDescription: "token_refresh",
+																					MarkdownDescription: "token_refresh<br>Conflicts with `login`, `login_mfa`, `login_partner`, and `logout`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5257,14 +5279,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"financial_services": schema.SingleNestedAttribute{
 																	Description:         "Financial Services",
-																	MarkdownDescription: "Financial Services",
+																	MarkdownDescription: "Financial Services<br>Conflicts with `account_management`, `authentication`, `flight`, `profile_management`, `search`, and `shopping_gift_cards`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
 																			Description:         "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
-																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
+																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.<br>Exactly one of `apply` or `money_transfer` must be specified.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -5277,7 +5299,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"apply": schema.BoolAttribute{
 																					Description:         "apply",
-																					MarkdownDescription: "apply",
+																					MarkdownDescription: "apply<br>Conflicts with `money_transfer`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5287,7 +5309,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"money_transfer": schema.BoolAttribute{
 																					Description:         "money_transfer",
-																					MarkdownDescription: "money_transfer",
+																					MarkdownDescription: "money_transfer<br>Conflicts with `apply`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5301,21 +5323,24 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"flight": schema.SingleNestedAttribute{
 																	Description:         "Flight",
-																	MarkdownDescription: "Flight",
+																	MarkdownDescription: "Flight<br>Conflicts with `account_management`, `authentication`, `financial_services`, `profile_management`, `search`, and `shopping_gift_cards`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
 																			Description:         "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
-																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
-																			Required:            true,
-																			Optional:            false,
-																			Computed:            false,
+																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.<br>`checkin` must be specified when `label_choice` is configured.",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            true,
 																			Validators: []validator.Object{
-																				exactlyoneofvalidator.RequiredExactlyOneOf(
+																				exactlyoneofvalidator.ExactlyOneOf(
 																					"checkin",
 																				),
+																			},
+																			PlanModifiers: []planmodifier.Object{
+																				objectplanmodifier.UseNonNullStateForUnknown(),
 																			},
 																			Attributes: map[string]schema.Attribute{
 																				"checkin": schema.BoolAttribute{
@@ -5334,14 +5359,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"profile_management": schema.SingleNestedAttribute{
 																	Description:         "Profile Management",
-																	MarkdownDescription: "Profile Management",
+																	MarkdownDescription: "Profile Management<br>Conflicts with `account_management`, `authentication`, `financial_services`, `flight`, `search`, and `shopping_gift_cards`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
 																			Description:         "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
-																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
+																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.<br>Exactly one of `create`, `update`, or `view` must be specified.",
 																			Required:            true,
 																			Optional:            false,
 																			Computed:            false,
@@ -5355,7 +5380,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"create": schema.BoolAttribute{
 																					Description:         "Create",
-																					MarkdownDescription: "Create",
+																					MarkdownDescription: "Create<br>Conflicts with `update` and `view`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5365,7 +5390,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"update": schema.BoolAttribute{
 																					Description:         "update",
-																					MarkdownDescription: "update",
+																					MarkdownDescription: "update<br>Conflicts with `create` and `view`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5375,7 +5400,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"view": schema.BoolAttribute{
 																					Description:         "view",
-																					MarkdownDescription: "view",
+																					MarkdownDescription: "view<br>Conflicts with `create` and `update`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5389,14 +5414,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"search": schema.SingleNestedAttribute{
 																	Description:         "Search",
-																	MarkdownDescription: "Search",
+																	MarkdownDescription: "Search<br>Conflicts with `account_management`, `authentication`, `financial_services`, `flight`, `profile_management`, and `shopping_gift_cards`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
 																			Description:         "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
-																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
+																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.<br>Exactly one of `flight_search`, `product_search`, `reservation_search`, or `room_search` must be specified when `label_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -5411,7 +5436,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"flight_search": schema.BoolAttribute{
 																					Description:         "flight_search",
-																					MarkdownDescription: "flight_search",
+																					MarkdownDescription: "flight_search<br>Conflicts with `product_search`, `reservation_search`, and `room_search`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5421,7 +5446,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"product_search": schema.BoolAttribute{
 																					Description:         "product_search",
-																					MarkdownDescription: "product_search",
+																					MarkdownDescription: "product_search<br>Conflicts with `flight_search`, `reservation_search`, and `room_search`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5431,7 +5456,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"reservation_search": schema.BoolAttribute{
 																					Description:         "reservation_search",
-																					MarkdownDescription: "reservation_search",
+																					MarkdownDescription: "reservation_search<br>Conflicts with `flight_search`, `product_search`, and `room_search`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5441,7 +5466,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"room_search": schema.BoolAttribute{
 																					Description:         "room_search",
-																					MarkdownDescription: "room_search",
+																					MarkdownDescription: "room_search<br>Conflicts with `flight_search`, `product_search`, and `reservation_search`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5455,14 +5480,14 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																},
 																"shopping_gift_cards": schema.SingleNestedAttribute{
 																	Description:         "Shopping",
-																	MarkdownDescription: "Shopping",
+																	MarkdownDescription: "Shopping<br>Conflicts with `account_management`, `authentication`, `financial_services`, `flight`, `profile_management`, and `search`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Attributes: map[string]schema.Attribute{
 																		"label_choice": schema.SingleNestedAttribute{
 																			Description:         "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
-																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.",
+																			MarkdownDescription: "Flow label Specific labels to help identity endpoints for more granular attack intent identification and reporting.<br>Exactly one of `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, or `shop_update_quantity` must be specified when `label_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -5485,7 +5510,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			Attributes: map[string]schema.Attribute{
 																				"gift_card_make_purchase_with_gift_card": schema.BoolAttribute{
 																					Description:         "Purchase with Gift Card",
-																					MarkdownDescription: "Purchase with Gift Card",
+																					MarkdownDescription: "Purchase with Gift Card<br>Conflicts with `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5495,7 +5520,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"gift_card_validation": schema.BoolAttribute{
 																					Description:         "Gift Card Validation",
-																					MarkdownDescription: "Gift Card Validation",
+																					MarkdownDescription: "Gift Card Validation<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5505,7 +5530,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"shop_add_to_cart": schema.BoolAttribute{
 																					Description:         "add_to_cart",
-																					MarkdownDescription: "add_to_cart",
+																					MarkdownDescription: "add_to_cart<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5515,7 +5540,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"shop_checkout": schema.BoolAttribute{
 																					Description:         "checkout",
-																					MarkdownDescription: "checkout",
+																					MarkdownDescription: "checkout<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5525,7 +5550,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"shop_choose_seat": schema.BoolAttribute{
 																					Description:         "Select Seat(s)",
-																					MarkdownDescription: "Select Seat(s)",
+																					MarkdownDescription: "Select Seat(s)<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5535,7 +5560,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"shop_enter_drawing_submission": schema.BoolAttribute{
 																					Description:         "Enter Drawing Submission",
-																					MarkdownDescription: "Enter Drawing Submission",
+																					MarkdownDescription: "Enter Drawing Submission<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5545,7 +5570,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"shop_make_payment": schema.BoolAttribute{
 																					Description:         "make_payment",
-																					MarkdownDescription: "make_payment",
+																					MarkdownDescription: "make_payment<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5555,7 +5580,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"shop_order": schema.BoolAttribute{
 																					Description:         "order",
-																					MarkdownDescription: "order",
+																					MarkdownDescription: "order<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_price_inquiry`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5565,7 +5590,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"shop_price_inquiry": schema.BoolAttribute{
 																					Description:         "price_inquiry",
-																					MarkdownDescription: "price_inquiry",
+																					MarkdownDescription: "price_inquiry<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_promo_code_validation`, `shop_purchase_gift_card`, and `shop_update_quantity`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5575,7 +5600,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"shop_promo_code_validation": schema.BoolAttribute{
 																					Description:         "promo_code_validation",
-																					MarkdownDescription: "promo_code_validation",
+																					MarkdownDescription: "promo_code_validation<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_purchase_gift_card`, and `shop_update_quantity`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5585,7 +5610,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"shop_purchase_gift_card": schema.BoolAttribute{
 																					Description:         "shop_purchase_gift_card",
-																					MarkdownDescription: "shop_purchase_gift_card",
+																					MarkdownDescription: "shop_purchase_gift_card<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, and `shop_update_quantity`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5595,7 +5620,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																				},
 																				"shop_update_quantity": schema.BoolAttribute{
 																					Description:         "Update Quantity",
-																					MarkdownDescription: "Update Quantity",
+																					MarkdownDescription: "Update Quantity<br>Conflicts with `gift_card_make_purchase_with_gift_card`, `gift_card_validation`, `shop_add_to_cart`, `shop_checkout`, `shop_choose_seat`, `shop_enter_drawing_submission`, `shop_make_payment`, `shop_order`, `shop_price_inquiry`, `shop_promo_code_validation`, and `shop_purchase_gift_card`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -5613,7 +5638,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 												},
 												"undefined_flow_label": schema.BoolAttribute{
 													Description:         "undefined",
-													MarkdownDescription: "undefined",
+													MarkdownDescription: "undefined<br>Conflicts with `flow_label`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -5720,7 +5745,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 									Attributes: map[string]schema.Attribute{
 										"client_source_choice": schema.SingleNestedAttribute{
 											Description:         "Client Identifier Client identifier that should be used for the client rule",
-											MarkdownDescription: "Client Identifier Client identifier that should be used for the client rule",
+											MarkdownDescription: "Client Identifier Client identifier that should be used for the client rule<br>Exactly one of `http_header` or `ip_prefix` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -5733,7 +5758,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 											Attributes: map[string]schema.Attribute{
 												"http_header": schema.SingleNestedAttribute{
 													Description:         "HTTP Header Request header name and value pairs",
-													MarkdownDescription: "HTTP Header Request header name and value pairs",
+													MarkdownDescription: "HTTP Header Request header name and value pairs<br>Conflicts with `ip_prefix`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -5765,7 +5790,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																	},
 																	"value_match_choice": schema.SingleNestedAttribute{
 																		Description:         "value_match The variants of matching a header value",
-																		MarkdownDescription: "value_match The variants of matching a header value",
+																		MarkdownDescription: "value_match The variants of matching a header value<br>Exactly one of `exact` or `regex` must be specified when `value_match_choice` is configured.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -5778,7 +5803,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																		Attributes: map[string]schema.Attribute{
 																			"exact": schema.StringAttribute{
 																				Description:         "exact Header value to match exactly",
-																				MarkdownDescription: "exact Header value to match exactly",
+																				MarkdownDescription: "exact Header value to match exactly<br>Conflicts with `regex`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -5789,7 +5814,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 																			},
 																			"regex": schema.StringAttribute{
 																				Description:         "regex Regex match of the header value in re2 format",
-																				MarkdownDescription: "regex Regex match of the header value in re2 format",
+																				MarkdownDescription: "regex Regex match of the header value in re2 format<br>Conflicts with `exact`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -5807,7 +5832,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 												},
 												"ip_prefix": schema.StringAttribute{
 													Description:         "ip prefix IP prefix string",
-													MarkdownDescription: "ip prefix IP prefix string",
+													MarkdownDescription: "ip prefix IP prefix string<br>Conflicts with `http_header`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -5860,7 +5885,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 					},
 					"custom_connector": schema.BoolAttribute{
 						Description:         "Custom template connector Get credentials needed to configure on other connectors.",
-						MarkdownDescription: "Custom template connector Get credentials needed to configure on other connectors.",
+						MarkdownDescription: "Custom template connector Get credentials needed to configure on other connectors.<br>Conflicts with `adobe_commerce_connector`, `big_ip_iapp`, `cloudflare`, `cloudfront`, `f5_big_ip`, and `salesforce_commerce_connector`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -5870,7 +5895,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 					},
 					"f5_big_ip": schema.BoolAttribute{
 						Description:         "F5 BIG-IP(V17.0 or greater) template connector Get credentials needed to configure on BIG-IP.",
-						MarkdownDescription: "F5 BIG-IP(V17.0 or greater) template connector Get credentials needed to configure on BIG-IP.",
+						MarkdownDescription: "F5 BIG-IP(V17.0 or greater) template connector Get credentials needed to configure on BIG-IP.<br>Conflicts with `adobe_commerce_connector`, `big_ip_iapp`, `cloudflare`, `cloudfront`, `custom_connector`, and `salesforce_commerce_connector`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -5880,7 +5905,7 @@ func (r *ResourceF5XCProtectedApplication) Schema(ctx context.Context, request r
 					},
 					"salesforce_commerce_connector": schema.BoolAttribute{
 						Description:         "Salesforce Commerce template connector Get credentials needed to configure on  Salesforce Commerce.",
-						MarkdownDescription: "Salesforce Commerce template connector Get credentials needed to configure on  Salesforce Commerce.",
+						MarkdownDescription: "Salesforce Commerce template connector Get credentials needed to configure on  Salesforce Commerce.<br>Conflicts with `adobe_commerce_connector`, `big_ip_iapp`, `cloudflare`, `cloudfront`, `custom_connector`, and `f5_big_ip`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -6058,7 +6083,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> ConnectorTypeChoice
+	// resource modelToSpecRoot OneOfField --> ConnectorTypeChoice
 	if !data.ConnectorTypeChoice.IsNull() && !data.ConnectorTypeChoice.IsUnknown() {
 		connectorTypeChoiceModel := ProtectedAppConnectorTypeChoice{}
 		response.Diagnostics.Append(data.ConnectorTypeChoice.As(ctx, &connectorTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6089,6 +6114,9 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 			}
 			cloudflareOneOfSpec := &ves_io_schema_shape_bot_defense_protected_application.CreateSpecType_Cloudflare{}
 			cloudflareOneOfSpec.Cloudflare = &ves_io_schema_shape_bot_defense_protected_application_cloudflare.CloudflareType{}
+			cloudflareOneOfSpec.Cloudflare.MobileSdkChoice = &ves_io_schema_shape_bot_defense_protected_application_cloudflare.CloudflareType_DisableMobileSdk{
+				DisableMobileSdk: &ves_io_schema.Empty{},
+			}
 			spec.ConnectorTypeChoice = cloudflareOneOfSpec
 
 			// resource modelToSpecNested StringField --> ContinueMitigationActionHdr
@@ -6141,10 +6169,13 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 						for i, excludeListElement := range excludeListElements {
 							// Initialize the spec struct for the current element
 							jsInsertionRulesOneOfSpec.JsInsertionRules.ExcludeList[i] = &ves_io_schema_shape_bot_defense_protected_application_cloudflare.JavaScriptExclusionRule{}
+							jsInsertionRulesOneOfSpec.JsInsertionRules.ExcludeList[i].DomainMatcherChoice = &ves_io_schema_shape_bot_defense_protected_application_cloudflare.JavaScriptExclusionRule_AnyDomain{
+								AnyDomain: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
-							// resource modelToSpecNested RequiredOneOfField --> DomainMatcherChoice
+							// resource modelToSpecNested OneOfField --> DomainMatcherChoice
 							if !excludeListElement.DomainMatcherChoice.IsNull() && !excludeListElement.DomainMatcherChoice.IsUnknown() {
 								excludeListDomainMatcherChoiceModel := ProtectedAppDomainMatcherChoice{}
 								response.Diagnostics.Append(excludeListElement.DomainMatcherChoice.As(ctx, &excludeListDomainMatcherChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6323,10 +6354,13 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 						for i, rulesElement := range rulesElements {
 							// Initialize the spec struct for the current element
 							jsInsertionRulesOneOfSpec.JsInsertionRules.Rules[i] = &ves_io_schema_shape_bot_defense_protected_application_cloudflare.JavaScriptInsertionRule{}
+							jsInsertionRulesOneOfSpec.JsInsertionRules.Rules[i].DomainMatcherChoice = &ves_io_schema_shape_bot_defense_protected_application_cloudflare.JavaScriptInsertionRule_AnyDomain{
+								AnyDomain: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
-							// resource modelToSpecNested RequiredOneOfField --> DomainMatcherChoice
+							// resource modelToSpecNested OneOfField --> DomainMatcherChoice
 							if !rulesElement.DomainMatcherChoice.IsNull() && !rulesElement.DomainMatcherChoice.IsUnknown() {
 								rulesDomainMatcherChoiceModel := ProtectedAppJavaScriptInsertionRuleDomainMatcherChoice{}
 								response.Diagnostics.Append(rulesElement.DomainMatcherChoice.As(ctx, &rulesDomainMatcherChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6492,7 +6526,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 				}
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MobileSdkChoice
+			// resource modelToSpecNested OneOfField --> MobileSdkChoice
 			if !protectedAppCloudflareModel.MobileSdkChoice.IsNull() && !protectedAppCloudflareModel.MobileSdkChoice.IsUnknown() {
 				cloudflareMobileSdkChoiceModel := ProtectedAppMobileSdkChoice{}
 				response.Diagnostics.Append(protectedAppCloudflareModel.MobileSdkChoice.As(ctx, &cloudflareMobileSdkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7414,6 +7448,9 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 			}
 			cloudfrontOneOfSpec := &ves_io_schema_shape_bot_defense_protected_application.CreateSpecType_Cloudfront{}
 			cloudfrontOneOfSpec.Cloudfront = &ves_io_schema_shape_bot_defense_protected_application_cloudfront.CloudfrontType{}
+			cloudfrontOneOfSpec.Cloudfront.MobileSdkChoice = &ves_io_schema_shape_bot_defense_protected_application_cloudfront.CloudfrontType_DisableMobileSdk{
+				DisableMobileSdk: &ves_io_schema.Empty{},
+			}
 			spec.ConnectorTypeChoice = cloudfrontOneOfSpec
 
 			// resource modelToSpecNested RequiredOneOfField --> AwsConfigurationTypeChoice
@@ -7537,10 +7574,13 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 						for i, excludeListElement := range excludeListElements {
 							// Initialize the spec struct for the current element
 							jsInsertionRulesOneOfSpec.JsInsertionRules.ExcludeList[i] = &ves_io_schema_shape_bot_defense_protected_application_cloudfront.JavaScriptExclusionRule{}
+							jsInsertionRulesOneOfSpec.JsInsertionRules.ExcludeList[i].DomainMatcherChoice = &ves_io_schema_shape_bot_defense_protected_application_cloudfront.JavaScriptExclusionRule_AnyDomain{
+								AnyDomain: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
-							// resource modelToSpecNested RequiredOneOfField --> DomainMatcherChoice
+							// resource modelToSpecNested OneOfField --> DomainMatcherChoice
 							if !excludeListElement.DomainMatcherChoice.IsNull() && !excludeListElement.DomainMatcherChoice.IsUnknown() {
 								excludeListDomainMatcherChoiceModel := ProtectedAppJavaScriptExclusionRuleDomainMatcherChoice{}
 								response.Diagnostics.Append(excludeListElement.DomainMatcherChoice.As(ctx, &excludeListDomainMatcherChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7743,10 +7783,13 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 						for i, rulesElement := range rulesElements {
 							// Initialize the spec struct for the current element
 							jsInsertionRulesOneOfSpec.JsInsertionRules.Rules[i] = &ves_io_schema_shape_bot_defense_protected_application_cloudfront.JavaScriptInsertionRule{}
+							jsInsertionRulesOneOfSpec.JsInsertionRules.Rules[i].DomainMatcherChoice = &ves_io_schema_shape_bot_defense_protected_application_cloudfront.JavaScriptInsertionRule_AnyDomain{
+								AnyDomain: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
-							// resource modelToSpecNested RequiredOneOfField --> DomainMatcherChoice
+							// resource modelToSpecNested OneOfField --> DomainMatcherChoice
 							if !rulesElement.DomainMatcherChoice.IsNull() && !rulesElement.DomainMatcherChoice.IsUnknown() {
 								rulesDomainMatcherChoiceModel := ProtectedAppCloudfrontJavaScriptInsertionRuleDomainMatcherChoice{}
 								response.Diagnostics.Append(rulesElement.DomainMatcherChoice.As(ctx, &rulesDomainMatcherChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7936,7 +7979,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 				}
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MobileSdkChoice
+			// resource modelToSpecNested OneOfField --> MobileSdkChoice
 			if !protectedAppCloudfrontModel.MobileSdkChoice.IsNull() && !protectedAppCloudfrontModel.MobileSdkChoice.IsUnknown() {
 				cloudfrontMobileSdkChoiceModel := ProtectedAppCloudfrontTypeMobileSdkChoice{}
 				response.Diagnostics.Append(protectedAppCloudfrontModel.MobileSdkChoice.As(ctx, &cloudfrontMobileSdkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8804,9 +8847,12 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 									}
 									flightOneOfSpec := &ves_io_schema.BotDefenseFlowLabelCategoriesChoiceType_Flight{}
 									flightOneOfSpec.Flight = &ves_io_schema.BotDefenseFlowLabelFlightChoiceType{}
+									flightOneOfSpec.Flight.LabelChoice = &ves_io_schema.BotDefenseFlowLabelFlightChoiceType_Checkin{
+										Checkin: &ves_io_schema.Empty{},
+									}
 									flowLabelOneOfSpec.FlowLabel.FlowLabelChoice = flightOneOfSpec
 
-									// resource modelToSpecNested RequiredOneOfField --> LabelChoice
+									// resource modelToSpecNested OneOfField --> LabelChoice
 									if !protectedAppFlightModel.LabelChoice.IsNull() && !protectedAppFlightModel.LabelChoice.IsUnknown() {
 										flightLabelChoiceModel := ProtectedAppBotDefenseFlowLabelFlightChoiceTypeLabelChoice{}
 										response.Diagnostics.Append(protectedAppFlightModel.LabelChoice.As(ctx, &flightLabelChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -9257,6 +9303,10 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 			spec.ConnectorTypeChoice = salesforceCommerceConnectorSpecBool
 		}
 
+	} else {
+		spec.ConnectorTypeChoice = &ves_io_schema_shape_bot_defense_protected_application.CreateSpecType_BigIpIapp{
+			BigIpIapp: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredEnumField --> Region
@@ -9500,7 +9550,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> ConnectorTypeChoice
+	// resource SpecToModelRoot OneOfField --> ConnectorTypeChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -9552,8 +9602,8 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var connectorTypeChoiceChoices interface{}
 		if v := rawSpecMap["connector_type_choice"]; v != nil {
 			connectorTypeChoiceChoices = v
@@ -9681,8 +9731,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 								for _, excludeListElement := range jsInsertionRulesElement.GetExcludeList() {
 									protectedAppJavaScriptExclusionRuleModel := ProtectedAppJavaScriptExclusionRule{}
 
-									// resource specToModelNested RequiredOneOfField --> DomainMatcherChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DomainMatcherChoice
 									// CreateSpecType: GetDomainMatcherChoice() returns the oneof interface value.
 									if excludeListElement.GetDomainMatcherChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -9998,8 +10047,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 								for _, rulesElement := range jsInsertionRulesElement.GetRules() {
 									protectedAppJavaScriptInsertionRuleModel := ProtectedAppJavaScriptInsertionRule{}
 
-									// resource specToModelNested RequiredOneOfField --> DomainMatcherChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DomainMatcherChoice
 									// CreateSpecType: GetDomainMatcherChoice() returns the oneof interface value.
 									if rulesElement.GetDomainMatcherChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -10332,8 +10380,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 					}
 				}
 
-				// resource specToModelNested RequiredOneOfField --> MobileSdkChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> MobileSdkChoice
 				// CreateSpecType: GetMobileSdkChoice() returns the oneof interface value.
 				if cloudflareElement.GetMobileSdkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -12125,8 +12172,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 								for _, excludeListElement := range jsInsertionRulesElement.GetExcludeList() {
 									protectedAppCloudfrontJavaScriptExclusionRuleModel := ProtectedAppCloudfrontJavaScriptExclusionRule{}
 
-									// resource specToModelNested RequiredOneOfField --> DomainMatcherChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DomainMatcherChoice
 									// CreateSpecType: GetDomainMatcherChoice() returns the oneof interface value.
 									if excludeListElement.GetDomainMatcherChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -12458,8 +12504,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 								for _, rulesElement := range jsInsertionRulesElement.GetRules() {
 									protectedAppCloudfrontJavaScriptInsertionRuleModel := ProtectedAppCloudfrontJavaScriptInsertionRule{}
 
-									// resource specToModelNested RequiredOneOfField --> DomainMatcherChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DomainMatcherChoice
 									// CreateSpecType: GetDomainMatcherChoice() returns the oneof interface value.
 									if rulesElement.GetDomainMatcherChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -12808,8 +12853,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 					}
 				}
 
-				// resource specToModelNested RequiredOneOfField --> MobileSdkChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> MobileSdkChoice
 				// CreateSpecType: GetMobileSdkChoice() returns the oneof interface value.
 				if cloudfrontElement.GetMobileSdkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -14449,8 +14493,7 @@ func (r *ResourceF5XCProtectedApplication) Create(ctx context.Context, request r
 											if isFlight && flightOptionsWrapper != nil && flightOptionsWrapper.Flight != nil {
 												flightElement := flightOptionsWrapper.Flight
 
-												// resource specToModelNested RequiredOneOfField --> LabelChoice
-												// CreateSpecType
+												// resource specToModelNested OneOfField --> LabelChoice
 												// CreateSpecType: GetLabelChoice() returns the oneof interface value.
 												if flightElement.GetLabelChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
@@ -15632,15 +15675,14 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
 	readGetRspType := strings.Replace(ves_io_schema_shape_bot_defense_protected_application.ObjectType, "Object", "GetResponse", 1)
 	readGetProtoMsgType := proto.MessageType(readGetRspType).Elem()
 	readCallRsp := &server.CallResponse{
 		ProtoMsg: reflect.New(readGetProtoMsgType).Interface().(proto.Message),
 	}
-	opts = append(opts, vesapi.WithOutCallResponse(readCallRsp))
+	opts := []vesapi.CallOpt{
+		vesapi.WithOutCallResponse(readCallRsp),
+	}
 
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_shape_bot_defense_protected_application.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
@@ -15829,7 +15871,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> ConnectorTypeChoice
+	// resource SpecToModelRoot OneOfField --> ConnectorTypeChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -15881,8 +15923,8 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var connectorTypeChoiceChoices interface{}
 		if v := rawSpecMap["connector_type_choice"]; v != nil {
 			connectorTypeChoiceChoices = v
@@ -16010,8 +16052,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 								for _, excludeListElement := range jsInsertionRulesElement.GetExcludeList() {
 									protectedAppJavaScriptExclusionRuleModel := ProtectedAppJavaScriptExclusionRule{}
 
-									// resource specToModelNested RequiredOneOfField --> DomainMatcherChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DomainMatcherChoice
 									// CreateSpecType: GetDomainMatcherChoice() returns the oneof interface value.
 									if excludeListElement.GetDomainMatcherChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -16330,8 +16371,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 								for _, rulesElement := range jsInsertionRulesElement.GetRules() {
 									protectedAppJavaScriptInsertionRuleModel := ProtectedAppJavaScriptInsertionRule{}
 
-									// resource specToModelNested RequiredOneOfField --> DomainMatcherChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DomainMatcherChoice
 									// CreateSpecType: GetDomainMatcherChoice() returns the oneof interface value.
 									if rulesElement.GetDomainMatcherChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -16667,8 +16707,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 					}
 				}
 
-				// resource specToModelNested RequiredOneOfField --> MobileSdkChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> MobileSdkChoice
 				// CreateSpecType: GetMobileSdkChoice() returns the oneof interface value.
 				if cloudflareElement.GetMobileSdkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -18463,8 +18502,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 								for _, excludeListElement := range jsInsertionRulesElement.GetExcludeList() {
 									protectedAppCloudfrontJavaScriptExclusionRuleModel := ProtectedAppCloudfrontJavaScriptExclusionRule{}
 
-									// resource specToModelNested RequiredOneOfField --> DomainMatcherChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DomainMatcherChoice
 									// CreateSpecType: GetDomainMatcherChoice() returns the oneof interface value.
 									if excludeListElement.GetDomainMatcherChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -18799,8 +18837,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 								for _, rulesElement := range jsInsertionRulesElement.GetRules() {
 									protectedAppCloudfrontJavaScriptInsertionRuleModel := ProtectedAppCloudfrontJavaScriptInsertionRule{}
 
-									// resource specToModelNested RequiredOneOfField --> DomainMatcherChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DomainMatcherChoice
 									// CreateSpecType: GetDomainMatcherChoice() returns the oneof interface value.
 									if rulesElement.GetDomainMatcherChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -19152,8 +19189,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 					}
 				}
 
-				// resource specToModelNested RequiredOneOfField --> MobileSdkChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> MobileSdkChoice
 				// CreateSpecType: GetMobileSdkChoice() returns the oneof interface value.
 				if cloudfrontElement.GetMobileSdkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -20796,8 +20832,7 @@ func (r *ResourceF5XCProtectedApplication) Read(ctx context.Context, request res
 											if isFlight && flightOptionsWrapper != nil && flightOptionsWrapper.Flight != nil {
 												flightElement := flightOptionsWrapper.Flight
 
-												// resource specToModelNested RequiredOneOfField --> LabelChoice
-												// CreateSpecType
+												// resource specToModelNested OneOfField --> LabelChoice
 												// CreateSpecType: GetLabelChoice() returns the oneof interface value.
 												if flightElement.GetLabelChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf
@@ -22064,7 +22099,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> ConnectorTypeChoice
+	// resource modelToSpecRoot OneOfField --> ConnectorTypeChoice
 	if !data.ConnectorTypeChoice.IsNull() && !data.ConnectorTypeChoice.IsUnknown() {
 		connectorTypeChoiceModel := ProtectedAppConnectorTypeChoice{}
 		response.Diagnostics.Append(data.ConnectorTypeChoice.As(ctx, &connectorTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -22095,6 +22130,9 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 			}
 			cloudflareOneOfSpec := &ves_io_schema_shape_bot_defense_protected_application.ReplaceSpecType_Cloudflare{}
 			cloudflareOneOfSpec.Cloudflare = &ves_io_schema_shape_bot_defense_protected_application_cloudflare.CloudflareType{}
+			cloudflareOneOfSpec.Cloudflare.MobileSdkChoice = &ves_io_schema_shape_bot_defense_protected_application_cloudflare.CloudflareType_DisableMobileSdk{
+				DisableMobileSdk: &ves_io_schema.Empty{},
+			}
 			spec.ConnectorTypeChoice = cloudflareOneOfSpec
 
 			// resource modelToSpecNested StringField --> ContinueMitigationActionHdr
@@ -22147,10 +22185,13 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 						for i, excludeListElement := range excludeListElements {
 							// Initialize the spec struct for the current element
 							jsInsertionRulesOneOfSpec.JsInsertionRules.ExcludeList[i] = &ves_io_schema_shape_bot_defense_protected_application_cloudflare.JavaScriptExclusionRule{}
+							jsInsertionRulesOneOfSpec.JsInsertionRules.ExcludeList[i].DomainMatcherChoice = &ves_io_schema_shape_bot_defense_protected_application_cloudflare.JavaScriptExclusionRule_AnyDomain{
+								AnyDomain: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
-							// resource modelToSpecNested RequiredOneOfField --> DomainMatcherChoice
+							// resource modelToSpecNested OneOfField --> DomainMatcherChoice
 							if !excludeListElement.DomainMatcherChoice.IsNull() && !excludeListElement.DomainMatcherChoice.IsUnknown() {
 								excludeListDomainMatcherChoiceModel := ProtectedAppDomainMatcherChoice{}
 								response.Diagnostics.Append(excludeListElement.DomainMatcherChoice.As(ctx, &excludeListDomainMatcherChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -22329,10 +22370,13 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 						for i, rulesElement := range rulesElements {
 							// Initialize the spec struct for the current element
 							jsInsertionRulesOneOfSpec.JsInsertionRules.Rules[i] = &ves_io_schema_shape_bot_defense_protected_application_cloudflare.JavaScriptInsertionRule{}
+							jsInsertionRulesOneOfSpec.JsInsertionRules.Rules[i].DomainMatcherChoice = &ves_io_schema_shape_bot_defense_protected_application_cloudflare.JavaScriptInsertionRule_AnyDomain{
+								AnyDomain: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
-							// resource modelToSpecNested RequiredOneOfField --> DomainMatcherChoice
+							// resource modelToSpecNested OneOfField --> DomainMatcherChoice
 							if !rulesElement.DomainMatcherChoice.IsNull() && !rulesElement.DomainMatcherChoice.IsUnknown() {
 								rulesDomainMatcherChoiceModel := ProtectedAppJavaScriptInsertionRuleDomainMatcherChoice{}
 								response.Diagnostics.Append(rulesElement.DomainMatcherChoice.As(ctx, &rulesDomainMatcherChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -22498,7 +22542,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 				}
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MobileSdkChoice
+			// resource modelToSpecNested OneOfField --> MobileSdkChoice
 			if !protectedAppCloudflareModel.MobileSdkChoice.IsNull() && !protectedAppCloudflareModel.MobileSdkChoice.IsUnknown() {
 				cloudflareMobileSdkChoiceModel := ProtectedAppMobileSdkChoice{}
 				response.Diagnostics.Append(protectedAppCloudflareModel.MobileSdkChoice.As(ctx, &cloudflareMobileSdkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -23420,6 +23464,9 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 			}
 			cloudfrontOneOfSpec := &ves_io_schema_shape_bot_defense_protected_application.ReplaceSpecType_Cloudfront{}
 			cloudfrontOneOfSpec.Cloudfront = &ves_io_schema_shape_bot_defense_protected_application_cloudfront.CloudfrontType{}
+			cloudfrontOneOfSpec.Cloudfront.MobileSdkChoice = &ves_io_schema_shape_bot_defense_protected_application_cloudfront.CloudfrontType_DisableMobileSdk{
+				DisableMobileSdk: &ves_io_schema.Empty{},
+			}
 			spec.ConnectorTypeChoice = cloudfrontOneOfSpec
 
 			// resource modelToSpecNested RequiredOneOfField --> AwsConfigurationTypeChoice
@@ -23543,10 +23590,13 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 						for i, excludeListElement := range excludeListElements {
 							// Initialize the spec struct for the current element
 							jsInsertionRulesOneOfSpec.JsInsertionRules.ExcludeList[i] = &ves_io_schema_shape_bot_defense_protected_application_cloudfront.JavaScriptExclusionRule{}
+							jsInsertionRulesOneOfSpec.JsInsertionRules.ExcludeList[i].DomainMatcherChoice = &ves_io_schema_shape_bot_defense_protected_application_cloudfront.JavaScriptExclusionRule_AnyDomain{
+								AnyDomain: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
-							// resource modelToSpecNested RequiredOneOfField --> DomainMatcherChoice
+							// resource modelToSpecNested OneOfField --> DomainMatcherChoice
 							if !excludeListElement.DomainMatcherChoice.IsNull() && !excludeListElement.DomainMatcherChoice.IsUnknown() {
 								excludeListDomainMatcherChoiceModel := ProtectedAppJavaScriptExclusionRuleDomainMatcherChoice{}
 								response.Diagnostics.Append(excludeListElement.DomainMatcherChoice.As(ctx, &excludeListDomainMatcherChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -23749,10 +23799,13 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 						for i, rulesElement := range rulesElements {
 							// Initialize the spec struct for the current element
 							jsInsertionRulesOneOfSpec.JsInsertionRules.Rules[i] = &ves_io_schema_shape_bot_defense_protected_application_cloudfront.JavaScriptInsertionRule{}
+							jsInsertionRulesOneOfSpec.JsInsertionRules.Rules[i].DomainMatcherChoice = &ves_io_schema_shape_bot_defense_protected_application_cloudfront.JavaScriptInsertionRule_AnyDomain{
+								AnyDomain: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
-							// resource modelToSpecNested RequiredOneOfField --> DomainMatcherChoice
+							// resource modelToSpecNested OneOfField --> DomainMatcherChoice
 							if !rulesElement.DomainMatcherChoice.IsNull() && !rulesElement.DomainMatcherChoice.IsUnknown() {
 								rulesDomainMatcherChoiceModel := ProtectedAppCloudfrontJavaScriptInsertionRuleDomainMatcherChoice{}
 								response.Diagnostics.Append(rulesElement.DomainMatcherChoice.As(ctx, &rulesDomainMatcherChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -23942,7 +23995,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 				}
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> MobileSdkChoice
+			// resource modelToSpecNested OneOfField --> MobileSdkChoice
 			if !protectedAppCloudfrontModel.MobileSdkChoice.IsNull() && !protectedAppCloudfrontModel.MobileSdkChoice.IsUnknown() {
 				cloudfrontMobileSdkChoiceModel := ProtectedAppCloudfrontTypeMobileSdkChoice{}
 				response.Diagnostics.Append(protectedAppCloudfrontModel.MobileSdkChoice.As(ctx, &cloudfrontMobileSdkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -24810,9 +24863,12 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 									}
 									flightOneOfSpec := &ves_io_schema.BotDefenseFlowLabelCategoriesChoiceType_Flight{}
 									flightOneOfSpec.Flight = &ves_io_schema.BotDefenseFlowLabelFlightChoiceType{}
+									flightOneOfSpec.Flight.LabelChoice = &ves_io_schema.BotDefenseFlowLabelFlightChoiceType_Checkin{
+										Checkin: &ves_io_schema.Empty{},
+									}
 									flowLabelOneOfSpec.FlowLabel.FlowLabelChoice = flightOneOfSpec
 
-									// resource modelToSpecNested RequiredOneOfField --> LabelChoice
+									// resource modelToSpecNested OneOfField --> LabelChoice
 									if !protectedAppFlightModel.LabelChoice.IsNull() && !protectedAppFlightModel.LabelChoice.IsUnknown() {
 										flightLabelChoiceModel := ProtectedAppBotDefenseFlowLabelFlightChoiceTypeLabelChoice{}
 										response.Diagnostics.Append(protectedAppFlightModel.LabelChoice.As(ctx, &flightLabelChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -25263,6 +25319,10 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 			spec.ConnectorTypeChoice = salesforceCommerceConnectorSpecBool
 		}
 
+	} else {
+		spec.ConnectorTypeChoice = &ves_io_schema_shape_bot_defense_protected_application.ReplaceSpecType_BigIpIapp{
+			BigIpIapp: &ves_io_schema.Empty{},
+		}
 	}
 
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
@@ -25276,12 +25336,8 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_shape_bot_defense_protected_application.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_shape_bot_defense_protected_application.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "protected_application", err),
@@ -25293,7 +25349,9 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 	updateCallRsp := &server.CallResponse{
 		ProtoMsg: reflect.New(updateGetProtoMsgType).Interface().(proto.Message),
 	}
-	opts = append(opts, vesapi.WithOutCallResponse(updateCallRsp))
+	opts := []vesapi.CallOpt{
+		vesapi.WithOutCallResponse(updateCallRsp),
+	}
 
 	// Read the replaced object
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_shape_bot_defense_protected_application.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
@@ -25482,7 +25540,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot RequiredOneOfField --> ConnectorTypeChoice
+	// resource SpecToModelRoot OneOfField --> ConnectorTypeChoice
 	// true
 	// true
 	// This resource uses custom JSON resolution.
@@ -25534,8 +25592,8 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		// The API may return the oneof choice keys directly at the top level (e.g. "re_acl") rather than
 		// nested under the oneof wrapper key (e.g. "site_choice"). In that case rawSpecMap["site_choice"]
-		// would be nil, so we fall back to the proto-typed spec struct getter so that the nested
-		// PointerOfOneOfField type-assertions can still find the correct choice.
+		// would be nil, so we fall back to rawSpecMap itself so that the nested PointerOfOneOfField
+		// type-assertions can still find the correct choice via the proto-typed spec struct.
 		var connectorTypeChoiceChoices interface{}
 		if v := rawSpecMap["connector_type_choice"]; v != nil {
 			connectorTypeChoiceChoices = v
@@ -25663,8 +25721,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 								for _, excludeListElement := range jsInsertionRulesElement.GetExcludeList() {
 									protectedAppJavaScriptExclusionRuleModel := ProtectedAppJavaScriptExclusionRule{}
 
-									// resource specToModelNested RequiredOneOfField --> DomainMatcherChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DomainMatcherChoice
 									// CreateSpecType: GetDomainMatcherChoice() returns the oneof interface value.
 									if excludeListElement.GetDomainMatcherChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -25980,8 +26037,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 								for _, rulesElement := range jsInsertionRulesElement.GetRules() {
 									protectedAppJavaScriptInsertionRuleModel := ProtectedAppJavaScriptInsertionRule{}
 
-									// resource specToModelNested RequiredOneOfField --> DomainMatcherChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DomainMatcherChoice
 									// CreateSpecType: GetDomainMatcherChoice() returns the oneof interface value.
 									if rulesElement.GetDomainMatcherChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -26314,8 +26370,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 					}
 				}
 
-				// resource specToModelNested RequiredOneOfField --> MobileSdkChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> MobileSdkChoice
 				// CreateSpecType: GetMobileSdkChoice() returns the oneof interface value.
 				if cloudflareElement.GetMobileSdkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -28107,8 +28162,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 								for _, excludeListElement := range jsInsertionRulesElement.GetExcludeList() {
 									protectedAppCloudfrontJavaScriptExclusionRuleModel := ProtectedAppCloudfrontJavaScriptExclusionRule{}
 
-									// resource specToModelNested RequiredOneOfField --> DomainMatcherChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DomainMatcherChoice
 									// CreateSpecType: GetDomainMatcherChoice() returns the oneof interface value.
 									if excludeListElement.GetDomainMatcherChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -28440,8 +28494,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 								for _, rulesElement := range jsInsertionRulesElement.GetRules() {
 									protectedAppCloudfrontJavaScriptInsertionRuleModel := ProtectedAppCloudfrontJavaScriptInsertionRule{}
 
-									// resource specToModelNested RequiredOneOfField --> DomainMatcherChoice
-									// CreateSpecType
+									// resource specToModelNested OneOfField --> DomainMatcherChoice
 									// CreateSpecType: GetDomainMatcherChoice() returns the oneof interface value.
 									if rulesElement.GetDomainMatcherChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
@@ -28790,8 +28843,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 					}
 				}
 
-				// resource specToModelNested RequiredOneOfField --> MobileSdkChoice
-				// CreateSpecType
+				// resource specToModelNested OneOfField --> MobileSdkChoice
 				// CreateSpecType: GetMobileSdkChoice() returns the oneof interface value.
 				if cloudfrontElement.GetMobileSdkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
@@ -30431,8 +30483,7 @@ func (r *ResourceF5XCProtectedApplication) Update(ctx context.Context, request r
 											if isFlight && flightOptionsWrapper != nil && flightOptionsWrapper.Flight != nil {
 												flightElement := flightOptionsWrapper.Flight
 
-												// resource specToModelNested RequiredOneOfField --> LabelChoice
-												// CreateSpecType
+												// resource specToModelNested OneOfField --> LabelChoice
 												// CreateSpecType: GetLabelChoice() returns the oneof interface value.
 												if flightElement.GetLabelChoice() != nil {
 													// Create a temporary attribute map for the choices within this OneOf

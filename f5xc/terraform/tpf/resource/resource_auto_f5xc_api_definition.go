@@ -26,6 +26,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -120,7 +121,7 @@ var ApiDefinitionNonApiEndpointsModelAttributeMap = map[string]attr.Type{
 	"path": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> SchemaUpdatesStrategy
+// Attribute map for OneOfField --> SchemaUpdatesStrategy
 var ApiDefinitionSchemaUpdatesStrategyModelAttributeMap = map[string]attr.Type{
 
 	"mixed_schema_origin":  types.BoolType,
@@ -321,20 +322,23 @@ func (r *ResourceF5XCApiDefinition) Schema(ctx context.Context, request resource
 			},
 			"schema_updates_strategy_choice": schema.SingleNestedAttribute{
 				Description:         "schema_updates_strategy Set schema update strategy for the API Inventory schemas management. In case when multiple AppTypes are associated with a single API Inventory, it is possible that for a single API Endpoint may be multiple sources. The strategy defines how schema origin should be treated in case of multiple schemas.",
-				MarkdownDescription: "schema_updates_strategy Set schema update strategy for the API Inventory schemas management. In case when multiple AppTypes are associated with a single API Inventory, it is possible that for a single API Endpoint may be multiple sources. The strategy defines how schema origin should be treated in case of multiple schemas.",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "schema_updates_strategy Set schema update strategy for the API Inventory schemas management. In case when multiple AppTypes are associated with a single API Inventory, it is possible that for a single API Endpoint may be multiple sources. The strategy defines how schema origin should be treated in case of multiple schemas.<br>Exactly one of `mixed_schema_origin` or `strict_schema_origin` must be specified when `schema_updates_strategy_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"mixed_schema_origin",
 						"strict_schema_origin",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"mixed_schema_origin": schema.BoolAttribute{
 						Description:         "mixed_schema_origin The schema can be updated from all associated LBs",
-						MarkdownDescription: "mixed_schema_origin The schema can be updated from all associated LBs",
+						MarkdownDescription: "mixed_schema_origin The schema can be updated from all associated LBs<br>Conflicts with `strict_schema_origin`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -344,7 +348,7 @@ func (r *ResourceF5XCApiDefinition) Schema(ctx context.Context, request resource
 					},
 					"strict_schema_origin": schema.BoolAttribute{
 						Description:         "strict_schema_origin Restrict schema updates to a single AppType The origin of the schema update is stored and validated per API endpoint",
-						MarkdownDescription: "strict_schema_origin Restrict schema updates to a single AppType The origin of the schema update is stored and validated per API endpoint",
+						MarkdownDescription: "strict_schema_origin Restrict schema updates to a single AppType The origin of the schema update is stored and validated per API endpoint<br>Conflicts with `mixed_schema_origin`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -674,7 +678,7 @@ func (r *ResourceF5XCApiDefinition) Create(ctx context.Context, request resource
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> SchemaUpdatesStrategy
+	// resource modelToSpecRoot OneOfField --> SchemaUpdatesStrategy
 	if !data.SchemaUpdatesStrategyChoice.IsNull() && !data.SchemaUpdatesStrategyChoice.IsUnknown() {
 		schemaUpdatesStrategyChoiceModel := ApiDefSchemaUpdatesStrategyChoice{}
 		response.Diagnostics.Append(data.SchemaUpdatesStrategyChoice.As(ctx, &schemaUpdatesStrategyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -696,6 +700,10 @@ func (r *ResourceF5XCApiDefinition) Create(ctx context.Context, request resource
 			spec.SchemaUpdatesStrategy = strictSchemaOriginSpecBool
 		}
 
+	} else {
+		spec.SchemaUpdatesStrategy = &ves_io_schema_views_api_definition.CreateSpecType_StrictSchemaOrigin{
+			StrictSchemaOrigin: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -1032,7 +1040,7 @@ func (r *ResourceF5XCApiDefinition) Create(ctx context.Context, request resource
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> SchemaUpdatesStrategy
+	// resource SpecToModelRoot OneOfField --> SchemaUpdatesStrategy
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -1080,8 +1088,6 @@ func (r *ResourceF5XCApiDefinition) Create(ctx context.Context, request resource
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.SchemaUpdatesStrategyChoice = types.ObjectNull(ApiDefinitionSchemaUpdatesStrategyModelAttributeMap)
 	}
 
@@ -1147,11 +1153,7 @@ func (r *ResourceF5XCApiDefinition) Read(ctx context.Context, request resource.R
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_api_definition.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_api_definition.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "api_definition", err),
@@ -1452,7 +1454,7 @@ func (r *ResourceF5XCApiDefinition) Read(ctx context.Context, request resource.R
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> SchemaUpdatesStrategy
+	// resource SpecToModelRoot OneOfField --> SchemaUpdatesStrategy
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -1500,8 +1502,6 @@ func (r *ResourceF5XCApiDefinition) Read(ctx context.Context, request resource.R
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.SchemaUpdatesStrategyChoice.IsNull() || data.SchemaUpdatesStrategyChoice.IsUnknown() || ((data.SchemaUpdatesStrategyChoice.Attributes()["mixed_schema_origin"].IsNull() || data.SchemaUpdatesStrategyChoice.Attributes()["mixed_schema_origin"].IsUnknown()) && (data.SchemaUpdatesStrategyChoice.Attributes()["strict_schema_origin"].IsNull() || data.SchemaUpdatesStrategyChoice.Attributes()["strict_schema_origin"].IsUnknown())) {
 			data.SchemaUpdatesStrategyChoice = types.ObjectValueMust(ApiDefinitionSchemaUpdatesStrategyModelAttributeMap, map[string]attr.Value{
@@ -1795,7 +1795,7 @@ func (r *ResourceF5XCApiDefinition) Update(ctx context.Context, request resource
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> SchemaUpdatesStrategy
+	// resource modelToSpecRoot OneOfField --> SchemaUpdatesStrategy
 	if !data.SchemaUpdatesStrategyChoice.IsNull() && !data.SchemaUpdatesStrategyChoice.IsUnknown() {
 		schemaUpdatesStrategyChoiceModel := ApiDefSchemaUpdatesStrategyChoice{}
 		response.Diagnostics.Append(data.SchemaUpdatesStrategyChoice.As(ctx, &schemaUpdatesStrategyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1817,6 +1817,10 @@ func (r *ResourceF5XCApiDefinition) Update(ctx context.Context, request resource
 			spec.SchemaUpdatesStrategy = strictSchemaOriginSpecBool
 		}
 
+	} else {
+		spec.SchemaUpdatesStrategy = &ves_io_schema_views_api_definition.ReplaceSpecType_StrictSchemaOrigin{
+			StrictSchemaOrigin: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -1840,12 +1844,8 @@ func (r *ResourceF5XCApiDefinition) Update(ctx context.Context, request resource
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_views_api_definition.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_views_api_definition.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "api_definition", err),
@@ -1854,7 +1854,7 @@ func (r *ResourceF5XCApiDefinition) Update(ctx context.Context, request resource
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_api_definition.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_api_definition.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "api_definition", err),
@@ -2154,7 +2154,7 @@ func (r *ResourceF5XCApiDefinition) Update(ctx context.Context, request resource
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> SchemaUpdatesStrategy
+	// resource SpecToModelRoot OneOfField --> SchemaUpdatesStrategy
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -2202,8 +2202,6 @@ func (r *ResourceF5XCApiDefinition) Update(ctx context.Context, request resource
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.SchemaUpdatesStrategyChoice = types.ObjectNull(ApiDefinitionSchemaUpdatesStrategyModelAttributeMap)
 	}
 

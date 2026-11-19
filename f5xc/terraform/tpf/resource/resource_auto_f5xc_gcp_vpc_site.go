@@ -607,7 +607,7 @@ var GcpVpcSiteAdminPasswordSecretInfoOneofClearSecretInfoModelAttributeMap = map
 	"url":      types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> BlockedServicesChoice
+// Attribute map for OneOfField --> BlockedServicesChoice
 var GcpVpcSiteBlockedServicesChoiceModelAttributeMap = map[string]attr.Type{
 
 	"block_all_services": types.BoolType,
@@ -744,7 +744,7 @@ var GcpVpcSiteKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoiceEnableUpgr
 	"drain_max_unavailable_node_count": types.Int64Type,
 }
 
-// Attribute map for RequiredOneOfField --> LogsReceiverChoice
+// Attribute map for OneOfField --> LogsReceiverChoice
 var GcpVpcSiteLogsReceiverChoiceModelAttributeMap = map[string]attr.Type{
 
 	"log_receiver": types.ObjectType{
@@ -769,7 +769,7 @@ var GcpVpcSiteOfflineSurvivabilityModeModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> OfflineSurvivabilityModeChoice
+// Attribute map for OneOfField --> OfflineSurvivabilityModeChoice
 var GcpVpcSiteOfflineSurvivabilityModeOfflineSurvivabilityModeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"enable_offline_survivability_mode": types.BoolType,
@@ -784,14 +784,14 @@ var GcpVpcSiteOsModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> OperatingSystemVersionChoice
+// Attribute map for OneOfField --> OperatingSystemVersionChoice
 var GcpVpcSiteOsOperatingSystemVersionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"default_os_version":       types.BoolType,
 	"operating_system_version": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> PrivateConnectivityChoice
+// Attribute map for OneOfField --> PrivateConnectivityChoice
 var GcpVpcSitePrivateConnectivityChoiceModelAttributeMap = map[string]attr.Type{
 
 	"private_connect_disabled": types.BoolType,
@@ -898,7 +898,7 @@ var GcpVpcSiteSiteTypeIngressEgressGwModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DcClusterGroupChoice
+// Attribute map for OneOfField --> DcClusterGroupChoice
 var GcpVpcSiteSiteTypeIngressEgressGwDcClusterGroupChoiceModelAttributeMap = map[string]attr.Type{
 
 	"dc_cluster_group_inside_vn": types.ObjectType{
@@ -926,7 +926,7 @@ var GcpVpcSiteSiteTypeIngressEgressGwDcClusterGroupChoiceDcClusterGroupOutsideVn
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> ForwardProxyChoice
+// Attribute map for OneOfField --> ForwardProxyChoice
 var GcpVpcSiteSiteTypeIngressEgressGwForwardProxyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"active_forward_proxy_policies": types.ObjectType{
@@ -959,7 +959,7 @@ var GcpVpcSiteForwardProxyPoliciesObjectRefModelAttributeMap = map[string]attr.T
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> GlobalNetworkChoice
+// Attribute map for OneOfField --> GlobalNetworkChoice
 var GcpVpcSiteSiteTypeIngressEgressGwGlobalNetworkChoiceModelAttributeMap = map[string]attr.Type{
 
 	"global_network_list": types.ObjectType{
@@ -1069,7 +1069,7 @@ var GcpVpcSiteSiteTypeIngressEgressGwInsideNetworkChoiceNewNetworkModelAttribute
 	"name": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> InsideStaticRouteChoice
+// Attribute map for OneOfField --> InsideStaticRouteChoice
 var GcpVpcSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceModelAttributeMap = map[string]attr.Type{
 
 	"inside_static_routes": types.ObjectType{
@@ -1285,7 +1285,7 @@ var GcpVpcSiteSiteTypeIngressEgressGwInsideSubnetChoiceNewSubnetModelAttributeMa
 	"subnet_name":  types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> NetworkPolicyChoice
+// Attribute map for OneOfField --> NetworkPolicyChoice
 var GcpVpcSiteSiteTypeIngressEgressGwNetworkPolicyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"active_enhanced_firewall_policies": types.ObjectType{
@@ -1374,7 +1374,7 @@ var GcpVpcSiteSiteTypeIngressEgressGwOutsideNetworkChoiceNewNetworkModelAttribut
 	"name": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> OutsideStaticRouteChoice
+// Attribute map for OneOfField --> OutsideStaticRouteChoice
 var GcpVpcSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceModelAttributeMap = map[string]attr.Type{
 
 	"no_outside_static_routes": types.BoolType,
@@ -1590,7 +1590,7 @@ var GcpVpcSiteSiteTypeIngressEgressGwPerformanceEnhancementModeModelAttributeMap
 	},
 }
 
-// Attribute map for RequiredOneOfField --> PerfModeChoice
+// Attribute map for OneOfField --> PerfModeChoice
 var GcpVpcSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"perf_mode_l3_enhanced": types.ObjectType{
@@ -1607,14 +1607,14 @@ var GcpVpcSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePer
 	},
 }
 
-// Attribute map for RequiredOneOfField --> PerfModeChoice
+// Attribute map for OneOfField --> PerfModeChoice
 var GcpVpcSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"jumbo":    types.BoolType,
 	"no_jumbo": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> SiteMeshGroupChoice
+// Attribute map for OneOfField --> SiteMeshGroupChoice
 var GcpVpcSiteSiteTypeIngressEgressGwSiteMeshGroupChoiceModelAttributeMap = map[string]attr.Type{
 
 	"sm_connection_public_ip": types.BoolType,
@@ -1717,7 +1717,7 @@ var GcpVpcSiteSiteTypeIngressGwPerformanceEnhancementModeModelAttributeMap = map
 	},
 }
 
-// Attribute map for RequiredOneOfField --> PerfModeChoice
+// Attribute map for OneOfField --> PerfModeChoice
 var GcpVpcSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"perf_mode_l3_enhanced": types.ObjectType{
@@ -1734,7 +1734,7 @@ var GcpVpcSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL
 	},
 }
 
-// Attribute map for RequiredOneOfField --> PerfModeChoice
+// Attribute map for OneOfField --> PerfModeChoice
 var GcpVpcSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoicePerfModeL3EnhancedPerfModeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"jumbo":    types.BoolType,
@@ -1785,7 +1785,7 @@ var GcpVpcSiteSiteTypeVoltstackClusterModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DcClusterGroupChoice
+// Attribute map for OneOfField --> DcClusterGroupChoice
 var GcpVpcSiteSiteTypeVoltstackClusterDcClusterGroupChoiceModelAttributeMap = map[string]attr.Type{
 
 	"dc_cluster_group": types.ObjectType{
@@ -1802,7 +1802,7 @@ var GcpVpcSiteSiteTypeVoltstackClusterDcClusterGroupChoiceDcClusterGroupModelAtt
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> ForwardProxyChoice
+// Attribute map for OneOfField --> ForwardProxyChoice
 var GcpVpcSiteSiteTypeVoltstackClusterForwardProxyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"active_forward_proxy_policies": types.ObjectType{
@@ -1827,7 +1827,7 @@ var GcpVpcSiteSiteTypeVoltstackClusterForwardProxyChoiceActiveForwardProxyPolici
 	},
 }
 
-// Attribute map for RequiredOneOfField --> GlobalNetworkChoice
+// Attribute map for OneOfField --> GlobalNetworkChoice
 var GcpVpcSiteSiteTypeVoltstackClusterGlobalNetworkChoiceModelAttributeMap = map[string]attr.Type{
 
 	"global_network_list": types.ObjectType{
@@ -1906,7 +1906,7 @@ var GcpVpcSiteSiteTypeVoltstackClusterGlobalNetworkChoiceGlobalNetworkListGlobal
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> K8SClusterChoice
+// Attribute map for OneOfField --> K8SClusterChoice
 var GcpVpcSiteSiteTypeVoltstackClusterK8SClusterChoiceModelAttributeMap = map[string]attr.Type{
 
 	"k8s_cluster": types.ObjectType{
@@ -1923,7 +1923,7 @@ var GcpVpcSiteSiteTypeVoltstackClusterK8SClusterChoiceK8SClusterModelAttributeMa
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> NetworkPolicyChoice
+// Attribute map for OneOfField --> NetworkPolicyChoice
 var GcpVpcSiteSiteTypeVoltstackClusterNetworkPolicyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"active_enhanced_firewall_policies": types.ObjectType{
@@ -1965,7 +1965,7 @@ var GcpVpcSiteSiteTypeVoltstackClusterNetworkPolicyChoiceActiveNetworkPoliciesMo
 	},
 }
 
-// Attribute map for RequiredOneOfField --> OutsideStaticRouteChoice
+// Attribute map for OneOfField --> OutsideStaticRouteChoice
 var GcpVpcSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceModelAttributeMap = map[string]attr.Type{
 
 	"no_outside_static_routes": types.BoolType,
@@ -2204,14 +2204,14 @@ var GcpVpcSiteSiteTypeVoltstackClusterSiteLocalSubnetChoiceNewSubnetModelAttribu
 	"subnet_name":  types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> SiteMeshGroupChoice
+// Attribute map for OneOfField --> SiteMeshGroupChoice
 var GcpVpcSiteSiteTypeVoltstackClusterSiteMeshGroupChoiceModelAttributeMap = map[string]attr.Type{
 
 	"sm_connection_public_ip": types.BoolType,
 	"sm_connection_pvt_ip":    types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> StorageClassChoice
+// Attribute map for OneOfField --> StorageClassChoice
 var GcpVpcSiteSiteTypeVoltstackClusterStorageClassChoiceModelAttributeMap = map[string]attr.Type{
 
 	"default_storage": types.BoolType,
@@ -2249,7 +2249,7 @@ var GcpVpcSiteSwModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> VolterraSwVersionChoice
+// Attribute map for OneOfField --> VolterraSwVersionChoice
 var GcpVpcSiteSwVolterraSwVersionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"default_sw_version":        types.BoolType,
@@ -2264,7 +2264,7 @@ var GcpVpcSiteWafSignaturesModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> SignaturesUpdateModeChoice
+// Attribute map for OneOfField --> SignaturesUpdateModeChoice
 var GcpVpcSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"automatic": types.BoolType,
@@ -2372,7 +2372,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 				Attributes: map[string]schema.Attribute{
 					"secret_info_choice": schema.SingleNestedAttribute{
 						Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-						MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+						MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -2386,7 +2386,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 						Attributes: map[string]schema.Attribute{
 							"blindfold_secret_info": schema.SingleNestedAttribute{
 								Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-								MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+								MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2426,7 +2426,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 							},
 							"clear_secret_info": schema.SingleNestedAttribute{
 								Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-								MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+								MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2461,7 +2461,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 							},
 							"none": schema.BoolAttribute{
 								Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-								MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+								MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2475,21 +2475,24 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 			},
 			"blocked_services_choice": schema.SingleNestedAttribute{
 				Description:         "Blocked Services on Site By default webui, ssh and dns are all blocked, you can choose other options to unblock.",
-				MarkdownDescription: "Blocked Services on Site By default webui, ssh and dns are all blocked, you can choose other options to unblock.",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Blocked Services on Site By default webui, ssh and dns are all blocked, you can choose other options to unblock.<br>Exactly one of `block_all_services`, `blocked_services`, or `default_blocked_services` must be specified when `blocked_services_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"block_all_services",
 						"blocked_services",
 						"default_blocked_services",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"block_all_services": schema.BoolAttribute{
 						Description:         "Block DNS, SSH & WebUI services on Site Block DNS, SSH & WebUI services on Site",
-						MarkdownDescription: "Block DNS, SSH & WebUI services on Site Block DNS, SSH & WebUI services on Site",
+						MarkdownDescription: "Block DNS, SSH & WebUI services on Site Block DNS, SSH & WebUI services on Site<br>Conflicts with `blocked_services` and `default_blocked_services`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2499,7 +2502,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 					},
 					"blocked_services": schema.SingleNestedAttribute{
 						Description:         "Custom Blocked Services Configuration Use custom blocked services configuration",
-						MarkdownDescription: "Custom Blocked Services Configuration Use custom blocked services configuration",
+						MarkdownDescription: "Custom Blocked Services Configuration Use custom blocked services configuration<br>Conflicts with `block_all_services` and `default_blocked_services`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2517,7 +2520,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 									Attributes: map[string]schema.Attribute{
 										"blocked_services_value_type_choice": schema.SingleNestedAttribute{
 											Description:         "blocked_services_type_choice Choose the Nodel Local Service to disable",
-											MarkdownDescription: "blocked_services_type_choice Choose the Nodel Local Service to disable",
+											MarkdownDescription: "blocked_services_type_choice Choose the Nodel Local Service to disable<br>Exactly one of `dns` or `ssh` must be specified when `blocked_services_value_type_choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -2530,7 +2533,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 											Attributes: map[string]schema.Attribute{
 												"dns": schema.BoolAttribute{
 													Description:         "DNS Matches DNS port 53",
-													MarkdownDescription: "DNS Matches DNS port 53",
+													MarkdownDescription: "DNS Matches DNS port 53<br>Conflicts with `ssh`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -2540,7 +2543,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 												},
 												"ssh": schema.BoolAttribute{
 													Description:         "SSH",
-													MarkdownDescription: "SSH",
+													MarkdownDescription: "SSH<br>Conflicts with `dns`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -2570,7 +2573,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 					},
 					"default_blocked_services": schema.BoolAttribute{
 						Description:         "Allow access to DNS, SSH services on Site Allow access to DNS, SSH services on Site",
-						MarkdownDescription: "Allow access to DNS, SSH services on Site Allow access to DNS, SSH services on Site",
+						MarkdownDescription: "Allow access to DNS, SSH services on Site Allow access to DNS, SSH services on Site<br>Conflicts with `block_all_services` and `blocked_services`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2714,7 +2717,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 			},
 			"deployment_choice": schema.SingleNestedAttribute{
 				Description:         "Automatic Deployment Deploying automatic via volterra.",
-				MarkdownDescription: "Automatic Deployment Deploying automatic via volterra.",
+				MarkdownDescription: "Automatic Deployment Deploying automatic via volterra.<br>`cloud_credentials` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -2772,7 +2775,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 			},
 			"encryption_choice": schema.SingleNestedAttribute{
 				Description:         "Encryption Option to encrypt the node disk with CMK. Defaults to disable encryption",
-				MarkdownDescription: "Encryption Option to encrypt the node disk with CMK. Defaults to disable encryption",
+				MarkdownDescription: "Encryption Option to encrypt the node disk with CMK. Defaults to disable encryption<br>Exactly one of `disable_encryption` or `enable_encryption` must be specified when `encryption_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -2785,7 +2788,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 				Attributes: map[string]schema.Attribute{
 					"disable_encryption": schema.BoolAttribute{
 						Description:         "Disable Encryption Disk attached to VM will not be encrypted with CMK",
-						MarkdownDescription: "Disable Encryption Disk attached to VM will not be encrypted with CMK",
+						MarkdownDescription: "Disable Encryption Disk attached to VM will not be encrypted with CMK<br>Conflicts with `enable_encryption`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2795,7 +2798,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 					},
 					"enable_encryption": schema.SingleNestedAttribute{
 						Description:         "Enable Customer Disk will be encrypted with the specified key",
-						MarkdownDescription: "Enable Customer Disk will be encrypted with the specified key",
+						MarkdownDescription: "Enable Customer Disk will be encrypted with the specified key<br>Conflicts with `disable_encryption`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2869,7 +2872,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 				Attributes: map[string]schema.Attribute{
 					"kubernetes_upgrade_drain_enable_choice": schema.SingleNestedAttribute{
 						Description:         "F5XC Enable/Disable Node by Node Upgrade Specify how nodes within a site will be upgraded. If enabled, you can specify number of Worker nodes to be upgraded in parallel. Note: This does not influence Control nodes. This is benefitial for sites with large number of nodes.",
-						MarkdownDescription: "F5XC Enable/Disable Node by Node Upgrade Specify how nodes within a site will be upgraded. If enabled, you can specify number of Worker nodes to be upgraded in parallel. Note: This does not influence Control nodes. This is benefitial for sites with large number of nodes.",
+						MarkdownDescription: "F5XC Enable/Disable Node by Node Upgrade Specify how nodes within a site will be upgraded. If enabled, you can specify number of Worker nodes to be upgraded in parallel. Note: This does not influence Control nodes. This is benefitial for sites with large number of nodes.<br>Exactly one of `disable_upgrade_drain` or `enable_upgrade_drain` must be specified.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -2882,7 +2885,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 						Attributes: map[string]schema.Attribute{
 							"disable_upgrade_drain": schema.BoolAttribute{
 								Description:         "Disable upgrade drain",
-								MarkdownDescription: "Disable upgrade drain",
+								MarkdownDescription: "Disable upgrade drain<br>Conflicts with `enable_upgrade_drain`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2892,14 +2895,14 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 							},
 							"enable_upgrade_drain": schema.SingleNestedAttribute{
 								Description:         "Enable Node by Node Upgrade",
-								MarkdownDescription: "Enable Node by Node Upgrade",
+								MarkdownDescription: "Enable Node by Node Upgrade<br>Conflicts with `disable_upgrade_drain`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
 								Attributes: map[string]schema.Attribute{
 									"drain_max_unavailable_choice": schema.SingleNestedAttribute{
 										Description:         "Node Batch Size Max number of worker nodes to be upgraded in parallel",
-										MarkdownDescription: "Node Batch Size Max number of worker nodes to be upgraded in parallel",
+										MarkdownDescription: "Node Batch Size Max number of worker nodes to be upgraded in parallel<br>`drain_max_unavailable_node_count` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -2943,20 +2946,23 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 			},
 			"logs_receiver_choice": schema.SingleNestedAttribute{
 				Description:         "Logs Streaming Select Logs receiver for logs streaming",
-				MarkdownDescription: "Logs Streaming Select Logs receiver for logs streaming",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Logs Streaming Select Logs receiver for logs streaming<br>Exactly one of `log_receiver` or `logs_streaming_disabled` must be specified when `logs_receiver_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"log_receiver",
 						"logs_streaming_disabled",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"log_receiver": schema.SingleNestedAttribute{
 						Description:         "Disable Logs Streaming Select log receiver for logs streaming",
-						MarkdownDescription: "Disable Logs Streaming Select log receiver for logs streaming",
+						MarkdownDescription: "Disable Logs Streaming Select log receiver for logs streaming<br>Conflicts with `logs_streaming_disabled`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -2989,7 +2995,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 					},
 					"logs_streaming_disabled": schema.BoolAttribute{
 						Description:         "Disable Logs Receiver Logs Streaming is disabled",
-						MarkdownDescription: "Disable Logs Receiver Logs Streaming is disabled",
+						MarkdownDescription: "Disable Logs Receiver Logs Streaming is disabled<br>Conflicts with `log_receiver`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -3008,20 +3014,23 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 				Attributes: map[string]schema.Attribute{
 					"offline_survivability_mode_choice": schema.SingleNestedAttribute{
 						Description:         "offline_survivability_mode_choice Offline Survivability allows the Site to continue functioning normally without traffic loss during periods of connectivity loss to the Regional Edge (RE) or the Global Controller (GC). When this feature is enabled, a site can continue to function as is with existing configuration for upto 7 days, even when the site is offline. The certificates needed to keep the services running on this site are signed using a local CA. Secrets would also be cached locally to handle the connectivity loss. When the mode is toggled, services will restart and traffic disruption will be seen.",
-						MarkdownDescription: "offline_survivability_mode_choice Offline Survivability allows the Site to continue functioning normally without traffic loss during periods of connectivity loss to the Regional Edge (RE) or the Global Controller (GC). When this feature is enabled, a site can continue to function as is with existing configuration for upto 7 days, even when the site is offline. The certificates needed to keep the services running on this site are signed using a local CA. Secrets would also be cached locally to handle the connectivity loss. When the mode is toggled, services will restart and traffic disruption will be seen.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "offline_survivability_mode_choice Offline Survivability allows the Site to continue functioning normally without traffic loss during periods of connectivity loss to the Regional Edge (RE) or the Global Controller (GC). When this feature is enabled, a site can continue to function as is with existing configuration for upto 7 days, even when the site is offline. The certificates needed to keep the services running on this site are signed using a local CA. Secrets would also be cached locally to handle the connectivity loss. When the mode is toggled, services will restart and traffic disruption will be seen.<br>Exactly one of `enable_offline_survivability_mode` or `no_offline_survivability_mode` must be specified when `offline_survivability_mode_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"enable_offline_survivability_mode",
 								"no_offline_survivability_mode",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"enable_offline_survivability_mode": schema.BoolAttribute{
 								Description:         "Enable Offline Survivability Mode",
-								MarkdownDescription: "Enable Offline Survivability Mode",
+								MarkdownDescription: "Enable Offline Survivability Mode<br>Conflicts with `no_offline_survivability_mode`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -3031,7 +3040,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 							},
 							"no_offline_survivability_mode": schema.BoolAttribute{
 								Description:         "Disable Offline Survivability Mode",
-								MarkdownDescription: "Disable Offline Survivability Mode",
+								MarkdownDescription: "Disable Offline Survivability Mode<br>Conflicts with `enable_offline_survivability_mode`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -3055,20 +3064,23 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 				Attributes: map[string]schema.Attribute{
 					"operating_system_version_choice": schema.SingleNestedAttribute{
 						Description:         "Operating System Version Select the F5XC Operating System Version for the site. By default, latest available OS Version will be used. Refer to release notes to find required released OS versions.",
-						MarkdownDescription: "Operating System Version Select the F5XC Operating System Version for the site. By default, latest available OS Version will be used. Refer to release notes to find required released OS versions.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "Operating System Version Select the F5XC Operating System Version for the site. By default, latest available OS Version will be used. Refer to release notes to find required released OS versions.<br>Exactly one of `default_os_version` or `operating_system_version` must be specified when `operating_system_version_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"default_os_version",
 								"operating_system_version",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"default_os_version": schema.BoolAttribute{
 								Description:         "Default OS Version Will assign latest available OS version",
-								MarkdownDescription: "Default OS Version Will assign latest available OS version",
+								MarkdownDescription: "Default OS Version Will assign latest available OS version<br>Conflicts with `operating_system_version`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -3078,7 +3090,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 							},
 							"operating_system_version": schema.StringAttribute{
 								Description:         "Operating System Version Specify a OS version to be used e.g. 9.2024.6.",
-								MarkdownDescription: "Operating System Version Specify a OS version to be used e.g. 9.2024.6.<br>**Validation:** `Length LengthAtMost(20)`",
+								MarkdownDescription: "Operating System Version Specify a OS version to be used e.g. 9.2024.6.<br>**Validation:** `Length LengthAtMost(20)`<br>Conflicts with `default_os_version`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -3092,20 +3104,23 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 			},
 			"private_connectivity_choice": schema.SingleNestedAttribute{
 				Description:         "Private Connectivity To Site Select Private Connectivity To Site",
-				MarkdownDescription: "Private Connectivity To Site Select Private Connectivity To Site",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Private Connectivity To Site Select Private Connectivity To Site<br>Exactly one of `private_connect_disabled` or `private_connectivity` must be specified when `private_connectivity_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"private_connect_disabled",
 						"private_connectivity",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"private_connect_disabled": schema.BoolAttribute{
 						Description:         "Disable Private Connectivity Disable Private Connectivity to Site",
-						MarkdownDescription: "Disable Private Connectivity Disable Private Connectivity to Site",
+						MarkdownDescription: "Disable Private Connectivity Disable Private Connectivity to Site<br>Conflicts with `private_connectivity`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -3115,7 +3130,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 					},
 					"private_connectivity": schema.SingleNestedAttribute{
 						Description:         "Enable Private Connectivity Enable Private Connectivity to Site",
-						MarkdownDescription: "Enable Private Connectivity Enable Private Connectivity to Site",
+						MarkdownDescription: "Enable Private Connectivity Enable Private Connectivity to Site<br>Conflicts with `private_connect_disabled`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -3155,7 +3170,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 							},
 							"network_options_choice": schema.SingleNestedAttribute{
 								Description:         "Choose Site Network Please use Outside Network if Private Connectivity to Regional Edge has been configured on the CloudLink",
-								MarkdownDescription: "Choose Site Network Please use Outside Network if Private Connectivity to Regional Edge has been configured on the CloudLink",
+								MarkdownDescription: "Choose Site Network Please use Outside Network if Private Connectivity to Regional Edge has been configured on the CloudLink<br>Exactly one of `inside` or `outside` must be specified when `network_options_choice` is configured.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -3168,7 +3183,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 								Attributes: map[string]schema.Attribute{
 									"inside": schema.BoolAttribute{
 										Description:         "Inside Network CloudLink will be associated, and routes will be propagated with the Site Local Inside Network of this Site",
-										MarkdownDescription: "Inside Network CloudLink will be associated, and routes will be propagated with the Site Local Inside Network of this Site",
+										MarkdownDescription: "Inside Network CloudLink will be associated, and routes will be propagated with the Site Local Inside Network of this Site<br>Conflicts with `outside`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3178,7 +3193,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 									},
 									"outside": schema.BoolAttribute{
 										Description:         "Outside Network CloudLink will be associated, and routes will be propagated with the Site Local Outside Network of this Site",
-										MarkdownDescription: "Outside Network CloudLink will be associated, and routes will be propagated with the Site Local Outside Network of this Site",
+										MarkdownDescription: "Outside Network CloudLink will be associated, and routes will be propagated with the Site Local Outside Network of this Site<br>Conflicts with `inside`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3194,7 +3209,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 			},
 			"site_type_choice": schema.SingleNestedAttribute{
 				Description:         "Number of interfaces on CE Choice of deploying one interface or two interface site",
-				MarkdownDescription: "Number of interfaces on CE Choice of deploying one interface or two interface site",
+				MarkdownDescription: "Number of interfaces on CE Choice of deploying one interface or two interface site<br>Exactly one of `ingress_egress_gw`, `ingress_gw`, or `voltstack_cluster` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -3208,28 +3223,31 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 				Attributes: map[string]schema.Attribute{
 					"ingress_egress_gw": schema.SingleNestedAttribute{
 						Description:         "Two Interface Site Two interface site is useful when site is used as ingress/egress gateway to the VPC network.",
-						MarkdownDescription: "Two Interface Site Two interface site is useful when site is used as ingress/egress gateway to the VPC network.",
+						MarkdownDescription: "Two Interface Site Two interface site is useful when site is used as ingress/egress gateway to the VPC network.<br>Conflicts with `ingress_gw` and `voltstack_cluster`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"dc_cluster_group_choice": schema.SingleNestedAttribute{
 								Description:         "Select DC Cluster Group Is this site member of a dc cluster group via selected network type",
-								MarkdownDescription: "Select DC Cluster Group Is this site member of a dc cluster group via selected network type",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Select DC Cluster Group Is this site member of a dc cluster group via selected network type<br>Exactly one of `dc_cluster_group_inside_vn`, `dc_cluster_group_outside_vn`, or `no_dc_cluster_group` must be specified when `dc_cluster_group_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"dc_cluster_group_inside_vn",
 										"dc_cluster_group_outside_vn",
 										"no_dc_cluster_group",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"dc_cluster_group_inside_vn": schema.SingleNestedAttribute{
 										Description:         "Member of DC cluster Group via Inside Network This site is member of dc cluster group connected via inside network",
-										MarkdownDescription: "Member of DC cluster Group via Inside Network This site is member of dc cluster group connected via inside network",
+										MarkdownDescription: "Member of DC cluster Group via Inside Network This site is member of dc cluster group connected via inside network<br>Conflicts with `dc_cluster_group_outside_vn` and `no_dc_cluster_group`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3262,7 +3280,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 									},
 									"dc_cluster_group_outside_vn": schema.SingleNestedAttribute{
 										Description:         "Member of DC cluster Group via Outside Network This site is member of dc cluster group connected via outside network",
-										MarkdownDescription: "Member of DC cluster Group via Outside Network This site is member of dc cluster group connected via outside network",
+										MarkdownDescription: "Member of DC cluster Group via Outside Network This site is member of dc cluster group connected via outside network<br>Conflicts with `dc_cluster_group_inside_vn` and `no_dc_cluster_group`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3295,7 +3313,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 									},
 									"no_dc_cluster_group": schema.BoolAttribute{
 										Description:         "Not a Member of DC Cluster Group This site is not a member of dc cluster group",
-										MarkdownDescription: "Not a Member of DC Cluster Group This site is not a member of dc cluster group",
+										MarkdownDescription: "Not a Member of DC Cluster Group This site is not a member of dc cluster group<br>Conflicts with `dc_cluster_group_inside_vn` and `dc_cluster_group_outside_vn`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3307,21 +3325,24 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 							},
 							"forward_proxy_choice": schema.SingleNestedAttribute{
 								Description:         "Manage Forward Proxy Manage Forward Proxy for this site",
-								MarkdownDescription: "Manage Forward Proxy Manage Forward Proxy for this site",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Manage Forward Proxy Manage Forward Proxy for this site<br>Exactly one of `active_forward_proxy_policies`, `forward_proxy_allow_all`, or `no_forward_proxy` must be specified when `forward_proxy_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"active_forward_proxy_policies",
 										"forward_proxy_allow_all",
 										"no_forward_proxy",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"active_forward_proxy_policies": schema.SingleNestedAttribute{
 										Description:         "Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies",
-										MarkdownDescription: "Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies",
+										MarkdownDescription: "Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies<br>Conflicts with `forward_proxy_allow_all` and `no_forward_proxy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3368,7 +3389,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 									},
 									"forward_proxy_allow_all": schema.BoolAttribute{
 										Description:         "Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.",
-										MarkdownDescription: "Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.",
+										MarkdownDescription: "Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.<br>Conflicts with `active_forward_proxy_policies` and `no_forward_proxy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3378,7 +3399,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 									},
 									"no_forward_proxy": schema.BoolAttribute{
 										Description:         "Disable Forward Proxy Disable Forward Proxy for this site",
-										MarkdownDescription: "Disable Forward Proxy Disable Forward Proxy for this site",
+										MarkdownDescription: "Disable Forward Proxy Disable Forward Proxy for this site<br>Conflicts with `active_forward_proxy_policies` and `forward_proxy_allow_all`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3415,20 +3436,23 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 							},
 							"global_network_choice": schema.SingleNestedAttribute{
 								Description:         "Connect to Global Network Select global networks to connect to inside or outside network",
-								MarkdownDescription: "Connect to Global Network Select global networks to connect to inside or outside network",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Connect to Global Network Select global networks to connect to inside or outside network<br>Exactly one of `global_network_list` or `no_global_network` must be specified when `global_network_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"global_network_list",
 										"no_global_network",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"global_network_list": schema.SingleNestedAttribute{
 										Description:         "Connect Global Networks List of global network connections",
-										MarkdownDescription: "Connect Global Networks List of global network connections",
+										MarkdownDescription: "Connect Global Networks List of global network connections<br>Conflicts with `no_global_network`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3446,7 +3470,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 													Attributes: map[string]schema.Attribute{
 														"connection_choice": schema.SingleNestedAttribute{
 															Description:         "Connector Choice Select the networks and method in which they are connected.",
-															MarkdownDescription: "Connector Choice Select the networks and method in which they are connected.",
+															MarkdownDescription: "Connector Choice Select the networks and method in which they are connected.<br>Exactly one of `sli_to_global_dr` or `slo_to_global_dr` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -3459,7 +3483,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 															Attributes: map[string]schema.Attribute{
 																"sli_to_global_dr": schema.SingleNestedAttribute{
 																	Description:         "Site Local Inside to a Global Network' Site local inside is connected directly to a given global network",
-																	MarkdownDescription: "Site Local Inside to a Global Network' Site local inside is connected directly to a given global network",
+																	MarkdownDescription: "Site Local Inside to a Global Network' Site local inside is connected directly to a given global network<br>Conflicts with `slo_to_global_dr`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3501,7 +3525,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 																},
 																"slo_to_global_dr": schema.SingleNestedAttribute{
 																	Description:         "Site Local Outside to a Global Network' Site local outside is connected directly to a given global network",
-																	MarkdownDescription: "Site Local Outside to a Global Network' Site local outside is connected directly to a given global network",
+																	MarkdownDescription: "Site Local Outside to a Global Network' Site local outside is connected directly to a given global network<br>Conflicts with `sli_to_global_dr`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3550,7 +3574,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 									},
 									"no_global_network": schema.BoolAttribute{
 										Description:         "Do not Connect Global Networks No global network to connect",
-										MarkdownDescription: "Do not Connect Global Networks No global network to connect",
+										MarkdownDescription: "Do not Connect Global Networks No global network to connect<br>Conflicts with `global_network_list`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3569,7 +3593,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 								Attributes: map[string]schema.Attribute{
 									"choice": schema.SingleNestedAttribute{
 										Description:         "Choice of existing or new VPC network Create a new VPC Network or select an existing one.",
-										MarkdownDescription: "Choice of existing or new VPC network Create a new VPC Network or select an existing one.",
+										MarkdownDescription: "Choice of existing or new VPC network Create a new VPC Network or select an existing one.<br>Exactly one of `existing_network` or `new_network` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -3582,7 +3606,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 										Attributes: map[string]schema.Attribute{
 											"existing_network": schema.SingleNestedAttribute{
 												Description:         "Existing VPC Name of existing VPC network.",
-												MarkdownDescription: "Existing VPC Name of existing VPC network.",
+												MarkdownDescription: "Existing VPC Name of existing VPC network.<br>Conflicts with `new_network`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3601,7 +3625,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 											},
 											"new_network": schema.SingleNestedAttribute{
 												Description:         "New VPC Create new VPC network with specified name.",
-												MarkdownDescription: "New VPC Create new VPC network with specified name.",
+												MarkdownDescription: "New VPC Create new VPC network with specified name.<br>Conflicts with `existing_network`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3624,20 +3648,23 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 							},
 							"inside_static_route_choice": schema.SingleNestedAttribute{
 								Description:         "Manage Static Routes for Inside Network Add static routes to inside network. Used to reach indirectly connected subnets.",
-								MarkdownDescription: "Manage Static Routes for Inside Network Add static routes to inside network. Used to reach indirectly connected subnets.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Manage Static Routes for Inside Network Add static routes to inside network. Used to reach indirectly connected subnets.<br>Exactly one of `inside_static_routes` or `no_inside_static_routes` must be specified when `inside_static_route_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"inside_static_routes",
 										"no_inside_static_routes",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"inside_static_routes": schema.SingleNestedAttribute{
 										Description:         "Manage Static routes Manage static routes for inside network.",
-										MarkdownDescription: "Manage Static routes Manage static routes for inside network.",
+										MarkdownDescription: "Manage Static routes Manage static routes for inside network.<br>Conflicts with `no_inside_static_routes`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3655,7 +3682,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 													Attributes: map[string]schema.Attribute{
 														"config_mode_choice": schema.SingleNestedAttribute{
 															Description:         "Static Route Config Mode Select method for configuring the route",
-															MarkdownDescription: "Static Route Config Mode Select method for configuring the route",
+															MarkdownDescription: "Static Route Config Mode Select method for configuring the route<br>Exactly one of `custom_static_route` or `simple_static_route` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -3668,7 +3695,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 															Attributes: map[string]schema.Attribute{
 																"custom_static_route": schema.SingleNestedAttribute{
 																	Description:         "Custom Static Route Use Custom static route to configure all advanced options",
-																	MarkdownDescription: "Custom Static Route Use Custom static route to configure all advanced options",
+																	MarkdownDescription: "Custom Static Route Use Custom static route to configure all advanced options<br>Conflicts with `simple_static_route`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3747,7 +3774,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 																					Attributes: map[string]schema.Attribute{
 																						"ver_choice": schema.SingleNestedAttribute{
 																							Description:         "Version IP Address version. Can be IPv4 Address or IPv6 Address",
-																							MarkdownDescription: "Version IP Address version. Can be IPv4 Address or IPv6 Address",
+																							MarkdownDescription: "Version IP Address version. Can be IPv4 Address or IPv6 Address<br>Exactly one of `dual_stack` or `ipv4` must be specified when `ver_choice` is configured.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -3760,7 +3787,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 																							Attributes: map[string]schema.Attribute{
 																								"dual_stack": schema.SingleNestedAttribute{
 																									Description:         "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together",
-																									MarkdownDescription: "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together",
+																									MarkdownDescription: "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together<br>Conflicts with `ipv4`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -3813,7 +3840,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 																								},
 																								"ipv4": schema.SingleNestedAttribute{
 																									Description:         "IPv4 Address IPv4 Address",
-																									MarkdownDescription: "IPv4 Address IPv4 Address",
+																									MarkdownDescription: "IPv4 Address IPv4 Address<br>Conflicts with `dual_stack`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -3865,7 +3892,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 																				Attributes: map[string]schema.Attribute{
 																					"ver_choice": schema.SingleNestedAttribute{
 																						Description:         "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address",
-																						MarkdownDescription: "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address",
+																						MarkdownDescription: "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address<br>`ipv4` must be specified.",
 																						Required:            true,
 																						Optional:            false,
 																						Computed:            false,
@@ -3916,7 +3943,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 																},
 																"simple_static_route": schema.StringAttribute{
 																	Description:         "Simple Static Route Use simple static route for prefix pointing to single interface in the network",
-																	MarkdownDescription: "Simple Static Route Use simple static route for prefix pointing to single interface in the network",
+																	MarkdownDescription: "Simple Static Route Use simple static route for prefix pointing to single interface in the network<br>Conflicts with `custom_static_route`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -3936,7 +3963,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 									},
 									"no_inside_static_routes": schema.BoolAttribute{
 										Description:         "Do Not Manage Static Routes Static Routes disabled for inside network.",
-										MarkdownDescription: "Do Not Manage Static Routes Static Routes disabled for inside network.",
+										MarkdownDescription: "Do Not Manage Static Routes Static Routes disabled for inside network.<br>Conflicts with `inside_static_routes`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -3955,7 +3982,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 								Attributes: map[string]schema.Attribute{
 									"choice": schema.SingleNestedAttribute{
 										Description:         "Choice of existing or new subnet Create a new VPC Subnet or select an existing one.",
-										MarkdownDescription: "Choice of existing or new subnet Create a new VPC Subnet or select an existing one.",
+										MarkdownDescription: "Choice of existing or new subnet Create a new VPC Subnet or select an existing one.<br>Exactly one of `existing_subnet` or `new_subnet` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -3968,7 +3995,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 										Attributes: map[string]schema.Attribute{
 											"existing_subnet": schema.SingleNestedAttribute{
 												Description:         "Existing VPC Name of existing VPC subnet.",
-												MarkdownDescription: "Existing VPC Name of existing VPC subnet.",
+												MarkdownDescription: "Existing VPC Name of existing VPC subnet.<br>Conflicts with `new_subnet`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3987,7 +4014,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 											},
 											"new_subnet": schema.SingleNestedAttribute{
 												Description:         "New VPC Parameters for creating a new VPC Subnet",
-												MarkdownDescription: "New VPC Parameters for creating a new VPC Subnet",
+												MarkdownDescription: "New VPC Parameters for creating a new VPC Subnet<br>Conflicts with `existing_subnet`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4034,21 +4061,24 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 							},
 							"network_policy_choice": schema.SingleNestedAttribute{
 								Description:         "Manage Firewall Policy Manage Firewall Policy via this view",
-								MarkdownDescription: "Manage Firewall Policy Manage Firewall Policy via this view",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Manage Firewall Policy Manage Firewall Policy via this view<br>Exactly one of `active_enhanced_firewall_policies`, `active_network_policies`, or `no_network_policy` must be specified when `network_policy_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"active_enhanced_firewall_policies",
 										"active_network_policies",
 										"no_network_policy",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"active_enhanced_firewall_policies": schema.SingleNestedAttribute{
 										Description:         "Manage Firewall Policy (V2) Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion.",
-										MarkdownDescription: "Manage Firewall Policy (V2) Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion.",
+										MarkdownDescription: "Manage Firewall Policy (V2) Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion.<br>Conflicts with `active_network_policies` and `no_network_policy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4095,7 +4125,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 									},
 									"active_network_policies": schema.SingleNestedAttribute{
 										Description:         "Manage Firewall Policy Firewall Policies active for this site.",
-										MarkdownDescription: "Manage Firewall Policy Firewall Policies active for this site.",
+										MarkdownDescription: "Manage Firewall Policy Firewall Policies active for this site.<br>Conflicts with `active_enhanced_firewall_policies` and `no_network_policy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4142,7 +4172,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 									},
 									"no_network_policy": schema.BoolAttribute{
 										Description:         "Do Not Manage Firewall Policy Firewall Policy is disabled for this site.",
-										MarkdownDescription: "Do Not Manage Firewall Policy Firewall Policy is disabled for this site.",
+										MarkdownDescription: "Do Not Manage Firewall Policy Firewall Policy is disabled for this site.<br>Conflicts with `active_enhanced_firewall_policies` and `active_network_policies`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4168,7 +4198,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 								Attributes: map[string]schema.Attribute{
 									"choice": schema.SingleNestedAttribute{
 										Description:         "Choice of existing or new VPC network Create a new VPC Network or select an existing one.",
-										MarkdownDescription: "Choice of existing or new VPC network Create a new VPC Network or select an existing one.",
+										MarkdownDescription: "Choice of existing or new VPC network Create a new VPC Network or select an existing one.<br>Exactly one of `existing_network` or `new_network` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -4181,7 +4211,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 										Attributes: map[string]schema.Attribute{
 											"existing_network": schema.SingleNestedAttribute{
 												Description:         "Existing VPC Name of existing VPC network.",
-												MarkdownDescription: "Existing VPC Name of existing VPC network.",
+												MarkdownDescription: "Existing VPC Name of existing VPC network.<br>Conflicts with `new_network`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4200,7 +4230,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 											},
 											"new_network": schema.SingleNestedAttribute{
 												Description:         "New VPC Create new VPC network with specified name.",
-												MarkdownDescription: "New VPC Create new VPC network with specified name.",
+												MarkdownDescription: "New VPC Create new VPC network with specified name.<br>Conflicts with `existing_network`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4223,20 +4253,23 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 							},
 							"outside_static_route_choice": schema.SingleNestedAttribute{
 								Description:         "Manage Static Routes for Outside Network Add static routes to outside network. Used to reach indirectly connected subnets.",
-								MarkdownDescription: "Manage Static Routes for Outside Network Add static routes to outside network. Used to reach indirectly connected subnets.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Manage Static Routes for Outside Network Add static routes to outside network. Used to reach indirectly connected subnets.<br>Exactly one of `no_outside_static_routes` or `outside_static_routes` must be specified when `outside_static_route_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"no_outside_static_routes",
 										"outside_static_routes",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"no_outside_static_routes": schema.BoolAttribute{
 										Description:         "Do Not Manage Static Routes Static Routes disabled for outside network.",
-										MarkdownDescription: "Do Not Manage Static Routes Static Routes disabled for outside network.",
+										MarkdownDescription: "Do Not Manage Static Routes Static Routes disabled for outside network.<br>Conflicts with `outside_static_routes`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4246,7 +4279,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 									},
 									"outside_static_routes": schema.SingleNestedAttribute{
 										Description:         "Manage Static routes Manage static routes for outside network.",
-										MarkdownDescription: "Manage Static routes Manage static routes for outside network.",
+										MarkdownDescription: "Manage Static routes Manage static routes for outside network.<br>Conflicts with `no_outside_static_routes`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4264,7 +4297,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 													Attributes: map[string]schema.Attribute{
 														"config_mode_choice": schema.SingleNestedAttribute{
 															Description:         "Static Route Config Mode Select method for configuring the route",
-															MarkdownDescription: "Static Route Config Mode Select method for configuring the route",
+															MarkdownDescription: "Static Route Config Mode Select method for configuring the route<br>Exactly one of `custom_static_route` or `simple_static_route` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -4277,7 +4310,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 															Attributes: map[string]schema.Attribute{
 																"custom_static_route": schema.SingleNestedAttribute{
 																	Description:         "Custom Static Route Use Custom static route to configure all advanced options",
-																	MarkdownDescription: "Custom Static Route Use Custom static route to configure all advanced options",
+																	MarkdownDescription: "Custom Static Route Use Custom static route to configure all advanced options<br>Conflicts with `simple_static_route`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4356,7 +4389,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 																					Attributes: map[string]schema.Attribute{
 																						"ver_choice": schema.SingleNestedAttribute{
 																							Description:         "Version IP Address version. Can be IPv4 Address or IPv6 Address",
-																							MarkdownDescription: "Version IP Address version. Can be IPv4 Address or IPv6 Address",
+																							MarkdownDescription: "Version IP Address version. Can be IPv4 Address or IPv6 Address<br>Exactly one of `dual_stack` or `ipv4` must be specified when `ver_choice` is configured.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -4369,7 +4402,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 																							Attributes: map[string]schema.Attribute{
 																								"dual_stack": schema.SingleNestedAttribute{
 																									Description:         "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together",
-																									MarkdownDescription: "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together",
+																									MarkdownDescription: "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together<br>Conflicts with `ipv4`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -4422,7 +4455,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 																								},
 																								"ipv4": schema.SingleNestedAttribute{
 																									Description:         "IPv4 Address IPv4 Address",
-																									MarkdownDescription: "IPv4 Address IPv4 Address",
+																									MarkdownDescription: "IPv4 Address IPv4 Address<br>Conflicts with `dual_stack`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -4474,7 +4507,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 																				Attributes: map[string]schema.Attribute{
 																					"ver_choice": schema.SingleNestedAttribute{
 																						Description:         "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address",
-																						MarkdownDescription: "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address",
+																						MarkdownDescription: "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address<br>`ipv4` must be specified.",
 																						Required:            true,
 																						Optional:            false,
 																						Computed:            false,
@@ -4525,7 +4558,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 																},
 																"simple_static_route": schema.StringAttribute{
 																	Description:         "Simple Static Route Use simple static route for prefix pointing to single interface in the network",
-																	MarkdownDescription: "Simple Static Route Use simple static route for prefix pointing to single interface in the network",
+																	MarkdownDescription: "Simple Static Route Use simple static route for prefix pointing to single interface in the network<br>Conflicts with `custom_static_route`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -4554,7 +4587,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 								Attributes: map[string]schema.Attribute{
 									"choice": schema.SingleNestedAttribute{
 										Description:         "Choice of existing or new subnet Create a new VPC Subnet or select an existing one.",
-										MarkdownDescription: "Choice of existing or new subnet Create a new VPC Subnet or select an existing one.",
+										MarkdownDescription: "Choice of existing or new subnet Create a new VPC Subnet or select an existing one.<br>Exactly one of `existing_subnet` or `new_subnet` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -4567,7 +4600,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 										Attributes: map[string]schema.Attribute{
 											"existing_subnet": schema.SingleNestedAttribute{
 												Description:         "Existing VPC Name of existing VPC subnet.",
-												MarkdownDescription: "Existing VPC Name of existing VPC subnet.",
+												MarkdownDescription: "Existing VPC Name of existing VPC subnet.<br>Conflicts with `new_subnet`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4586,7 +4619,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 											},
 											"new_subnet": schema.SingleNestedAttribute{
 												Description:         "New VPC Parameters for creating a new VPC Subnet",
-												MarkdownDescription: "New VPC Parameters for creating a new VPC Subnet",
+												MarkdownDescription: "New VPC Parameters for creating a new VPC Subnet<br>Conflicts with `existing_subnet`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4640,40 +4673,46 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 								Attributes: map[string]schema.Attribute{
 									"perf_mode_choice": schema.SingleNestedAttribute{
 										Description:         "Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.",
-										MarkdownDescription: "Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.<br>Exactly one of `perf_mode_l3_enhanced` or `perf_mode_l7_enhanced` must be specified when `perf_mode_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"perf_mode_l3_enhanced",
 												"perf_mode_l7_enhanced",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"perf_mode_l3_enhanced": schema.SingleNestedAttribute{
 												Description:         "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
-												MarkdownDescription: "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
+												MarkdownDescription: "L3 Mode Enhanced Performance Site optimized for L3 traffic processing<br>Conflicts with `perf_mode_l7_enhanced`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
 												Attributes: map[string]schema.Attribute{
 													"perf_mode_choice": schema.SingleNestedAttribute{
 														Description:         "L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads.",
-														MarkdownDescription: "L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads.",
-														Required:            true,
-														Optional:            false,
-														Computed:            false,
+														MarkdownDescription: "L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads.<br>Exactly one of `jumbo` or `no_jumbo` must be specified when `perf_mode_choice` is configured.",
+														Required:            false,
+														Optional:            true,
+														Computed:            true,
 														Validators: []validator.Object{
-															exactlyoneofvalidator.RequiredExactlyOneOf(
+															exactlyoneofvalidator.ExactlyOneOf(
 																"jumbo",
 																"no_jumbo",
 															),
 														},
+														PlanModifiers: []planmodifier.Object{
+															objectplanmodifier.UseNonNullStateForUnknown(),
+														},
 														Attributes: map[string]schema.Attribute{
 															"jumbo": schema.BoolAttribute{
 																Description:         "L3 Mode Enhanced Performance with jumbo frame support(9000)",
-																MarkdownDescription: "L3 Mode Enhanced Performance with jumbo frame support(9000)",
+																MarkdownDescription: "L3 Mode Enhanced Performance with jumbo frame support(9000)<br>Conflicts with `no_jumbo`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -4683,7 +4722,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 															},
 															"no_jumbo": schema.BoolAttribute{
 																Description:         "L3 Mode Enhanced Performance with no jumbo frame support",
-																MarkdownDescription: "L3 Mode Enhanced Performance with no jumbo frame support",
+																MarkdownDescription: "L3 Mode Enhanced Performance with no jumbo frame support<br>Conflicts with `jumbo`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -4697,7 +4736,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 											},
 											"perf_mode_l7_enhanced": schema.BoolAttribute{
 												Description:         "Default Performance Mode Site optimized for L7 traffic processing",
-												MarkdownDescription: "Default Performance Mode Site optimized for L7 traffic processing",
+												MarkdownDescription: "Default Performance Mode Site optimized for L7 traffic processing<br>Conflicts with `perf_mode_l3_enhanced`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4711,20 +4750,23 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 							},
 							"site_mesh_group_choice": schema.SingleNestedAttribute{
 								Description:         "Site Mesh Group Connection Type Select how the site mesh group needs to be connected",
-								MarkdownDescription: "Site Mesh Group Connection Type Select how the site mesh group needs to be connected",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Site Mesh Group Connection Type Select how the site mesh group needs to be connected<br>Exactly one of `sm_connection_public_ip` or `sm_connection_pvt_ip` must be specified when `site_mesh_group_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"sm_connection_public_ip",
 										"sm_connection_pvt_ip",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"sm_connection_public_ip": schema.BoolAttribute{
 										Description:         "Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group",
-										MarkdownDescription: "Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group",
+										MarkdownDescription: "Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group<br>Conflicts with `sm_connection_pvt_ip`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4734,7 +4776,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 									},
 									"sm_connection_pvt_ip": schema.BoolAttribute{
 										Description:         "Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group",
-										MarkdownDescription: "Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group",
+										MarkdownDescription: "Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group<br>Conflicts with `sm_connection_public_ip`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -4748,7 +4790,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 					},
 					"ingress_gw": schema.SingleNestedAttribute{
 						Description:         "Ingress Gateway One interface site is useful when site is only used as ingress gateway to the VPC network.",
-						MarkdownDescription: "Ingress Gateway One interface site is useful when site is only used as ingress gateway to the VPC network.",
+						MarkdownDescription: "Ingress Gateway One interface site is useful when site is only used as ingress gateway to the VPC network.<br>Conflicts with `ingress_egress_gw` and `voltstack_cluster`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -4787,7 +4829,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 								Attributes: map[string]schema.Attribute{
 									"choice": schema.SingleNestedAttribute{
 										Description:         "Choice of existing or new VPC network Create a new VPC Network or select an existing one.",
-										MarkdownDescription: "Choice of existing or new VPC network Create a new VPC Network or select an existing one.",
+										MarkdownDescription: "Choice of existing or new VPC network Create a new VPC Network or select an existing one.<br>Exactly one of `existing_network` or `new_network` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -4800,7 +4842,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 										Attributes: map[string]schema.Attribute{
 											"existing_network": schema.SingleNestedAttribute{
 												Description:         "Existing VPC Name of existing VPC network.",
-												MarkdownDescription: "Existing VPC Name of existing VPC network.",
+												MarkdownDescription: "Existing VPC Name of existing VPC network.<br>Conflicts with `new_network`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4819,7 +4861,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 											},
 											"new_network": schema.SingleNestedAttribute{
 												Description:         "New VPC Create new VPC network with specified name.",
-												MarkdownDescription: "New VPC Create new VPC network with specified name.",
+												MarkdownDescription: "New VPC Create new VPC network with specified name.<br>Conflicts with `existing_network`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4849,7 +4891,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 								Attributes: map[string]schema.Attribute{
 									"choice": schema.SingleNestedAttribute{
 										Description:         "Choice of existing or new subnet Create a new VPC Subnet or select an existing one.",
-										MarkdownDescription: "Choice of existing or new subnet Create a new VPC Subnet or select an existing one.",
+										MarkdownDescription: "Choice of existing or new subnet Create a new VPC Subnet or select an existing one.<br>Exactly one of `existing_subnet` or `new_subnet` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -4862,7 +4904,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 										Attributes: map[string]schema.Attribute{
 											"existing_subnet": schema.SingleNestedAttribute{
 												Description:         "Existing VPC Name of existing VPC subnet.",
-												MarkdownDescription: "Existing VPC Name of existing VPC subnet.",
+												MarkdownDescription: "Existing VPC Name of existing VPC subnet.<br>Conflicts with `new_subnet`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4881,7 +4923,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 											},
 											"new_subnet": schema.SingleNestedAttribute{
 												Description:         "New VPC Parameters for creating a new VPC Subnet",
-												MarkdownDescription: "New VPC Parameters for creating a new VPC Subnet",
+												MarkdownDescription: "New VPC Parameters for creating a new VPC Subnet<br>Conflicts with `existing_subnet`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -4942,40 +4984,46 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 								Attributes: map[string]schema.Attribute{
 									"perf_mode_choice": schema.SingleNestedAttribute{
 										Description:         "Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.",
-										MarkdownDescription: "Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.<br>Exactly one of `perf_mode_l3_enhanced` or `perf_mode_l7_enhanced` must be specified when `perf_mode_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"perf_mode_l3_enhanced",
 												"perf_mode_l7_enhanced",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"perf_mode_l3_enhanced": schema.SingleNestedAttribute{
 												Description:         "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
-												MarkdownDescription: "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
+												MarkdownDescription: "L3 Mode Enhanced Performance Site optimized for L3 traffic processing<br>Conflicts with `perf_mode_l7_enhanced`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
 												Attributes: map[string]schema.Attribute{
 													"perf_mode_choice": schema.SingleNestedAttribute{
 														Description:         "L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads.",
-														MarkdownDescription: "L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads.",
-														Required:            true,
-														Optional:            false,
-														Computed:            false,
+														MarkdownDescription: "L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads.<br>Exactly one of `jumbo` or `no_jumbo` must be specified when `perf_mode_choice` is configured.",
+														Required:            false,
+														Optional:            true,
+														Computed:            true,
 														Validators: []validator.Object{
-															exactlyoneofvalidator.RequiredExactlyOneOf(
+															exactlyoneofvalidator.ExactlyOneOf(
 																"jumbo",
 																"no_jumbo",
 															),
 														},
+														PlanModifiers: []planmodifier.Object{
+															objectplanmodifier.UseNonNullStateForUnknown(),
+														},
 														Attributes: map[string]schema.Attribute{
 															"jumbo": schema.BoolAttribute{
 																Description:         "L3 Mode Enhanced Performance with jumbo frame support(9000)",
-																MarkdownDescription: "L3 Mode Enhanced Performance with jumbo frame support(9000)",
+																MarkdownDescription: "L3 Mode Enhanced Performance with jumbo frame support(9000)<br>Conflicts with `no_jumbo`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -4985,7 +5033,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 															},
 															"no_jumbo": schema.BoolAttribute{
 																Description:         "L3 Mode Enhanced Performance with no jumbo frame support",
-																MarkdownDescription: "L3 Mode Enhanced Performance with no jumbo frame support",
+																MarkdownDescription: "L3 Mode Enhanced Performance with no jumbo frame support<br>Conflicts with `jumbo`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -4999,7 +5047,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 											},
 											"perf_mode_l7_enhanced": schema.BoolAttribute{
 												Description:         "Default Performance Mode Site optimized for L7 traffic processing",
-												MarkdownDescription: "Default Performance Mode Site optimized for L7 traffic processing",
+												MarkdownDescription: "Default Performance Mode Site optimized for L7 traffic processing<br>Conflicts with `perf_mode_l3_enhanced`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -5015,27 +5063,30 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 					},
 					"voltstack_cluster": schema.SingleNestedAttribute{
 						Description:         "App Stack Cluster App Stack Cluster using single interface, useful for deploying K8s cluster.",
-						MarkdownDescription: "App Stack Cluster App Stack Cluster using single interface, useful for deploying K8s cluster.",
+						MarkdownDescription: "App Stack Cluster App Stack Cluster using single interface, useful for deploying K8s cluster.<br>Conflicts with `ingress_egress_gw` and `ingress_gw`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"dc_cluster_group_choice": schema.SingleNestedAttribute{
 								Description:         "Select DC Cluster Group Is this site member of a dc cluster group via via selected network type",
-								MarkdownDescription: "Select DC Cluster Group Is this site member of a dc cluster group via via selected network type",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Select DC Cluster Group Is this site member of a dc cluster group via via selected network type<br>Exactly one of `dc_cluster_group` or `no_dc_cluster_group` must be specified when `dc_cluster_group_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"dc_cluster_group",
 										"no_dc_cluster_group",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"dc_cluster_group": schema.SingleNestedAttribute{
 										Description:         "Member of DC cluster Group via Outside Network This site is member of dc cluster group connected via outside network",
-										MarkdownDescription: "Member of DC cluster Group via Outside Network This site is member of dc cluster group connected via outside network",
+										MarkdownDescription: "Member of DC cluster Group via Outside Network This site is member of dc cluster group connected via outside network<br>Conflicts with `no_dc_cluster_group`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5068,7 +5119,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 									},
 									"no_dc_cluster_group": schema.BoolAttribute{
 										Description:         "Not a Member This site is not a member of dc cluster group",
-										MarkdownDescription: "Not a Member This site is not a member of dc cluster group",
+										MarkdownDescription: "Not a Member This site is not a member of dc cluster group<br>Conflicts with `dc_cluster_group`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5080,21 +5131,24 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 							},
 							"forward_proxy_choice": schema.SingleNestedAttribute{
 								Description:         "Manage Forward Proxy Manage Forward Proxy for this site",
-								MarkdownDescription: "Manage Forward Proxy Manage Forward Proxy for this site",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Manage Forward Proxy Manage Forward Proxy for this site<br>Exactly one of `active_forward_proxy_policies`, `forward_proxy_allow_all`, or `no_forward_proxy` must be specified when `forward_proxy_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"active_forward_proxy_policies",
 										"forward_proxy_allow_all",
 										"no_forward_proxy",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"active_forward_proxy_policies": schema.SingleNestedAttribute{
 										Description:         "Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies",
-										MarkdownDescription: "Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies",
+										MarkdownDescription: "Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies<br>Conflicts with `forward_proxy_allow_all` and `no_forward_proxy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5141,7 +5195,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 									},
 									"forward_proxy_allow_all": schema.BoolAttribute{
 										Description:         "Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.",
-										MarkdownDescription: "Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.",
+										MarkdownDescription: "Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.<br>Conflicts with `active_forward_proxy_policies` and `no_forward_proxy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5151,7 +5205,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 									},
 									"no_forward_proxy": schema.BoolAttribute{
 										Description:         "Disable Forward Proxy Disable Forward Proxy for this site",
-										MarkdownDescription: "Disable Forward Proxy Disable Forward Proxy for this site",
+										MarkdownDescription: "Disable Forward Proxy Disable Forward Proxy for this site<br>Conflicts with `active_forward_proxy_policies` and `forward_proxy_allow_all`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5188,20 +5242,23 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 							},
 							"global_network_choice": schema.SingleNestedAttribute{
 								Description:         "Connect to Global Network Select global networks to connect to site local network",
-								MarkdownDescription: "Connect to Global Network Select global networks to connect to site local network",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Connect to Global Network Select global networks to connect to site local network<br>Exactly one of `global_network_list` or `no_global_network` must be specified when `global_network_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"global_network_list",
 										"no_global_network",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"global_network_list": schema.SingleNestedAttribute{
 										Description:         "Connect Global Networks List of global network connections",
-										MarkdownDescription: "Connect Global Networks List of global network connections",
+										MarkdownDescription: "Connect Global Networks List of global network connections<br>Conflicts with `no_global_network`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5219,7 +5276,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 													Attributes: map[string]schema.Attribute{
 														"connection_choice": schema.SingleNestedAttribute{
 															Description:         "Connector Choice Select the networks and method in which they are connected.",
-															MarkdownDescription: "Connector Choice Select the networks and method in which they are connected.",
+															MarkdownDescription: "Connector Choice Select the networks and method in which they are connected.<br>Exactly one of `sli_to_global_dr` or `slo_to_global_dr` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -5232,7 +5289,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 															Attributes: map[string]schema.Attribute{
 																"sli_to_global_dr": schema.SingleNestedAttribute{
 																	Description:         "Site Local Inside to a Global Network' Site local inside is connected directly to a given global network",
-																	MarkdownDescription: "Site Local Inside to a Global Network' Site local inside is connected directly to a given global network",
+																	MarkdownDescription: "Site Local Inside to a Global Network' Site local inside is connected directly to a given global network<br>Conflicts with `slo_to_global_dr`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -5274,7 +5331,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 																},
 																"slo_to_global_dr": schema.SingleNestedAttribute{
 																	Description:         "Site Local Outside to a Global Network' Site local outside is connected directly to a given global network",
-																	MarkdownDescription: "Site Local Outside to a Global Network' Site local outside is connected directly to a given global network",
+																	MarkdownDescription: "Site Local Outside to a Global Network' Site local outside is connected directly to a given global network<br>Conflicts with `sli_to_global_dr`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -5323,7 +5380,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 									},
 									"no_global_network": schema.BoolAttribute{
 										Description:         "Do not Connect Global Networks No global network to connect",
-										MarkdownDescription: "Do not Connect Global Networks No global network to connect",
+										MarkdownDescription: "Do not Connect Global Networks No global network to connect<br>Conflicts with `global_network_list`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5335,20 +5392,23 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 							},
 							"k8s_cluster_choice": schema.SingleNestedAttribute{
 								Description:         "Site Local K8s API access Enable/Disable choice for site local K8s API access",
-								MarkdownDescription: "Site Local K8s API access Enable/Disable choice for site local K8s API access",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Site Local K8s API access Enable/Disable choice for site local K8s API access<br>Exactly one of `k8s_cluster` or `no_k8s_cluster` must be specified when `k8s_cluster_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"k8s_cluster",
 										"no_k8s_cluster",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"k8s_cluster": schema.SingleNestedAttribute{
 										Description:         "Enable Site Local K8s API access Site Local K8s API access is enabled, using k8s_cluster object",
-										MarkdownDescription: "Enable Site Local K8s API access Site Local K8s API access is enabled, using k8s_cluster object",
+										MarkdownDescription: "Enable Site Local K8s API access Site Local K8s API access is enabled, using k8s_cluster object<br>Conflicts with `no_k8s_cluster`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5381,7 +5441,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 									},
 									"no_k8s_cluster": schema.BoolAttribute{
 										Description:         "Disable Site Local K8s API access Site Local K8s API access is disabled",
-										MarkdownDescription: "Disable Site Local K8s API access Site Local K8s API access is disabled",
+										MarkdownDescription: "Disable Site Local K8s API access Site Local K8s API access is disabled<br>Conflicts with `k8s_cluster`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5393,21 +5453,24 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 							},
 							"network_policy_choice": schema.SingleNestedAttribute{
 								Description:         "Manage Firewall Policy Manage Firewall Policy via this view",
-								MarkdownDescription: "Manage Firewall Policy Manage Firewall Policy via this view",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Manage Firewall Policy Manage Firewall Policy via this view<br>Exactly one of `active_enhanced_firewall_policies`, `active_network_policies`, or `no_network_policy` must be specified when `network_policy_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"active_enhanced_firewall_policies",
 										"active_network_policies",
 										"no_network_policy",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"active_enhanced_firewall_policies": schema.SingleNestedAttribute{
 										Description:         "Manage Firewall Policy (V2) Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion.",
-										MarkdownDescription: "Manage Firewall Policy (V2) Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion.",
+										MarkdownDescription: "Manage Firewall Policy (V2) Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion.<br>Conflicts with `active_network_policies` and `no_network_policy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5454,7 +5517,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 									},
 									"active_network_policies": schema.SingleNestedAttribute{
 										Description:         "Manage Firewall Policy Firewall Policies active for this site.",
-										MarkdownDescription: "Manage Firewall Policy Firewall Policies active for this site.",
+										MarkdownDescription: "Manage Firewall Policy Firewall Policies active for this site.<br>Conflicts with `active_enhanced_firewall_policies` and `no_network_policy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5501,7 +5564,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 									},
 									"no_network_policy": schema.BoolAttribute{
 										Description:         "Do Not Manage Firewall Policy Firewall Policy is disabled for this site.",
-										MarkdownDescription: "Do Not Manage Firewall Policy Firewall Policy is disabled for this site.",
+										MarkdownDescription: "Do Not Manage Firewall Policy Firewall Policy is disabled for this site.<br>Conflicts with `active_enhanced_firewall_policies` and `active_network_policies`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5520,20 +5583,23 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 							},
 							"outside_static_route_choice": schema.SingleNestedAttribute{
 								Description:         "Manage Static Routes for Site Local Network Add static routes to site local network. Used to reach indirectly connected subnets.",
-								MarkdownDescription: "Manage Static Routes for Site Local Network Add static routes to site local network. Used to reach indirectly connected subnets.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Manage Static Routes for Site Local Network Add static routes to site local network. Used to reach indirectly connected subnets.<br>Exactly one of `no_outside_static_routes` or `outside_static_routes` must be specified when `outside_static_route_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"no_outside_static_routes",
 										"outside_static_routes",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"no_outside_static_routes": schema.BoolAttribute{
 										Description:         "Do Not Manage Static Routes Static Routes disabled for outside network.",
-										MarkdownDescription: "Do Not Manage Static Routes Static Routes disabled for outside network.",
+										MarkdownDescription: "Do Not Manage Static Routes Static Routes disabled for outside network.<br>Conflicts with `outside_static_routes`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5543,7 +5609,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 									},
 									"outside_static_routes": schema.SingleNestedAttribute{
 										Description:         "Manage Static routes Manage static routes for outside network.",
-										MarkdownDescription: "Manage Static routes Manage static routes for outside network.",
+										MarkdownDescription: "Manage Static routes Manage static routes for outside network.<br>Conflicts with `no_outside_static_routes`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -5561,7 +5627,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 													Attributes: map[string]schema.Attribute{
 														"config_mode_choice": schema.SingleNestedAttribute{
 															Description:         "Static Route Config Mode Select method for configuring the route",
-															MarkdownDescription: "Static Route Config Mode Select method for configuring the route",
+															MarkdownDescription: "Static Route Config Mode Select method for configuring the route<br>Exactly one of `custom_static_route` or `simple_static_route` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -5574,7 +5640,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 															Attributes: map[string]schema.Attribute{
 																"custom_static_route": schema.SingleNestedAttribute{
 																	Description:         "Custom Static Route Use Custom static route to configure all advanced options",
-																	MarkdownDescription: "Custom Static Route Use Custom static route to configure all advanced options",
+																	MarkdownDescription: "Custom Static Route Use Custom static route to configure all advanced options<br>Conflicts with `simple_static_route`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -5653,7 +5719,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 																					Attributes: map[string]schema.Attribute{
 																						"ver_choice": schema.SingleNestedAttribute{
 																							Description:         "Version IP Address version. Can be IPv4 Address or IPv6 Address",
-																							MarkdownDescription: "Version IP Address version. Can be IPv4 Address or IPv6 Address",
+																							MarkdownDescription: "Version IP Address version. Can be IPv4 Address or IPv6 Address<br>Exactly one of `dual_stack` or `ipv4` must be specified when `ver_choice` is configured.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -5666,7 +5732,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 																							Attributes: map[string]schema.Attribute{
 																								"dual_stack": schema.SingleNestedAttribute{
 																									Description:         "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together",
-																									MarkdownDescription: "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together",
+																									MarkdownDescription: "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together<br>Conflicts with `ipv4`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -5719,7 +5785,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 																								},
 																								"ipv4": schema.SingleNestedAttribute{
 																									Description:         "IPv4 Address IPv4 Address",
-																									MarkdownDescription: "IPv4 Address IPv4 Address",
+																									MarkdownDescription: "IPv4 Address IPv4 Address<br>Conflicts with `dual_stack`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -5771,7 +5837,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 																				Attributes: map[string]schema.Attribute{
 																					"ver_choice": schema.SingleNestedAttribute{
 																						Description:         "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address",
-																						MarkdownDescription: "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address",
+																						MarkdownDescription: "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address<br>`ipv4` must be specified.",
 																						Required:            true,
 																						Optional:            false,
 																						Computed:            false,
@@ -5822,7 +5888,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 																},
 																"simple_static_route": schema.StringAttribute{
 																	Description:         "Simple Static Route Use simple static route for prefix pointing to single interface in the network",
-																	MarkdownDescription: "Simple Static Route Use simple static route for prefix pointing to single interface in the network",
+																	MarkdownDescription: "Simple Static Route Use simple static route for prefix pointing to single interface in the network<br>Conflicts with `custom_static_route`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -5851,7 +5917,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 								Attributes: map[string]schema.Attribute{
 									"choice": schema.SingleNestedAttribute{
 										Description:         "Choice of existing or new VPC network Create a new VPC Network or select an existing one.",
-										MarkdownDescription: "Choice of existing or new VPC network Create a new VPC Network or select an existing one.",
+										MarkdownDescription: "Choice of existing or new VPC network Create a new VPC Network or select an existing one.<br>Exactly one of `existing_network` or `new_network` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -5864,7 +5930,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 										Attributes: map[string]schema.Attribute{
 											"existing_network": schema.SingleNestedAttribute{
 												Description:         "Existing VPC Name of existing VPC network.",
-												MarkdownDescription: "Existing VPC Name of existing VPC network.",
+												MarkdownDescription: "Existing VPC Name of existing VPC network.<br>Conflicts with `new_network`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -5883,7 +5949,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 											},
 											"new_network": schema.SingleNestedAttribute{
 												Description:         "New VPC Create new VPC network with specified name.",
-												MarkdownDescription: "New VPC Create new VPC network with specified name.",
+												MarkdownDescription: "New VPC Create new VPC network with specified name.<br>Conflicts with `existing_network`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -5913,7 +5979,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 								Attributes: map[string]schema.Attribute{
 									"choice": schema.SingleNestedAttribute{
 										Description:         "Choice of existing or new subnet Create a new VPC Subnet or select an existing one.",
-										MarkdownDescription: "Choice of existing or new subnet Create a new VPC Subnet or select an existing one.",
+										MarkdownDescription: "Choice of existing or new subnet Create a new VPC Subnet or select an existing one.<br>Exactly one of `existing_subnet` or `new_subnet` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -5926,7 +5992,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 										Attributes: map[string]schema.Attribute{
 											"existing_subnet": schema.SingleNestedAttribute{
 												Description:         "Existing VPC Name of existing VPC subnet.",
-												MarkdownDescription: "Existing VPC Name of existing VPC subnet.",
+												MarkdownDescription: "Existing VPC Name of existing VPC subnet.<br>Conflicts with `new_subnet`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -5945,7 +6011,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 											},
 											"new_subnet": schema.SingleNestedAttribute{
 												Description:         "New VPC Parameters for creating a new VPC Subnet",
-												MarkdownDescription: "New VPC Parameters for creating a new VPC Subnet",
+												MarkdownDescription: "New VPC Parameters for creating a new VPC Subnet<br>Conflicts with `existing_subnet`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -5992,20 +6058,23 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 							},
 							"site_mesh_group_choice": schema.SingleNestedAttribute{
 								Description:         "Site Mesh Group Connection Type Select how the site mesh group needs to be connected",
-								MarkdownDescription: "Site Mesh Group Connection Type Select how the site mesh group needs to be connected",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Site Mesh Group Connection Type Select how the site mesh group needs to be connected<br>Exactly one of `sm_connection_public_ip` or `sm_connection_pvt_ip` must be specified when `site_mesh_group_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"sm_connection_public_ip",
 										"sm_connection_pvt_ip",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"sm_connection_public_ip": schema.BoolAttribute{
 										Description:         "Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group",
-										MarkdownDescription: "Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group",
+										MarkdownDescription: "Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group<br>Conflicts with `sm_connection_pvt_ip`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6015,7 +6084,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 									},
 									"sm_connection_pvt_ip": schema.BoolAttribute{
 										Description:         "Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group",
-										MarkdownDescription: "Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group",
+										MarkdownDescription: "Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group<br>Conflicts with `sm_connection_public_ip`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6027,20 +6096,23 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 							},
 							"storage_class_choice": schema.SingleNestedAttribute{
 								Description:         "Storage Class Configuration Configure custom storage classes in kubernetes for this site",
-								MarkdownDescription: "Storage Class Configuration Configure custom storage classes in kubernetes for this site",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Storage Class Configuration Configure custom storage classes in kubernetes for this site<br>Exactly one of `default_storage` or `storage_class_list` must be specified when `storage_class_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"default_storage",
 										"storage_class_list",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"default_storage": schema.BoolAttribute{
 										Description:         "Default Storage Class Use standard storage class configured as AWS EBS",
-										MarkdownDescription: "Default Storage Class Use standard storage class configured as AWS EBS",
+										MarkdownDescription: "Default Storage Class Use standard storage class configured as AWS EBS<br>Conflicts with `storage_class_list`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6050,7 +6122,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 									},
 									"storage_class_list": schema.SingleNestedAttribute{
 										Description:         "Custom Storage Class Add additional custom storage classes in kubernetes for site",
-										MarkdownDescription: "Custom Storage Class Add additional custom storage classes in kubernetes for site",
+										MarkdownDescription: "Custom Storage Class Add additional custom storage classes in kubernetes for site<br>Conflicts with `default_storage`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6129,20 +6201,23 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 				Attributes: map[string]schema.Attribute{
 					"volterra_sw_version_choice": schema.SingleNestedAttribute{
 						Description:         "F5XC Software Version Select the F5XC Software Version for the site. By default, latest available F5XC Software Version will be used. Refer to release notes to find required released SW versions.",
-						MarkdownDescription: "F5XC Software Version Select the F5XC Software Version for the site. By default, latest available F5XC Software Version will be used. Refer to release notes to find required released SW versions.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "F5XC Software Version Select the F5XC Software Version for the site. By default, latest available F5XC Software Version will be used. Refer to release notes to find required released SW versions.<br>Exactly one of `default_sw_version` or `volterra_software_version` must be specified when `volterra_sw_version_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"default_sw_version",
 								"volterra_software_version",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"default_sw_version": schema.BoolAttribute{
 								Description:         "Default SW Version Will assign latest available F5XC Software Version",
-								MarkdownDescription: "Default SW Version Will assign latest available F5XC Software Version",
+								MarkdownDescription: "Default SW Version Will assign latest available F5XC Software Version<br>Conflicts with `volterra_software_version`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -6152,7 +6227,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 							},
 							"volterra_software_version": schema.StringAttribute{
 								Description:         "F5XC Software Version Specify a F5XC Software Version to be used e.g. crt-20210329-1002.",
-								MarkdownDescription: "F5XC Software Version Specify a F5XC Software Version to be used e.g. crt-20210329-1002.<br>**Validation:** `Length LengthAtMost(20)`",
+								MarkdownDescription: "F5XC Software Version Specify a F5XC Software Version to be used e.g. crt-20210329-1002.<br>**Validation:** `Length LengthAtMost(20)`<br>Conflicts with `default_sw_version`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -6185,20 +6260,23 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 				Attributes: map[string]schema.Attribute{
 					"signatures_update_mode_choice": schema.SingleNestedAttribute{
 						Description:         "WAF Signatures update mode Select F5XC WAF Signatures update mode for the site. By default, new signatures will be applied manually. Refer to release notes for details about available Signatures update modes and versions.",
-						MarkdownDescription: "WAF Signatures update mode Select F5XC WAF Signatures update mode for the site. By default, new signatures will be applied manually. Refer to release notes for details about available Signatures update modes and versions.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "WAF Signatures update mode Select F5XC WAF Signatures update mode for the site. By default, new signatures will be applied manually. Refer to release notes for details about available Signatures update modes and versions.<br>Exactly one of `automatic` or `manual` must be specified when `signatures_update_mode_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"automatic",
 								"manual",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"automatic": schema.BoolAttribute{
 								Description:         "Automatic update mode New WAF signatures will be applied automatically as soon as they are released.",
-								MarkdownDescription: "Automatic update mode New WAF signatures will be applied automatically as soon as they are released.",
+								MarkdownDescription: "Automatic update mode New WAF signatures will be applied automatically as soon as they are released.<br>Conflicts with `manual`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -6208,7 +6286,7 @@ func (r *ResourceF5XCGcpVpcSite) Schema(ctx context.Context, request resource.Sc
 							},
 							"manual": schema.BoolAttribute{
 								Description:         "Manual update mode New WAF signatures will only be applied when an update is triggered manually.",
-								MarkdownDescription: "Manual update mode New WAF signatures will only be applied when an update is triggered manually.",
+								MarkdownDescription: "Manual update mode New WAF signatures will only be applied when an update is triggered manually.<br>Conflicts with `automatic`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -6474,7 +6552,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> BlockedServicesChoice
+	// resource modelToSpecRoot OneOfField --> BlockedServicesChoice
 	if !data.BlockedServicesChoice.IsNull() && !data.BlockedServicesChoice.IsUnknown() {
 		blockedServicesChoiceModel := GcpVpcSiteBlockedServicesChoice{}
 		response.Diagnostics.Append(data.BlockedServicesChoice.As(ctx, &blockedServicesChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6580,6 +6658,10 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 			spec.BlockedServicesChoice = defaultBlockedServicesSpecBool
 		}
 
+	} else {
+		spec.BlockedServicesChoice = &ves_io_schema_views_gcp_vpc_site.CreateSpecType_BlockAllServices{
+			BlockAllServices: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -6815,7 +6897,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> LogsReceiverChoice
+	// resource modelToSpecRoot OneOfField --> LogsReceiverChoice
 	if !data.LogsReceiverChoice.IsNull() && !data.LogsReceiverChoice.IsUnknown() {
 		logsReceiverChoiceModel := GcpVpcSiteLogsReceiverChoice{}
 		response.Diagnostics.Append(data.LogsReceiverChoice.As(ctx, &logsReceiverChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6853,12 +6935,19 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 			spec.LogsReceiverChoice = logsStreamingDisabledSpecBool
 		}
 
+	} else {
+		spec.LogsReceiverChoice = &ves_io_schema_views_gcp_vpc_site.CreateSpecType_LogsStreamingDisabled{
+			LogsStreamingDisabled: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
 		// resource modelToSpecRoot PointerField --> OfflineSurvivabilityMode
 		if !data.OfflineSurvivabilityMode.IsNull() && !data.OfflineSurvivabilityMode.IsUnknown() {
 			offlineSurvivabilityModeSpec := &ves_io_schema_views.OfflineSurvivabilityModeType{}
+			offlineSurvivabilityModeSpec.OfflineSurvivabilityModeChoice = &ves_io_schema_views.OfflineSurvivabilityModeType_NoOfflineSurvivabilityMode{
+				NoOfflineSurvivabilityMode: &ves_io_schema.Empty{},
+			}
 			spec.OfflineSurvivabilityMode = offlineSurvivabilityModeSpec
 			var offlineSurvivabilityModeModel GcpVpcSiteOfflineSurvivabilityModeType
 
@@ -6869,7 +6958,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> OfflineSurvivabilityModeChoice
+			// resource modelToSpecNested OneOfField --> OfflineSurvivabilityModeChoice
 			if !offlineSurvivabilityModeModel.OfflineSurvivabilityModeChoice.IsNull() && !offlineSurvivabilityModeModel.OfflineSurvivabilityModeChoice.IsUnknown() {
 				offlineSurvivabilityModeOfflineSurvivabilityModeChoiceModel := GcpVpcSiteOfflineSurvivabilityModeChoice{}
 				response.Diagnostics.Append(offlineSurvivabilityModeModel.OfflineSurvivabilityModeChoice.As(ctx, &offlineSurvivabilityModeOfflineSurvivabilityModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6900,6 +6989,9 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 		// resource modelToSpecRoot PointerField --> Os
 		if !data.Os.IsNull() && !data.Os.IsUnknown() {
 			osSpec := &ves_io_schema_views.OperatingSystemType{}
+			osSpec.OperatingSystemVersionChoice = &ves_io_schema_views.OperatingSystemType_DefaultOsVersion{
+				DefaultOsVersion: &ves_io_schema.Empty{},
+			}
 			spec.Os = osSpec
 			var osModel GcpVpcSiteOperatingSystemType
 
@@ -6910,7 +7002,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> OperatingSystemVersionChoice
+			// resource modelToSpecNested OneOfField --> OperatingSystemVersionChoice
 			if !osModel.OperatingSystemVersionChoice.IsNull() && !osModel.OperatingSystemVersionChoice.IsUnknown() {
 				osOperatingSystemVersionChoiceModel := GcpVpcSiteOperatingSystemVersionChoice{}
 				response.Diagnostics.Append(osModel.OperatingSystemVersionChoice.As(ctx, &osOperatingSystemVersionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6937,7 +7029,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> PrivateConnectivityChoice
+	// resource modelToSpecRoot OneOfField --> PrivateConnectivityChoice
 	if !data.PrivateConnectivityChoice.IsNull() && !data.PrivateConnectivityChoice.IsUnknown() {
 		privateConnectivityChoiceModel := GcpVpcSitePrivateConnectivityChoice{}
 		response.Diagnostics.Append(data.PrivateConnectivityChoice.As(ctx, &privateConnectivityChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7012,6 +7104,10 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 
 		}
 
+	} else {
+		spec.PrivateConnectivityChoice = &ves_io_schema_views_gcp_vpc_site.CreateSpecType_PrivateConnectDisabled{
+			PrivateConnectDisabled: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredOneOfField --> SiteType
@@ -7031,9 +7127,30 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 			}
 			ingressEgressGwOneOfSpec := &ves_io_schema_views_gcp_vpc_site.CreateSpecType_IngressEgressGw{}
 			ingressEgressGwOneOfSpec.IngressEgressGw = &ves_io_schema_views_gcp_vpc_site.GCPVPCIngressEgressGwType{}
+			ingressEgressGwOneOfSpec.IngressEgressGw.DcClusterGroupChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCIngressEgressGwType_NoDcClusterGroup{
+				NoDcClusterGroup: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwOneOfSpec.IngressEgressGw.ForwardProxyChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCIngressEgressGwType_NoForwardProxy{
+				NoForwardProxy: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwOneOfSpec.IngressEgressGw.GlobalNetworkChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCIngressEgressGwType_NoGlobalNetwork{
+				NoGlobalNetwork: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwOneOfSpec.IngressEgressGw.InsideStaticRouteChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCIngressEgressGwType_NoInsideStaticRoutes{
+				NoInsideStaticRoutes: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwOneOfSpec.IngressEgressGw.NetworkPolicyChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCIngressEgressGwType_NoNetworkPolicy{
+				NoNetworkPolicy: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwOneOfSpec.IngressEgressGw.OutsideStaticRouteChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCIngressEgressGwType_NoOutsideStaticRoutes{
+				NoOutsideStaticRoutes: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwOneOfSpec.IngressEgressGw.SiteMeshGroupChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCIngressEgressGwType_SmConnectionPublicIp{
+				SmConnectionPublicIp: &ves_io_schema.Empty{},
+			}
 			spec.SiteType = ingressEgressGwOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> DcClusterGroupChoice
+			// resource modelToSpecNested OneOfField --> DcClusterGroupChoice
 			if !gcpVpcSiteIngressEgressGwModel.DcClusterGroupChoice.IsNull() && !gcpVpcSiteIngressEgressGwModel.DcClusterGroupChoice.IsUnknown() {
 				ingressEgressGwDcClusterGroupChoiceModel := GcpVpcSiteDcClusterGroupChoice{}
 				response.Diagnostics.Append(gcpVpcSiteIngressEgressGwModel.DcClusterGroupChoice.As(ctx, &ingressEgressGwDcClusterGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7096,7 +7213,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ForwardProxyChoice
+			// resource modelToSpecNested OneOfField --> ForwardProxyChoice
 			if !gcpVpcSiteIngressEgressGwModel.ForwardProxyChoice.IsNull() && !gcpVpcSiteIngressEgressGwModel.ForwardProxyChoice.IsUnknown() {
 				ingressEgressGwForwardProxyChoiceModel := GcpVpcSiteForwardProxyChoice{}
 				response.Diagnostics.Append(gcpVpcSiteIngressEgressGwModel.ForwardProxyChoice.As(ctx, &ingressEgressGwForwardProxyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7182,7 +7299,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 				ingressEgressGwOneOfSpec.IngressEgressGw.GcpZoneNames = elements
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> GlobalNetworkChoice
+			// resource modelToSpecNested OneOfField --> GlobalNetworkChoice
 			if !gcpVpcSiteIngressEgressGwModel.GlobalNetworkChoice.IsNull() && !gcpVpcSiteIngressEgressGwModel.GlobalNetworkChoice.IsUnknown() {
 				ingressEgressGwGlobalNetworkChoiceModel := GcpVpcSiteGlobalNetChoice{}
 				response.Diagnostics.Append(gcpVpcSiteIngressEgressGwModel.GlobalNetworkChoice.As(ctx, &ingressEgressGwGlobalNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7382,7 +7499,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> InsideStaticRouteChoice
+			// resource modelToSpecNested OneOfField --> InsideStaticRouteChoice
 			if !gcpVpcSiteIngressEgressGwModel.InsideStaticRouteChoice.IsNull() && !gcpVpcSiteIngressEgressGwModel.InsideStaticRouteChoice.IsUnknown() {
 				ingressEgressGwInsideStaticRouteChoiceModel := GcpVpcSiteInsideStaticRouteChoice{}
 				response.Diagnostics.Append(gcpVpcSiteIngressEgressGwModel.InsideStaticRouteChoice.As(ctx, &ingressEgressGwInsideStaticRouteChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7791,7 +7908,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> NetworkPolicyChoice
+			// resource modelToSpecNested OneOfField --> NetworkPolicyChoice
 			if !gcpVpcSiteIngressEgressGwModel.NetworkPolicyChoice.IsNull() && !gcpVpcSiteIngressEgressGwModel.NetworkPolicyChoice.IsUnknown() {
 				ingressEgressGwNetworkPolicyChoiceModel := GcpVpcSiteNetPolicyChoice{}
 				response.Diagnostics.Append(gcpVpcSiteIngressEgressGwModel.NetworkPolicyChoice.As(ctx, &ingressEgressGwNetworkPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -7967,7 +8084,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> OutsideStaticRouteChoice
+			// resource modelToSpecNested OneOfField --> OutsideStaticRouteChoice
 			if !gcpVpcSiteIngressEgressGwModel.OutsideStaticRouteChoice.IsNull() && !gcpVpcSiteIngressEgressGwModel.OutsideStaticRouteChoice.IsUnknown() {
 				ingressEgressGwOutsideStaticRouteChoiceModel := GcpVpcSiteOutsideStaticRouteChoice{}
 				response.Diagnostics.Append(gcpVpcSiteIngressEgressGwModel.OutsideStaticRouteChoice.As(ctx, &ingressEgressGwOutsideStaticRouteChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8385,9 +8502,16 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 				}
 
 				performanceEnhancementModeSpec := &ves_io_schema_views.PerformanceEnhancementModeType{}
+				performanceEnhancementModeSpec.PerfModeChoice = &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{
+					PerfModeL7Enhanced: &ves_io_schema_views.L7PerformanceEnhancementType{
+						PerfModeChoice: &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{
+							JumboDisabled: &ves_io_schema.Empty{},
+						},
+					},
+				}
 				ingressEgressGwOneOfSpec.IngressEgressGw.PerformanceEnhancementMode = performanceEnhancementModeSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
+				// resource modelToSpecNested OneOfField --> PerfModeChoice
 				if !performanceEnhancementModeModel.PerfModeChoice.IsNull() && !performanceEnhancementModeModel.PerfModeChoice.IsUnknown() {
 					performanceEnhancementModePerfModeChoiceModel := GcpVpcSitePerfModeChoice{}
 					response.Diagnostics.Append(performanceEnhancementModeModel.PerfModeChoice.As(ctx, &performanceEnhancementModePerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8404,9 +8528,12 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 						}
 						perfModeL3EnhancedOneOfSpec := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced{}
 						perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced = &ves_io_schema_views.L3PerformanceEnhancementType{}
+						perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced.PerfModeChoice = &ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo{
+							NoJumbo: &ves_io_schema.Empty{},
+						}
 						performanceEnhancementModeSpec.PerfModeChoice = perfModeL3EnhancedOneOfSpec
 
-						// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
+						// resource modelToSpecNested OneOfField --> PerfModeChoice
 						if !gcpVpcSitePerfModeL3EnhancedModel.PerfModeChoice.IsNull() && !gcpVpcSitePerfModeL3EnhancedModel.PerfModeChoice.IsUnknown() {
 							perfModeL3EnhancedPerfModeChoiceModel := GcpVpcSiteL3PerformanceEnhancementTypePerfModeChoice{}
 							response.Diagnostics.Append(gcpVpcSitePerfModeL3EnhancedModel.PerfModeChoice.As(ctx, &perfModeL3EnhancedPerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8446,7 +8573,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SiteMeshGroupChoice
+			// resource modelToSpecNested OneOfField --> SiteMeshGroupChoice
 			if !gcpVpcSiteIngressEgressGwModel.SiteMeshGroupChoice.IsNull() && !gcpVpcSiteIngressEgressGwModel.SiteMeshGroupChoice.IsUnknown() {
 				ingressEgressGwSiteMeshGroupChoiceModel := GcpVpcSiteSiteMeshGroupChoice{}
 				response.Diagnostics.Append(gcpVpcSiteIngressEgressGwModel.SiteMeshGroupChoice.As(ctx, &ingressEgressGwSiteMeshGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8639,9 +8766,16 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 				}
 
 				performanceEnhancementModeSpec := &ves_io_schema_views.PerformanceEnhancementModeType{}
+				performanceEnhancementModeSpec.PerfModeChoice = &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{
+					PerfModeL7Enhanced: &ves_io_schema_views.L7PerformanceEnhancementType{
+						PerfModeChoice: &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{
+							JumboDisabled: &ves_io_schema.Empty{},
+						},
+					},
+				}
 				ingressGwOneOfSpec.IngressGw.PerformanceEnhancementMode = performanceEnhancementModeSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
+				// resource modelToSpecNested OneOfField --> PerfModeChoice
 				if !performanceEnhancementModeModel.PerfModeChoice.IsNull() && !performanceEnhancementModeModel.PerfModeChoice.IsUnknown() {
 					performanceEnhancementModePerfModeChoiceModel := GcpVpcSitePerfModeChoice{}
 					response.Diagnostics.Append(performanceEnhancementModeModel.PerfModeChoice.As(ctx, &performanceEnhancementModePerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8658,9 +8792,12 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 						}
 						perfModeL3EnhancedOneOfSpec := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced{}
 						perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced = &ves_io_schema_views.L3PerformanceEnhancementType{}
+						perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced.PerfModeChoice = &ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo{
+							NoJumbo: &ves_io_schema.Empty{},
+						}
 						performanceEnhancementModeSpec.PerfModeChoice = perfModeL3EnhancedOneOfSpec
 
-						// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
+						// resource modelToSpecNested OneOfField --> PerfModeChoice
 						if !gcpVpcSitePerfModeL3EnhancedModel.PerfModeChoice.IsNull() && !gcpVpcSitePerfModeL3EnhancedModel.PerfModeChoice.IsUnknown() {
 							perfModeL3EnhancedPerfModeChoiceModel := GcpVpcSiteL3PerformanceEnhancementTypePerfModeChoice{}
 							response.Diagnostics.Append(gcpVpcSitePerfModeL3EnhancedModel.PerfModeChoice.As(ctx, &perfModeL3EnhancedPerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8711,9 +8848,33 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 			}
 			voltstackClusterOneOfSpec := &ves_io_schema_views_gcp_vpc_site.CreateSpecType_VoltstackCluster{}
 			voltstackClusterOneOfSpec.VoltstackCluster = &ves_io_schema_views_gcp_vpc_site.GCPVPCVoltstackClusterType{}
+			voltstackClusterOneOfSpec.VoltstackCluster.DcClusterGroupChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCVoltstackClusterType_NoDcClusterGroup{
+				NoDcClusterGroup: &ves_io_schema.Empty{},
+			}
+			voltstackClusterOneOfSpec.VoltstackCluster.ForwardProxyChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCVoltstackClusterType_NoForwardProxy{
+				NoForwardProxy: &ves_io_schema.Empty{},
+			}
+			voltstackClusterOneOfSpec.VoltstackCluster.GlobalNetworkChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCVoltstackClusterType_NoGlobalNetwork{
+				NoGlobalNetwork: &ves_io_schema.Empty{},
+			}
+			voltstackClusterOneOfSpec.VoltstackCluster.K8SClusterChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCVoltstackClusterType_NoK8SCluster{
+				NoK8SCluster: &ves_io_schema.Empty{},
+			}
+			voltstackClusterOneOfSpec.VoltstackCluster.NetworkPolicyChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCVoltstackClusterType_NoNetworkPolicy{
+				NoNetworkPolicy: &ves_io_schema.Empty{},
+			}
+			voltstackClusterOneOfSpec.VoltstackCluster.OutsideStaticRouteChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCVoltstackClusterType_NoOutsideStaticRoutes{
+				NoOutsideStaticRoutes: &ves_io_schema.Empty{},
+			}
+			voltstackClusterOneOfSpec.VoltstackCluster.SiteMeshGroupChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCVoltstackClusterType_SmConnectionPublicIp{
+				SmConnectionPublicIp: &ves_io_schema.Empty{},
+			}
+			voltstackClusterOneOfSpec.VoltstackCluster.StorageClassChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCVoltstackClusterType_DefaultStorage{
+				DefaultStorage: &ves_io_schema.Empty{},
+			}
 			spec.SiteType = voltstackClusterOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> DcClusterGroupChoice
+			// resource modelToSpecNested OneOfField --> DcClusterGroupChoice
 			if !gcpVpcSiteVoltstackClusterModel.DcClusterGroupChoice.IsNull() && !gcpVpcSiteVoltstackClusterModel.DcClusterGroupChoice.IsUnknown() {
 				voltstackClusterDcClusterGroupChoiceModel := GcpVpcSiteGCPVPCVoltstackClusterTypeDcClusterGroupChoice{}
 				response.Diagnostics.Append(gcpVpcSiteVoltstackClusterModel.DcClusterGroupChoice.As(ctx, &voltstackClusterDcClusterGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8753,7 +8914,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ForwardProxyChoice
+			// resource modelToSpecNested OneOfField --> ForwardProxyChoice
 			if !gcpVpcSiteVoltstackClusterModel.ForwardProxyChoice.IsNull() && !gcpVpcSiteVoltstackClusterModel.ForwardProxyChoice.IsUnknown() {
 				voltstackClusterForwardProxyChoiceModel := GcpVpcSiteGCPVPCVoltstackClusterTypeForwardProxyChoice{}
 				response.Diagnostics.Append(gcpVpcSiteVoltstackClusterModel.ForwardProxyChoice.As(ctx, &voltstackClusterForwardProxyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8839,7 +9000,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 				voltstackClusterOneOfSpec.VoltstackCluster.GcpZoneNames = elements
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> GlobalNetworkChoice
+			// resource modelToSpecNested OneOfField --> GlobalNetworkChoice
 			if !gcpVpcSiteVoltstackClusterModel.GlobalNetworkChoice.IsNull() && !gcpVpcSiteVoltstackClusterModel.GlobalNetworkChoice.IsUnknown() {
 				voltstackClusterGlobalNetworkChoiceModel := GcpVpcSiteGCPVPCVoltstackClusterTypeGlobalNetChoice{}
 				response.Diagnostics.Append(gcpVpcSiteVoltstackClusterModel.GlobalNetworkChoice.As(ctx, &voltstackClusterGlobalNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8977,7 +9138,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> K8SClusterChoice
+			// resource modelToSpecNested OneOfField --> K8SClusterChoice
 			if !gcpVpcSiteVoltstackClusterModel.K8SClusterChoice.IsNull() && !gcpVpcSiteVoltstackClusterModel.K8SClusterChoice.IsUnknown() {
 				voltstackClusterK8SClusterChoiceModel := GcpVpcSiteK8SClusterChoice{}
 				response.Diagnostics.Append(gcpVpcSiteVoltstackClusterModel.K8SClusterChoice.As(ctx, &voltstackClusterK8SClusterChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -9017,7 +9178,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> NetworkPolicyChoice
+			// resource modelToSpecNested OneOfField --> NetworkPolicyChoice
 			if !gcpVpcSiteVoltstackClusterModel.NetworkPolicyChoice.IsNull() && !gcpVpcSiteVoltstackClusterModel.NetworkPolicyChoice.IsUnknown() {
 				voltstackClusterNetworkPolicyChoiceModel := GcpVpcSiteGCPVPCVoltstackClusterTypeNetPolicyChoice{}
 				response.Diagnostics.Append(gcpVpcSiteVoltstackClusterModel.NetworkPolicyChoice.As(ctx, &voltstackClusterNetworkPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -9131,7 +9292,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 				voltstackClusterOneOfSpec.VoltstackCluster.NodeNumber = uint32(uint32(gcpVpcSiteVoltstackClusterModel.NodeNumber.ValueInt64()))
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> OutsideStaticRouteChoice
+			// resource modelToSpecNested OneOfField --> OutsideStaticRouteChoice
 			if !gcpVpcSiteVoltstackClusterModel.OutsideStaticRouteChoice.IsNull() && !gcpVpcSiteVoltstackClusterModel.OutsideStaticRouteChoice.IsUnknown() {
 				voltstackClusterOutsideStaticRouteChoiceModel := GcpVpcSiteGCPVPCVoltstackClusterTypeOutsideStaticRouteChoice{}
 				response.Diagnostics.Append(gcpVpcSiteVoltstackClusterModel.OutsideStaticRouteChoice.As(ctx, &voltstackClusterOutsideStaticRouteChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -9602,7 +9763,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SiteMeshGroupChoice
+			// resource modelToSpecNested OneOfField --> SiteMeshGroupChoice
 			if !gcpVpcSiteVoltstackClusterModel.SiteMeshGroupChoice.IsNull() && !gcpVpcSiteVoltstackClusterModel.SiteMeshGroupChoice.IsUnknown() {
 				voltstackClusterSiteMeshGroupChoiceModel := GcpVpcSiteGCPVPCVoltstackClusterTypeSiteMeshGroupChoice{}
 				response.Diagnostics.Append(gcpVpcSiteVoltstackClusterModel.SiteMeshGroupChoice.As(ctx, &voltstackClusterSiteMeshGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -9626,7 +9787,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> StorageClassChoice
+			// resource modelToSpecNested OneOfField --> StorageClassChoice
 			if !gcpVpcSiteVoltstackClusterModel.StorageClassChoice.IsNull() && !gcpVpcSiteVoltstackClusterModel.StorageClassChoice.IsUnknown() {
 				voltstackClusterStorageClassChoiceModel := GcpVpcSiteStorageClassChoice{}
 				response.Diagnostics.Append(gcpVpcSiteVoltstackClusterModel.StorageClassChoice.As(ctx, &voltstackClusterStorageClassChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -9702,6 +9863,9 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 		// resource modelToSpecRoot PointerField --> Sw
 		if !data.Sw.IsNull() && !data.Sw.IsUnknown() {
 			swSpec := &ves_io_schema_views.VolterraSoftwareType{}
+			swSpec.VolterraSwVersionChoice = &ves_io_schema_views.VolterraSoftwareType_DefaultSwVersion{
+				DefaultSwVersion: &ves_io_schema.Empty{},
+			}
 			spec.Sw = swSpec
 			var swModel GcpVpcSiteVolterraSoftwareType
 
@@ -9712,7 +9876,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> VolterraSwVersionChoice
+			// resource modelToSpecNested OneOfField --> VolterraSwVersionChoice
 			if !swModel.VolterraSwVersionChoice.IsNull() && !swModel.VolterraSwVersionChoice.IsUnknown() {
 				swVolterraSwVersionChoiceModel := GcpVpcSiteVolterraSwVersionChoice{}
 				response.Diagnostics.Append(swModel.VolterraSwVersionChoice.As(ctx, &swVolterraSwVersionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -9743,6 +9907,9 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 		// resource modelToSpecRoot PointerField --> WafSignatures
 		if !data.WafSignatures.IsNull() && !data.WafSignatures.IsUnknown() {
 			wafSignaturesSpec := &ves_io_schema_views_common_waf.LiveSignaturesUpdate{}
+			wafSignaturesSpec.SignaturesUpdateModeChoice = &ves_io_schema_views_common_waf.LiveSignaturesUpdate_Manual{
+				Manual: &ves_io_schema.Empty{},
+			}
 			spec.WafSignatures = wafSignaturesSpec
 			var wafSignaturesModel GcpVpcSiteLiveSignaturesUpdate
 
@@ -9753,7 +9920,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SignaturesUpdateModeChoice
+			// resource modelToSpecNested OneOfField --> SignaturesUpdateModeChoice
 			if !wafSignaturesModel.SignaturesUpdateModeChoice.IsNull() && !wafSignaturesModel.SignaturesUpdateModeChoice.IsUnknown() {
 				wafSignaturesSignaturesUpdateModeChoiceModel := GcpVpcSiteSignaturesUpdateModeChoice{}
 				response.Diagnostics.Append(wafSignaturesModel.SignaturesUpdateModeChoice.As(ctx, &wafSignaturesSignaturesUpdateModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -10068,7 +10235,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 		data.AdminPassword = types.ObjectNull(GcpVpcSiteAdminPasswordModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> BlockedServicesChoice
+	// resource SpecToModelRoot OneOfField --> BlockedServicesChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -10226,8 +10393,6 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.BlockedServicesChoice = types.ObjectNull(GcpVpcSiteBlockedServicesChoiceModelAttributeMap)
 	}
 
@@ -10697,7 +10862,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 		data.KubernetesUpgradeDrain = types.ObjectNull(GcpVpcSiteKubernetesUpgradeDrainModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> LogsReceiverChoice
+	// resource SpecToModelRoot OneOfField --> LogsReceiverChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -10781,8 +10946,6 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.LogsReceiverChoice = types.ObjectNull(GcpVpcSiteLogsReceiverChoiceModelAttributeMap)
 	}
 
@@ -10791,8 +10954,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 		var gcpVpcSiteOfflineSurvivabilityModeTypeModel = &GcpVpcSiteOfflineSurvivabilityModeType{}
 		offlineSurvivabilityModeElement := specData.GetOfflineSurvivabilityMode()
 
-		// resource specToModelNested RequiredOneOfField --> OfflineSurvivabilityModeChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> OfflineSurvivabilityModeChoice
 		if offlineSurvivabilityModeElement.GetOfflineSurvivabilityModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			offlineSurvivabilityModeofflineSurvivabilityModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -10858,8 +11020,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 		var gcpVpcSiteOperatingSystemTypeModel = &GcpVpcSiteOperatingSystemType{}
 		osElement := specData.GetOs()
 
-		// resource specToModelNested RequiredOneOfField --> OperatingSystemVersionChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> OperatingSystemVersionChoice
 		if osElement.GetOperatingSystemVersionChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			osoperatingSystemVersionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -10921,7 +11082,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 		data.Os = types.ObjectNull(GcpVpcSiteOsModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> PrivateConnectivityChoice
+	// resource SpecToModelRoot OneOfField --> PrivateConnectivityChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -11078,8 +11239,6 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.PrivateConnectivityChoice = types.ObjectNull(GcpVpcSitePrivateConnectivityChoiceModelAttributeMap)
 	}
 
@@ -11106,8 +11265,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 			if isIngressEgressGw && ingressEgressGwOptionsWrapper != nil && ingressEgressGwOptionsWrapper.IngressEgressGw != nil {
 				ingressEgressGwElement := ingressEgressGwOptionsWrapper.IngressEgressGw
 
-				// resource specToModelNested RequiredOneOfField --> DcClusterGroupChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> DcClusterGroupChoice
 				if ingressEgressGwElement.GetDcClusterGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwdcClusterGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -11235,8 +11393,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 					ingressEgressGwAttributeMap["dc_cluster_group_choice"] = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwDcClusterGroupChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ForwardProxyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> ForwardProxyChoice
 				if ingressEgressGwElement.GetForwardProxyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwforwardProxyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -11376,8 +11533,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 					}
 				}
 
-				// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> GlobalNetworkChoice
 				if ingressEgressGwElement.GetGlobalNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwglobalNetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -11748,8 +11904,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 					ingressEgressGwAttributeMap["inside_network"] = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwInsideNetworkModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> InsideStaticRouteChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> InsideStaticRouteChoice
 				if ingressEgressGwElement.GetInsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwinsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -12418,8 +12573,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 					ingressEgressGwAttributeMap["inside_subnet"] = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwInsideSubnetModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> NetworkPolicyChoice
 				if ingressEgressGwElement.GetNetworkPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwnetworkPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -12716,8 +12870,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 					ingressEgressGwAttributeMap["outside_network"] = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwOutsideNetworkModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> OutsideStaticRouteChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> OutsideStaticRouteChoice
 				if ingressEgressGwElement.GetOutsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwoutsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -13394,8 +13547,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> PerfModeChoice
 					if performanceEnhancementModeElement.GetPerfModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						performanceEnhancementModeperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -13415,8 +13567,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 							if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
 								perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
 
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// GlobalSpecType
+								// resource specToModelNested OneOfField --> PerfModeChoice
 								if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									perfModeL3EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -13520,8 +13671,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 					ingressEgressGwAttributeMap["performance_enhancement_mode"] = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwPerformanceEnhancementModeModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SiteMeshGroupChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> SiteMeshGroupChoice
 				if ingressEgressGwElement.GetSiteMeshGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwsiteMeshGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -13858,8 +14008,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> PerfModeChoice
 					if performanceEnhancementModeElement.GetPerfModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						performanceEnhancementModeperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -13879,8 +14028,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 							if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
 								perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
 
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// GlobalSpecType
+								// resource specToModelNested OneOfField --> PerfModeChoice
 								if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									perfModeL3EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -14005,8 +14153,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 			if isVoltstackCluster && voltstackClusterOptionsWrapper != nil && voltstackClusterOptionsWrapper.VoltstackCluster != nil {
 				voltstackClusterElement := voltstackClusterOptionsWrapper.VoltstackCluster
 
-				// resource specToModelNested RequiredOneOfField --> DcClusterGroupChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> DcClusterGroupChoice
 				if voltstackClusterElement.GetDcClusterGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterdcClusterGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -14089,8 +14236,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 					voltstackClusterAttributeMap["dc_cluster_group_choice"] = types.ObjectNull(GcpVpcSiteSiteTypeVoltstackClusterDcClusterGroupChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ForwardProxyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> ForwardProxyChoice
 				if voltstackClusterElement.GetForwardProxyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterforwardProxyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -14230,8 +14376,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 					}
 				}
 
-				// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> GlobalNetworkChoice
 				if voltstackClusterElement.GetGlobalNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterglobalNetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -14488,8 +14633,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 					voltstackClusterAttributeMap["global_network_choice"] = types.ObjectNull(GcpVpcSiteSiteTypeVoltstackClusterGlobalNetworkChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> K8SClusterChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> K8SClusterChoice
 				if voltstackClusterElement.GetK8SClusterChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterk8sClusterChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -14572,8 +14716,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 					voltstackClusterAttributeMap["k8s_cluster_choice"] = types.ObjectNull(GcpVpcSiteSiteTypeVoltstackClusterK8SClusterChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> NetworkPolicyChoice
 				if voltstackClusterElement.GetNetworkPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusternetworkPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -14756,8 +14899,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 				// resource specToModelNested UintField --> NodeNumber
 				voltstackClusterAttributeMap["node_number"] = types.Int64Value(int64(voltstackClusterElement.GetNodeNumber()))
 
-				// resource specToModelNested RequiredOneOfField --> OutsideStaticRouteChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> OutsideStaticRouteChoice
 				if voltstackClusterElement.GetOutsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusteroutsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -15540,8 +15682,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 					voltstackClusterAttributeMap["site_local_subnet"] = types.ObjectNull(GcpVpcSiteSiteTypeVoltstackClusterSiteLocalSubnetModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SiteMeshGroupChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> SiteMeshGroupChoice
 				if voltstackClusterElement.GetSiteMeshGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClustersiteMeshGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -15588,8 +15729,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 					voltstackClusterAttributeMap["site_mesh_group_choice"] = types.ObjectNull(GcpVpcSiteSiteTypeVoltstackClusterSiteMeshGroupChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> StorageClassChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> StorageClassChoice
 				if voltstackClusterElement.GetStorageClassChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterstorageClassChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -15735,8 +15875,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 		var gcpVpcSiteVolterraSoftwareTypeModel = &GcpVpcSiteVolterraSoftwareType{}
 		swElement := specData.GetSw()
 
-		// resource specToModelNested RequiredOneOfField --> VolterraSwVersionChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> VolterraSwVersionChoice
 		if swElement.GetVolterraSwVersionChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			swvolterraSwVersionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -15820,8 +15959,7 @@ func (r *ResourceF5XCGcpVpcSite) Create(ctx context.Context, request resource.Cr
 		var gcpVpcSiteLiveSignaturesUpdateModel = &GcpVpcSiteLiveSignaturesUpdate{}
 		wafSignaturesElement := specData.GetWafSignatures()
 
-		// resource specToModelNested RequiredOneOfField --> SignaturesUpdateModeChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> SignaturesUpdateModeChoice
 		if wafSignaturesElement.GetSignaturesUpdateModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			wafSignaturessignaturesUpdateModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -15926,11 +16064,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 	defer cancel()
 	priorAdminPassword := data.AdminPassword
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_gcp_vpc_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_gcp_vpc_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "gcp_vpc_site", err),
@@ -16219,7 +16353,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> BlockedServicesChoice
+	// resource SpecToModelRoot OneOfField --> BlockedServicesChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -16377,8 +16511,6 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.BlockedServicesChoice.IsNull() || data.BlockedServicesChoice.IsUnknown() || ((data.BlockedServicesChoice.Attributes()["block_all_services"].IsNull() || data.BlockedServicesChoice.Attributes()["block_all_services"].IsUnknown()) && (data.BlockedServicesChoice.Attributes()["blocked_services"].(types.Object).IsNull() || data.BlockedServicesChoice.Attributes()["blocked_services"].(types.Object).IsUnknown() || (data.BlockedServicesChoice.Attributes()["blocked_services"].(types.Object).Attributes()["blocked_sevice"].IsNull() || data.BlockedServicesChoice.Attributes()["blocked_services"].(types.Object).Attributes()["blocked_sevice"].IsUnknown())) && (data.BlockedServicesChoice.Attributes()["default_blocked_services"].IsNull() || data.BlockedServicesChoice.Attributes()["default_blocked_services"].IsUnknown())) {
 			data.BlockedServicesChoice = types.ObjectValueMust(GcpVpcSiteBlockedServicesChoiceModelAttributeMap, map[string]attr.Value{
@@ -16891,7 +17023,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 		data.KubernetesUpgradeDrain = types.ObjectNull(GcpVpcSiteKubernetesUpgradeDrainModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> LogsReceiverChoice
+	// resource SpecToModelRoot OneOfField --> LogsReceiverChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -16975,8 +17107,6 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.LogsReceiverChoice.IsNull() || data.LogsReceiverChoice.IsUnknown() || ((data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).IsNull() || data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).IsUnknown() || ((data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["name"].IsNull() || data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["name"].IsUnknown()) && (data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["namespace"].IsNull() || data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["tenant"].IsNull() || data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["tenant"].IsUnknown()))) && (data.LogsReceiverChoice.Attributes()["logs_streaming_disabled"].IsNull() || data.LogsReceiverChoice.Attributes()["logs_streaming_disabled"].IsUnknown())) {
 			data.LogsReceiverChoice = types.ObjectValueMust(GcpVpcSiteLogsReceiverChoiceModelAttributeMap, map[string]attr.Value{
@@ -16991,8 +17121,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 		var gcpVpcSiteOfflineSurvivabilityModeTypeModel = &GcpVpcSiteOfflineSurvivabilityModeType{}
 		offlineSurvivabilityModeElement := specData.GetOfflineSurvivabilityMode()
 
-		// resource specToModelNested RequiredOneOfField --> OfflineSurvivabilityModeChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> OfflineSurvivabilityModeChoice
 		if offlineSurvivabilityModeElement.GetOfflineSurvivabilityModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			offlineSurvivabilityModeofflineSurvivabilityModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -17061,8 +17190,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 		var gcpVpcSiteOperatingSystemTypeModel = &GcpVpcSiteOperatingSystemType{}
 		osElement := specData.GetOs()
 
-		// resource specToModelNested RequiredOneOfField --> OperatingSystemVersionChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> OperatingSystemVersionChoice
 		if osElement.GetOperatingSystemVersionChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			osoperatingSystemVersionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -17127,7 +17255,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 		data.Os = types.ObjectNull(GcpVpcSiteOsModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> PrivateConnectivityChoice
+	// resource SpecToModelRoot OneOfField --> PrivateConnectivityChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -17284,8 +17412,6 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.PrivateConnectivityChoice.IsNull() || data.PrivateConnectivityChoice.IsUnknown() || ((data.PrivateConnectivityChoice.Attributes()["private_connect_disabled"].IsNull() || data.PrivateConnectivityChoice.Attributes()["private_connect_disabled"].IsUnknown()) && (data.PrivateConnectivityChoice.Attributes()["private_connectivity"].(types.Object).IsNull() || data.PrivateConnectivityChoice.Attributes()["private_connectivity"].(types.Object).IsUnknown() || ((data.PrivateConnectivityChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["cloud_link"].(types.Object).IsNull() || data.PrivateConnectivityChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["cloud_link"].(types.Object).IsUnknown() || ((data.PrivateConnectivityChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["cloud_link"].(types.Object).Attributes()["name"].IsNull() || data.PrivateConnectivityChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["cloud_link"].(types.Object).Attributes()["name"].IsUnknown()) && (data.PrivateConnectivityChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["cloud_link"].(types.Object).Attributes()["namespace"].IsNull() || data.PrivateConnectivityChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["cloud_link"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.PrivateConnectivityChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["cloud_link"].(types.Object).Attributes()["tenant"].IsNull() || data.PrivateConnectivityChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["cloud_link"].(types.Object).Attributes()["tenant"].IsUnknown()))) && (data.PrivateConnectivityChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["network_options_choice"].(types.Object).IsNull() || data.PrivateConnectivityChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["network_options_choice"].(types.Object).IsUnknown() || ((data.PrivateConnectivityChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["network_options_choice"].(types.Object).Attributes()["inside"].IsNull() || data.PrivateConnectivityChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["network_options_choice"].(types.Object).Attributes()["inside"].IsUnknown()) && (data.PrivateConnectivityChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["network_options_choice"].(types.Object).Attributes()["outside"].IsNull() || data.PrivateConnectivityChoice.Attributes()["private_connectivity"].(types.Object).Attributes()["network_options_choice"].(types.Object).Attributes()["outside"].IsUnknown())))))) {
 			data.PrivateConnectivityChoice = types.ObjectValueMust(GcpVpcSitePrivateConnectivityChoiceModelAttributeMap, map[string]attr.Value{
@@ -17318,8 +17444,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 			if isIngressEgressGw && ingressEgressGwOptionsWrapper != nil && ingressEgressGwOptionsWrapper.IngressEgressGw != nil {
 				ingressEgressGwElement := ingressEgressGwOptionsWrapper.IngressEgressGw
 
-				// resource specToModelNested RequiredOneOfField --> DcClusterGroupChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> DcClusterGroupChoice
 				if ingressEgressGwElement.GetDcClusterGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwdcClusterGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -17451,8 +17576,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ForwardProxyChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> ForwardProxyChoice
 				if ingressEgressGwElement.GetForwardProxyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwforwardProxyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -17596,8 +17720,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 					}
 				}
 
-				// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> GlobalNetworkChoice
 				if ingressEgressGwElement.GetGlobalNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwglobalNetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -17971,8 +18094,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 					ingressEgressGwAttributeMap["inside_network"] = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwInsideNetworkModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> InsideStaticRouteChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> InsideStaticRouteChoice
 				if ingressEgressGwElement.GetInsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwinsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -18644,8 +18766,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 					ingressEgressGwAttributeMap["inside_subnet"] = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwInsideSubnetModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> NetworkPolicyChoice
 				if ingressEgressGwElement.GetNetworkPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwnetworkPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -18946,8 +19067,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 					ingressEgressGwAttributeMap["outside_network"] = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwOutsideNetworkModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> OutsideStaticRouteChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> OutsideStaticRouteChoice
 				if ingressEgressGwElement.GetOutsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwoutsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -19627,8 +19747,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> PerfModeChoice
 					if performanceEnhancementModeElement.GetPerfModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						performanceEnhancementModeperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -19648,8 +19767,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 							if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
 								perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
 
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// <no value>
+								// resource specToModelNested OneOfField --> PerfModeChoice
 								if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									perfModeL3EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -19759,8 +19877,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 					ingressEgressGwAttributeMap["performance_enhancement_mode"] = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwPerformanceEnhancementModeModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SiteMeshGroupChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> SiteMeshGroupChoice
 				if ingressEgressGwElement.GetSiteMeshGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwsiteMeshGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -20100,8 +20217,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> PerfModeChoice
 					if performanceEnhancementModeElement.GetPerfModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						performanceEnhancementModeperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -20121,8 +20237,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 							if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
 								perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
 
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// <no value>
+								// resource specToModelNested OneOfField --> PerfModeChoice
 								if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									perfModeL3EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -20253,8 +20368,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 			if isVoltstackCluster && voltstackClusterOptionsWrapper != nil && voltstackClusterOptionsWrapper.VoltstackCluster != nil {
 				voltstackClusterElement := voltstackClusterOptionsWrapper.VoltstackCluster
 
-				// resource specToModelNested RequiredOneOfField --> DcClusterGroupChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> DcClusterGroupChoice
 				if voltstackClusterElement.GetDcClusterGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterdcClusterGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -20340,8 +20454,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ForwardProxyChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> ForwardProxyChoice
 				if voltstackClusterElement.GetForwardProxyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterforwardProxyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -20485,8 +20598,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 					}
 				}
 
-				// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> GlobalNetworkChoice
 				if voltstackClusterElement.GetGlobalNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterglobalNetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -20746,8 +20858,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> K8SClusterChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> K8SClusterChoice
 				if voltstackClusterElement.GetK8SClusterChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterk8sClusterChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -20833,8 +20944,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> NetworkPolicyChoice
 				if voltstackClusterElement.GetNetworkPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusternetworkPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -21021,8 +21131,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 				// resource specToModelNested UintField --> NodeNumber
 				voltstackClusterAttributeMap["node_number"] = types.Int64Value(int64(voltstackClusterElement.GetNodeNumber()))
 
-				// resource specToModelNested RequiredOneOfField --> OutsideStaticRouteChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> OutsideStaticRouteChoice
 				if voltstackClusterElement.GetOutsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusteroutsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -21808,8 +21917,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 					voltstackClusterAttributeMap["site_local_subnet"] = types.ObjectNull(GcpVpcSiteSiteTypeVoltstackClusterSiteLocalSubnetModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SiteMeshGroupChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> SiteMeshGroupChoice
 				if voltstackClusterElement.GetSiteMeshGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClustersiteMeshGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -21859,8 +21967,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> StorageClassChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> StorageClassChoice
 				if voltstackClusterElement.GetStorageClassChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterstorageClassChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -22009,8 +22116,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 		var gcpVpcSiteVolterraSoftwareTypeModel = &GcpVpcSiteVolterraSoftwareType{}
 		swElement := specData.GetSw()
 
-		// resource specToModelNested RequiredOneOfField --> VolterraSwVersionChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> VolterraSwVersionChoice
 		if swElement.GetVolterraSwVersionChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			swvolterraSwVersionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -22097,8 +22203,7 @@ func (r *ResourceF5XCGcpVpcSite) Read(ctx context.Context, request resource.Read
 		var gcpVpcSiteLiveSignaturesUpdateModel = &GcpVpcSiteLiveSignaturesUpdate{}
 		wafSignaturesElement := specData.GetWafSignatures()
 
-		// resource specToModelNested RequiredOneOfField --> SignaturesUpdateModeChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> SignaturesUpdateModeChoice
 		if wafSignaturesElement.GetSignaturesUpdateModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			wafSignaturessignaturesUpdateModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -22294,7 +22399,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 		spec.Address = string(data.Address.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> BlockedServicesChoice
+	// resource modelToSpecRoot OneOfField --> BlockedServicesChoice
 	if !data.BlockedServicesChoice.IsNull() && !data.BlockedServicesChoice.IsUnknown() {
 		blockedServicesChoiceModel := GcpVpcSiteBlockedServicesChoice{}
 		response.Diagnostics.Append(data.BlockedServicesChoice.As(ctx, &blockedServicesChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -22400,6 +22505,10 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 			spec.BlockedServicesChoice = defaultBlockedServicesSpecBool
 		}
 
+	} else {
+		spec.BlockedServicesChoice = &ves_io_schema_views_gcp_vpc_site.ReplaceSpecType_BlockAllServices{
+			BlockAllServices: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -22580,7 +22689,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> LogsReceiverChoice
+	// resource modelToSpecRoot OneOfField --> LogsReceiverChoice
 	if !data.LogsReceiverChoice.IsNull() && !data.LogsReceiverChoice.IsUnknown() {
 		logsReceiverChoiceModel := GcpVpcSiteLogsReceiverChoice{}
 		response.Diagnostics.Append(data.LogsReceiverChoice.As(ctx, &logsReceiverChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -22618,12 +22727,19 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 			spec.LogsReceiverChoice = logsStreamingDisabledSpecBool
 		}
 
+	} else {
+		spec.LogsReceiverChoice = &ves_io_schema_views_gcp_vpc_site.ReplaceSpecType_LogsStreamingDisabled{
+			LogsStreamingDisabled: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
 		// resource modelToSpecRoot PointerField --> OfflineSurvivabilityMode
 		if !data.OfflineSurvivabilityMode.IsNull() && !data.OfflineSurvivabilityMode.IsUnknown() {
 			offlineSurvivabilityModeSpec := &ves_io_schema_views.OfflineSurvivabilityModeType{}
+			offlineSurvivabilityModeSpec.OfflineSurvivabilityModeChoice = &ves_io_schema_views.OfflineSurvivabilityModeType_NoOfflineSurvivabilityMode{
+				NoOfflineSurvivabilityMode: &ves_io_schema.Empty{},
+			}
 			spec.OfflineSurvivabilityMode = offlineSurvivabilityModeSpec
 			var offlineSurvivabilityModeModel GcpVpcSiteOfflineSurvivabilityModeType
 
@@ -22634,7 +22750,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> OfflineSurvivabilityModeChoice
+			// resource modelToSpecNested OneOfField --> OfflineSurvivabilityModeChoice
 			if !offlineSurvivabilityModeModel.OfflineSurvivabilityModeChoice.IsNull() && !offlineSurvivabilityModeModel.OfflineSurvivabilityModeChoice.IsUnknown() {
 				offlineSurvivabilityModeOfflineSurvivabilityModeChoiceModel := GcpVpcSiteOfflineSurvivabilityModeChoice{}
 				response.Diagnostics.Append(offlineSurvivabilityModeModel.OfflineSurvivabilityModeChoice.As(ctx, &offlineSurvivabilityModeOfflineSurvivabilityModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -22661,7 +22777,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> PrivateConnectivityChoice
+	// resource modelToSpecRoot OneOfField --> PrivateConnectivityChoice
 	if !data.PrivateConnectivityChoice.IsNull() && !data.PrivateConnectivityChoice.IsUnknown() {
 		privateConnectivityChoiceModel := GcpVpcSitePrivateConnectivityChoice{}
 		response.Diagnostics.Append(data.PrivateConnectivityChoice.As(ctx, &privateConnectivityChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -22736,6 +22852,10 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 
 		}
 
+	} else {
+		spec.PrivateConnectivityChoice = &ves_io_schema_views_gcp_vpc_site.ReplaceSpecType_PrivateConnectDisabled{
+			PrivateConnectDisabled: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredOneOfField --> SiteType
@@ -22755,9 +22875,30 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 			}
 			ingressEgressGwOneOfSpec := &ves_io_schema_views_gcp_vpc_site.ReplaceSpecType_IngressEgressGw{}
 			ingressEgressGwOneOfSpec.IngressEgressGw = &ves_io_schema_views_gcp_vpc_site.GCPVPCIngressEgressGwReplaceType{}
+			ingressEgressGwOneOfSpec.IngressEgressGw.DcClusterGroupChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCIngressEgressGwReplaceType_NoDcClusterGroup{
+				NoDcClusterGroup: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwOneOfSpec.IngressEgressGw.ForwardProxyChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCIngressEgressGwReplaceType_NoForwardProxy{
+				NoForwardProxy: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwOneOfSpec.IngressEgressGw.GlobalNetworkChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCIngressEgressGwReplaceType_NoGlobalNetwork{
+				NoGlobalNetwork: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwOneOfSpec.IngressEgressGw.InsideStaticRouteChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCIngressEgressGwReplaceType_NoInsideStaticRoutes{
+				NoInsideStaticRoutes: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwOneOfSpec.IngressEgressGw.NetworkPolicyChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCIngressEgressGwReplaceType_NoNetworkPolicy{
+				NoNetworkPolicy: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwOneOfSpec.IngressEgressGw.OutsideStaticRouteChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCIngressEgressGwReplaceType_NoOutsideStaticRoutes{
+				NoOutsideStaticRoutes: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwOneOfSpec.IngressEgressGw.SiteMeshGroupChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCIngressEgressGwReplaceType_SmConnectionPublicIp{
+				SmConnectionPublicIp: &ves_io_schema.Empty{},
+			}
 			spec.SiteType = ingressEgressGwOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> DcClusterGroupChoice
+			// resource modelToSpecNested OneOfField --> DcClusterGroupChoice
 			if !gcpVpcSiteIngressEgressGwModel.DcClusterGroupChoice.IsNull() && !gcpVpcSiteIngressEgressGwModel.DcClusterGroupChoice.IsUnknown() {
 				ingressEgressGwDcClusterGroupChoiceModel := GcpVpcSiteDcClusterGroupChoice{}
 				response.Diagnostics.Append(gcpVpcSiteIngressEgressGwModel.DcClusterGroupChoice.As(ctx, &ingressEgressGwDcClusterGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -22820,7 +22961,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ForwardProxyChoice
+			// resource modelToSpecNested OneOfField --> ForwardProxyChoice
 			if !gcpVpcSiteIngressEgressGwModel.ForwardProxyChoice.IsNull() && !gcpVpcSiteIngressEgressGwModel.ForwardProxyChoice.IsUnknown() {
 				ingressEgressGwForwardProxyChoiceModel := GcpVpcSiteForwardProxyChoice{}
 				response.Diagnostics.Append(gcpVpcSiteIngressEgressGwModel.ForwardProxyChoice.As(ctx, &ingressEgressGwForwardProxyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -22901,7 +23042,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 				ingressEgressGwOneOfSpec.IngressEgressGw.GcpZoneNames = elements
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> GlobalNetworkChoice
+			// resource modelToSpecNested OneOfField --> GlobalNetworkChoice
 			if !gcpVpcSiteIngressEgressGwModel.GlobalNetworkChoice.IsNull() && !gcpVpcSiteIngressEgressGwModel.GlobalNetworkChoice.IsUnknown() {
 				ingressEgressGwGlobalNetworkChoiceModel := GcpVpcSiteGlobalNetChoice{}
 				response.Diagnostics.Append(gcpVpcSiteIngressEgressGwModel.GlobalNetworkChoice.As(ctx, &ingressEgressGwGlobalNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -23101,7 +23242,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> InsideStaticRouteChoice
+			// resource modelToSpecNested OneOfField --> InsideStaticRouteChoice
 			if !gcpVpcSiteIngressEgressGwModel.InsideStaticRouteChoice.IsNull() && !gcpVpcSiteIngressEgressGwModel.InsideStaticRouteChoice.IsUnknown() {
 				ingressEgressGwInsideStaticRouteChoiceModel := GcpVpcSiteInsideStaticRouteChoice{}
 				response.Diagnostics.Append(gcpVpcSiteIngressEgressGwModel.InsideStaticRouteChoice.As(ctx, &ingressEgressGwInsideStaticRouteChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -23510,7 +23651,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> NetworkPolicyChoice
+			// resource modelToSpecNested OneOfField --> NetworkPolicyChoice
 			if !gcpVpcSiteIngressEgressGwModel.NetworkPolicyChoice.IsNull() && !gcpVpcSiteIngressEgressGwModel.NetworkPolicyChoice.IsUnknown() {
 				ingressEgressGwNetworkPolicyChoiceModel := GcpVpcSiteNetPolicyChoice{}
 				response.Diagnostics.Append(gcpVpcSiteIngressEgressGwModel.NetworkPolicyChoice.As(ctx, &ingressEgressGwNetworkPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -23686,7 +23827,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> OutsideStaticRouteChoice
+			// resource modelToSpecNested OneOfField --> OutsideStaticRouteChoice
 			if !gcpVpcSiteIngressEgressGwModel.OutsideStaticRouteChoice.IsNull() && !gcpVpcSiteIngressEgressGwModel.OutsideStaticRouteChoice.IsUnknown() {
 				ingressEgressGwOutsideStaticRouteChoiceModel := GcpVpcSiteOutsideStaticRouteChoice{}
 				response.Diagnostics.Append(gcpVpcSiteIngressEgressGwModel.OutsideStaticRouteChoice.As(ctx, &ingressEgressGwOutsideStaticRouteChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -24104,9 +24245,16 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 				}
 
 				performanceEnhancementModeSpec := &ves_io_schema_views.PerformanceEnhancementModeType{}
+				performanceEnhancementModeSpec.PerfModeChoice = &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{
+					PerfModeL7Enhanced: &ves_io_schema_views.L7PerformanceEnhancementType{
+						PerfModeChoice: &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{
+							JumboDisabled: &ves_io_schema.Empty{},
+						},
+					},
+				}
 				ingressEgressGwOneOfSpec.IngressEgressGw.PerformanceEnhancementMode = performanceEnhancementModeSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
+				// resource modelToSpecNested OneOfField --> PerfModeChoice
 				if !performanceEnhancementModeModel.PerfModeChoice.IsNull() && !performanceEnhancementModeModel.PerfModeChoice.IsUnknown() {
 					performanceEnhancementModePerfModeChoiceModel := GcpVpcSitePerfModeChoice{}
 					response.Diagnostics.Append(performanceEnhancementModeModel.PerfModeChoice.As(ctx, &performanceEnhancementModePerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -24123,9 +24271,12 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 						}
 						perfModeL3EnhancedOneOfSpec := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced{}
 						perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced = &ves_io_schema_views.L3PerformanceEnhancementType{}
+						perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced.PerfModeChoice = &ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo{
+							NoJumbo: &ves_io_schema.Empty{},
+						}
 						performanceEnhancementModeSpec.PerfModeChoice = perfModeL3EnhancedOneOfSpec
 
-						// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
+						// resource modelToSpecNested OneOfField --> PerfModeChoice
 						if !gcpVpcSitePerfModeL3EnhancedModel.PerfModeChoice.IsNull() && !gcpVpcSitePerfModeL3EnhancedModel.PerfModeChoice.IsUnknown() {
 							perfModeL3EnhancedPerfModeChoiceModel := GcpVpcSiteL3PerformanceEnhancementTypePerfModeChoice{}
 							response.Diagnostics.Append(gcpVpcSitePerfModeL3EnhancedModel.PerfModeChoice.As(ctx, &perfModeL3EnhancedPerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -24165,7 +24316,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SiteMeshGroupChoice
+			// resource modelToSpecNested OneOfField --> SiteMeshGroupChoice
 			if !gcpVpcSiteIngressEgressGwModel.SiteMeshGroupChoice.IsNull() && !gcpVpcSiteIngressEgressGwModel.SiteMeshGroupChoice.IsUnknown() {
 				ingressEgressGwSiteMeshGroupChoiceModel := GcpVpcSiteSiteMeshGroupChoice{}
 				response.Diagnostics.Append(gcpVpcSiteIngressEgressGwModel.SiteMeshGroupChoice.As(ctx, &ingressEgressGwSiteMeshGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -24353,9 +24504,16 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 				}
 
 				performanceEnhancementModeSpec := &ves_io_schema_views.PerformanceEnhancementModeType{}
+				performanceEnhancementModeSpec.PerfModeChoice = &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{
+					PerfModeL7Enhanced: &ves_io_schema_views.L7PerformanceEnhancementType{
+						PerfModeChoice: &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{
+							JumboDisabled: &ves_io_schema.Empty{},
+						},
+					},
+				}
 				ingressGwOneOfSpec.IngressGw.PerformanceEnhancementMode = performanceEnhancementModeSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
+				// resource modelToSpecNested OneOfField --> PerfModeChoice
 				if !performanceEnhancementModeModel.PerfModeChoice.IsNull() && !performanceEnhancementModeModel.PerfModeChoice.IsUnknown() {
 					performanceEnhancementModePerfModeChoiceModel := GcpVpcSitePerfModeChoice{}
 					response.Diagnostics.Append(performanceEnhancementModeModel.PerfModeChoice.As(ctx, &performanceEnhancementModePerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -24372,9 +24530,12 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 						}
 						perfModeL3EnhancedOneOfSpec := &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL3Enhanced{}
 						perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced = &ves_io_schema_views.L3PerformanceEnhancementType{}
+						perfModeL3EnhancedOneOfSpec.PerfModeL3Enhanced.PerfModeChoice = &ves_io_schema_views.L3PerformanceEnhancementType_NoJumbo{
+							NoJumbo: &ves_io_schema.Empty{},
+						}
 						performanceEnhancementModeSpec.PerfModeChoice = perfModeL3EnhancedOneOfSpec
 
-						// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
+						// resource modelToSpecNested OneOfField --> PerfModeChoice
 						if !gcpVpcSitePerfModeL3EnhancedModel.PerfModeChoice.IsNull() && !gcpVpcSitePerfModeL3EnhancedModel.PerfModeChoice.IsUnknown() {
 							perfModeL3EnhancedPerfModeChoiceModel := GcpVpcSiteL3PerformanceEnhancementTypePerfModeChoice{}
 							response.Diagnostics.Append(gcpVpcSitePerfModeL3EnhancedModel.PerfModeChoice.As(ctx, &perfModeL3EnhancedPerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -24425,9 +24586,30 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 			}
 			voltstackClusterOneOfSpec := &ves_io_schema_views_gcp_vpc_site.ReplaceSpecType_VoltstackCluster{}
 			voltstackClusterOneOfSpec.VoltstackCluster = &ves_io_schema_views_gcp_vpc_site.GCPVPCVoltstackClusterReplaceType{}
+			voltstackClusterOneOfSpec.VoltstackCluster.DcClusterGroupChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCVoltstackClusterReplaceType_NoDcClusterGroup{
+				NoDcClusterGroup: &ves_io_schema.Empty{},
+			}
+			voltstackClusterOneOfSpec.VoltstackCluster.ForwardProxyChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCVoltstackClusterReplaceType_NoForwardProxy{
+				NoForwardProxy: &ves_io_schema.Empty{},
+			}
+			voltstackClusterOneOfSpec.VoltstackCluster.GlobalNetworkChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCVoltstackClusterReplaceType_NoGlobalNetwork{
+				NoGlobalNetwork: &ves_io_schema.Empty{},
+			}
+			voltstackClusterOneOfSpec.VoltstackCluster.K8SClusterChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCVoltstackClusterReplaceType_NoK8SCluster{
+				NoK8SCluster: &ves_io_schema.Empty{},
+			}
+			voltstackClusterOneOfSpec.VoltstackCluster.NetworkPolicyChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCVoltstackClusterReplaceType_NoNetworkPolicy{
+				NoNetworkPolicy: &ves_io_schema.Empty{},
+			}
+			voltstackClusterOneOfSpec.VoltstackCluster.OutsideStaticRouteChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCVoltstackClusterReplaceType_NoOutsideStaticRoutes{
+				NoOutsideStaticRoutes: &ves_io_schema.Empty{},
+			}
+			voltstackClusterOneOfSpec.VoltstackCluster.SiteMeshGroupChoice = &ves_io_schema_views_gcp_vpc_site.GCPVPCVoltstackClusterReplaceType_SmConnectionPublicIp{
+				SmConnectionPublicIp: &ves_io_schema.Empty{},
+			}
 			spec.SiteType = voltstackClusterOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> DcClusterGroupChoice
+			// resource modelToSpecNested OneOfField --> DcClusterGroupChoice
 			if !gcpVpcSiteVoltstackClusterModel.DcClusterGroupChoice.IsNull() && !gcpVpcSiteVoltstackClusterModel.DcClusterGroupChoice.IsUnknown() {
 				voltstackClusterDcClusterGroupChoiceModel := GcpVpcSiteGCPVPCVoltstackClusterTypeDcClusterGroupChoice{}
 				response.Diagnostics.Append(gcpVpcSiteVoltstackClusterModel.DcClusterGroupChoice.As(ctx, &voltstackClusterDcClusterGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -24467,7 +24649,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ForwardProxyChoice
+			// resource modelToSpecNested OneOfField --> ForwardProxyChoice
 			if !gcpVpcSiteVoltstackClusterModel.ForwardProxyChoice.IsNull() && !gcpVpcSiteVoltstackClusterModel.ForwardProxyChoice.IsUnknown() {
 				voltstackClusterForwardProxyChoiceModel := GcpVpcSiteGCPVPCVoltstackClusterTypeForwardProxyChoice{}
 				response.Diagnostics.Append(gcpVpcSiteVoltstackClusterModel.ForwardProxyChoice.As(ctx, &voltstackClusterForwardProxyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -24548,7 +24730,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 				voltstackClusterOneOfSpec.VoltstackCluster.GcpZoneNames = elements
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> GlobalNetworkChoice
+			// resource modelToSpecNested OneOfField --> GlobalNetworkChoice
 			if !gcpVpcSiteVoltstackClusterModel.GlobalNetworkChoice.IsNull() && !gcpVpcSiteVoltstackClusterModel.GlobalNetworkChoice.IsUnknown() {
 				voltstackClusterGlobalNetworkChoiceModel := GcpVpcSiteGCPVPCVoltstackClusterTypeGlobalNetChoice{}
 				response.Diagnostics.Append(gcpVpcSiteVoltstackClusterModel.GlobalNetworkChoice.As(ctx, &voltstackClusterGlobalNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -24686,7 +24868,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> K8SClusterChoice
+			// resource modelToSpecNested OneOfField --> K8SClusterChoice
 			if !gcpVpcSiteVoltstackClusterModel.K8SClusterChoice.IsNull() && !gcpVpcSiteVoltstackClusterModel.K8SClusterChoice.IsUnknown() {
 				voltstackClusterK8SClusterChoiceModel := GcpVpcSiteK8SClusterChoice{}
 				response.Diagnostics.Append(gcpVpcSiteVoltstackClusterModel.K8SClusterChoice.As(ctx, &voltstackClusterK8SClusterChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -24726,7 +24908,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> NetworkPolicyChoice
+			// resource modelToSpecNested OneOfField --> NetworkPolicyChoice
 			if !gcpVpcSiteVoltstackClusterModel.NetworkPolicyChoice.IsNull() && !gcpVpcSiteVoltstackClusterModel.NetworkPolicyChoice.IsUnknown() {
 				voltstackClusterNetworkPolicyChoiceModel := GcpVpcSiteGCPVPCVoltstackClusterTypeNetPolicyChoice{}
 				response.Diagnostics.Append(gcpVpcSiteVoltstackClusterModel.NetworkPolicyChoice.As(ctx, &voltstackClusterNetworkPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -24840,7 +25022,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 				voltstackClusterOneOfSpec.VoltstackCluster.NodeNumber = uint32(uint32(gcpVpcSiteVoltstackClusterModel.NodeNumber.ValueInt64()))
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> OutsideStaticRouteChoice
+			// resource modelToSpecNested OneOfField --> OutsideStaticRouteChoice
 			if !gcpVpcSiteVoltstackClusterModel.OutsideStaticRouteChoice.IsNull() && !gcpVpcSiteVoltstackClusterModel.OutsideStaticRouteChoice.IsUnknown() {
 				voltstackClusterOutsideStaticRouteChoiceModel := GcpVpcSiteGCPVPCVoltstackClusterTypeOutsideStaticRouteChoice{}
 				response.Diagnostics.Append(gcpVpcSiteVoltstackClusterModel.OutsideStaticRouteChoice.As(ctx, &voltstackClusterOutsideStaticRouteChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -25311,7 +25493,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SiteMeshGroupChoice
+			// resource modelToSpecNested OneOfField --> SiteMeshGroupChoice
 			if !gcpVpcSiteVoltstackClusterModel.SiteMeshGroupChoice.IsNull() && !gcpVpcSiteVoltstackClusterModel.SiteMeshGroupChoice.IsUnknown() {
 				voltstackClusterSiteMeshGroupChoiceModel := GcpVpcSiteGCPVPCVoltstackClusterTypeSiteMeshGroupChoice{}
 				response.Diagnostics.Append(gcpVpcSiteVoltstackClusterModel.SiteMeshGroupChoice.As(ctx, &voltstackClusterSiteMeshGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -25346,6 +25528,9 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 		// resource modelToSpecRoot PointerField --> WafSignatures
 		if !data.WafSignatures.IsNull() && !data.WafSignatures.IsUnknown() {
 			wafSignaturesSpec := &ves_io_schema_views_common_waf.LiveSignaturesUpdate{}
+			wafSignaturesSpec.SignaturesUpdateModeChoice = &ves_io_schema_views_common_waf.LiveSignaturesUpdate_Manual{
+				Manual: &ves_io_schema.Empty{},
+			}
 			spec.WafSignatures = wafSignaturesSpec
 			var wafSignaturesModel GcpVpcSiteLiveSignaturesUpdate
 
@@ -25356,7 +25541,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SignaturesUpdateModeChoice
+			// resource modelToSpecNested OneOfField --> SignaturesUpdateModeChoice
 			if !wafSignaturesModel.SignaturesUpdateModeChoice.IsNull() && !wafSignaturesModel.SignaturesUpdateModeChoice.IsUnknown() {
 				wafSignaturesSignaturesUpdateModeChoiceModel := GcpVpcSiteSignaturesUpdateModeChoice{}
 				response.Diagnostics.Append(wafSignaturesModel.SignaturesUpdateModeChoice.As(ctx, &wafSignaturesSignaturesUpdateModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -25394,12 +25579,8 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_views_gcp_vpc_site.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_views_gcp_vpc_site.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "gcp_vpc_site", err),
@@ -25408,7 +25589,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_gcp_vpc_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_gcp_vpc_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "gcp_vpc_site", err),
@@ -25672,7 +25853,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 		data.AdminPassword = types.ObjectNull(GcpVpcSiteAdminPasswordModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> BlockedServicesChoice
+	// resource SpecToModelRoot OneOfField --> BlockedServicesChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -25830,8 +26011,6 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.BlockedServicesChoice = types.ObjectNull(GcpVpcSiteBlockedServicesChoiceModelAttributeMap)
 	}
 
@@ -26301,7 +26480,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 		data.KubernetesUpgradeDrain = types.ObjectNull(GcpVpcSiteKubernetesUpgradeDrainModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> LogsReceiverChoice
+	// resource SpecToModelRoot OneOfField --> LogsReceiverChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -26385,8 +26564,6 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.LogsReceiverChoice = types.ObjectNull(GcpVpcSiteLogsReceiverChoiceModelAttributeMap)
 	}
 
@@ -26395,8 +26572,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 		var gcpVpcSiteOfflineSurvivabilityModeTypeModel = &GcpVpcSiteOfflineSurvivabilityModeType{}
 		offlineSurvivabilityModeElement := specData.GetOfflineSurvivabilityMode()
 
-		// resource specToModelNested RequiredOneOfField --> OfflineSurvivabilityModeChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> OfflineSurvivabilityModeChoice
 		if offlineSurvivabilityModeElement.GetOfflineSurvivabilityModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			offlineSurvivabilityModeofflineSurvivabilityModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -26462,8 +26638,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 		var gcpVpcSiteOperatingSystemTypeModel = &GcpVpcSiteOperatingSystemType{}
 		osElement := specData.GetOs()
 
-		// resource specToModelNested RequiredOneOfField --> OperatingSystemVersionChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> OperatingSystemVersionChoice
 		if osElement.GetOperatingSystemVersionChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			osoperatingSystemVersionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -26525,7 +26700,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 		data.Os = types.ObjectNull(GcpVpcSiteOsModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> PrivateConnectivityChoice
+	// resource SpecToModelRoot OneOfField --> PrivateConnectivityChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -26682,8 +26857,6 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.PrivateConnectivityChoice = types.ObjectNull(GcpVpcSitePrivateConnectivityChoiceModelAttributeMap)
 	}
 
@@ -26710,8 +26883,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 			if isIngressEgressGw && ingressEgressGwOptionsWrapper != nil && ingressEgressGwOptionsWrapper.IngressEgressGw != nil {
 				ingressEgressGwElement := ingressEgressGwOptionsWrapper.IngressEgressGw
 
-				// resource specToModelNested RequiredOneOfField --> DcClusterGroupChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> DcClusterGroupChoice
 				if ingressEgressGwElement.GetDcClusterGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwdcClusterGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -26839,8 +27011,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 					ingressEgressGwAttributeMap["dc_cluster_group_choice"] = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwDcClusterGroupChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ForwardProxyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> ForwardProxyChoice
 				if ingressEgressGwElement.GetForwardProxyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwforwardProxyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -26980,8 +27151,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 					}
 				}
 
-				// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> GlobalNetworkChoice
 				if ingressEgressGwElement.GetGlobalNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwglobalNetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -27352,8 +27522,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 					ingressEgressGwAttributeMap["inside_network"] = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwInsideNetworkModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> InsideStaticRouteChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> InsideStaticRouteChoice
 				if ingressEgressGwElement.GetInsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwinsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -28022,8 +28191,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 					ingressEgressGwAttributeMap["inside_subnet"] = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwInsideSubnetModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> NetworkPolicyChoice
 				if ingressEgressGwElement.GetNetworkPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwnetworkPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -28320,8 +28488,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 					ingressEgressGwAttributeMap["outside_network"] = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwOutsideNetworkModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> OutsideStaticRouteChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> OutsideStaticRouteChoice
 				if ingressEgressGwElement.GetOutsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwoutsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -28998,8 +29165,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> PerfModeChoice
 					if performanceEnhancementModeElement.GetPerfModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						performanceEnhancementModeperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -29019,8 +29185,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 							if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
 								perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
 
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// GlobalSpecType
+								// resource specToModelNested OneOfField --> PerfModeChoice
 								if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									perfModeL3EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -29124,8 +29289,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 					ingressEgressGwAttributeMap["performance_enhancement_mode"] = types.ObjectNull(GcpVpcSiteSiteTypeIngressEgressGwPerformanceEnhancementModeModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SiteMeshGroupChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> SiteMeshGroupChoice
 				if ingressEgressGwElement.GetSiteMeshGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwsiteMeshGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -29462,8 +29626,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> PerfModeChoice
 					if performanceEnhancementModeElement.GetPerfModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						performanceEnhancementModeperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -29483,8 +29646,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 							if isPerfModeL3Enhanced && perfModeL3EnhancedOptionsWrapper != nil && perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced != nil {
 								perfModeL3EnhancedElement := perfModeL3EnhancedOptionsWrapper.PerfModeL3Enhanced
 
-								// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-								// GlobalSpecType
+								// resource specToModelNested OneOfField --> PerfModeChoice
 								if perfModeL3EnhancedElement.GetPerfModeChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									perfModeL3EnhancedperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -29609,8 +29771,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 			if isVoltstackCluster && voltstackClusterOptionsWrapper != nil && voltstackClusterOptionsWrapper.VoltstackCluster != nil {
 				voltstackClusterElement := voltstackClusterOptionsWrapper.VoltstackCluster
 
-				// resource specToModelNested RequiredOneOfField --> DcClusterGroupChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> DcClusterGroupChoice
 				if voltstackClusterElement.GetDcClusterGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterdcClusterGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -29693,8 +29854,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 					voltstackClusterAttributeMap["dc_cluster_group_choice"] = types.ObjectNull(GcpVpcSiteSiteTypeVoltstackClusterDcClusterGroupChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ForwardProxyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> ForwardProxyChoice
 				if voltstackClusterElement.GetForwardProxyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterforwardProxyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -29834,8 +29994,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 					}
 				}
 
-				// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> GlobalNetworkChoice
 				if voltstackClusterElement.GetGlobalNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterglobalNetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -30092,8 +30251,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 					voltstackClusterAttributeMap["global_network_choice"] = types.ObjectNull(GcpVpcSiteSiteTypeVoltstackClusterGlobalNetworkChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> K8SClusterChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> K8SClusterChoice
 				if voltstackClusterElement.GetK8SClusterChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterk8sClusterChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -30176,8 +30334,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 					voltstackClusterAttributeMap["k8s_cluster_choice"] = types.ObjectNull(GcpVpcSiteSiteTypeVoltstackClusterK8SClusterChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> NetworkPolicyChoice
 				if voltstackClusterElement.GetNetworkPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusternetworkPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -30360,8 +30517,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 				// resource specToModelNested UintField --> NodeNumber
 				voltstackClusterAttributeMap["node_number"] = types.Int64Value(int64(voltstackClusterElement.GetNodeNumber()))
 
-				// resource specToModelNested RequiredOneOfField --> OutsideStaticRouteChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> OutsideStaticRouteChoice
 				if voltstackClusterElement.GetOutsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusteroutsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -31144,8 +31300,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 					voltstackClusterAttributeMap["site_local_subnet"] = types.ObjectNull(GcpVpcSiteSiteTypeVoltstackClusterSiteLocalSubnetModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SiteMeshGroupChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> SiteMeshGroupChoice
 				if voltstackClusterElement.GetSiteMeshGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClustersiteMeshGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -31192,8 +31347,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 					voltstackClusterAttributeMap["site_mesh_group_choice"] = types.ObjectNull(GcpVpcSiteSiteTypeVoltstackClusterSiteMeshGroupChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> StorageClassChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> StorageClassChoice
 				if voltstackClusterElement.GetStorageClassChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterstorageClassChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -31339,8 +31493,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 		var gcpVpcSiteVolterraSoftwareTypeModel = &GcpVpcSiteVolterraSoftwareType{}
 		swElement := specData.GetSw()
 
-		// resource specToModelNested RequiredOneOfField --> VolterraSwVersionChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> VolterraSwVersionChoice
 		if swElement.GetVolterraSwVersionChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			swvolterraSwVersionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -31424,8 +31577,7 @@ func (r *ResourceF5XCGcpVpcSite) Update(ctx context.Context, request resource.Up
 		var gcpVpcSiteLiveSignaturesUpdateModel = &GcpVpcSiteLiveSignaturesUpdate{}
 		wafSignaturesElement := specData.GetWafSignatures()
 
-		// resource specToModelNested RequiredOneOfField --> SignaturesUpdateModeChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> SignaturesUpdateModeChoice
 		if wafSignaturesElement.GetSignaturesUpdateModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			wafSignaturessignaturesUpdateModeChoiceChoicesAttributeMap := make(map[string]attr.Value)

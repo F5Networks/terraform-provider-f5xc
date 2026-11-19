@@ -16,11 +16,11 @@ subcategory: "API Security & Management"
 description: |-
   # F5 XC API Definition Uploader
   
-  The f5xc_api_definition_uploader resource uploads raw OpenAPI or Swagger specifications to the F5 Distributed Cloud (F5 XC) Object Store. It exports the backend-generated versioned URL in metadata.url, which can be passed to f5xc_api_definition for API Discovery, API Inventory, and API Protection policies.
+  The `f5xc_api_definition_uploader` resource uploads raw or Base64-encoded OpenAPI or Swagger specifications to the F5 Distributed Cloud (F5 XC) Object Store. It exports the backend-generated versioned URL in `metadata.url`, which can be passed to `f5xc_api_definition` for API Discovery, API Inventory, and API Protection policies.
   
-  ## Declarative Upload
+  ## Declarative Upload & State Hygiene
   
-  Takes the raw specification through the string_value attribute. The value can come from a local file, a rendered template, decoded Base64 input, a remote HTTP response, cloud storage, or jsonencode(...).
+  Both `string_value` and `bytes_value` are write-only attributes (requires Terraform >= 1.11). Multi-megabyte OpenAPI payloads are sent only during `Create` and `Update` and are never persisted in Terraform state or plan files. Change detection is driven by `content_hash` (automatically computed as the SHA-256 digest when omitted, or explicitly set via e.g. `filesha256(...)`).
   
   ## Object Store Integration
   
@@ -33,24 +33,24 @@ description: |-
   The resource manages the object lifecycle:
   
   - Create uploads the specification.
-  - Read retrieves the stored object through metadata.url.
-  - Update replaces the stored specification.
+  - Read retrieves the stored object metadata through `metadata.url`.
+  - Update replaces the stored specification only when content or description changes.
   - Delete removes the stored object.
   
   ## Computed URL Export
   
-  Captures the backend-generated versioned URL in metadata.url for use by dependent f5xc_api_definition resources.
+  Captures the backend-generated versioned URL in `metadata.url` for use by dependent `f5xc_api_definition` resources.
 ---
 
 # f5xc_api_definition_uploader (Resource)
 
 # F5 XC API Definition Uploader
 
-The f5xc_api_definition_uploader resource uploads raw OpenAPI or Swagger specifications to the F5 Distributed Cloud (F5 XC) Object Store. It exports the backend-generated versioned URL in metadata.url, which can be passed to f5xc_api_definition for API Discovery, API Inventory, and API Protection policies.
+The `f5xc_api_definition_uploader` resource uploads raw or Base64-encoded OpenAPI or Swagger specifications to the F5 Distributed Cloud (F5 XC) Object Store. It exports the backend-generated versioned URL in `metadata.url`, which can be passed to `f5xc_api_definition` for API Discovery, API Inventory, and API Protection policies.
 
-## Declarative Upload
+## Declarative Upload & State Hygiene
 
-Takes the raw specification through the string_value attribute. The value can come from a local file, a rendered template, decoded Base64 input, a remote HTTP response, cloud storage, or jsonencode(...).
+Both `string_value` and `bytes_value` are write-only attributes (requires Terraform >= 1.11). Multi-megabyte OpenAPI payloads are sent only during `Create` and `Update` and are never persisted in Terraform state or plan files. Change detection is driven by `content_hash` (automatically computed as the SHA-256 digest when omitted, or explicitly set via e.g. `filesha256(...)`).
 
 ## Object Store Integration
 
@@ -63,13 +63,13 @@ Uploads the specification with a PUT request to the F5 XC Object Store REST API:
 The resource manages the object lifecycle:
 
 - Create uploads the specification.
-- Read retrieves the stored object through metadata.url.
-- Update replaces the stored specification.
+- Read retrieves the stored object metadata through `metadata.url`.
+- Update replaces the stored specification only when content or description changes.
 - Delete removes the stored object.
 
 ## Computed URL Export
 
-Captures the backend-generated versioned URL in metadata.url for use by dependent f5xc_api_definition resources.
+Captures the backend-generated versioned URL in `metadata.url` for use by dependent `f5xc_api_definition` resources.
 
 To get more information about f5xc_api_definition_uploader, refer:
 
@@ -78,10 +78,11 @@ To get more information about f5xc_api_definition_uploader, refer:
 ## Example Usage
 
 ```terraform
-# Base64 Input Example
-# Common in automated CI/CD pipelines (such as GitHub Actions, GitLab CI, or 
-# external secret managers) where file contents are passed into Terraform via environment variables or 
-# variables as base64-encoded strings.
+# Base64 Write-Only Input Example (Terraform >= 1.11)
+# Common in automated CI/CD pipelines (such as GitHub Actions, GitLab CI, or
+# external secret managers) where file contents are passed into Terraform via environment variables or
+# variables as Base64-encoded strings, or read directly with filebase64(...).
+# Because bytes_value is write-only, the payload is never stored in Terraform state.
 
 variable "openapi_spec_base64" {
   type        = string
@@ -91,12 +92,13 @@ variable "openapi_spec_base64" {
 
 resource "f5xc_api_definition_uploader" "from_base64" {
   metadata = {
-    name        = "base64-decoded-spec"
+    name        = "base64-spec"
     namespace   = "shared"
-    description = "OpenAPI specification decoded from Base64 input"
+    description = "OpenAPI specification uploaded from Base64 input without storing payload in state"
   }
 
-  string_value = base64decode(var.openapi_spec_base64)
+  bytes_value  = var.openapi_spec_base64
+  content_hash = sha256(base64decode(var.openapi_spec_base64))
 }
 ```
 
@@ -202,9 +204,12 @@ resource "f5xc_api_definition_uploader" "from_s3" {
 ```
 
 ```terraform
-# Static Local File Example
+# Static Local File Example (Write-Only, Terraform >= 1.11)
 # Use this approach when the OpenAPI specification is committed directly to
 # the repository as a static JSON or YAML file.
+#
+# string_value is write-only and never persisted in Terraform state; content_hash
+# (computed automatically when omitted, or explicitly set via filesha256) tracks changes.
 #
 # Best practice: use ${path.module}/... so Terraform resolves the file path
 # relative to the module directory, regardless of the working directory.
@@ -216,8 +221,9 @@ resource "f5xc_api_definition_uploader" "from_file" {
     description = "OpenAPI specification loaded directly from local file"
   }
 
-  # Read the file contents as a raw string. This works with JSON and YAML.
+  # Read the file contents as a raw write-only string (JSON or YAML).
   string_value = file("${path.module}/files/openapi.json")
+  content_hash = filesha256("${path.module}/files/openapi.json")
 }
 ```
 
@@ -243,17 +249,20 @@ resource "f5xc_api_definition_uploader" "yaml_to_json" {
 ### Required
 
 - `metadata` (Attributes) metadata Set schema update strategy for the API Inventory schemas management. (see [below for nested schema](#nestedatt--metadata))
-- `string_value` (String) string_value Raw OpenAPI specification content (JSON or YAML).
 
 ### Optional
 
+> **NOTE**: [Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments) are supported in Terraform 1.11 and later.
+
+- `bytes_value` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) bytes_value Write-only Base64-encoded OpenAPI specification content (e.g. filebase64(...)). Sent only during Create and Update operations and never stored in Terraform state or plans (requires Terraform >= 1.11).
+- `content_hash` (String) content_hash SHA-256 hex digest or user-supplied version trigger used to detect API specification modifications and prevent version churn. Computed automatically from the specification when omitted.
 - `force_delete` (Boolean) force_delete When true, destroys all historical versions of the stored object upon resource deletion.
 - `retain_versions` (Number) retain_versions Maximum number of historical versions to retain in the F5 XC object store. Defaults to 2 (current + previous version). Set to 0 to disable automated pruning.
+- `string_value` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) string_value Write-only raw OpenAPI specification content (JSON or YAML). Sent only during Create and Update operations and never stored in Terraform state or plans (requires Terraform >= 1.11).
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
-- `content_hash` (String) content_hash SHA-256 hash of string_value used to detect content modifications and prevent version churn.
 - `previous_version_url` (String) previous_version_url The URL of the immediately preceding version, available for rollback references.
 - `status` (String) status Response status from the F5 XC object store create/update operation.
 

@@ -41,6 +41,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/requiredifvalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -451,7 +452,7 @@ var NatPolicyRulesCriteriaProtocolChoiceUdpSourcePortPortMatchModelAttributeMap 
 	"port_ranges":   types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> EnableChoice
+// Attribute map for OneOfField --> EnableChoice
 var NatPolicyRulesEnableChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disable": types.BoolType,
@@ -647,7 +648,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 			},
 			"applies_to_choice": schema.SingleNestedAttribute{
 				Description:         "applies_to Select the sites on which NAT policy is applicable to",
-				MarkdownDescription: "applies_to Select the sites on which NAT policy is applicable to",
+				MarkdownDescription: "applies_to Select the sites on which NAT policy is applicable to<br>`site` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -692,8 +693,12 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 											Required:            false,
 											Optional:            true,
 											Computed:            true,
+											Validators: []validator.String{
+												requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+											},
 											PlanModifiers: []planmodifier.String{
 												stringplanmodifier.UseNonNullStateForUnknown(),
+												requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 											},
 										},
 									},
@@ -723,7 +728,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 							Attributes: map[string]schema.Attribute{
 								"source_nat_choice": schema.SingleNestedAttribute{
 									Description:         "NAT Choose between source NAT or Virtual Subnet NAT (Static NAT). When a match occurs, source NAT will change the original source address to either an SNAT Pool for East-West Scenarios or Cloud Elastic IP Object when traffic is destined to the internet. Virtual Subnet NAT is a static NAT implementation that changes the source & destination address and is mostly used for overlapping address scenarios.",
-									MarkdownDescription: "NAT Choose between source NAT or Virtual Subnet NAT (Static NAT). When a match occurs, source NAT will change the original source address to either an SNAT Pool for East-West Scenarios or Cloud Elastic IP Object when traffic is destined to the internet. Virtual Subnet NAT is a static NAT implementation that changes the source & destination address and is mostly used for overlapping address scenarios.",
+									MarkdownDescription: "NAT Choose between source NAT or Virtual Subnet NAT (Static NAT). When a match occurs, source NAT will change the original source address to either an SNAT Pool for East-West Scenarios or Cloud Elastic IP Object when traffic is destined to the internet. Virtual Subnet NAT is a static NAT implementation that changes the source & destination address and is mostly used for overlapping address scenarios.<br>Exactly one of `dynamic` or `virtual_cidr` must be specified when `source_nat_choice` is configured.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -736,14 +741,14 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 									Attributes: map[string]schema.Attribute{
 										"dynamic": schema.SingleNestedAttribute{
 											Description:         "Source NAT Source NAT to either an SNAT Pool for East-West traffic or to a Cloud Elastic IP Object. Note that for a 3-node cluster the IPv4 prefix list should provide a minimum of 3 addresses to ensure each node gets an IP address from the pool.",
-											MarkdownDescription: "Source NAT Source NAT to either an SNAT Pool for East-West traffic or to a Cloud Elastic IP Object. Note that for a 3-node cluster the IPv4 prefix list should provide a minimum of 3 addresses to ensure each node gets an IP address from the pool.",
+											MarkdownDescription: "Source NAT Source NAT to either an SNAT Pool for East-West traffic or to a Cloud Elastic IP Object. Note that for a 3-node cluster the IPv4 prefix list should provide a minimum of 3 addresses to ensure each node gets an IP address from the pool.<br>Conflicts with `virtual_cidr`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
 											Attributes: map[string]schema.Attribute{
 												"pool_choice": schema.SingleNestedAttribute{
 													Description:         "Pool choice Select choice of pool",
-													MarkdownDescription: "Pool choice Select choice of pool",
+													MarkdownDescription: "Pool choice Select choice of pool<br>Exactly one of `elastic_ips` or `pools` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -756,7 +761,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 													Attributes: map[string]schema.Attribute{
 														"elastic_ips": schema.SingleNestedAttribute{
 															Description:         "elastic IP pool Use Cloud Elastic IP Object as SNAT Pool that is routable in Internet in Cloud Environments",
-															MarkdownDescription: "elastic IP pool Use Cloud Elastic IP Object as SNAT Pool that is routable in Internet in Cloud Environments",
+															MarkdownDescription: "elastic IP pool Use Cloud Elastic IP Object as SNAT Pool that is routable in Internet in Cloud Environments<br>Conflicts with `pools`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -792,8 +797,12 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            true,
+																				Validators: []validator.String{
+																					requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+																				},
 																				PlanModifiers: []planmodifier.String{
 																					stringplanmodifier.UseNonNullStateForUnknown(),
+																					requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 																				},
 																			},
 																		},
@@ -803,7 +812,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 														},
 														"pools": schema.SingleNestedAttribute{
 															Description:         "SNAT Pool Use the configured Pool as SNAT Pool",
-															MarkdownDescription: "SNAT Pool Use the configured Pool as SNAT Pool",
+															MarkdownDescription: "SNAT Pool Use the configured Pool as SNAT Pool<br>Conflicts with `elastic_ips`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -848,7 +857,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 										},
 										"virtual_cidr": schema.StringAttribute{
 											Description:         "Virtual Subnet NAT Virtual Subnet NAT is static NAT that does a one-to-one translation between the real source IP CIDR in the policy and the virtual CIDR in a bidirectional fashion. The range of the real CIDR and virtual CIDRs should be the same (e.g. if the real CIDR has the CIDR 10.10.10.0/24, the virtual CIDR has 100.100.100.0/24.",
-											MarkdownDescription: "Virtual Subnet NAT Virtual Subnet NAT is static NAT that does a one-to-one translation between the real source IP CIDR in the policy and the virtual CIDR in a bidirectional fashion. The range of the real CIDR and virtual CIDRs should be the same (e.g. if the real CIDR has the CIDR 10.10.10.0/24, the virtual CIDR has 100.100.100.0/24.",
+											MarkdownDescription: "Virtual Subnet NAT Virtual Subnet NAT is static NAT that does a one-to-one translation between the real source IP CIDR in the policy and the virtual CIDR in a bidirectional fashion. The range of the real CIDR and virtual CIDRs should be the same (e.g. if the real CIDR has the CIDR 10.10.10.0/24, the virtual CIDR has 100.100.100.0/24.<br>Conflicts with `dynamic`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -886,7 +895,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 								},
 								"network_choice": schema.SingleNestedAttribute{
 									Description:         "destination virtual network This field is only used when traffic is destined to an interface in the Site Local Inside (SLI) or Site Local Outside (SLO). The most common use case is traffic that is destined to the internet. For any other traffic, this field should not be used. For the options Site Local Outside Virtual Network add the (SLO)  and similarly for the Site Local Inside Virtual Network add the (SLI)",
-									MarkdownDescription: "destination virtual network This field is only used when traffic is destined to an interface in the Site Local Inside (SLI) or Site Local Outside (SLO). The most common use case is traffic that is destined to the internet. For any other traffic, this field should not be used. For the options Site Local Outside Virtual Network add the (SLO)  and similarly for the Site Local Inside Virtual Network add the (SLI)",
+									MarkdownDescription: "destination virtual network This field is only used when traffic is destined to an interface in the Site Local Inside (SLI) or Site Local Outside (SLO). The most common use case is traffic that is destined to the internet. For any other traffic, this field should not be used. For the options Site Local Outside Virtual Network add the (SLO)  and similarly for the Site Local Inside Virtual Network add the (SLI)<br>Exactly one of `site_local_inside_network` or `site_local_network` must be specified when `network_choice` is configured.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -899,7 +908,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 									Attributes: map[string]schema.Attribute{
 										"site_local_inside_network": schema.BoolAttribute{
 											Description:         "Site Local Network Inside",
-											MarkdownDescription: "Site Local Network Inside",
+											MarkdownDescription: "Site Local Network Inside<br>Conflicts with `site_local_network`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -909,7 +918,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 										},
 										"site_local_network": schema.BoolAttribute{
 											Description:         "Site Local Network",
-											MarkdownDescription: "Site Local Network",
+											MarkdownDescription: "Site Local Network<br>Conflicts with `site_local_inside_network`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -921,7 +930,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 								},
 								"protocol_choice": schema.SingleNestedAttribute{
 									Description:         "protocol match Network/Transport Protocols to Match",
-									MarkdownDescription: "protocol match Network/Transport Protocols to Match",
+									MarkdownDescription: "protocol match Network/Transport Protocols to Match<br>Exactly one of `any`, `icmp`, `tcp`, or `udp` must be specified when `protocol_choice` is configured.",
 									Required:            false,
 									Optional:            true,
 									Computed:            true,
@@ -940,7 +949,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 									Attributes: map[string]schema.Attribute{
 										"any": schema.BoolAttribute{
 											Description:         "Any Protocol Match Any Protocol",
-											MarkdownDescription: "Any Protocol Match Any Protocol",
+											MarkdownDescription: "Any Protocol Match Any Protocol<br>Conflicts with `icmp`, `tcp`, and `udp`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -950,7 +959,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 										},
 										"icmp": schema.BoolAttribute{
 											Description:         "ICMP Protocol Match ICMP Protocol",
-											MarkdownDescription: "ICMP Protocol Match ICMP Protocol",
+											MarkdownDescription: "ICMP Protocol Match ICMP Protocol<br>Conflicts with `any`, `tcp`, and `udp`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -960,7 +969,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 										},
 										"tcp": schema.SingleNestedAttribute{
 											Description:         "TCP Protocol Match TCP Protocol",
-											MarkdownDescription: "TCP Protocol Match TCP Protocol",
+											MarkdownDescription: "TCP Protocol Match TCP Protocol<br>Conflicts with `any`, `icmp`, and `udp`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -974,7 +983,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 													Attributes: map[string]schema.Attribute{
 														"port_match_choice": schema.SingleNestedAttribute{
 															Description:         "port_match A specification of port match",
-															MarkdownDescription: "port_match A specification of port match",
+															MarkdownDescription: "port_match A specification of port match<br>Exactly one of `no_port_match`, `port`, or `port_ranges` must be specified when `port_match_choice` is configured.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -988,7 +997,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 															Attributes: map[string]schema.Attribute{
 																"no_port_match": schema.BoolAttribute{
 																	Description:         "disable port Match Disable matching of ports",
-																	MarkdownDescription: "disable port Match Disable matching of ports",
+																	MarkdownDescription: "disable port Match Disable matching of ports<br>Conflicts with `port` and `port_ranges`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -998,7 +1007,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 																},
 																"port": schema.Int64Attribute{
 																	Description:         "port Exact Port to match",
-																	MarkdownDescription: "port Exact Port to match",
+																	MarkdownDescription: "port Exact Port to match<br>Conflicts with `no_port_match` and `port_ranges`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1008,7 +1017,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 																},
 																"port_ranges": schema.StringAttribute{
 																	Description:         "port_range Port range to match",
-																	MarkdownDescription: "port_range Port range to match<br>**Validation:** `Length LengthBetween(1, 32)`",
+																	MarkdownDescription: "port_range Port range to match<br>**Validation:** `Length LengthBetween(1, 32)`<br>Conflicts with `no_port_match` and `port`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1033,7 +1042,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 													Attributes: map[string]schema.Attribute{
 														"port_match_choice": schema.SingleNestedAttribute{
 															Description:         "port_match A specification of port match",
-															MarkdownDescription: "port_match A specification of port match",
+															MarkdownDescription: "port_match A specification of port match<br>Exactly one of `no_port_match`, `port`, or `port_ranges` must be specified when `port_match_choice` is configured.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1047,7 +1056,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 															Attributes: map[string]schema.Attribute{
 																"no_port_match": schema.BoolAttribute{
 																	Description:         "disable port Match Disable matching of ports",
-																	MarkdownDescription: "disable port Match Disable matching of ports",
+																	MarkdownDescription: "disable port Match Disable matching of ports<br>Conflicts with `port` and `port_ranges`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1057,7 +1066,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 																},
 																"port": schema.Int64Attribute{
 																	Description:         "port Exact Port to match",
-																	MarkdownDescription: "port Exact Port to match",
+																	MarkdownDescription: "port Exact Port to match<br>Conflicts with `no_port_match` and `port_ranges`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1067,7 +1076,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 																},
 																"port_ranges": schema.StringAttribute{
 																	Description:         "port_range Port range to match",
-																	MarkdownDescription: "port_range Port range to match<br>**Validation:** `Length LengthBetween(1, 32)`",
+																	MarkdownDescription: "port_range Port range to match<br>**Validation:** `Length LengthBetween(1, 32)`<br>Conflicts with `no_port_match` and `port`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1087,7 +1096,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 										},
 										"udp": schema.SingleNestedAttribute{
 											Description:         "UDP Protocol Match UDP Protocol",
-											MarkdownDescription: "UDP Protocol Match UDP Protocol",
+											MarkdownDescription: "UDP Protocol Match UDP Protocol<br>Conflicts with `any`, `icmp`, and `tcp`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -1101,7 +1110,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 													Attributes: map[string]schema.Attribute{
 														"port_match_choice": schema.SingleNestedAttribute{
 															Description:         "port_match A specification of port match",
-															MarkdownDescription: "port_match A specification of port match",
+															MarkdownDescription: "port_match A specification of port match<br>Exactly one of `no_port_match`, `port`, or `port_ranges` must be specified when `port_match_choice` is configured.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1115,7 +1124,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 															Attributes: map[string]schema.Attribute{
 																"no_port_match": schema.BoolAttribute{
 																	Description:         "disable port Match Disable matching of ports",
-																	MarkdownDescription: "disable port Match Disable matching of ports",
+																	MarkdownDescription: "disable port Match Disable matching of ports<br>Conflicts with `port` and `port_ranges`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1125,7 +1134,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 																},
 																"port": schema.Int64Attribute{
 																	Description:         "port Exact Port to match",
-																	MarkdownDescription: "port Exact Port to match",
+																	MarkdownDescription: "port Exact Port to match<br>Conflicts with `no_port_match` and `port_ranges`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1135,7 +1144,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 																},
 																"port_ranges": schema.StringAttribute{
 																	Description:         "port_range Port range to match",
-																	MarkdownDescription: "port_range Port range to match<br>**Validation:** `Length LengthBetween(1, 32)`",
+																	MarkdownDescription: "port_range Port range to match<br>**Validation:** `Length LengthBetween(1, 32)`<br>Conflicts with `no_port_match` and `port`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1160,7 +1169,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 													Attributes: map[string]schema.Attribute{
 														"port_match_choice": schema.SingleNestedAttribute{
 															Description:         "port_match A specification of port match",
-															MarkdownDescription: "port_match A specification of port match",
+															MarkdownDescription: "port_match A specification of port match<br>Exactly one of `no_port_match`, `port`, or `port_ranges` must be specified when `port_match_choice` is configured.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1174,7 +1183,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 															Attributes: map[string]schema.Attribute{
 																"no_port_match": schema.BoolAttribute{
 																	Description:         "disable port Match Disable matching of ports",
-																	MarkdownDescription: "disable port Match Disable matching of ports",
+																	MarkdownDescription: "disable port Match Disable matching of ports<br>Conflicts with `port` and `port_ranges`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1184,7 +1193,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 																},
 																"port": schema.Int64Attribute{
 																	Description:         "port Exact Port to match",
-																	MarkdownDescription: "port Exact Port to match",
+																	MarkdownDescription: "port Exact Port to match<br>Conflicts with `no_port_match` and `port_ranges`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1194,7 +1203,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 																},
 																"port_ranges": schema.StringAttribute{
 																	Description:         "port_range Port range to match",
-																	MarkdownDescription: "port_range Port range to match<br>**Validation:** `Length LengthBetween(1, 32)`",
+																	MarkdownDescription: "port_range Port range to match<br>**Validation:** `Length LengthBetween(1, 32)`<br>Conflicts with `no_port_match` and `port`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1232,20 +1241,23 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 						},
 						"enable_choice": schema.SingleNestedAttribute{
 							Description:         "enable Enable or disable the rule",
-							MarkdownDescription: "enable Enable or disable the rule",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
+							MarkdownDescription: "enable Enable or disable the rule<br>Exactly one of `disable` or `enable` must be specified when `enable_choice` is configured.",
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
 							Validators: []validator.Object{
-								exactlyoneofvalidator.RequiredExactlyOneOf(
+								exactlyoneofvalidator.ExactlyOneOf(
 									"disable",
 									"enable",
 								),
 							},
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.UseNonNullStateForUnknown(),
+							},
 							Attributes: map[string]schema.Attribute{
 								"disable": schema.BoolAttribute{
 									Description:         "disable Disables the rule",
-									MarkdownDescription: "disable Disables the rule",
+									MarkdownDescription: "disable Disables the rule<br>Conflicts with `enable`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1255,7 +1267,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 								},
 								"enable": schema.BoolAttribute{
 									Description:         "enable Enables the rule",
-									MarkdownDescription: "enable Enables the rule",
+									MarkdownDescription: "enable Enables the rule<br>Conflicts with `disable`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1274,7 +1286,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 						},
 						"scope_choice": schema.SingleNestedAttribute{
 							Description:         "scope Scope identifies the ingress point at which to apply rule",
-							MarkdownDescription: "scope Scope identifies the ingress point at which to apply rule",
+							MarkdownDescription: "scope Scope identifies the ingress point at which to apply rule<br>Exactly one of `cloud_connect`, `node_interface`, `segment`, or `virtual_network` must be specified.",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
@@ -1289,7 +1301,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 							Attributes: map[string]schema.Attribute{
 								"cloud_connect": schema.SingleNestedAttribute{
 									Description:         "cloud connect NAT rule is applied to packet coming from cloud connect",
-									MarkdownDescription: "cloud connect NAT rule is applied to packet coming from cloud connect",
+									MarkdownDescription: "cloud connect NAT rule is applied to packet coming from cloud connect<br>Conflicts with `node_interface`, `segment`, and `virtual_network`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1325,8 +1337,12 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 														Required:            false,
 														Optional:            true,
 														Computed:            true,
+														Validators: []validator.String{
+															requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+														},
 														PlanModifiers: []planmodifier.String{
 															stringplanmodifier.UseNonNullStateForUnknown(),
+															requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 														},
 													},
 												},
@@ -1336,7 +1352,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 								},
 								"node_interface": schema.SingleNestedAttribute{
 									Description:         "node interface NAT rule is applied to packet coming from one or more interfaces of nodes",
-									MarkdownDescription: "node interface NAT rule is applied to packet coming from one or more interfaces of nodes",
+									MarkdownDescription: "node interface NAT rule is applied to packet coming from one or more interfaces of nodes<br>Conflicts with `cloud_connect`, `segment`, and `virtual_network`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1383,8 +1399,12 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            true,
+																	Validators: []validator.String{
+																		requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+																	},
 																	PlanModifiers: []planmodifier.String{
 																		stringplanmodifier.UseNonNullStateForUnknown(),
+																		requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 																	},
 																},
 															},
@@ -1404,7 +1424,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 								},
 								"segment": schema.SingleNestedAttribute{
 									Description:         "segment NAT rule is applied to packet in the segment",
-									MarkdownDescription: "segment NAT rule is applied to packet in the segment",
+									MarkdownDescription: "segment NAT rule is applied to packet in the segment<br>Conflicts with `cloud_connect`, `node_interface`, and `virtual_network`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1440,8 +1460,12 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 														Required:            false,
 														Optional:            true,
 														Computed:            true,
+														Validators: []validator.String{
+															requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+														},
 														PlanModifiers: []planmodifier.String{
 															stringplanmodifier.UseNonNullStateForUnknown(),
+															requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 														},
 													},
 												},
@@ -1451,7 +1475,7 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 								},
 								"virtual_network": schema.SingleNestedAttribute{
 									Description:         "virtual network NAT rule is applied to packet in the virtual network",
-									MarkdownDescription: "virtual network NAT rule is applied to packet in the virtual network",
+									MarkdownDescription: "virtual network NAT rule is applied to packet in the virtual network<br>Conflicts with `cloud_connect`, `node_interface`, and `segment`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1487,8 +1511,12 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 														Required:            false,
 														Optional:            true,
 														Computed:            true,
+														Validators: []validator.String{
+															requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+														},
 														PlanModifiers: []planmodifier.String{
 															stringplanmodifier.UseNonNullStateForUnknown(),
+															requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 														},
 													},
 												},
@@ -1727,6 +1755,9 @@ func (r *ResourceF5XCNatPolicy) Create(ctx context.Context, request resource.Cre
 
 		for i, rulesElement := range rulesElementsModelToSpec {
 			rulesSpec[i] = &ves_io_schema_nat_policy.RuleType{}
+			rulesSpec[i].EnableChoice = &ves_io_schema_nat_policy.RuleType_Enable{
+				Enable: &ves_io_schema.Empty{},
+			}
 
 			// resource modelToSpecNested RequiredPointerField --> Action
 			if !rulesElement.Action.IsNull() && !rulesElement.Action.IsUnknown() {
@@ -1934,7 +1965,7 @@ func (r *ResourceF5XCNatPolicy) Create(ctx context.Context, request resource.Cre
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> EnableChoice
+			// resource modelToSpecNested OneOfField --> EnableChoice
 			if !rulesElement.EnableChoice.IsNull() && !rulesElement.EnableChoice.IsUnknown() {
 				rulesEnableChoiceModel := NatPolicyEnableChoice{}
 				response.Diagnostics.Append(rulesElement.EnableChoice.As(ctx, &rulesEnableChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3268,8 +3299,7 @@ func (r *ResourceF5XCNatPolicy) Create(ctx context.Context, request resource.Cre
 				natPolicyRuleTypeModel.Criteria = types.ObjectNull(NatPolicyRulesCriteriaModelAttributeMap)
 			}
 
-			// resource specToModelNested RequiredOneOfField --> EnableChoice
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> EnableChoice
 			if rulesElement.GetEnableChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				rulesenableChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3733,11 +3763,7 @@ func (r *ResourceF5XCNatPolicy) Read(ctx context.Context, request resource.ReadR
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_nat_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_nat_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "nat_policy", err),
@@ -4772,8 +4798,7 @@ func (r *ResourceF5XCNatPolicy) Read(ctx context.Context, request resource.ReadR
 				natPolicyRuleTypeModel.Criteria = types.ObjectNull(NatPolicyRulesCriteriaModelAttributeMap)
 			}
 
-			// resource specToModelNested RequiredOneOfField --> EnableChoice
-			// <no value>
+			// resource specToModelNested OneOfField --> EnableChoice
 			if rulesElement.GetEnableChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				rulesenableChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5385,6 +5410,9 @@ func (r *ResourceF5XCNatPolicy) Update(ctx context.Context, request resource.Upd
 
 		for i, rulesElement := range rulesElementsModelToSpec {
 			rulesSpec[i] = &ves_io_schema_nat_policy.RuleType{}
+			rulesSpec[i].EnableChoice = &ves_io_schema_nat_policy.RuleType_Enable{
+				Enable: &ves_io_schema.Empty{},
+			}
 
 			// resource modelToSpecNested RequiredPointerField --> Action
 			if !rulesElement.Action.IsNull() && !rulesElement.Action.IsUnknown() {
@@ -5592,7 +5620,7 @@ func (r *ResourceF5XCNatPolicy) Update(ctx context.Context, request resource.Upd
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> EnableChoice
+			// resource modelToSpecNested OneOfField --> EnableChoice
 			if !rulesElement.EnableChoice.IsNull() && !rulesElement.EnableChoice.IsUnknown() {
 				rulesEnableChoiceModel := NatPolicyEnableChoice{}
 				response.Diagnostics.Append(rulesElement.EnableChoice.As(ctx, &rulesEnableChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5879,12 +5907,8 @@ func (r *ResourceF5XCNatPolicy) Update(ctx context.Context, request resource.Upd
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_nat_policy.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_nat_policy.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "nat_policy", err),
@@ -5893,7 +5917,7 @@ func (r *ResourceF5XCNatPolicy) Update(ctx context.Context, request resource.Upd
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_nat_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_nat_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "nat_policy", err),
@@ -6927,8 +6951,7 @@ func (r *ResourceF5XCNatPolicy) Update(ctx context.Context, request resource.Upd
 				natPolicyRuleTypeModel.Criteria = types.ObjectNull(NatPolicyRulesCriteriaModelAttributeMap)
 			}
 
-			// resource specToModelNested RequiredOneOfField --> EnableChoice
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> EnableChoice
 			if rulesElement.GetEnableChoice() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				rulesenableChoiceChoicesAttributeMap := make(map[string]attr.Value)

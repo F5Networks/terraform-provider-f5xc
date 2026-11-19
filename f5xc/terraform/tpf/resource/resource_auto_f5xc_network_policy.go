@@ -653,7 +653,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 				Attributes: map[string]schema.Attribute{
 					"endpoint_choice": schema.SingleNestedAttribute{
 						Description:         "endpoint_choice Policy is for set of endpoints defined, rules are applied to connections to or from these endpoints.",
-						MarkdownDescription: "endpoint_choice Policy is for set of endpoints defined, rules are applied to connections to or from these endpoints.",
+						MarkdownDescription: "endpoint_choice Policy is for set of endpoints defined, rules are applied to connections to or from these endpoints.<br>Exactly one of `any`, `inside_endpoints`, `label_selector`, `outside_endpoints`, or `prefix_list` must be specified.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -672,7 +672,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 						Attributes: map[string]schema.Attribute{
 							"any": schema.BoolAttribute{
 								Description:         "Any Endpoint Any Endpoint that matches 0/0 ip prefix",
-								MarkdownDescription: "Any Endpoint Any Endpoint that matches 0/0 ip prefix",
+								MarkdownDescription: "Any Endpoint Any Endpoint that matches 0/0 ip prefix<br>Conflicts with `inside_endpoints`, `label_selector`, `outside_endpoints`, and `prefix_list`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
@@ -682,7 +682,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 							},
 							"inside_endpoints": schema.BoolAttribute{
 								Description:         "All Endpoints Reachable via all inside interfaces All ip prefixes that are reachable via inside interfaces are chosen as Endpoints",
-								MarkdownDescription: "All Endpoints Reachable via all inside interfaces All ip prefixes that are reachable via inside interfaces are chosen as Endpoints",
+								MarkdownDescription: "All Endpoints Reachable via all inside interfaces All ip prefixes that are reachable via inside interfaces are chosen as Endpoints<br>Conflicts with `any`, `label_selector`, `outside_endpoints`, and `prefix_list`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -692,7 +692,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 							},
 							"label_selector": schema.SingleNestedAttribute{
 								Description:         "prefix Label selector local end point is set of prefixes determined by label selector expression",
-								MarkdownDescription: "prefix Label selector local end point is set of prefixes determined by label selector expression",
+								MarkdownDescription: "prefix Label selector local end point is set of prefixes determined by label selector expression<br>Conflicts with `any`, `inside_endpoints`, `outside_endpoints`, and `prefix_list`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -713,7 +713,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 							},
 							"outside_endpoints": schema.BoolAttribute{
 								Description:         "All Endpoints Reachable via all outside interfaces All ip prefixes that are reachable via outside interfaces are chosen as Endpoints",
-								MarkdownDescription: "All Endpoints Reachable via all outside interfaces All ip prefixes that are reachable via outside interfaces are chosen as Endpoints",
+								MarkdownDescription: "All Endpoints Reachable via all outside interfaces All ip prefixes that are reachable via outside interfaces are chosen as Endpoints<br>Conflicts with `any`, `inside_endpoints`, `label_selector`, and `prefix_list`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -723,7 +723,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 							},
 							"prefix_list": schema.SingleNestedAttribute{
 								Description:         "ipv4/ipv6 prefix list List of ip prefixes that are representing endpoint For egress rules: from this endpoints to remote endpoints these ip prefixes are source ip. For Ingress rules: To this endpoints from remote endpoints these ip prefixes are destination ip.",
-								MarkdownDescription: "ipv4/ipv6 prefix list List of ip prefixes that are representing endpoint For egress rules: from this endpoints to remote endpoints these ip prefixes are source ip. For Ingress rules: To this endpoints from remote endpoints these ip prefixes are destination ip.",
+								MarkdownDescription: "ipv4/ipv6 prefix list List of ip prefixes that are representing endpoint For egress rules: from this endpoints to remote endpoints these ip prefixes are source ip. For Ingress rules: To this endpoints from remote endpoints these ip prefixes are destination ip.<br>Conflicts with `any`, `inside_endpoints`, `label_selector`, and `outside_endpoints`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
@@ -768,7 +768,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 			},
 			"rule_choice": schema.SingleNestedAttribute{
 				Description:         "Rule Choice Style of rules used when the policy was created. This cannot be modified.",
-				MarkdownDescription: "Rule Choice Style of rules used when the policy was created. This cannot be modified.",
+				MarkdownDescription: "Rule Choice Style of rules used when the policy was created. This cannot be modified.<br>`rules` must be specified when `rule_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
@@ -891,7 +891,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 										},
 										"other_endpoint_choice": schema.SingleNestedAttribute{
 											Description:         "Other Endpoint Other endpoint of ingress or egress session with endpoint of policy. If rule is an ingress rule then other endpoint indicates the source endpoint from which session is initiated. If rule is an egress rule then other endpoint indicates the destination endpoint to which session is initiated from policy endpoint.",
-											MarkdownDescription: "Other Endpoint Other endpoint of ingress or egress session with endpoint of policy. If rule is an ingress rule then other endpoint indicates the source endpoint from which session is initiated. If rule is an egress rule then other endpoint indicates the destination endpoint to which session is initiated from policy endpoint.",
+											MarkdownDescription: "Other Endpoint Other endpoint of ingress or egress session with endpoint of policy. If rule is an ingress rule then other endpoint indicates the source endpoint from which session is initiated. If rule is an egress rule then other endpoint indicates the destination endpoint to which session is initiated from policy endpoint.<br>Exactly one of `any`, `inside_endpoints`, `ip_prefix_set`, `label_selector`, `outside_endpoints`, or `prefix_list` must be specified when `other_endpoint_choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -908,7 +908,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 											Attributes: map[string]schema.Attribute{
 												"any": schema.BoolAttribute{
 													Description:         "Any Endpoint Any Endpoint that matches 0/0 ip prefix",
-													MarkdownDescription: "Any Endpoint Any Endpoint that matches 0/0 ip prefix",
+													MarkdownDescription: "Any Endpoint Any Endpoint that matches 0/0 ip prefix<br>Conflicts with `inside_endpoints`, `ip_prefix_set`, `label_selector`, `outside_endpoints`, and `prefix_list`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -918,7 +918,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 												},
 												"inside_endpoints": schema.BoolAttribute{
 													Description:         "All Endpoints Reachable via all inside interfaces All ip prefixes that are reachable via inside interfaces are chosen as Endpoints",
-													MarkdownDescription: "All Endpoints Reachable via all inside interfaces All ip prefixes that are reachable via inside interfaces are chosen as Endpoints",
+													MarkdownDescription: "All Endpoints Reachable via all inside interfaces All ip prefixes that are reachable via inside interfaces are chosen as Endpoints<br>Conflicts with `any`, `ip_prefix_set`, `label_selector`, `outside_endpoints`, and `prefix_list`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -928,7 +928,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 												},
 												"ip_prefix_set": schema.SingleNestedAttribute{
 													Description:         "ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint",
-													MarkdownDescription: "ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint",
+													MarkdownDescription: "ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint<br>Conflicts with `any`, `inside_endpoints`, `label_selector`, `outside_endpoints`, and `prefix_list`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -975,7 +975,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 												},
 												"label_selector": schema.SingleNestedAttribute{
 													Description:         "prefix Label selector local end point is set of prefixes determined by label selector expression",
-													MarkdownDescription: "prefix Label selector local end point is set of prefixes determined by label selector expression",
+													MarkdownDescription: "prefix Label selector local end point is set of prefixes determined by label selector expression<br>Conflicts with `any`, `inside_endpoints`, `ip_prefix_set`, `outside_endpoints`, and `prefix_list`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -996,7 +996,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 												},
 												"outside_endpoints": schema.BoolAttribute{
 													Description:         "All Endpoints Reachable via all outside interfaces All ip prefixes that are reachable via outside interfaces are chosen as Endpoints",
-													MarkdownDescription: "All Endpoints Reachable via all outside interfaces All ip prefixes that are reachable via outside interfaces are chosen as Endpoints",
+													MarkdownDescription: "All Endpoints Reachable via all outside interfaces All ip prefixes that are reachable via outside interfaces are chosen as Endpoints<br>Conflicts with `any`, `inside_endpoints`, `ip_prefix_set`, `label_selector`, and `prefix_list`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1006,7 +1006,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 												},
 												"prefix_list": schema.SingleNestedAttribute{
 													Description:         "ipv4/ipv6 prefix list list of ip prefixes that are representing endpoint For Egress rules: from these endpoints to remote endpoints these ip prefixes are source IPs. For Ingress rules: To these endpoints from remote endpoints these ip prefixes are destination IPs.",
-													MarkdownDescription: "ipv4/ipv6 prefix list list of ip prefixes that are representing endpoint For Egress rules: from these endpoints to remote endpoints these ip prefixes are source IPs. For Ingress rules: To these endpoints from remote endpoints these ip prefixes are destination IPs.",
+													MarkdownDescription: "ipv4/ipv6 prefix list list of ip prefixes that are representing endpoint For Egress rules: from these endpoints to remote endpoints these ip prefixes are source IPs. For Ingress rules: To these endpoints from remote endpoints these ip prefixes are destination IPs.<br>Conflicts with `any`, `inside_endpoints`, `ip_prefix_set`, `label_selector`, and `outside_endpoints`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1049,7 +1049,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 										},
 										"traffic_choice": schema.SingleNestedAttribute{
 											Description:         "Traffic Type Select type of traffic to match",
-											MarkdownDescription: "Traffic Type Select type of traffic to match",
+											MarkdownDescription: "Traffic Type Select type of traffic to match<br>Exactly one of `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, `applications`, or `protocol_port_range` must be specified when `traffic_choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -1065,7 +1065,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 											Attributes: map[string]schema.Attribute{
 												"all_tcp_traffic": schema.BoolAttribute{
 													Description:         "All TCP Traffic Select all TCP traffic to match",
-													MarkdownDescription: "All TCP Traffic Select all TCP traffic to match",
+													MarkdownDescription: "All TCP Traffic Select all TCP traffic to match<br>Conflicts with `all_traffic`, `all_udp_traffic`, `applications`, and `protocol_port_range`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1075,7 +1075,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 												},
 												"all_traffic": schema.BoolAttribute{
 													Description:         "All Traffic Select all traffic to match",
-													MarkdownDescription: "All Traffic Select all traffic to match",
+													MarkdownDescription: "All Traffic Select all traffic to match<br>Conflicts with `all_tcp_traffic`, `all_udp_traffic`, `applications`, and `protocol_port_range`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1085,7 +1085,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 												},
 												"all_udp_traffic": schema.BoolAttribute{
 													Description:         "All UDP Traffic Select all UDP traffic to match",
-													MarkdownDescription: "All UDP Traffic Select all UDP traffic to match",
+													MarkdownDescription: "All UDP Traffic Select all UDP traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `applications`, and `protocol_port_range`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1095,7 +1095,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 												},
 												"applications": schema.SingleNestedAttribute{
 													Description:         "Specific Applications Select Application traffic to match",
-													MarkdownDescription: "Specific Applications Select Application traffic to match",
+													MarkdownDescription: "Specific Applications Select Application traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, and `protocol_port_range`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1115,7 +1115,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 												},
 												"protocol_port_range": schema.SingleNestedAttribute{
 													Description:         "Protocol and Port Ranges Select specific protocol and port ranges traffic to match",
-													MarkdownDescription: "Protocol and Port Ranges Select specific protocol and port ranges traffic to match",
+													MarkdownDescription: "Protocol and Port Ranges Select specific protocol and port ranges traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, and `applications`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1256,7 +1256,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 										},
 										"other_endpoint_choice": schema.SingleNestedAttribute{
 											Description:         "Other Endpoint Other endpoint of ingress or egress session with endpoint of policy. If rule is an ingress rule then other endpoint indicates the source endpoint from which session is initiated. If rule is an egress rule then other endpoint indicates the destination endpoint to which session is initiated from policy endpoint.",
-											MarkdownDescription: "Other Endpoint Other endpoint of ingress or egress session with endpoint of policy. If rule is an ingress rule then other endpoint indicates the source endpoint from which session is initiated. If rule is an egress rule then other endpoint indicates the destination endpoint to which session is initiated from policy endpoint.",
+											MarkdownDescription: "Other Endpoint Other endpoint of ingress or egress session with endpoint of policy. If rule is an ingress rule then other endpoint indicates the source endpoint from which session is initiated. If rule is an egress rule then other endpoint indicates the destination endpoint to which session is initiated from policy endpoint.<br>Exactly one of `any`, `inside_endpoints`, `ip_prefix_set`, `label_selector`, `outside_endpoints`, or `prefix_list` must be specified when `other_endpoint_choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -1273,7 +1273,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 											Attributes: map[string]schema.Attribute{
 												"any": schema.BoolAttribute{
 													Description:         "Any Endpoint Any Endpoint that matches 0/0 ip prefix",
-													MarkdownDescription: "Any Endpoint Any Endpoint that matches 0/0 ip prefix",
+													MarkdownDescription: "Any Endpoint Any Endpoint that matches 0/0 ip prefix<br>Conflicts with `inside_endpoints`, `ip_prefix_set`, `label_selector`, `outside_endpoints`, and `prefix_list`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1283,7 +1283,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 												},
 												"inside_endpoints": schema.BoolAttribute{
 													Description:         "All Endpoints Reachable via all inside interfaces All ip prefixes that are reachable via inside interfaces are chosen as Endpoints",
-													MarkdownDescription: "All Endpoints Reachable via all inside interfaces All ip prefixes that are reachable via inside interfaces are chosen as Endpoints",
+													MarkdownDescription: "All Endpoints Reachable via all inside interfaces All ip prefixes that are reachable via inside interfaces are chosen as Endpoints<br>Conflicts with `any`, `ip_prefix_set`, `label_selector`, `outside_endpoints`, and `prefix_list`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1293,7 +1293,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 												},
 												"ip_prefix_set": schema.SingleNestedAttribute{
 													Description:         "ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint",
-													MarkdownDescription: "ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint",
+													MarkdownDescription: "ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint<br>Conflicts with `any`, `inside_endpoints`, `label_selector`, `outside_endpoints`, and `prefix_list`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1340,7 +1340,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 												},
 												"label_selector": schema.SingleNestedAttribute{
 													Description:         "prefix Label selector local end point is set of prefixes determined by label selector expression",
-													MarkdownDescription: "prefix Label selector local end point is set of prefixes determined by label selector expression",
+													MarkdownDescription: "prefix Label selector local end point is set of prefixes determined by label selector expression<br>Conflicts with `any`, `inside_endpoints`, `ip_prefix_set`, `outside_endpoints`, and `prefix_list`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1361,7 +1361,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 												},
 												"outside_endpoints": schema.BoolAttribute{
 													Description:         "All Endpoints Reachable via all outside interfaces All ip prefixes that are reachable via outside interfaces are chosen as Endpoints",
-													MarkdownDescription: "All Endpoints Reachable via all outside interfaces All ip prefixes that are reachable via outside interfaces are chosen as Endpoints",
+													MarkdownDescription: "All Endpoints Reachable via all outside interfaces All ip prefixes that are reachable via outside interfaces are chosen as Endpoints<br>Conflicts with `any`, `inside_endpoints`, `ip_prefix_set`, `label_selector`, and `prefix_list`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1371,7 +1371,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 												},
 												"prefix_list": schema.SingleNestedAttribute{
 													Description:         "ipv4/ipv6 prefix list list of ip prefixes that are representing endpoint For Egress rules: from these endpoints to remote endpoints these ip prefixes are source IPs. For Ingress rules: To these endpoints from remote endpoints these ip prefixes are destination IPs.",
-													MarkdownDescription: "ipv4/ipv6 prefix list list of ip prefixes that are representing endpoint For Egress rules: from these endpoints to remote endpoints these ip prefixes are source IPs. For Ingress rules: To these endpoints from remote endpoints these ip prefixes are destination IPs.",
+													MarkdownDescription: "ipv4/ipv6 prefix list list of ip prefixes that are representing endpoint For Egress rules: from these endpoints to remote endpoints these ip prefixes are source IPs. For Ingress rules: To these endpoints from remote endpoints these ip prefixes are destination IPs.<br>Conflicts with `any`, `inside_endpoints`, `ip_prefix_set`, `label_selector`, and `outside_endpoints`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1414,7 +1414,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 										},
 										"traffic_choice": schema.SingleNestedAttribute{
 											Description:         "Traffic Type Select type of traffic to match",
-											MarkdownDescription: "Traffic Type Select type of traffic to match",
+											MarkdownDescription: "Traffic Type Select type of traffic to match<br>Exactly one of `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, `applications`, or `protocol_port_range` must be specified when `traffic_choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -1430,7 +1430,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 											Attributes: map[string]schema.Attribute{
 												"all_tcp_traffic": schema.BoolAttribute{
 													Description:         "All TCP Traffic Select all TCP traffic to match",
-													MarkdownDescription: "All TCP Traffic Select all TCP traffic to match",
+													MarkdownDescription: "All TCP Traffic Select all TCP traffic to match<br>Conflicts with `all_traffic`, `all_udp_traffic`, `applications`, and `protocol_port_range`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1440,7 +1440,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 												},
 												"all_traffic": schema.BoolAttribute{
 													Description:         "All Traffic Select all traffic to match",
-													MarkdownDescription: "All Traffic Select all traffic to match",
+													MarkdownDescription: "All Traffic Select all traffic to match<br>Conflicts with `all_tcp_traffic`, `all_udp_traffic`, `applications`, and `protocol_port_range`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1450,7 +1450,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 												},
 												"all_udp_traffic": schema.BoolAttribute{
 													Description:         "All UDP Traffic Select all UDP traffic to match",
-													MarkdownDescription: "All UDP Traffic Select all UDP traffic to match",
+													MarkdownDescription: "All UDP Traffic Select all UDP traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `applications`, and `protocol_port_range`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1460,7 +1460,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 												},
 												"applications": schema.SingleNestedAttribute{
 													Description:         "Specific Applications Select Application traffic to match",
-													MarkdownDescription: "Specific Applications Select Application traffic to match",
+													MarkdownDescription: "Specific Applications Select Application traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, and `protocol_port_range`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1480,7 +1480,7 @@ func (r *ResourceF5XCNetworkPolicy) Schema(ctx context.Context, request resource
 												},
 												"protocol_port_range": schema.SingleNestedAttribute{
 													Description:         "Protocol and Port Ranges Select specific protocol and port ranges traffic to match",
-													MarkdownDescription: "Protocol and Port Ranges Select specific protocol and port ranges traffic to match",
+													MarkdownDescription: "Protocol and Port Ranges Select specific protocol and port ranges traffic to match<br>Conflicts with `all_tcp_traffic`, `all_traffic`, `all_udp_traffic`, and `applications`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -4035,11 +4035,7 @@ func (r *ResourceF5XCNetworkPolicy) Read(ctx context.Context, request resource.R
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_network_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_network_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "network_policy", err),
@@ -6457,12 +6453,8 @@ func (r *ResourceF5XCNetworkPolicy) Update(ctx context.Context, request resource
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_network_policy.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_network_policy.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "network_policy", err),
@@ -6471,7 +6463,7 @@ func (r *ResourceF5XCNetworkPolicy) Update(ctx context.Context, request resource
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_network_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_network_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "network_policy", err),

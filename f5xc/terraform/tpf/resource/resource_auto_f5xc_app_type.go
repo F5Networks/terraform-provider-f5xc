@@ -240,7 +240,7 @@ func (r *ResourceF5XCAppType) Schema(ctx context.Context, request resource.Schem
 					},
 					"learn_from_redirect_traffic_choice": schema.SingleNestedAttribute{
 						Description:         "Include or Exclude data in machine learning from traffic with redirect response in API Discovery By default, API Discovery only learns API Endpoints and patterns from traffic with response code 2xx On enabling this, the AI engine will learn API Endpoints from traffic with response code 3xx in addition to 2xx",
-						MarkdownDescription: "Include or Exclude data in machine learning from traffic with redirect response in API Discovery By default, API Discovery only learns API Endpoints and patterns from traffic with response code 2xx On enabling this, the AI engine will learn API Endpoints from traffic with response code 3xx in addition to 2xx",
+						MarkdownDescription: "Include or Exclude data in machine learning from traffic with redirect response in API Discovery By default, API Discovery only learns API Endpoints and patterns from traffic with response code 2xx On enabling this, the AI engine will learn API Endpoints from traffic with response code 3xx in addition to 2xx<br>Exactly one of `disable` or `enable` must be specified when `learn_from_redirect_traffic_choice` is configured.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -253,7 +253,7 @@ func (r *ResourceF5XCAppType) Schema(ctx context.Context, request resource.Schem
 						Attributes: map[string]schema.Attribute{
 							"disable": schema.BoolAttribute{
 								Description:         "Disable learning from redirected request traffic Disable learning API patterns from traffic with redirect response codes 3xx",
-								MarkdownDescription: "Disable learning from redirected request traffic Disable learning API patterns from traffic with redirect response codes 3xx",
+								MarkdownDescription: "Disable learning from redirected request traffic Disable learning API patterns from traffic with redirect response codes 3xx<br>Conflicts with `enable`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -263,7 +263,7 @@ func (r *ResourceF5XCAppType) Schema(ctx context.Context, request resource.Schem
 							},
 							"enable": schema.BoolAttribute{
 								Description:         "Enable learning from redirected request traffic Enable learning API patterns from traffic with redirect response codes 3xx",
-								MarkdownDescription: "Enable learning from redirected request traffic Enable learning API patterns from traffic with redirect response codes 3xx",
+								MarkdownDescription: "Enable learning from redirected request traffic Enable learning API patterns from traffic with redirect response codes 3xx<br>Conflicts with `disable`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -894,11 +894,7 @@ func (r *ResourceF5XCAppType) Read(ctx context.Context, request resource.ReadReq
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_app_type.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_app_type.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "app_type", err),
@@ -1398,12 +1394,8 @@ func (r *ResourceF5XCAppType) Update(ctx context.Context, request resource.Updat
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_app_type.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_app_type.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "app_type", err),
@@ -1412,7 +1404,7 @@ func (r *ResourceF5XCAppType) Update(ctx context.Context, request resource.Updat
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_app_type.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_app_type.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "app_type", err),

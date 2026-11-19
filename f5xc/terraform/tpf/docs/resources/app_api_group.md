@@ -70,7 +70,7 @@ resource "f5xc_app_api_group" "example" {
 - `elements` (Attributes List) elements List of API group elements with methods and path regex for matching requests. (see [below for nested schema](#nestedatt--elements))
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
-- `scope_choice` (Attributes) API Group Scope The scope of the API Group which limits the superset of API endpoints which can be used to create an API Group (see [below for nested schema](#nestedatt--scope_choice))
+- `scope_choice` (Attributes) API Group Scope The scope of the API Group which limits the superset of API endpoints which can be used to create an API Group<br>Exactly one of `bigip_virtual_server`, `cdn_loadbalancer`, or `http_loadbalancer` must be specified. (see [below for nested schema](#nestedatt--scope_choice))
 
 ### Optional
 
@@ -98,9 +98,9 @@ Required:
 
 Optional:
 
-- `bigip_virtual_server` (Attributes) BIGIP Virtual Server Scope Set scope to an BIGIP Virtual Server object to define the API endpoints list for API groups management (see [below for nested schema](#nestedatt--scope_choice--bigip_virtual_server))
-- `cdn_loadbalancer` (Attributes) CDN Loadbalancer Scope Set scope to an CDN Loadbalancer object to define the API endpoints list for API groups management (see [below for nested schema](#nestedatt--scope_choice--cdn_loadbalancer))
-- `http_loadbalancer` (Attributes) HTTP Loadbalancer Scope Set scope to an HTTP Loadbalancer object to define the API endpoints list for API groups management (see [below for nested schema](#nestedatt--scope_choice--http_loadbalancer))
+- `bigip_virtual_server` (Attributes) BIGIP Virtual Server Scope Set scope to an BIGIP Virtual Server object to define the API endpoints list for API groups management<br>Conflicts with `cdn_loadbalancer` and `http_loadbalancer`. (see [below for nested schema](#nestedatt--scope_choice--bigip_virtual_server))
+- `cdn_loadbalancer` (Attributes) CDN Loadbalancer Scope Set scope to an CDN Loadbalancer object to define the API endpoints list for API groups management<br>Conflicts with `bigip_virtual_server` and `http_loadbalancer`. (see [below for nested schema](#nestedatt--scope_choice--cdn_loadbalancer))
+- `http_loadbalancer` (Attributes) HTTP Loadbalancer Scope Set scope to an HTTP Loadbalancer object to define the API endpoints list for API groups management<br>Conflicts with `bigip_virtual_server` and `cdn_loadbalancer`. (see [below for nested schema](#nestedatt--scope_choice--http_loadbalancer))
 
 <a id="nestedatt--scope_choice--bigip_virtual_server"></a>
 ### Nested Schema for `scope_choice.bigip_virtual_server`
@@ -196,6 +196,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_app_api_group.example"
+	to = f5xc_app_api_group.example
 }
 ```

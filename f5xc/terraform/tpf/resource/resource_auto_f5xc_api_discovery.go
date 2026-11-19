@@ -28,6 +28,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -180,7 +181,7 @@ var ApiDiscoveryUserDefinedApiDiscoveryPolicyModelAttributeMap = map[string]attr
 	},
 }
 
-// Attribute map for RequiredOneOfField --> DefaultBehaviorChoice
+// Attribute map for OneOfField --> DefaultBehaviorChoice
 var ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModelAttributeMap = map[string]attr.Type{
 
 	"exclusive": types.ObjectType{
@@ -197,7 +198,7 @@ var ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveModel
 	},
 }
 
-// Attribute map for RequiredOneOfField --> ActionChoice
+// Attribute map for OneOfField --> ActionChoice
 var ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveActionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"archive": types.BoolType,
@@ -281,7 +282,7 @@ var ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTyp
 	},
 }
 
-// Attribute map for RequiredOneOfField --> ActionChoice
+// Attribute map for OneOfField --> ActionChoice
 var ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionActionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"archive": types.BoolType,
@@ -416,40 +417,46 @@ func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.
 				Attributes: map[string]schema.Attribute{
 					"default_behavior_choice": schema.SingleNestedAttribute{
 						Description:         "default_behavior_choice Define the default action for endpoints that do not match any rule, choosing to either include or exclude them from the discovery process.",
-						MarkdownDescription: "default_behavior_choice Define the default action for endpoints that do not match any rule, choosing to either include or exclude them from the discovery process.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "default_behavior_choice Define the default action for endpoints that do not match any rule, choosing to either include or exclude them from the discovery process.<br>Exactly one of `exclusive` or `inclusive` must be specified when `default_behavior_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"exclusive",
 								"inclusive",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"exclusive": schema.SingleNestedAttribute{
 								Description:         "exclusive Any traffic that does not match the specified rules will be ignored by default.",
-								MarkdownDescription: "exclusive Any traffic that does not match the specified rules will be ignored by default.",
+								MarkdownDescription: "exclusive Any traffic that does not match the specified rules will be ignored by default.<br>Conflicts with `inclusive`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
 								Attributes: map[string]schema.Attribute{
 									"action_choice": schema.SingleNestedAttribute{
 										Description:         "action Specifies the action to take for excluded endpoints",
-										MarkdownDescription: "action Specifies the action to take for excluded endpoints",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "action Specifies the action to take for excluded endpoints<br>Exactly one of `archive` or `ignore` must be specified when `action_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"archive",
 												"ignore",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"archive": schema.BoolAttribute{
 												Description:         "archive Endpoints are removed from active API Discovery and stored in the Archive under Non-API Rules for reference and auditing.",
-												MarkdownDescription: "archive Endpoints are removed from active API Discovery and stored in the Archive under Non-API Rules for reference and auditing.",
+												MarkdownDescription: "archive Endpoints are removed from active API Discovery and stored in the Archive under Non-API Rules for reference and auditing.<br>Conflicts with `ignore`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -459,7 +466,7 @@ func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.
 											},
 											"ignore": schema.BoolAttribute{
 												Description:         "ignore Excluded endpoints are completely ignored by API Discovery and will not appear in discovery results, inventories, or insights.",
-												MarkdownDescription: "ignore Excluded endpoints are completely ignored by API Discovery and will not appear in discovery results, inventories, or insights.",
+												MarkdownDescription: "ignore Excluded endpoints are completely ignored by API Discovery and will not appear in discovery results, inventories, or insights.<br>Conflicts with `archive`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -473,7 +480,7 @@ func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.
 							},
 							"inclusive": schema.BoolAttribute{
 								Description:         "inclusive Any traffic that does not match the specified rules will be discovered by default.",
-								MarkdownDescription: "inclusive Any traffic that does not match the specified rules will be discovered by default.",
+								MarkdownDescription: "inclusive Any traffic that does not match the specified rules will be discovered by default.<br>Conflicts with `exclusive`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -545,7 +552,7 @@ func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.
 									Attributes: map[string]schema.Attribute{
 										"criteria_choice": schema.SingleNestedAttribute{
 											Description:         "criteria Specifies what is used to match endpoints.",
-											MarkdownDescription: "criteria Specifies what is used to match endpoints.",
+											MarkdownDescription: "criteria Specifies what is used to match endpoints.<br>Exactly one of `http_header_criteria` or `pattern` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -558,7 +565,7 @@ func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.
 											Attributes: map[string]schema.Attribute{
 												"http_header_criteria": schema.SingleNestedAttribute{
 													Description:         "http_header_criteria",
-													MarkdownDescription: "http_header_criteria",
+													MarkdownDescription: "http_header_criteria<br>Conflicts with `pattern`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -618,7 +625,7 @@ func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.
 												},
 												"pattern": schema.StringAttribute{
 													Description:         "pattern Patterns are matched against the request path to identify endpoints by path structure, file extension, or version prefix. Endpoints that match this pattern are affected by the rule.",
-													MarkdownDescription: "pattern Patterns are matched against the request path to identify endpoints by path structure, file extension, or version prefix. Endpoints that match this pattern are affected by the rule.",
+													MarkdownDescription: "pattern Patterns are matched against the request path to identify endpoints by path structure, file extension, or version prefix. Endpoints that match this pattern are affected by the rule.<br>Conflicts with `http_header_criteria`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -631,7 +638,7 @@ func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.
 										},
 										"rule_type_choice": schema.SingleNestedAttribute{
 											Description:         "rule_type_choice Determines whether matching endpoints are included in API Discovery or excluded.",
-											MarkdownDescription: "rule_type_choice Determines whether matching endpoints are included in API Discovery or excluded.",
+											MarkdownDescription: "rule_type_choice Determines whether matching endpoints are included in API Discovery or excluded.<br>Exactly one of `exclusion` or `inclusion` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -644,27 +651,30 @@ func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.
 											Attributes: map[string]schema.Attribute{
 												"exclusion": schema.SingleNestedAttribute{
 													Description:         "exclusion Matching endpoints will be excluded from API discovery",
-													MarkdownDescription: "exclusion Matching endpoints will be excluded from API discovery",
+													MarkdownDescription: "exclusion Matching endpoints will be excluded from API discovery<br>Conflicts with `inclusion`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"action_choice": schema.SingleNestedAttribute{
 															Description:         "action Specifies the action to take for excluded endpoints",
-															MarkdownDescription: "action Specifies the action to take for excluded endpoints",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
+															MarkdownDescription: "action Specifies the action to take for excluded endpoints<br>Exactly one of `archive` or `ignore` must be specified when `action_choice` is configured.",
+															Required:            false,
+															Optional:            true,
+															Computed:            true,
 															Validators: []validator.Object{
-																exactlyoneofvalidator.RequiredExactlyOneOf(
+																exactlyoneofvalidator.ExactlyOneOf(
 																	"archive",
 																	"ignore",
 																),
 															},
+															PlanModifiers: []planmodifier.Object{
+																objectplanmodifier.UseNonNullStateForUnknown(),
+															},
 															Attributes: map[string]schema.Attribute{
 																"archive": schema.BoolAttribute{
 																	Description:         "archive Endpoints are removed from active API Discovery and stored in the Archive under Non-API Rules for reference and auditing.",
-																	MarkdownDescription: "archive Endpoints are removed from active API Discovery and stored in the Archive under Non-API Rules for reference and auditing.",
+																	MarkdownDescription: "archive Endpoints are removed from active API Discovery and stored in the Archive under Non-API Rules for reference and auditing.<br>Conflicts with `ignore`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -674,7 +684,7 @@ func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.
 																},
 																"ignore": schema.BoolAttribute{
 																	Description:         "ignore Excluded endpoints are completely ignored by API Discovery and will not appear in discovery results, inventories, or insights.",
-																	MarkdownDescription: "ignore Excluded endpoints are completely ignored by API Discovery and will not appear in discovery results, inventories, or insights.",
+																	MarkdownDescription: "ignore Excluded endpoints are completely ignored by API Discovery and will not appear in discovery results, inventories, or insights.<br>Conflicts with `archive`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -688,7 +698,7 @@ func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.
 												},
 												"inclusion": schema.BoolAttribute{
 													Description:         "inclusion Matching endpoints will be included in API discovery",
-													MarkdownDescription: "inclusion Matching endpoints will be included in API discovery",
+													MarkdownDescription: "inclusion Matching endpoints will be included in API discovery<br>Conflicts with `exclusion`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -912,6 +922,9 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 		// resource modelToSpecRoot PointerField --> UserDefinedApiDiscoveryPolicy
 		if !data.UserDefinedApiDiscoveryPolicy.IsNull() && !data.UserDefinedApiDiscoveryPolicy.IsUnknown() {
 			userDefinedApiDiscoveryPolicySpec := &ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy{}
+			userDefinedApiDiscoveryPolicySpec.DefaultBehaviorChoice = &ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy_Inclusive{
+				Inclusive: &ves_io_schema.Empty{},
+			}
 			spec.UserDefinedApiDiscoveryPolicy = userDefinedApiDiscoveryPolicySpec
 			var userDefinedApiDiscoveryPolicyModel ApiDiscoveryUserDefinedApiDiscoveryPolicy
 
@@ -922,7 +935,7 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> DefaultBehaviorChoice
+			// resource modelToSpecNested OneOfField --> DefaultBehaviorChoice
 			if !userDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice.IsNull() && !userDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice.IsUnknown() {
 				userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel := ApiDiscoveryDefaultBehaviorChoice{}
 				response.Diagnostics.Append(userDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice.As(ctx, &userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -939,9 +952,12 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 					}
 					exclusiveOneOfSpec := &ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy_Exclusive{}
 					exclusiveOneOfSpec.Exclusive = &ves_io_schema_api_sec_api_discovery.ExclusionConfig{}
+					exclusiveOneOfSpec.Exclusive.ActionChoice = &ves_io_schema_api_sec_api_discovery.ExclusionConfig_Ignore{
+						Ignore: &ves_io_schema.Empty{},
+					}
 					userDefinedApiDiscoveryPolicySpec.DefaultBehaviorChoice = exclusiveOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> ActionChoice
+					// resource modelToSpecNested OneOfField --> ActionChoice
 					if !apiDiscoveryExclusiveModel.ActionChoice.IsNull() && !apiDiscoveryExclusiveModel.ActionChoice.IsUnknown() {
 						exclusiveActionChoiceModel := ApiDiscoveryActionChoice{}
 						response.Diagnostics.Append(apiDiscoveryExclusiveModel.ActionChoice.As(ctx, &exclusiveActionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1156,9 +1172,12 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 								}
 								exclusionOneOfSpec := &ves_io_schema_api_sec_api_discovery.RuleProperties_Exclusion{}
 								exclusionOneOfSpec.Exclusion = &ves_io_schema_api_sec_api_discovery.ExclusionConfig{}
+								exclusionOneOfSpec.Exclusion.ActionChoice = &ves_io_schema_api_sec_api_discovery.ExclusionConfig_Ignore{
+									Ignore: &ves_io_schema.Empty{},
+								}
 								rulePropertiesSpec.RuleTypeChoice = exclusionOneOfSpec
 
-								// resource modelToSpecNested RequiredOneOfField --> ActionChoice
+								// resource modelToSpecNested OneOfField --> ActionChoice
 								if !apiDiscoveryExclusionModel.ActionChoice.IsNull() && !apiDiscoveryExclusionModel.ActionChoice.IsUnknown() {
 									exclusionActionChoiceModel := ApiDiscoveryActionChoice{}
 									response.Diagnostics.Append(apiDiscoveryExclusionModel.ActionChoice.As(ctx, &exclusionActionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1411,8 +1430,7 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 		var apiDiscoveryUserDefinedApiDiscoveryPolicyModel = &ApiDiscoveryUserDefinedApiDiscoveryPolicy{}
 		userDefinedApiDiscoveryPolicyElement := specData.GetUserDefinedApiDiscoveryPolicy()
 
-		// resource specToModelNested RequiredOneOfField --> DefaultBehaviorChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> DefaultBehaviorChoice
 		if userDefinedApiDiscoveryPolicyElement.GetDefaultBehaviorChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -1432,8 +1450,7 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 				if isExclusive && exclusiveOptionsWrapper != nil && exclusiveOptionsWrapper.Exclusive != nil {
 					exclusiveElement := exclusiveOptionsWrapper.Exclusive
 
-					// resource specToModelNested RequiredOneOfField --> ActionChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> ActionChoice
 					if exclusiveElement.GetActionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						exclusiveactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -1735,8 +1752,7 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 							if isExclusion && exclusionOptionsWrapper != nil && exclusionOptionsWrapper.Exclusion != nil {
 								exclusionElement := exclusionOptionsWrapper.Exclusion
 
-								// resource specToModelNested RequiredOneOfField --> ActionChoice
-								// GlobalSpecType
+								// resource specToModelNested OneOfField --> ActionChoice
 								if exclusionElement.GetActionChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									exclusionactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -1915,11 +1931,7 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_api_sec_api_discovery.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_api_sec_api_discovery.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "api_discovery", err),
@@ -2106,8 +2118,7 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 		var apiDiscoveryUserDefinedApiDiscoveryPolicyModel = &ApiDiscoveryUserDefinedApiDiscoveryPolicy{}
 		userDefinedApiDiscoveryPolicyElement := specData.GetUserDefinedApiDiscoveryPolicy()
 
-		// resource specToModelNested RequiredOneOfField --> DefaultBehaviorChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> DefaultBehaviorChoice
 		if userDefinedApiDiscoveryPolicyElement.GetDefaultBehaviorChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -2127,8 +2138,7 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 				if isExclusive && exclusiveOptionsWrapper != nil && exclusiveOptionsWrapper.Exclusive != nil {
 					exclusiveElement := exclusiveOptionsWrapper.Exclusive
 
-					// resource specToModelNested RequiredOneOfField --> ActionChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> ActionChoice
 					if exclusiveElement.GetActionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						exclusiveactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -2436,8 +2446,7 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 							if isExclusion && exclusionOptionsWrapper != nil && exclusionOptionsWrapper.Exclusion != nil {
 								exclusionElement := exclusionOptionsWrapper.Exclusion
 
-								// resource specToModelNested RequiredOneOfField --> ActionChoice
-								// <no value>
+								// resource specToModelNested OneOfField --> ActionChoice
 								if exclusionElement.GetActionChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									exclusionactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -2753,6 +2762,9 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 		// resource modelToSpecRoot PointerField --> UserDefinedApiDiscoveryPolicy
 		if !data.UserDefinedApiDiscoveryPolicy.IsNull() && !data.UserDefinedApiDiscoveryPolicy.IsUnknown() {
 			userDefinedApiDiscoveryPolicySpec := &ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy{}
+			userDefinedApiDiscoveryPolicySpec.DefaultBehaviorChoice = &ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy_Inclusive{
+				Inclusive: &ves_io_schema.Empty{},
+			}
 			spec.UserDefinedApiDiscoveryPolicy = userDefinedApiDiscoveryPolicySpec
 			var userDefinedApiDiscoveryPolicyModel ApiDiscoveryUserDefinedApiDiscoveryPolicy
 
@@ -2763,7 +2775,7 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> DefaultBehaviorChoice
+			// resource modelToSpecNested OneOfField --> DefaultBehaviorChoice
 			if !userDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice.IsNull() && !userDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice.IsUnknown() {
 				userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel := ApiDiscoveryDefaultBehaviorChoice{}
 				response.Diagnostics.Append(userDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice.As(ctx, &userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2780,9 +2792,12 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 					}
 					exclusiveOneOfSpec := &ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy_Exclusive{}
 					exclusiveOneOfSpec.Exclusive = &ves_io_schema_api_sec_api_discovery.ExclusionConfig{}
+					exclusiveOneOfSpec.Exclusive.ActionChoice = &ves_io_schema_api_sec_api_discovery.ExclusionConfig_Ignore{
+						Ignore: &ves_io_schema.Empty{},
+					}
 					userDefinedApiDiscoveryPolicySpec.DefaultBehaviorChoice = exclusiveOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> ActionChoice
+					// resource modelToSpecNested OneOfField --> ActionChoice
 					if !apiDiscoveryExclusiveModel.ActionChoice.IsNull() && !apiDiscoveryExclusiveModel.ActionChoice.IsUnknown() {
 						exclusiveActionChoiceModel := ApiDiscoveryActionChoice{}
 						response.Diagnostics.Append(apiDiscoveryExclusiveModel.ActionChoice.As(ctx, &exclusiveActionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2997,9 +3012,12 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 								}
 								exclusionOneOfSpec := &ves_io_schema_api_sec_api_discovery.RuleProperties_Exclusion{}
 								exclusionOneOfSpec.Exclusion = &ves_io_schema_api_sec_api_discovery.ExclusionConfig{}
+								exclusionOneOfSpec.Exclusion.ActionChoice = &ves_io_schema_api_sec_api_discovery.ExclusionConfig_Ignore{
+									Ignore: &ves_io_schema.Empty{},
+								}
 								rulePropertiesSpec.RuleTypeChoice = exclusionOneOfSpec
 
-								// resource modelToSpecNested RequiredOneOfField --> ActionChoice
+								// resource modelToSpecNested OneOfField --> ActionChoice
 								if !apiDiscoveryExclusionModel.ActionChoice.IsNull() && !apiDiscoveryExclusionModel.ActionChoice.IsUnknown() {
 									exclusionActionChoiceModel := ApiDiscoveryActionChoice{}
 									response.Diagnostics.Append(apiDiscoveryExclusionModel.ActionChoice.As(ctx, &exclusionActionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3053,12 +3071,8 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_api_sec_api_discovery.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_api_sec_api_discovery.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "api_discovery", err),
@@ -3067,7 +3081,7 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_api_sec_api_discovery.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_api_sec_api_discovery.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "api_discovery", err),
@@ -3253,8 +3267,7 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 		var apiDiscoveryUserDefinedApiDiscoveryPolicyModel = &ApiDiscoveryUserDefinedApiDiscoveryPolicy{}
 		userDefinedApiDiscoveryPolicyElement := specData.GetUserDefinedApiDiscoveryPolicy()
 
-		// resource specToModelNested RequiredOneOfField --> DefaultBehaviorChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> DefaultBehaviorChoice
 		if userDefinedApiDiscoveryPolicyElement.GetDefaultBehaviorChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3274,8 +3287,7 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 				if isExclusive && exclusiveOptionsWrapper != nil && exclusiveOptionsWrapper.Exclusive != nil {
 					exclusiveElement := exclusiveOptionsWrapper.Exclusive
 
-					// resource specToModelNested RequiredOneOfField --> ActionChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> ActionChoice
 					if exclusiveElement.GetActionChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						exclusiveactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3577,8 +3589,7 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 							if isExclusion && exclusionOptionsWrapper != nil && exclusionOptionsWrapper.Exclusion != nil {
 								exclusionElement := exclusionOptionsWrapper.Exclusion
 
-								// resource specToModelNested RequiredOneOfField --> ActionChoice
-								// GlobalSpecType
+								// resource specToModelNested OneOfField --> ActionChoice
 								if exclusionElement.GetActionChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									exclusionactionChoiceChoicesAttributeMap := make(map[string]attr.Value)

@@ -678,11 +678,7 @@ func (r *ResourceF5XCTrustedCaList) Read(ctx context.Context, request resource.R
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_trusted_ca_list.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_trusted_ca_list.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "trusted_ca_list", err),
@@ -1027,12 +1023,8 @@ func (r *ResourceF5XCTrustedCaList) Update(ctx context.Context, request resource
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_trusted_ca_list.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_trusted_ca_list.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "trusted_ca_list", err),
@@ -1041,7 +1033,7 @@ func (r *ResourceF5XCTrustedCaList) Update(ctx context.Context, request resource
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_trusted_ca_list.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_trusted_ca_list.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "trusted_ca_list", err),

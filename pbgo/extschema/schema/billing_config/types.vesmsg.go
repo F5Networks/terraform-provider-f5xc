@@ -15,6 +15,7 @@ import (
 	"gopkg.volterra.us/stdlib/errors"
 
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
+	ves_io_schema_pbac_addon_service "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/pbac/addon_service"
 )
 
 var (
@@ -156,6 +157,7 @@ var DefaultGlobalSpecTypeValidator = func() *ValidateGlobalSpecType {
 		panic(errMsg)
 	}
 	v.FldValidators["service_usage_types"] = vFn
+	v.FldValidators["entitlement_configs"] = ves_io_schema_pbac_addon_service.EntitlementConfigValidator().Validate
 
 	return v
 }()

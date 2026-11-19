@@ -27,6 +27,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -172,7 +173,7 @@ var DnsLbHealthCheckHealthCheckHttpHealthCheckModelAttributeMap = map[string]att
 	},
 }
 
-// Attribute map for RequiredOneOfField --> VirtualHostChoice
+// Attribute map for OneOfField --> VirtualHostChoice
 var DnsLbHealthCheckHealthCheckHttpHealthCheckVirtualHostChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disable_virtual_host":       types.BoolType,
@@ -192,7 +193,7 @@ var DnsLbHealthCheckHealthCheckHttpsHealthCheckModelAttributeMap = map[string]at
 	},
 }
 
-// Attribute map for RequiredOneOfField --> VirtualHostChoice
+// Attribute map for OneOfField --> VirtualHostChoice
 var DnsLbHealthCheckHealthCheckHttpsHealthCheckVirtualHostChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disable_virtual_host":       types.BoolType,
@@ -342,7 +343,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request resou
 			},
 			"health_check_choice": schema.SingleNestedAttribute{
 				Description:         "Type of Health Check Select type of health check",
-				MarkdownDescription: "Type of Health Check Select type of health check",
+				MarkdownDescription: "Type of Health Check Select type of health check<br>Exactly one of `http_health_check`, `https_health_check`, `icmp_health_check`, `tcp_health_check`, `tcp_hex_health_check`, or `udp_health_check` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -359,7 +360,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request resou
 				Attributes: map[string]schema.Attribute{
 					"http_health_check": schema.SingleNestedAttribute{
 						Description:         "HTTP Health Check HTTP Health Check",
-						MarkdownDescription: "HTTP Health Check HTTP Health Check",
+						MarkdownDescription: "HTTP Health Check HTTP Health Check<br>Conflicts with `https_health_check`, `icmp_health_check`, `tcp_health_check`, `tcp_hex_health_check`, and `udp_health_check`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -409,21 +410,24 @@ func (r *ResourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request resou
 							},
 							"virtual_host_choice": schema.SingleNestedAttribute{
 								Description:         "Virtual Host",
-								MarkdownDescription: "Virtual Host",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Virtual Host<br>Exactly one of `disable_virtual_host`, `inherit_load_balancer_fqdn`, or `virtual_host` must be specified when `virtual_host_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"disable_virtual_host",
 										"inherit_load_balancer_fqdn",
 										"virtual_host",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"disable_virtual_host": schema.BoolAttribute{
 										Description:         "Disable Virtual Host",
-										MarkdownDescription: "Disable Virtual Host",
+										MarkdownDescription: "Disable Virtual Host<br>Conflicts with `inherit_load_balancer_fqdn` and `virtual_host`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -433,7 +437,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request resou
 									},
 									"inherit_load_balancer_fqdn": schema.BoolAttribute{
 										Description:         "Inherit From Load Balancer FQDN Inherit load balancer FQDN as the virtual host to use for SNI.",
-										MarkdownDescription: "Inherit From Load Balancer FQDN Inherit load balancer FQDN as the virtual host to use for SNI.",
+										MarkdownDescription: "Inherit From Load Balancer FQDN Inherit load balancer FQDN as the virtual host to use for SNI.<br>Conflicts with `disable_virtual_host` and `virtual_host`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -443,7 +447,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request resou
 									},
 									"virtual_host": schema.StringAttribute{
 										Description:         "Enable Virtual Host Name of the virtual host to use for SNI.",
-										MarkdownDescription: "Enable Virtual Host Name of the virtual host to use for SNI.<br>**Validation:** `Length LengthAtMost(2048)`",
+										MarkdownDescription: "Enable Virtual Host Name of the virtual host to use for SNI.<br>**Validation:** `Length LengthAtMost(2048)`<br>Conflicts with `disable_virtual_host` and `inherit_load_balancer_fqdn`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -457,7 +461,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request resou
 					},
 					"https_health_check": schema.SingleNestedAttribute{
 						Description:         "HTTPS Health Check HTTPS Health Check",
-						MarkdownDescription: "HTTPS Health Check HTTPS Health Check",
+						MarkdownDescription: "HTTPS Health Check HTTPS Health Check<br>Conflicts with `http_health_check`, `icmp_health_check`, `tcp_health_check`, `tcp_hex_health_check`, and `udp_health_check`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -507,21 +511,24 @@ func (r *ResourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request resou
 							},
 							"virtual_host_choice": schema.SingleNestedAttribute{
 								Description:         "Virtual Host",
-								MarkdownDescription: "Virtual Host",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Virtual Host<br>Exactly one of `disable_virtual_host`, `inherit_load_balancer_fqdn`, or `virtual_host` must be specified when `virtual_host_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"disable_virtual_host",
 										"inherit_load_balancer_fqdn",
 										"virtual_host",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"disable_virtual_host": schema.BoolAttribute{
 										Description:         "Disable Virtual Host",
-										MarkdownDescription: "Disable Virtual Host",
+										MarkdownDescription: "Disable Virtual Host<br>Conflicts with `inherit_load_balancer_fqdn` and `virtual_host`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -531,7 +538,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request resou
 									},
 									"inherit_load_balancer_fqdn": schema.BoolAttribute{
 										Description:         "Inherit From Load Balancer FQDN Inherit load balancer FQDN as the virtual host to use for SNI.",
-										MarkdownDescription: "Inherit From Load Balancer FQDN Inherit load balancer FQDN as the virtual host to use for SNI.",
+										MarkdownDescription: "Inherit From Load Balancer FQDN Inherit load balancer FQDN as the virtual host to use for SNI.<br>Conflicts with `disable_virtual_host` and `virtual_host`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -541,7 +548,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request resou
 									},
 									"virtual_host": schema.StringAttribute{
 										Description:         "Enable Virtual Host Name of the virtual host to use for SNI.",
-										MarkdownDescription: "Enable Virtual Host Name of the virtual host to use for SNI.<br>**Validation:** `Length LengthAtMost(2048)`",
+										MarkdownDescription: "Enable Virtual Host Name of the virtual host to use for SNI.<br>**Validation:** `Length LengthAtMost(2048)`<br>Conflicts with `disable_virtual_host` and `inherit_load_balancer_fqdn`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -555,7 +562,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request resou
 					},
 					"icmp_health_check": schema.BoolAttribute{
 						Description:         "ICMP Health Check ICMP Health Check",
-						MarkdownDescription: "ICMP Health Check ICMP Health Check",
+						MarkdownDescription: "ICMP Health Check ICMP Health Check<br>Conflicts with `http_health_check`, `https_health_check`, `tcp_health_check`, `tcp_hex_health_check`, and `udp_health_check`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -565,7 +572,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request resou
 					},
 					"tcp_health_check": schema.SingleNestedAttribute{
 						Description:         "TCP Health Check TCP Health Check",
-						MarkdownDescription: "TCP Health Check TCP Health Check",
+						MarkdownDescription: "TCP Health Check TCP Health Check<br>Conflicts with `http_health_check`, `https_health_check`, `icmp_health_check`, `tcp_hex_health_check`, and `udp_health_check`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -617,7 +624,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request resou
 					},
 					"tcp_hex_health_check": schema.SingleNestedAttribute{
 						Description:         "TCP Hex Health Check TCP Health Check with Hex Encoded Payload",
-						MarkdownDescription: "TCP Hex Health Check TCP Health Check with Hex Encoded Payload",
+						MarkdownDescription: "TCP Hex Health Check TCP Health Check with Hex Encoded Payload<br>Conflicts with `http_health_check`, `https_health_check`, `icmp_health_check`, `tcp_health_check`, and `udp_health_check`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -675,7 +682,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Schema(ctx context.Context, request resou
 					},
 					"udp_health_check": schema.SingleNestedAttribute{
 						Description:         "UDP Health Check UDP Health Check",
-						MarkdownDescription: "UDP Health Check UDP Health Check",
+						MarkdownDescription: "UDP Health Check UDP Health Check<br>Conflicts with `http_health_check`, `https_health_check`, `icmp_health_check`, `tcp_health_check`, and `tcp_hex_health_check`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -895,6 +902,9 @@ func (r *ResourceF5XCDnsLbHealthCheck) Create(ctx context.Context, request resou
 			}
 			httpHealthCheckOneOfSpec := &ves_io_schema_dns_lb_health_check.CreateSpecType_HttpHealthCheck{}
 			httpHealthCheckOneOfSpec.HttpHealthCheck = &ves_io_schema_dns_lb_health_check.HttpHealthCheck{}
+			httpHealthCheckOneOfSpec.HttpHealthCheck.VirtualHostChoice = &ves_io_schema_dns_lb_health_check.HttpHealthCheck_DisableVirtualHost{
+				DisableVirtualHost: &ves_io_schema.Empty{},
+			}
 			spec.HealthCheck = httpHealthCheckOneOfSpec
 
 			// resource modelToSpecNested RequiredUintField --> HealthCheckPort
@@ -921,7 +931,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Create(ctx context.Context, request resou
 				httpHealthCheckOneOfSpec.HttpHealthCheck.Send = "HEAD / HTTP/1.0\\\\r\\\\n\\\\r\\\\n"
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> VirtualHostChoice
+			// resource modelToSpecNested OneOfField --> VirtualHostChoice
 			if !dnsLbHealthCheckHttpHealthCheckModel.VirtualHostChoice.IsNull() && !dnsLbHealthCheckHttpHealthCheckModel.VirtualHostChoice.IsUnknown() {
 				httpHealthCheckVirtualHostChoiceModel := DnsLbHealthCheckVirtualHostChoice{}
 				response.Diagnostics.Append(dnsLbHealthCheckHttpHealthCheckModel.VirtualHostChoice.As(ctx, &httpHealthCheckVirtualHostChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -963,6 +973,9 @@ func (r *ResourceF5XCDnsLbHealthCheck) Create(ctx context.Context, request resou
 			}
 			httpsHealthCheckOneOfSpec := &ves_io_schema_dns_lb_health_check.CreateSpecType_HttpsHealthCheck{}
 			httpsHealthCheckOneOfSpec.HttpsHealthCheck = &ves_io_schema_dns_lb_health_check.HttpHealthCheck{}
+			httpsHealthCheckOneOfSpec.HttpsHealthCheck.VirtualHostChoice = &ves_io_schema_dns_lb_health_check.HttpHealthCheck_DisableVirtualHost{
+				DisableVirtualHost: &ves_io_schema.Empty{},
+			}
 			spec.HealthCheck = httpsHealthCheckOneOfSpec
 
 			// resource modelToSpecNested RequiredUintField --> HealthCheckPort
@@ -989,7 +1002,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Create(ctx context.Context, request resou
 				httpsHealthCheckOneOfSpec.HttpsHealthCheck.Send = "HEAD / HTTP/1.0\\\\r\\\\n\\\\r\\\\n"
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> VirtualHostChoice
+			// resource modelToSpecNested OneOfField --> VirtualHostChoice
 			if !dnsLbHealthCheckHttpsHealthCheckModel.VirtualHostChoice.IsNull() && !dnsLbHealthCheckHttpsHealthCheckModel.VirtualHostChoice.IsUnknown() {
 				httpsHealthCheckVirtualHostChoiceModel := DnsLbHealthCheckVirtualHostChoice{}
 				response.Diagnostics.Append(dnsLbHealthCheckHttpsHealthCheckModel.VirtualHostChoice.As(ctx, &httpsHealthCheckVirtualHostChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1382,8 +1395,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Create(ctx context.Context, request resou
 					httpHealthCheckAttributeMap["send"] = types.StringNull()
 				}
 
-				// resource specToModelNested RequiredOneOfField --> VirtualHostChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> VirtualHostChoice
 				if httpHealthCheckElement.GetVirtualHostChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					httpHealthCheckvirtualHostChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -1483,8 +1495,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Create(ctx context.Context, request resou
 					httpsHealthCheckAttributeMap["send"] = types.StringNull()
 				}
 
-				// resource specToModelNested RequiredOneOfField --> VirtualHostChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> VirtualHostChoice
 				if httpsHealthCheckElement.GetVirtualHostChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					httpsHealthCheckvirtualHostChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -1747,11 +1758,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Read(ctx context.Context, request resourc
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_lb_health_check.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_lb_health_check.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "dns_lb_health_check", err),
@@ -1977,8 +1984,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Read(ctx context.Context, request resourc
 					httpHealthCheckAttributeMap["send"] = types.StringNull()
 				}
 
-				// resource specToModelNested RequiredOneOfField --> VirtualHostChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> VirtualHostChoice
 				if httpHealthCheckElement.GetVirtualHostChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					httpHealthCheckvirtualHostChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -2082,8 +2088,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Read(ctx context.Context, request resourc
 					httpsHealthCheckAttributeMap["send"] = types.StringNull()
 				}
 
-				// resource specToModelNested RequiredOneOfField --> VirtualHostChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> VirtualHostChoice
 				if httpsHealthCheckElement.GetVirtualHostChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					httpsHealthCheckvirtualHostChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -2439,6 +2444,9 @@ func (r *ResourceF5XCDnsLbHealthCheck) Update(ctx context.Context, request resou
 			}
 			httpHealthCheckOneOfSpec := &ves_io_schema_dns_lb_health_check.ReplaceSpecType_HttpHealthCheck{}
 			httpHealthCheckOneOfSpec.HttpHealthCheck = &ves_io_schema_dns_lb_health_check.HttpHealthCheck{}
+			httpHealthCheckOneOfSpec.HttpHealthCheck.VirtualHostChoice = &ves_io_schema_dns_lb_health_check.HttpHealthCheck_DisableVirtualHost{
+				DisableVirtualHost: &ves_io_schema.Empty{},
+			}
 			spec.HealthCheck = httpHealthCheckOneOfSpec
 
 			// resource modelToSpecNested RequiredUintField --> HealthCheckPort
@@ -2465,7 +2473,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Update(ctx context.Context, request resou
 				httpHealthCheckOneOfSpec.HttpHealthCheck.Send = "HEAD / HTTP/1.0\\\\r\\\\n\\\\r\\\\n"
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> VirtualHostChoice
+			// resource modelToSpecNested OneOfField --> VirtualHostChoice
 			if !dnsLbHealthCheckHttpHealthCheckModel.VirtualHostChoice.IsNull() && !dnsLbHealthCheckHttpHealthCheckModel.VirtualHostChoice.IsUnknown() {
 				httpHealthCheckVirtualHostChoiceModel := DnsLbHealthCheckVirtualHostChoice{}
 				response.Diagnostics.Append(dnsLbHealthCheckHttpHealthCheckModel.VirtualHostChoice.As(ctx, &httpHealthCheckVirtualHostChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2507,6 +2515,9 @@ func (r *ResourceF5XCDnsLbHealthCheck) Update(ctx context.Context, request resou
 			}
 			httpsHealthCheckOneOfSpec := &ves_io_schema_dns_lb_health_check.ReplaceSpecType_HttpsHealthCheck{}
 			httpsHealthCheckOneOfSpec.HttpsHealthCheck = &ves_io_schema_dns_lb_health_check.HttpHealthCheck{}
+			httpsHealthCheckOneOfSpec.HttpsHealthCheck.VirtualHostChoice = &ves_io_schema_dns_lb_health_check.HttpHealthCheck_DisableVirtualHost{
+				DisableVirtualHost: &ves_io_schema.Empty{},
+			}
 			spec.HealthCheck = httpsHealthCheckOneOfSpec
 
 			// resource modelToSpecNested RequiredUintField --> HealthCheckPort
@@ -2533,7 +2544,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Update(ctx context.Context, request resou
 				httpsHealthCheckOneOfSpec.HttpsHealthCheck.Send = "HEAD / HTTP/1.0\\\\r\\\\n\\\\r\\\\n"
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> VirtualHostChoice
+			// resource modelToSpecNested OneOfField --> VirtualHostChoice
 			if !dnsLbHealthCheckHttpsHealthCheckModel.VirtualHostChoice.IsNull() && !dnsLbHealthCheckHttpsHealthCheckModel.VirtualHostChoice.IsUnknown() {
 				httpsHealthCheckVirtualHostChoiceModel := DnsLbHealthCheckVirtualHostChoice{}
 				response.Diagnostics.Append(dnsLbHealthCheckHttpsHealthCheckModel.VirtualHostChoice.As(ctx, &httpsHealthCheckVirtualHostChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2688,12 +2699,8 @@ func (r *ResourceF5XCDnsLbHealthCheck) Update(ctx context.Context, request resou
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_dns_lb_health_check.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_dns_lb_health_check.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "dns_lb_health_check", err),
@@ -2702,7 +2709,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Update(ctx context.Context, request resou
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_lb_health_check.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_lb_health_check.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "dns_lb_health_check", err),
@@ -2927,8 +2934,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Update(ctx context.Context, request resou
 					httpHealthCheckAttributeMap["send"] = types.StringNull()
 				}
 
-				// resource specToModelNested RequiredOneOfField --> VirtualHostChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> VirtualHostChoice
 				if httpHealthCheckElement.GetVirtualHostChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					httpHealthCheckvirtualHostChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3028,8 +3034,7 @@ func (r *ResourceF5XCDnsLbHealthCheck) Update(ctx context.Context, request resou
 					httpsHealthCheckAttributeMap["send"] = types.StringNull()
 				}
 
-				// resource specToModelNested RequiredOneOfField --> VirtualHostChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> VirtualHostChoice
 				if httpsHealthCheckElement.GetVirtualHostChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					httpsHealthCheckvirtualHostChoiceChoicesAttributeMap := make(map[string]attr.Value)

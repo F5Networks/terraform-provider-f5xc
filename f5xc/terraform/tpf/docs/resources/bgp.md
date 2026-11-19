@@ -158,16 +158,19 @@ resource "f5xc_bgp" "example" {
 Required:
 
 - `asn` (Number) ASN Autonomous System Number
-- `router_id_choice` (Attributes) router_id_choice Select the Router ID. (see [below for nested schema](#nestedatt--bgp_parameters--router_id_choice))
+
+Optional:
+
+- `router_id_choice` (Attributes) router_id_choice Select the Router ID.<br>Exactly one of `from_site`, `ip_address`, or `local_address` must be specified when `router_id_choice` is configured. (see [below for nested schema](#nestedatt--bgp_parameters--router_id_choice))
 
 <a id="nestedatt--bgp_parameters--router_id_choice"></a>
 ### Nested Schema for `bgp_parameters.router_id_choice`
 
 Optional:
 
-- `from_site` (Boolean) from_site Use the Router ID field from the site object.
-- `ip_address` (String) ip_address Use the configured IPv4 Address as Router ID.
-- `local_address` (Boolean) local_address Use an interface address of the site as the Router ID.
+- `from_site` (Boolean) from_site Use the Router ID field from the site object.<br>Conflicts with `ip_address` and `local_address`.
+- `ip_address` (String) ip_address Use the configured IPv4 Address as Router ID.<br>Conflicts with `from_site` and `local_address`.
+- `local_address` (Boolean) local_address Use an interface address of the site as the Router ID.<br>Conflicts with `from_site` and `ip_address`.
 
 
 
@@ -176,104 +179,16 @@ Optional:
 
 Required:
 
-- `bfd_choice` (Attributes) bdf_enable_choice Enable/Disable BFD for BGP Peer. (see [below for nested schema](#nestedatt--peers--bfd_choice))
-- `enable_choice` (Attributes) bgp_routing_policy Enable or disable the rule (see [below for nested schema](#nestedatt--peers--enable_choice))
 - `metadata` (Attributes) metadata Common attributes for the peer including name and description. (see [below for nested schema](#nestedatt--peers--metadata))
-- `passive_choice` (Attributes) passive_choice Do not attempt to actively connect to the peer if passive mode is enabled. (see [below for nested schema](#nestedatt--peers--passive_choice))
-- `type_choice` (Attributes) type_choice Select the type of peer. (see [below for nested schema](#nestedatt--peers--type_choice))
+- `type_choice` (Attributes) type_choice Select the type of peer.<br>`external` must be specified. (see [below for nested schema](#nestedatt--peers--type_choice))
 
 Optional:
 
-- `ebgp_multihop_choice` (Attributes) ebgp_multihop_choice Control eBGP multihop for this peer. When multihop is enabled (default), the BGP speaker permits non-directly-connected peers (TTL > 1) and BFD runs in multihop mode (RFC 5883, port 4784). When disabled, single-hop BFD (RFC 5881, port 3784) is used and ebgp-multihop is not configured on the BGP speaker. (see [below for nested schema](#nestedatt--peers--ebgp_multihop_choice))
+- `bfd_choice` (Attributes) bdf_enable_choice Enable/Disable BFD for BGP Peer.<br>Exactly one of `bfd_disabled` or `bfd_enabled` must be specified when `bfd_choice` is configured. (see [below for nested schema](#nestedatt--peers--bfd_choice))
+- `ebgp_multihop_choice` (Attributes) ebgp_multihop_choice Control eBGP multihop for this peer. When multihop is enabled (default), the BGP speaker permits non-directly-connected peers (TTL > 1) and BFD runs in multihop mode (RFC 5883, port 4784). When disabled, single-hop BFD (RFC 5881, port 3784) is used and ebgp-multihop is not configured on the BGP speaker.<br>Exactly one of `ebgp_multihop_disabled` or `ebgp_multihop_enabled` must be specified when `ebgp_multihop_choice` is configured. (see [below for nested schema](#nestedatt--peers--ebgp_multihop_choice))
+- `enable_choice` (Attributes) bgp_routing_policy Enable or disable the rule<br>Exactly one of `disable` or `routing_policies` must be specified when `enable_choice` is configured. (see [below for nested schema](#nestedatt--peers--enable_choice))
 - `label` (String) label Specify whether this peer should be
-
-<a id="nestedatt--peers--bfd_choice"></a>
-### Nested Schema for `peers.bfd_choice`
-
-Optional:
-
-- `bfd_disabled` (Boolean) bfd_disabled
-- `bfd_enabled` (Attributes) bfd_enabled (see [below for nested schema](#nestedatt--peers--bfd_choice--bfd_enabled))
-
-<a id="nestedatt--peers--bfd_choice--bfd_enabled"></a>
-### Nested Schema for `peers.bfd_choice.bfd_enabled`
-
-Optional:
-
-- `multiplier` (Number) Multiplier Specify Number of missed packets to bring session down'<br>**Default:** `3`
-- `receive_interval_milliseconds` (Number) Receive Interval in milliseconds BFD receive interval timer, in milliseconds<br>**Default:** `3000`
-- `transmit_interval_milliseconds` (Number) Transmit Interval in milliseconds BFD transmit interval timer, in milliseconds<br>**Default:** `3000`
-
-
-
-<a id="nestedatt--peers--enable_choice"></a>
-### Nested Schema for `peers.enable_choice`
-
-Optional:
-
-- `disable` (Boolean) disable Disables the BGP routing policy
-- `routing_policies` (Attributes) routing_policies BGP Routing policies are enabled, created policies need to be referenced with a direction inbound or outbound and specify the node or nodes that this policy applies to (see [below for nested schema](#nestedatt--peers--enable_choice--routing_policies))
-
-<a id="nestedatt--peers--enable_choice--routing_policies"></a>
-### Nested Schema for `peers.enable_choice.routing_policies`
-
-Optional:
-
-- `route_policy` (Attributes List) route_policy Route policy to be applied (see [below for nested schema](#nestedatt--peers--enable_choice--routing_policies--route_policy))
-
-<a id="nestedatt--peers--enable_choice--routing_policies--route_policy"></a>
-### Nested Schema for `peers.enable_choice.routing_policies.route_policy`
-
-Required:
-
-- `object_refs` (Attributes List) Policy to apply Select route policy to apply. (see [below for nested schema](#nestedatt--peers--enable_choice--routing_policies--route_policy--object_refs))
-
-Optional:
-
-- `direction_choice` (Attributes) direction Select direction on which to apply route policy. (see [below for nested schema](#nestedatt--peers--enable_choice--routing_policies--route_policy--direction_choice))
-- `node_choice` (Attributes) node_choice Select BGP Session on which policy will be applied. (see [below for nested schema](#nestedatt--peers--enable_choice--routing_policies--route_policy--node_choice))
-
-<a id="nestedatt--peers--enable_choice--routing_policies--route_policy--object_refs"></a>
-### Nested Schema for `peers.enable_choice.routing_policies.route_policy.object_refs`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-<a id="nestedatt--peers--enable_choice--routing_policies--route_policy--direction_choice"></a>
-### Nested Schema for `peers.enable_choice.routing_policies.route_policy.direction_choice`
-
-Optional:
-
-- `inbound` (Boolean) inbound Apply policy on routes being imported
-- `outbound` (Boolean) outbound Apply policy on routes being exported
-
-
-<a id="nestedatt--peers--enable_choice--routing_policies--route_policy--node_choice"></a>
-### Nested Schema for `peers.enable_choice.routing_policies.route_policy.node_choice`
-
-Optional:
-
-- `all_nodes` (Boolean) all Apply filter on all nodes where Peer is valid
-- `node_name` (Attributes) node_name Select nodes where BGP routing policy has to be applied (see [below for nested schema](#nestedatt--peers--enable_choice--routing_policies--route_policy--node_choice--node_name))
-
-<a id="nestedatt--peers--enable_choice--routing_policies--route_policy--node_choice--node_name"></a>
-### Nested Schema for `peers.enable_choice.routing_policies.route_policy.node_choice.node_name`
-
-Optional:
-
-- `node` (List of String) Node Select BGP Session on which policy will be applied.
-
-
-
-
-
+- `passive_choice` (Attributes) passive_choice Do not attempt to actively connect to the peer if passive mode is enabled.<br>Exactly one of `passive_mode_disabled` or `passive_mode_enabled` must be specified when `passive_choice` is configured. (see [below for nested schema](#nestedatt--peers--passive_choice))
 
 <a id="nestedatt--peers--metadata"></a>
 ### Nested Schema for `peers.metadata`
@@ -285,15 +200,6 @@ Required:
 Optional:
 
 - `description` (String) description Human readable description.<br>**Validation:** `Length LengthAtMost(256)`
-
-
-<a id="nestedatt--peers--passive_choice"></a>
-### Nested Schema for `peers.passive_choice`
-
-Optional:
-
-- `passive_mode_disabled` (Boolean) passive_mode_disabled
-- `passive_mode_enabled` (Boolean) passive_mode_enabled
 
 
 <a id="nestedatt--peers--type_choice"></a>
@@ -308,14 +214,14 @@ Optional:
 
 Required:
 
-- `address_choice` (Attributes) address_choice Peer address configuration. (see [below for nested schema](#nestedatt--peers--type_choice--external--address_choice))
-- `address_choice_v6_choice` (Attributes) address_choice_v6 Peer address configuration. (see [below for nested schema](#nestedatt--peers--type_choice--external--address_choice_v6_choice))
+- `address_choice` (Attributes) address_choice Peer address configuration.<br>Exactly one of `address`, `default_gateway`, `disable`, `external_connector`, `from_site`, `subnet_begin_offset`, or `subnet_end_offset` must be specified. (see [below for nested schema](#nestedatt--peers--type_choice--external--address_choice))
 - `asn` (Number) ASN Autonomous System Number for BGP peer
-- `interface_choice` (Attributes) interface_choice Peer interface configuration. (see [below for nested schema](#nestedatt--peers--type_choice--external--interface_choice))
+- `interface_choice` (Attributes) interface_choice Peer interface configuration.<br>Exactly one of `interface` or `interface_list` must be specified. (see [below for nested schema](#nestedatt--peers--type_choice--external--interface_choice))
 
 Optional:
 
-- `auth_choice` (Attributes) auth_choice Select BGP Session Authentication parameters. (see [below for nested schema](#nestedatt--peers--type_choice--external--auth_choice))
+- `address_choice_v6_choice` (Attributes) address_choice_v6 Peer address configuration.<br>Exactly one of `address_ipv6`, `default_gateway_v6`, `disable_v6`, `from_site_v6`, `subnet_begin_offset_v6`, or `subnet_end_offset_v6` must be specified when `address_choice_v6_choice` is configured. (see [below for nested schema](#nestedatt--peers--type_choice--external--address_choice_v6_choice))
+- `auth_choice` (Attributes) auth_choice Select BGP Session Authentication parameters.<br>Exactly one of `md5_auth_key` or `no_authentication` must be specified when `auth_choice` is configured. (see [below for nested schema](#nestedatt--peers--type_choice--external--auth_choice))
 - `family_inet` (Attributes) family_inet Enable/Disable Ipv4 family of routes exchange with peer (see [below for nested schema](#nestedatt--peers--type_choice--external--family_inet))
 - `family_inet_v6` (Attributes) family_inet_v6 Enable/Disable IPv6 family of routes exchange with peer (see [below for nested schema](#nestedatt--peers--type_choice--external--family_inet_v6))
 - `port` (Number) Peer Port Peer TCP port number.<br>**Default:** `179`
@@ -325,26 +231,13 @@ Optional:
 
 Optional:
 
-- `address` (String) address Specify IPV4 peer address.
-- `default_gateway` (Boolean) default_gateway Use the default gateway address.
-- `disable` (Boolean) disable No Peer Ipv4 Address.
-- `external_connector` (Boolean) external_connector Pick Peer Address from External connector interface remote address.
-- `from_site` (Boolean) from_site Use the address specified in the site object.
-- `subnet_begin_offset` (Number) subnet_begin_offset Calculate peer address using offset from the beginning of the subnet.
-- `subnet_end_offset` (Number) subnet_end_offset Calculate peer address using offset from the end of the subnet.
-
-
-<a id="nestedatt--peers--type_choice--external--address_choice_v6_choice"></a>
-### Nested Schema for `peers.type_choice.external.address_choice_v6_choice`
-
-Optional:
-
-- `address_ipv6` (String) address_ipv6 Specify peer IPv6 address.
-- `default_gateway_v6` (Boolean) default_gateway_v6 Use the default gateway address.
-- `disable_v6` (Boolean) disable_v6 No Peer IPv6 Address.
-- `from_site_v6` (Boolean) from_site_v6 Use the address specified in the site object.
-- `subnet_begin_offset_v6` (Number) subnet_begin_offset_v6 Calculate peer address using offset from the beginning of the subnet.
-- `subnet_end_offset_v6` (Number) subnet_end_offset_v6 Calculate peer address using offset from the end of the subnet.
+- `address` (String) address Specify IPV4 peer address.<br>Conflicts with `default_gateway`, `disable`, `external_connector`, `from_site`, `subnet_begin_offset`, and `subnet_end_offset`.
+- `default_gateway` (Boolean) default_gateway Use the default gateway address.<br>Conflicts with `address`, `disable`, `external_connector`, `from_site`, `subnet_begin_offset`, and `subnet_end_offset`.
+- `disable` (Boolean) disable No Peer Ipv4 Address.<br>Conflicts with `address`, `default_gateway`, `external_connector`, `from_site`, `subnet_begin_offset`, and `subnet_end_offset`.
+- `external_connector` (Boolean) external_connector Pick Peer Address from External connector interface remote address.<br>Conflicts with `address`, `default_gateway`, `disable`, `from_site`, `subnet_begin_offset`, and `subnet_end_offset`.
+- `from_site` (Boolean) from_site Use the address specified in the site object.<br>Conflicts with `address`, `default_gateway`, `disable`, `external_connector`, `subnet_begin_offset`, and `subnet_end_offset`.
+- `subnet_begin_offset` (Number) subnet_begin_offset Calculate peer address using offset from the beginning of the subnet.<br>Conflicts with `address`, `default_gateway`, `disable`, `external_connector`, `from_site`, and `subnet_end_offset`.
+- `subnet_end_offset` (Number) subnet_end_offset Calculate peer address using offset from the end of the subnet.<br>Conflicts with `address`, `default_gateway`, `disable`, `external_connector`, `from_site`, and `subnet_begin_offset`.
 
 
 <a id="nestedatt--peers--type_choice--external--interface_choice"></a>
@@ -352,8 +245,8 @@ Optional:
 
 Optional:
 
-- `interface` (Attributes) interface Specify interface. (see [below for nested schema](#nestedatt--peers--type_choice--external--interface_choice--interface))
-- `interface_list` (Attributes) interface_list List of network interfaces. (see [below for nested schema](#nestedatt--peers--type_choice--external--interface_choice--interface_list))
+- `interface` (Attributes) interface Specify interface.<br>Conflicts with `interface_list`. (see [below for nested schema](#nestedatt--peers--type_choice--external--interface_choice--interface))
+- `interface_list` (Attributes) interface_list List of network interfaces.<br>Conflicts with `interface`. (see [below for nested schema](#nestedatt--peers--type_choice--external--interface_choice--interface_list))
 
 <a id="nestedatt--peers--type_choice--external--interface_choice--interface"></a>
 ### Nested Schema for `peers.type_choice.external.interface_choice.interface`
@@ -390,13 +283,26 @@ Read-Only:
 
 
 
+<a id="nestedatt--peers--type_choice--external--address_choice_v6_choice"></a>
+### Nested Schema for `peers.type_choice.external.address_choice_v6_choice`
+
+Optional:
+
+- `address_ipv6` (String) address_ipv6 Specify peer IPv6 address.<br>Conflicts with `default_gateway_v6`, `disable_v6`, `from_site_v6`, `subnet_begin_offset_v6`, and `subnet_end_offset_v6`.
+- `default_gateway_v6` (Boolean) default_gateway_v6 Use the default gateway address.<br>Conflicts with `address_ipv6`, `disable_v6`, `from_site_v6`, `subnet_begin_offset_v6`, and `subnet_end_offset_v6`.
+- `disable_v6` (Boolean) disable_v6 No Peer IPv6 Address.<br>Conflicts with `address_ipv6`, `default_gateway_v6`, `from_site_v6`, `subnet_begin_offset_v6`, and `subnet_end_offset_v6`.
+- `from_site_v6` (Boolean) from_site_v6 Use the address specified in the site object.<br>Conflicts with `address_ipv6`, `default_gateway_v6`, `disable_v6`, `subnet_begin_offset_v6`, and `subnet_end_offset_v6`.
+- `subnet_begin_offset_v6` (Number) subnet_begin_offset_v6 Calculate peer address using offset from the beginning of the subnet.<br>Conflicts with `address_ipv6`, `default_gateway_v6`, `disable_v6`, `from_site_v6`, and `subnet_end_offset_v6`.
+- `subnet_end_offset_v6` (Number) subnet_end_offset_v6 Calculate peer address using offset from the end of the subnet.<br>Conflicts with `address_ipv6`, `default_gateway_v6`, `disable_v6`, `from_site_v6`, and `subnet_begin_offset_v6`.
+
+
 <a id="nestedatt--peers--type_choice--external--auth_choice"></a>
 ### Nested Schema for `peers.type_choice.external.auth_choice`
 
 Optional:
 
-- `md5_auth_key` (String, Sensitive) md5_auth_key MD5 key for protecting BGP Sessions (RFC 2385)
-- `no_authentication` (Boolean) no_authentication No Authentication of BGP session
+- `md5_auth_key` (String, Sensitive) md5_auth_key MD5 key for protecting BGP Sessions (RFC 2385)<br>Conflicts with `no_authentication`.
+- `no_authentication` (Boolean) no_authentication No Authentication of BGP session<br>Conflicts with `md5_auth_key`.
 
 
 <a id="nestedatt--peers--type_choice--external--family_inet"></a>
@@ -404,15 +310,15 @@ Optional:
 
 Required:
 
-- `enable_choice` (Attributes) enable_choice Enable/Disable IPv4 family of routes exchange with peer i.e. AFI 1 and SAFI 1. (see [below for nested schema](#nestedatt--peers--type_choice--external--family_inet--enable_choice))
+- `enable_choice` (Attributes) enable_choice Enable/Disable IPv4 family of routes exchange with peer i.e. AFI 1 and SAFI 1.<br>Exactly one of `disable` or `enable` must be specified. (see [below for nested schema](#nestedatt--peers--type_choice--external--family_inet--enable_choice))
 
 <a id="nestedatt--peers--type_choice--external--family_inet--enable_choice"></a>
 ### Nested Schema for `peers.type_choice.external.family_inet.enable_choice`
 
 Optional:
 
-- `disable` (Boolean) disable Disable IPv4 family Route Exchange.
-- `enable` (Attributes) enable Enable IPv4 family Route Exchange. (see [below for nested schema](#nestedatt--peers--type_choice--external--family_inet--enable_choice--enable))
+- `disable` (Boolean) disable Disable IPv4 family Route Exchange.<br>Conflicts with `enable`.
+- `enable` (Attributes) enable Enable IPv4 family Route Exchange.<br>Conflicts with `disable`. (see [below for nested schema](#nestedatt--peers--type_choice--external--family_inet--enable_choice--enable))
 
 <a id="nestedatt--peers--type_choice--external--family_inet--enable_choice--enable"></a>
 ### Nested Schema for `peers.type_choice.external.family_inet.enable_choice.enable`
@@ -432,9 +338,9 @@ Optional:
 <a id="nestedatt--peers--type_choice--external--family_inet--enable_choice--enable--aggregation--options"></a>
 ### Nested Schema for `peers.type_choice.external.family_inet.enable_choice.enable.aggregation.options`
 
-Required:
+Optional:
 
-- `aggregation_choice` (Attributes) aggregation_choice (see [below for nested schema](#nestedatt--peers--type_choice--external--family_inet--enable_choice--enable--aggregation--options--aggregation_choice))
+- `aggregation_choice` (Attributes) aggregation_choice<br>`summary_only` must be specified when `aggregation_choice` is configured. (see [below for nested schema](#nestedatt--peers--type_choice--external--family_inet--enable_choice--enable--aggregation--options--aggregation_choice))
 
 <a id="nestedatt--peers--type_choice--external--family_inet--enable_choice--enable--aggregation--options--aggregation_choice"></a>
 ### Nested Schema for `peers.type_choice.external.family_inet.enable_choice.enable.aggregation.options.aggregation_choice`
@@ -452,17 +358,17 @@ Optional:
 <a id="nestedatt--peers--type_choice--external--family_inet_v6"></a>
 ### Nested Schema for `peers.type_choice.external.family_inet_v6`
 
-Required:
+Optional:
 
-- `enable_choice` (Attributes) enable_choice Enable/Disable IPv6 family of routes exchange with peer i.e. AFI 2 and SAFI 1. (see [below for nested schema](#nestedatt--peers--type_choice--external--family_inet_v6--enable_choice))
+- `enable_choice` (Attributes) enable_choice Enable/Disable IPv6 family of routes exchange with peer i.e. AFI 2 and SAFI 1.<br>Exactly one of `disable` or `enable` must be specified when `enable_choice` is configured. (see [below for nested schema](#nestedatt--peers--type_choice--external--family_inet_v6--enable_choice))
 
 <a id="nestedatt--peers--type_choice--external--family_inet_v6--enable_choice"></a>
 ### Nested Schema for `peers.type_choice.external.family_inet_v6.enable_choice`
 
 Optional:
 
-- `disable` (Boolean) disable Disable IPv6 family Route Exchange.
-- `enable` (Attributes) enable Enable IPv6 family Route Exchange. (see [below for nested schema](#nestedatt--peers--type_choice--external--family_inet_v6--enable_choice--enable))
+- `disable` (Boolean) disable Disable IPv6 family Route Exchange.<br>Conflicts with `enable`.
+- `enable` (Attributes) enable Enable IPv6 family Route Exchange.<br>Conflicts with `disable`. (see [below for nested schema](#nestedatt--peers--type_choice--external--family_inet_v6--enable_choice--enable))
 
 <a id="nestedatt--peers--type_choice--external--family_inet_v6--enable_choice--enable"></a>
 ### Nested Schema for `peers.type_choice.external.family_inet_v6.enable_choice.enable`
@@ -482,9 +388,9 @@ Optional:
 <a id="nestedatt--peers--type_choice--external--family_inet_v6--enable_choice--enable--aggregation--options"></a>
 ### Nested Schema for `peers.type_choice.external.family_inet_v6.enable_choice.enable.aggregation.options`
 
-Required:
+Optional:
 
-- `aggregation_choice` (Attributes) aggregation_choice (see [below for nested schema](#nestedatt--peers--type_choice--external--family_inet_v6--enable_choice--enable--aggregation--options--aggregation_choice))
+- `aggregation_choice` (Attributes) aggregation_choice<br>`summary_only` must be specified when `aggregation_choice` is configured. (see [below for nested schema](#nestedatt--peers--type_choice--external--family_inet_v6--enable_choice--enable--aggregation--options--aggregation_choice))
 
 <a id="nestedatt--peers--type_choice--external--family_inet_v6--enable_choice--enable--aggregation--options--aggregation_choice"></a>
 ### Nested Schema for `peers.type_choice.external.family_inet_v6.enable_choice.enable.aggregation.options.aggregation_choice`
@@ -501,13 +407,110 @@ Optional:
 
 
 
+<a id="nestedatt--peers--bfd_choice"></a>
+### Nested Schema for `peers.bfd_choice`
+
+Optional:
+
+- `bfd_disabled` (Boolean) bfd_disabled<br>Conflicts with `bfd_enabled`.
+- `bfd_enabled` (Attributes) bfd_enabled<br>Conflicts with `bfd_disabled`. (see [below for nested schema](#nestedatt--peers--bfd_choice--bfd_enabled))
+
+<a id="nestedatt--peers--bfd_choice--bfd_enabled"></a>
+### Nested Schema for `peers.bfd_choice.bfd_enabled`
+
+Optional:
+
+- `multiplier` (Number) Multiplier Specify Number of missed packets to bring session down'<br>**Default:** `3`
+- `receive_interval_milliseconds` (Number) Receive Interval in milliseconds BFD receive interval timer, in milliseconds<br>**Default:** `3000`
+- `transmit_interval_milliseconds` (Number) Transmit Interval in milliseconds BFD transmit interval timer, in milliseconds<br>**Default:** `3000`
+
+
+
 <a id="nestedatt--peers--ebgp_multihop_choice"></a>
 ### Nested Schema for `peers.ebgp_multihop_choice`
 
 Optional:
 
-- `ebgp_multihop_disabled` (Boolean) ebgp_multihop_disabled eBGP multihop is disabled. Single-hop BFD (port 3784) is used and ebgp-multihop is not configured on the BGP speaker.
-- `ebgp_multihop_enabled` (Boolean) ebgp_multihop_enabled eBGP multihop is enabled (default). The BGP speaker allows non-directly-connected peers and BFD runs in multihop mode (port 4784).
+- `ebgp_multihop_disabled` (Boolean) ebgp_multihop_disabled eBGP multihop is disabled. Single-hop BFD (port 3784) is used and ebgp-multihop is not configured on the BGP speaker.<br>Conflicts with `ebgp_multihop_enabled`.
+- `ebgp_multihop_enabled` (Boolean) ebgp_multihop_enabled eBGP multihop is enabled (default). The BGP speaker allows non-directly-connected peers and BFD runs in multihop mode (port 4784).<br>Conflicts with `ebgp_multihop_disabled`.
+
+
+<a id="nestedatt--peers--enable_choice"></a>
+### Nested Schema for `peers.enable_choice`
+
+Optional:
+
+- `disable` (Boolean) disable Disables the BGP routing policy<br>Conflicts with `routing_policies`.
+- `routing_policies` (Attributes) routing_policies BGP Routing policies are enabled, created policies need to be referenced with a direction inbound or outbound and specify the node or nodes that this policy applies to<br>Conflicts with `disable`. (see [below for nested schema](#nestedatt--peers--enable_choice--routing_policies))
+
+<a id="nestedatt--peers--enable_choice--routing_policies"></a>
+### Nested Schema for `peers.enable_choice.routing_policies`
+
+Optional:
+
+- `route_policy` (Attributes List) route_policy Route policy to be applied (see [below for nested schema](#nestedatt--peers--enable_choice--routing_policies--route_policy))
+
+<a id="nestedatt--peers--enable_choice--routing_policies--route_policy"></a>
+### Nested Schema for `peers.enable_choice.routing_policies.route_policy`
+
+Required:
+
+- `object_refs` (Attributes List) Policy to apply Select route policy to apply. (see [below for nested schema](#nestedatt--peers--enable_choice--routing_policies--route_policy--object_refs))
+
+Optional:
+
+- `direction_choice` (Attributes) direction Select direction on which to apply route policy.<br>Exactly one of `inbound` or `outbound` must be specified when `direction_choice` is configured. (see [below for nested schema](#nestedatt--peers--enable_choice--routing_policies--route_policy--direction_choice))
+- `node_choice` (Attributes) node_choice Select BGP Session on which policy will be applied.<br>Exactly one of `all_nodes` or `node_name` must be specified when `node_choice` is configured. (see [below for nested schema](#nestedatt--peers--enable_choice--routing_policies--route_policy--node_choice))
+
+<a id="nestedatt--peers--enable_choice--routing_policies--route_policy--object_refs"></a>
+### Nested Schema for `peers.enable_choice.routing_policies.route_policy.object_refs`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+<a id="nestedatt--peers--enable_choice--routing_policies--route_policy--direction_choice"></a>
+### Nested Schema for `peers.enable_choice.routing_policies.route_policy.direction_choice`
+
+Optional:
+
+- `inbound` (Boolean) inbound Apply policy on routes being imported<br>Conflicts with `outbound`.
+- `outbound` (Boolean) outbound Apply policy on routes being exported<br>Conflicts with `inbound`.
+
+
+<a id="nestedatt--peers--enable_choice--routing_policies--route_policy--node_choice"></a>
+### Nested Schema for `peers.enable_choice.routing_policies.route_policy.node_choice`
+
+Optional:
+
+- `all_nodes` (Boolean) all Apply filter on all nodes where Peer is valid<br>Conflicts with `node_name`.
+- `node_name` (Attributes) node_name Select nodes where BGP routing policy has to be applied<br>Conflicts with `all_nodes`. (see [below for nested schema](#nestedatt--peers--enable_choice--routing_policies--route_policy--node_choice--node_name))
+
+<a id="nestedatt--peers--enable_choice--routing_policies--route_policy--node_choice--node_name"></a>
+### Nested Schema for `peers.enable_choice.routing_policies.route_policy.node_choice.node_name`
+
+Optional:
+
+- `node` (List of String) Node Select BGP Session on which policy will be applied.
+
+
+
+
+
+
+<a id="nestedatt--peers--passive_choice"></a>
+### Nested Schema for `peers.passive_choice`
+
+Optional:
+
+- `passive_mode_disabled` (Boolean) passive_mode_disabled<br>Conflicts with `passive_mode_enabled`.
+- `passive_mode_enabled` (Boolean) passive_mode_enabled<br>Conflicts with `passive_mode_disabled`.
 
 
 
@@ -516,15 +519,15 @@ Optional:
 
 Required:
 
-- `ref_or_selector_choice` (Attributes) ref_or_selector One of following (see [below for nested schema](#nestedatt--where--ref_or_selector_choice))
+- `ref_or_selector_choice` (Attributes) ref_or_selector One of following<br>Exactly one of `site` or `virtual_site` must be specified. (see [below for nested schema](#nestedatt--where--ref_or_selector_choice))
 
 <a id="nestedatt--where--ref_or_selector_choice"></a>
 ### Nested Schema for `where.ref_or_selector_choice`
 
 Optional:
 
-- `site` (Attributes) site Direct reference to site object (see [below for nested schema](#nestedatt--where--ref_or_selector_choice--site))
-- `virtual_site` (Attributes) virtual_site Direct reference to virtual site object (see [below for nested schema](#nestedatt--where--ref_or_selector_choice--virtual_site))
+- `site` (Attributes) site Direct reference to site object<br>Conflicts with `virtual_site`. (see [below for nested schema](#nestedatt--where--ref_or_selector_choice--site))
+- `virtual_site` (Attributes) virtual_site Direct reference to virtual site object<br>Conflicts with `site`. (see [below for nested schema](#nestedatt--where--ref_or_selector_choice--virtual_site))
 
 <a id="nestedatt--where--ref_or_selector_choice--site"></a>
 ### Nested Schema for `where.ref_or_selector_choice.site`
@@ -600,6 +603,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_bgp.example"
+	to = f5xc_bgp.example
 }
 ```

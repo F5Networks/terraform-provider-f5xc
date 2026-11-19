@@ -27,6 +27,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -388,14 +389,14 @@ var ApiTestingDomainsCredentialsCredentialsChoiceLoginEndpointJsonPayloadSecretI
 	"url":      types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> RoleChoice
+// Attribute map for OneOfField --> RoleChoice
 var ApiTestingDomainsCredentialsRoleChoiceModelAttributeMap = map[string]attr.Type{
 
 	"admin":    types.BoolType,
 	"standard": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> FrequencyChoice
+// Attribute map for OneOfField --> FrequencyChoice
 var ApiTestingFrequencyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"every_day":   types.BoolType,
@@ -539,7 +540,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 									},
 									"credentials_choice": schema.SingleNestedAttribute{
 										Description:         "Credential Type",
-										MarkdownDescription: "Credential Type",
+										MarkdownDescription: "Credential Type<br>Exactly one of `api_key`, `basic_auth`, `bearer_token`, or `login_endpoint` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -554,7 +555,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 										Attributes: map[string]schema.Attribute{
 											"api_key": schema.SingleNestedAttribute{
 												Description:         "Field Aggregation",
-												MarkdownDescription: "Field Aggregation",
+												MarkdownDescription: "Field Aggregation<br>Conflicts with `basic_auth`, `bearer_token`, and `login_endpoint`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -582,7 +583,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 														Attributes: map[string]schema.Attribute{
 															"secret_info_choice": schema.SingleNestedAttribute{
 																Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
@@ -596,7 +597,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 																Attributes: map[string]schema.Attribute{
 																	"blindfold_secret_info": schema.SingleNestedAttribute{
 																		Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																		MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																		MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -636,7 +637,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 																	},
 																	"clear_secret_info": schema.SingleNestedAttribute{
 																		Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																		MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																		MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -671,7 +672,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 																	},
 																	"none": schema.BoolAttribute{
 																		Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																		MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																		MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -687,7 +688,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 											},
 											"basic_auth": schema.SingleNestedAttribute{
 												Description:         "Basic authentication",
-												MarkdownDescription: "Basic authentication",
+												MarkdownDescription: "Basic authentication<br>Conflicts with `api_key`, `bearer_token`, and `login_endpoint`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -701,7 +702,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 														Attributes: map[string]schema.Attribute{
 															"secret_info_choice": schema.SingleNestedAttribute{
 																Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
@@ -715,7 +716,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 																Attributes: map[string]schema.Attribute{
 																	"blindfold_secret_info": schema.SingleNestedAttribute{
 																		Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																		MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																		MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -755,7 +756,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 																	},
 																	"clear_secret_info": schema.SingleNestedAttribute{
 																		Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																		MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																		MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -790,7 +791,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 																	},
 																	"none": schema.BoolAttribute{
 																		Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																		MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																		MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -816,7 +817,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 											},
 											"bearer_token": schema.SingleNestedAttribute{
 												Description:         "Bearer Token",
-												MarkdownDescription: "Bearer Token",
+												MarkdownDescription: "Bearer Token<br>Conflicts with `api_key`, `basic_auth`, and `login_endpoint`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -830,7 +831,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 														Attributes: map[string]schema.Attribute{
 															"secret_info_choice": schema.SingleNestedAttribute{
 																Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
@@ -844,7 +845,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 																Attributes: map[string]schema.Attribute{
 																	"blindfold_secret_info": schema.SingleNestedAttribute{
 																		Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																		MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																		MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -884,7 +885,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 																	},
 																	"clear_secret_info": schema.SingleNestedAttribute{
 																		Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																		MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																		MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -919,7 +920,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 																	},
 																	"none": schema.BoolAttribute{
 																		Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																		MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																		MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -935,7 +936,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 											},
 											"login_endpoint": schema.SingleNestedAttribute{
 												Description:         "Login Endpoint",
-												MarkdownDescription: "Login Endpoint",
+												MarkdownDescription: "Login Endpoint<br>Conflicts with `api_key`, `basic_auth`, and `bearer_token`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -949,7 +950,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 														Attributes: map[string]schema.Attribute{
 															"secret_info_choice": schema.SingleNestedAttribute{
 																Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
@@ -963,7 +964,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 																Attributes: map[string]schema.Attribute{
 																	"blindfold_secret_info": schema.SingleNestedAttribute{
 																		Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																		MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																		MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -1003,7 +1004,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 																	},
 																	"clear_secret_info": schema.SingleNestedAttribute{
 																		Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																		MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																		MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -1038,7 +1039,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 																	},
 																	"none": schema.BoolAttribute{
 																		Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																		MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																		MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -1089,20 +1090,23 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 									},
 									"role_choice": schema.SingleNestedAttribute{
 										Description:         "Role Configure role type(.e.g.,Standard, Admin)",
-										MarkdownDescription: "Role Configure role type(.e.g.,Standard, Admin)",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Role Configure role type(.e.g.,Standard, Admin)<br>Exactly one of `admin` or `standard` must be specified when `role_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"admin",
 												"standard",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"admin": schema.BoolAttribute{
 												Description:         "Admin Role",
-												MarkdownDescription: "Admin Role",
+												MarkdownDescription: "Admin Role<br>Conflicts with `standard`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1112,7 +1116,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 											},
 											"standard": schema.BoolAttribute{
 												Description:         "Standard Role",
-												MarkdownDescription: "Standard Role",
+												MarkdownDescription: "Standard Role<br>Conflicts with `admin`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1144,21 +1148,24 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 			},
 			"frequency_choice": schema.SingleNestedAttribute{
 				Description:         "Frequency of Api Testing",
-				MarkdownDescription: "Frequency of Api Testing",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Frequency of Api Testing<br>Exactly one of `every_day`, `every_month`, or `every_week` must be specified when `frequency_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"every_day",
 						"every_month",
 						"every_week",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"every_day": schema.BoolAttribute{
 						Description:         "Every Day",
-						MarkdownDescription: "Every Day",
+						MarkdownDescription: "Every Day<br>Conflicts with `every_month` and `every_week`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1168,7 +1175,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 					},
 					"every_month": schema.BoolAttribute{
 						Description:         "Every Month",
-						MarkdownDescription: "Every Month",
+						MarkdownDescription: "Every Month<br>Conflicts with `every_day` and `every_week`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1178,7 +1185,7 @@ func (r *ResourceF5XCApiTesting) Schema(ctx context.Context, request resource.Sc
 					},
 					"every_week": schema.BoolAttribute{
 						Description:         "Every Week",
-						MarkdownDescription: "Every Week",
+						MarkdownDescription: "Every Week<br>Conflicts with `every_day` and `every_month`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1394,6 +1401,9 @@ func (r *ResourceF5XCApiTesting) Create(ctx context.Context, request resource.Cr
 				for ii, credentialsElement := range credentialsElements {
 					// Initialize the spec struct for the current element
 					domainsSpec[i].Credentials[ii] = &ves_io_schema_api_sec_api_testing.Credentials{}
+					domainsSpec[i].Credentials[ii].RoleChoice = &ves_io_schema_api_sec_api_testing.Credentials_Standard{
+						Standard: &ves_io_schema.Empty{},
+					}
 
 					// Recursively process nested elements
 
@@ -1832,7 +1842,7 @@ func (r *ResourceF5XCApiTesting) Create(ctx context.Context, request resource.Cr
 
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> RoleChoice
+					// resource modelToSpecNested OneOfField --> RoleChoice
 					if !credentialsElement.RoleChoice.IsNull() && !credentialsElement.RoleChoice.IsUnknown() {
 						credentialsRoleChoiceModel := ApiTestingRoleChoice{}
 						response.Diagnostics.Append(credentialsElement.RoleChoice.As(ctx, &credentialsRoleChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1869,7 +1879,7 @@ func (r *ResourceF5XCApiTesting) Create(ctx context.Context, request resource.Cr
 		spec.Domains = domainsSpec
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> FrequencyChoice
+	// resource modelToSpecRoot OneOfField --> FrequencyChoice
 	if !data.FrequencyChoice.IsNull() && !data.FrequencyChoice.IsUnknown() {
 		frequencyChoiceModel := ApiTestingFrequencyChoice{}
 		response.Diagnostics.Append(data.FrequencyChoice.As(ctx, &frequencyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1898,7 +1908,12 @@ func (r *ResourceF5XCApiTesting) Create(ctx context.Context, request resource.Cr
 			spec.FrequencyChoice = everyWeekSpecBool
 		}
 
+	} else {
+		spec.FrequencyChoice = &ves_io_schema_api_sec_api_testing.CreateSpecType_EveryWeek{
+			EveryWeek: &ves_io_schema.Empty{},
+		}
 	}
+
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
@@ -2824,8 +2839,7 @@ func (r *ResourceF5XCApiTesting) Create(ctx context.Context, request resource.Cr
 						apiTestingCredentialsModel.CredentialsChoice = types.ObjectNull(ApiTestingDomainsCredentialsCredentialsChoiceModelAttributeMap)
 					}
 
-					// resource specToModelNested RequiredOneOfField --> RoleChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> RoleChoice
 					if credentialsElement.GetRoleChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						credentialsroleChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -2917,7 +2931,7 @@ func (r *ResourceF5XCApiTesting) Create(ctx context.Context, request resource.Cr
 		data.Domains = domainsList
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> FrequencyChoice
+	// resource SpecToModelRoot OneOfField --> FrequencyChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -2974,8 +2988,6 @@ func (r *ResourceF5XCApiTesting) Create(ctx context.Context, request resource.Cr
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.FrequencyChoice = types.ObjectNull(ApiTestingFrequencyChoiceModelAttributeMap)
 	}
 
@@ -3023,11 +3035,7 @@ func (r *ResourceF5XCApiTesting) Read(ctx context.Context, request resource.Read
 	defer cancel()
 	priorDomains := data.Domains
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_api_sec_api_testing.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_api_sec_api_testing.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "api_testing", err),
@@ -3977,8 +3985,7 @@ func (r *ResourceF5XCApiTesting) Read(ctx context.Context, request resource.Read
 						apiTestingCredentialsModel.CredentialsChoice = types.ObjectNull(ApiTestingDomainsCredentialsCredentialsChoiceModelAttributeMap)
 					}
 
-					// resource specToModelNested RequiredOneOfField --> RoleChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> RoleChoice
 					if credentialsElement.GetRoleChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						credentialsroleChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -4073,7 +4080,7 @@ func (r *ResourceF5XCApiTesting) Read(ctx context.Context, request resource.Read
 		data.Domains = domainsList
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> FrequencyChoice
+	// resource SpecToModelRoot OneOfField --> FrequencyChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -4130,8 +4137,6 @@ func (r *ResourceF5XCApiTesting) Read(ctx context.Context, request resource.Read
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.FrequencyChoice.IsNull() || data.FrequencyChoice.IsUnknown() || ((data.FrequencyChoice.Attributes()["every_day"].IsNull() || data.FrequencyChoice.Attributes()["every_day"].IsUnknown()) && (data.FrequencyChoice.Attributes()["every_month"].IsNull() || data.FrequencyChoice.Attributes()["every_month"].IsUnknown()) && (data.FrequencyChoice.Attributes()["every_week"].IsNull() || data.FrequencyChoice.Attributes()["every_week"].IsUnknown())) {
 			data.FrequencyChoice = types.ObjectValueMust(ApiTestingFrequencyChoiceModelAttributeMap, map[string]attr.Value{
@@ -4311,6 +4316,9 @@ func (r *ResourceF5XCApiTesting) Update(ctx context.Context, request resource.Up
 				for ii, credentialsElement := range credentialsElements {
 					// Initialize the spec struct for the current element
 					domainsSpec[i].Credentials[ii] = &ves_io_schema_api_sec_api_testing.Credentials{}
+					domainsSpec[i].Credentials[ii].RoleChoice = &ves_io_schema_api_sec_api_testing.Credentials_Standard{
+						Standard: &ves_io_schema.Empty{},
+					}
 
 					// Recursively process nested elements
 
@@ -4749,7 +4757,7 @@ func (r *ResourceF5XCApiTesting) Update(ctx context.Context, request resource.Up
 
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> RoleChoice
+					// resource modelToSpecNested OneOfField --> RoleChoice
 					if !credentialsElement.RoleChoice.IsNull() && !credentialsElement.RoleChoice.IsUnknown() {
 						credentialsRoleChoiceModel := ApiTestingRoleChoice{}
 						response.Diagnostics.Append(credentialsElement.RoleChoice.As(ctx, &credentialsRoleChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4786,7 +4794,7 @@ func (r *ResourceF5XCApiTesting) Update(ctx context.Context, request resource.Up
 		spec.Domains = domainsSpec
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> FrequencyChoice
+	// resource modelToSpecRoot OneOfField --> FrequencyChoice
 	if !data.FrequencyChoice.IsNull() && !data.FrequencyChoice.IsUnknown() {
 		frequencyChoiceModel := ApiTestingFrequencyChoice{}
 		response.Diagnostics.Append(data.FrequencyChoice.As(ctx, &frequencyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4815,7 +4823,12 @@ func (r *ResourceF5XCApiTesting) Update(ctx context.Context, request resource.Up
 			spec.FrequencyChoice = everyWeekSpecBool
 		}
 
+	} else {
+		spec.FrequencyChoice = &ves_io_schema_api_sec_api_testing.ReplaceSpecType_EveryWeek{
+			EveryWeek: &ves_io_schema.Empty{},
+		}
 	}
+
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
@@ -4827,12 +4840,8 @@ func (r *ResourceF5XCApiTesting) Update(ctx context.Context, request resource.Up
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_api_sec_api_testing.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_api_sec_api_testing.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "api_testing", err),
@@ -4841,7 +4850,7 @@ func (r *ResourceF5XCApiTesting) Update(ctx context.Context, request resource.Up
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_api_sec_api_testing.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_api_sec_api_testing.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "api_testing", err),
@@ -5742,8 +5751,7 @@ func (r *ResourceF5XCApiTesting) Update(ctx context.Context, request resource.Up
 						apiTestingCredentialsModel.CredentialsChoice = types.ObjectNull(ApiTestingDomainsCredentialsCredentialsChoiceModelAttributeMap)
 					}
 
-					// resource specToModelNested RequiredOneOfField --> RoleChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> RoleChoice
 					if credentialsElement.GetRoleChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						credentialsroleChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5835,7 +5843,7 @@ func (r *ResourceF5XCApiTesting) Update(ctx context.Context, request resource.Up
 		data.Domains = domainsList
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> FrequencyChoice
+	// resource SpecToModelRoot OneOfField --> FrequencyChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -5892,8 +5900,6 @@ func (r *ResourceF5XCApiTesting) Update(ctx context.Context, request resource.Up
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.FrequencyChoice = types.ObjectNull(ApiTestingFrequencyChoiceModelAttributeMap)
 	}
 

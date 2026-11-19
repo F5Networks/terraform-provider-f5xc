@@ -60,15 +60,16 @@ type VirtualSiteLabelSelectorType struct {
 
 // ResourceF5XCVirtualSiteModel describes the resource data model.
 type ResourceF5XCVirtualSiteModel struct {
-	Annotations  types.Map      `tfsdk:"annotations"`
-	Description  types.String   `tfsdk:"description"`
-	Labels       types.Map      `tfsdk:"labels"`
-	Name         types.String   `tfsdk:"name"`
-	Namespace    types.String   `tfsdk:"namespace"`
-	Uid          types.String   `tfsdk:"uid"`
-	SiteSelector types.Object   `tfsdk:"site_selector"`
-	SiteType     types.List     `tfsdk:"site_type"`
-	Timeouts     timeouts.Value `tfsdk:"timeouts"`
+	Annotations    types.Map      `tfsdk:"annotations"`
+	Description    types.String   `tfsdk:"description"`
+	Labels         types.Map      `tfsdk:"labels"`
+	Name           types.String   `tfsdk:"name"`
+	Namespace      types.String   `tfsdk:"namespace"`
+	Uid            types.String   `tfsdk:"uid"`
+	SiteSelector   types.Object   `tfsdk:"site_selector"`
+	SiteType       types.List     `tfsdk:"site_type"`
+	FailIfReferred types.Bool     `tfsdk:"fail_if_referred"`
+	Timeouts       timeouts.Value `tfsdk:"timeouts"`
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -205,6 +206,13 @@ func (r *ResourceF5XCVirtualSite) Schema(ctx context.Context, request resource.S
 				PlanModifiers: []planmodifier.List{
 					immutableplanmodifier.ImmutableList(),
 				},
+			},
+			"fail_if_referred": schema.BoolAttribute{
+				Description:         "Controls whether deletion is restricted when the resource is referenced by other objects, excluding virtual_k8s. The default is true. When set to false, deletion proceeds even if references are present.",
+				MarkdownDescription: "Controls whether deletion is restricted when the resource is referenced by other objects, excluding virtual_k8s. The default is true. When set to false, deletion proceeds even if references are present.",
+				Required:            false,
+				Optional:            true,
+				Computed:            false,
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Create: true, // activate timeouts.create
@@ -649,11 +657,7 @@ func (r *ResourceF5XCVirtualSite) Read(ctx context.Context, request resource.Rea
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_virtual_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_virtual_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "virtual_site", err),
@@ -950,12 +954,8 @@ func (r *ResourceF5XCVirtualSite) Update(ctx context.Context, request resource.U
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_virtual_site.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_virtual_site.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "virtual_site", err),
@@ -964,7 +964,7 @@ func (r *ResourceF5XCVirtualSite) Update(ctx context.Context, request resource.U
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_virtual_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_virtual_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "virtual_site", err),
@@ -1193,7 +1193,7 @@ func (r *ResourceF5XCVirtualSite) Delete(ctx context.Context, request resource.D
 	ctx, cancel := context.WithTimeout(ctx, deleteTimeout)
 	defer cancel()
 	// Override-Delete Hook: hook.VirtualSiteOverrideDeleteHook
-	if hookErr := hook.VirtualSiteOverrideDeleteHook(ctx, r.client, data.Namespace.ValueString(), data.Name.ValueString()); hookErr != nil {
+	if hookErr := hook.VirtualSiteOverrideDeleteHook(ctx, r.client, data.Namespace.ValueString(), data.Name.ValueString(), data.FailIfReferred.IsNull() || data.FailIfReferred.ValueBool()); hookErr != nil {
 		response.Diagnostics.AddError(
 			"Override-Delete Hook Error",
 			fmt.Sprintf("Override-delete hook failed for %s: %s", "virtual_site", hookErr),

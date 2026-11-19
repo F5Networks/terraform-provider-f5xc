@@ -113,17 +113,17 @@ Read-Only:
 
 Optional:
 
-- `type_choice` (Attributes) Type Provide various protocol specific match conditions (see [below for nested schema](#nestedatt--protocol_policer--protocol--type_choice))
+- `type_choice` (Attributes) Type Provide various protocol specific match conditions<br>Exactly one of `dns`, `icmp`, `tcp`, or `udp` must be specified when `type_choice` is configured. (see [below for nested schema](#nestedatt--protocol_policer--protocol--type_choice))
 
 <a id="nestedatt--protocol_policer--protocol--type_choice"></a>
 ### Nested Schema for `protocol_policer.protocol.type_choice`
 
 Optional:
 
-- `dns` (Boolean) DNS packet type Match all DNS packets
-- `icmp` (Attributes) ICMP packet type ICMP message types to be matched in packet (see [below for nested schema](#nestedatt--protocol_policer--protocol--type_choice--icmp))
-- `tcp` (Attributes) TCP packet type TCP flags to be matched in packet (see [below for nested schema](#nestedatt--protocol_policer--protocol--type_choice--tcp))
-- `udp` (Boolean) UDP packet type Match all UDP packets
+- `dns` (Boolean) DNS packet type Match all DNS packets<br>Conflicts with `icmp`, `tcp`, and `udp`.
+- `icmp` (Attributes) ICMP packet type ICMP message types to be matched in packet<br>Conflicts with `dns`, `tcp`, and `udp`. (see [below for nested schema](#nestedatt--protocol_policer--protocol--type_choice--icmp))
+- `tcp` (Attributes) TCP packet type TCP flags to be matched in packet<br>Conflicts with `dns`, `icmp`, and `udp`. (see [below for nested schema](#nestedatt--protocol_policer--protocol--type_choice--tcp))
+- `udp` (Boolean) UDP packet type Match all UDP packets<br>Conflicts with `dns`, `icmp`, and `tcp`.
 
 <a id="nestedatt--protocol_policer--protocol--type_choice--icmp"></a>
 ### Nested Schema for `protocol_policer.protocol.type_choice.icmp`
@@ -174,6 +174,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_protocol_policer.example"
+	to = f5xc_protocol_policer.example
 }
 ```

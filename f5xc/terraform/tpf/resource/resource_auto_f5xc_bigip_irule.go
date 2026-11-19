@@ -576,11 +576,7 @@ func (r *ResourceF5XCBigipIrule) Read(ctx context.Context, request resource.Read
 		backendObjectName = data.BackendName.ValueString()
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_bigip_irule.ObjectType, data.Namespace.ValueString(), backendObjectName, opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_bigip_irule.ObjectType, data.Namespace.ValueString(), backendObjectName)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "bigip_irule", err),
@@ -887,12 +883,8 @@ func (r *ResourceF5XCBigipIrule) Update(ctx context.Context, request resource.Up
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_bigip_irule.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_bigip_irule.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "bigip_irule", err),
@@ -901,7 +893,7 @@ func (r *ResourceF5XCBigipIrule) Update(ctx context.Context, request resource.Up
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_bigip_irule.ObjectType, data.Namespace.ValueString(), backendObjectName, opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_bigip_irule.ObjectType, data.Namespace.ValueString(), backendObjectName)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "bigip_irule", err),

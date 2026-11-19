@@ -154,6 +154,14 @@ resources:
         api_url: https://docs.cloud.f5.com/docs-v2/api/ip-prefix-set
     irule:
         api_url: https://docs.cloud.f5.com/docs-v2/api/irule
+    k8s_cluster:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/k8s-cluster
+    k8s_cluster_role:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/k8s-cluster-role
+    k8s_cluster_role_binding:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/k8s-cluster-role-binding
+    k8s_pod_security_admission:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/k8s-pod-security-admission
     known_label:
         api_url: https://docs.cloud.f5.com/docs-v2/api/known-label
     known_label_key:

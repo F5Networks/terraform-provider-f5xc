@@ -143,8 +143,8 @@ resource "f5xc_dns_lb_pool" "example" {
 - `load_balancing_mode` (List of String) Load Balancing Mode<br>**Allowed Values (choose one):** `['PRIORITY', 'RATIO_MEMBER', 'ROUND_ROBIN', 'STATIC_PERSIST']`
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
-- `pool_type_choice` (Attributes) Pool Type (see [below for nested schema](#nestedatt--pool_type_choice))
-- `ttl_choice` (Attributes) TTL choice TTL in seconds (see [below for nested schema](#nestedatt--ttl_choice))
+- `pool_type_choice` (Attributes) Pool Type<br>Exactly one of `a_pool`, `aaaa_pool`, `cname_pool`, `mx_pool`, or `srv_pool` must be specified. (see [below for nested schema](#nestedatt--pool_type_choice))
+- `ttl_choice` (Attributes) TTL choice TTL in seconds<br>Exactly one of `ttl` or `use_rrset_ttl` must be specified. (see [below for nested schema](#nestedatt--ttl_choice))
 
 ### Optional
 
@@ -163,45 +163,23 @@ resource "f5xc_dns_lb_pool" "example" {
 
 Optional:
 
-- `a_pool` (Attributes) A Pool (see [below for nested schema](#nestedatt--pool_type_choice--a_pool))
-- `aaaa_pool` (Attributes) AAAA Pool (see [below for nested schema](#nestedatt--pool_type_choice--aaaa_pool))
-- `cname_pool` (Attributes) CNAME Pool (see [below for nested schema](#nestedatt--pool_type_choice--cname_pool))
-- `mx_pool` (Attributes) MX Pool (see [below for nested schema](#nestedatt--pool_type_choice--mx_pool))
-- `srv_pool` (Attributes) SRV Pool (see [below for nested schema](#nestedatt--pool_type_choice--srv_pool))
+- `a_pool` (Attributes) A Pool<br>Conflicts with `aaaa_pool`, `cname_pool`, `mx_pool`, and `srv_pool`. (see [below for nested schema](#nestedatt--pool_type_choice--a_pool))
+- `aaaa_pool` (Attributes) AAAA Pool<br>Conflicts with `a_pool`, `cname_pool`, `mx_pool`, and `srv_pool`. (see [below for nested schema](#nestedatt--pool_type_choice--aaaa_pool))
+- `cname_pool` (Attributes) CNAME Pool<br>Conflicts with `a_pool`, `aaaa_pool`, `mx_pool`, and `srv_pool`. (see [below for nested schema](#nestedatt--pool_type_choice--cname_pool))
+- `mx_pool` (Attributes) MX Pool<br>Conflicts with `a_pool`, `aaaa_pool`, `cname_pool`, and `srv_pool`. (see [below for nested schema](#nestedatt--pool_type_choice--mx_pool))
+- `srv_pool` (Attributes) SRV Pool<br>Conflicts with `a_pool`, `aaaa_pool`, `cname_pool`, and `mx_pool`. (see [below for nested schema](#nestedatt--pool_type_choice--srv_pool))
 
 <a id="nestedatt--pool_type_choice--a_pool"></a>
 ### Nested Schema for `pool_type_choice.a_pool`
 
 Required:
 
-- `health_check_choice` (Attributes) DNS Load Balancer Health Check (see [below for nested schema](#nestedatt--pool_type_choice--a_pool--health_check_choice))
 - `members` (Attributes List) Collection of A record members (see [below for nested schema](#nestedatt--pool_type_choice--a_pool--members))
 
 Optional:
 
+- `health_check_choice` (Attributes) DNS Load Balancer Health Check<br>Exactly one of `disable_health_check` or `health_check` must be specified when `health_check_choice` is configured. (see [below for nested schema](#nestedatt--pool_type_choice--a_pool--health_check_choice))
 - `max_answers` (Number) Maximum Answers Limit on number of Resource Records to be included in the response to query<br>**Default:** `1`
-
-<a id="nestedatt--pool_type_choice--a_pool--health_check_choice"></a>
-### Nested Schema for `pool_type_choice.a_pool.health_check_choice`
-
-Optional:
-
-- `disable_health_check` (Boolean) Disable health check When health check is disabled, the pool member is presumed to be always healthy
-- `health_check` (Attributes) Health Check Select the health check to be applied to all the pool members (see [below for nested schema](#nestedatt--pool_type_choice--a_pool--health_check_choice--health_check))
-
-<a id="nestedatt--pool_type_choice--a_pool--health_check_choice--health_check"></a>
-### Nested Schema for `pool_type_choice.a_pool.health_check_choice.health_check`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
 
 <a id="nestedatt--pool_type_choice--a_pool--members"></a>
 ### Nested Schema for `pool_type_choice.a_pool.members`
@@ -215,6 +193,28 @@ Optional:
 - `name` (String) Name Pool member name<br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority Used if the pool’s load balancing mode is set to Priority<br>**Default:** `10`
 - `ratio` (Number) Ratio Used if the pool’s load balancing mode is set to Ratio-Member<br>**Default:** `1`
+
+
+<a id="nestedatt--pool_type_choice--a_pool--health_check_choice"></a>
+### Nested Schema for `pool_type_choice.a_pool.health_check_choice`
+
+Optional:
+
+- `disable_health_check` (Boolean) Disable health check When health check is disabled, the pool member is presumed to be always healthy<br>Conflicts with `health_check`.
+- `health_check` (Attributes) Health Check Select the health check to be applied to all the pool members<br>Conflicts with `disable_health_check`. (see [below for nested schema](#nestedatt--pool_type_choice--a_pool--health_check_choice--health_check))
+
+<a id="nestedatt--pool_type_choice--a_pool--health_check_choice--health_check"></a>
+### Nested Schema for `pool_type_choice.a_pool.health_check_choice.health_check`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
 
 
 
@@ -249,30 +249,11 @@ Optional:
 
 Required:
 
-- `health_check_choice` (Attributes) DNS Load Balancer Health Check (see [below for nested schema](#nestedatt--pool_type_choice--cname_pool--health_check_choice))
 - `members` (Attributes List) Collection of CNAME record members (see [below for nested schema](#nestedatt--pool_type_choice--cname_pool--members))
-
-<a id="nestedatt--pool_type_choice--cname_pool--health_check_choice"></a>
-### Nested Schema for `pool_type_choice.cname_pool.health_check_choice`
 
 Optional:
 
-- `disable_health_check` (Boolean) Disable health check When health check is disabled, the pool member is presumed to be always healthy
-- `health_check` (Attributes) Health Check Select the health check to be applied to all the pool members (see [below for nested schema](#nestedatt--pool_type_choice--cname_pool--health_check_choice--health_check))
-
-<a id="nestedatt--pool_type_choice--cname_pool--health_check_choice--health_check"></a>
-### Nested Schema for `pool_type_choice.cname_pool.health_check_choice.health_check`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
+- `health_check_choice` (Attributes) DNS Load Balancer Health Check<br>Exactly one of `disable_health_check` or `health_check` must be specified when `health_check_choice` is configured. (see [below for nested schema](#nestedatt--pool_type_choice--cname_pool--health_check_choice))
 
 <a id="nestedatt--pool_type_choice--cname_pool--members"></a>
 ### Nested Schema for `pool_type_choice.cname_pool.members`
@@ -287,6 +268,28 @@ Optional:
 - `name` (String) Name Pool member name<br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority Used if the pool’s load balancing mode is set to Priority. Determines the order in which traffic is routed to pool members. The lower the number, the higher the priority, making those members active while higher-numbered members act as backups.<br>**Default:** `10`
 - `ratio` (Number) Ratio Used if the pool’s load balancing mode is set to Ratio-Member<br>**Default:** `1`
+
+
+<a id="nestedatt--pool_type_choice--cname_pool--health_check_choice"></a>
+### Nested Schema for `pool_type_choice.cname_pool.health_check_choice`
+
+Optional:
+
+- `disable_health_check` (Boolean) Disable health check When health check is disabled, the pool member is presumed to be always healthy<br>Conflicts with `health_check`.
+- `health_check` (Attributes) Health Check Select the health check to be applied to all the pool members<br>Conflicts with `disable_health_check`. (see [below for nested schema](#nestedatt--pool_type_choice--cname_pool--health_check_choice--health_check))
+
+<a id="nestedatt--pool_type_choice--cname_pool--health_check_choice--health_check"></a>
+### Nested Schema for `pool_type_choice.cname_pool.health_check_choice.health_check`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
 
 
 
@@ -351,8 +354,8 @@ Optional:
 
 Optional:
 
-- `ttl` (Number) Custom TTL Custom TTL in seconds (default 30) for responses from this pool
-- `use_rrset_ttl` (Boolean) Use RRSet TTL Use TTL specified in the RRSet of the DNS Load Balancer Record which uses the pool
+- `ttl` (Number) Custom TTL Custom TTL in seconds (default 30) for responses from this pool<br>Conflicts with `use_rrset_ttl`.
+- `use_rrset_ttl` (Boolean) Use RRSet TTL Use TTL specified in the RRSet of the DNS Load Balancer Record which uses the pool<br>Conflicts with `ttl`.
 
 
 <a id="nestedatt--timeouts"></a>
@@ -395,6 +398,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_dns_lb_pool.example"
+	to = f5xc_dns_lb_pool.example
 }
 ```

@@ -955,7 +955,7 @@ var AzureVnetSiteAdminPasswordSecretInfoOneofClearSecretInfoModelAttributeMap = 
 	"url":      types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> BlockedServicesChoice
+// Attribute map for OneOfField --> BlockedServicesChoice
 var AzureVnetSiteBlockedServicesChoiceModelAttributeMap = map[string]attr.Type{
 
 	"block_all_services": types.BoolType,
@@ -1089,7 +1089,7 @@ var AzureVnetSiteCloudSiteInfoSpokeVnetPrefixInfoVnetModelAttributeMap = map[str
 	"vnet_name": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> RoutingType
+// Attribute map for OneOfField --> RoutingType
 var AzureVnetSiteCloudSiteInfoSpokeVnetPrefixInfoVnetRoutingTypeModelAttributeMap = map[string]attr.Type{
 
 	"f5_orchestrated_routing": types.BoolType,
@@ -1183,7 +1183,7 @@ var AzureVnetSiteKubernetesUpgradeDrainKubernetesUpgradeDrainEnableChoiceEnableU
 	"drain_max_unavailable_node_count": types.Int64Type,
 }
 
-// Attribute map for RequiredOneOfField --> LogsReceiverChoice
+// Attribute map for OneOfField --> LogsReceiverChoice
 var AzureVnetSiteLogsReceiverChoiceModelAttributeMap = map[string]attr.Type{
 
 	"log_receiver": types.ObjectType{
@@ -1208,7 +1208,7 @@ var AzureVnetSiteOfflineSurvivabilityModeModelAttributeMap = map[string]attr.Typ
 	},
 }
 
-// Attribute map for RequiredOneOfField --> OfflineSurvivabilityModeChoice
+// Attribute map for OneOfField --> OfflineSurvivabilityModeChoice
 var AzureVnetSiteOfflineSurvivabilityModeOfflineSurvivabilityModeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"enable_offline_survivability_mode": types.BoolType,
@@ -1223,7 +1223,7 @@ var AzureVnetSiteOsModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> OperatingSystemVersionChoice
+// Attribute map for OneOfField --> OperatingSystemVersionChoice
 var AzureVnetSiteOsOperatingSystemVersionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"default_os_version":       types.BoolType,
@@ -1326,7 +1326,7 @@ var AzureVnetSiteSiteTypeIngressEgressGwAcceleratedNetworkingModelAttributeMap =
 	},
 }
 
-// Attribute map for RequiredOneOfField --> AcceleratedNetworking
+// Attribute map for OneOfField --> AcceleratedNetworking
 var AzureVnetSiteSiteTypeIngressEgressGwAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap = map[string]attr.Type{
 
 	"disable": types.BoolType,
@@ -1431,7 +1431,7 @@ var AzureVnetSiteSiteTypeIngressEgressGwAzNodesOutsideSubnetChoiceSubnetParamMod
 	"ipv4": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> DcClusterGroupChoice
+// Attribute map for OneOfField --> DcClusterGroupChoice
 var AzureVnetSiteSiteTypeIngressEgressGwDcClusterGroupChoiceModelAttributeMap = map[string]attr.Type{
 
 	"dc_cluster_group_inside_vn": types.ObjectType{
@@ -1459,7 +1459,7 @@ var AzureVnetSiteSiteTypeIngressEgressGwDcClusterGroupChoiceDcClusterGroupOutsid
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> ForwardProxyChoice
+// Attribute map for OneOfField --> ForwardProxyChoice
 var AzureVnetSiteSiteTypeIngressEgressGwForwardProxyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"active_forward_proxy_policies": types.ObjectType{
@@ -1492,7 +1492,7 @@ var AzureVnetSiteForwardProxyPoliciesObjectRefModelAttributeMap = map[string]att
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> GlobalNetworkChoice
+// Attribute map for OneOfField --> GlobalNetworkChoice
 var AzureVnetSiteSiteTypeIngressEgressGwGlobalNetworkChoiceModelAttributeMap = map[string]attr.Type{
 
 	"global_network_list": types.ObjectType{
@@ -1659,7 +1659,7 @@ var AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRou
 	},
 }
 
-// Attribute map for RequiredOneOfField --> AsnChoice
+// Attribute map for OneOfField --> AsnChoice
 var AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledAsnChoiceModelAttributeMap = map[string]attr.Type{
 
 	"auto_asn":   types.BoolType,
@@ -1764,7 +1764,7 @@ var AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRou
 	},
 }
 
-// Attribute map for RequiredOneOfField --> Choice
+// Attribute map for OneOfField --> Choice
 var AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetChoiceModelAttributeMap = map[string]attr.Type{
 
 	"auto": types.BoolType,
@@ -1805,7 +1805,7 @@ var AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRou
 	},
 }
 
-// Attribute map for RequiredOneOfField --> Choice
+// Attribute map for OneOfField --> Choice
 var AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetChoiceModelAttributeMap = map[string]attr.Type{
 
 	"auto": types.BoolType,
@@ -1872,7 +1872,7 @@ var AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubSpokeVnetsModelAttributeMap 
 	},
 }
 
-// Attribute map for RequiredOneOfField --> RoutingChoice
+// Attribute map for OneOfField --> RoutingChoice
 var AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubSpokeVnetsRoutingChoiceModelAttributeMap = map[string]attr.Type{
 
 	"auto":   types.BoolType,
@@ -1889,14 +1889,14 @@ var AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubSpokeVnetsVnetModelAttribute
 	"vnet_name": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> RoutingType
+// Attribute map for OneOfField --> RoutingType
 var AzureVnetSiteSiteTypeIngressEgressGwHubChoiceHubSpokeVnetsVnetRoutingTypeModelAttributeMap = map[string]attr.Type{
 
 	"f5_orchestrated_routing": types.BoolType,
 	"manual_routing":          types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> InsideStaticRouteChoice
+// Attribute map for OneOfField --> InsideStaticRouteChoice
 var AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceModelAttributeMap = map[string]attr.Type{
 
 	"inside_static_routes": types.ObjectType{
@@ -2080,7 +2080,7 @@ var AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceInsideStaticRoute
 	"prefix": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> NetworkPolicyChoice
+// Attribute map for OneOfField --> NetworkPolicyChoice
 var AzureVnetSiteSiteTypeIngressEgressGwNetworkPolicyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"active_enhanced_firewall_policies": types.ObjectType{
@@ -2138,7 +2138,7 @@ var AzureVnetSiteNetworkPoliciesObjectRefModelAttributeMap = map[string]attr.Typ
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> OutsideStaticRouteChoice
+// Attribute map for OneOfField --> OutsideStaticRouteChoice
 var AzureVnetSiteSiteTypeIngressEgressGwOutsideStaticRouteChoiceModelAttributeMap = map[string]attr.Type{
 
 	"no_outside_static_routes": types.BoolType,
@@ -2322,14 +2322,14 @@ var AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModeModelAttribute
 	},
 }
 
-// Attribute map for RequiredOneOfField --> PerfModeChoice
+// Attribute map for OneOfField --> PerfModeChoice
 var AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModePerfModeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"perf_mode_l3_enhanced": types.BoolType,
 	"perf_mode_l7_enhanced": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> SiteMeshGroupChoice
+// Attribute map for OneOfField --> SiteMeshGroupChoice
 var AzureVnetSiteSiteTypeIngressEgressGwSiteMeshGroupChoiceModelAttributeMap = map[string]attr.Type{
 
 	"sm_connection_public_ip": types.BoolType,
@@ -2399,14 +2399,14 @@ var AzureVnetSiteSiteTypeIngressEgressGwArAcceleratedNetworkingModelAttributeMap
 	},
 }
 
-// Attribute map for RequiredOneOfField --> AcceleratedNetworking
+// Attribute map for OneOfField --> AcceleratedNetworking
 var AzureVnetSiteSiteTypeIngressEgressGwArAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap = map[string]attr.Type{
 
 	"disable": types.BoolType,
 	"enable":  types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> DcClusterGroupChoice
+// Attribute map for OneOfField --> DcClusterGroupChoice
 var AzureVnetSiteSiteTypeIngressEgressGwArDcClusterGroupChoiceModelAttributeMap = map[string]attr.Type{
 
 	"dc_cluster_group_inside_vn": types.ObjectType{
@@ -2434,7 +2434,7 @@ var AzureVnetSiteSiteTypeIngressEgressGwArDcClusterGroupChoiceDcClusterGroupOuts
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> ForwardProxyChoice
+// Attribute map for OneOfField --> ForwardProxyChoice
 var AzureVnetSiteSiteTypeIngressEgressGwArForwardProxyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"active_forward_proxy_policies": types.ObjectType{
@@ -2459,7 +2459,7 @@ var AzureVnetSiteSiteTypeIngressEgressGwArForwardProxyChoiceActiveForwardProxyPo
 	},
 }
 
-// Attribute map for RequiredOneOfField --> GlobalNetworkChoice
+// Attribute map for OneOfField --> GlobalNetworkChoice
 var AzureVnetSiteSiteTypeIngressEgressGwArGlobalNetworkChoiceModelAttributeMap = map[string]attr.Type{
 
 	"global_network_list": types.ObjectType{
@@ -2626,7 +2626,7 @@ var AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressR
 	},
 }
 
-// Attribute map for RequiredOneOfField --> AsnChoice
+// Attribute map for OneOfField --> AsnChoice
 var AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledAsnChoiceModelAttributeMap = map[string]attr.Type{
 
 	"auto_asn":   types.BoolType,
@@ -2731,7 +2731,7 @@ var AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressR
 	},
 }
 
-// Attribute map for RequiredOneOfField --> Choice
+// Attribute map for OneOfField --> Choice
 var AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledGatewaySubnetChoiceModelAttributeMap = map[string]attr.Type{
 
 	"auto": types.BoolType,
@@ -2772,7 +2772,7 @@ var AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressR
 	},
 }
 
-// Attribute map for RequiredOneOfField --> Choice
+// Attribute map for OneOfField --> Choice
 var AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubExpressRouteChoiceExpressRouteEnabledRouteServerSubnetChoiceModelAttributeMap = map[string]attr.Type{
 
 	"auto": types.BoolType,
@@ -2839,7 +2839,7 @@ var AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubSpokeVnetsModelAttributeMa
 	},
 }
 
-// Attribute map for RequiredOneOfField --> RoutingChoice
+// Attribute map for OneOfField --> RoutingChoice
 var AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubSpokeVnetsRoutingChoiceModelAttributeMap = map[string]attr.Type{
 
 	"auto":   types.BoolType,
@@ -2856,14 +2856,14 @@ var AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubSpokeVnetsVnetModelAttribu
 	"vnet_name": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> RoutingType
+// Attribute map for OneOfField --> RoutingType
 var AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceHubSpokeVnetsVnetRoutingTypeModelAttributeMap = map[string]attr.Type{
 
 	"f5_orchestrated_routing": types.BoolType,
 	"manual_routing":          types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> InsideStaticRouteChoice
+// Attribute map for OneOfField --> InsideStaticRouteChoice
 var AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceModelAttributeMap = map[string]attr.Type{
 
 	"inside_static_routes": types.ObjectType{
@@ -3039,7 +3039,7 @@ var AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceInsideStaticRou
 	"prefix": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> NetworkPolicyChoice
+// Attribute map for OneOfField --> NetworkPolicyChoice
 var AzureVnetSiteSiteTypeIngressEgressGwArNetworkPolicyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"active_enhanced_firewall_policies": types.ObjectType{
@@ -3181,7 +3181,7 @@ var AzureVnetSiteSiteTypeIngressEgressGwArNodeOutsideSubnetChoiceSubnetParamMode
 	"ipv4": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> OutsideStaticRouteChoice
+// Attribute map for OneOfField --> OutsideStaticRouteChoice
 var AzureVnetSiteSiteTypeIngressEgressGwArOutsideStaticRouteChoiceModelAttributeMap = map[string]attr.Type{
 
 	"no_outside_static_routes": types.BoolType,
@@ -3365,14 +3365,14 @@ var AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModeModelAttribu
 	},
 }
 
-// Attribute map for RequiredOneOfField --> PerfModeChoice
+// Attribute map for OneOfField --> PerfModeChoice
 var AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModePerfModeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"perf_mode_l3_enhanced": types.BoolType,
 	"perf_mode_l7_enhanced": types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> SiteMeshGroupChoice
+// Attribute map for OneOfField --> SiteMeshGroupChoice
 var AzureVnetSiteSiteTypeIngressEgressGwArSiteMeshGroupChoiceModelAttributeMap = map[string]attr.Type{
 
 	"sm_connection_public_ip": types.BoolType,
@@ -3416,7 +3416,7 @@ var AzureVnetSiteSiteTypeIngressGwAcceleratedNetworkingModelAttributeMap = map[s
 	},
 }
 
-// Attribute map for RequiredOneOfField --> AcceleratedNetworking
+// Attribute map for OneOfField --> AcceleratedNetworking
 var AzureVnetSiteSiteTypeIngressGwAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap = map[string]attr.Type{
 
 	"disable": types.BoolType,
@@ -3483,7 +3483,7 @@ var AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModeModelAttributeMap = 
 	},
 }
 
-// Attribute map for RequiredOneOfField --> PerfModeChoice
+// Attribute map for OneOfField --> PerfModeChoice
 var AzureVnetSiteSiteTypeIngressGwPerformanceEnhancementModePerfModeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"perf_mode_l3_enhanced": types.BoolType,
@@ -3524,7 +3524,7 @@ var AzureVnetSiteSiteTypeIngressGwArAcceleratedNetworkingModelAttributeMap = map
 	},
 }
 
-// Attribute map for RequiredOneOfField --> AcceleratedNetworking
+// Attribute map for OneOfField --> AcceleratedNetworking
 var AzureVnetSiteSiteTypeIngressGwArAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap = map[string]attr.Type{
 
 	"disable": types.BoolType,
@@ -3593,7 +3593,7 @@ var AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModeModelAttributeMap 
 	},
 }
 
-// Attribute map for RequiredOneOfField --> PerfModeChoice
+// Attribute map for OneOfField --> PerfModeChoice
 var AzureVnetSiteSiteTypeIngressGwArPerformanceEnhancementModePerfModeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"perf_mode_l3_enhanced": types.BoolType,
@@ -3656,7 +3656,7 @@ var AzureVnetSiteSiteTypeVoltstackClusterAcceleratedNetworkingModelAttributeMap 
 	},
 }
 
-// Attribute map for RequiredOneOfField --> AcceleratedNetworking
+// Attribute map for OneOfField --> AcceleratedNetworking
 var AzureVnetSiteSiteTypeVoltstackClusterAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap = map[string]attr.Type{
 
 	"disable": types.BoolType,
@@ -3715,7 +3715,7 @@ var AzureVnetSiteSiteTypeVoltstackClusterAzNodesLocalSubnetChoiceSubnetParamMode
 	"ipv4": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> DcClusterGroupChoice
+// Attribute map for OneOfField --> DcClusterGroupChoice
 var AzureVnetSiteSiteTypeVoltstackClusterDcClusterGroupChoiceModelAttributeMap = map[string]attr.Type{
 
 	"dc_cluster_group": types.ObjectType{
@@ -3732,7 +3732,7 @@ var AzureVnetSiteSiteTypeVoltstackClusterDcClusterGroupChoiceDcClusterGroupModel
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> ForwardProxyChoice
+// Attribute map for OneOfField --> ForwardProxyChoice
 var AzureVnetSiteSiteTypeVoltstackClusterForwardProxyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"active_forward_proxy_policies": types.ObjectType{
@@ -3757,7 +3757,7 @@ var AzureVnetSiteSiteTypeVoltstackClusterForwardProxyChoiceActiveForwardProxyPol
 	},
 }
 
-// Attribute map for RequiredOneOfField --> GlobalNetworkChoice
+// Attribute map for OneOfField --> GlobalNetworkChoice
 var AzureVnetSiteSiteTypeVoltstackClusterGlobalNetworkChoiceModelAttributeMap = map[string]attr.Type{
 
 	"global_network_list": types.ObjectType{
@@ -3836,7 +3836,7 @@ var AzureVnetSiteSiteTypeVoltstackClusterGlobalNetworkChoiceGlobalNetworkListGlo
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> K8SClusterChoice
+// Attribute map for OneOfField --> K8SClusterChoice
 var AzureVnetSiteSiteTypeVoltstackClusterK8SClusterChoiceModelAttributeMap = map[string]attr.Type{
 
 	"k8s_cluster": types.ObjectType{
@@ -3853,7 +3853,7 @@ var AzureVnetSiteSiteTypeVoltstackClusterK8SClusterChoiceK8SClusterModelAttribut
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> NetworkPolicyChoice
+// Attribute map for OneOfField --> NetworkPolicyChoice
 var AzureVnetSiteSiteTypeVoltstackClusterNetworkPolicyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"active_enhanced_firewall_policies": types.ObjectType{
@@ -3895,7 +3895,7 @@ var AzureVnetSiteSiteTypeVoltstackClusterNetworkPolicyChoiceActiveNetworkPolicie
 	},
 }
 
-// Attribute map for RequiredOneOfField --> OutsideStaticRouteChoice
+// Attribute map for OneOfField --> OutsideStaticRouteChoice
 var AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceModelAttributeMap = map[string]attr.Type{
 
 	"no_outside_static_routes": types.BoolType,
@@ -4071,14 +4071,14 @@ var AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceOutsideStaticRo
 	"prefix": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> SiteMeshGroupChoice
+// Attribute map for OneOfField --> SiteMeshGroupChoice
 var AzureVnetSiteSiteTypeVoltstackClusterSiteMeshGroupChoiceModelAttributeMap = map[string]attr.Type{
 
 	"sm_connection_public_ip": types.BoolType,
 	"sm_connection_pvt_ip":    types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> StorageClassChoice
+// Attribute map for OneOfField --> StorageClassChoice
 var AzureVnetSiteSiteTypeVoltstackClusterStorageClassChoiceModelAttributeMap = map[string]attr.Type{
 
 	"default_storage": types.BoolType,
@@ -4161,14 +4161,14 @@ var AzureVnetSiteSiteTypeVoltstackClusterArAcceleratedNetworkingModelAttributeMa
 	},
 }
 
-// Attribute map for RequiredOneOfField --> AcceleratedNetworking
+// Attribute map for OneOfField --> AcceleratedNetworking
 var AzureVnetSiteSiteTypeVoltstackClusterArAcceleratedNetworkingAcceleratedNetworkingModelAttributeMap = map[string]attr.Type{
 
 	"disable": types.BoolType,
 	"enable":  types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> DcClusterGroupChoice
+// Attribute map for OneOfField --> DcClusterGroupChoice
 var AzureVnetSiteSiteTypeVoltstackClusterArDcClusterGroupChoiceModelAttributeMap = map[string]attr.Type{
 
 	"dc_cluster_group": types.ObjectType{
@@ -4185,7 +4185,7 @@ var AzureVnetSiteSiteTypeVoltstackClusterArDcClusterGroupChoiceDcClusterGroupMod
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> ForwardProxyChoice
+// Attribute map for OneOfField --> ForwardProxyChoice
 var AzureVnetSiteSiteTypeVoltstackClusterArForwardProxyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"active_forward_proxy_policies": types.ObjectType{
@@ -4210,7 +4210,7 @@ var AzureVnetSiteSiteTypeVoltstackClusterArForwardProxyChoiceActiveForwardProxyP
 	},
 }
 
-// Attribute map for RequiredOneOfField --> GlobalNetworkChoice
+// Attribute map for OneOfField --> GlobalNetworkChoice
 var AzureVnetSiteSiteTypeVoltstackClusterArGlobalNetworkChoiceModelAttributeMap = map[string]attr.Type{
 
 	"global_network_list": types.ObjectType{
@@ -4289,7 +4289,7 @@ var AzureVnetSiteSiteTypeVoltstackClusterArGlobalNetworkChoiceGlobalNetworkListG
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> K8SClusterChoice
+// Attribute map for OneOfField --> K8SClusterChoice
 var AzureVnetSiteSiteTypeVoltstackClusterArK8SClusterChoiceModelAttributeMap = map[string]attr.Type{
 
 	"k8s_cluster": types.ObjectType{
@@ -4306,7 +4306,7 @@ var AzureVnetSiteSiteTypeVoltstackClusterArK8SClusterChoiceK8SClusterModelAttrib
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> NetworkPolicyChoice
+// Attribute map for OneOfField --> NetworkPolicyChoice
 var AzureVnetSiteSiteTypeVoltstackClusterArNetworkPolicyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"active_enhanced_firewall_policies": types.ObjectType{
@@ -4402,7 +4402,7 @@ var AzureVnetSiteSiteTypeVoltstackClusterArNodeLocalSubnetChoiceSubnetParamModel
 	"ipv4": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> OutsideStaticRouteChoice
+// Attribute map for OneOfField --> OutsideStaticRouteChoice
 var AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceModelAttributeMap = map[string]attr.Type{
 
 	"no_outside_static_routes": types.BoolType,
@@ -4578,14 +4578,14 @@ var AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceOutsideStatic
 	"prefix": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> SiteMeshGroupChoice
+// Attribute map for OneOfField --> SiteMeshGroupChoice
 var AzureVnetSiteSiteTypeVoltstackClusterArSiteMeshGroupChoiceModelAttributeMap = map[string]attr.Type{
 
 	"sm_connection_public_ip": types.BoolType,
 	"sm_connection_pvt_ip":    types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> StorageClassChoice
+// Attribute map for OneOfField --> StorageClassChoice
 var AzureVnetSiteSiteTypeVoltstackClusterArStorageClassChoiceModelAttributeMap = map[string]attr.Type{
 
 	"default_storage": types.BoolType,
@@ -4623,7 +4623,7 @@ var AzureVnetSiteSwModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> VolterraSwVersionChoice
+// Attribute map for OneOfField --> VolterraSwVersionChoice
 var AzureVnetSiteSwVolterraSwVersionChoiceModelAttributeMap = map[string]attr.Type{
 
 	"default_sw_version":        types.BoolType,
@@ -4659,7 +4659,7 @@ var AzureVnetSiteVnetChoiceExistingVnetModelAttributeMap = map[string]attr.Type{
 	"vnet_name": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> RoutingType
+// Attribute map for OneOfField --> RoutingType
 var AzureVnetSiteVnetChoiceExistingVnetRoutingTypeModelAttributeMap = map[string]attr.Type{
 
 	"f5_orchestrated_routing": types.BoolType,
@@ -4675,7 +4675,7 @@ var AzureVnetSiteVnetChoiceNewVnetModelAttributeMap = map[string]attr.Type{
 	"primary_ipv4": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> NameChoice
+// Attribute map for OneOfField --> NameChoice
 var AzureVnetSiteVnetChoiceNewVnetNameChoiceModelAttributeMap = map[string]attr.Type{
 
 	"autogenerate": types.BoolType,
@@ -4690,14 +4690,14 @@ var AzureVnetSiteWafSignaturesModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> SignaturesUpdateModeChoice
+// Attribute map for OneOfField --> SignaturesUpdateModeChoice
 var AzureVnetSiteWafSignaturesSignaturesUpdateModeChoiceModelAttributeMap = map[string]attr.Type{
 
 	"automatic": types.BoolType,
 	"manual":    types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> WorkerNodes
+// Attribute map for OneOfField --> WorkerNodes
 var AzureVnetSiteWorkerNodesModelAttributeMap = map[string]attr.Type{
 
 	"no_worker_nodes": types.BoolType,
@@ -4806,7 +4806,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 				Attributes: map[string]schema.Attribute{
 					"secret_info_choice": schema.SingleNestedAttribute{
 						Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-						MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+						MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -4820,7 +4820,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 						Attributes: map[string]schema.Attribute{
 							"blindfold_secret_info": schema.SingleNestedAttribute{
 								Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-								MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+								MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -4860,7 +4860,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"clear_secret_info": schema.SingleNestedAttribute{
 								Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-								MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+								MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -4895,7 +4895,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"none": schema.BoolAttribute{
 								Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-								MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+								MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -4909,21 +4909,24 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 			},
 			"blocked_services_choice": schema.SingleNestedAttribute{
 				Description:         "Blocked Services on Site By default webui, ssh and dns are all blocked, you can choose other options to unblock.",
-				MarkdownDescription: "Blocked Services on Site By default webui, ssh and dns are all blocked, you can choose other options to unblock.",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Blocked Services on Site By default webui, ssh and dns are all blocked, you can choose other options to unblock.<br>Exactly one of `block_all_services`, `blocked_services`, or `default_blocked_services` must be specified when `blocked_services_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"block_all_services",
 						"blocked_services",
 						"default_blocked_services",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"block_all_services": schema.BoolAttribute{
 						Description:         "Block DNS, SSH & WebUI services on Site Block DNS, SSH & WebUI services on Site",
-						MarkdownDescription: "Block DNS, SSH & WebUI services on Site Block DNS, SSH & WebUI services on Site",
+						MarkdownDescription: "Block DNS, SSH & WebUI services on Site Block DNS, SSH & WebUI services on Site<br>Conflicts with `blocked_services` and `default_blocked_services`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -4933,7 +4936,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 					},
 					"blocked_services": schema.SingleNestedAttribute{
 						Description:         "Custom Blocked Services Configuration Use custom blocked services configuration",
-						MarkdownDescription: "Custom Blocked Services Configuration Use custom blocked services configuration",
+						MarkdownDescription: "Custom Blocked Services Configuration Use custom blocked services configuration<br>Conflicts with `block_all_services` and `default_blocked_services`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -4951,7 +4954,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									Attributes: map[string]schema.Attribute{
 										"blocked_services_value_type_choice": schema.SingleNestedAttribute{
 											Description:         "blocked_services_type_choice Choose the Nodel Local Service to disable",
-											MarkdownDescription: "blocked_services_type_choice Choose the Nodel Local Service to disable",
+											MarkdownDescription: "blocked_services_type_choice Choose the Nodel Local Service to disable<br>Exactly one of `dns` or `ssh` must be specified when `blocked_services_value_type_choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -4964,7 +4967,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 											Attributes: map[string]schema.Attribute{
 												"dns": schema.BoolAttribute{
 													Description:         "DNS Matches DNS port 53",
-													MarkdownDescription: "DNS Matches DNS port 53",
+													MarkdownDescription: "DNS Matches DNS port 53<br>Conflicts with `ssh`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -4974,7 +4977,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 												},
 												"ssh": schema.BoolAttribute{
 													Description:         "SSH",
-													MarkdownDescription: "SSH",
+													MarkdownDescription: "SSH<br>Conflicts with `dns`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -5004,7 +5007,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 					},
 					"default_blocked_services": schema.BoolAttribute{
 						Description:         "Allow access to DNS, SSH services on Site Allow access to DNS, SSH services on Site",
-						MarkdownDescription: "Allow access to DNS, SSH services on Site Allow access to DNS, SSH services on Site",
+						MarkdownDescription: "Allow access to DNS, SSH services on Site Allow access to DNS, SSH services on Site<br>Conflicts with `block_all_services` and `blocked_services`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -5158,20 +5161,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 										},
 										"routing_type_choice": schema.SingleNestedAttribute{
 											Description:         "Choice of Routing This is choice of F5 Orchestrated Routing or Manual Routing for CE VPC/VNET",
-											MarkdownDescription: "Choice of Routing This is choice of F5 Orchestrated Routing or Manual Routing for CE VPC/VNET",
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
+											MarkdownDescription: "Choice of Routing This is choice of F5 Orchestrated Routing or Manual Routing for CE VPC/VNET<br>Exactly one of `f5_orchestrated_routing` or `manual_routing` must be specified when `routing_type_choice` is configured.",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
 											Validators: []validator.Object{
-												exactlyoneofvalidator.RequiredExactlyOneOf(
+												exactlyoneofvalidator.ExactlyOneOf(
 													"f5_orchestrated_routing",
 													"manual_routing",
 												),
 											},
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.UseNonNullStateForUnknown(),
+											},
 											Attributes: map[string]schema.Attribute{
 												"f5_orchestrated_routing": schema.BoolAttribute{
 													Description:         "F5 Orchestrated Routing F5 will orchestrate required routes for SLO Route Table towards Internet and SLI RT towards the CE.",
-													MarkdownDescription: "F5 Orchestrated Routing F5 will orchestrate required routes for SLO Route Table towards Internet and SLI RT towards the CE.",
+													MarkdownDescription: "F5 Orchestrated Routing F5 will orchestrate required routes for SLO Route Table towards Internet and SLI RT towards the CE.<br>Conflicts with `manual_routing`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -5181,7 +5187,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 												},
 												"manual_routing": schema.BoolAttribute{
 													Description:         "Manual Routing In this mode, F5 will not create nor alter any route tables or routes within the existing VPCs/Vnets providing better integration for existing environments.",
-													MarkdownDescription: "Manual Routing In this mode, F5 will not create nor alter any route tables or routes within the existing VPCs/Vnets providing better integration for existing environments.",
+													MarkdownDescription: "Manual Routing In this mode, F5 will not create nor alter any route tables or routes within the existing VPCs/Vnets providing better integration for existing environments.<br>Conflicts with `f5_orchestrated_routing`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -5321,7 +5327,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 			},
 			"deployment_choice": schema.SingleNestedAttribute{
 				Description:         "Automatic Deployment Deploying automatic via volterra.",
-				MarkdownDescription: "Automatic Deployment Deploying automatic via volterra.",
+				MarkdownDescription: "Automatic Deployment Deploying automatic via volterra.<br>`azure_cred` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -5379,7 +5385,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 			},
 			"encryption_choice": schema.SingleNestedAttribute{
 				Description:         "Encryption Option to encrypt the node disk with CMK. Defaults to disable encryption",
-				MarkdownDescription: "Encryption Option to encrypt the node disk with CMK. Defaults to disable encryption",
+				MarkdownDescription: "Encryption Option to encrypt the node disk with CMK. Defaults to disable encryption<br>Exactly one of `disable_encryption` or `enable_encryption` must be specified when `encryption_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
@@ -5395,7 +5401,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 				Attributes: map[string]schema.Attribute{
 					"disable_encryption": schema.BoolAttribute{
 						Description:         "Disable Encryption Disk attached to VM will not be encrypted with CMK",
-						MarkdownDescription: "Disable Encryption Disk attached to VM will not be encrypted with CMK",
+						MarkdownDescription: "Disable Encryption Disk attached to VM will not be encrypted with CMK<br>Conflicts with `enable_encryption`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -5405,7 +5411,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 					},
 					"enable_encryption": schema.SingleNestedAttribute{
 						Description:         "Enable Encryption Disk will be encrypted with the specified key",
-						MarkdownDescription: "Enable Encryption Disk will be encrypted with the specified key",
+						MarkdownDescription: "Enable Encryption Disk will be encrypted with the specified key<br>Conflicts with `disable_encryption`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -5448,7 +5454,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 				Attributes: map[string]schema.Attribute{
 					"kubernetes_upgrade_drain_enable_choice": schema.SingleNestedAttribute{
 						Description:         "F5XC Enable/Disable Node by Node Upgrade Specify how nodes within a site will be upgraded. If enabled, you can specify number of Worker nodes to be upgraded in parallel. Note: This does not influence Control nodes. This is benefitial for sites with large number of nodes.",
-						MarkdownDescription: "F5XC Enable/Disable Node by Node Upgrade Specify how nodes within a site will be upgraded. If enabled, you can specify number of Worker nodes to be upgraded in parallel. Note: This does not influence Control nodes. This is benefitial for sites with large number of nodes.",
+						MarkdownDescription: "F5XC Enable/Disable Node by Node Upgrade Specify how nodes within a site will be upgraded. If enabled, you can specify number of Worker nodes to be upgraded in parallel. Note: This does not influence Control nodes. This is benefitial for sites with large number of nodes.<br>Exactly one of `disable_upgrade_drain` or `enable_upgrade_drain` must be specified.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -5461,7 +5467,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 						Attributes: map[string]schema.Attribute{
 							"disable_upgrade_drain": schema.BoolAttribute{
 								Description:         "Disable upgrade drain",
-								MarkdownDescription: "Disable upgrade drain",
+								MarkdownDescription: "Disable upgrade drain<br>Conflicts with `enable_upgrade_drain`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -5471,14 +5477,14 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"enable_upgrade_drain": schema.SingleNestedAttribute{
 								Description:         "Enable Node by Node Upgrade",
-								MarkdownDescription: "Enable Node by Node Upgrade",
+								MarkdownDescription: "Enable Node by Node Upgrade<br>Conflicts with `disable_upgrade_drain`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
 								Attributes: map[string]schema.Attribute{
 									"drain_max_unavailable_choice": schema.SingleNestedAttribute{
 										Description:         "Node Batch Size Max number of worker nodes to be upgraded in parallel",
-										MarkdownDescription: "Node Batch Size Max number of worker nodes to be upgraded in parallel",
+										MarkdownDescription: "Node Batch Size Max number of worker nodes to be upgraded in parallel<br>`drain_max_unavailable_node_count` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -5522,20 +5528,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 			},
 			"logs_receiver_choice": schema.SingleNestedAttribute{
 				Description:         "Logs Streaming Select Logs receiver for logs streaming",
-				MarkdownDescription: "Logs Streaming Select Logs receiver for logs streaming",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Logs Streaming Select Logs receiver for logs streaming<br>Exactly one of `log_receiver` or `logs_streaming_disabled` must be specified when `logs_receiver_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"log_receiver",
 						"logs_streaming_disabled",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"log_receiver": schema.SingleNestedAttribute{
 						Description:         "Disable Logs Streaming Select log receiver for logs streaming",
-						MarkdownDescription: "Disable Logs Streaming Select log receiver for logs streaming",
+						MarkdownDescription: "Disable Logs Streaming Select log receiver for logs streaming<br>Conflicts with `logs_streaming_disabled`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -5568,7 +5577,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 					},
 					"logs_streaming_disabled": schema.BoolAttribute{
 						Description:         "Disable Logs Receiver Logs Streaming is disabled",
-						MarkdownDescription: "Disable Logs Receiver Logs Streaming is disabled",
+						MarkdownDescription: "Disable Logs Receiver Logs Streaming is disabled<br>Conflicts with `log_receiver`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -5597,20 +5606,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 				Attributes: map[string]schema.Attribute{
 					"offline_survivability_mode_choice": schema.SingleNestedAttribute{
 						Description:         "offline_survivability_mode_choice Offline Survivability allows the Site to continue functioning normally without traffic loss during periods of connectivity loss to the Regional Edge (RE) or the Global Controller (GC). When this feature is enabled, a site can continue to function as is with existing configuration for upto 7 days, even when the site is offline. The certificates needed to keep the services running on this site are signed using a local CA. Secrets would also be cached locally to handle the connectivity loss. When the mode is toggled, services will restart and traffic disruption will be seen.",
-						MarkdownDescription: "offline_survivability_mode_choice Offline Survivability allows the Site to continue functioning normally without traffic loss during periods of connectivity loss to the Regional Edge (RE) or the Global Controller (GC). When this feature is enabled, a site can continue to function as is with existing configuration for upto 7 days, even when the site is offline. The certificates needed to keep the services running on this site are signed using a local CA. Secrets would also be cached locally to handle the connectivity loss. When the mode is toggled, services will restart and traffic disruption will be seen.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "offline_survivability_mode_choice Offline Survivability allows the Site to continue functioning normally without traffic loss during periods of connectivity loss to the Regional Edge (RE) or the Global Controller (GC). When this feature is enabled, a site can continue to function as is with existing configuration for upto 7 days, even when the site is offline. The certificates needed to keep the services running on this site are signed using a local CA. Secrets would also be cached locally to handle the connectivity loss. When the mode is toggled, services will restart and traffic disruption will be seen.<br>Exactly one of `enable_offline_survivability_mode` or `no_offline_survivability_mode` must be specified when `offline_survivability_mode_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"enable_offline_survivability_mode",
 								"no_offline_survivability_mode",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"enable_offline_survivability_mode": schema.BoolAttribute{
 								Description:         "Enable Offline Survivability Mode",
-								MarkdownDescription: "Enable Offline Survivability Mode",
+								MarkdownDescription: "Enable Offline Survivability Mode<br>Conflicts with `no_offline_survivability_mode`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -5620,7 +5632,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"no_offline_survivability_mode": schema.BoolAttribute{
 								Description:         "Disable Offline Survivability Mode",
-								MarkdownDescription: "Disable Offline Survivability Mode",
+								MarkdownDescription: "Disable Offline Survivability Mode<br>Conflicts with `enable_offline_survivability_mode`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -5644,20 +5656,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 				Attributes: map[string]schema.Attribute{
 					"operating_system_version_choice": schema.SingleNestedAttribute{
 						Description:         "Operating System Version Select the F5XC Operating System Version for the site. By default, latest available OS Version will be used. Refer to release notes to find required released OS versions.",
-						MarkdownDescription: "Operating System Version Select the F5XC Operating System Version for the site. By default, latest available OS Version will be used. Refer to release notes to find required released OS versions.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "Operating System Version Select the F5XC Operating System Version for the site. By default, latest available OS Version will be used. Refer to release notes to find required released OS versions.<br>Exactly one of `default_os_version` or `operating_system_version` must be specified when `operating_system_version_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"default_os_version",
 								"operating_system_version",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"default_os_version": schema.BoolAttribute{
 								Description:         "Default OS Version Will assign latest available OS version",
-								MarkdownDescription: "Default OS Version Will assign latest available OS version",
+								MarkdownDescription: "Default OS Version Will assign latest available OS version<br>Conflicts with `operating_system_version`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -5667,7 +5682,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"operating_system_version": schema.StringAttribute{
 								Description:         "Operating System Version Specify a OS version to be used e.g. 9.2024.6.",
-								MarkdownDescription: "Operating System Version Specify a OS version to be used e.g. 9.2024.6.<br>**Validation:** `Length LengthAtMost(20)`",
+								MarkdownDescription: "Operating System Version Specify a OS version to be used e.g. 9.2024.6.<br>**Validation:** `Length LengthAtMost(20)`<br>Conflicts with `default_os_version`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -5681,7 +5696,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 			},
 			"region_choice": schema.SingleNestedAttribute{
 				Description:         "Select Azure Region Type Choice of selecting recommended region or alternate region",
-				MarkdownDescription: "Select Azure Region Type Choice of selecting recommended region or alternate region",
+				MarkdownDescription: "Select Azure Region Type Choice of selecting recommended region or alternate region<br>Exactly one of `alternate_region` or `azure_region` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -5694,7 +5709,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 				Attributes: map[string]schema.Attribute{
 					"alternate_region": schema.StringAttribute{
 						Description:         "Alternate Azure Region Name Name of the azure region which does not support availability zones.",
-						MarkdownDescription: "Alternate Azure Region Name Name of the azure region which does not support availability zones.<br>**Validation:** `Length LengthAtMost(64)`",
+						MarkdownDescription: "Alternate Azure Region Name Name of the azure region which does not support availability zones.<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `azure_region`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -5704,7 +5719,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 					},
 					"azure_region": schema.StringAttribute{
 						Description:         "Recommended Azure Region Name Name of the azure region which supports availability zones.",
-						MarkdownDescription: "Recommended Azure Region Name Name of the azure region which supports availability zones.<br>**Validation:** `Length LengthAtMost(64)`",
+						MarkdownDescription: "Recommended Azure Region Name Name of the azure region which supports availability zones.<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `alternate_region`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -5726,7 +5741,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 			},
 			"site_type_choice": schema.SingleNestedAttribute{
 				Description:         "Number of interfaces on CE Choice of deploying one interface or two interface site",
-				MarkdownDescription: "Number of interfaces on CE Choice of deploying one interface or two interface site",
+				MarkdownDescription: "Number of interfaces on CE Choice of deploying one interface or two interface site<br>Exactly one of `ingress_egress_gw`, `ingress_egress_gw_ar`, `ingress_gw`, `ingress_gw_ar`, `voltstack_cluster`, or `voltstack_cluster_ar` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -5743,7 +5758,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 				Attributes: map[string]schema.Attribute{
 					"ingress_egress_gw": schema.SingleNestedAttribute{
 						Description:         "Ingress/Egress Gateway on Recommended Region Two interface site is useful when site is used as ingress/egress gateway to the VNet.",
-						MarkdownDescription: "Ingress/Egress Gateway on Recommended Region Two interface site is useful when site is used as ingress/egress gateway to the VNet.",
+						MarkdownDescription: "Ingress/Egress Gateway on Recommended Region Two interface site is useful when site is used as ingress/egress gateway to the VNet.<br>Conflicts with `ingress_egress_gw_ar`, `ingress_gw`, `ingress_gw_ar`, `voltstack_cluster`, and `voltstack_cluster_ar`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -5757,20 +5772,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 								Attributes: map[string]schema.Attribute{
 									"accelerated_networking_choice": schema.SingleNestedAttribute{
 										Description:         "Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen",
-										MarkdownDescription: "Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen<br>Exactly one of `disable` or `enable` must be specified when `accelerated_networking_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"disable",
 												"enable",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"disable": schema.BoolAttribute{
 												Description:         "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
-												MarkdownDescription: "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
+												MarkdownDescription: "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.<br>Conflicts with `enable`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -5780,7 +5798,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 											},
 											"enable": schema.BoolAttribute{
 												Description:         "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
-												MarkdownDescription: "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
+												MarkdownDescription: "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance<br>Conflicts with `disable`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -5822,7 +5840,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 											Attributes: map[string]schema.Attribute{
 												"choice": schema.SingleNestedAttribute{
 													Description:         "Choice of subnet Subnet for the Single interface of the site",
-													MarkdownDescription: "Choice of subnet Subnet for the Single interface of the site",
+													MarkdownDescription: "Choice of subnet Subnet for the Single interface of the site<br>Exactly one of `subnet` or `subnet_param` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -5835,14 +5853,14 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 													Attributes: map[string]schema.Attribute{
 														"subnet": schema.SingleNestedAttribute{
 															Description:         "Existing Subnet Information about existing subnet.",
-															MarkdownDescription: "Existing Subnet Information about existing subnet.",
+															MarkdownDescription: "Existing Subnet Information about existing subnet.<br>Conflicts with `subnet_param`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
 															Attributes: map[string]schema.Attribute{
 																"resource_group_choice": schema.SingleNestedAttribute{
 																	Description:         "Existing Subnet Resource Group Resource group for this subnet.",
-																	MarkdownDescription: "Existing Subnet Resource Group Resource group for this subnet.",
+																	MarkdownDescription: "Existing Subnet Resource Group Resource group for this subnet.<br>Exactly one of `subnet_resource_grp` or `vnet_resource_group` must be specified when `resource_group_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -5855,7 +5873,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	Attributes: map[string]schema.Attribute{
 																		"subnet_resource_grp": schema.StringAttribute{
 																			Description:         "subnet_resource_grp Specify name of Resource Group",
-																			MarkdownDescription: "subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`",
+																			MarkdownDescription: "subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `vnet_resource_group`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -5865,7 +5883,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																		},
 																		"vnet_resource_group": schema.BoolAttribute{
 																			Description:         "vnet_resource_group Use the same Resource Group as the Vnet",
-																			MarkdownDescription: "vnet_resource_group Use the same Resource Group as the Vnet",
+																			MarkdownDescription: "vnet_resource_group Use the same Resource Group as the Vnet<br>Conflicts with `subnet_resource_grp`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -5889,7 +5907,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 														},
 														"subnet_param": schema.SingleNestedAttribute{
 															Description:         "New Subnet Parameters for creating new subnet.",
-															MarkdownDescription: "New Subnet Parameters for creating new subnet.",
+															MarkdownDescription: "New Subnet Parameters for creating new subnet.<br>Conflicts with `subnet`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -5926,7 +5944,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 											Attributes: map[string]schema.Attribute{
 												"choice": schema.SingleNestedAttribute{
 													Description:         "Choice of subnet Subnet for the Single interface of the site",
-													MarkdownDescription: "Choice of subnet Subnet for the Single interface of the site",
+													MarkdownDescription: "Choice of subnet Subnet for the Single interface of the site<br>Exactly one of `subnet` or `subnet_param` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -5939,14 +5957,14 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 													Attributes: map[string]schema.Attribute{
 														"subnet": schema.SingleNestedAttribute{
 															Description:         "Existing Subnet Information about existing subnet.",
-															MarkdownDescription: "Existing Subnet Information about existing subnet.",
+															MarkdownDescription: "Existing Subnet Information about existing subnet.<br>Conflicts with `subnet_param`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
 															Attributes: map[string]schema.Attribute{
 																"resource_group_choice": schema.SingleNestedAttribute{
 																	Description:         "Existing Subnet Resource Group Resource group for this subnet.",
-																	MarkdownDescription: "Existing Subnet Resource Group Resource group for this subnet.",
+																	MarkdownDescription: "Existing Subnet Resource Group Resource group for this subnet.<br>Exactly one of `subnet_resource_grp` or `vnet_resource_group` must be specified when `resource_group_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -5959,7 +5977,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	Attributes: map[string]schema.Attribute{
 																		"subnet_resource_grp": schema.StringAttribute{
 																			Description:         "subnet_resource_grp Specify name of Resource Group",
-																			MarkdownDescription: "subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`",
+																			MarkdownDescription: "subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `vnet_resource_group`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -5969,7 +5987,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																		},
 																		"vnet_resource_group": schema.BoolAttribute{
 																			Description:         "vnet_resource_group Use the same Resource Group as the Vnet",
-																			MarkdownDescription: "vnet_resource_group Use the same Resource Group as the Vnet",
+																			MarkdownDescription: "vnet_resource_group Use the same Resource Group as the Vnet<br>Conflicts with `subnet_resource_grp`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -5993,7 +6011,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 														},
 														"subnet_param": schema.SingleNestedAttribute{
 															Description:         "New Subnet Parameters for creating new subnet.",
-															MarkdownDescription: "New Subnet Parameters for creating new subnet.",
+															MarkdownDescription: "New Subnet Parameters for creating new subnet.<br>Conflicts with `subnet`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -6038,21 +6056,24 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"dc_cluster_group_choice": schema.SingleNestedAttribute{
 								Description:         "Select DC Cluster Group Is this site member of a dc cluster group via selected network type",
-								MarkdownDescription: "Select DC Cluster Group Is this site member of a dc cluster group via selected network type",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Select DC Cluster Group Is this site member of a dc cluster group via selected network type<br>Exactly one of `dc_cluster_group_inside_vn`, `dc_cluster_group_outside_vn`, or `no_dc_cluster_group` must be specified when `dc_cluster_group_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"dc_cluster_group_inside_vn",
 										"dc_cluster_group_outside_vn",
 										"no_dc_cluster_group",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"dc_cluster_group_inside_vn": schema.SingleNestedAttribute{
 										Description:         "Member of DC cluster Group via Inside Network This site is member of dc cluster group connected via inside network",
-										MarkdownDescription: "Member of DC cluster Group via Inside Network This site is member of dc cluster group connected via inside network",
+										MarkdownDescription: "Member of DC cluster Group via Inside Network This site is member of dc cluster group connected via inside network<br>Conflicts with `dc_cluster_group_outside_vn` and `no_dc_cluster_group`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6085,7 +6106,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"dc_cluster_group_outside_vn": schema.SingleNestedAttribute{
 										Description:         "Member of DC cluster Group via Outside Network This site is member of dc cluster group connected via outside network",
-										MarkdownDescription: "Member of DC cluster Group via Outside Network This site is member of dc cluster group connected via outside network",
+										MarkdownDescription: "Member of DC cluster Group via Outside Network This site is member of dc cluster group connected via outside network<br>Conflicts with `dc_cluster_group_inside_vn` and `no_dc_cluster_group`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6118,7 +6139,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"no_dc_cluster_group": schema.BoolAttribute{
 										Description:         "Not a Member of DC Cluster Group This site is not a member of dc cluster group",
-										MarkdownDescription: "Not a Member of DC Cluster Group This site is not a member of dc cluster group",
+										MarkdownDescription: "Not a Member of DC Cluster Group This site is not a member of dc cluster group<br>Conflicts with `dc_cluster_group_inside_vn` and `dc_cluster_group_outside_vn`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6130,21 +6151,24 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"forward_proxy_choice": schema.SingleNestedAttribute{
 								Description:         "Manage Forward Proxy Manage Forward Proxy for this site",
-								MarkdownDescription: "Manage Forward Proxy Manage Forward Proxy for this site",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Manage Forward Proxy Manage Forward Proxy for this site<br>Exactly one of `active_forward_proxy_policies`, `forward_proxy_allow_all`, or `no_forward_proxy` must be specified when `forward_proxy_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"active_forward_proxy_policies",
 										"forward_proxy_allow_all",
 										"no_forward_proxy",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"active_forward_proxy_policies": schema.SingleNestedAttribute{
 										Description:         "Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies",
-										MarkdownDescription: "Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies",
+										MarkdownDescription: "Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies<br>Conflicts with `forward_proxy_allow_all` and `no_forward_proxy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6191,7 +6215,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"forward_proxy_allow_all": schema.BoolAttribute{
 										Description:         "Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.",
-										MarkdownDescription: "Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.",
+										MarkdownDescription: "Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.<br>Conflicts with `active_forward_proxy_policies` and `no_forward_proxy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6201,7 +6225,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"no_forward_proxy": schema.BoolAttribute{
 										Description:         "Disable Forward Proxy Disable Forward Proxy for this site",
-										MarkdownDescription: "Disable Forward Proxy Disable Forward Proxy for this site",
+										MarkdownDescription: "Disable Forward Proxy Disable Forward Proxy for this site<br>Conflicts with `active_forward_proxy_policies` and `forward_proxy_allow_all`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6213,20 +6237,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"global_network_choice": schema.SingleNestedAttribute{
 								Description:         "Connect to Global Network Select global networks to connect to inside or outside network",
-								MarkdownDescription: "Connect to Global Network Select global networks to connect to inside or outside network",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Connect to Global Network Select global networks to connect to inside or outside network<br>Exactly one of `global_network_list` or `no_global_network` must be specified when `global_network_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"global_network_list",
 										"no_global_network",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"global_network_list": schema.SingleNestedAttribute{
 										Description:         "Connect Global Networks List of global network connections",
-										MarkdownDescription: "Connect Global Networks List of global network connections",
+										MarkdownDescription: "Connect Global Networks List of global network connections<br>Conflicts with `no_global_network`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6244,7 +6271,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 													Attributes: map[string]schema.Attribute{
 														"connection_choice": schema.SingleNestedAttribute{
 															Description:         "Connector Choice Select the networks and method in which they are connected.",
-															MarkdownDescription: "Connector Choice Select the networks and method in which they are connected.",
+															MarkdownDescription: "Connector Choice Select the networks and method in which they are connected.<br>Exactly one of `sli_to_global_dr` or `slo_to_global_dr` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -6257,7 +6284,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															Attributes: map[string]schema.Attribute{
 																"sli_to_global_dr": schema.SingleNestedAttribute{
 																	Description:         "Site Local Inside to a Global Network' Site local inside is connected directly to a given global network",
-																	MarkdownDescription: "Site Local Inside to a Global Network' Site local inside is connected directly to a given global network",
+																	MarkdownDescription: "Site Local Inside to a Global Network' Site local inside is connected directly to a given global network<br>Conflicts with `slo_to_global_dr`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -6299,7 +6326,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																},
 																"slo_to_global_dr": schema.SingleNestedAttribute{
 																	Description:         "Site Local Outside to a Global Network' Site local outside is connected directly to a given global network",
-																	MarkdownDescription: "Site Local Outside to a Global Network' Site local outside is connected directly to a given global network",
+																	MarkdownDescription: "Site Local Outside to a Global Network' Site local outside is connected directly to a given global network<br>Conflicts with `sli_to_global_dr`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -6348,7 +6375,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"no_global_network": schema.BoolAttribute{
 										Description:         "Do not Connect Global Networks No global network to connect",
-										MarkdownDescription: "Do not Connect Global Networks No global network to connect",
+										MarkdownDescription: "Do not Connect Global Networks No global network to connect<br>Conflicts with `global_network_list`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -6360,7 +6387,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"hub_choice": schema.SingleNestedAttribute{
 								Description:         "Choice of VNet type Select VNet is a hub or standalone",
-								MarkdownDescription: "Choice of VNet type Select VNet is a hub or standalone",
+								MarkdownDescription: "Choice of VNet type Select VNet is a hub or standalone<br>Exactly one of `hub` or `not_hub` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -6373,14 +6400,14 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 								Attributes: map[string]schema.Attribute{
 									"hub": schema.SingleNestedAttribute{
 										Description:         "Hub VNet This VNet is a hub VNet",
-										MarkdownDescription: "Hub VNet This VNet is a hub VNet",
+										MarkdownDescription: "Hub VNet This VNet is a hub VNet<br>Conflicts with `not_hub`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
 										Attributes: map[string]schema.Attribute{
 											"express_route_choice": schema.SingleNestedAttribute{
 												Description:         "Express Route Configuration Express Route is disabled on this site or Express Route is enabled on this site",
-												MarkdownDescription: "Express Route Configuration Express Route is disabled on this site or Express Route is enabled on this site",
+												MarkdownDescription: "Express Route Configuration Express Route is disabled on this site or Express Route is enabled on this site<br>Exactly one of `express_route_disabled` or `express_route_enabled` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -6393,7 +6420,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 												Attributes: map[string]schema.Attribute{
 													"express_route_disabled": schema.BoolAttribute{
 														Description:         "Disabled Express Route is disabled on this site",
-														MarkdownDescription: "Disabled Express Route is disabled on this site",
+														MarkdownDescription: "Disabled Express Route is disabled on this site<br>Conflicts with `express_route_enabled`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -6403,27 +6430,30 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 													},
 													"express_route_enabled": schema.SingleNestedAttribute{
 														Description:         "Enabled Express Route is enabled on this site",
-														MarkdownDescription: "Enabled Express Route is enabled on this site",
+														MarkdownDescription: "Enabled Express Route is enabled on this site<br>Conflicts with `express_route_disabled`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
 														Attributes: map[string]schema.Attribute{
 															"asn_choice": schema.SingleNestedAttribute{
 																Description:         "Autonomous System Number (ASN) for F5XC Site Autonomous System Number (ASN) for F5XC Site",
-																MarkdownDescription: "Autonomous System Number (ASN) for F5XC Site Autonomous System Number (ASN) for F5XC Site",
-																Required:            true,
-																Optional:            false,
-																Computed:            false,
+																MarkdownDescription: "Autonomous System Number (ASN) for F5XC Site Autonomous System Number (ASN) for F5XC Site<br>Exactly one of `auto_asn` or `custom_asn` must be specified when `asn_choice` is configured.",
+																Required:            false,
+																Optional:            true,
+																Computed:            true,
 																Validators: []validator.Object{
-																	exactlyoneofvalidator.RequiredExactlyOneOf(
+																	exactlyoneofvalidator.ExactlyOneOf(
 																		"auto_asn",
 																		"custom_asn",
 																	),
 																},
+																PlanModifiers: []planmodifier.Object{
+																	objectplanmodifier.UseNonNullStateForUnknown(),
+																},
 																Attributes: map[string]schema.Attribute{
 																	"auto_asn": schema.BoolAttribute{
 																		Description:         "Auto ASN (Recommended) Automatically set ASN for F5XC Site",
-																		MarkdownDescription: "Auto ASN (Recommended) Automatically set ASN for F5XC Site",
+																		MarkdownDescription: "Auto ASN (Recommended) Automatically set ASN for F5XC Site<br>Conflicts with `custom_asn`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -6433,22 +6463,14 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	},
 																	"custom_asn": schema.Int64Attribute{
 																		Description:         "Custom ASN Set custom ASN for F5XC Site",
-																		MarkdownDescription: "Custom ASN Set custom ASN for F5XC Site",
+																		MarkdownDescription: "Custom ASN Set custom ASN for F5XC Site<br>Conflicts with `auto_asn`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
 																		Validators: []validator.Int64{
 																			int64validator.AtMost(65535),
 																			int64validator.AtLeast(2),
-																			int64validator.NoneOf(65515),
-																			int64validator.NoneOf(65517),
-																			int64validator.NoneOf(65518),
-																			int64validator.NoneOf(65519),
-																			int64validator.NoneOf(65520),
-																			int64validator.NoneOf(8074),
-																			int64validator.NoneOf(8075),
-																			int64validator.NoneOf(12076),
-																			int64validator.NoneOf(23456),
+																			int64validator.NoneOf(65515, 65517, 65518, 65519, 65520, 8074, 8075, 12076, 23456),
 																		},
 																	},
 																},
@@ -6499,7 +6521,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																		},
 																		"subscription_choice": schema.SingleNestedAttribute{
 																			Description:         "Express Route Circuit Configuration Select the type of Express Route Circuit Subscription",
-																			MarkdownDescription: "Express Route Circuit Configuration Select the type of Express Route Circuit Subscription",
+																			MarkdownDescription: "Express Route Circuit Configuration Select the type of Express Route Circuit Subscription<br>Exactly one of `circuit_id` or `other_subscription` must be specified when `subscription_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -6512,7 +6534,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																			Attributes: map[string]schema.Attribute{
 																				"circuit_id": schema.StringAttribute{
 																					Description:         "Circuit in Same subscription ExpressRoute Circuit is in same subscription as the site",
-																					MarkdownDescription: "Circuit in Same subscription ExpressRoute Circuit is in same subscription as the site<br>**Validation:** `Length LengthAtMost(512)`",
+																					MarkdownDescription: "Circuit in Same subscription ExpressRoute Circuit is in same subscription as the site<br>**Validation:** `Length LengthAtMost(512)`<br>Conflicts with `other_subscription`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -6522,7 +6544,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																				},
 																				"other_subscription": schema.SingleNestedAttribute{
 																					Description:         "Circuit in another subscription ExpressRoute Circuit is in a different subscription than the site. In this case both Circuit ID and Authorization key are needed",
-																					MarkdownDescription: "Circuit in another subscription ExpressRoute Circuit is in a different subscription than the site. In this case both Circuit ID and Authorization key are needed",
+																					MarkdownDescription: "Circuit in another subscription ExpressRoute Circuit is in a different subscription than the site. In this case both Circuit ID and Authorization key are needed<br>Conflicts with `circuit_id`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -6536,7 +6558,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																							Attributes: map[string]schema.Attribute{
 																								"secret_info_choice": schema.SingleNestedAttribute{
 																									Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																									MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																									MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																									Required:            true,
 																									Optional:            false,
 																									Computed:            false,
@@ -6550,7 +6572,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																									Attributes: map[string]schema.Attribute{
 																										"blindfold_secret_info": schema.SingleNestedAttribute{
 																											Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																											MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																											MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -6590,7 +6612,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																										},
 																										"clear_secret_info": schema.SingleNestedAttribute{
 																											Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																											MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																											MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -6625,7 +6647,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																										},
 																										"none": schema.BoolAttribute{
 																											Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																											MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -6664,7 +6686,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															},
 															"connectivity_options_choice": schema.SingleNestedAttribute{
 																Description:         "Site Registration & Connectivity to RE",
-																MarkdownDescription: "Site Registration & Connectivity to RE",
+																MarkdownDescription: "Site Registration & Connectivity to RE<br>Exactly one of `site_registration_over_express_route` or `site_registration_over_internet` must be specified when `connectivity_options_choice` is configured.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -6677,7 +6699,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																Attributes: map[string]schema.Attribute{
 																	"site_registration_over_express_route": schema.SingleNestedAttribute{
 																		Description:         "Site Registration & Connectivity to RE over Azure Express Route Site Registration and Site to RE tunnels go over the Azure Express Route",
-																		MarkdownDescription: "Site Registration & Connectivity to RE over Azure Express Route Site Registration and Site to RE tunnels go over the Azure Express Route",
+																		MarkdownDescription: "Site Registration & Connectivity to RE over Azure Express Route Site Registration and Site to RE tunnels go over the Azure Express Route<br>Conflicts with `site_registration_over_internet`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -6696,7 +6718,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	},
 																	"site_registration_over_internet": schema.BoolAttribute{
 																		Description:         "Site Registration & Connectivity to RE over Internet Site Registration and Site to RE tunnels go over the internet",
-																		MarkdownDescription: "Site Registration & Connectivity to RE over Internet Site Registration and Site to RE tunnels go over the internet",
+																		MarkdownDescription: "Site Registration & Connectivity to RE over Internet Site Registration and Site to RE tunnels go over the internet<br>Conflicts with `site_registration_over_express_route`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -6715,21 +6737,24 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																Attributes: map[string]schema.Attribute{
 																	"choice": schema.SingleNestedAttribute{
 																		Description:         "Choice of subnet Select Auto Subnet, Existing Subnet or Create New",
-																		MarkdownDescription: "Choice of subnet Select Auto Subnet, Existing Subnet or Create New",
-																		Required:            true,
-																		Optional:            false,
-																		Computed:            false,
+																		MarkdownDescription: "Choice of subnet Select Auto Subnet, Existing Subnet or Create New<br>Exactly one of `auto`, `subnet`, or `subnet_param` must be specified when `choice` is configured.",
+																		Required:            false,
+																		Optional:            true,
+																		Computed:            true,
 																		Validators: []validator.Object{
-																			exactlyoneofvalidator.RequiredExactlyOneOf(
+																			exactlyoneofvalidator.ExactlyOneOf(
 																				"auto",
 																				"subnet",
 																				"subnet_param",
 																			),
 																		},
+																		PlanModifiers: []planmodifier.Object{
+																			objectplanmodifier.UseNonNullStateForUnknown(),
+																		},
 																		Attributes: map[string]schema.Attribute{
 																			"auto": schema.BoolAttribute{
 																				Description:         "Auto Subnet The subnet CIDR is autogenerated.",
-																				MarkdownDescription: "Auto Subnet The subnet CIDR is autogenerated.",
+																				MarkdownDescription: "Auto Subnet The subnet CIDR is autogenerated.<br>Conflicts with `subnet` and `subnet_param`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -6739,14 +6764,14 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																			},
 																			"subnet": schema.SingleNestedAttribute{
 																				Description:         "Existing Subnet An existing subnet in specified resource group is used.",
-																				MarkdownDescription: "Existing Subnet An existing subnet in specified resource group is used.",
+																				MarkdownDescription: "Existing Subnet An existing subnet in specified resource group is used.<br>Conflicts with `auto` and `subnet_param`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
 																				Attributes: map[string]schema.Attribute{
 																					"resource_group_choice": schema.SingleNestedAttribute{
 																						Description:         "Existing Subnet Resource Group Resource group for this subnet.",
-																						MarkdownDescription: "Existing Subnet Resource Group Resource group for this subnet.",
+																						MarkdownDescription: "Existing Subnet Resource Group Resource group for this subnet.<br>Exactly one of `subnet_resource_grp` or `vnet_resource_group` must be specified when `resource_group_choice` is configured.",
 																						Required:            false,
 																						Optional:            true,
 																						Computed:            false,
@@ -6759,7 +6784,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																						Attributes: map[string]schema.Attribute{
 																							"subnet_resource_grp": schema.StringAttribute{
 																								Description:         "subnet_resource_grp Specify name of Resource Group",
-																								MarkdownDescription: "subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`",
+																								MarkdownDescription: "subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `vnet_resource_group`.",
 																								Required:            false,
 																								Optional:            true,
 																								Computed:            false,
@@ -6769,7 +6794,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																							},
 																							"vnet_resource_group": schema.BoolAttribute{
 																								Description:         "vnet_resource_group Use the same Resource Group as the Vnet",
-																								MarkdownDescription: "vnet_resource_group Use the same Resource Group as the Vnet",
+																								MarkdownDescription: "vnet_resource_group Use the same Resource Group as the Vnet<br>Conflicts with `subnet_resource_grp`.",
 																								Required:            false,
 																								Optional:            true,
 																								Computed:            false,
@@ -6783,7 +6808,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																			},
 																			"subnet_param": schema.SingleNestedAttribute{
 																				Description:         "New Subnet A new subnet with specified CIDR is created.",
-																				MarkdownDescription: "New Subnet A new subnet with specified CIDR is created.",
+																				MarkdownDescription: "New Subnet A new subnet with specified CIDR is created.<br>Conflicts with `auto` and `subnet`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -6820,21 +6845,24 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																Attributes: map[string]schema.Attribute{
 																	"choice": schema.SingleNestedAttribute{
 																		Description:         "Choice of subnet Select Auto Subnet, Existing Subnet or Create New",
-																		MarkdownDescription: "Choice of subnet Select Auto Subnet, Existing Subnet or Create New",
-																		Required:            true,
-																		Optional:            false,
-																		Computed:            false,
+																		MarkdownDescription: "Choice of subnet Select Auto Subnet, Existing Subnet or Create New<br>Exactly one of `auto`, `subnet`, or `subnet_param` must be specified when `choice` is configured.",
+																		Required:            false,
+																		Optional:            true,
+																		Computed:            true,
 																		Validators: []validator.Object{
-																			exactlyoneofvalidator.RequiredExactlyOneOf(
+																			exactlyoneofvalidator.ExactlyOneOf(
 																				"auto",
 																				"subnet",
 																				"subnet_param",
 																			),
 																		},
+																		PlanModifiers: []planmodifier.Object{
+																			objectplanmodifier.UseNonNullStateForUnknown(),
+																		},
 																		Attributes: map[string]schema.Attribute{
 																			"auto": schema.BoolAttribute{
 																				Description:         "Auto Subnet The subnet CIDR is autogenerated.",
-																				MarkdownDescription: "Auto Subnet The subnet CIDR is autogenerated.",
+																				MarkdownDescription: "Auto Subnet The subnet CIDR is autogenerated.<br>Conflicts with `subnet` and `subnet_param`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -6844,14 +6872,14 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																			},
 																			"subnet": schema.SingleNestedAttribute{
 																				Description:         "Existing Subnet An existing subnet in specified resource group is used.",
-																				MarkdownDescription: "Existing Subnet An existing subnet in specified resource group is used.",
+																				MarkdownDescription: "Existing Subnet An existing subnet in specified resource group is used.<br>Conflicts with `auto` and `subnet_param`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
 																				Attributes: map[string]schema.Attribute{
 																					"resource_group_choice": schema.SingleNestedAttribute{
 																						Description:         "Existing Subnet Resource Group Resource group for this subnet.",
-																						MarkdownDescription: "Existing Subnet Resource Group Resource group for this subnet.",
+																						MarkdownDescription: "Existing Subnet Resource Group Resource group for this subnet.<br>Exactly one of `subnet_resource_grp` or `vnet_resource_group` must be specified when `resource_group_choice` is configured.",
 																						Required:            false,
 																						Optional:            true,
 																						Computed:            false,
@@ -6864,7 +6892,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																						Attributes: map[string]schema.Attribute{
 																							"subnet_resource_grp": schema.StringAttribute{
 																								Description:         "subnet_resource_grp Specify name of Resource Group",
-																								MarkdownDescription: "subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`",
+																								MarkdownDescription: "subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `vnet_resource_group`.",
 																								Required:            false,
 																								Optional:            true,
 																								Computed:            false,
@@ -6874,7 +6902,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																							},
 																							"vnet_resource_group": schema.BoolAttribute{
 																								Description:         "vnet_resource_group Use the same Resource Group as the Vnet",
-																								MarkdownDescription: "vnet_resource_group Use the same Resource Group as the Vnet",
+																								MarkdownDescription: "vnet_resource_group Use the same Resource Group as the Vnet<br>Conflicts with `subnet_resource_grp`.",
 																								Required:            false,
 																								Optional:            true,
 																								Computed:            false,
@@ -6888,7 +6916,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																			},
 																			"subnet_param": schema.SingleNestedAttribute{
 																				Description:         "New Subnet A new subnet with specified CIDR is created.",
-																				MarkdownDescription: "New Subnet A new subnet with specified CIDR is created.",
+																				MarkdownDescription: "New Subnet A new subnet with specified CIDR is created.<br>Conflicts with `auto` and `subnet`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -6918,7 +6946,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															},
 															"sku_choice": schema.SingleNestedAttribute{
 																Description:         "Gateway SKU Gateway SKU to be used for Azure VNet Gateway",
-																MarkdownDescription: "Gateway SKU Gateway SKU to be used for Azure VNet Gateway",
+																MarkdownDescription: "Gateway SKU Gateway SKU to be used for Azure VNet Gateway<br>Exactly one of `sku_ergw1az`, `sku_ergw2az`, `sku_high_perf`, or `sku_standard` must be specified when `sku_choice` is configured.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -6933,7 +6961,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																Attributes: map[string]schema.Attribute{
 																	"sku_ergw1az": schema.BoolAttribute{
 																		Description:         "ErGw1Az SKU ErGw1Az SKU (Standard + Zone protection)",
-																		MarkdownDescription: "ErGw1Az SKU ErGw1Az SKU (Standard + Zone protection)",
+																		MarkdownDescription: "ErGw1Az SKU ErGw1Az SKU (Standard + Zone protection)<br>Conflicts with `sku_ergw2az`, `sku_high_perf`, and `sku_standard`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -6943,7 +6971,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	},
 																	"sku_ergw2az": schema.BoolAttribute{
 																		Description:         "ErGw2Az SKU ErGw2Az SKU (High Perf + Zone protection)",
-																		MarkdownDescription: "ErGw2Az SKU ErGw2Az SKU (High Perf + Zone protection)",
+																		MarkdownDescription: "ErGw2Az SKU ErGw2Az SKU (High Perf + Zone protection)<br>Conflicts with `sku_ergw1az`, `sku_high_perf`, and `sku_standard`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -6953,7 +6981,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	},
 																	"sku_high_perf": schema.BoolAttribute{
 																		Description:         "High Perf SKU High Perf SKU",
-																		MarkdownDescription: "High Perf SKU High Perf SKU",
+																		MarkdownDescription: "High Perf SKU High Perf SKU<br>Conflicts with `sku_ergw1az`, `sku_ergw2az`, and `sku_standard`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -6963,7 +6991,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	},
 																	"sku_standard": schema.BoolAttribute{
 																		Description:         "Standard SKU Standard SKU",
-																		MarkdownDescription: "Standard SKU Standard SKU",
+																		MarkdownDescription: "Standard SKU Standard SKU<br>Conflicts with `sku_ergw1az`, `sku_ergw2az`, and `sku_high_perf`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -6975,7 +7003,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															},
 															"spoke_vnet_routes_choice": schema.SingleNestedAttribute{
 																Description:         "Spoke Vnet Route Advertisement To Route Server",
-																MarkdownDescription: "Spoke Vnet Route Advertisement To Route Server",
+																MarkdownDescription: "Spoke Vnet Route Advertisement To Route Server<br>Exactly one of `advertise_to_route_server` or `do_not_advertise_to_route_server` must be specified when `spoke_vnet_routes_choice` is configured.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -6988,7 +7016,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																Attributes: map[string]schema.Attribute{
 																	"advertise_to_route_server": schema.BoolAttribute{
 																		Description:         "Advertise Spoke Vnet CIDR Routes To Route Server Advertise Spoke Vnet CIDR Routes To  Azure Route Server via BGP",
-																		MarkdownDescription: "Advertise Spoke Vnet CIDR Routes To Route Server Advertise Spoke Vnet CIDR Routes To  Azure Route Server via BGP",
+																		MarkdownDescription: "Advertise Spoke Vnet CIDR Routes To Route Server Advertise Spoke Vnet CIDR Routes To  Azure Route Server via BGP<br>Conflicts with `do_not_advertise_to_route_server`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -6998,7 +7026,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	},
 																	"do_not_advertise_to_route_server": schema.BoolAttribute{
 																		Description:         "Do Not Advertise Spoke Vnet CIDR Routes To Route Server Do Not Advertise Spoke Vnet CIDR Routes To  Azure Route Server via BGP",
-																		MarkdownDescription: "Do Not Advertise Spoke Vnet CIDR Routes To Route Server Do Not Advertise Spoke Vnet CIDR Routes To  Azure Route Server via BGP",
+																		MarkdownDescription: "Do Not Advertise Spoke Vnet CIDR Routes To Route Server Do Not Advertise Spoke Vnet CIDR Routes To  Azure Route Server via BGP<br>Conflicts with `advertise_to_route_server`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -7034,20 +7062,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 														},
 														"routing_choice": schema.SingleNestedAttribute{
 															Description:         "Choice of routing configuration Select automatic or manual configuration for routes",
-															MarkdownDescription: "Choice of routing configuration Select automatic or manual configuration for routes",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
+															MarkdownDescription: "Choice of routing configuration Select automatic or manual configuration for routes<br>Exactly one of `auto` or `manual` must be specified when `routing_choice` is configured.",
+															Required:            false,
+															Optional:            true,
+															Computed:            true,
 															Validators: []validator.Object{
-																exactlyoneofvalidator.RequiredExactlyOneOf(
+																exactlyoneofvalidator.ExactlyOneOf(
 																	"auto",
 																	"manual",
 																),
 															},
+															PlanModifiers: []planmodifier.Object{
+																objectplanmodifier.UseNonNullStateForUnknown(),
+															},
 															Attributes: map[string]schema.Attribute{
 																"auto": schema.BoolAttribute{
 																	Description:         "Auto Routing setup routing for all existing subnets on spoke VNet",
-																	MarkdownDescription: "Auto Routing setup routing for all existing subnets on spoke VNet",
+																	MarkdownDescription: "Auto Routing setup routing for all existing subnets on spoke VNet<br>Conflicts with `manual`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -7057,7 +7088,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																},
 																"manual": schema.BoolAttribute{
 																	Description:         "Manual Routing Manually setup routing on spoke VNet",
-																	MarkdownDescription: "Manual Routing Manually setup routing on spoke VNet",
+																	MarkdownDescription: "Manual Routing Manually setup routing on spoke VNet<br>Conflicts with `auto`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -7086,20 +7117,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																},
 																"routing_type_choice": schema.SingleNestedAttribute{
 																	Description:         "Choice of Routing This is choice of F5 Orchestrated Routing or Manual Routing for CE VPC/VNET",
-																	MarkdownDescription: "Choice of Routing This is choice of F5 Orchestrated Routing or Manual Routing for CE VPC/VNET",
-																	Required:            true,
-																	Optional:            false,
-																	Computed:            false,
+																	MarkdownDescription: "Choice of Routing This is choice of F5 Orchestrated Routing or Manual Routing for CE VPC/VNET<br>Exactly one of `f5_orchestrated_routing` or `manual_routing` must be specified when `routing_type_choice` is configured.",
+																	Required:            false,
+																	Optional:            true,
+																	Computed:            true,
 																	Validators: []validator.Object{
-																		exactlyoneofvalidator.RequiredExactlyOneOf(
+																		exactlyoneofvalidator.ExactlyOneOf(
 																			"f5_orchestrated_routing",
 																			"manual_routing",
 																		),
 																	},
+																	PlanModifiers: []planmodifier.Object{
+																		objectplanmodifier.UseNonNullStateForUnknown(),
+																	},
 																	Attributes: map[string]schema.Attribute{
 																		"f5_orchestrated_routing": schema.BoolAttribute{
 																			Description:         "F5 Orchestrated Routing F5 will orchestrate required routes for SLO Route Table towards Internet and SLI RT towards the CE.",
-																			MarkdownDescription: "F5 Orchestrated Routing F5 will orchestrate required routes for SLO Route Table towards Internet and SLI RT towards the CE.",
+																			MarkdownDescription: "F5 Orchestrated Routing F5 will orchestrate required routes for SLO Route Table towards Internet and SLI RT towards the CE.<br>Conflicts with `manual_routing`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -7109,7 +7143,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																		},
 																		"manual_routing": schema.BoolAttribute{
 																			Description:         "Manual Routing In this mode, F5 will not create nor alter any route tables or routes within the existing VPCs/Vnets providing better integration for existing environments.",
-																			MarkdownDescription: "Manual Routing In this mode, F5 will not create nor alter any route tables or routes within the existing VPCs/Vnets providing better integration for existing environments.",
+																			MarkdownDescription: "Manual Routing In this mode, F5 will not create nor alter any route tables or routes within the existing VPCs/Vnets providing better integration for existing environments.<br>Conflicts with `f5_orchestrated_routing`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -7138,7 +7172,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"not_hub": schema.BoolAttribute{
 										Description:         "Standalone VNet This VNet is a standalone VNet",
-										MarkdownDescription: "Standalone VNet This VNet is a standalone VNet",
+										MarkdownDescription: "Standalone VNet This VNet is a standalone VNet<br>Conflicts with `hub`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -7150,20 +7184,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"inside_static_route_choice": schema.SingleNestedAttribute{
 								Description:         "Manage Static Routes for Inside Network Add static routes to inside network. Used to reach indirectly connected subnets.",
-								MarkdownDescription: "Manage Static Routes for Inside Network Add static routes to inside network. Used to reach indirectly connected subnets.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Manage Static Routes for Inside Network Add static routes to inside network. Used to reach indirectly connected subnets.<br>Exactly one of `inside_static_routes` or `no_inside_static_routes` must be specified when `inside_static_route_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"inside_static_routes",
 										"no_inside_static_routes",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"inside_static_routes": schema.SingleNestedAttribute{
 										Description:         "Manage Static routes Manage static routes for inside network.",
-										MarkdownDescription: "Manage Static routes Manage static routes for inside network.",
+										MarkdownDescription: "Manage Static routes Manage static routes for inside network.<br>Conflicts with `no_inside_static_routes`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -7181,7 +7218,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 													Attributes: map[string]schema.Attribute{
 														"config_mode_choice": schema.SingleNestedAttribute{
 															Description:         "Static Route Config Mode Select method for configuring the route",
-															MarkdownDescription: "Static Route Config Mode Select method for configuring the route",
+															MarkdownDescription: "Static Route Config Mode Select method for configuring the route<br>Exactly one of `custom_static_route` or `simple_static_route` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -7194,7 +7231,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															Attributes: map[string]schema.Attribute{
 																"custom_static_route": schema.SingleNestedAttribute{
 																	Description:         "Custom Static Route Use Custom static route to configure all advanced options",
-																	MarkdownDescription: "Custom Static Route Use Custom static route to configure all advanced options",
+																	MarkdownDescription: "Custom Static Route Use Custom static route to configure all advanced options<br>Conflicts with `simple_static_route`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -7273,7 +7310,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																					Attributes: map[string]schema.Attribute{
 																						"ver_choice": schema.SingleNestedAttribute{
 																							Description:         "Version IP Address version. Can be IPv4 Address or IPv6 Address",
-																							MarkdownDescription: "Version IP Address version. Can be IPv4 Address or IPv6 Address",
+																							MarkdownDescription: "Version IP Address version. Can be IPv4 Address or IPv6 Address<br>Exactly one of `dual_stack` or `ipv4` must be specified when `ver_choice` is configured.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -7286,7 +7323,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																							Attributes: map[string]schema.Attribute{
 																								"dual_stack": schema.SingleNestedAttribute{
 																									Description:         "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together",
-																									MarkdownDescription: "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together",
+																									MarkdownDescription: "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together<br>Conflicts with `ipv4`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -7339,7 +7376,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																								},
 																								"ipv4": schema.SingleNestedAttribute{
 																									Description:         "IPv4 Address IPv4 Address",
-																									MarkdownDescription: "IPv4 Address IPv4 Address",
+																									MarkdownDescription: "IPv4 Address IPv4 Address<br>Conflicts with `dual_stack`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -7391,7 +7428,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																				Attributes: map[string]schema.Attribute{
 																					"ver_choice": schema.SingleNestedAttribute{
 																						Description:         "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address",
-																						MarkdownDescription: "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address",
+																						MarkdownDescription: "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address<br>`ipv4` must be specified.",
 																						Required:            true,
 																						Optional:            false,
 																						Computed:            false,
@@ -7442,7 +7479,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																},
 																"simple_static_route": schema.StringAttribute{
 																	Description:         "Simple Static Route Use simple static route for prefix pointing to single interface in the network",
-																	MarkdownDescription: "Simple Static Route Use simple static route for prefix pointing to single interface in the network",
+																	MarkdownDescription: "Simple Static Route Use simple static route for prefix pointing to single interface in the network<br>Conflicts with `custom_static_route`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -7462,7 +7499,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"no_inside_static_routes": schema.BoolAttribute{
 										Description:         "Do Not Manage Static Routes Static Routes disabled for inside network.",
-										MarkdownDescription: "Do Not Manage Static Routes Static Routes disabled for inside network.",
+										MarkdownDescription: "Do Not Manage Static Routes Static Routes disabled for inside network.<br>Conflicts with `inside_static_routes`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -7474,21 +7511,24 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"network_policy_choice": schema.SingleNestedAttribute{
 								Description:         "Manage Firewall Policy Manage Firewall Policy via this view",
-								MarkdownDescription: "Manage Firewall Policy Manage Firewall Policy via this view",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Manage Firewall Policy Manage Firewall Policy via this view<br>Exactly one of `active_enhanced_firewall_policies`, `active_network_policies`, or `no_network_policy` must be specified when `network_policy_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"active_enhanced_firewall_policies",
 										"active_network_policies",
 										"no_network_policy",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"active_enhanced_firewall_policies": schema.SingleNestedAttribute{
 										Description:         "Manage Enhanced Firewall Policy Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion.",
-										MarkdownDescription: "Manage Enhanced Firewall Policy Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion.",
+										MarkdownDescription: "Manage Enhanced Firewall Policy Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion.<br>Conflicts with `active_network_policies` and `no_network_policy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -7535,7 +7575,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"active_network_policies": schema.SingleNestedAttribute{
 										Description:         "Manage Firewall Policy Firewall Policies active for this site.",
-										MarkdownDescription: "Manage Firewall Policy Firewall Policies active for this site.",
+										MarkdownDescription: "Manage Firewall Policy Firewall Policies active for this site.<br>Conflicts with `active_enhanced_firewall_policies` and `no_network_policy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -7582,7 +7622,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"no_network_policy": schema.BoolAttribute{
 										Description:         "Do Not Manage Firewall Policy Firewall Policy is disabled for this site.",
-										MarkdownDescription: "Do Not Manage Firewall Policy Firewall Policy is disabled for this site.",
+										MarkdownDescription: "Do Not Manage Firewall Policy Firewall Policy is disabled for this site.<br>Conflicts with `active_enhanced_firewall_policies` and `active_network_policies`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -7594,20 +7634,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"outside_static_route_choice": schema.SingleNestedAttribute{
 								Description:         "Manage Static Routes for Outside Network Add static routes to outside network. Used to reach indirectly connected subnets.",
-								MarkdownDescription: "Manage Static Routes for Outside Network Add static routes to outside network. Used to reach indirectly connected subnets.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Manage Static Routes for Outside Network Add static routes to outside network. Used to reach indirectly connected subnets.<br>Exactly one of `no_outside_static_routes` or `outside_static_routes` must be specified when `outside_static_route_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"no_outside_static_routes",
 										"outside_static_routes",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"no_outside_static_routes": schema.BoolAttribute{
 										Description:         "Do Not Manage Static Routes Static Routes disabled for outside network.",
-										MarkdownDescription: "Do Not Manage Static Routes Static Routes disabled for outside network.",
+										MarkdownDescription: "Do Not Manage Static Routes Static Routes disabled for outside network.<br>Conflicts with `outside_static_routes`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -7617,7 +7660,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"outside_static_routes": schema.SingleNestedAttribute{
 										Description:         "Manage Static routes Manage static routes for outside network.",
-										MarkdownDescription: "Manage Static routes Manage static routes for outside network.",
+										MarkdownDescription: "Manage Static routes Manage static routes for outside network.<br>Conflicts with `no_outside_static_routes`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -7635,7 +7678,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 													Attributes: map[string]schema.Attribute{
 														"config_mode_choice": schema.SingleNestedAttribute{
 															Description:         "Static Route Config Mode Select method for configuring the route",
-															MarkdownDescription: "Static Route Config Mode Select method for configuring the route",
+															MarkdownDescription: "Static Route Config Mode Select method for configuring the route<br>Exactly one of `custom_static_route` or `simple_static_route` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -7648,7 +7691,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															Attributes: map[string]schema.Attribute{
 																"custom_static_route": schema.SingleNestedAttribute{
 																	Description:         "Custom Static Route Use Custom static route to configure all advanced options",
-																	MarkdownDescription: "Custom Static Route Use Custom static route to configure all advanced options",
+																	MarkdownDescription: "Custom Static Route Use Custom static route to configure all advanced options<br>Conflicts with `simple_static_route`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -7727,7 +7770,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																					Attributes: map[string]schema.Attribute{
 																						"ver_choice": schema.SingleNestedAttribute{
 																							Description:         "Version IP Address version. Can be IPv4 Address or IPv6 Address",
-																							MarkdownDescription: "Version IP Address version. Can be IPv4 Address or IPv6 Address",
+																							MarkdownDescription: "Version IP Address version. Can be IPv4 Address or IPv6 Address<br>Exactly one of `dual_stack` or `ipv4` must be specified when `ver_choice` is configured.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -7740,7 +7783,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																							Attributes: map[string]schema.Attribute{
 																								"dual_stack": schema.SingleNestedAttribute{
 																									Description:         "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together",
-																									MarkdownDescription: "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together",
+																									MarkdownDescription: "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together<br>Conflicts with `ipv4`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -7793,7 +7836,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																								},
 																								"ipv4": schema.SingleNestedAttribute{
 																									Description:         "IPv4 Address IPv4 Address",
-																									MarkdownDescription: "IPv4 Address IPv4 Address",
+																									MarkdownDescription: "IPv4 Address IPv4 Address<br>Conflicts with `dual_stack`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -7845,7 +7888,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																				Attributes: map[string]schema.Attribute{
 																					"ver_choice": schema.SingleNestedAttribute{
 																						Description:         "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address",
-																						MarkdownDescription: "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address",
+																						MarkdownDescription: "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address<br>`ipv4` must be specified.",
 																						Required:            true,
 																						Optional:            false,
 																						Computed:            false,
@@ -7896,7 +7939,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																},
 																"simple_static_route": schema.StringAttribute{
 																	Description:         "Simple Static Route Use simple static route for prefix pointing to single interface in the network",
-																	MarkdownDescription: "Simple Static Route Use simple static route for prefix pointing to single interface in the network",
+																	MarkdownDescription: "Simple Static Route Use simple static route for prefix pointing to single interface in the network<br>Conflicts with `custom_static_route`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -7925,20 +7968,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 								Attributes: map[string]schema.Attribute{
 									"perf_mode_choice": schema.SingleNestedAttribute{
 										Description:         "Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.",
-										MarkdownDescription: "Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.<br>Exactly one of `perf_mode_l3_enhanced` or `perf_mode_l7_enhanced` must be specified when `perf_mode_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"perf_mode_l3_enhanced",
 												"perf_mode_l7_enhanced",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"perf_mode_l3_enhanced": schema.BoolAttribute{
 												Description:         "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
-												MarkdownDescription: "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
+												MarkdownDescription: "L3 Mode Enhanced Performance Site optimized for L3 traffic processing<br>Conflicts with `perf_mode_l7_enhanced`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -7948,7 +7994,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 											},
 											"perf_mode_l7_enhanced": schema.BoolAttribute{
 												Description:         "Default Performance Mode Site optimized for L7 traffic processing",
-												MarkdownDescription: "Default Performance Mode Site optimized for L7 traffic processing",
+												MarkdownDescription: "Default Performance Mode Site optimized for L7 traffic processing<br>Conflicts with `perf_mode_l3_enhanced`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -7962,20 +8008,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"site_mesh_group_choice": schema.SingleNestedAttribute{
 								Description:         "Site Mesh Group Connection Type Select how the site mesh group needs to be connected",
-								MarkdownDescription: "Site Mesh Group Connection Type Select how the site mesh group needs to be connected",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Site Mesh Group Connection Type Select how the site mesh group needs to be connected<br>Exactly one of `sm_connection_public_ip` or `sm_connection_pvt_ip` must be specified when `site_mesh_group_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"sm_connection_public_ip",
 										"sm_connection_pvt_ip",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"sm_connection_public_ip": schema.BoolAttribute{
 										Description:         "Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group",
-										MarkdownDescription: "Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group",
+										MarkdownDescription: "Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group<br>Conflicts with `sm_connection_pvt_ip`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -7985,7 +8034,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"sm_connection_pvt_ip": schema.BoolAttribute{
 										Description:         "Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group",
-										MarkdownDescription: "Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group",
+										MarkdownDescription: "Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group<br>Conflicts with `sm_connection_public_ip`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -7999,7 +8048,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 					},
 					"ingress_egress_gw_ar": schema.SingleNestedAttribute{
 						Description:         "Ingress/Egress Gateway on Alternate Region Two interface site is useful when site is used as ingress/egress gateway to the VNet.",
-						MarkdownDescription: "Ingress/Egress Gateway on Alternate Region Two interface site is useful when site is used as ingress/egress gateway to the VNet.",
+						MarkdownDescription: "Ingress/Egress Gateway on Alternate Region Two interface site is useful when site is used as ingress/egress gateway to the VNet.<br>Conflicts with `ingress_egress_gw`, `ingress_gw`, `ingress_gw_ar`, `voltstack_cluster`, and `voltstack_cluster_ar`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -8013,20 +8062,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 								Attributes: map[string]schema.Attribute{
 									"accelerated_networking_choice": schema.SingleNestedAttribute{
 										Description:         "Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen",
-										MarkdownDescription: "Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen<br>Exactly one of `disable` or `enable` must be specified when `accelerated_networking_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"disable",
 												"enable",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"disable": schema.BoolAttribute{
 												Description:         "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
-												MarkdownDescription: "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
+												MarkdownDescription: "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.<br>Conflicts with `enable`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -8036,7 +8088,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 											},
 											"enable": schema.BoolAttribute{
 												Description:         "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
-												MarkdownDescription: "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
+												MarkdownDescription: "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance<br>Conflicts with `disable`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -8062,21 +8114,24 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"dc_cluster_group_choice": schema.SingleNestedAttribute{
 								Description:         "Select DC Cluster Group Is this site member of a dc cluster group via selected network type",
-								MarkdownDescription: "Select DC Cluster Group Is this site member of a dc cluster group via selected network type",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Select DC Cluster Group Is this site member of a dc cluster group via selected network type<br>Exactly one of `dc_cluster_group_inside_vn`, `dc_cluster_group_outside_vn`, or `no_dc_cluster_group` must be specified when `dc_cluster_group_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"dc_cluster_group_inside_vn",
 										"dc_cluster_group_outside_vn",
 										"no_dc_cluster_group",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"dc_cluster_group_inside_vn": schema.SingleNestedAttribute{
 										Description:         "Member of DC cluster Group via Inside Network This site is member of dc cluster group connected via inside network",
-										MarkdownDescription: "Member of DC cluster Group via Inside Network This site is member of dc cluster group connected via inside network",
+										MarkdownDescription: "Member of DC cluster Group via Inside Network This site is member of dc cluster group connected via inside network<br>Conflicts with `dc_cluster_group_outside_vn` and `no_dc_cluster_group`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -8109,7 +8164,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"dc_cluster_group_outside_vn": schema.SingleNestedAttribute{
 										Description:         "Member of DC cluster Group via Outside Network This site is member of dc cluster group connected via outside network",
-										MarkdownDescription: "Member of DC cluster Group via Outside Network This site is member of dc cluster group connected via outside network",
+										MarkdownDescription: "Member of DC cluster Group via Outside Network This site is member of dc cluster group connected via outside network<br>Conflicts with `dc_cluster_group_inside_vn` and `no_dc_cluster_group`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -8142,7 +8197,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"no_dc_cluster_group": schema.BoolAttribute{
 										Description:         "Not a Member of DC Cluster Group This site is not a member of dc cluster group",
-										MarkdownDescription: "Not a Member of DC Cluster Group This site is not a member of dc cluster group",
+										MarkdownDescription: "Not a Member of DC Cluster Group This site is not a member of dc cluster group<br>Conflicts with `dc_cluster_group_inside_vn` and `dc_cluster_group_outside_vn`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -8154,21 +8209,24 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"forward_proxy_choice": schema.SingleNestedAttribute{
 								Description:         "Manage Forward Proxy Manage Forward Proxy for this site",
-								MarkdownDescription: "Manage Forward Proxy Manage Forward Proxy for this site",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Manage Forward Proxy Manage Forward Proxy for this site<br>Exactly one of `active_forward_proxy_policies`, `forward_proxy_allow_all`, or `no_forward_proxy` must be specified when `forward_proxy_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"active_forward_proxy_policies",
 										"forward_proxy_allow_all",
 										"no_forward_proxy",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"active_forward_proxy_policies": schema.SingleNestedAttribute{
 										Description:         "Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies",
-										MarkdownDescription: "Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies",
+										MarkdownDescription: "Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies<br>Conflicts with `forward_proxy_allow_all` and `no_forward_proxy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -8215,7 +8273,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"forward_proxy_allow_all": schema.BoolAttribute{
 										Description:         "Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.",
-										MarkdownDescription: "Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.",
+										MarkdownDescription: "Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.<br>Conflicts with `active_forward_proxy_policies` and `no_forward_proxy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -8225,7 +8283,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"no_forward_proxy": schema.BoolAttribute{
 										Description:         "Disable Forward Proxy Disable Forward Proxy for this site",
-										MarkdownDescription: "Disable Forward Proxy Disable Forward Proxy for this site",
+										MarkdownDescription: "Disable Forward Proxy Disable Forward Proxy for this site<br>Conflicts with `active_forward_proxy_policies` and `forward_proxy_allow_all`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -8237,20 +8295,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"global_network_choice": schema.SingleNestedAttribute{
 								Description:         "Connect to Global Network Select global networks to connect to inside or outside network",
-								MarkdownDescription: "Connect to Global Network Select global networks to connect to inside or outside network",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Connect to Global Network Select global networks to connect to inside or outside network<br>Exactly one of `global_network_list` or `no_global_network` must be specified when `global_network_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"global_network_list",
 										"no_global_network",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"global_network_list": schema.SingleNestedAttribute{
 										Description:         "Connect Global Networks List of global network connections",
-										MarkdownDescription: "Connect Global Networks List of global network connections",
+										MarkdownDescription: "Connect Global Networks List of global network connections<br>Conflicts with `no_global_network`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -8268,7 +8329,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 													Attributes: map[string]schema.Attribute{
 														"connection_choice": schema.SingleNestedAttribute{
 															Description:         "Connector Choice Select the networks and method in which they are connected.",
-															MarkdownDescription: "Connector Choice Select the networks and method in which they are connected.",
+															MarkdownDescription: "Connector Choice Select the networks and method in which they are connected.<br>Exactly one of `sli_to_global_dr` or `slo_to_global_dr` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -8281,7 +8342,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															Attributes: map[string]schema.Attribute{
 																"sli_to_global_dr": schema.SingleNestedAttribute{
 																	Description:         "Site Local Inside to a Global Network' Site local inside is connected directly to a given global network",
-																	MarkdownDescription: "Site Local Inside to a Global Network' Site local inside is connected directly to a given global network",
+																	MarkdownDescription: "Site Local Inside to a Global Network' Site local inside is connected directly to a given global network<br>Conflicts with `slo_to_global_dr`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -8323,7 +8384,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																},
 																"slo_to_global_dr": schema.SingleNestedAttribute{
 																	Description:         "Site Local Outside to a Global Network' Site local outside is connected directly to a given global network",
-																	MarkdownDescription: "Site Local Outside to a Global Network' Site local outside is connected directly to a given global network",
+																	MarkdownDescription: "Site Local Outside to a Global Network' Site local outside is connected directly to a given global network<br>Conflicts with `sli_to_global_dr`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -8372,7 +8433,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"no_global_network": schema.BoolAttribute{
 										Description:         "Do not Connect Global Networks No global network to connect",
-										MarkdownDescription: "Do not Connect Global Networks No global network to connect",
+										MarkdownDescription: "Do not Connect Global Networks No global network to connect<br>Conflicts with `global_network_list`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -8384,7 +8445,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"hub_choice": schema.SingleNestedAttribute{
 								Description:         "Choice of VNet type Select VNet is a hub or standalone",
-								MarkdownDescription: "Choice of VNet type Select VNet is a hub or standalone",
+								MarkdownDescription: "Choice of VNet type Select VNet is a hub or standalone<br>Exactly one of `hub` or `not_hub` must be specified.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
@@ -8397,14 +8458,14 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 								Attributes: map[string]schema.Attribute{
 									"hub": schema.SingleNestedAttribute{
 										Description:         "Hub VNet This VNet is a hub VNet",
-										MarkdownDescription: "Hub VNet This VNet is a hub VNet",
+										MarkdownDescription: "Hub VNet This VNet is a hub VNet<br>Conflicts with `not_hub`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
 										Attributes: map[string]schema.Attribute{
 											"express_route_choice": schema.SingleNestedAttribute{
 												Description:         "Express Route Configuration Express Route is disabled on this site or Express Route is enabled on this site",
-												MarkdownDescription: "Express Route Configuration Express Route is disabled on this site or Express Route is enabled on this site",
+												MarkdownDescription: "Express Route Configuration Express Route is disabled on this site or Express Route is enabled on this site<br>Exactly one of `express_route_disabled` or `express_route_enabled` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -8417,7 +8478,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 												Attributes: map[string]schema.Attribute{
 													"express_route_disabled": schema.BoolAttribute{
 														Description:         "Disabled Express Route is disabled on this site",
-														MarkdownDescription: "Disabled Express Route is disabled on this site",
+														MarkdownDescription: "Disabled Express Route is disabled on this site<br>Conflicts with `express_route_enabled`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -8427,27 +8488,30 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 													},
 													"express_route_enabled": schema.SingleNestedAttribute{
 														Description:         "Enabled Express Route is enabled on this site",
-														MarkdownDescription: "Enabled Express Route is enabled on this site",
+														MarkdownDescription: "Enabled Express Route is enabled on this site<br>Conflicts with `express_route_disabled`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
 														Attributes: map[string]schema.Attribute{
 															"asn_choice": schema.SingleNestedAttribute{
 																Description:         "Autonomous System Number (ASN) for F5XC Site Autonomous System Number (ASN) for F5XC Site",
-																MarkdownDescription: "Autonomous System Number (ASN) for F5XC Site Autonomous System Number (ASN) for F5XC Site",
-																Required:            true,
-																Optional:            false,
-																Computed:            false,
+																MarkdownDescription: "Autonomous System Number (ASN) for F5XC Site Autonomous System Number (ASN) for F5XC Site<br>Exactly one of `auto_asn` or `custom_asn` must be specified when `asn_choice` is configured.",
+																Required:            false,
+																Optional:            true,
+																Computed:            true,
 																Validators: []validator.Object{
-																	exactlyoneofvalidator.RequiredExactlyOneOf(
+																	exactlyoneofvalidator.ExactlyOneOf(
 																		"auto_asn",
 																		"custom_asn",
 																	),
 																},
+																PlanModifiers: []planmodifier.Object{
+																	objectplanmodifier.UseNonNullStateForUnknown(),
+																},
 																Attributes: map[string]schema.Attribute{
 																	"auto_asn": schema.BoolAttribute{
 																		Description:         "Auto ASN (Recommended) Automatically set ASN for F5XC Site",
-																		MarkdownDescription: "Auto ASN (Recommended) Automatically set ASN for F5XC Site",
+																		MarkdownDescription: "Auto ASN (Recommended) Automatically set ASN for F5XC Site<br>Conflicts with `custom_asn`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -8457,22 +8521,14 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	},
 																	"custom_asn": schema.Int64Attribute{
 																		Description:         "Custom ASN Set custom ASN for F5XC Site",
-																		MarkdownDescription: "Custom ASN Set custom ASN for F5XC Site",
+																		MarkdownDescription: "Custom ASN Set custom ASN for F5XC Site<br>Conflicts with `auto_asn`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
 																		Validators: []validator.Int64{
 																			int64validator.AtMost(65535),
 																			int64validator.AtLeast(2),
-																			int64validator.NoneOf(65515),
-																			int64validator.NoneOf(65517),
-																			int64validator.NoneOf(65518),
-																			int64validator.NoneOf(65519),
-																			int64validator.NoneOf(65520),
-																			int64validator.NoneOf(8074),
-																			int64validator.NoneOf(8075),
-																			int64validator.NoneOf(12076),
-																			int64validator.NoneOf(23456),
+																			int64validator.NoneOf(65515, 65517, 65518, 65519, 65520, 8074, 8075, 12076, 23456),
 																		},
 																	},
 																},
@@ -8523,7 +8579,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																		},
 																		"subscription_choice": schema.SingleNestedAttribute{
 																			Description:         "Express Route Circuit Configuration Select the type of Express Route Circuit Subscription",
-																			MarkdownDescription: "Express Route Circuit Configuration Select the type of Express Route Circuit Subscription",
+																			MarkdownDescription: "Express Route Circuit Configuration Select the type of Express Route Circuit Subscription<br>Exactly one of `circuit_id` or `other_subscription` must be specified when `subscription_choice` is configured.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -8536,7 +8592,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																			Attributes: map[string]schema.Attribute{
 																				"circuit_id": schema.StringAttribute{
 																					Description:         "Circuit in Same subscription ExpressRoute Circuit is in same subscription as the site",
-																					MarkdownDescription: "Circuit in Same subscription ExpressRoute Circuit is in same subscription as the site<br>**Validation:** `Length LengthAtMost(512)`",
+																					MarkdownDescription: "Circuit in Same subscription ExpressRoute Circuit is in same subscription as the site<br>**Validation:** `Length LengthAtMost(512)`<br>Conflicts with `other_subscription`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -8546,7 +8602,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																				},
 																				"other_subscription": schema.SingleNestedAttribute{
 																					Description:         "Circuit in another subscription ExpressRoute Circuit is in a different subscription than the site. In this case both Circuit ID and Authorization key are needed",
-																					MarkdownDescription: "Circuit in another subscription ExpressRoute Circuit is in a different subscription than the site. In this case both Circuit ID and Authorization key are needed",
+																					MarkdownDescription: "Circuit in another subscription ExpressRoute Circuit is in a different subscription than the site. In this case both Circuit ID and Authorization key are needed<br>Conflicts with `circuit_id`.",
 																					Required:            false,
 																					Optional:            true,
 																					Computed:            false,
@@ -8560,7 +8616,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																							Attributes: map[string]schema.Attribute{
 																								"secret_info_choice": schema.SingleNestedAttribute{
 																									Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																									MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																									MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 																									Required:            true,
 																									Optional:            false,
 																									Computed:            false,
@@ -8574,7 +8630,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																									Attributes: map[string]schema.Attribute{
 																										"blindfold_secret_info": schema.SingleNestedAttribute{
 																											Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																											MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																											MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -8614,7 +8670,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																										},
 																										"clear_secret_info": schema.SingleNestedAttribute{
 																											Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																											MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																											MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -8649,7 +8705,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																										},
 																										"none": schema.BoolAttribute{
 																											Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																											MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																											MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																											Required:            false,
 																											Optional:            true,
 																											Computed:            false,
@@ -8688,7 +8744,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															},
 															"connectivity_options_choice": schema.SingleNestedAttribute{
 																Description:         "Site Registration & Connectivity to RE",
-																MarkdownDescription: "Site Registration & Connectivity to RE",
+																MarkdownDescription: "Site Registration & Connectivity to RE<br>Exactly one of `site_registration_over_express_route` or `site_registration_over_internet` must be specified when `connectivity_options_choice` is configured.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -8701,7 +8757,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																Attributes: map[string]schema.Attribute{
 																	"site_registration_over_express_route": schema.SingleNestedAttribute{
 																		Description:         "Site Registration & Connectivity to RE over Azure Express Route Site Registration and Site to RE tunnels go over the Azure Express Route",
-																		MarkdownDescription: "Site Registration & Connectivity to RE over Azure Express Route Site Registration and Site to RE tunnels go over the Azure Express Route",
+																		MarkdownDescription: "Site Registration & Connectivity to RE over Azure Express Route Site Registration and Site to RE tunnels go over the Azure Express Route<br>Conflicts with `site_registration_over_internet`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -8720,7 +8776,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	},
 																	"site_registration_over_internet": schema.BoolAttribute{
 																		Description:         "Site Registration & Connectivity to RE over Internet Site Registration and Site to RE tunnels go over the internet",
-																		MarkdownDescription: "Site Registration & Connectivity to RE over Internet Site Registration and Site to RE tunnels go over the internet",
+																		MarkdownDescription: "Site Registration & Connectivity to RE over Internet Site Registration and Site to RE tunnels go over the internet<br>Conflicts with `site_registration_over_express_route`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -8739,21 +8795,24 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																Attributes: map[string]schema.Attribute{
 																	"choice": schema.SingleNestedAttribute{
 																		Description:         "Choice of subnet Select Auto Subnet, Existing Subnet or Create New",
-																		MarkdownDescription: "Choice of subnet Select Auto Subnet, Existing Subnet or Create New",
-																		Required:            true,
-																		Optional:            false,
-																		Computed:            false,
+																		MarkdownDescription: "Choice of subnet Select Auto Subnet, Existing Subnet or Create New<br>Exactly one of `auto`, `subnet`, or `subnet_param` must be specified when `choice` is configured.",
+																		Required:            false,
+																		Optional:            true,
+																		Computed:            true,
 																		Validators: []validator.Object{
-																			exactlyoneofvalidator.RequiredExactlyOneOf(
+																			exactlyoneofvalidator.ExactlyOneOf(
 																				"auto",
 																				"subnet",
 																				"subnet_param",
 																			),
 																		},
+																		PlanModifiers: []planmodifier.Object{
+																			objectplanmodifier.UseNonNullStateForUnknown(),
+																		},
 																		Attributes: map[string]schema.Attribute{
 																			"auto": schema.BoolAttribute{
 																				Description:         "Auto Subnet The subnet CIDR is autogenerated.",
-																				MarkdownDescription: "Auto Subnet The subnet CIDR is autogenerated.",
+																				MarkdownDescription: "Auto Subnet The subnet CIDR is autogenerated.<br>Conflicts with `subnet` and `subnet_param`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -8763,14 +8822,14 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																			},
 																			"subnet": schema.SingleNestedAttribute{
 																				Description:         "Existing Subnet An existing subnet in specified resource group is used.",
-																				MarkdownDescription: "Existing Subnet An existing subnet in specified resource group is used.",
+																				MarkdownDescription: "Existing Subnet An existing subnet in specified resource group is used.<br>Conflicts with `auto` and `subnet_param`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
 																				Attributes: map[string]schema.Attribute{
 																					"resource_group_choice": schema.SingleNestedAttribute{
 																						Description:         "Existing Subnet Resource Group Resource group for this subnet.",
-																						MarkdownDescription: "Existing Subnet Resource Group Resource group for this subnet.",
+																						MarkdownDescription: "Existing Subnet Resource Group Resource group for this subnet.<br>Exactly one of `subnet_resource_grp` or `vnet_resource_group` must be specified when `resource_group_choice` is configured.",
 																						Required:            false,
 																						Optional:            true,
 																						Computed:            false,
@@ -8783,7 +8842,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																						Attributes: map[string]schema.Attribute{
 																							"subnet_resource_grp": schema.StringAttribute{
 																								Description:         "subnet_resource_grp Specify name of Resource Group",
-																								MarkdownDescription: "subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`",
+																								MarkdownDescription: "subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `vnet_resource_group`.",
 																								Required:            false,
 																								Optional:            true,
 																								Computed:            false,
@@ -8793,7 +8852,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																							},
 																							"vnet_resource_group": schema.BoolAttribute{
 																								Description:         "vnet_resource_group Use the same Resource Group as the Vnet",
-																								MarkdownDescription: "vnet_resource_group Use the same Resource Group as the Vnet",
+																								MarkdownDescription: "vnet_resource_group Use the same Resource Group as the Vnet<br>Conflicts with `subnet_resource_grp`.",
 																								Required:            false,
 																								Optional:            true,
 																								Computed:            false,
@@ -8807,7 +8866,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																			},
 																			"subnet_param": schema.SingleNestedAttribute{
 																				Description:         "New Subnet A new subnet with specified CIDR is created.",
-																				MarkdownDescription: "New Subnet A new subnet with specified CIDR is created.",
+																				MarkdownDescription: "New Subnet A new subnet with specified CIDR is created.<br>Conflicts with `auto` and `subnet`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -8844,21 +8903,24 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																Attributes: map[string]schema.Attribute{
 																	"choice": schema.SingleNestedAttribute{
 																		Description:         "Choice of subnet Select Auto Subnet, Existing Subnet or Create New",
-																		MarkdownDescription: "Choice of subnet Select Auto Subnet, Existing Subnet or Create New",
-																		Required:            true,
-																		Optional:            false,
-																		Computed:            false,
+																		MarkdownDescription: "Choice of subnet Select Auto Subnet, Existing Subnet or Create New<br>Exactly one of `auto`, `subnet`, or `subnet_param` must be specified when `choice` is configured.",
+																		Required:            false,
+																		Optional:            true,
+																		Computed:            true,
 																		Validators: []validator.Object{
-																			exactlyoneofvalidator.RequiredExactlyOneOf(
+																			exactlyoneofvalidator.ExactlyOneOf(
 																				"auto",
 																				"subnet",
 																				"subnet_param",
 																			),
 																		},
+																		PlanModifiers: []planmodifier.Object{
+																			objectplanmodifier.UseNonNullStateForUnknown(),
+																		},
 																		Attributes: map[string]schema.Attribute{
 																			"auto": schema.BoolAttribute{
 																				Description:         "Auto Subnet The subnet CIDR is autogenerated.",
-																				MarkdownDescription: "Auto Subnet The subnet CIDR is autogenerated.",
+																				MarkdownDescription: "Auto Subnet The subnet CIDR is autogenerated.<br>Conflicts with `subnet` and `subnet_param`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -8868,14 +8930,14 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																			},
 																			"subnet": schema.SingleNestedAttribute{
 																				Description:         "Existing Subnet An existing subnet in specified resource group is used.",
-																				MarkdownDescription: "Existing Subnet An existing subnet in specified resource group is used.",
+																				MarkdownDescription: "Existing Subnet An existing subnet in specified resource group is used.<br>Conflicts with `auto` and `subnet_param`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
 																				Attributes: map[string]schema.Attribute{
 																					"resource_group_choice": schema.SingleNestedAttribute{
 																						Description:         "Existing Subnet Resource Group Resource group for this subnet.",
-																						MarkdownDescription: "Existing Subnet Resource Group Resource group for this subnet.",
+																						MarkdownDescription: "Existing Subnet Resource Group Resource group for this subnet.<br>Exactly one of `subnet_resource_grp` or `vnet_resource_group` must be specified when `resource_group_choice` is configured.",
 																						Required:            false,
 																						Optional:            true,
 																						Computed:            false,
@@ -8888,7 +8950,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																						Attributes: map[string]schema.Attribute{
 																							"subnet_resource_grp": schema.StringAttribute{
 																								Description:         "subnet_resource_grp Specify name of Resource Group",
-																								MarkdownDescription: "subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`",
+																								MarkdownDescription: "subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `vnet_resource_group`.",
 																								Required:            false,
 																								Optional:            true,
 																								Computed:            false,
@@ -8898,7 +8960,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																							},
 																							"vnet_resource_group": schema.BoolAttribute{
 																								Description:         "vnet_resource_group Use the same Resource Group as the Vnet",
-																								MarkdownDescription: "vnet_resource_group Use the same Resource Group as the Vnet",
+																								MarkdownDescription: "vnet_resource_group Use the same Resource Group as the Vnet<br>Conflicts with `subnet_resource_grp`.",
 																								Required:            false,
 																								Optional:            true,
 																								Computed:            false,
@@ -8912,7 +8974,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																			},
 																			"subnet_param": schema.SingleNestedAttribute{
 																				Description:         "New Subnet A new subnet with specified CIDR is created.",
-																				MarkdownDescription: "New Subnet A new subnet with specified CIDR is created.",
+																				MarkdownDescription: "New Subnet A new subnet with specified CIDR is created.<br>Conflicts with `auto` and `subnet`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -8942,7 +9004,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															},
 															"sku_choice": schema.SingleNestedAttribute{
 																Description:         "Gateway SKU Gateway SKU to be used for Azure VNet Gateway",
-																MarkdownDescription: "Gateway SKU Gateway SKU to be used for Azure VNet Gateway",
+																MarkdownDescription: "Gateway SKU Gateway SKU to be used for Azure VNet Gateway<br>Exactly one of `sku_ergw1az`, `sku_ergw2az`, `sku_high_perf`, or `sku_standard` must be specified when `sku_choice` is configured.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -8957,7 +9019,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																Attributes: map[string]schema.Attribute{
 																	"sku_ergw1az": schema.BoolAttribute{
 																		Description:         "ErGw1Az SKU ErGw1Az SKU (Standard + Zone protection)",
-																		MarkdownDescription: "ErGw1Az SKU ErGw1Az SKU (Standard + Zone protection)",
+																		MarkdownDescription: "ErGw1Az SKU ErGw1Az SKU (Standard + Zone protection)<br>Conflicts with `sku_ergw2az`, `sku_high_perf`, and `sku_standard`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -8967,7 +9029,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	},
 																	"sku_ergw2az": schema.BoolAttribute{
 																		Description:         "ErGw2Az SKU ErGw2Az SKU (High Perf + Zone protection)",
-																		MarkdownDescription: "ErGw2Az SKU ErGw2Az SKU (High Perf + Zone protection)",
+																		MarkdownDescription: "ErGw2Az SKU ErGw2Az SKU (High Perf + Zone protection)<br>Conflicts with `sku_ergw1az`, `sku_high_perf`, and `sku_standard`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -8977,7 +9039,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	},
 																	"sku_high_perf": schema.BoolAttribute{
 																		Description:         "High Perf SKU High Perf SKU",
-																		MarkdownDescription: "High Perf SKU High Perf SKU",
+																		MarkdownDescription: "High Perf SKU High Perf SKU<br>Conflicts with `sku_ergw1az`, `sku_ergw2az`, and `sku_standard`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -8987,7 +9049,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	},
 																	"sku_standard": schema.BoolAttribute{
 																		Description:         "Standard SKU Standard SKU",
-																		MarkdownDescription: "Standard SKU Standard SKU",
+																		MarkdownDescription: "Standard SKU Standard SKU<br>Conflicts with `sku_ergw1az`, `sku_ergw2az`, and `sku_high_perf`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -8999,7 +9061,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															},
 															"spoke_vnet_routes_choice": schema.SingleNestedAttribute{
 																Description:         "Spoke Vnet Route Advertisement To Route Server",
-																MarkdownDescription: "Spoke Vnet Route Advertisement To Route Server",
+																MarkdownDescription: "Spoke Vnet Route Advertisement To Route Server<br>Exactly one of `advertise_to_route_server` or `do_not_advertise_to_route_server` must be specified when `spoke_vnet_routes_choice` is configured.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -9012,7 +9074,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																Attributes: map[string]schema.Attribute{
 																	"advertise_to_route_server": schema.BoolAttribute{
 																		Description:         "Advertise Spoke Vnet CIDR Routes To Route Server Advertise Spoke Vnet CIDR Routes To  Azure Route Server via BGP",
-																		MarkdownDescription: "Advertise Spoke Vnet CIDR Routes To Route Server Advertise Spoke Vnet CIDR Routes To  Azure Route Server via BGP",
+																		MarkdownDescription: "Advertise Spoke Vnet CIDR Routes To Route Server Advertise Spoke Vnet CIDR Routes To  Azure Route Server via BGP<br>Conflicts with `do_not_advertise_to_route_server`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -9022,7 +9084,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	},
 																	"do_not_advertise_to_route_server": schema.BoolAttribute{
 																		Description:         "Do Not Advertise Spoke Vnet CIDR Routes To Route Server Do Not Advertise Spoke Vnet CIDR Routes To  Azure Route Server via BGP",
-																		MarkdownDescription: "Do Not Advertise Spoke Vnet CIDR Routes To Route Server Do Not Advertise Spoke Vnet CIDR Routes To  Azure Route Server via BGP",
+																		MarkdownDescription: "Do Not Advertise Spoke Vnet CIDR Routes To Route Server Do Not Advertise Spoke Vnet CIDR Routes To  Azure Route Server via BGP<br>Conflicts with `advertise_to_route_server`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -9058,20 +9120,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 														},
 														"routing_choice": schema.SingleNestedAttribute{
 															Description:         "Choice of routing configuration Select automatic or manual configuration for routes",
-															MarkdownDescription: "Choice of routing configuration Select automatic or manual configuration for routes",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
+															MarkdownDescription: "Choice of routing configuration Select automatic or manual configuration for routes<br>Exactly one of `auto` or `manual` must be specified when `routing_choice` is configured.",
+															Required:            false,
+															Optional:            true,
+															Computed:            true,
 															Validators: []validator.Object{
-																exactlyoneofvalidator.RequiredExactlyOneOf(
+																exactlyoneofvalidator.ExactlyOneOf(
 																	"auto",
 																	"manual",
 																),
 															},
+															PlanModifiers: []planmodifier.Object{
+																objectplanmodifier.UseNonNullStateForUnknown(),
+															},
 															Attributes: map[string]schema.Attribute{
 																"auto": schema.BoolAttribute{
 																	Description:         "Auto Routing setup routing for all existing subnets on spoke VNet",
-																	MarkdownDescription: "Auto Routing setup routing for all existing subnets on spoke VNet",
+																	MarkdownDescription: "Auto Routing setup routing for all existing subnets on spoke VNet<br>Conflicts with `manual`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -9081,7 +9146,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																},
 																"manual": schema.BoolAttribute{
 																	Description:         "Manual Routing Manually setup routing on spoke VNet",
-																	MarkdownDescription: "Manual Routing Manually setup routing on spoke VNet",
+																	MarkdownDescription: "Manual Routing Manually setup routing on spoke VNet<br>Conflicts with `auto`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -9110,20 +9175,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																},
 																"routing_type_choice": schema.SingleNestedAttribute{
 																	Description:         "Choice of Routing This is choice of F5 Orchestrated Routing or Manual Routing for CE VPC/VNET",
-																	MarkdownDescription: "Choice of Routing This is choice of F5 Orchestrated Routing or Manual Routing for CE VPC/VNET",
-																	Required:            true,
-																	Optional:            false,
-																	Computed:            false,
+																	MarkdownDescription: "Choice of Routing This is choice of F5 Orchestrated Routing or Manual Routing for CE VPC/VNET<br>Exactly one of `f5_orchestrated_routing` or `manual_routing` must be specified when `routing_type_choice` is configured.",
+																	Required:            false,
+																	Optional:            true,
+																	Computed:            true,
 																	Validators: []validator.Object{
-																		exactlyoneofvalidator.RequiredExactlyOneOf(
+																		exactlyoneofvalidator.ExactlyOneOf(
 																			"f5_orchestrated_routing",
 																			"manual_routing",
 																		),
 																	},
+																	PlanModifiers: []planmodifier.Object{
+																		objectplanmodifier.UseNonNullStateForUnknown(),
+																	},
 																	Attributes: map[string]schema.Attribute{
 																		"f5_orchestrated_routing": schema.BoolAttribute{
 																			Description:         "F5 Orchestrated Routing F5 will orchestrate required routes for SLO Route Table towards Internet and SLI RT towards the CE.",
-																			MarkdownDescription: "F5 Orchestrated Routing F5 will orchestrate required routes for SLO Route Table towards Internet and SLI RT towards the CE.",
+																			MarkdownDescription: "F5 Orchestrated Routing F5 will orchestrate required routes for SLO Route Table towards Internet and SLI RT towards the CE.<br>Conflicts with `manual_routing`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -9133,7 +9201,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																		},
 																		"manual_routing": schema.BoolAttribute{
 																			Description:         "Manual Routing In this mode, F5 will not create nor alter any route tables or routes within the existing VPCs/Vnets providing better integration for existing environments.",
-																			MarkdownDescription: "Manual Routing In this mode, F5 will not create nor alter any route tables or routes within the existing VPCs/Vnets providing better integration for existing environments.",
+																			MarkdownDescription: "Manual Routing In this mode, F5 will not create nor alter any route tables or routes within the existing VPCs/Vnets providing better integration for existing environments.<br>Conflicts with `f5_orchestrated_routing`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -9162,7 +9230,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"not_hub": schema.BoolAttribute{
 										Description:         "Standalone VNet This VNet is a standalone VNet",
-										MarkdownDescription: "Standalone VNet This VNet is a standalone VNet",
+										MarkdownDescription: "Standalone VNet This VNet is a standalone VNet<br>Conflicts with `hub`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -9174,20 +9242,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"inside_static_route_choice": schema.SingleNestedAttribute{
 								Description:         "Manage Static Routes for Inside Network Add static routes to inside network. Used to reach indirectly connected subnets.",
-								MarkdownDescription: "Manage Static Routes for Inside Network Add static routes to inside network. Used to reach indirectly connected subnets.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Manage Static Routes for Inside Network Add static routes to inside network. Used to reach indirectly connected subnets.<br>Exactly one of `inside_static_routes` or `no_inside_static_routes` must be specified when `inside_static_route_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"inside_static_routes",
 										"no_inside_static_routes",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"inside_static_routes": schema.SingleNestedAttribute{
 										Description:         "Manage Static routes Manage static routes for inside network.",
-										MarkdownDescription: "Manage Static routes Manage static routes for inside network.",
+										MarkdownDescription: "Manage Static routes Manage static routes for inside network.<br>Conflicts with `no_inside_static_routes`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -9205,7 +9276,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 													Attributes: map[string]schema.Attribute{
 														"config_mode_choice": schema.SingleNestedAttribute{
 															Description:         "Static Route Config Mode Select method for configuring the route",
-															MarkdownDescription: "Static Route Config Mode Select method for configuring the route",
+															MarkdownDescription: "Static Route Config Mode Select method for configuring the route<br>Exactly one of `custom_static_route` or `simple_static_route` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -9218,7 +9289,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															Attributes: map[string]schema.Attribute{
 																"custom_static_route": schema.SingleNestedAttribute{
 																	Description:         "Custom Static Route Use Custom static route to configure all advanced options",
-																	MarkdownDescription: "Custom Static Route Use Custom static route to configure all advanced options",
+																	MarkdownDescription: "Custom Static Route Use Custom static route to configure all advanced options<br>Conflicts with `simple_static_route`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -9297,7 +9368,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																					Attributes: map[string]schema.Attribute{
 																						"ver_choice": schema.SingleNestedAttribute{
 																							Description:         "Version IP Address version. Can be IPv4 Address or IPv6 Address",
-																							MarkdownDescription: "Version IP Address version. Can be IPv4 Address or IPv6 Address",
+																							MarkdownDescription: "Version IP Address version. Can be IPv4 Address or IPv6 Address<br>Exactly one of `dual_stack` or `ipv4` must be specified when `ver_choice` is configured.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -9310,7 +9381,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																							Attributes: map[string]schema.Attribute{
 																								"dual_stack": schema.SingleNestedAttribute{
 																									Description:         "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together",
-																									MarkdownDescription: "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together",
+																									MarkdownDescription: "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together<br>Conflicts with `ipv4`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -9363,7 +9434,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																								},
 																								"ipv4": schema.SingleNestedAttribute{
 																									Description:         "IPv4 Address IPv4 Address",
-																									MarkdownDescription: "IPv4 Address IPv4 Address",
+																									MarkdownDescription: "IPv4 Address IPv4 Address<br>Conflicts with `dual_stack`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -9415,7 +9486,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																				Attributes: map[string]schema.Attribute{
 																					"ver_choice": schema.SingleNestedAttribute{
 																						Description:         "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address",
-																						MarkdownDescription: "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address",
+																						MarkdownDescription: "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address<br>`ipv4` must be specified.",
 																						Required:            true,
 																						Optional:            false,
 																						Computed:            false,
@@ -9466,7 +9537,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																},
 																"simple_static_route": schema.StringAttribute{
 																	Description:         "Simple Static Route Use simple static route for prefix pointing to single interface in the network",
-																	MarkdownDescription: "Simple Static Route Use simple static route for prefix pointing to single interface in the network",
+																	MarkdownDescription: "Simple Static Route Use simple static route for prefix pointing to single interface in the network<br>Conflicts with `custom_static_route`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -9486,7 +9557,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"no_inside_static_routes": schema.BoolAttribute{
 										Description:         "Do Not Manage Static Routes Static Routes disabled for inside network.",
-										MarkdownDescription: "Do Not Manage Static Routes Static Routes disabled for inside network.",
+										MarkdownDescription: "Do Not Manage Static Routes Static Routes disabled for inside network.<br>Conflicts with `inside_static_routes`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -9498,21 +9569,24 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"network_policy_choice": schema.SingleNestedAttribute{
 								Description:         "Manage Firewall Policy Manage Firewall Policy via this view",
-								MarkdownDescription: "Manage Firewall Policy Manage Firewall Policy via this view",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Manage Firewall Policy Manage Firewall Policy via this view<br>Exactly one of `active_enhanced_firewall_policies`, `active_network_policies`, or `no_network_policy` must be specified when `network_policy_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"active_enhanced_firewall_policies",
 										"active_network_policies",
 										"no_network_policy",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"active_enhanced_firewall_policies": schema.SingleNestedAttribute{
 										Description:         "Manage Enhanced Firewall Policy Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion.",
-										MarkdownDescription: "Manage Enhanced Firewall Policy Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion.",
+										MarkdownDescription: "Manage Enhanced Firewall Policy Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion.<br>Conflicts with `active_network_policies` and `no_network_policy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -9559,7 +9633,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"active_network_policies": schema.SingleNestedAttribute{
 										Description:         "Manage Firewall Policy Firewall Policies active for this site.",
-										MarkdownDescription: "Manage Firewall Policy Firewall Policies active for this site.",
+										MarkdownDescription: "Manage Firewall Policy Firewall Policies active for this site.<br>Conflicts with `active_enhanced_firewall_policies` and `no_network_policy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -9606,7 +9680,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"no_network_policy": schema.BoolAttribute{
 										Description:         "Do Not Manage Firewall Policy Firewall Policy is disabled for this site.",
-										MarkdownDescription: "Do Not Manage Firewall Policy Firewall Policy is disabled for this site.",
+										MarkdownDescription: "Do Not Manage Firewall Policy Firewall Policy is disabled for this site.<br>Conflicts with `active_enhanced_firewall_policies` and `active_network_policies`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -9643,7 +9717,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 										Attributes: map[string]schema.Attribute{
 											"choice": schema.SingleNestedAttribute{
 												Description:         "Choice of subnet Subnet for the Single interface of the site",
-												MarkdownDescription: "Choice of subnet Subnet for the Single interface of the site",
+												MarkdownDescription: "Choice of subnet Subnet for the Single interface of the site<br>Exactly one of `subnet` or `subnet_param` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -9656,14 +9730,14 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 												Attributes: map[string]schema.Attribute{
 													"subnet": schema.SingleNestedAttribute{
 														Description:         "Existing Subnet Information about existing subnet.",
-														MarkdownDescription: "Existing Subnet Information about existing subnet.",
+														MarkdownDescription: "Existing Subnet Information about existing subnet.<br>Conflicts with `subnet_param`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
 														Attributes: map[string]schema.Attribute{
 															"resource_group_choice": schema.SingleNestedAttribute{
 																Description:         "Existing Subnet Resource Group Resource group for this subnet.",
-																MarkdownDescription: "Existing Subnet Resource Group Resource group for this subnet.",
+																MarkdownDescription: "Existing Subnet Resource Group Resource group for this subnet.<br>Exactly one of `subnet_resource_grp` or `vnet_resource_group` must be specified when `resource_group_choice` is configured.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -9676,7 +9750,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																Attributes: map[string]schema.Attribute{
 																	"subnet_resource_grp": schema.StringAttribute{
 																		Description:         "subnet_resource_grp Specify name of Resource Group",
-																		MarkdownDescription: "subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`",
+																		MarkdownDescription: "subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `vnet_resource_group`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -9686,7 +9760,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	},
 																	"vnet_resource_group": schema.BoolAttribute{
 																		Description:         "vnet_resource_group Use the same Resource Group as the Vnet",
-																		MarkdownDescription: "vnet_resource_group Use the same Resource Group as the Vnet",
+																		MarkdownDescription: "vnet_resource_group Use the same Resource Group as the Vnet<br>Conflicts with `subnet_resource_grp`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -9710,7 +9784,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 													},
 													"subnet_param": schema.SingleNestedAttribute{
 														Description:         "New Subnet Parameters for creating new subnet.",
-														MarkdownDescription: "New Subnet Parameters for creating new subnet.",
+														MarkdownDescription: "New Subnet Parameters for creating new subnet.<br>Conflicts with `subnet`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -9754,7 +9828,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 										Attributes: map[string]schema.Attribute{
 											"choice": schema.SingleNestedAttribute{
 												Description:         "Choice of subnet Subnet for the Single interface of the site",
-												MarkdownDescription: "Choice of subnet Subnet for the Single interface of the site",
+												MarkdownDescription: "Choice of subnet Subnet for the Single interface of the site<br>Exactly one of `subnet` or `subnet_param` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -9767,14 +9841,14 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 												Attributes: map[string]schema.Attribute{
 													"subnet": schema.SingleNestedAttribute{
 														Description:         "Existing Subnet Information about existing subnet.",
-														MarkdownDescription: "Existing Subnet Information about existing subnet.",
+														MarkdownDescription: "Existing Subnet Information about existing subnet.<br>Conflicts with `subnet_param`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
 														Attributes: map[string]schema.Attribute{
 															"resource_group_choice": schema.SingleNestedAttribute{
 																Description:         "Existing Subnet Resource Group Resource group for this subnet.",
-																MarkdownDescription: "Existing Subnet Resource Group Resource group for this subnet.",
+																MarkdownDescription: "Existing Subnet Resource Group Resource group for this subnet.<br>Exactly one of `subnet_resource_grp` or `vnet_resource_group` must be specified when `resource_group_choice` is configured.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -9787,7 +9861,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																Attributes: map[string]schema.Attribute{
 																	"subnet_resource_grp": schema.StringAttribute{
 																		Description:         "subnet_resource_grp Specify name of Resource Group",
-																		MarkdownDescription: "subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`",
+																		MarkdownDescription: "subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `vnet_resource_group`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -9797,7 +9871,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	},
 																	"vnet_resource_group": schema.BoolAttribute{
 																		Description:         "vnet_resource_group Use the same Resource Group as the Vnet",
-																		MarkdownDescription: "vnet_resource_group Use the same Resource Group as the Vnet",
+																		MarkdownDescription: "vnet_resource_group Use the same Resource Group as the Vnet<br>Conflicts with `subnet_resource_grp`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -9821,7 +9895,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 													},
 													"subnet_param": schema.SingleNestedAttribute{
 														Description:         "New Subnet Parameters for creating new subnet.",
-														MarkdownDescription: "New Subnet Parameters for creating new subnet.",
+														MarkdownDescription: "New Subnet Parameters for creating new subnet.<br>Conflicts with `subnet`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -9864,20 +9938,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"outside_static_route_choice": schema.SingleNestedAttribute{
 								Description:         "Manage Static Routes for Outside Network Add static routes to outside network. Used to reach indirectly connected subnets.",
-								MarkdownDescription: "Manage Static Routes for Outside Network Add static routes to outside network. Used to reach indirectly connected subnets.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Manage Static Routes for Outside Network Add static routes to outside network. Used to reach indirectly connected subnets.<br>Exactly one of `no_outside_static_routes` or `outside_static_routes` must be specified when `outside_static_route_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"no_outside_static_routes",
 										"outside_static_routes",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"no_outside_static_routes": schema.BoolAttribute{
 										Description:         "Do Not Manage Static Routes Static Routes disabled for outside network.",
-										MarkdownDescription: "Do Not Manage Static Routes Static Routes disabled for outside network.",
+										MarkdownDescription: "Do Not Manage Static Routes Static Routes disabled for outside network.<br>Conflicts with `outside_static_routes`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -9887,7 +9964,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"outside_static_routes": schema.SingleNestedAttribute{
 										Description:         "Manage Static routes Manage static routes for outside network.",
-										MarkdownDescription: "Manage Static routes Manage static routes for outside network.",
+										MarkdownDescription: "Manage Static routes Manage static routes for outside network.<br>Conflicts with `no_outside_static_routes`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -9905,7 +9982,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 													Attributes: map[string]schema.Attribute{
 														"config_mode_choice": schema.SingleNestedAttribute{
 															Description:         "Static Route Config Mode Select method for configuring the route",
-															MarkdownDescription: "Static Route Config Mode Select method for configuring the route",
+															MarkdownDescription: "Static Route Config Mode Select method for configuring the route<br>Exactly one of `custom_static_route` or `simple_static_route` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -9918,7 +9995,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															Attributes: map[string]schema.Attribute{
 																"custom_static_route": schema.SingleNestedAttribute{
 																	Description:         "Custom Static Route Use Custom static route to configure all advanced options",
-																	MarkdownDescription: "Custom Static Route Use Custom static route to configure all advanced options",
+																	MarkdownDescription: "Custom Static Route Use Custom static route to configure all advanced options<br>Conflicts with `simple_static_route`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -9997,7 +10074,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																					Attributes: map[string]schema.Attribute{
 																						"ver_choice": schema.SingleNestedAttribute{
 																							Description:         "Version IP Address version. Can be IPv4 Address or IPv6 Address",
-																							MarkdownDescription: "Version IP Address version. Can be IPv4 Address or IPv6 Address",
+																							MarkdownDescription: "Version IP Address version. Can be IPv4 Address or IPv6 Address<br>Exactly one of `dual_stack` or `ipv4` must be specified when `ver_choice` is configured.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -10010,7 +10087,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																							Attributes: map[string]schema.Attribute{
 																								"dual_stack": schema.SingleNestedAttribute{
 																									Description:         "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together",
-																									MarkdownDescription: "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together",
+																									MarkdownDescription: "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together<br>Conflicts with `ipv4`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -10063,7 +10140,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																								},
 																								"ipv4": schema.SingleNestedAttribute{
 																									Description:         "IPv4 Address IPv4 Address",
-																									MarkdownDescription: "IPv4 Address IPv4 Address",
+																									MarkdownDescription: "IPv4 Address IPv4 Address<br>Conflicts with `dual_stack`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -10115,7 +10192,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																				Attributes: map[string]schema.Attribute{
 																					"ver_choice": schema.SingleNestedAttribute{
 																						Description:         "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address",
-																						MarkdownDescription: "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address",
+																						MarkdownDescription: "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address<br>`ipv4` must be specified.",
 																						Required:            true,
 																						Optional:            false,
 																						Computed:            false,
@@ -10166,7 +10243,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																},
 																"simple_static_route": schema.StringAttribute{
 																	Description:         "Simple Static Route Use simple static route for prefix pointing to single interface in the network",
-																	MarkdownDescription: "Simple Static Route Use simple static route for prefix pointing to single interface in the network",
+																	MarkdownDescription: "Simple Static Route Use simple static route for prefix pointing to single interface in the network<br>Conflicts with `custom_static_route`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -10195,20 +10272,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 								Attributes: map[string]schema.Attribute{
 									"perf_mode_choice": schema.SingleNestedAttribute{
 										Description:         "Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.",
-										MarkdownDescription: "Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.<br>Exactly one of `perf_mode_l3_enhanced` or `perf_mode_l7_enhanced` must be specified when `perf_mode_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"perf_mode_l3_enhanced",
 												"perf_mode_l7_enhanced",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"perf_mode_l3_enhanced": schema.BoolAttribute{
 												Description:         "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
-												MarkdownDescription: "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
+												MarkdownDescription: "L3 Mode Enhanced Performance Site optimized for L3 traffic processing<br>Conflicts with `perf_mode_l7_enhanced`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -10218,7 +10298,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 											},
 											"perf_mode_l7_enhanced": schema.BoolAttribute{
 												Description:         "Default Performance Mode Site optimized for L7 traffic processing",
-												MarkdownDescription: "Default Performance Mode Site optimized for L7 traffic processing",
+												MarkdownDescription: "Default Performance Mode Site optimized for L7 traffic processing<br>Conflicts with `perf_mode_l3_enhanced`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -10232,20 +10312,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"site_mesh_group_choice": schema.SingleNestedAttribute{
 								Description:         "Site Mesh Group Connection Type Select how the site mesh group needs to be connected",
-								MarkdownDescription: "Site Mesh Group Connection Type Select how the site mesh group needs to be connected",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Site Mesh Group Connection Type Select how the site mesh group needs to be connected<br>Exactly one of `sm_connection_public_ip` or `sm_connection_pvt_ip` must be specified when `site_mesh_group_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"sm_connection_public_ip",
 										"sm_connection_pvt_ip",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"sm_connection_public_ip": schema.BoolAttribute{
 										Description:         "Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group",
-										MarkdownDescription: "Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group",
+										MarkdownDescription: "Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group<br>Conflicts with `sm_connection_pvt_ip`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -10255,7 +10338,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"sm_connection_pvt_ip": schema.BoolAttribute{
 										Description:         "Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group",
-										MarkdownDescription: "Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group",
+										MarkdownDescription: "Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group<br>Conflicts with `sm_connection_public_ip`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -10269,7 +10352,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 					},
 					"ingress_gw": schema.SingleNestedAttribute{
 						Description:         "Ingress Gateway on Recommended Region One interface site is useful when site is only used as ingress gateway to the VNet.",
-						MarkdownDescription: "Ingress Gateway on Recommended Region One interface site is useful when site is only used as ingress gateway to the VNet.",
+						MarkdownDescription: "Ingress Gateway on Recommended Region One interface site is useful when site is only used as ingress gateway to the VNet.<br>Conflicts with `ingress_egress_gw`, `ingress_egress_gw_ar`, `ingress_gw_ar`, `voltstack_cluster`, and `voltstack_cluster_ar`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -10283,20 +10366,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 								Attributes: map[string]schema.Attribute{
 									"accelerated_networking_choice": schema.SingleNestedAttribute{
 										Description:         "Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen",
-										MarkdownDescription: "Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen<br>Exactly one of `disable` or `enable` must be specified when `accelerated_networking_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"disable",
 												"enable",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"disable": schema.BoolAttribute{
 												Description:         "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
-												MarkdownDescription: "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
+												MarkdownDescription: "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.<br>Conflicts with `enable`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -10306,7 +10392,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 											},
 											"enable": schema.BoolAttribute{
 												Description:         "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
-												MarkdownDescription: "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
+												MarkdownDescription: "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance<br>Conflicts with `disable`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -10348,7 +10434,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 											Attributes: map[string]schema.Attribute{
 												"choice": schema.SingleNestedAttribute{
 													Description:         "Choice of subnet Subnet for the Single interface of the site",
-													MarkdownDescription: "Choice of subnet Subnet for the Single interface of the site",
+													MarkdownDescription: "Choice of subnet Subnet for the Single interface of the site<br>Exactly one of `subnet` or `subnet_param` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -10361,14 +10447,14 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 													Attributes: map[string]schema.Attribute{
 														"subnet": schema.SingleNestedAttribute{
 															Description:         "Existing Subnet Information about existing subnet.",
-															MarkdownDescription: "Existing Subnet Information about existing subnet.",
+															MarkdownDescription: "Existing Subnet Information about existing subnet.<br>Conflicts with `subnet_param`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
 															Attributes: map[string]schema.Attribute{
 																"resource_group_choice": schema.SingleNestedAttribute{
 																	Description:         "Existing Subnet Resource Group Resource group for this subnet.",
-																	MarkdownDescription: "Existing Subnet Resource Group Resource group for this subnet.",
+																	MarkdownDescription: "Existing Subnet Resource Group Resource group for this subnet.<br>Exactly one of `subnet_resource_grp` or `vnet_resource_group` must be specified when `resource_group_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -10381,7 +10467,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	Attributes: map[string]schema.Attribute{
 																		"subnet_resource_grp": schema.StringAttribute{
 																			Description:         "subnet_resource_grp Specify name of Resource Group",
-																			MarkdownDescription: "subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`",
+																			MarkdownDescription: "subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `vnet_resource_group`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -10391,7 +10477,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																		},
 																		"vnet_resource_group": schema.BoolAttribute{
 																			Description:         "vnet_resource_group Use the same Resource Group as the Vnet",
-																			MarkdownDescription: "vnet_resource_group Use the same Resource Group as the Vnet",
+																			MarkdownDescription: "vnet_resource_group Use the same Resource Group as the Vnet<br>Conflicts with `subnet_resource_grp`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -10415,7 +10501,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 														},
 														"subnet_param": schema.SingleNestedAttribute{
 															Description:         "New Subnet Parameters for creating new subnet.",
-															MarkdownDescription: "New Subnet Parameters for creating new subnet.",
+															MarkdownDescription: "New Subnet Parameters for creating new subnet.<br>Conflicts with `subnet`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -10467,20 +10553,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 								Attributes: map[string]schema.Attribute{
 									"perf_mode_choice": schema.SingleNestedAttribute{
 										Description:         "Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.",
-										MarkdownDescription: "Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.<br>Exactly one of `perf_mode_l3_enhanced` or `perf_mode_l7_enhanced` must be specified when `perf_mode_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"perf_mode_l3_enhanced",
 												"perf_mode_l7_enhanced",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"perf_mode_l3_enhanced": schema.BoolAttribute{
 												Description:         "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
-												MarkdownDescription: "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
+												MarkdownDescription: "L3 Mode Enhanced Performance Site optimized for L3 traffic processing<br>Conflicts with `perf_mode_l7_enhanced`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -10490,7 +10579,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 											},
 											"perf_mode_l7_enhanced": schema.BoolAttribute{
 												Description:         "Default Performance Mode Site optimized for L7 traffic processing",
-												MarkdownDescription: "Default Performance Mode Site optimized for L7 traffic processing",
+												MarkdownDescription: "Default Performance Mode Site optimized for L7 traffic processing<br>Conflicts with `perf_mode_l3_enhanced`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -10506,7 +10595,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 					},
 					"ingress_gw_ar": schema.SingleNestedAttribute{
 						Description:         "Ingress Gateway on Alternate Region One interface site is useful when site is only used as ingress gateway to the VNet.",
-						MarkdownDescription: "Ingress Gateway on Alternate Region One interface site is useful when site is only used as ingress gateway to the VNet.",
+						MarkdownDescription: "Ingress Gateway on Alternate Region One interface site is useful when site is only used as ingress gateway to the VNet.<br>Conflicts with `ingress_egress_gw`, `ingress_egress_gw_ar`, `ingress_gw`, `voltstack_cluster`, and `voltstack_cluster_ar`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -10520,20 +10609,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 								Attributes: map[string]schema.Attribute{
 									"accelerated_networking_choice": schema.SingleNestedAttribute{
 										Description:         "Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen",
-										MarkdownDescription: "Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen<br>Exactly one of `disable` or `enable` must be specified when `accelerated_networking_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"disable",
 												"enable",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"disable": schema.BoolAttribute{
 												Description:         "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
-												MarkdownDescription: "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
+												MarkdownDescription: "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.<br>Conflicts with `enable`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -10543,7 +10635,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 											},
 											"enable": schema.BoolAttribute{
 												Description:         "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
-												MarkdownDescription: "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
+												MarkdownDescription: "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance<br>Conflicts with `disable`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -10594,7 +10686,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 										Attributes: map[string]schema.Attribute{
 											"choice": schema.SingleNestedAttribute{
 												Description:         "Choice of subnet Subnet for the Single interface of the site",
-												MarkdownDescription: "Choice of subnet Subnet for the Single interface of the site",
+												MarkdownDescription: "Choice of subnet Subnet for the Single interface of the site<br>Exactly one of `subnet` or `subnet_param` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -10607,14 +10699,14 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 												Attributes: map[string]schema.Attribute{
 													"subnet": schema.SingleNestedAttribute{
 														Description:         "Existing Subnet Information about existing subnet.",
-														MarkdownDescription: "Existing Subnet Information about existing subnet.",
+														MarkdownDescription: "Existing Subnet Information about existing subnet.<br>Conflicts with `subnet_param`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
 														Attributes: map[string]schema.Attribute{
 															"resource_group_choice": schema.SingleNestedAttribute{
 																Description:         "Existing Subnet Resource Group Resource group for this subnet.",
-																MarkdownDescription: "Existing Subnet Resource Group Resource group for this subnet.",
+																MarkdownDescription: "Existing Subnet Resource Group Resource group for this subnet.<br>Exactly one of `subnet_resource_grp` or `vnet_resource_group` must be specified when `resource_group_choice` is configured.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -10627,7 +10719,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																Attributes: map[string]schema.Attribute{
 																	"subnet_resource_grp": schema.StringAttribute{
 																		Description:         "subnet_resource_grp Specify name of Resource Group",
-																		MarkdownDescription: "subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`",
+																		MarkdownDescription: "subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `vnet_resource_group`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -10637,7 +10729,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	},
 																	"vnet_resource_group": schema.BoolAttribute{
 																		Description:         "vnet_resource_group Use the same Resource Group as the Vnet",
-																		MarkdownDescription: "vnet_resource_group Use the same Resource Group as the Vnet",
+																		MarkdownDescription: "vnet_resource_group Use the same Resource Group as the Vnet<br>Conflicts with `subnet_resource_grp`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -10661,7 +10753,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 													},
 													"subnet_param": schema.SingleNestedAttribute{
 														Description:         "New Subnet Parameters for creating new subnet.",
-														MarkdownDescription: "New Subnet Parameters for creating new subnet.",
+														MarkdownDescription: "New Subnet Parameters for creating new subnet.<br>Conflicts with `subnet`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -10718,20 +10810,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 								Attributes: map[string]schema.Attribute{
 									"perf_mode_choice": schema.SingleNestedAttribute{
 										Description:         "Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.",
-										MarkdownDescription: "Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.<br>Exactly one of `perf_mode_l3_enhanced` or `perf_mode_l7_enhanced` must be specified when `perf_mode_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"perf_mode_l3_enhanced",
 												"perf_mode_l7_enhanced",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"perf_mode_l3_enhanced": schema.BoolAttribute{
 												Description:         "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
-												MarkdownDescription: "L3 Mode Enhanced Performance Site optimized for L3 traffic processing",
+												MarkdownDescription: "L3 Mode Enhanced Performance Site optimized for L3 traffic processing<br>Conflicts with `perf_mode_l7_enhanced`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -10741,7 +10836,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 											},
 											"perf_mode_l7_enhanced": schema.BoolAttribute{
 												Description:         "Default Performance Mode Site optimized for L7 traffic processing",
-												MarkdownDescription: "Default Performance Mode Site optimized for L7 traffic processing",
+												MarkdownDescription: "Default Performance Mode Site optimized for L7 traffic processing<br>Conflicts with `perf_mode_l3_enhanced`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -10757,7 +10852,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 					},
 					"voltstack_cluster": schema.SingleNestedAttribute{
 						Description:         "App Stack Cluster on Recommended Region App Stack Cluster using single interface, useful for deploying K8s cluster.",
-						MarkdownDescription: "App Stack Cluster on Recommended Region App Stack Cluster using single interface, useful for deploying K8s cluster.",
+						MarkdownDescription: "App Stack Cluster on Recommended Region App Stack Cluster using single interface, useful for deploying K8s cluster.<br>Conflicts with `ingress_egress_gw`, `ingress_egress_gw_ar`, `ingress_gw`, `ingress_gw_ar`, and `voltstack_cluster_ar`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -10771,20 +10866,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 								Attributes: map[string]schema.Attribute{
 									"accelerated_networking_choice": schema.SingleNestedAttribute{
 										Description:         "Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen",
-										MarkdownDescription: "Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen<br>Exactly one of `disable` or `enable` must be specified when `accelerated_networking_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"disable",
 												"enable",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"disable": schema.BoolAttribute{
 												Description:         "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
-												MarkdownDescription: "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
+												MarkdownDescription: "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.<br>Conflicts with `enable`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -10794,7 +10892,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 											},
 											"enable": schema.BoolAttribute{
 												Description:         "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
-												MarkdownDescription: "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
+												MarkdownDescription: "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance<br>Conflicts with `disable`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -10836,7 +10934,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 											Attributes: map[string]schema.Attribute{
 												"choice": schema.SingleNestedAttribute{
 													Description:         "Choice of subnet Subnet for the Single interface of the site",
-													MarkdownDescription: "Choice of subnet Subnet for the Single interface of the site",
+													MarkdownDescription: "Choice of subnet Subnet for the Single interface of the site<br>Exactly one of `subnet` or `subnet_param` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -10849,14 +10947,14 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 													Attributes: map[string]schema.Attribute{
 														"subnet": schema.SingleNestedAttribute{
 															Description:         "Existing Subnet Information about existing subnet.",
-															MarkdownDescription: "Existing Subnet Information about existing subnet.",
+															MarkdownDescription: "Existing Subnet Information about existing subnet.<br>Conflicts with `subnet_param`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
 															Attributes: map[string]schema.Attribute{
 																"resource_group_choice": schema.SingleNestedAttribute{
 																	Description:         "Existing Subnet Resource Group Resource group for this subnet.",
-																	MarkdownDescription: "Existing Subnet Resource Group Resource group for this subnet.",
+																	MarkdownDescription: "Existing Subnet Resource Group Resource group for this subnet.<br>Exactly one of `subnet_resource_grp` or `vnet_resource_group` must be specified when `resource_group_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -10869,7 +10967,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	Attributes: map[string]schema.Attribute{
 																		"subnet_resource_grp": schema.StringAttribute{
 																			Description:         "subnet_resource_grp Specify name of Resource Group",
-																			MarkdownDescription: "subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`",
+																			MarkdownDescription: "subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `vnet_resource_group`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -10879,7 +10977,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																		},
 																		"vnet_resource_group": schema.BoolAttribute{
 																			Description:         "vnet_resource_group Use the same Resource Group as the Vnet",
-																			MarkdownDescription: "vnet_resource_group Use the same Resource Group as the Vnet",
+																			MarkdownDescription: "vnet_resource_group Use the same Resource Group as the Vnet<br>Conflicts with `subnet_resource_grp`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -10903,7 +11001,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 														},
 														"subnet_param": schema.SingleNestedAttribute{
 															Description:         "New Subnet Parameters for creating new subnet.",
-															MarkdownDescription: "New Subnet Parameters for creating new subnet.",
+															MarkdownDescription: "New Subnet Parameters for creating new subnet.<br>Conflicts with `subnet`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -10948,20 +11046,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"dc_cluster_group_choice": schema.SingleNestedAttribute{
 								Description:         "Select DC Cluster Group Is this site member of a dc cluster group via selected network type",
-								MarkdownDescription: "Select DC Cluster Group Is this site member of a dc cluster group via selected network type",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Select DC Cluster Group Is this site member of a dc cluster group via selected network type<br>Exactly one of `dc_cluster_group` or `no_dc_cluster_group` must be specified when `dc_cluster_group_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"dc_cluster_group",
 										"no_dc_cluster_group",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"dc_cluster_group": schema.SingleNestedAttribute{
 										Description:         "Member of DC cluster Group of DC Cluster Group This site is member of dc cluster group via Outside Network",
-										MarkdownDescription: "Member of DC cluster Group of DC Cluster Group This site is member of dc cluster group via Outside Network",
+										MarkdownDescription: "Member of DC cluster Group of DC Cluster Group This site is member of dc cluster group via Outside Network<br>Conflicts with `no_dc_cluster_group`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -10994,7 +11095,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"no_dc_cluster_group": schema.BoolAttribute{
 										Description:         "Not a Member of DC Cluster Group This site is not a member of dc cluster group",
-										MarkdownDescription: "Not a Member of DC Cluster Group This site is not a member of dc cluster group",
+										MarkdownDescription: "Not a Member of DC Cluster Group This site is not a member of dc cluster group<br>Conflicts with `dc_cluster_group`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -11006,21 +11107,24 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"forward_proxy_choice": schema.SingleNestedAttribute{
 								Description:         "Manage Forward Proxy Manage Forward Proxy for this site",
-								MarkdownDescription: "Manage Forward Proxy Manage Forward Proxy for this site",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Manage Forward Proxy Manage Forward Proxy for this site<br>Exactly one of `active_forward_proxy_policies`, `forward_proxy_allow_all`, or `no_forward_proxy` must be specified when `forward_proxy_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"active_forward_proxy_policies",
 										"forward_proxy_allow_all",
 										"no_forward_proxy",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"active_forward_proxy_policies": schema.SingleNestedAttribute{
 										Description:         "Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies",
-										MarkdownDescription: "Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies",
+										MarkdownDescription: "Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies<br>Conflicts with `forward_proxy_allow_all` and `no_forward_proxy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -11067,7 +11171,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"forward_proxy_allow_all": schema.BoolAttribute{
 										Description:         "Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.",
-										MarkdownDescription: "Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.",
+										MarkdownDescription: "Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.<br>Conflicts with `active_forward_proxy_policies` and `no_forward_proxy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -11077,7 +11181,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"no_forward_proxy": schema.BoolAttribute{
 										Description:         "Disable Forward Proxy Disable Forward Proxy for this site",
-										MarkdownDescription: "Disable Forward Proxy Disable Forward Proxy for this site",
+										MarkdownDescription: "Disable Forward Proxy Disable Forward Proxy for this site<br>Conflicts with `active_forward_proxy_policies` and `forward_proxy_allow_all`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -11089,20 +11193,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"global_network_choice": schema.SingleNestedAttribute{
 								Description:         "Connect to Global Network Select global networks to connect to site local network",
-								MarkdownDescription: "Connect to Global Network Select global networks to connect to site local network",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Connect to Global Network Select global networks to connect to site local network<br>Exactly one of `global_network_list` or `no_global_network` must be specified when `global_network_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"global_network_list",
 										"no_global_network",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"global_network_list": schema.SingleNestedAttribute{
 										Description:         "Connect Global Networks List of global network connections",
-										MarkdownDescription: "Connect Global Networks List of global network connections",
+										MarkdownDescription: "Connect Global Networks List of global network connections<br>Conflicts with `no_global_network`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -11120,7 +11227,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 													Attributes: map[string]schema.Attribute{
 														"connection_choice": schema.SingleNestedAttribute{
 															Description:         "Connector Choice Select the networks and method in which they are connected.",
-															MarkdownDescription: "Connector Choice Select the networks and method in which they are connected.",
+															MarkdownDescription: "Connector Choice Select the networks and method in which they are connected.<br>Exactly one of `sli_to_global_dr` or `slo_to_global_dr` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -11133,7 +11240,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															Attributes: map[string]schema.Attribute{
 																"sli_to_global_dr": schema.SingleNestedAttribute{
 																	Description:         "Site Local Inside to a Global Network' Site local inside is connected directly to a given global network",
-																	MarkdownDescription: "Site Local Inside to a Global Network' Site local inside is connected directly to a given global network",
+																	MarkdownDescription: "Site Local Inside to a Global Network' Site local inside is connected directly to a given global network<br>Conflicts with `slo_to_global_dr`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -11175,7 +11282,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																},
 																"slo_to_global_dr": schema.SingleNestedAttribute{
 																	Description:         "Site Local Outside to a Global Network' Site local outside is connected directly to a given global network",
-																	MarkdownDescription: "Site Local Outside to a Global Network' Site local outside is connected directly to a given global network",
+																	MarkdownDescription: "Site Local Outside to a Global Network' Site local outside is connected directly to a given global network<br>Conflicts with `sli_to_global_dr`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -11224,7 +11331,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"no_global_network": schema.BoolAttribute{
 										Description:         "Do not Connect Global Networks No global network to connect",
-										MarkdownDescription: "Do not Connect Global Networks No global network to connect",
+										MarkdownDescription: "Do not Connect Global Networks No global network to connect<br>Conflicts with `global_network_list`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -11236,20 +11343,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"k8s_cluster_choice": schema.SingleNestedAttribute{
 								Description:         "Site Local K8s API access Enable/Disable choice for site local K8s API access",
-								MarkdownDescription: "Site Local K8s API access Enable/Disable choice for site local K8s API access",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Site Local K8s API access Enable/Disable choice for site local K8s API access<br>Exactly one of `k8s_cluster` or `no_k8s_cluster` must be specified when `k8s_cluster_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"k8s_cluster",
 										"no_k8s_cluster",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"k8s_cluster": schema.SingleNestedAttribute{
 										Description:         "Enable Site Local K8s API access Site Local K8s API access is enabled, using k8s_cluster object",
-										MarkdownDescription: "Enable Site Local K8s API access Site Local K8s API access is enabled, using k8s_cluster object",
+										MarkdownDescription: "Enable Site Local K8s API access Site Local K8s API access is enabled, using k8s_cluster object<br>Conflicts with `no_k8s_cluster`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -11282,7 +11392,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"no_k8s_cluster": schema.BoolAttribute{
 										Description:         "Disable Site Local K8s API access Site Local K8s API access is disabled",
-										MarkdownDescription: "Disable Site Local K8s API access Site Local K8s API access is disabled",
+										MarkdownDescription: "Disable Site Local K8s API access Site Local K8s API access is disabled<br>Conflicts with `k8s_cluster`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -11294,21 +11404,24 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"network_policy_choice": schema.SingleNestedAttribute{
 								Description:         "Manage Firewall Policy Manage Firewall Policy via this view",
-								MarkdownDescription: "Manage Firewall Policy Manage Firewall Policy via this view",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Manage Firewall Policy Manage Firewall Policy via this view<br>Exactly one of `active_enhanced_firewall_policies`, `active_network_policies`, or `no_network_policy` must be specified when `network_policy_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"active_enhanced_firewall_policies",
 										"active_network_policies",
 										"no_network_policy",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"active_enhanced_firewall_policies": schema.SingleNestedAttribute{
 										Description:         "Manage Enhanced Firewall Policy Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion.",
-										MarkdownDescription: "Manage Enhanced Firewall Policy Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion.",
+										MarkdownDescription: "Manage Enhanced Firewall Policy Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion.<br>Conflicts with `active_network_policies` and `no_network_policy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -11355,7 +11468,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"active_network_policies": schema.SingleNestedAttribute{
 										Description:         "Manage Firewall Policy Firewall Policies active for this site.",
-										MarkdownDescription: "Manage Firewall Policy Firewall Policies active for this site.",
+										MarkdownDescription: "Manage Firewall Policy Firewall Policies active for this site.<br>Conflicts with `active_enhanced_firewall_policies` and `no_network_policy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -11402,7 +11515,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"no_network_policy": schema.BoolAttribute{
 										Description:         "Do Not Manage Firewall Policy Firewall Policy is disabled for this site.",
-										MarkdownDescription: "Do Not Manage Firewall Policy Firewall Policy is disabled for this site.",
+										MarkdownDescription: "Do Not Manage Firewall Policy Firewall Policy is disabled for this site.<br>Conflicts with `active_enhanced_firewall_policies` and `active_network_policies`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -11414,20 +11527,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"outside_static_route_choice": schema.SingleNestedAttribute{
 								Description:         "Manage Static Routes for Site Local Network Add static routes to site local network. Used to reach indirectly connected subnets.",
-								MarkdownDescription: "Manage Static Routes for Site Local Network Add static routes to site local network. Used to reach indirectly connected subnets.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Manage Static Routes for Site Local Network Add static routes to site local network. Used to reach indirectly connected subnets.<br>Exactly one of `no_outside_static_routes` or `outside_static_routes` must be specified when `outside_static_route_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"no_outside_static_routes",
 										"outside_static_routes",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"no_outside_static_routes": schema.BoolAttribute{
 										Description:         "Do Not Manage Static Routes Static Routes disabled for outside network.",
-										MarkdownDescription: "Do Not Manage Static Routes Static Routes disabled for outside network.",
+										MarkdownDescription: "Do Not Manage Static Routes Static Routes disabled for outside network.<br>Conflicts with `outside_static_routes`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -11437,7 +11553,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"outside_static_routes": schema.SingleNestedAttribute{
 										Description:         "Manage Static routes Manage static routes for outside network.",
-										MarkdownDescription: "Manage Static routes Manage static routes for outside network.",
+										MarkdownDescription: "Manage Static routes Manage static routes for outside network.<br>Conflicts with `no_outside_static_routes`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -11455,7 +11571,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 													Attributes: map[string]schema.Attribute{
 														"config_mode_choice": schema.SingleNestedAttribute{
 															Description:         "Static Route Config Mode Select method for configuring the route",
-															MarkdownDescription: "Static Route Config Mode Select method for configuring the route",
+															MarkdownDescription: "Static Route Config Mode Select method for configuring the route<br>Exactly one of `custom_static_route` or `simple_static_route` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -11468,7 +11584,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															Attributes: map[string]schema.Attribute{
 																"custom_static_route": schema.SingleNestedAttribute{
 																	Description:         "Custom Static Route Use Custom static route to configure all advanced options",
-																	MarkdownDescription: "Custom Static Route Use Custom static route to configure all advanced options",
+																	MarkdownDescription: "Custom Static Route Use Custom static route to configure all advanced options<br>Conflicts with `simple_static_route`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -11547,7 +11663,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																					Attributes: map[string]schema.Attribute{
 																						"ver_choice": schema.SingleNestedAttribute{
 																							Description:         "Version IP Address version. Can be IPv4 Address or IPv6 Address",
-																							MarkdownDescription: "Version IP Address version. Can be IPv4 Address or IPv6 Address",
+																							MarkdownDescription: "Version IP Address version. Can be IPv4 Address or IPv6 Address<br>Exactly one of `dual_stack` or `ipv4` must be specified when `ver_choice` is configured.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -11560,7 +11676,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																							Attributes: map[string]schema.Attribute{
 																								"dual_stack": schema.SingleNestedAttribute{
 																									Description:         "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together",
-																									MarkdownDescription: "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together",
+																									MarkdownDescription: "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together<br>Conflicts with `ipv4`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -11613,7 +11729,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																								},
 																								"ipv4": schema.SingleNestedAttribute{
 																									Description:         "IPv4 Address IPv4 Address",
-																									MarkdownDescription: "IPv4 Address IPv4 Address",
+																									MarkdownDescription: "IPv4 Address IPv4 Address<br>Conflicts with `dual_stack`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -11665,7 +11781,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																				Attributes: map[string]schema.Attribute{
 																					"ver_choice": schema.SingleNestedAttribute{
 																						Description:         "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address",
-																						MarkdownDescription: "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address",
+																						MarkdownDescription: "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address<br>`ipv4` must be specified.",
 																						Required:            true,
 																						Optional:            false,
 																						Computed:            false,
@@ -11716,7 +11832,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																},
 																"simple_static_route": schema.StringAttribute{
 																	Description:         "Simple Static Route Use simple static route for prefix pointing to single interface in the network",
-																	MarkdownDescription: "Simple Static Route Use simple static route for prefix pointing to single interface in the network",
+																	MarkdownDescription: "Simple Static Route Use simple static route for prefix pointing to single interface in the network<br>Conflicts with `custom_static_route`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -11738,20 +11854,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"site_mesh_group_choice": schema.SingleNestedAttribute{
 								Description:         "Site Mesh Group Connection Type Select how the site mesh group needs to be connected",
-								MarkdownDescription: "Site Mesh Group Connection Type Select how the site mesh group needs to be connected",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Site Mesh Group Connection Type Select how the site mesh group needs to be connected<br>Exactly one of `sm_connection_public_ip` or `sm_connection_pvt_ip` must be specified when `site_mesh_group_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"sm_connection_public_ip",
 										"sm_connection_pvt_ip",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"sm_connection_public_ip": schema.BoolAttribute{
 										Description:         "Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group",
-										MarkdownDescription: "Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group",
+										MarkdownDescription: "Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group<br>Conflicts with `sm_connection_pvt_ip`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -11761,7 +11880,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"sm_connection_pvt_ip": schema.BoolAttribute{
 										Description:         "Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group",
-										MarkdownDescription: "Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group",
+										MarkdownDescription: "Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group<br>Conflicts with `sm_connection_public_ip`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -11773,20 +11892,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"storage_class_choice": schema.SingleNestedAttribute{
 								Description:         "Storage Class Configuration Configure custom storage classes in kubernetes for this site",
-								MarkdownDescription: "Storage Class Configuration Configure custom storage classes in kubernetes for this site",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Storage Class Configuration Configure custom storage classes in kubernetes for this site<br>Exactly one of `default_storage` or `storage_class_list` must be specified when `storage_class_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"default_storage",
 										"storage_class_list",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"default_storage": schema.BoolAttribute{
 										Description:         "Default Storage Class Use standard storage class configured as AWS EBS",
-										MarkdownDescription: "Default Storage Class Use standard storage class configured as AWS EBS",
+										MarkdownDescription: "Default Storage Class Use standard storage class configured as AWS EBS<br>Conflicts with `storage_class_list`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -11796,7 +11918,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"storage_class_list": schema.SingleNestedAttribute{
 										Description:         "Custom Storage Class Add additional custom storage classes in kubernetes for site",
-										MarkdownDescription: "Custom Storage Class Add additional custom storage classes in kubernetes for site",
+										MarkdownDescription: "Custom Storage Class Add additional custom storage classes in kubernetes for site<br>Conflicts with `default_storage`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -11845,7 +11967,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 					},
 					"voltstack_cluster_ar": schema.SingleNestedAttribute{
 						Description:         "App Stack Cluster on Alternate Region App Stack Cluster using single interface, useful for deploying K8s cluster.",
-						MarkdownDescription: "App Stack Cluster on Alternate Region App Stack Cluster using single interface, useful for deploying K8s cluster.",
+						MarkdownDescription: "App Stack Cluster on Alternate Region App Stack Cluster using single interface, useful for deploying K8s cluster.<br>Conflicts with `ingress_egress_gw`, `ingress_egress_gw_ar`, `ingress_gw`, `ingress_gw_ar`, and `voltstack_cluster`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -11859,20 +11981,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 								Attributes: map[string]schema.Attribute{
 									"accelerated_networking_choice": schema.SingleNestedAttribute{
 										Description:         "Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen",
-										MarkdownDescription: "Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Accelerated Networking Accelerated Networking to reduce Latency, When Mode is toggled, traffic disruption will be seen<br>Exactly one of `disable` or `enable` must be specified when `accelerated_networking_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"disable",
 												"enable",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"disable": schema.BoolAttribute{
 												Description:         "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
-												MarkdownDescription: "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.",
+												MarkdownDescription: "Disable Accelerated Networking Site not optimized for accelerated networking. All networking traffic in and out of the VM traverses the host and the virtual switch on Azure hosting infrastructure.<br>Conflicts with `enable`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -11882,7 +12007,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 											},
 											"enable": schema.BoolAttribute{
 												Description:         "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
-												MarkdownDescription: "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance",
+												MarkdownDescription: "Enable Accelerated Networking Enable Accelerated Networking- Site optimized for accelerated networking. All Network traffic that arrives at the VM's network interface (NIC) is forwarded directly to the VM on Azure hosting infrastructure,  greatly improving networking performance<br>Conflicts with `disable`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -11908,20 +12033,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"dc_cluster_group_choice": schema.SingleNestedAttribute{
 								Description:         "Select DC Cluster Group Is this site member of a dc cluster group via selected network type",
-								MarkdownDescription: "Select DC Cluster Group Is this site member of a dc cluster group via selected network type",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Select DC Cluster Group Is this site member of a dc cluster group via selected network type<br>Exactly one of `dc_cluster_group` or `no_dc_cluster_group` must be specified when `dc_cluster_group_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"dc_cluster_group",
 										"no_dc_cluster_group",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"dc_cluster_group": schema.SingleNestedAttribute{
 										Description:         "Member of DC cluster Group This site is member of dc cluster group via outside network",
-										MarkdownDescription: "Member of DC cluster Group This site is member of dc cluster group via outside network",
+										MarkdownDescription: "Member of DC cluster Group This site is member of dc cluster group via outside network<br>Conflicts with `no_dc_cluster_group`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -11954,7 +12082,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"no_dc_cluster_group": schema.BoolAttribute{
 										Description:         "Not a Member This site is not a member of dc cluster group",
-										MarkdownDescription: "Not a Member This site is not a member of dc cluster group",
+										MarkdownDescription: "Not a Member This site is not a member of dc cluster group<br>Conflicts with `dc_cluster_group`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -11966,21 +12094,24 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"forward_proxy_choice": schema.SingleNestedAttribute{
 								Description:         "Manage Forward Proxy Manage Forward Proxy for this site",
-								MarkdownDescription: "Manage Forward Proxy Manage Forward Proxy for this site",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Manage Forward Proxy Manage Forward Proxy for this site<br>Exactly one of `active_forward_proxy_policies`, `forward_proxy_allow_all`, or `no_forward_proxy` must be specified when `forward_proxy_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"active_forward_proxy_policies",
 										"forward_proxy_allow_all",
 										"no_forward_proxy",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"active_forward_proxy_policies": schema.SingleNestedAttribute{
 										Description:         "Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies",
-										MarkdownDescription: "Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies",
+										MarkdownDescription: "Enable Forward Proxy and Manage Policies Enable Forward Proxy for this site and manage policies<br>Conflicts with `forward_proxy_allow_all` and `no_forward_proxy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -12027,7 +12158,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"forward_proxy_allow_all": schema.BoolAttribute{
 										Description:         "Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.",
-										MarkdownDescription: "Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.",
+										MarkdownDescription: "Enable Forward Proxy with Allow All Policy Enable Forward Proxy for this site and allow all requests.<br>Conflicts with `active_forward_proxy_policies` and `no_forward_proxy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -12037,7 +12168,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"no_forward_proxy": schema.BoolAttribute{
 										Description:         "Disable Forward Proxy Disable Forward Proxy for this site",
-										MarkdownDescription: "Disable Forward Proxy Disable Forward Proxy for this site",
+										MarkdownDescription: "Disable Forward Proxy Disable Forward Proxy for this site<br>Conflicts with `active_forward_proxy_policies` and `forward_proxy_allow_all`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -12049,20 +12180,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"global_network_choice": schema.SingleNestedAttribute{
 								Description:         "Connect to Global Network Select global networks to connect to site local network",
-								MarkdownDescription: "Connect to Global Network Select global networks to connect to site local network",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Connect to Global Network Select global networks to connect to site local network<br>Exactly one of `global_network_list` or `no_global_network` must be specified when `global_network_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"global_network_list",
 										"no_global_network",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"global_network_list": schema.SingleNestedAttribute{
 										Description:         "Connect Global Networks List of global network connections",
-										MarkdownDescription: "Connect Global Networks List of global network connections",
+										MarkdownDescription: "Connect Global Networks List of global network connections<br>Conflicts with `no_global_network`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -12080,7 +12214,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 													Attributes: map[string]schema.Attribute{
 														"connection_choice": schema.SingleNestedAttribute{
 															Description:         "Connector Choice Select the networks and method in which they are connected.",
-															MarkdownDescription: "Connector Choice Select the networks and method in which they are connected.",
+															MarkdownDescription: "Connector Choice Select the networks and method in which they are connected.<br>Exactly one of `sli_to_global_dr` or `slo_to_global_dr` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -12093,7 +12227,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															Attributes: map[string]schema.Attribute{
 																"sli_to_global_dr": schema.SingleNestedAttribute{
 																	Description:         "Site Local Inside to a Global Network' Site local inside is connected directly to a given global network",
-																	MarkdownDescription: "Site Local Inside to a Global Network' Site local inside is connected directly to a given global network",
+																	MarkdownDescription: "Site Local Inside to a Global Network' Site local inside is connected directly to a given global network<br>Conflicts with `slo_to_global_dr`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -12135,7 +12269,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																},
 																"slo_to_global_dr": schema.SingleNestedAttribute{
 																	Description:         "Site Local Outside to a Global Network' Site local outside is connected directly to a given global network",
-																	MarkdownDescription: "Site Local Outside to a Global Network' Site local outside is connected directly to a given global network",
+																	MarkdownDescription: "Site Local Outside to a Global Network' Site local outside is connected directly to a given global network<br>Conflicts with `sli_to_global_dr`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -12184,7 +12318,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"no_global_network": schema.BoolAttribute{
 										Description:         "Do not Connect Global Networks No global network to connect",
-										MarkdownDescription: "Do not Connect Global Networks No global network to connect",
+										MarkdownDescription: "Do not Connect Global Networks No global network to connect<br>Conflicts with `global_network_list`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -12196,20 +12330,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"k8s_cluster_choice": schema.SingleNestedAttribute{
 								Description:         "Site Local K8s API access Enable/Disable choice for site local K8s API access",
-								MarkdownDescription: "Site Local K8s API access Enable/Disable choice for site local K8s API access",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Site Local K8s API access Enable/Disable choice for site local K8s API access<br>Exactly one of `k8s_cluster` or `no_k8s_cluster` must be specified when `k8s_cluster_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"k8s_cluster",
 										"no_k8s_cluster",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"k8s_cluster": schema.SingleNestedAttribute{
 										Description:         "Enable Site Local K8s API access Site Local K8s API access is enabled, using k8s_cluster object",
-										MarkdownDescription: "Enable Site Local K8s API access Site Local K8s API access is enabled, using k8s_cluster object",
+										MarkdownDescription: "Enable Site Local K8s API access Site Local K8s API access is enabled, using k8s_cluster object<br>Conflicts with `no_k8s_cluster`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -12242,7 +12379,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"no_k8s_cluster": schema.BoolAttribute{
 										Description:         "Disable Site Local K8s API access Site Local K8s API access is disabled",
-										MarkdownDescription: "Disable Site Local K8s API access Site Local K8s API access is disabled",
+										MarkdownDescription: "Disable Site Local K8s API access Site Local K8s API access is disabled<br>Conflicts with `k8s_cluster`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -12254,21 +12391,24 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"network_policy_choice": schema.SingleNestedAttribute{
 								Description:         "Manage Firewall Policy Manage Firewall Policy via this view",
-								MarkdownDescription: "Manage Firewall Policy Manage Firewall Policy via this view",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Manage Firewall Policy Manage Firewall Policy via this view<br>Exactly one of `active_enhanced_firewall_policies`, `active_network_policies`, or `no_network_policy` must be specified when `network_policy_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"active_enhanced_firewall_policies",
 										"active_network_policies",
 										"no_network_policy",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"active_enhanced_firewall_policies": schema.SingleNestedAttribute{
 										Description:         "Manage Enhanced Firewall Policy Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion.",
-										MarkdownDescription: "Manage Enhanced Firewall Policy Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion.",
+										MarkdownDescription: "Manage Enhanced Firewall Policy Enhanced Firewall Policies active for this site. These policies use session-based rules and provide all options available under firewall policies with an additional option for service insertion.<br>Conflicts with `active_network_policies` and `no_network_policy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -12315,7 +12455,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"active_network_policies": schema.SingleNestedAttribute{
 										Description:         "Manage Firewall Policy Firewall Policies active for this site.",
-										MarkdownDescription: "Manage Firewall Policy Firewall Policies active for this site.",
+										MarkdownDescription: "Manage Firewall Policy Firewall Policies active for this site.<br>Conflicts with `active_enhanced_firewall_policies` and `no_network_policy`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -12362,7 +12502,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"no_network_policy": schema.BoolAttribute{
 										Description:         "Do Not Manage Firewall Policy Firewall Policy is disabled for this site.",
-										MarkdownDescription: "Do Not Manage Firewall Policy Firewall Policy is disabled for this site.",
+										MarkdownDescription: "Do Not Manage Firewall Policy Firewall Policy is disabled for this site.<br>Conflicts with `active_enhanced_firewall_policies` and `active_network_policies`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -12399,7 +12539,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 										Attributes: map[string]schema.Attribute{
 											"choice": schema.SingleNestedAttribute{
 												Description:         "Choice of subnet Subnet for the Single interface of the site",
-												MarkdownDescription: "Choice of subnet Subnet for the Single interface of the site",
+												MarkdownDescription: "Choice of subnet Subnet for the Single interface of the site<br>Exactly one of `subnet` or `subnet_param` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -12412,14 +12552,14 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 												Attributes: map[string]schema.Attribute{
 													"subnet": schema.SingleNestedAttribute{
 														Description:         "Existing Subnet Information about existing subnet.",
-														MarkdownDescription: "Existing Subnet Information about existing subnet.",
+														MarkdownDescription: "Existing Subnet Information about existing subnet.<br>Conflicts with `subnet_param`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
 														Attributes: map[string]schema.Attribute{
 															"resource_group_choice": schema.SingleNestedAttribute{
 																Description:         "Existing Subnet Resource Group Resource group for this subnet.",
-																MarkdownDescription: "Existing Subnet Resource Group Resource group for this subnet.",
+																MarkdownDescription: "Existing Subnet Resource Group Resource group for this subnet.<br>Exactly one of `subnet_resource_grp` or `vnet_resource_group` must be specified when `resource_group_choice` is configured.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -12432,7 +12572,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																Attributes: map[string]schema.Attribute{
 																	"subnet_resource_grp": schema.StringAttribute{
 																		Description:         "subnet_resource_grp Specify name of Resource Group",
-																		MarkdownDescription: "subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`",
+																		MarkdownDescription: "subnet_resource_grp Specify name of Resource Group<br>**Validation:** `Length LengthAtMost(64)`<br>Conflicts with `vnet_resource_group`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -12442,7 +12582,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																	},
 																	"vnet_resource_group": schema.BoolAttribute{
 																		Description:         "vnet_resource_group Use the same Resource Group as the Vnet",
-																		MarkdownDescription: "vnet_resource_group Use the same Resource Group as the Vnet",
+																		MarkdownDescription: "vnet_resource_group Use the same Resource Group as the Vnet<br>Conflicts with `subnet_resource_grp`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -12466,7 +12606,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 													},
 													"subnet_param": schema.SingleNestedAttribute{
 														Description:         "New Subnet Parameters for creating new subnet.",
-														MarkdownDescription: "New Subnet Parameters for creating new subnet.",
+														MarkdownDescription: "New Subnet Parameters for creating new subnet.<br>Conflicts with `subnet`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -12516,20 +12656,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"outside_static_route_choice": schema.SingleNestedAttribute{
 								Description:         "Manage Static Routes for Site Local Network Add static routes to site local network. Used to reach indirectly connected subnets.",
-								MarkdownDescription: "Manage Static Routes for Site Local Network Add static routes to site local network. Used to reach indirectly connected subnets.",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Manage Static Routes for Site Local Network Add static routes to site local network. Used to reach indirectly connected subnets.<br>Exactly one of `no_outside_static_routes` or `outside_static_routes` must be specified when `outside_static_route_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"no_outside_static_routes",
 										"outside_static_routes",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"no_outside_static_routes": schema.BoolAttribute{
 										Description:         "Do Not Manage Static Routes Static Routes disabled for outside network.",
-										MarkdownDescription: "Do Not Manage Static Routes Static Routes disabled for outside network.",
+										MarkdownDescription: "Do Not Manage Static Routes Static Routes disabled for outside network.<br>Conflicts with `outside_static_routes`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -12539,7 +12682,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"outside_static_routes": schema.SingleNestedAttribute{
 										Description:         "Manage Static routes Manage static routes for outside network.",
-										MarkdownDescription: "Manage Static routes Manage static routes for outside network.",
+										MarkdownDescription: "Manage Static routes Manage static routes for outside network.<br>Conflicts with `no_outside_static_routes`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -12557,7 +12700,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 													Attributes: map[string]schema.Attribute{
 														"config_mode_choice": schema.SingleNestedAttribute{
 															Description:         "Static Route Config Mode Select method for configuring the route",
-															MarkdownDescription: "Static Route Config Mode Select method for configuring the route",
+															MarkdownDescription: "Static Route Config Mode Select method for configuring the route<br>Exactly one of `custom_static_route` or `simple_static_route` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -12570,7 +12713,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 															Attributes: map[string]schema.Attribute{
 																"custom_static_route": schema.SingleNestedAttribute{
 																	Description:         "Custom Static Route Use Custom static route to configure all advanced options",
-																	MarkdownDescription: "Custom Static Route Use Custom static route to configure all advanced options",
+																	MarkdownDescription: "Custom Static Route Use Custom static route to configure all advanced options<br>Conflicts with `simple_static_route`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -12649,7 +12792,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																					Attributes: map[string]schema.Attribute{
 																						"ver_choice": schema.SingleNestedAttribute{
 																							Description:         "Version IP Address version. Can be IPv4 Address or IPv6 Address",
-																							MarkdownDescription: "Version IP Address version. Can be IPv4 Address or IPv6 Address",
+																							MarkdownDescription: "Version IP Address version. Can be IPv4 Address or IPv6 Address<br>Exactly one of `dual_stack` or `ipv4` must be specified when `ver_choice` is configured.",
 																							Required:            false,
 																							Optional:            true,
 																							Computed:            false,
@@ -12662,7 +12805,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																							Attributes: map[string]schema.Attribute{
 																								"dual_stack": schema.SingleNestedAttribute{
 																									Description:         "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together",
-																									MarkdownDescription: "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together",
+																									MarkdownDescription: "Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together<br>Conflicts with `ipv4`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -12715,7 +12858,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																								},
 																								"ipv4": schema.SingleNestedAttribute{
 																									Description:         "IPv4 Address IPv4 Address",
-																									MarkdownDescription: "IPv4 Address IPv4 Address",
+																									MarkdownDescription: "IPv4 Address IPv4 Address<br>Conflicts with `dual_stack`.",
 																									Required:            false,
 																									Optional:            true,
 																									Computed:            false,
@@ -12767,7 +12910,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																				Attributes: map[string]schema.Attribute{
 																					"ver_choice": schema.SingleNestedAttribute{
 																						Description:         "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address",
-																						MarkdownDescription: "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address",
+																						MarkdownDescription: "Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address<br>`ipv4` must be specified.",
 																						Required:            true,
 																						Optional:            false,
 																						Computed:            false,
@@ -12818,7 +12961,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 																},
 																"simple_static_route": schema.StringAttribute{
 																	Description:         "Simple Static Route Use simple static route for prefix pointing to single interface in the network",
-																	MarkdownDescription: "Simple Static Route Use simple static route for prefix pointing to single interface in the network",
+																	MarkdownDescription: "Simple Static Route Use simple static route for prefix pointing to single interface in the network<br>Conflicts with `custom_static_route`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -12840,20 +12983,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"site_mesh_group_choice": schema.SingleNestedAttribute{
 								Description:         "Site Mesh Group Connection Type Select how the site mesh group needs to be connected",
-								MarkdownDescription: "Site Mesh Group Connection Type Select how the site mesh group needs to be connected",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Site Mesh Group Connection Type Select how the site mesh group needs to be connected<br>Exactly one of `sm_connection_public_ip` or `sm_connection_pvt_ip` must be specified when `site_mesh_group_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"sm_connection_public_ip",
 										"sm_connection_pvt_ip",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"sm_connection_public_ip": schema.BoolAttribute{
 										Description:         "Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group",
-										MarkdownDescription: "Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group",
+										MarkdownDescription: "Site Mesh Group Connection Via Public Ip Site Mesh Group Connection Via Public IP. This option will use elastic IP for creating ipsec between two sites which are part of the site mesh group<br>Conflicts with `sm_connection_pvt_ip`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -12863,7 +13009,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"sm_connection_pvt_ip": schema.BoolAttribute{
 										Description:         "Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group",
-										MarkdownDescription: "Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group",
+										MarkdownDescription: "Site Mesh Group Connection Via Private Ip Site Mesh Group Connection Via Private IP. This option will use private IP for creating ipsec between two sites which are part of the site mesh group<br>Conflicts with `sm_connection_public_ip`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -12875,20 +13021,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"storage_class_choice": schema.SingleNestedAttribute{
 								Description:         "Storage Class Configuration Configure custom storage classes in kubernetes for this site",
-								MarkdownDescription: "Storage Class Configuration Configure custom storage classes in kubernetes for this site",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
+								MarkdownDescription: "Storage Class Configuration Configure custom storage classes in kubernetes for this site<br>Exactly one of `default_storage` or `storage_class_list` must be specified when `storage_class_choice` is configured.",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
 								Validators: []validator.Object{
-									exactlyoneofvalidator.RequiredExactlyOneOf(
+									exactlyoneofvalidator.ExactlyOneOf(
 										"default_storage",
 										"storage_class_list",
 									),
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseNonNullStateForUnknown(),
+								},
 								Attributes: map[string]schema.Attribute{
 									"default_storage": schema.BoolAttribute{
 										Description:         "Default Storage Class Use standard storage class configured as AWS EBS",
-										MarkdownDescription: "Default Storage Class Use standard storage class configured as AWS EBS",
+										MarkdownDescription: "Default Storage Class Use standard storage class configured as AWS EBS<br>Conflicts with `storage_class_list`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -12898,7 +13047,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"storage_class_list": schema.SingleNestedAttribute{
 										Description:         "Custom Storage Class Add additional custom storage classes in kubernetes for site",
-										MarkdownDescription: "Custom Storage Class Add additional custom storage classes in kubernetes for site",
+										MarkdownDescription: "Custom Storage Class Add additional custom storage classes in kubernetes for site<br>Conflicts with `default_storage`.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -12977,20 +13126,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 				Attributes: map[string]schema.Attribute{
 					"volterra_sw_version_choice": schema.SingleNestedAttribute{
 						Description:         "F5XC Software Version Select the F5XC Software Version for the site. By default, latest available F5XC Software Version will be used. Refer to release notes to find required released SW versions.",
-						MarkdownDescription: "F5XC Software Version Select the F5XC Software Version for the site. By default, latest available F5XC Software Version will be used. Refer to release notes to find required released SW versions.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "F5XC Software Version Select the F5XC Software Version for the site. By default, latest available F5XC Software Version will be used. Refer to release notes to find required released SW versions.<br>Exactly one of `default_sw_version` or `volterra_software_version` must be specified when `volterra_sw_version_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"default_sw_version",
 								"volterra_software_version",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"default_sw_version": schema.BoolAttribute{
 								Description:         "Default SW Version Will assign latest available F5XC Software Version",
-								MarkdownDescription: "Default SW Version Will assign latest available F5XC Software Version",
+								MarkdownDescription: "Default SW Version Will assign latest available F5XC Software Version<br>Conflicts with `volterra_software_version`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -13000,7 +13152,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"volterra_software_version": schema.StringAttribute{
 								Description:         "F5XC Software Version Specify a F5XC Software Version to be used e.g. crt-20210329-1002.",
-								MarkdownDescription: "F5XC Software Version Specify a F5XC Software Version to be used e.g. crt-20210329-1002.<br>**Validation:** `Length LengthAtMost(20)`",
+								MarkdownDescription: "F5XC Software Version Specify a F5XC Software Version to be used e.g. crt-20210329-1002.<br>**Validation:** `Length LengthAtMost(20)`<br>Conflicts with `default_sw_version`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -13050,7 +13202,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 				Attributes: map[string]schema.Attribute{
 					"choice": schema.SingleNestedAttribute{
 						Description:         "Choice of existing or new Vnet This is choice of existing Vnet or new Vnet",
-						MarkdownDescription: "Choice of existing or new Vnet This is choice of existing Vnet or new Vnet",
+						MarkdownDescription: "Choice of existing or new Vnet This is choice of existing Vnet or new Vnet<br>Exactly one of `existing_vnet` or `new_vnet` must be specified.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -13063,7 +13215,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 						Attributes: map[string]schema.Attribute{
 							"existing_vnet": schema.SingleNestedAttribute{
 								Description:         "Existing VPC Information about existing Vnet",
-								MarkdownDescription: "Existing VPC Information about existing Vnet",
+								MarkdownDescription: "Existing VPC Information about existing Vnet<br>Conflicts with `new_vnet`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -13080,20 +13232,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 									},
 									"routing_type_choice": schema.SingleNestedAttribute{
 										Description:         "Choice of Routing This is choice of F5 Orchestrated Routing or Manual Routing for CE VPC/VNET",
-										MarkdownDescription: "Choice of Routing This is choice of F5 Orchestrated Routing or Manual Routing for CE VPC/VNET",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Choice of Routing This is choice of F5 Orchestrated Routing or Manual Routing for CE VPC/VNET<br>Exactly one of `f5_orchestrated_routing` or `manual_routing` must be specified when `routing_type_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"f5_orchestrated_routing",
 												"manual_routing",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"f5_orchestrated_routing": schema.BoolAttribute{
 												Description:         "F5 Orchestrated Routing F5 will orchestrate required routes for SLO Route Table towards Internet and SLI RT towards the CE.",
-												MarkdownDescription: "F5 Orchestrated Routing F5 will orchestrate required routes for SLO Route Table towards Internet and SLI RT towards the CE.",
+												MarkdownDescription: "F5 Orchestrated Routing F5 will orchestrate required routes for SLO Route Table towards Internet and SLI RT towards the CE.<br>Conflicts with `manual_routing`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -13103,7 +13258,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 											},
 											"manual_routing": schema.BoolAttribute{
 												Description:         "Manual Routing In this mode, F5 will not create nor alter any route tables or routes within the existing VPCs/Vnets providing better integration for existing environments.",
-												MarkdownDescription: "Manual Routing In this mode, F5 will not create nor alter any route tables or routes within the existing VPCs/Vnets providing better integration for existing environments.",
+												MarkdownDescription: "Manual Routing In this mode, F5 will not create nor alter any route tables or routes within the existing VPCs/Vnets providing better integration for existing environments.<br>Conflicts with `f5_orchestrated_routing`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -13127,27 +13282,30 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"new_vnet": schema.SingleNestedAttribute{
 								Description:         "New VPC Parameters for creating new Vnet",
-								MarkdownDescription: "New VPC Parameters for creating new Vnet",
+								MarkdownDescription: "New VPC Parameters for creating new Vnet<br>Conflicts with `existing_vnet`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
 								Attributes: map[string]schema.Attribute{
 									"name_choice": schema.SingleNestedAttribute{
 										Description:         "Azure Vnet Name Name for your Azure Vnet",
-										MarkdownDescription: "Azure Vnet Name Name for your Azure Vnet",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Azure Vnet Name Name for your Azure Vnet<br>Exactly one of `autogenerate` or `name` must be specified when `name_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"autogenerate",
 												"name",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"autogenerate": schema.BoolAttribute{
 												Description:         "autogenerate Autogenerate the Vnet Name",
-												MarkdownDescription: "autogenerate Autogenerate the Vnet Name",
+												MarkdownDescription: "autogenerate Autogenerate the Vnet Name<br>Conflicts with `name`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -13157,7 +13315,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 											},
 											"name": schema.StringAttribute{
 												Description:         "name Specify the Vnet Name",
-												MarkdownDescription: "name Specify the Vnet Name<br>**Validation:** `Length LengthBetween(1, 64)`",
+												MarkdownDescription: "name Specify the Vnet Name<br>**Validation:** `Length LengthBetween(1, 64)`<br>Conflicts with `autogenerate`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -13203,20 +13361,23 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 				Attributes: map[string]schema.Attribute{
 					"signatures_update_mode_choice": schema.SingleNestedAttribute{
 						Description:         "WAF Signatures update mode Select F5XC WAF Signatures update mode for the site. By default, new signatures will be applied manually. Refer to release notes for details about available Signatures update modes and versions.",
-						MarkdownDescription: "WAF Signatures update mode Select F5XC WAF Signatures update mode for the site. By default, new signatures will be applied manually. Refer to release notes for details about available Signatures update modes and versions.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "WAF Signatures update mode Select F5XC WAF Signatures update mode for the site. By default, new signatures will be applied manually. Refer to release notes for details about available Signatures update modes and versions.<br>Exactly one of `automatic` or `manual` must be specified when `signatures_update_mode_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"automatic",
 								"manual",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"automatic": schema.BoolAttribute{
 								Description:         "Automatic update mode New WAF signatures will be applied automatically as soon as they are released.",
-								MarkdownDescription: "Automatic update mode New WAF signatures will be applied automatically as soon as they are released.",
+								MarkdownDescription: "Automatic update mode New WAF signatures will be applied automatically as soon as they are released.<br>Conflicts with `manual`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -13226,7 +13387,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 							},
 							"manual": schema.BoolAttribute{
 								Description:         "Manual update mode New WAF signatures will only be applied when an update is triggered manually.",
-								MarkdownDescription: "Manual update mode New WAF signatures will only be applied when an update is triggered manually.",
+								MarkdownDescription: "Manual update mode New WAF signatures will only be applied when an update is triggered manually.<br>Conflicts with `automatic`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -13240,21 +13401,24 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 			},
 			"worker_nodes_choice": schema.SingleNestedAttribute{
 				Description:         "Desired Worker Nodes Selection Choice of deploying desired number of worker nodes.",
-				MarkdownDescription: "Desired Worker Nodes Selection Choice of deploying desired number of worker nodes.",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Desired Worker Nodes Selection Choice of deploying desired number of worker nodes.<br>Exactly one of `no_worker_nodes`, `nodes_per_az`, or `total_nodes` must be specified when `worker_nodes_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"no_worker_nodes",
 						"nodes_per_az",
 						"total_nodes",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"no_worker_nodes": schema.BoolAttribute{
 						Description:         "No Worker Nodes Worker nodes is set to zero",
-						MarkdownDescription: "No Worker Nodes Worker nodes is set to zero",
+						MarkdownDescription: "No Worker Nodes Worker nodes is set to zero<br>Conflicts with `nodes_per_az` and `total_nodes`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -13264,7 +13428,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 					},
 					"nodes_per_az": schema.Int64Attribute{
 						Description:         "Desired Worker Nodes Per AZ Desired Worker Nodes Per AZ. Max limit is up to 21",
-						MarkdownDescription: "Desired Worker Nodes Per AZ Desired Worker Nodes Per AZ. Max limit is up to 21",
+						MarkdownDescription: "Desired Worker Nodes Per AZ Desired Worker Nodes Per AZ. Max limit is up to 21<br>Conflicts with `no_worker_nodes` and `total_nodes`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -13274,7 +13438,7 @@ func (r *ResourceF5XCAzureVnetSite) Schema(ctx context.Context, request resource
 					},
 					"total_nodes": schema.Int64Attribute{
 						Description:         "Total Number of Worker Nodes for a Site Total number of worker nodes to be deployed across all AZ's used in the Site",
-						MarkdownDescription: "Total Number of Worker Nodes for a Site Total number of worker nodes to be deployed across all AZ's used in the Site",
+						MarkdownDescription: "Total Number of Worker Nodes for a Site Total number of worker nodes to be deployed across all AZ's used in the Site<br>Conflicts with `no_worker_nodes` and `nodes_per_az`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -13541,7 +13705,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> BlockedServicesChoice
+	// resource modelToSpecRoot OneOfField --> BlockedServicesChoice
 	if !data.BlockedServicesChoice.IsNull() && !data.BlockedServicesChoice.IsUnknown() {
 		blockedServicesChoiceModel := AzureVnetSiteBlockedServicesChoice{}
 		response.Diagnostics.Append(data.BlockedServicesChoice.As(ctx, &blockedServicesChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -13647,6 +13811,10 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 			spec.BlockedServicesChoice = defaultBlockedServicesSpecBool
 		}
 
+	} else {
+		spec.BlockedServicesChoice = &ves_io_schema_views_azure_vnet_site.CreateSpecType_BlockAllServices{
+			BlockAllServices: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -13861,7 +14029,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> LogsReceiverChoice
+	// resource modelToSpecRoot OneOfField --> LogsReceiverChoice
 	if !data.LogsReceiverChoice.IsNull() && !data.LogsReceiverChoice.IsUnknown() {
 		logsReceiverChoiceModel := AzureVnetSiteLogsReceiverChoice{}
 		response.Diagnostics.Append(data.LogsReceiverChoice.As(ctx, &logsReceiverChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -13899,6 +14067,10 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 			spec.LogsReceiverChoice = logsStreamingDisabledSpecBool
 		}
 
+	} else {
+		spec.LogsReceiverChoice = &ves_io_schema_views_azure_vnet_site.CreateSpecType_LogsStreamingDisabled{
+			LogsStreamingDisabled: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredStringField --> MachineType
@@ -13908,6 +14080,9 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 		// resource modelToSpecRoot PointerField --> OfflineSurvivabilityMode
 		if !data.OfflineSurvivabilityMode.IsNull() && !data.OfflineSurvivabilityMode.IsUnknown() {
 			offlineSurvivabilityModeSpec := &ves_io_schema_views.OfflineSurvivabilityModeType{}
+			offlineSurvivabilityModeSpec.OfflineSurvivabilityModeChoice = &ves_io_schema_views.OfflineSurvivabilityModeType_NoOfflineSurvivabilityMode{
+				NoOfflineSurvivabilityMode: &ves_io_schema.Empty{},
+			}
 			spec.OfflineSurvivabilityMode = offlineSurvivabilityModeSpec
 			var offlineSurvivabilityModeModel AzureVnetSiteOfflineSurvivabilityModeType
 
@@ -13918,7 +14093,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> OfflineSurvivabilityModeChoice
+			// resource modelToSpecNested OneOfField --> OfflineSurvivabilityModeChoice
 			if !offlineSurvivabilityModeModel.OfflineSurvivabilityModeChoice.IsNull() && !offlineSurvivabilityModeModel.OfflineSurvivabilityModeChoice.IsUnknown() {
 				offlineSurvivabilityModeOfflineSurvivabilityModeChoiceModel := AzureVnetSiteOfflineSurvivabilityModeChoice{}
 				response.Diagnostics.Append(offlineSurvivabilityModeModel.OfflineSurvivabilityModeChoice.As(ctx, &offlineSurvivabilityModeOfflineSurvivabilityModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -13949,6 +14124,9 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 		// resource modelToSpecRoot PointerField --> Os
 		if !data.Os.IsNull() && !data.Os.IsUnknown() {
 			osSpec := &ves_io_schema_views.OperatingSystemType{}
+			osSpec.OperatingSystemVersionChoice = &ves_io_schema_views.OperatingSystemType_DefaultOsVersion{
+				DefaultOsVersion: &ves_io_schema.Empty{},
+			}
 			spec.Os = osSpec
 			var osModel AzureVnetSiteOperatingSystemType
 
@@ -13959,7 +14137,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> OperatingSystemVersionChoice
+			// resource modelToSpecNested OneOfField --> OperatingSystemVersionChoice
 			if !osModel.OperatingSystemVersionChoice.IsNull() && !osModel.OperatingSystemVersionChoice.IsUnknown() {
 				osOperatingSystemVersionChoiceModel := AzureVnetSiteOperatingSystemVersionChoice{}
 				response.Diagnostics.Append(osModel.OperatingSystemVersionChoice.As(ctx, &osOperatingSystemVersionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -14030,6 +14208,27 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 			}
 			ingressEgressGwOneOfSpec := &ves_io_schema_views_azure_vnet_site.CreateSpecType_IngressEgressGw{}
 			ingressEgressGwOneOfSpec.IngressEgressGw = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwType{}
+			ingressEgressGwOneOfSpec.IngressEgressGw.DcClusterGroupChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwType_NoDcClusterGroup{
+				NoDcClusterGroup: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwOneOfSpec.IngressEgressGw.ForwardProxyChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwType_NoForwardProxy{
+				NoForwardProxy: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwOneOfSpec.IngressEgressGw.GlobalNetworkChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwType_NoGlobalNetwork{
+				NoGlobalNetwork: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwOneOfSpec.IngressEgressGw.InsideStaticRouteChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwType_NoInsideStaticRoutes{
+				NoInsideStaticRoutes: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwOneOfSpec.IngressEgressGw.NetworkPolicyChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwType_NoNetworkPolicy{
+				NoNetworkPolicy: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwOneOfSpec.IngressEgressGw.OutsideStaticRouteChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwType_NoOutsideStaticRoutes{
+				NoOutsideStaticRoutes: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwOneOfSpec.IngressEgressGw.SiteMeshGroupChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwType_SmConnectionPublicIp{
+				SmConnectionPublicIp: &ves_io_schema.Empty{},
+			}
 			spec.SiteType = ingressEgressGwOneOfSpec
 
 			// resource modelToSpecNested PointerField --> AcceleratedNetworking
@@ -14041,9 +14240,12 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 				}
 
 				acceleratedNetworkingSpec := &ves_io_schema_views.AcceleratedNetworkingType{}
+				acceleratedNetworkingSpec.AcceleratedNetworking = &ves_io_schema_views.AcceleratedNetworkingType_Enable{
+					Enable: &ves_io_schema.Empty{},
+				}
 				ingressEgressGwOneOfSpec.IngressEgressGw.AcceleratedNetworking = acceleratedNetworkingSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> AcceleratedNetworking
+				// resource modelToSpecNested OneOfField --> AcceleratedNetworking
 				if !acceleratedNetworkingModel.AcceleratedNetworkingChoice.IsNull() && !acceleratedNetworkingModel.AcceleratedNetworkingChoice.IsUnknown() {
 					acceleratedNetworkingAcceleratedNetworkingChoiceModel := AzureVnetSiteAcceleratedNetworkingChoice{}
 					response.Diagnostics.Append(acceleratedNetworkingModel.AcceleratedNetworkingChoice.As(ctx, &acceleratedNetworkingAcceleratedNetworkingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -14266,7 +14468,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 				ingressEgressGwOneOfSpec.IngressEgressGw.AzureCertifiedHw = string(azureVnetSiteIngressEgressGwModel.AzureCertifiedHw.ValueString())
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> DcClusterGroupChoice
+			// resource modelToSpecNested OneOfField --> DcClusterGroupChoice
 			if !azureVnetSiteIngressEgressGwModel.DcClusterGroupChoice.IsNull() && !azureVnetSiteIngressEgressGwModel.DcClusterGroupChoice.IsUnknown() {
 				ingressEgressGwDcClusterGroupChoiceModel := AzureVnetSiteDcClusterGroupChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwModel.DcClusterGroupChoice.As(ctx, &ingressEgressGwDcClusterGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -14329,7 +14531,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ForwardProxyChoice
+			// resource modelToSpecNested OneOfField --> ForwardProxyChoice
 			if !azureVnetSiteIngressEgressGwModel.ForwardProxyChoice.IsNull() && !azureVnetSiteIngressEgressGwModel.ForwardProxyChoice.IsUnknown() {
 				ingressEgressGwForwardProxyChoiceModel := AzureVnetSiteForwardProxyChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwModel.ForwardProxyChoice.As(ctx, &ingressEgressGwForwardProxyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -14399,7 +14601,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> GlobalNetworkChoice
+			// resource modelToSpecNested OneOfField --> GlobalNetworkChoice
 			if !azureVnetSiteIngressEgressGwModel.GlobalNetworkChoice.IsNull() && !azureVnetSiteIngressEgressGwModel.GlobalNetworkChoice.IsUnknown() {
 				ingressEgressGwGlobalNetworkChoiceModel := AzureVnetSiteGlobalNetChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwModel.GlobalNetworkChoice.As(ctx, &ingressEgressGwGlobalNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -14580,9 +14782,12 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 							}
 							expressRouteEnabledOneOfSpec := &ves_io_schema_views_azure_vnet_site.AzureHubVnetType_ExpressRouteEnabled{}
 							expressRouteEnabledOneOfSpec.ExpressRouteEnabled = &ves_io_schema_views_azure_vnet_site.ExpressRouteConfigType{}
+							expressRouteEnabledOneOfSpec.ExpressRouteEnabled.AsnChoice = &ves_io_schema_views_azure_vnet_site.ExpressRouteConfigType_AutoAsn{
+								AutoAsn: &ves_io_schema.Empty{},
+							}
 							hubOneOfSpec.Hub.ExpressRouteChoice = expressRouteEnabledOneOfSpec
 
-							// resource modelToSpecNested RequiredOneOfField --> AsnChoice
+							// resource modelToSpecNested OneOfField --> AsnChoice
 							if !azureVnetSiteExpressRouteEnabledModel.AsnChoice.IsNull() && !azureVnetSiteExpressRouteEnabledModel.AsnChoice.IsUnknown() {
 								expressRouteEnabledAsnChoiceModel := AzureVnetSiteAsnChoice{}
 								response.Diagnostics.Append(azureVnetSiteExpressRouteEnabledModel.AsnChoice.As(ctx, &expressRouteEnabledAsnChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -14819,9 +15024,12 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 								}
 
 								gatewaySubnetSpec := &ves_io_schema_views.AzureSubnetChoiceWithAutoType{}
+								gatewaySubnetSpec.Choice = &ves_io_schema_views.AzureSubnetChoiceWithAutoType_Auto{
+									Auto: &ves_io_schema.Empty{},
+								}
 								expressRouteEnabledOneOfSpec.ExpressRouteEnabled.GatewaySubnet = gatewaySubnetSpec
 
-								// resource modelToSpecNested RequiredOneOfField --> Choice
+								// resource modelToSpecNested OneOfField --> Choice
 								if !gatewaySubnetModel.Choice.IsNull() && !gatewaySubnetModel.Choice.IsUnknown() {
 									gatewaySubnetChoiceModel := AzureVnetSiteAzureSubnetChoiceWithAutoTypeChoice{}
 									response.Diagnostics.Append(gatewaySubnetModel.Choice.As(ctx, &gatewaySubnetChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -14904,9 +15112,12 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 								}
 
 								routeServerSubnetSpec := &ves_io_schema_views.AzureSubnetChoiceWithAutoType{}
+								routeServerSubnetSpec.Choice = &ves_io_schema_views.AzureSubnetChoiceWithAutoType_Auto{
+									Auto: &ves_io_schema.Empty{},
+								}
 								expressRouteEnabledOneOfSpec.ExpressRouteEnabled.RouteServerSubnet = routeServerSubnetSpec
 
-								// resource modelToSpecNested RequiredOneOfField --> Choice
+								// resource modelToSpecNested OneOfField --> Choice
 								if !routeServerSubnetModel.Choice.IsNull() && !routeServerSubnetModel.Choice.IsUnknown() {
 									routeServerSubnetChoiceModel := AzureVnetSiteAzureSubnetChoiceWithAutoTypeChoice{}
 									response.Diagnostics.Append(routeServerSubnetModel.Choice.As(ctx, &routeServerSubnetChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15063,6 +15274,9 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 						for i, spokeVnetsElement := range spokeVnetsElements {
 							// Initialize the spec struct for the current element
 							hubOneOfSpec.Hub.SpokeVnets[i] = &ves_io_schema_views_azure_vnet_site.VnetPeeringType{}
+							hubOneOfSpec.Hub.SpokeVnets[i].RoutingChoice = &ves_io_schema_views_azure_vnet_site.VnetPeeringType_Auto{
+								Auto: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
@@ -15087,7 +15301,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 								spokeVnetsSpec[i].Labels = nil
 							}
 
-							// resource modelToSpecNested RequiredOneOfField --> RoutingChoice
+							// resource modelToSpecNested OneOfField --> RoutingChoice
 							if !spokeVnetsElement.RoutingChoice.IsNull() && !spokeVnetsElement.RoutingChoice.IsUnknown() {
 								spokeVnetsRoutingChoiceModel := AzureVnetSiteRoutingChoice{}
 								response.Diagnostics.Append(spokeVnetsElement.RoutingChoice.As(ctx, &spokeVnetsRoutingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15120,6 +15334,9 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 								}
 
 								vnetSpec := &ves_io_schema_views.AzureVnetType{}
+								vnetSpec.RoutingType = &ves_io_schema_views.AzureVnetType_F5OrchestratedRouting{
+									F5OrchestratedRouting: &ves_io_schema.Empty{},
+								}
 								spokeVnetsSpec[i].Vnet = vnetSpec
 
 								// resource modelToSpecNested RequiredStringField --> ResourceGroup
@@ -15127,7 +15344,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 									vnetSpec.ResourceGroup = string(vnetModel.ResourceGroup.ValueString())
 								}
 
-								// resource modelToSpecNested RequiredOneOfField --> RoutingType
+								// resource modelToSpecNested OneOfField --> RoutingType
 								if !vnetModel.RoutingTypeChoice.IsNull() && !vnetModel.RoutingTypeChoice.IsUnknown() {
 									vnetRoutingTypeChoiceModel := AzureVnetSiteRoutingTypeChoice{}
 									response.Diagnostics.Append(vnetModel.RoutingTypeChoice.As(ctx, &vnetRoutingTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15172,7 +15389,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> InsideStaticRouteChoice
+			// resource modelToSpecNested OneOfField --> InsideStaticRouteChoice
 			if !azureVnetSiteIngressEgressGwModel.InsideStaticRouteChoice.IsNull() && !azureVnetSiteIngressEgressGwModel.InsideStaticRouteChoice.IsUnknown() {
 				ingressEgressGwInsideStaticRouteChoiceModel := AzureVnetSiteInsideStaticRouteChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwModel.InsideStaticRouteChoice.As(ctx, &ingressEgressGwInsideStaticRouteChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15517,7 +15734,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> NetworkPolicyChoice
+			// resource modelToSpecNested OneOfField --> NetworkPolicyChoice
 			if !azureVnetSiteIngressEgressGwModel.NetworkPolicyChoice.IsNull() && !azureVnetSiteIngressEgressGwModel.NetworkPolicyChoice.IsUnknown() {
 				ingressEgressGwNetworkPolicyChoiceModel := AzureVnetSiteNetPolicyChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwModel.NetworkPolicyChoice.As(ctx, &ingressEgressGwNetworkPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15626,7 +15843,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> OutsideStaticRouteChoice
+			// resource modelToSpecNested OneOfField --> OutsideStaticRouteChoice
 			if !azureVnetSiteIngressEgressGwModel.OutsideStaticRouteChoice.IsNull() && !azureVnetSiteIngressEgressGwModel.OutsideStaticRouteChoice.IsUnknown() {
 				ingressEgressGwOutsideStaticRouteChoiceModel := AzureVnetSiteOutsideStaticRouteChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwModel.OutsideStaticRouteChoice.As(ctx, &ingressEgressGwOutsideStaticRouteChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -15980,9 +16197,16 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 				}
 
 				performanceEnhancementModeSpec := &ves_io_schema_views.PerformanceEnhancementModeType{}
+				performanceEnhancementModeSpec.PerfModeChoice = &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{
+					PerfModeL7Enhanced: &ves_io_schema_views.L7PerformanceEnhancementType{
+						PerfModeChoice: &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{
+							JumboDisabled: &ves_io_schema.Empty{},
+						},
+					},
+				}
 				ingressEgressGwOneOfSpec.IngressEgressGw.PerformanceEnhancementMode = performanceEnhancementModeSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
+				// resource modelToSpecNested OneOfField --> PerfModeChoice
 				if !performanceEnhancementModeModel.PerfModeChoice.IsNull() && !performanceEnhancementModeModel.PerfModeChoice.IsUnknown() {
 					performanceEnhancementModePerfModeChoiceModel := AzureVnetSitePerfModeChoice{}
 					response.Diagnostics.Append(performanceEnhancementModeModel.PerfModeChoice.As(ctx, &performanceEnhancementModePerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16014,7 +16238,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SiteMeshGroupChoice
+			// resource modelToSpecNested OneOfField --> SiteMeshGroupChoice
 			if !azureVnetSiteIngressEgressGwModel.SiteMeshGroupChoice.IsNull() && !azureVnetSiteIngressEgressGwModel.SiteMeshGroupChoice.IsUnknown() {
 				ingressEgressGwSiteMeshGroupChoiceModel := AzureVnetSiteSiteMeshGroupChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwModel.SiteMeshGroupChoice.As(ctx, &ingressEgressGwSiteMeshGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16049,6 +16273,27 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 			}
 			ingressEgressGwArOneOfSpec := &ves_io_schema_views_azure_vnet_site.CreateSpecType_IngressEgressGwAr{}
 			ingressEgressGwArOneOfSpec.IngressEgressGwAr = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwARType{}
+			ingressEgressGwArOneOfSpec.IngressEgressGwAr.DcClusterGroupChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwARType_NoDcClusterGroup{
+				NoDcClusterGroup: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwArOneOfSpec.IngressEgressGwAr.ForwardProxyChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwARType_NoForwardProxy{
+				NoForwardProxy: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwArOneOfSpec.IngressEgressGwAr.GlobalNetworkChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwARType_NoGlobalNetwork{
+				NoGlobalNetwork: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwArOneOfSpec.IngressEgressGwAr.InsideStaticRouteChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwARType_NoInsideStaticRoutes{
+				NoInsideStaticRoutes: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwArOneOfSpec.IngressEgressGwAr.NetworkPolicyChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwARType_NoNetworkPolicy{
+				NoNetworkPolicy: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwArOneOfSpec.IngressEgressGwAr.OutsideStaticRouteChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwARType_NoOutsideStaticRoutes{
+				NoOutsideStaticRoutes: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwArOneOfSpec.IngressEgressGwAr.SiteMeshGroupChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwARType_SmConnectionPublicIp{
+				SmConnectionPublicIp: &ves_io_schema.Empty{},
+			}
 			spec.SiteType = ingressEgressGwArOneOfSpec
 
 			// resource modelToSpecNested PointerField --> AcceleratedNetworking
@@ -16060,9 +16305,12 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 				}
 
 				acceleratedNetworkingSpec := &ves_io_schema_views.AcceleratedNetworkingType{}
+				acceleratedNetworkingSpec.AcceleratedNetworking = &ves_io_schema_views.AcceleratedNetworkingType_Enable{
+					Enable: &ves_io_schema.Empty{},
+				}
 				ingressEgressGwArOneOfSpec.IngressEgressGwAr.AcceleratedNetworking = acceleratedNetworkingSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> AcceleratedNetworking
+				// resource modelToSpecNested OneOfField --> AcceleratedNetworking
 				if !acceleratedNetworkingModel.AcceleratedNetworkingChoice.IsNull() && !acceleratedNetworkingModel.AcceleratedNetworkingChoice.IsUnknown() {
 					acceleratedNetworkingAcceleratedNetworkingChoiceModel := AzureVnetSiteAcceleratedNetworkingChoice{}
 					response.Diagnostics.Append(acceleratedNetworkingModel.AcceleratedNetworkingChoice.As(ctx, &acceleratedNetworkingAcceleratedNetworkingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16093,7 +16341,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 				ingressEgressGwArOneOfSpec.IngressEgressGwAr.AzureCertifiedHw = string(azureVnetSiteIngressEgressGwArModel.AzureCertifiedHw.ValueString())
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> DcClusterGroupChoice
+			// resource modelToSpecNested OneOfField --> DcClusterGroupChoice
 			if !azureVnetSiteIngressEgressGwArModel.DcClusterGroupChoice.IsNull() && !azureVnetSiteIngressEgressGwArModel.DcClusterGroupChoice.IsUnknown() {
 				ingressEgressGwArDcClusterGroupChoiceModel := AzureVnetSiteAzureVnetIngressEgressGwARTypeDcClusterGroupChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwArModel.DcClusterGroupChoice.As(ctx, &ingressEgressGwArDcClusterGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16156,7 +16404,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ForwardProxyChoice
+			// resource modelToSpecNested OneOfField --> ForwardProxyChoice
 			if !azureVnetSiteIngressEgressGwArModel.ForwardProxyChoice.IsNull() && !azureVnetSiteIngressEgressGwArModel.ForwardProxyChoice.IsUnknown() {
 				ingressEgressGwArForwardProxyChoiceModel := AzureVnetSiteAzureVnetIngressEgressGwARTypeForwardProxyChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwArModel.ForwardProxyChoice.As(ctx, &ingressEgressGwArForwardProxyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16226,7 +16474,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> GlobalNetworkChoice
+			// resource modelToSpecNested OneOfField --> GlobalNetworkChoice
 			if !azureVnetSiteIngressEgressGwArModel.GlobalNetworkChoice.IsNull() && !azureVnetSiteIngressEgressGwArModel.GlobalNetworkChoice.IsUnknown() {
 				ingressEgressGwArGlobalNetworkChoiceModel := AzureVnetSiteAzureVnetIngressEgressGwARTypeGlobalNetChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwArModel.GlobalNetworkChoice.As(ctx, &ingressEgressGwArGlobalNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16407,9 +16655,12 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 							}
 							expressRouteEnabledOneOfSpec := &ves_io_schema_views_azure_vnet_site.AzureHubVnetType_ExpressRouteEnabled{}
 							expressRouteEnabledOneOfSpec.ExpressRouteEnabled = &ves_io_schema_views_azure_vnet_site.ExpressRouteConfigType{}
+							expressRouteEnabledOneOfSpec.ExpressRouteEnabled.AsnChoice = &ves_io_schema_views_azure_vnet_site.ExpressRouteConfigType_AutoAsn{
+								AutoAsn: &ves_io_schema.Empty{},
+							}
 							hubOneOfSpec.Hub.ExpressRouteChoice = expressRouteEnabledOneOfSpec
 
-							// resource modelToSpecNested RequiredOneOfField --> AsnChoice
+							// resource modelToSpecNested OneOfField --> AsnChoice
 							if !azureVnetSiteExpressRouteEnabledModel.AsnChoice.IsNull() && !azureVnetSiteExpressRouteEnabledModel.AsnChoice.IsUnknown() {
 								expressRouteEnabledAsnChoiceModel := AzureVnetSiteAsnChoice{}
 								response.Diagnostics.Append(azureVnetSiteExpressRouteEnabledModel.AsnChoice.As(ctx, &expressRouteEnabledAsnChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16646,9 +16897,12 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 								}
 
 								gatewaySubnetSpec := &ves_io_schema_views.AzureSubnetChoiceWithAutoType{}
+								gatewaySubnetSpec.Choice = &ves_io_schema_views.AzureSubnetChoiceWithAutoType_Auto{
+									Auto: &ves_io_schema.Empty{},
+								}
 								expressRouteEnabledOneOfSpec.ExpressRouteEnabled.GatewaySubnet = gatewaySubnetSpec
 
-								// resource modelToSpecNested RequiredOneOfField --> Choice
+								// resource modelToSpecNested OneOfField --> Choice
 								if !gatewaySubnetModel.Choice.IsNull() && !gatewaySubnetModel.Choice.IsUnknown() {
 									gatewaySubnetChoiceModel := AzureVnetSiteAzureSubnetChoiceWithAutoTypeChoice{}
 									response.Diagnostics.Append(gatewaySubnetModel.Choice.As(ctx, &gatewaySubnetChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16731,9 +16985,12 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 								}
 
 								routeServerSubnetSpec := &ves_io_schema_views.AzureSubnetChoiceWithAutoType{}
+								routeServerSubnetSpec.Choice = &ves_io_schema_views.AzureSubnetChoiceWithAutoType_Auto{
+									Auto: &ves_io_schema.Empty{},
+								}
 								expressRouteEnabledOneOfSpec.ExpressRouteEnabled.RouteServerSubnet = routeServerSubnetSpec
 
-								// resource modelToSpecNested RequiredOneOfField --> Choice
+								// resource modelToSpecNested OneOfField --> Choice
 								if !routeServerSubnetModel.Choice.IsNull() && !routeServerSubnetModel.Choice.IsUnknown() {
 									routeServerSubnetChoiceModel := AzureVnetSiteAzureSubnetChoiceWithAutoTypeChoice{}
 									response.Diagnostics.Append(routeServerSubnetModel.Choice.As(ctx, &routeServerSubnetChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16890,6 +17147,9 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 						for i, spokeVnetsElement := range spokeVnetsElements {
 							// Initialize the spec struct for the current element
 							hubOneOfSpec.Hub.SpokeVnets[i] = &ves_io_schema_views_azure_vnet_site.VnetPeeringType{}
+							hubOneOfSpec.Hub.SpokeVnets[i].RoutingChoice = &ves_io_schema_views_azure_vnet_site.VnetPeeringType_Auto{
+								Auto: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
@@ -16914,7 +17174,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 								spokeVnetsSpec[i].Labels = nil
 							}
 
-							// resource modelToSpecNested RequiredOneOfField --> RoutingChoice
+							// resource modelToSpecNested OneOfField --> RoutingChoice
 							if !spokeVnetsElement.RoutingChoice.IsNull() && !spokeVnetsElement.RoutingChoice.IsUnknown() {
 								spokeVnetsRoutingChoiceModel := AzureVnetSiteRoutingChoice{}
 								response.Diagnostics.Append(spokeVnetsElement.RoutingChoice.As(ctx, &spokeVnetsRoutingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16947,6 +17207,9 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 								}
 
 								vnetSpec := &ves_io_schema_views.AzureVnetType{}
+								vnetSpec.RoutingType = &ves_io_schema_views.AzureVnetType_F5OrchestratedRouting{
+									F5OrchestratedRouting: &ves_io_schema.Empty{},
+								}
 								spokeVnetsSpec[i].Vnet = vnetSpec
 
 								// resource modelToSpecNested RequiredStringField --> ResourceGroup
@@ -16954,7 +17217,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 									vnetSpec.ResourceGroup = string(vnetModel.ResourceGroup.ValueString())
 								}
 
-								// resource modelToSpecNested RequiredOneOfField --> RoutingType
+								// resource modelToSpecNested OneOfField --> RoutingType
 								if !vnetModel.RoutingTypeChoice.IsNull() && !vnetModel.RoutingTypeChoice.IsUnknown() {
 									vnetRoutingTypeChoiceModel := AzureVnetSiteRoutingTypeChoice{}
 									response.Diagnostics.Append(vnetModel.RoutingTypeChoice.As(ctx, &vnetRoutingTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16999,7 +17262,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> InsideStaticRouteChoice
+			// resource modelToSpecNested OneOfField --> InsideStaticRouteChoice
 			if !azureVnetSiteIngressEgressGwArModel.InsideStaticRouteChoice.IsNull() && !azureVnetSiteIngressEgressGwArModel.InsideStaticRouteChoice.IsUnknown() {
 				ingressEgressGwArInsideStaticRouteChoiceModel := AzureVnetSiteAzureVnetIngressEgressGwARTypeInsideStaticRouteChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwArModel.InsideStaticRouteChoice.As(ctx, &ingressEgressGwArInsideStaticRouteChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -17344,7 +17607,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> NetworkPolicyChoice
+			// resource modelToSpecNested OneOfField --> NetworkPolicyChoice
 			if !azureVnetSiteIngressEgressGwArModel.NetworkPolicyChoice.IsNull() && !azureVnetSiteIngressEgressGwArModel.NetworkPolicyChoice.IsUnknown() {
 				ingressEgressGwArNetworkPolicyChoiceModel := AzureVnetSiteAzureVnetIngressEgressGwARTypeNetPolicyChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwArModel.NetworkPolicyChoice.As(ctx, &ingressEgressGwArNetworkPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -17647,7 +17910,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> OutsideStaticRouteChoice
+			// resource modelToSpecNested OneOfField --> OutsideStaticRouteChoice
 			if !azureVnetSiteIngressEgressGwArModel.OutsideStaticRouteChoice.IsNull() && !azureVnetSiteIngressEgressGwArModel.OutsideStaticRouteChoice.IsUnknown() {
 				ingressEgressGwArOutsideStaticRouteChoiceModel := AzureVnetSiteAzureVnetIngressEgressGwARTypeOutsideStaticRouteChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwArModel.OutsideStaticRouteChoice.As(ctx, &ingressEgressGwArOutsideStaticRouteChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -18001,9 +18264,16 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 				}
 
 				performanceEnhancementModeSpec := &ves_io_schema_views.PerformanceEnhancementModeType{}
+				performanceEnhancementModeSpec.PerfModeChoice = &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{
+					PerfModeL7Enhanced: &ves_io_schema_views.L7PerformanceEnhancementType{
+						PerfModeChoice: &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{
+							JumboDisabled: &ves_io_schema.Empty{},
+						},
+					},
+				}
 				ingressEgressGwArOneOfSpec.IngressEgressGwAr.PerformanceEnhancementMode = performanceEnhancementModeSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
+				// resource modelToSpecNested OneOfField --> PerfModeChoice
 				if !performanceEnhancementModeModel.PerfModeChoice.IsNull() && !performanceEnhancementModeModel.PerfModeChoice.IsUnknown() {
 					performanceEnhancementModePerfModeChoiceModel := AzureVnetSitePerfModeChoice{}
 					response.Diagnostics.Append(performanceEnhancementModeModel.PerfModeChoice.As(ctx, &performanceEnhancementModePerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -18035,7 +18305,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SiteMeshGroupChoice
+			// resource modelToSpecNested OneOfField --> SiteMeshGroupChoice
 			if !azureVnetSiteIngressEgressGwArModel.SiteMeshGroupChoice.IsNull() && !azureVnetSiteIngressEgressGwArModel.SiteMeshGroupChoice.IsUnknown() {
 				ingressEgressGwArSiteMeshGroupChoiceModel := AzureVnetSiteAzureVnetIngressEgressGwARTypeSiteMeshGroupChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwArModel.SiteMeshGroupChoice.As(ctx, &ingressEgressGwArSiteMeshGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -18081,9 +18351,12 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 				}
 
 				acceleratedNetworkingSpec := &ves_io_schema_views.AcceleratedNetworkingType{}
+				acceleratedNetworkingSpec.AcceleratedNetworking = &ves_io_schema_views.AcceleratedNetworkingType_Enable{
+					Enable: &ves_io_schema.Empty{},
+				}
 				ingressGwOneOfSpec.IngressGw.AcceleratedNetworking = acceleratedNetworkingSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> AcceleratedNetworking
+				// resource modelToSpecNested OneOfField --> AcceleratedNetworking
 				if !acceleratedNetworkingModel.AcceleratedNetworkingChoice.IsNull() && !acceleratedNetworkingModel.AcceleratedNetworkingChoice.IsUnknown() {
 					acceleratedNetworkingAcceleratedNetworkingChoiceModel := AzureVnetSiteAcceleratedNetworkingChoice{}
 					response.Diagnostics.Append(acceleratedNetworkingModel.AcceleratedNetworkingChoice.As(ctx, &acceleratedNetworkingAcceleratedNetworkingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -18233,9 +18506,16 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 				}
 
 				performanceEnhancementModeSpec := &ves_io_schema_views.PerformanceEnhancementModeType{}
+				performanceEnhancementModeSpec.PerfModeChoice = &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{
+					PerfModeL7Enhanced: &ves_io_schema_views.L7PerformanceEnhancementType{
+						PerfModeChoice: &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{
+							JumboDisabled: &ves_io_schema.Empty{},
+						},
+					},
+				}
 				ingressGwOneOfSpec.IngressGw.PerformanceEnhancementMode = performanceEnhancementModeSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
+				// resource modelToSpecNested OneOfField --> PerfModeChoice
 				if !performanceEnhancementModeModel.PerfModeChoice.IsNull() && !performanceEnhancementModeModel.PerfModeChoice.IsUnknown() {
 					performanceEnhancementModePerfModeChoiceModel := AzureVnetSitePerfModeChoice{}
 					response.Diagnostics.Append(performanceEnhancementModeModel.PerfModeChoice.As(ctx, &performanceEnhancementModePerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -18289,9 +18569,12 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 				}
 
 				acceleratedNetworkingSpec := &ves_io_schema_views.AcceleratedNetworkingType{}
+				acceleratedNetworkingSpec.AcceleratedNetworking = &ves_io_schema_views.AcceleratedNetworkingType_Enable{
+					Enable: &ves_io_schema.Empty{},
+				}
 				ingressGwArOneOfSpec.IngressGwAr.AcceleratedNetworking = acceleratedNetworkingSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> AcceleratedNetworking
+				// resource modelToSpecNested OneOfField --> AcceleratedNetworking
 				if !acceleratedNetworkingModel.AcceleratedNetworkingChoice.IsNull() && !acceleratedNetworkingModel.AcceleratedNetworkingChoice.IsUnknown() {
 					acceleratedNetworkingAcceleratedNetworkingChoiceModel := AzureVnetSiteAcceleratedNetworkingChoice{}
 					response.Diagnostics.Append(acceleratedNetworkingModel.AcceleratedNetworkingChoice.As(ctx, &acceleratedNetworkingAcceleratedNetworkingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -18443,9 +18726,16 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 				}
 
 				performanceEnhancementModeSpec := &ves_io_schema_views.PerformanceEnhancementModeType{}
+				performanceEnhancementModeSpec.PerfModeChoice = &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{
+					PerfModeL7Enhanced: &ves_io_schema_views.L7PerformanceEnhancementType{
+						PerfModeChoice: &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{
+							JumboDisabled: &ves_io_schema.Empty{},
+						},
+					},
+				}
 				ingressGwArOneOfSpec.IngressGwAr.PerformanceEnhancementMode = performanceEnhancementModeSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
+				// resource modelToSpecNested OneOfField --> PerfModeChoice
 				if !performanceEnhancementModeModel.PerfModeChoice.IsNull() && !performanceEnhancementModeModel.PerfModeChoice.IsUnknown() {
 					performanceEnhancementModePerfModeChoiceModel := AzureVnetSitePerfModeChoice{}
 					response.Diagnostics.Append(performanceEnhancementModeModel.PerfModeChoice.As(ctx, &performanceEnhancementModePerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -18488,6 +18778,30 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 			}
 			voltstackClusterOneOfSpec := &ves_io_schema_views_azure_vnet_site.CreateSpecType_VoltstackCluster{}
 			voltstackClusterOneOfSpec.VoltstackCluster = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterType{}
+			voltstackClusterOneOfSpec.VoltstackCluster.DcClusterGroupChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterType_NoDcClusterGroup{
+				NoDcClusterGroup: &ves_io_schema.Empty{},
+			}
+			voltstackClusterOneOfSpec.VoltstackCluster.ForwardProxyChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterType_NoForwardProxy{
+				NoForwardProxy: &ves_io_schema.Empty{},
+			}
+			voltstackClusterOneOfSpec.VoltstackCluster.GlobalNetworkChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterType_NoGlobalNetwork{
+				NoGlobalNetwork: &ves_io_schema.Empty{},
+			}
+			voltstackClusterOneOfSpec.VoltstackCluster.K8SClusterChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterType_NoK8SCluster{
+				NoK8SCluster: &ves_io_schema.Empty{},
+			}
+			voltstackClusterOneOfSpec.VoltstackCluster.NetworkPolicyChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterType_NoNetworkPolicy{
+				NoNetworkPolicy: &ves_io_schema.Empty{},
+			}
+			voltstackClusterOneOfSpec.VoltstackCluster.OutsideStaticRouteChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterType_NoOutsideStaticRoutes{
+				NoOutsideStaticRoutes: &ves_io_schema.Empty{},
+			}
+			voltstackClusterOneOfSpec.VoltstackCluster.SiteMeshGroupChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterType_SmConnectionPublicIp{
+				SmConnectionPublicIp: &ves_io_schema.Empty{},
+			}
+			voltstackClusterOneOfSpec.VoltstackCluster.StorageClassChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterType_DefaultStorage{
+				DefaultStorage: &ves_io_schema.Empty{},
+			}
 			spec.SiteType = voltstackClusterOneOfSpec
 
 			// resource modelToSpecNested PointerField --> AcceleratedNetworking
@@ -18499,9 +18813,12 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 				}
 
 				acceleratedNetworkingSpec := &ves_io_schema_views.AcceleratedNetworkingType{}
+				acceleratedNetworkingSpec.AcceleratedNetworking = &ves_io_schema_views.AcceleratedNetworkingType_Enable{
+					Enable: &ves_io_schema.Empty{},
+				}
 				voltstackClusterOneOfSpec.VoltstackCluster.AcceleratedNetworking = acceleratedNetworkingSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> AcceleratedNetworking
+				// resource modelToSpecNested OneOfField --> AcceleratedNetworking
 				if !acceleratedNetworkingModel.AcceleratedNetworkingChoice.IsNull() && !acceleratedNetworkingModel.AcceleratedNetworkingChoice.IsUnknown() {
 					acceleratedNetworkingAcceleratedNetworkingChoiceModel := AzureVnetSiteAcceleratedNetworkingChoice{}
 					response.Diagnostics.Append(acceleratedNetworkingModel.AcceleratedNetworkingChoice.As(ctx, &acceleratedNetworkingAcceleratedNetworkingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -18642,7 +18959,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 				voltstackClusterOneOfSpec.VoltstackCluster.AzureCertifiedHw = string(azureVnetSiteVoltstackClusterModel.AzureCertifiedHw.ValueString())
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> DcClusterGroupChoice
+			// resource modelToSpecNested OneOfField --> DcClusterGroupChoice
 			if !azureVnetSiteVoltstackClusterModel.DcClusterGroupChoice.IsNull() && !azureVnetSiteVoltstackClusterModel.DcClusterGroupChoice.IsUnknown() {
 				voltstackClusterDcClusterGroupChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterTypeDcClusterGroupChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterModel.DcClusterGroupChoice.As(ctx, &voltstackClusterDcClusterGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -18682,7 +18999,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ForwardProxyChoice
+			// resource modelToSpecNested OneOfField --> ForwardProxyChoice
 			if !azureVnetSiteVoltstackClusterModel.ForwardProxyChoice.IsNull() && !azureVnetSiteVoltstackClusterModel.ForwardProxyChoice.IsUnknown() {
 				voltstackClusterForwardProxyChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterTypeForwardProxyChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterModel.ForwardProxyChoice.As(ctx, &voltstackClusterForwardProxyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -18752,7 +19069,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> GlobalNetworkChoice
+			// resource modelToSpecNested OneOfField --> GlobalNetworkChoice
 			if !azureVnetSiteVoltstackClusterModel.GlobalNetworkChoice.IsNull() && !azureVnetSiteVoltstackClusterModel.GlobalNetworkChoice.IsUnknown() {
 				voltstackClusterGlobalNetworkChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterTypeGlobalNetChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterModel.GlobalNetworkChoice.As(ctx, &voltstackClusterGlobalNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -18890,7 +19207,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> K8SClusterChoice
+			// resource modelToSpecNested OneOfField --> K8SClusterChoice
 			if !azureVnetSiteVoltstackClusterModel.K8SClusterChoice.IsNull() && !azureVnetSiteVoltstackClusterModel.K8SClusterChoice.IsUnknown() {
 				voltstackClusterK8SClusterChoiceModel := AzureVnetSiteK8SClusterChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterModel.K8SClusterChoice.As(ctx, &voltstackClusterK8SClusterChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -18930,7 +19247,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> NetworkPolicyChoice
+			// resource modelToSpecNested OneOfField --> NetworkPolicyChoice
 			if !azureVnetSiteVoltstackClusterModel.NetworkPolicyChoice.IsNull() && !azureVnetSiteVoltstackClusterModel.NetworkPolicyChoice.IsUnknown() {
 				voltstackClusterNetworkPolicyChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterTypeNetPolicyChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterModel.NetworkPolicyChoice.As(ctx, &voltstackClusterNetworkPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -19039,7 +19356,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> OutsideStaticRouteChoice
+			// resource modelToSpecNested OneOfField --> OutsideStaticRouteChoice
 			if !azureVnetSiteVoltstackClusterModel.OutsideStaticRouteChoice.IsNull() && !azureVnetSiteVoltstackClusterModel.OutsideStaticRouteChoice.IsUnknown() {
 				voltstackClusterOutsideStaticRouteChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterTypeOutsideStaticRouteChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterModel.OutsideStaticRouteChoice.As(ctx, &voltstackClusterOutsideStaticRouteChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -19384,7 +19701,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SiteMeshGroupChoice
+			// resource modelToSpecNested OneOfField --> SiteMeshGroupChoice
 			if !azureVnetSiteVoltstackClusterModel.SiteMeshGroupChoice.IsNull() && !azureVnetSiteVoltstackClusterModel.SiteMeshGroupChoice.IsUnknown() {
 				voltstackClusterSiteMeshGroupChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterTypeSiteMeshGroupChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterModel.SiteMeshGroupChoice.As(ctx, &voltstackClusterSiteMeshGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -19408,7 +19725,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> StorageClassChoice
+			// resource modelToSpecNested OneOfField --> StorageClassChoice
 			if !azureVnetSiteVoltstackClusterModel.StorageClassChoice.IsNull() && !azureVnetSiteVoltstackClusterModel.StorageClassChoice.IsUnknown() {
 				voltstackClusterStorageClassChoiceModel := AzureVnetSiteStorageClassChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterModel.StorageClassChoice.As(ctx, &voltstackClusterStorageClassChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -19484,6 +19801,30 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 			}
 			voltstackClusterArOneOfSpec := &ves_io_schema_views_azure_vnet_site.CreateSpecType_VoltstackClusterAr{}
 			voltstackClusterArOneOfSpec.VoltstackClusterAr = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterARType{}
+			voltstackClusterArOneOfSpec.VoltstackClusterAr.DcClusterGroupChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterARType_NoDcClusterGroup{
+				NoDcClusterGroup: &ves_io_schema.Empty{},
+			}
+			voltstackClusterArOneOfSpec.VoltstackClusterAr.ForwardProxyChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterARType_NoForwardProxy{
+				NoForwardProxy: &ves_io_schema.Empty{},
+			}
+			voltstackClusterArOneOfSpec.VoltstackClusterAr.GlobalNetworkChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterARType_NoGlobalNetwork{
+				NoGlobalNetwork: &ves_io_schema.Empty{},
+			}
+			voltstackClusterArOneOfSpec.VoltstackClusterAr.K8SClusterChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterARType_NoK8SCluster{
+				NoK8SCluster: &ves_io_schema.Empty{},
+			}
+			voltstackClusterArOneOfSpec.VoltstackClusterAr.NetworkPolicyChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterARType_NoNetworkPolicy{
+				NoNetworkPolicy: &ves_io_schema.Empty{},
+			}
+			voltstackClusterArOneOfSpec.VoltstackClusterAr.OutsideStaticRouteChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterARType_NoOutsideStaticRoutes{
+				NoOutsideStaticRoutes: &ves_io_schema.Empty{},
+			}
+			voltstackClusterArOneOfSpec.VoltstackClusterAr.SiteMeshGroupChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterARType_SmConnectionPublicIp{
+				SmConnectionPublicIp: &ves_io_schema.Empty{},
+			}
+			voltstackClusterArOneOfSpec.VoltstackClusterAr.StorageClassChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterARType_DefaultStorage{
+				DefaultStorage: &ves_io_schema.Empty{},
+			}
 			spec.SiteType = voltstackClusterArOneOfSpec
 
 			// resource modelToSpecNested PointerField --> AcceleratedNetworking
@@ -19495,9 +19836,12 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 				}
 
 				acceleratedNetworkingSpec := &ves_io_schema_views.AcceleratedNetworkingType{}
+				acceleratedNetworkingSpec.AcceleratedNetworking = &ves_io_schema_views.AcceleratedNetworkingType_Enable{
+					Enable: &ves_io_schema.Empty{},
+				}
 				voltstackClusterArOneOfSpec.VoltstackClusterAr.AcceleratedNetworking = acceleratedNetworkingSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> AcceleratedNetworking
+				// resource modelToSpecNested OneOfField --> AcceleratedNetworking
 				if !acceleratedNetworkingModel.AcceleratedNetworkingChoice.IsNull() && !acceleratedNetworkingModel.AcceleratedNetworkingChoice.IsUnknown() {
 					acceleratedNetworkingAcceleratedNetworkingChoiceModel := AzureVnetSiteAcceleratedNetworkingChoice{}
 					response.Diagnostics.Append(acceleratedNetworkingModel.AcceleratedNetworkingChoice.As(ctx, &acceleratedNetworkingAcceleratedNetworkingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -19528,7 +19872,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 				voltstackClusterArOneOfSpec.VoltstackClusterAr.AzureCertifiedHw = string(azureVnetSiteVoltstackClusterArModel.AzureCertifiedHw.ValueString())
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> DcClusterGroupChoice
+			// resource modelToSpecNested OneOfField --> DcClusterGroupChoice
 			if !azureVnetSiteVoltstackClusterArModel.DcClusterGroupChoice.IsNull() && !azureVnetSiteVoltstackClusterArModel.DcClusterGroupChoice.IsUnknown() {
 				voltstackClusterArDcClusterGroupChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterARTypeDcClusterGroupChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterArModel.DcClusterGroupChoice.As(ctx, &voltstackClusterArDcClusterGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -19568,7 +19912,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ForwardProxyChoice
+			// resource modelToSpecNested OneOfField --> ForwardProxyChoice
 			if !azureVnetSiteVoltstackClusterArModel.ForwardProxyChoice.IsNull() && !azureVnetSiteVoltstackClusterArModel.ForwardProxyChoice.IsUnknown() {
 				voltstackClusterArForwardProxyChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterARTypeForwardProxyChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterArModel.ForwardProxyChoice.As(ctx, &voltstackClusterArForwardProxyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -19638,7 +19982,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> GlobalNetworkChoice
+			// resource modelToSpecNested OneOfField --> GlobalNetworkChoice
 			if !azureVnetSiteVoltstackClusterArModel.GlobalNetworkChoice.IsNull() && !azureVnetSiteVoltstackClusterArModel.GlobalNetworkChoice.IsUnknown() {
 				voltstackClusterArGlobalNetworkChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterARTypeGlobalNetChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterArModel.GlobalNetworkChoice.As(ctx, &voltstackClusterArGlobalNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -19776,7 +20120,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> K8SClusterChoice
+			// resource modelToSpecNested OneOfField --> K8SClusterChoice
 			if !azureVnetSiteVoltstackClusterArModel.K8SClusterChoice.IsNull() && !azureVnetSiteVoltstackClusterArModel.K8SClusterChoice.IsUnknown() {
 				voltstackClusterArK8SClusterChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterARTypeK8SClusterChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterArModel.K8SClusterChoice.As(ctx, &voltstackClusterArK8SClusterChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -19816,7 +20160,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> NetworkPolicyChoice
+			// resource modelToSpecNested OneOfField --> NetworkPolicyChoice
 			if !azureVnetSiteVoltstackClusterArModel.NetworkPolicyChoice.IsNull() && !azureVnetSiteVoltstackClusterArModel.NetworkPolicyChoice.IsUnknown() {
 				voltstackClusterArNetworkPolicyChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterARTypeNetPolicyChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterArModel.NetworkPolicyChoice.As(ctx, &voltstackClusterArNetworkPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -20037,7 +20381,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> OutsideStaticRouteChoice
+			// resource modelToSpecNested OneOfField --> OutsideStaticRouteChoice
 			if !azureVnetSiteVoltstackClusterArModel.OutsideStaticRouteChoice.IsNull() && !azureVnetSiteVoltstackClusterArModel.OutsideStaticRouteChoice.IsUnknown() {
 				voltstackClusterArOutsideStaticRouteChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterARTypeOutsideStaticRouteChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterArModel.OutsideStaticRouteChoice.As(ctx, &voltstackClusterArOutsideStaticRouteChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -20382,7 +20726,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SiteMeshGroupChoice
+			// resource modelToSpecNested OneOfField --> SiteMeshGroupChoice
 			if !azureVnetSiteVoltstackClusterArModel.SiteMeshGroupChoice.IsNull() && !azureVnetSiteVoltstackClusterArModel.SiteMeshGroupChoice.IsUnknown() {
 				voltstackClusterArSiteMeshGroupChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterARTypeSiteMeshGroupChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterArModel.SiteMeshGroupChoice.As(ctx, &voltstackClusterArSiteMeshGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -20406,7 +20750,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> StorageClassChoice
+			// resource modelToSpecNested OneOfField --> StorageClassChoice
 			if !azureVnetSiteVoltstackClusterArModel.StorageClassChoice.IsNull() && !azureVnetSiteVoltstackClusterArModel.StorageClassChoice.IsUnknown() {
 				voltstackClusterArStorageClassChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterARTypeStorageClassChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterArModel.StorageClassChoice.As(ctx, &voltstackClusterArStorageClassChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -20482,6 +20826,9 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 		// resource modelToSpecRoot PointerField --> Sw
 		if !data.Sw.IsNull() && !data.Sw.IsUnknown() {
 			swSpec := &ves_io_schema_views.VolterraSoftwareType{}
+			swSpec.VolterraSwVersionChoice = &ves_io_schema_views.VolterraSoftwareType_DefaultSwVersion{
+				DefaultSwVersion: &ves_io_schema.Empty{},
+			}
 			spec.Sw = swSpec
 			var swModel AzureVnetSiteVolterraSoftwareType
 
@@ -20492,7 +20839,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> VolterraSwVersionChoice
+			// resource modelToSpecNested OneOfField --> VolterraSwVersionChoice
 			if !swModel.VolterraSwVersionChoice.IsNull() && !swModel.VolterraSwVersionChoice.IsUnknown() {
 				swVolterraSwVersionChoiceModel := AzureVnetSiteVolterraSwVersionChoice{}
 				response.Diagnostics.Append(swModel.VolterraSwVersionChoice.As(ctx, &swVolterraSwVersionChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -20565,6 +20912,9 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					}
 					existingVnetOneOfSpec := &ves_io_schema_views.AzureVnetChoiceType_ExistingVnet{}
 					existingVnetOneOfSpec.ExistingVnet = &ves_io_schema_views.AzureVnetType{}
+					existingVnetOneOfSpec.ExistingVnet.RoutingType = &ves_io_schema_views.AzureVnetType_F5OrchestratedRouting{
+						F5OrchestratedRouting: &ves_io_schema.Empty{},
+					}
 					vnetSpec.Choice = existingVnetOneOfSpec
 
 					// resource modelToSpecNested RequiredStringField --> ResourceGroup
@@ -20572,7 +20922,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 						existingVnetOneOfSpec.ExistingVnet.ResourceGroup = string(azureVnetSiteExistingVnetModel.ResourceGroup.ValueString())
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> RoutingType
+					// resource modelToSpecNested OneOfField --> RoutingType
 					if !azureVnetSiteExistingVnetModel.RoutingTypeChoice.IsNull() && !azureVnetSiteExistingVnetModel.RoutingTypeChoice.IsUnknown() {
 						existingVnetRoutingTypeChoiceModel := AzureVnetSiteRoutingTypeChoice{}
 						response.Diagnostics.Append(azureVnetSiteExistingVnetModel.RoutingTypeChoice.As(ctx, &existingVnetRoutingTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -20612,9 +20962,12 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					}
 					newVnetOneOfSpec := &ves_io_schema_views.AzureVnetChoiceType_NewVnet{}
 					newVnetOneOfSpec.NewVnet = &ves_io_schema_views.AzureVnetParamsType{}
+					newVnetOneOfSpec.NewVnet.NameChoice = &ves_io_schema_views.AzureVnetParamsType_Autogenerate{
+						Autogenerate: &ves_io_schema.Empty{},
+					}
 					vnetSpec.Choice = newVnetOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> NameChoice
+					// resource modelToSpecNested OneOfField --> NameChoice
 					if !azureVnetSiteNewVnetModel.NameChoice.IsNull() && !azureVnetSiteNewVnetModel.NameChoice.IsUnknown() {
 						newVnetNameChoiceModel := AzureVnetSiteNameChoice{}
 						response.Diagnostics.Append(azureVnetSiteNewVnetModel.NameChoice.As(ctx, &newVnetNameChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -20654,6 +21007,9 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 		// resource modelToSpecRoot PointerField --> WafSignatures
 		if !data.WafSignatures.IsNull() && !data.WafSignatures.IsUnknown() {
 			wafSignaturesSpec := &ves_io_schema_views_common_waf.LiveSignaturesUpdate{}
+			wafSignaturesSpec.SignaturesUpdateModeChoice = &ves_io_schema_views_common_waf.LiveSignaturesUpdate_Manual{
+				Manual: &ves_io_schema.Empty{},
+			}
 			spec.WafSignatures = wafSignaturesSpec
 			var wafSignaturesModel AzureVnetSiteLiveSignaturesUpdate
 
@@ -20664,7 +21020,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SignaturesUpdateModeChoice
+			// resource modelToSpecNested OneOfField --> SignaturesUpdateModeChoice
 			if !wafSignaturesModel.SignaturesUpdateModeChoice.IsNull() && !wafSignaturesModel.SignaturesUpdateModeChoice.IsUnknown() {
 				wafSignaturesSignaturesUpdateModeChoiceModel := AzureVnetSiteSignaturesUpdateModeChoice{}
 				response.Diagnostics.Append(wafSignaturesModel.SignaturesUpdateModeChoice.As(ctx, &wafSignaturesSignaturesUpdateModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -20691,7 +21047,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> WorkerNodes
+	// resource modelToSpecRoot OneOfField --> WorkerNodes
 	if !data.WorkerNodesChoice.IsNull() && !data.WorkerNodesChoice.IsUnknown() {
 		workerNodesChoiceModel := AzureVnetSiteWorkerNodesChoice{}
 		response.Diagnostics.Append(data.WorkerNodesChoice.As(ctx, &workerNodesChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -20720,7 +21076,12 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 			spec.WorkerNodes = totalNodesSpecUint
 		}
 
+	} else {
+		spec.WorkerNodes = &ves_io_schema_views_azure_vnet_site.CreateSpecType_NoWorkerNodes{
+			NoWorkerNodes: &ves_io_schema.Empty{},
+		}
 	}
+
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
@@ -21009,7 +21370,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 		data.AdminPassword = types.ObjectNull(AzureVnetSiteAdminPasswordModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> BlockedServicesChoice
+	// resource SpecToModelRoot OneOfField --> BlockedServicesChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -21167,8 +21528,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.BlockedServicesChoice = types.ObjectNull(AzureVnetSiteBlockedServicesChoiceModelAttributeMap)
 	}
 
@@ -21328,8 +21687,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 						azureVnetSiteAzureVnetTypeModel.ResourceGroup = types.StringNull()
 					}
 
-					// resource specToModelNested RequiredOneOfField --> RoutingType
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> RoutingType
 					if vnetElement.GetRoutingType() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						vnetroutingTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -21855,7 +22213,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 		data.KubernetesUpgradeDrain = types.ObjectNull(AzureVnetSiteKubernetesUpgradeDrainModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> LogsReceiverChoice
+	// resource SpecToModelRoot OneOfField --> LogsReceiverChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -21939,8 +22297,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.LogsReceiverChoice = types.ObjectNull(AzureVnetSiteLogsReceiverChoiceModelAttributeMap)
 	}
 
@@ -21957,8 +22313,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 		var azureVnetSiteOfflineSurvivabilityModeTypeModel = &AzureVnetSiteOfflineSurvivabilityModeType{}
 		offlineSurvivabilityModeElement := specData.GetOfflineSurvivabilityMode()
 
-		// resource specToModelNested RequiredOneOfField --> OfflineSurvivabilityModeChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> OfflineSurvivabilityModeChoice
 		if offlineSurvivabilityModeElement.GetOfflineSurvivabilityModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			offlineSurvivabilityModeofflineSurvivabilityModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -22024,8 +22379,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 		var azureVnetSiteOperatingSystemTypeModel = &AzureVnetSiteOperatingSystemType{}
 		osElement := specData.GetOs()
 
-		// resource specToModelNested RequiredOneOfField --> OperatingSystemVersionChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> OperatingSystemVersionChoice
 		if osElement.GetOperatingSystemVersionChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			osoperatingSystemVersionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -22181,8 +22535,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> AcceleratedNetworking
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> AcceleratedNetworking
 					if acceleratedNetworkingElement.GetAcceleratedNetworking() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -22609,8 +22962,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					ingressEgressGwAttributeMap["azure_certified_hw"] = types.StringNull()
 				}
 
-				// resource specToModelNested RequiredOneOfField --> DcClusterGroupChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> DcClusterGroupChoice
 				if ingressEgressGwElement.GetDcClusterGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwdcClusterGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -22738,8 +23090,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					ingressEgressGwAttributeMap["dc_cluster_group_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwDcClusterGroupChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ForwardProxyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> ForwardProxyChoice
 				if ingressEgressGwElement.GetForwardProxyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwforwardProxyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -22857,8 +23208,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					ingressEgressGwAttributeMap["forward_proxy_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwForwardProxyChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> GlobalNetworkChoice
 				if ingressEgressGwElement.GetGlobalNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwglobalNetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -23166,8 +23516,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 									if isExpressRouteEnabled && expressRouteEnabledOptionsWrapper != nil && expressRouteEnabledOptionsWrapper.ExpressRouteEnabled != nil {
 										expressRouteEnabledElement := expressRouteEnabledOptionsWrapper.ExpressRouteEnabled
 
-										// resource specToModelNested RequiredOneOfField --> AsnChoice
-										// GlobalSpecType
+										// resource specToModelNested OneOfField --> AsnChoice
 										if expressRouteEnabledElement.GetAsnChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											expressRouteEnabledasnChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -23578,8 +23927,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 											// Recursively populate the nested struct
 
-											// resource specToModelNested RequiredOneOfField --> Choice
-											// GlobalSpecType
+											// resource specToModelNested OneOfField --> Choice
 											if gatewaySubnetElement.GetChoice() != nil {
 												// Create a temporary attribute map for the choices within this OneOf
 												gatewaySubnetchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -23741,8 +24089,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 											// Recursively populate the nested struct
 
-											// resource specToModelNested RequiredOneOfField --> Choice
-											// GlobalSpecType
+											// resource specToModelNested OneOfField --> Choice
 											if routeServerSubnetElement.GetChoice() != nil {
 												// Create a temporary attribute map for the choices within this OneOf
 												routeServerSubnetchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -24074,8 +24421,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 										azureVnetSiteVnetPeeringTypeModel.Labels = types.MapNull(types.StringType)
 									}
 
-									// resource specToModelNested RequiredOneOfField --> RoutingChoice
-									// GlobalSpecType
+									// resource specToModelNested OneOfField --> RoutingChoice
 									if spokeVnetsElement.GetRoutingChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										spokeVnetsroutingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -24138,8 +24484,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 											azureVnetSiteAzureVnetTypeModel.ResourceGroup = types.StringNull()
 										}
 
-										// resource specToModelNested RequiredOneOfField --> RoutingType
-										// GlobalSpecType
+										// resource specToModelNested OneOfField --> RoutingType
 										if vnetElement.GetRoutingType() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											vnetroutingTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -24269,8 +24614,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					ingressEgressGwAttributeMap["hub_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> InsideStaticRouteChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> InsideStaticRouteChoice
 				if ingressEgressGwElement.GetInsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwinsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -24817,8 +25161,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					ingressEgressGwAttributeMap["inside_static_route_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> NetworkPolicyChoice
 				if ingressEgressGwElement.GetNetworkPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwnetworkPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -24998,8 +25341,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					ingressEgressGwAttributeMap["network_policy_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwNetworkPolicyChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> OutsideStaticRouteChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> OutsideStaticRouteChoice
 				if ingressEgressGwElement.GetOutsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwoutsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -25554,8 +25896,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> PerfModeChoice
 					if performanceEnhancementModeElement.GetPerfModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						performanceEnhancementModeperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -25620,8 +25961,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					ingressEgressGwAttributeMap["performance_enhancement_mode"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModeModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SiteMeshGroupChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> SiteMeshGroupChoice
 				if ingressEgressGwElement.GetSiteMeshGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwsiteMeshGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -25697,8 +26037,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> AcceleratedNetworking
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> AcceleratedNetworking
 					if acceleratedNetworkingElement.GetAcceleratedNetworking() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -25771,8 +26110,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					ingressEgressGwArAttributeMap["azure_certified_hw"] = types.StringNull()
 				}
 
-				// resource specToModelNested RequiredOneOfField --> DcClusterGroupChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> DcClusterGroupChoice
 				if ingressEgressGwArElement.GetDcClusterGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwArdcClusterGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -25900,8 +26238,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					ingressEgressGwArAttributeMap["dc_cluster_group_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArDcClusterGroupChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ForwardProxyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> ForwardProxyChoice
 				if ingressEgressGwArElement.GetForwardProxyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwArforwardProxyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -26019,8 +26356,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					ingressEgressGwArAttributeMap["forward_proxy_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArForwardProxyChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> GlobalNetworkChoice
 				if ingressEgressGwArElement.GetGlobalNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwArglobalNetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -26328,8 +26664,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 									if isExpressRouteEnabled && expressRouteEnabledOptionsWrapper != nil && expressRouteEnabledOptionsWrapper.ExpressRouteEnabled != nil {
 										expressRouteEnabledElement := expressRouteEnabledOptionsWrapper.ExpressRouteEnabled
 
-										// resource specToModelNested RequiredOneOfField --> AsnChoice
-										// GlobalSpecType
+										// resource specToModelNested OneOfField --> AsnChoice
 										if expressRouteEnabledElement.GetAsnChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											expressRouteEnabledasnChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -26740,8 +27075,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 											// Recursively populate the nested struct
 
-											// resource specToModelNested RequiredOneOfField --> Choice
-											// GlobalSpecType
+											// resource specToModelNested OneOfField --> Choice
 											if gatewaySubnetElement.GetChoice() != nil {
 												// Create a temporary attribute map for the choices within this OneOf
 												gatewaySubnetchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -26903,8 +27237,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 											// Recursively populate the nested struct
 
-											// resource specToModelNested RequiredOneOfField --> Choice
-											// GlobalSpecType
+											// resource specToModelNested OneOfField --> Choice
 											if routeServerSubnetElement.GetChoice() != nil {
 												// Create a temporary attribute map for the choices within this OneOf
 												routeServerSubnetchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -27236,8 +27569,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 										azureVnetSiteVnetPeeringTypeModel.Labels = types.MapNull(types.StringType)
 									}
 
-									// resource specToModelNested RequiredOneOfField --> RoutingChoice
-									// GlobalSpecType
+									// resource specToModelNested OneOfField --> RoutingChoice
 									if spokeVnetsElement.GetRoutingChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										spokeVnetsroutingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -27300,8 +27632,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 											azureVnetSiteAzureVnetTypeModel.ResourceGroup = types.StringNull()
 										}
 
-										// resource specToModelNested RequiredOneOfField --> RoutingType
-										// GlobalSpecType
+										// resource specToModelNested OneOfField --> RoutingType
 										if vnetElement.GetRoutingType() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											vnetroutingTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -27431,8 +27762,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					ingressEgressGwArAttributeMap["hub_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> InsideStaticRouteChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> InsideStaticRouteChoice
 				if ingressEgressGwArElement.GetInsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwArinsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -27979,8 +28309,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					ingressEgressGwArAttributeMap["inside_static_route_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> NetworkPolicyChoice
 				if ingressEgressGwArElement.GetNetworkPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwArnetworkPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -28515,8 +28844,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					ingressEgressGwArAttributeMap["node"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArNodeModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> OutsideStaticRouteChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> OutsideStaticRouteChoice
 				if ingressEgressGwArElement.GetOutsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwAroutsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -29071,8 +29399,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> PerfModeChoice
 					if performanceEnhancementModeElement.GetPerfModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						performanceEnhancementModeperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -29137,8 +29464,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					ingressEgressGwArAttributeMap["performance_enhancement_mode"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModeModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SiteMeshGroupChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> SiteMeshGroupChoice
 				if ingressEgressGwArElement.GetSiteMeshGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwArsiteMeshGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -29214,8 +29540,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> AcceleratedNetworking
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> AcceleratedNetworking
 					if acceleratedNetworkingElement.GetAcceleratedNetworking() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -29490,8 +29815,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> PerfModeChoice
 					if performanceEnhancementModeElement.GetPerfModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						performanceEnhancementModeperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -29585,8 +29909,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> AcceleratedNetworking
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> AcceleratedNetworking
 					if acceleratedNetworkingElement.GetAcceleratedNetworking() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -29862,8 +30185,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> PerfModeChoice
 					if performanceEnhancementModeElement.GetPerfModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						performanceEnhancementModeperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -29957,8 +30279,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> AcceleratedNetworking
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> AcceleratedNetworking
 					if acceleratedNetworkingElement.GetAcceleratedNetworking() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -30225,8 +30546,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					voltstackClusterAttributeMap["azure_certified_hw"] = types.StringNull()
 				}
 
-				// resource specToModelNested RequiredOneOfField --> DcClusterGroupChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> DcClusterGroupChoice
 				if voltstackClusterElement.GetDcClusterGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterdcClusterGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -30309,8 +30629,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					voltstackClusterAttributeMap["dc_cluster_group_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterDcClusterGroupChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ForwardProxyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> ForwardProxyChoice
 				if voltstackClusterElement.GetForwardProxyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterforwardProxyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -30428,8 +30747,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					voltstackClusterAttributeMap["forward_proxy_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterForwardProxyChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> GlobalNetworkChoice
 				if voltstackClusterElement.GetGlobalNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterglobalNetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -30686,8 +31004,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					voltstackClusterAttributeMap["global_network_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterGlobalNetworkChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> K8SClusterChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> K8SClusterChoice
 				if voltstackClusterElement.GetK8SClusterChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterk8sClusterChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -30770,8 +31087,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					voltstackClusterAttributeMap["k8s_cluster_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterK8SClusterChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> NetworkPolicyChoice
 				if voltstackClusterElement.GetNetworkPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusternetworkPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -30951,8 +31267,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					voltstackClusterAttributeMap["network_policy_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterNetworkPolicyChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> OutsideStaticRouteChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> OutsideStaticRouteChoice
 				if voltstackClusterElement.GetOutsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusteroutsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -31499,8 +31814,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					voltstackClusterAttributeMap["outside_static_route_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SiteMeshGroupChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> SiteMeshGroupChoice
 				if voltstackClusterElement.GetSiteMeshGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClustersiteMeshGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -31547,8 +31861,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					voltstackClusterAttributeMap["site_mesh_group_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterSiteMeshGroupChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> StorageClassChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> StorageClassChoice
 				if voltstackClusterElement.GetStorageClassChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterstorageClassChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -31673,8 +31986,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> AcceleratedNetworking
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> AcceleratedNetworking
 					if acceleratedNetworkingElement.GetAcceleratedNetworking() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -31747,8 +32059,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					voltstackClusterArAttributeMap["azure_certified_hw"] = types.StringNull()
 				}
 
-				// resource specToModelNested RequiredOneOfField --> DcClusterGroupChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> DcClusterGroupChoice
 				if voltstackClusterArElement.GetDcClusterGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterArdcClusterGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -31831,8 +32142,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					voltstackClusterArAttributeMap["dc_cluster_group_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArDcClusterGroupChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ForwardProxyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> ForwardProxyChoice
 				if voltstackClusterArElement.GetForwardProxyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterArforwardProxyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -31950,8 +32260,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					voltstackClusterArAttributeMap["forward_proxy_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArForwardProxyChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> GlobalNetworkChoice
 				if voltstackClusterArElement.GetGlobalNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterArglobalNetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -32208,8 +32517,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					voltstackClusterArAttributeMap["global_network_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArGlobalNetworkChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> K8SClusterChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> K8SClusterChoice
 				if voltstackClusterArElement.GetK8SClusterChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterArk8sClusterChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -32292,8 +32600,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					voltstackClusterArAttributeMap["k8s_cluster_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArK8SClusterChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> NetworkPolicyChoice
 				if voltstackClusterArElement.GetNetworkPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterArnetworkPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -32668,8 +32975,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					voltstackClusterArAttributeMap["node"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArNodeModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> OutsideStaticRouteChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> OutsideStaticRouteChoice
 				if voltstackClusterArElement.GetOutsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterAroutsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -33216,8 +33522,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					voltstackClusterArAttributeMap["outside_static_route_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SiteMeshGroupChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> SiteMeshGroupChoice
 				if voltstackClusterArElement.GetSiteMeshGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterArsiteMeshGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -33264,8 +33569,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 					voltstackClusterArAttributeMap["site_mesh_group_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArSiteMeshGroupChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> StorageClassChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> StorageClassChoice
 				if voltstackClusterArElement.GetStorageClassChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterArstorageClassChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -33411,8 +33715,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 		var azureVnetSiteVolterraSoftwareTypeModel = &AzureVnetSiteVolterraSoftwareType{}
 		swElement := specData.GetSw()
 
-		// resource specToModelNested RequiredOneOfField --> VolterraSwVersionChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> VolterraSwVersionChoice
 		if swElement.GetVolterraSwVersionChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			swvolterraSwVersionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -33545,8 +33848,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 						existingVnetAttributeMap["resource_group"] = types.StringNull()
 					}
 
-					// resource specToModelNested RequiredOneOfField --> RoutingType
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> RoutingType
 					if existingVnetElement.GetRoutingType() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						existingVnetroutingTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -33622,8 +33924,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 				if isNewVnet && newVnetOptionsWrapper != nil && newVnetOptionsWrapper.NewVnet != nil {
 					newVnetElement := newVnetOptionsWrapper.NewVnet
 
-					// resource specToModelNested RequiredOneOfField --> NameChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> NameChoice
 					if newVnetElement.GetNameChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						newVnetnameChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -33728,8 +34029,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 		var azureVnetSiteLiveSignaturesUpdateModel = &AzureVnetSiteLiveSignaturesUpdate{}
 		wafSignaturesElement := specData.GetWafSignatures()
 
-		// resource specToModelNested RequiredOneOfField --> SignaturesUpdateModeChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> SignaturesUpdateModeChoice
 		if wafSignaturesElement.GetSignaturesUpdateModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			wafSignaturessignaturesUpdateModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -33790,7 +34090,7 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 		data.WafSignatures = types.ObjectNull(AzureVnetSiteWafSignaturesModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> WorkerNodes
+	// resource SpecToModelRoot OneOfField --> WorkerNodes
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -33849,8 +34149,6 @@ func (r *ResourceF5XCAzureVnetSite) Create(ctx context.Context, request resource
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.WorkerNodesChoice = types.ObjectNull(AzureVnetSiteWorkerNodesModelAttributeMap)
 	}
 
@@ -33899,11 +34197,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 	priorAdminPassword := data.AdminPassword
 	priorSiteTypeChoice := data.SiteTypeChoice
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_azure_vnet_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_azure_vnet_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "azure_vnet_site", err),
@@ -34192,7 +34486,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> BlockedServicesChoice
+	// resource SpecToModelRoot OneOfField --> BlockedServicesChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -34350,8 +34644,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.BlockedServicesChoice.IsNull() || data.BlockedServicesChoice.IsUnknown() || ((data.BlockedServicesChoice.Attributes()["block_all_services"].IsNull() || data.BlockedServicesChoice.Attributes()["block_all_services"].IsUnknown()) && (data.BlockedServicesChoice.Attributes()["blocked_services"].(types.Object).IsNull() || data.BlockedServicesChoice.Attributes()["blocked_services"].(types.Object).IsUnknown() || (data.BlockedServicesChoice.Attributes()["blocked_services"].(types.Object).Attributes()["blocked_sevice"].IsNull() || data.BlockedServicesChoice.Attributes()["blocked_services"].(types.Object).Attributes()["blocked_sevice"].IsUnknown())) && (data.BlockedServicesChoice.Attributes()["default_blocked_services"].IsNull() || data.BlockedServicesChoice.Attributes()["default_blocked_services"].IsUnknown())) {
 			data.BlockedServicesChoice = types.ObjectValueMust(AzureVnetSiteBlockedServicesChoiceModelAttributeMap, map[string]attr.Value{
@@ -34518,8 +34810,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 						azureVnetSiteAzureVnetTypeModel.ResourceGroup = types.StringNull()
 					}
 
-					// resource specToModelNested RequiredOneOfField --> RoutingType
-					// <no value>
+					// resource specToModelNested OneOfField --> RoutingType
 					if vnetElement.GetRoutingType() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						vnetroutingTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -35084,7 +35375,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 		data.KubernetesUpgradeDrain = types.ObjectNull(AzureVnetSiteKubernetesUpgradeDrainModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> LogsReceiverChoice
+	// resource SpecToModelRoot OneOfField --> LogsReceiverChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -35168,8 +35459,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.LogsReceiverChoice.IsNull() || data.LogsReceiverChoice.IsUnknown() || ((data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).IsNull() || data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).IsUnknown() || ((data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["name"].IsNull() || data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["name"].IsUnknown()) && (data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["namespace"].IsNull() || data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["namespace"].IsUnknown()) && (data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["tenant"].IsNull() || data.LogsReceiverChoice.Attributes()["log_receiver"].(types.Object).Attributes()["tenant"].IsUnknown()))) && (data.LogsReceiverChoice.Attributes()["logs_streaming_disabled"].IsNull() || data.LogsReceiverChoice.Attributes()["logs_streaming_disabled"].IsUnknown())) {
 			data.LogsReceiverChoice = types.ObjectValueMust(AzureVnetSiteLogsReceiverChoiceModelAttributeMap, map[string]attr.Value{
@@ -35192,8 +35481,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 		var azureVnetSiteOfflineSurvivabilityModeTypeModel = &AzureVnetSiteOfflineSurvivabilityModeType{}
 		offlineSurvivabilityModeElement := specData.GetOfflineSurvivabilityMode()
 
-		// resource specToModelNested RequiredOneOfField --> OfflineSurvivabilityModeChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> OfflineSurvivabilityModeChoice
 		if offlineSurvivabilityModeElement.GetOfflineSurvivabilityModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			offlineSurvivabilityModeofflineSurvivabilityModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -35262,8 +35550,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 		var azureVnetSiteOperatingSystemTypeModel = &AzureVnetSiteOperatingSystemType{}
 		osElement := specData.GetOs()
 
-		// resource specToModelNested RequiredOneOfField --> OperatingSystemVersionChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> OperatingSystemVersionChoice
 		if osElement.GetOperatingSystemVersionChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			osoperatingSystemVersionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -35422,8 +35709,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> AcceleratedNetworking
-					// <no value>
+					// resource specToModelNested OneOfField --> AcceleratedNetworking
 					if acceleratedNetworkingElement.GetAcceleratedNetworking() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -35853,8 +36139,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					ingressEgressGwAttributeMap["azure_certified_hw"] = types.StringNull()
 				}
 
-				// resource specToModelNested RequiredOneOfField --> DcClusterGroupChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> DcClusterGroupChoice
 				if ingressEgressGwElement.GetDcClusterGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwdcClusterGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -35986,8 +36271,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ForwardProxyChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> ForwardProxyChoice
 				if ingressEgressGwElement.GetForwardProxyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwforwardProxyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -36109,8 +36393,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> GlobalNetworkChoice
 				if ingressEgressGwElement.GetGlobalNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwglobalNetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -36421,8 +36704,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 									if isExpressRouteEnabled && expressRouteEnabledOptionsWrapper != nil && expressRouteEnabledOptionsWrapper.ExpressRouteEnabled != nil {
 										expressRouteEnabledElement := expressRouteEnabledOptionsWrapper.ExpressRouteEnabled
 
-										// resource specToModelNested RequiredOneOfField --> AsnChoice
-										// <no value>
+										// resource specToModelNested OneOfField --> AsnChoice
 										if expressRouteEnabledElement.GetAsnChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											expressRouteEnabledasnChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -36848,8 +37130,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 											// Recursively populate the nested struct
 
-											// resource specToModelNested RequiredOneOfField --> Choice
-											// <no value>
+											// resource specToModelNested OneOfField --> Choice
 											if gatewaySubnetElement.GetChoice() != nil {
 												// Create a temporary attribute map for the choices within this OneOf
 												gatewaySubnetchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -37015,8 +37296,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 											// Recursively populate the nested struct
 
-											// resource specToModelNested RequiredOneOfField --> Choice
-											// <no value>
+											// resource specToModelNested OneOfField --> Choice
 											if routeServerSubnetElement.GetChoice() != nil {
 												// Create a temporary attribute map for the choices within this OneOf
 												routeServerSubnetchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -37355,8 +37635,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 										azureVnetSiteVnetPeeringTypeModel.Labels = types.MapNull(types.StringType)
 									}
 
-									// resource specToModelNested RequiredOneOfField --> RoutingChoice
-									// <no value>
+									// resource specToModelNested OneOfField --> RoutingChoice
 									if spokeVnetsElement.GetRoutingChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										spokeVnetsroutingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -37422,8 +37701,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 											azureVnetSiteAzureVnetTypeModel.ResourceGroup = types.StringNull()
 										}
 
-										// resource specToModelNested RequiredOneOfField --> RoutingType
-										// <no value>
+										// resource specToModelNested OneOfField --> RoutingType
 										if vnetElement.GetRoutingType() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											vnetroutingTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -37559,8 +37837,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> InsideStaticRouteChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> InsideStaticRouteChoice
 				if ingressEgressGwElement.GetInsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwinsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -38110,8 +38387,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> NetworkPolicyChoice
 				if ingressEgressGwElement.GetNetworkPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwnetworkPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -38295,8 +38571,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> OutsideStaticRouteChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> OutsideStaticRouteChoice
 				if ingressEgressGwElement.GetOutsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwoutsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -38854,8 +39129,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> PerfModeChoice
 					if performanceEnhancementModeElement.GetPerfModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						performanceEnhancementModeperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -38923,8 +39197,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					ingressEgressGwAttributeMap["performance_enhancement_mode"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModeModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SiteMeshGroupChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> SiteMeshGroupChoice
 				if ingressEgressGwElement.GetSiteMeshGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwsiteMeshGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -39003,8 +39276,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> AcceleratedNetworking
-					// <no value>
+					// resource specToModelNested OneOfField --> AcceleratedNetworking
 					if acceleratedNetworkingElement.GetAcceleratedNetworking() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -39080,8 +39352,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					ingressEgressGwArAttributeMap["azure_certified_hw"] = types.StringNull()
 				}
 
-				// resource specToModelNested RequiredOneOfField --> DcClusterGroupChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> DcClusterGroupChoice
 				if ingressEgressGwArElement.GetDcClusterGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwArdcClusterGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -39213,8 +39484,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ForwardProxyChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> ForwardProxyChoice
 				if ingressEgressGwArElement.GetForwardProxyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwArforwardProxyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -39336,8 +39606,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> GlobalNetworkChoice
 				if ingressEgressGwArElement.GetGlobalNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwArglobalNetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -39648,8 +39917,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 									if isExpressRouteEnabled && expressRouteEnabledOptionsWrapper != nil && expressRouteEnabledOptionsWrapper.ExpressRouteEnabled != nil {
 										expressRouteEnabledElement := expressRouteEnabledOptionsWrapper.ExpressRouteEnabled
 
-										// resource specToModelNested RequiredOneOfField --> AsnChoice
-										// <no value>
+										// resource specToModelNested OneOfField --> AsnChoice
 										if expressRouteEnabledElement.GetAsnChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											expressRouteEnabledasnChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -40075,8 +40343,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 											// Recursively populate the nested struct
 
-											// resource specToModelNested RequiredOneOfField --> Choice
-											// <no value>
+											// resource specToModelNested OneOfField --> Choice
 											if gatewaySubnetElement.GetChoice() != nil {
 												// Create a temporary attribute map for the choices within this OneOf
 												gatewaySubnetchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -40242,8 +40509,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 											// Recursively populate the nested struct
 
-											// resource specToModelNested RequiredOneOfField --> Choice
-											// <no value>
+											// resource specToModelNested OneOfField --> Choice
 											if routeServerSubnetElement.GetChoice() != nil {
 												// Create a temporary attribute map for the choices within this OneOf
 												routeServerSubnetchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -40582,8 +40848,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 										azureVnetSiteVnetPeeringTypeModel.Labels = types.MapNull(types.StringType)
 									}
 
-									// resource specToModelNested RequiredOneOfField --> RoutingChoice
-									// <no value>
+									// resource specToModelNested OneOfField --> RoutingChoice
 									if spokeVnetsElement.GetRoutingChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										spokeVnetsroutingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -40649,8 +40914,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 											azureVnetSiteAzureVnetTypeModel.ResourceGroup = types.StringNull()
 										}
 
-										// resource specToModelNested RequiredOneOfField --> RoutingType
-										// <no value>
+										// resource specToModelNested OneOfField --> RoutingType
 										if vnetElement.GetRoutingType() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											vnetroutingTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -40786,8 +41050,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> InsideStaticRouteChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> InsideStaticRouteChoice
 				if ingressEgressGwArElement.GetInsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwArinsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -41337,8 +41600,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> NetworkPolicyChoice
 				if ingressEgressGwArElement.GetNetworkPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwArnetworkPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -41877,8 +42139,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					ingressEgressGwArAttributeMap["node"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArNodeModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> OutsideStaticRouteChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> OutsideStaticRouteChoice
 				if ingressEgressGwArElement.GetOutsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwAroutsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -42436,8 +42697,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> PerfModeChoice
 					if performanceEnhancementModeElement.GetPerfModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						performanceEnhancementModeperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -42505,8 +42765,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					ingressEgressGwArAttributeMap["performance_enhancement_mode"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModeModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SiteMeshGroupChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> SiteMeshGroupChoice
 				if ingressEgressGwArElement.GetSiteMeshGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwArsiteMeshGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -42585,8 +42844,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> AcceleratedNetworking
-					// <no value>
+					// resource specToModelNested OneOfField --> AcceleratedNetworking
 					if acceleratedNetworkingElement.GetAcceleratedNetworking() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -42864,8 +43122,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> PerfModeChoice
 					if performanceEnhancementModeElement.GetPerfModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						performanceEnhancementModeperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -42962,8 +43219,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> AcceleratedNetworking
-					// <no value>
+					// resource specToModelNested OneOfField --> AcceleratedNetworking
 					if acceleratedNetworkingElement.GetAcceleratedNetworking() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -43242,8 +43498,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> PerfModeChoice
 					if performanceEnhancementModeElement.GetPerfModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						performanceEnhancementModeperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -43340,8 +43595,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> AcceleratedNetworking
-					// <no value>
+					// resource specToModelNested OneOfField --> AcceleratedNetworking
 					if acceleratedNetworkingElement.GetAcceleratedNetworking() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -43611,8 +43865,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					voltstackClusterAttributeMap["azure_certified_hw"] = types.StringNull()
 				}
 
-				// resource specToModelNested RequiredOneOfField --> DcClusterGroupChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> DcClusterGroupChoice
 				if voltstackClusterElement.GetDcClusterGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterdcClusterGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -43698,8 +43951,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ForwardProxyChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> ForwardProxyChoice
 				if voltstackClusterElement.GetForwardProxyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterforwardProxyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -43821,8 +44073,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> GlobalNetworkChoice
 				if voltstackClusterElement.GetGlobalNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterglobalNetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -44082,8 +44333,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> K8SClusterChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> K8SClusterChoice
 				if voltstackClusterElement.GetK8SClusterChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterk8sClusterChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -44169,8 +44419,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> NetworkPolicyChoice
 				if voltstackClusterElement.GetNetworkPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusternetworkPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -44354,8 +44603,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> OutsideStaticRouteChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> OutsideStaticRouteChoice
 				if voltstackClusterElement.GetOutsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusteroutsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -44905,8 +45153,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SiteMeshGroupChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> SiteMeshGroupChoice
 				if voltstackClusterElement.GetSiteMeshGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClustersiteMeshGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -44956,8 +45203,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> StorageClassChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> StorageClassChoice
 				if voltstackClusterElement.GetStorageClassChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterstorageClassChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -45085,8 +45331,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> AcceleratedNetworking
-					// <no value>
+					// resource specToModelNested OneOfField --> AcceleratedNetworking
 					if acceleratedNetworkingElement.GetAcceleratedNetworking() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -45162,8 +45407,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					voltstackClusterArAttributeMap["azure_certified_hw"] = types.StringNull()
 				}
 
-				// resource specToModelNested RequiredOneOfField --> DcClusterGroupChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> DcClusterGroupChoice
 				if voltstackClusterArElement.GetDcClusterGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterArdcClusterGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -45249,8 +45493,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ForwardProxyChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> ForwardProxyChoice
 				if voltstackClusterArElement.GetForwardProxyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterArforwardProxyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -45372,8 +45615,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> GlobalNetworkChoice
 				if voltstackClusterArElement.GetGlobalNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterArglobalNetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -45633,8 +45875,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> K8SClusterChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> K8SClusterChoice
 				if voltstackClusterArElement.GetK8SClusterChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterArk8sClusterChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -45720,8 +45961,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> NetworkPolicyChoice
 				if voltstackClusterArElement.GetNetworkPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterArnetworkPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -46100,8 +46340,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					voltstackClusterArAttributeMap["node"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArNodeModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> OutsideStaticRouteChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> OutsideStaticRouteChoice
 				if voltstackClusterArElement.GetOutsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterAroutsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -46651,8 +46890,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SiteMeshGroupChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> SiteMeshGroupChoice
 				if voltstackClusterArElement.GetSiteMeshGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterArsiteMeshGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -46702,8 +46940,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 					})
 				}
 
-				// resource specToModelNested RequiredOneOfField --> StorageClassChoice
-				// <no value>
+				// resource specToModelNested OneOfField --> StorageClassChoice
 				if voltstackClusterArElement.GetStorageClassChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterArstorageClassChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -46852,8 +47089,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 		var azureVnetSiteVolterraSoftwareTypeModel = &AzureVnetSiteVolterraSoftwareType{}
 		swElement := specData.GetSw()
 
-		// resource specToModelNested RequiredOneOfField --> VolterraSwVersionChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> VolterraSwVersionChoice
 		if swElement.GetVolterraSwVersionChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			swvolterraSwVersionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -46989,8 +47225,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 						existingVnetAttributeMap["resource_group"] = types.StringNull()
 					}
 
-					// resource specToModelNested RequiredOneOfField --> RoutingType
-					// <no value>
+					// resource specToModelNested OneOfField --> RoutingType
 					if existingVnetElement.GetRoutingType() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						existingVnetroutingTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -47069,8 +47304,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 				if isNewVnet && newVnetOptionsWrapper != nil && newVnetOptionsWrapper.NewVnet != nil {
 					newVnetElement := newVnetOptionsWrapper.NewVnet
 
-					// resource specToModelNested RequiredOneOfField --> NameChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> NameChoice
 					if newVnetElement.GetNameChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						newVnetnameChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -47178,8 +47412,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 		var azureVnetSiteLiveSignaturesUpdateModel = &AzureVnetSiteLiveSignaturesUpdate{}
 		wafSignaturesElement := specData.GetWafSignatures()
 
-		// resource specToModelNested RequiredOneOfField --> SignaturesUpdateModeChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> SignaturesUpdateModeChoice
 		if wafSignaturesElement.GetSignaturesUpdateModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			wafSignaturessignaturesUpdateModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -47243,7 +47476,7 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 		data.WafSignatures = types.ObjectNull(AzureVnetSiteWafSignaturesModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> WorkerNodes
+	// resource SpecToModelRoot OneOfField --> WorkerNodes
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -47302,8 +47535,6 @@ func (r *ResourceF5XCAzureVnetSite) Read(ctx context.Context, request resource.R
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.WorkerNodesChoice.IsNull() || data.WorkerNodesChoice.IsUnknown() || ((data.WorkerNodesChoice.Attributes()["no_worker_nodes"].IsNull() || data.WorkerNodesChoice.Attributes()["no_worker_nodes"].IsUnknown()) && (data.WorkerNodesChoice.Attributes()["nodes_per_az"].IsNull() || data.WorkerNodesChoice.Attributes()["nodes_per_az"].IsUnknown()) && (data.WorkerNodesChoice.Attributes()["total_nodes"].IsNull() || data.WorkerNodesChoice.Attributes()["total_nodes"].IsUnknown())) {
 			data.WorkerNodesChoice = types.ObjectValueMust(AzureVnetSiteWorkerNodesModelAttributeMap, map[string]attr.Value{
@@ -47455,7 +47686,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 		spec.Address = string(data.Address.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> BlockedServicesChoice
+	// resource modelToSpecRoot OneOfField --> BlockedServicesChoice
 	if !data.BlockedServicesChoice.IsNull() && !data.BlockedServicesChoice.IsUnknown() {
 		blockedServicesChoiceModel := AzureVnetSiteBlockedServicesChoice{}
 		response.Diagnostics.Append(data.BlockedServicesChoice.As(ctx, &blockedServicesChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -47561,6 +47792,10 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 			spec.BlockedServicesChoice = defaultBlockedServicesSpecBool
 		}
 
+	} else {
+		spec.BlockedServicesChoice = &ves_io_schema_views_azure_vnet_site.ReplaceSpecType_BlockAllServices{
+			BlockAllServices: &ves_io_schema.Empty{},
+		}
 	}
 
 	{
@@ -47735,7 +47970,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> LogsReceiverChoice
+	// resource modelToSpecRoot OneOfField --> LogsReceiverChoice
 	if !data.LogsReceiverChoice.IsNull() && !data.LogsReceiverChoice.IsUnknown() {
 		logsReceiverChoiceModel := AzureVnetSiteLogsReceiverChoice{}
 		response.Diagnostics.Append(data.LogsReceiverChoice.As(ctx, &logsReceiverChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -47773,6 +48008,10 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 			spec.LogsReceiverChoice = logsStreamingDisabledSpecBool
 		}
 
+	} else {
+		spec.LogsReceiverChoice = &ves_io_schema_views_azure_vnet_site.ReplaceSpecType_LogsStreamingDisabled{
+			LogsStreamingDisabled: &ves_io_schema.Empty{},
+		}
 	}
 
 	// resource modelToSpecRoot RequiredStringField --> MachineType
@@ -47782,6 +48021,9 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 		// resource modelToSpecRoot PointerField --> OfflineSurvivabilityMode
 		if !data.OfflineSurvivabilityMode.IsNull() && !data.OfflineSurvivabilityMode.IsUnknown() {
 			offlineSurvivabilityModeSpec := &ves_io_schema_views.OfflineSurvivabilityModeType{}
+			offlineSurvivabilityModeSpec.OfflineSurvivabilityModeChoice = &ves_io_schema_views.OfflineSurvivabilityModeType_NoOfflineSurvivabilityMode{
+				NoOfflineSurvivabilityMode: &ves_io_schema.Empty{},
+			}
 			spec.OfflineSurvivabilityMode = offlineSurvivabilityModeSpec
 			var offlineSurvivabilityModeModel AzureVnetSiteOfflineSurvivabilityModeType
 
@@ -47792,7 +48034,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> OfflineSurvivabilityModeChoice
+			// resource modelToSpecNested OneOfField --> OfflineSurvivabilityModeChoice
 			if !offlineSurvivabilityModeModel.OfflineSurvivabilityModeChoice.IsNull() && !offlineSurvivabilityModeModel.OfflineSurvivabilityModeChoice.IsUnknown() {
 				offlineSurvivabilityModeOfflineSurvivabilityModeChoiceModel := AzureVnetSiteOfflineSurvivabilityModeChoice{}
 				response.Diagnostics.Append(offlineSurvivabilityModeModel.OfflineSurvivabilityModeChoice.As(ctx, &offlineSurvivabilityModeOfflineSurvivabilityModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -47863,6 +48105,27 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 			}
 			ingressEgressGwOneOfSpec := &ves_io_schema_views_azure_vnet_site.ReplaceSpecType_IngressEgressGw{}
 			ingressEgressGwOneOfSpec.IngressEgressGw = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwReplaceType{}
+			ingressEgressGwOneOfSpec.IngressEgressGw.DcClusterGroupChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwReplaceType_NoDcClusterGroup{
+				NoDcClusterGroup: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwOneOfSpec.IngressEgressGw.ForwardProxyChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwReplaceType_NoForwardProxy{
+				NoForwardProxy: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwOneOfSpec.IngressEgressGw.GlobalNetworkChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwReplaceType_NoGlobalNetwork{
+				NoGlobalNetwork: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwOneOfSpec.IngressEgressGw.InsideStaticRouteChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwReplaceType_NoInsideStaticRoutes{
+				NoInsideStaticRoutes: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwOneOfSpec.IngressEgressGw.NetworkPolicyChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwReplaceType_NoNetworkPolicy{
+				NoNetworkPolicy: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwOneOfSpec.IngressEgressGw.OutsideStaticRouteChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwReplaceType_NoOutsideStaticRoutes{
+				NoOutsideStaticRoutes: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwOneOfSpec.IngressEgressGw.SiteMeshGroupChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwReplaceType_SmConnectionPublicIp{
+				SmConnectionPublicIp: &ves_io_schema.Empty{},
+			}
 			spec.SiteType = ingressEgressGwOneOfSpec
 
 			// resource modelToSpecNested RequiredArrayOfPointerField --> AzNodes
@@ -48057,7 +48320,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 				}
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> DcClusterGroupChoice
+			// resource modelToSpecNested OneOfField --> DcClusterGroupChoice
 			if !azureVnetSiteIngressEgressGwModel.DcClusterGroupChoice.IsNull() && !azureVnetSiteIngressEgressGwModel.DcClusterGroupChoice.IsUnknown() {
 				ingressEgressGwDcClusterGroupChoiceModel := AzureVnetSiteDcClusterGroupChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwModel.DcClusterGroupChoice.As(ctx, &ingressEgressGwDcClusterGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -48120,7 +48383,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ForwardProxyChoice
+			// resource modelToSpecNested OneOfField --> ForwardProxyChoice
 			if !azureVnetSiteIngressEgressGwModel.ForwardProxyChoice.IsNull() && !azureVnetSiteIngressEgressGwModel.ForwardProxyChoice.IsUnknown() {
 				ingressEgressGwForwardProxyChoiceModel := AzureVnetSiteForwardProxyChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwModel.ForwardProxyChoice.As(ctx, &ingressEgressGwForwardProxyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -48190,7 +48453,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> GlobalNetworkChoice
+			// resource modelToSpecNested OneOfField --> GlobalNetworkChoice
 			if !azureVnetSiteIngressEgressGwModel.GlobalNetworkChoice.IsNull() && !azureVnetSiteIngressEgressGwModel.GlobalNetworkChoice.IsUnknown() {
 				ingressEgressGwGlobalNetworkChoiceModel := AzureVnetSiteGlobalNetChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwModel.GlobalNetworkChoice.As(ctx, &ingressEgressGwGlobalNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -48371,9 +48634,12 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 							}
 							expressRouteEnabledOneOfSpec := &ves_io_schema_views_azure_vnet_site.AzureHubVnetType_ExpressRouteEnabled{}
 							expressRouteEnabledOneOfSpec.ExpressRouteEnabled = &ves_io_schema_views_azure_vnet_site.ExpressRouteConfigType{}
+							expressRouteEnabledOneOfSpec.ExpressRouteEnabled.AsnChoice = &ves_io_schema_views_azure_vnet_site.ExpressRouteConfigType_AutoAsn{
+								AutoAsn: &ves_io_schema.Empty{},
+							}
 							hubOneOfSpec.Hub.ExpressRouteChoice = expressRouteEnabledOneOfSpec
 
-							// resource modelToSpecNested RequiredOneOfField --> AsnChoice
+							// resource modelToSpecNested OneOfField --> AsnChoice
 							if !azureVnetSiteExpressRouteEnabledModel.AsnChoice.IsNull() && !azureVnetSiteExpressRouteEnabledModel.AsnChoice.IsUnknown() {
 								expressRouteEnabledAsnChoiceModel := AzureVnetSiteAsnChoice{}
 								response.Diagnostics.Append(azureVnetSiteExpressRouteEnabledModel.AsnChoice.As(ctx, &expressRouteEnabledAsnChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -48610,9 +48876,12 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 								}
 
 								gatewaySubnetSpec := &ves_io_schema_views.AzureSubnetChoiceWithAutoType{}
+								gatewaySubnetSpec.Choice = &ves_io_schema_views.AzureSubnetChoiceWithAutoType_Auto{
+									Auto: &ves_io_schema.Empty{},
+								}
 								expressRouteEnabledOneOfSpec.ExpressRouteEnabled.GatewaySubnet = gatewaySubnetSpec
 
-								// resource modelToSpecNested RequiredOneOfField --> Choice
+								// resource modelToSpecNested OneOfField --> Choice
 								if !gatewaySubnetModel.Choice.IsNull() && !gatewaySubnetModel.Choice.IsUnknown() {
 									gatewaySubnetChoiceModel := AzureVnetSiteAzureSubnetChoiceWithAutoTypeChoice{}
 									response.Diagnostics.Append(gatewaySubnetModel.Choice.As(ctx, &gatewaySubnetChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -48695,9 +48964,12 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 								}
 
 								routeServerSubnetSpec := &ves_io_schema_views.AzureSubnetChoiceWithAutoType{}
+								routeServerSubnetSpec.Choice = &ves_io_schema_views.AzureSubnetChoiceWithAutoType_Auto{
+									Auto: &ves_io_schema.Empty{},
+								}
 								expressRouteEnabledOneOfSpec.ExpressRouteEnabled.RouteServerSubnet = routeServerSubnetSpec
 
-								// resource modelToSpecNested RequiredOneOfField --> Choice
+								// resource modelToSpecNested OneOfField --> Choice
 								if !routeServerSubnetModel.Choice.IsNull() && !routeServerSubnetModel.Choice.IsUnknown() {
 									routeServerSubnetChoiceModel := AzureVnetSiteAzureSubnetChoiceWithAutoTypeChoice{}
 									response.Diagnostics.Append(routeServerSubnetModel.Choice.As(ctx, &routeServerSubnetChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -48854,6 +49126,9 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 						for i, spokeVnetsElement := range spokeVnetsElements {
 							// Initialize the spec struct for the current element
 							hubOneOfSpec.Hub.SpokeVnets[i] = &ves_io_schema_views_azure_vnet_site.VnetPeeringType{}
+							hubOneOfSpec.Hub.SpokeVnets[i].RoutingChoice = &ves_io_schema_views_azure_vnet_site.VnetPeeringType_Auto{
+								Auto: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
@@ -48878,7 +49153,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 								spokeVnetsSpec[i].Labels = nil
 							}
 
-							// resource modelToSpecNested RequiredOneOfField --> RoutingChoice
+							// resource modelToSpecNested OneOfField --> RoutingChoice
 							if !spokeVnetsElement.RoutingChoice.IsNull() && !spokeVnetsElement.RoutingChoice.IsUnknown() {
 								spokeVnetsRoutingChoiceModel := AzureVnetSiteRoutingChoice{}
 								response.Diagnostics.Append(spokeVnetsElement.RoutingChoice.As(ctx, &spokeVnetsRoutingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -48911,6 +49186,9 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 								}
 
 								vnetSpec := &ves_io_schema_views.AzureVnetType{}
+								vnetSpec.RoutingType = &ves_io_schema_views.AzureVnetType_F5OrchestratedRouting{
+									F5OrchestratedRouting: &ves_io_schema.Empty{},
+								}
 								spokeVnetsSpec[i].Vnet = vnetSpec
 
 								// resource modelToSpecNested RequiredStringField --> ResourceGroup
@@ -48918,7 +49196,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 									vnetSpec.ResourceGroup = string(vnetModel.ResourceGroup.ValueString())
 								}
 
-								// resource modelToSpecNested RequiredOneOfField --> RoutingType
+								// resource modelToSpecNested OneOfField --> RoutingType
 								if !vnetModel.RoutingTypeChoice.IsNull() && !vnetModel.RoutingTypeChoice.IsUnknown() {
 									vnetRoutingTypeChoiceModel := AzureVnetSiteRoutingTypeChoice{}
 									response.Diagnostics.Append(vnetModel.RoutingTypeChoice.As(ctx, &vnetRoutingTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -48963,7 +49241,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> InsideStaticRouteChoice
+			// resource modelToSpecNested OneOfField --> InsideStaticRouteChoice
 			if !azureVnetSiteIngressEgressGwModel.InsideStaticRouteChoice.IsNull() && !azureVnetSiteIngressEgressGwModel.InsideStaticRouteChoice.IsUnknown() {
 				ingressEgressGwInsideStaticRouteChoiceModel := AzureVnetSiteInsideStaticRouteChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwModel.InsideStaticRouteChoice.As(ctx, &ingressEgressGwInsideStaticRouteChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -49308,7 +49586,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> NetworkPolicyChoice
+			// resource modelToSpecNested OneOfField --> NetworkPolicyChoice
 			if !azureVnetSiteIngressEgressGwModel.NetworkPolicyChoice.IsNull() && !azureVnetSiteIngressEgressGwModel.NetworkPolicyChoice.IsUnknown() {
 				ingressEgressGwNetworkPolicyChoiceModel := AzureVnetSiteNetPolicyChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwModel.NetworkPolicyChoice.As(ctx, &ingressEgressGwNetworkPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -49417,7 +49695,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> OutsideStaticRouteChoice
+			// resource modelToSpecNested OneOfField --> OutsideStaticRouteChoice
 			if !azureVnetSiteIngressEgressGwModel.OutsideStaticRouteChoice.IsNull() && !azureVnetSiteIngressEgressGwModel.OutsideStaticRouteChoice.IsUnknown() {
 				ingressEgressGwOutsideStaticRouteChoiceModel := AzureVnetSiteOutsideStaticRouteChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwModel.OutsideStaticRouteChoice.As(ctx, &ingressEgressGwOutsideStaticRouteChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -49771,9 +50049,16 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 				}
 
 				performanceEnhancementModeSpec := &ves_io_schema_views.PerformanceEnhancementModeType{}
+				performanceEnhancementModeSpec.PerfModeChoice = &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{
+					PerfModeL7Enhanced: &ves_io_schema_views.L7PerformanceEnhancementType{
+						PerfModeChoice: &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{
+							JumboDisabled: &ves_io_schema.Empty{},
+						},
+					},
+				}
 				ingressEgressGwOneOfSpec.IngressEgressGw.PerformanceEnhancementMode = performanceEnhancementModeSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
+				// resource modelToSpecNested OneOfField --> PerfModeChoice
 				if !performanceEnhancementModeModel.PerfModeChoice.IsNull() && !performanceEnhancementModeModel.PerfModeChoice.IsUnknown() {
 					performanceEnhancementModePerfModeChoiceModel := AzureVnetSitePerfModeChoice{}
 					response.Diagnostics.Append(performanceEnhancementModeModel.PerfModeChoice.As(ctx, &performanceEnhancementModePerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -49805,7 +50090,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SiteMeshGroupChoice
+			// resource modelToSpecNested OneOfField --> SiteMeshGroupChoice
 			if !azureVnetSiteIngressEgressGwModel.SiteMeshGroupChoice.IsNull() && !azureVnetSiteIngressEgressGwModel.SiteMeshGroupChoice.IsUnknown() {
 				ingressEgressGwSiteMeshGroupChoiceModel := AzureVnetSiteSiteMeshGroupChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwModel.SiteMeshGroupChoice.As(ctx, &ingressEgressGwSiteMeshGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -49840,9 +50125,30 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 			}
 			ingressEgressGwArOneOfSpec := &ves_io_schema_views_azure_vnet_site.ReplaceSpecType_IngressEgressGwAr{}
 			ingressEgressGwArOneOfSpec.IngressEgressGwAr = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwARReplaceType{}
+			ingressEgressGwArOneOfSpec.IngressEgressGwAr.DcClusterGroupChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwARReplaceType_NoDcClusterGroup{
+				NoDcClusterGroup: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwArOneOfSpec.IngressEgressGwAr.ForwardProxyChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwARReplaceType_NoForwardProxy{
+				NoForwardProxy: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwArOneOfSpec.IngressEgressGwAr.GlobalNetworkChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwARReplaceType_NoGlobalNetwork{
+				NoGlobalNetwork: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwArOneOfSpec.IngressEgressGwAr.InsideStaticRouteChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwARReplaceType_NoInsideStaticRoutes{
+				NoInsideStaticRoutes: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwArOneOfSpec.IngressEgressGwAr.NetworkPolicyChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwARReplaceType_NoNetworkPolicy{
+				NoNetworkPolicy: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwArOneOfSpec.IngressEgressGwAr.OutsideStaticRouteChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwARReplaceType_NoOutsideStaticRoutes{
+				NoOutsideStaticRoutes: &ves_io_schema.Empty{},
+			}
+			ingressEgressGwArOneOfSpec.IngressEgressGwAr.SiteMeshGroupChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetIngressEgressGwARReplaceType_SmConnectionPublicIp{
+				SmConnectionPublicIp: &ves_io_schema.Empty{},
+			}
 			spec.SiteType = ingressEgressGwArOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> DcClusterGroupChoice
+			// resource modelToSpecNested OneOfField --> DcClusterGroupChoice
 			if !azureVnetSiteIngressEgressGwArModel.DcClusterGroupChoice.IsNull() && !azureVnetSiteIngressEgressGwArModel.DcClusterGroupChoice.IsUnknown() {
 				ingressEgressGwArDcClusterGroupChoiceModel := AzureVnetSiteAzureVnetIngressEgressGwARTypeDcClusterGroupChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwArModel.DcClusterGroupChoice.As(ctx, &ingressEgressGwArDcClusterGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -49905,7 +50211,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ForwardProxyChoice
+			// resource modelToSpecNested OneOfField --> ForwardProxyChoice
 			if !azureVnetSiteIngressEgressGwArModel.ForwardProxyChoice.IsNull() && !azureVnetSiteIngressEgressGwArModel.ForwardProxyChoice.IsUnknown() {
 				ingressEgressGwArForwardProxyChoiceModel := AzureVnetSiteAzureVnetIngressEgressGwARTypeForwardProxyChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwArModel.ForwardProxyChoice.As(ctx, &ingressEgressGwArForwardProxyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -49975,7 +50281,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> GlobalNetworkChoice
+			// resource modelToSpecNested OneOfField --> GlobalNetworkChoice
 			if !azureVnetSiteIngressEgressGwArModel.GlobalNetworkChoice.IsNull() && !azureVnetSiteIngressEgressGwArModel.GlobalNetworkChoice.IsUnknown() {
 				ingressEgressGwArGlobalNetworkChoiceModel := AzureVnetSiteAzureVnetIngressEgressGwARTypeGlobalNetChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwArModel.GlobalNetworkChoice.As(ctx, &ingressEgressGwArGlobalNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -50156,9 +50462,12 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 							}
 							expressRouteEnabledOneOfSpec := &ves_io_schema_views_azure_vnet_site.AzureHubVnetType_ExpressRouteEnabled{}
 							expressRouteEnabledOneOfSpec.ExpressRouteEnabled = &ves_io_schema_views_azure_vnet_site.ExpressRouteConfigType{}
+							expressRouteEnabledOneOfSpec.ExpressRouteEnabled.AsnChoice = &ves_io_schema_views_azure_vnet_site.ExpressRouteConfigType_AutoAsn{
+								AutoAsn: &ves_io_schema.Empty{},
+							}
 							hubOneOfSpec.Hub.ExpressRouteChoice = expressRouteEnabledOneOfSpec
 
-							// resource modelToSpecNested RequiredOneOfField --> AsnChoice
+							// resource modelToSpecNested OneOfField --> AsnChoice
 							if !azureVnetSiteExpressRouteEnabledModel.AsnChoice.IsNull() && !azureVnetSiteExpressRouteEnabledModel.AsnChoice.IsUnknown() {
 								expressRouteEnabledAsnChoiceModel := AzureVnetSiteAsnChoice{}
 								response.Diagnostics.Append(azureVnetSiteExpressRouteEnabledModel.AsnChoice.As(ctx, &expressRouteEnabledAsnChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -50395,9 +50704,12 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 								}
 
 								gatewaySubnetSpec := &ves_io_schema_views.AzureSubnetChoiceWithAutoType{}
+								gatewaySubnetSpec.Choice = &ves_io_schema_views.AzureSubnetChoiceWithAutoType_Auto{
+									Auto: &ves_io_schema.Empty{},
+								}
 								expressRouteEnabledOneOfSpec.ExpressRouteEnabled.GatewaySubnet = gatewaySubnetSpec
 
-								// resource modelToSpecNested RequiredOneOfField --> Choice
+								// resource modelToSpecNested OneOfField --> Choice
 								if !gatewaySubnetModel.Choice.IsNull() && !gatewaySubnetModel.Choice.IsUnknown() {
 									gatewaySubnetChoiceModel := AzureVnetSiteAzureSubnetChoiceWithAutoTypeChoice{}
 									response.Diagnostics.Append(gatewaySubnetModel.Choice.As(ctx, &gatewaySubnetChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -50480,9 +50792,12 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 								}
 
 								routeServerSubnetSpec := &ves_io_schema_views.AzureSubnetChoiceWithAutoType{}
+								routeServerSubnetSpec.Choice = &ves_io_schema_views.AzureSubnetChoiceWithAutoType_Auto{
+									Auto: &ves_io_schema.Empty{},
+								}
 								expressRouteEnabledOneOfSpec.ExpressRouteEnabled.RouteServerSubnet = routeServerSubnetSpec
 
-								// resource modelToSpecNested RequiredOneOfField --> Choice
+								// resource modelToSpecNested OneOfField --> Choice
 								if !routeServerSubnetModel.Choice.IsNull() && !routeServerSubnetModel.Choice.IsUnknown() {
 									routeServerSubnetChoiceModel := AzureVnetSiteAzureSubnetChoiceWithAutoTypeChoice{}
 									response.Diagnostics.Append(routeServerSubnetModel.Choice.As(ctx, &routeServerSubnetChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -50639,6 +50954,9 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 						for i, spokeVnetsElement := range spokeVnetsElements {
 							// Initialize the spec struct for the current element
 							hubOneOfSpec.Hub.SpokeVnets[i] = &ves_io_schema_views_azure_vnet_site.VnetPeeringType{}
+							hubOneOfSpec.Hub.SpokeVnets[i].RoutingChoice = &ves_io_schema_views_azure_vnet_site.VnetPeeringType_Auto{
+								Auto: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
@@ -50663,7 +50981,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 								spokeVnetsSpec[i].Labels = nil
 							}
 
-							// resource modelToSpecNested RequiredOneOfField --> RoutingChoice
+							// resource modelToSpecNested OneOfField --> RoutingChoice
 							if !spokeVnetsElement.RoutingChoice.IsNull() && !spokeVnetsElement.RoutingChoice.IsUnknown() {
 								spokeVnetsRoutingChoiceModel := AzureVnetSiteRoutingChoice{}
 								response.Diagnostics.Append(spokeVnetsElement.RoutingChoice.As(ctx, &spokeVnetsRoutingChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -50696,6 +51014,9 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 								}
 
 								vnetSpec := &ves_io_schema_views.AzureVnetType{}
+								vnetSpec.RoutingType = &ves_io_schema_views.AzureVnetType_F5OrchestratedRouting{
+									F5OrchestratedRouting: &ves_io_schema.Empty{},
+								}
 								spokeVnetsSpec[i].Vnet = vnetSpec
 
 								// resource modelToSpecNested RequiredStringField --> ResourceGroup
@@ -50703,7 +51024,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 									vnetSpec.ResourceGroup = string(vnetModel.ResourceGroup.ValueString())
 								}
 
-								// resource modelToSpecNested RequiredOneOfField --> RoutingType
+								// resource modelToSpecNested OneOfField --> RoutingType
 								if !vnetModel.RoutingTypeChoice.IsNull() && !vnetModel.RoutingTypeChoice.IsUnknown() {
 									vnetRoutingTypeChoiceModel := AzureVnetSiteRoutingTypeChoice{}
 									response.Diagnostics.Append(vnetModel.RoutingTypeChoice.As(ctx, &vnetRoutingTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -50748,7 +51069,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> InsideStaticRouteChoice
+			// resource modelToSpecNested OneOfField --> InsideStaticRouteChoice
 			if !azureVnetSiteIngressEgressGwArModel.InsideStaticRouteChoice.IsNull() && !azureVnetSiteIngressEgressGwArModel.InsideStaticRouteChoice.IsUnknown() {
 				ingressEgressGwArInsideStaticRouteChoiceModel := AzureVnetSiteAzureVnetIngressEgressGwARTypeInsideStaticRouteChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwArModel.InsideStaticRouteChoice.As(ctx, &ingressEgressGwArInsideStaticRouteChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -51093,7 +51414,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> NetworkPolicyChoice
+			// resource modelToSpecNested OneOfField --> NetworkPolicyChoice
 			if !azureVnetSiteIngressEgressGwArModel.NetworkPolicyChoice.IsNull() && !azureVnetSiteIngressEgressGwArModel.NetworkPolicyChoice.IsUnknown() {
 				ingressEgressGwArNetworkPolicyChoiceModel := AzureVnetSiteAzureVnetIngressEgressGwARTypeNetPolicyChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwArModel.NetworkPolicyChoice.As(ctx, &ingressEgressGwArNetworkPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -51396,7 +51717,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> OutsideStaticRouteChoice
+			// resource modelToSpecNested OneOfField --> OutsideStaticRouteChoice
 			if !azureVnetSiteIngressEgressGwArModel.OutsideStaticRouteChoice.IsNull() && !azureVnetSiteIngressEgressGwArModel.OutsideStaticRouteChoice.IsUnknown() {
 				ingressEgressGwArOutsideStaticRouteChoiceModel := AzureVnetSiteAzureVnetIngressEgressGwARTypeOutsideStaticRouteChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwArModel.OutsideStaticRouteChoice.As(ctx, &ingressEgressGwArOutsideStaticRouteChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -51750,9 +52071,16 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 				}
 
 				performanceEnhancementModeSpec := &ves_io_schema_views.PerformanceEnhancementModeType{}
+				performanceEnhancementModeSpec.PerfModeChoice = &ves_io_schema_views.PerformanceEnhancementModeType_PerfModeL7Enhanced{
+					PerfModeL7Enhanced: &ves_io_schema_views.L7PerformanceEnhancementType{
+						PerfModeChoice: &ves_io_schema_views.L7PerformanceEnhancementType_JumboDisabled{
+							JumboDisabled: &ves_io_schema.Empty{},
+						},
+					},
+				}
 				ingressEgressGwArOneOfSpec.IngressEgressGwAr.PerformanceEnhancementMode = performanceEnhancementModeSpec
 
-				// resource modelToSpecNested RequiredOneOfField --> PerfModeChoice
+				// resource modelToSpecNested OneOfField --> PerfModeChoice
 				if !performanceEnhancementModeModel.PerfModeChoice.IsNull() && !performanceEnhancementModeModel.PerfModeChoice.IsUnknown() {
 					performanceEnhancementModePerfModeChoiceModel := AzureVnetSitePerfModeChoice{}
 					response.Diagnostics.Append(performanceEnhancementModeModel.PerfModeChoice.As(ctx, &performanceEnhancementModePerfModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -51784,7 +52112,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SiteMeshGroupChoice
+			// resource modelToSpecNested OneOfField --> SiteMeshGroupChoice
 			if !azureVnetSiteIngressEgressGwArModel.SiteMeshGroupChoice.IsNull() && !azureVnetSiteIngressEgressGwArModel.SiteMeshGroupChoice.IsUnknown() {
 				ingressEgressGwArSiteMeshGroupChoiceModel := AzureVnetSiteAzureVnetIngressEgressGwARTypeSiteMeshGroupChoice{}
 				response.Diagnostics.Append(azureVnetSiteIngressEgressGwArModel.SiteMeshGroupChoice.As(ctx, &ingressEgressGwArSiteMeshGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -52067,6 +52395,27 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 			}
 			voltstackClusterOneOfSpec := &ves_io_schema_views_azure_vnet_site.ReplaceSpecType_VoltstackCluster{}
 			voltstackClusterOneOfSpec.VoltstackCluster = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterReplaceType{}
+			voltstackClusterOneOfSpec.VoltstackCluster.DcClusterGroupChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterReplaceType_NoDcClusterGroup{
+				NoDcClusterGroup: &ves_io_schema.Empty{},
+			}
+			voltstackClusterOneOfSpec.VoltstackCluster.ForwardProxyChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterReplaceType_NoForwardProxy{
+				NoForwardProxy: &ves_io_schema.Empty{},
+			}
+			voltstackClusterOneOfSpec.VoltstackCluster.GlobalNetworkChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterReplaceType_NoGlobalNetwork{
+				NoGlobalNetwork: &ves_io_schema.Empty{},
+			}
+			voltstackClusterOneOfSpec.VoltstackCluster.K8SClusterChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterReplaceType_NoK8SCluster{
+				NoK8SCluster: &ves_io_schema.Empty{},
+			}
+			voltstackClusterOneOfSpec.VoltstackCluster.NetworkPolicyChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterReplaceType_NoNetworkPolicy{
+				NoNetworkPolicy: &ves_io_schema.Empty{},
+			}
+			voltstackClusterOneOfSpec.VoltstackCluster.OutsideStaticRouteChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterReplaceType_NoOutsideStaticRoutes{
+				NoOutsideStaticRoutes: &ves_io_schema.Empty{},
+			}
+			voltstackClusterOneOfSpec.VoltstackCluster.SiteMeshGroupChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterReplaceType_SmConnectionPublicIp{
+				SmConnectionPublicIp: &ves_io_schema.Empty{},
+			}
 			spec.SiteType = voltstackClusterOneOfSpec
 
 			// resource modelToSpecNested RequiredArrayOfPointerField --> AzNodes
@@ -52179,7 +52528,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 				}
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> DcClusterGroupChoice
+			// resource modelToSpecNested OneOfField --> DcClusterGroupChoice
 			if !azureVnetSiteVoltstackClusterModel.DcClusterGroupChoice.IsNull() && !azureVnetSiteVoltstackClusterModel.DcClusterGroupChoice.IsUnknown() {
 				voltstackClusterDcClusterGroupChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterTypeDcClusterGroupChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterModel.DcClusterGroupChoice.As(ctx, &voltstackClusterDcClusterGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -52219,7 +52568,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ForwardProxyChoice
+			// resource modelToSpecNested OneOfField --> ForwardProxyChoice
 			if !azureVnetSiteVoltstackClusterModel.ForwardProxyChoice.IsNull() && !azureVnetSiteVoltstackClusterModel.ForwardProxyChoice.IsUnknown() {
 				voltstackClusterForwardProxyChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterTypeForwardProxyChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterModel.ForwardProxyChoice.As(ctx, &voltstackClusterForwardProxyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -52289,7 +52638,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> GlobalNetworkChoice
+			// resource modelToSpecNested OneOfField --> GlobalNetworkChoice
 			if !azureVnetSiteVoltstackClusterModel.GlobalNetworkChoice.IsNull() && !azureVnetSiteVoltstackClusterModel.GlobalNetworkChoice.IsUnknown() {
 				voltstackClusterGlobalNetworkChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterTypeGlobalNetChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterModel.GlobalNetworkChoice.As(ctx, &voltstackClusterGlobalNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -52427,7 +52776,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> K8SClusterChoice
+			// resource modelToSpecNested OneOfField --> K8SClusterChoice
 			if !azureVnetSiteVoltstackClusterModel.K8SClusterChoice.IsNull() && !azureVnetSiteVoltstackClusterModel.K8SClusterChoice.IsUnknown() {
 				voltstackClusterK8SClusterChoiceModel := AzureVnetSiteK8SClusterChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterModel.K8SClusterChoice.As(ctx, &voltstackClusterK8SClusterChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -52467,7 +52816,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> NetworkPolicyChoice
+			// resource modelToSpecNested OneOfField --> NetworkPolicyChoice
 			if !azureVnetSiteVoltstackClusterModel.NetworkPolicyChoice.IsNull() && !azureVnetSiteVoltstackClusterModel.NetworkPolicyChoice.IsUnknown() {
 				voltstackClusterNetworkPolicyChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterTypeNetPolicyChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterModel.NetworkPolicyChoice.As(ctx, &voltstackClusterNetworkPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -52576,7 +52925,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> OutsideStaticRouteChoice
+			// resource modelToSpecNested OneOfField --> OutsideStaticRouteChoice
 			if !azureVnetSiteVoltstackClusterModel.OutsideStaticRouteChoice.IsNull() && !azureVnetSiteVoltstackClusterModel.OutsideStaticRouteChoice.IsUnknown() {
 				voltstackClusterOutsideStaticRouteChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterTypeOutsideStaticRouteChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterModel.OutsideStaticRouteChoice.As(ctx, &voltstackClusterOutsideStaticRouteChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -52921,7 +53270,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SiteMeshGroupChoice
+			// resource modelToSpecNested OneOfField --> SiteMeshGroupChoice
 			if !azureVnetSiteVoltstackClusterModel.SiteMeshGroupChoice.IsNull() && !azureVnetSiteVoltstackClusterModel.SiteMeshGroupChoice.IsUnknown() {
 				voltstackClusterSiteMeshGroupChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterTypeSiteMeshGroupChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterModel.SiteMeshGroupChoice.As(ctx, &voltstackClusterSiteMeshGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -52956,9 +53305,30 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 			}
 			voltstackClusterArOneOfSpec := &ves_io_schema_views_azure_vnet_site.ReplaceSpecType_VoltstackClusterAr{}
 			voltstackClusterArOneOfSpec.VoltstackClusterAr = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterARReplaceType{}
+			voltstackClusterArOneOfSpec.VoltstackClusterAr.DcClusterGroupChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterARReplaceType_NoDcClusterGroup{
+				NoDcClusterGroup: &ves_io_schema.Empty{},
+			}
+			voltstackClusterArOneOfSpec.VoltstackClusterAr.ForwardProxyChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterARReplaceType_NoForwardProxy{
+				NoForwardProxy: &ves_io_schema.Empty{},
+			}
+			voltstackClusterArOneOfSpec.VoltstackClusterAr.GlobalNetworkChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterARReplaceType_NoGlobalNetwork{
+				NoGlobalNetwork: &ves_io_schema.Empty{},
+			}
+			voltstackClusterArOneOfSpec.VoltstackClusterAr.K8SClusterChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterARReplaceType_NoK8SCluster{
+				NoK8SCluster: &ves_io_schema.Empty{},
+			}
+			voltstackClusterArOneOfSpec.VoltstackClusterAr.NetworkPolicyChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterARReplaceType_NoNetworkPolicy{
+				NoNetworkPolicy: &ves_io_schema.Empty{},
+			}
+			voltstackClusterArOneOfSpec.VoltstackClusterAr.OutsideStaticRouteChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterARReplaceType_NoOutsideStaticRoutes{
+				NoOutsideStaticRoutes: &ves_io_schema.Empty{},
+			}
+			voltstackClusterArOneOfSpec.VoltstackClusterAr.SiteMeshGroupChoice = &ves_io_schema_views_azure_vnet_site.AzureVnetVoltstackClusterARReplaceType_SmConnectionPublicIp{
+				SmConnectionPublicIp: &ves_io_schema.Empty{},
+			}
 			spec.SiteType = voltstackClusterArOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> DcClusterGroupChoice
+			// resource modelToSpecNested OneOfField --> DcClusterGroupChoice
 			if !azureVnetSiteVoltstackClusterArModel.DcClusterGroupChoice.IsNull() && !azureVnetSiteVoltstackClusterArModel.DcClusterGroupChoice.IsUnknown() {
 				voltstackClusterArDcClusterGroupChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterARTypeDcClusterGroupChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterArModel.DcClusterGroupChoice.As(ctx, &voltstackClusterArDcClusterGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -52998,7 +53368,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ForwardProxyChoice
+			// resource modelToSpecNested OneOfField --> ForwardProxyChoice
 			if !azureVnetSiteVoltstackClusterArModel.ForwardProxyChoice.IsNull() && !azureVnetSiteVoltstackClusterArModel.ForwardProxyChoice.IsUnknown() {
 				voltstackClusterArForwardProxyChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterARTypeForwardProxyChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterArModel.ForwardProxyChoice.As(ctx, &voltstackClusterArForwardProxyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -53068,7 +53438,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> GlobalNetworkChoice
+			// resource modelToSpecNested OneOfField --> GlobalNetworkChoice
 			if !azureVnetSiteVoltstackClusterArModel.GlobalNetworkChoice.IsNull() && !azureVnetSiteVoltstackClusterArModel.GlobalNetworkChoice.IsUnknown() {
 				voltstackClusterArGlobalNetworkChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterARTypeGlobalNetChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterArModel.GlobalNetworkChoice.As(ctx, &voltstackClusterArGlobalNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -53206,7 +53576,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> K8SClusterChoice
+			// resource modelToSpecNested OneOfField --> K8SClusterChoice
 			if !azureVnetSiteVoltstackClusterArModel.K8SClusterChoice.IsNull() && !azureVnetSiteVoltstackClusterArModel.K8SClusterChoice.IsUnknown() {
 				voltstackClusterArK8SClusterChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterARTypeK8SClusterChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterArModel.K8SClusterChoice.As(ctx, &voltstackClusterArK8SClusterChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -53246,7 +53616,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> NetworkPolicyChoice
+			// resource modelToSpecNested OneOfField --> NetworkPolicyChoice
 			if !azureVnetSiteVoltstackClusterArModel.NetworkPolicyChoice.IsNull() && !azureVnetSiteVoltstackClusterArModel.NetworkPolicyChoice.IsUnknown() {
 				voltstackClusterArNetworkPolicyChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterARTypeNetPolicyChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterArModel.NetworkPolicyChoice.As(ctx, &voltstackClusterArNetworkPolicyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -53467,7 +53837,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> OutsideStaticRouteChoice
+			// resource modelToSpecNested OneOfField --> OutsideStaticRouteChoice
 			if !azureVnetSiteVoltstackClusterArModel.OutsideStaticRouteChoice.IsNull() && !azureVnetSiteVoltstackClusterArModel.OutsideStaticRouteChoice.IsUnknown() {
 				voltstackClusterArOutsideStaticRouteChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterARTypeOutsideStaticRouteChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterArModel.OutsideStaticRouteChoice.As(ctx, &voltstackClusterArOutsideStaticRouteChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -53812,7 +54182,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SiteMeshGroupChoice
+			// resource modelToSpecNested OneOfField --> SiteMeshGroupChoice
 			if !azureVnetSiteVoltstackClusterArModel.SiteMeshGroupChoice.IsNull() && !azureVnetSiteVoltstackClusterArModel.SiteMeshGroupChoice.IsUnknown() {
 				voltstackClusterArSiteMeshGroupChoiceModel := AzureVnetSiteAzureVnetVoltstackClusterARTypeSiteMeshGroupChoice{}
 				response.Diagnostics.Append(azureVnetSiteVoltstackClusterArModel.SiteMeshGroupChoice.As(ctx, &voltstackClusterArSiteMeshGroupChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -53874,6 +54244,9 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					}
 					existingVnetOneOfSpec := &ves_io_schema_views.AzureVnetChoiceType_ExistingVnet{}
 					existingVnetOneOfSpec.ExistingVnet = &ves_io_schema_views.AzureVnetType{}
+					existingVnetOneOfSpec.ExistingVnet.RoutingType = &ves_io_schema_views.AzureVnetType_F5OrchestratedRouting{
+						F5OrchestratedRouting: &ves_io_schema.Empty{},
+					}
 					vnetSpec.Choice = existingVnetOneOfSpec
 
 					// resource modelToSpecNested RequiredStringField --> ResourceGroup
@@ -53881,7 +54254,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 						existingVnetOneOfSpec.ExistingVnet.ResourceGroup = string(azureVnetSiteExistingVnetModel.ResourceGroup.ValueString())
 					}
 
-					// resource modelToSpecNested RequiredOneOfField --> RoutingType
+					// resource modelToSpecNested OneOfField --> RoutingType
 					if !azureVnetSiteExistingVnetModel.RoutingTypeChoice.IsNull() && !azureVnetSiteExistingVnetModel.RoutingTypeChoice.IsUnknown() {
 						existingVnetRoutingTypeChoiceModel := AzureVnetSiteRoutingTypeChoice{}
 						response.Diagnostics.Append(azureVnetSiteExistingVnetModel.RoutingTypeChoice.As(ctx, &existingVnetRoutingTypeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -53921,9 +54294,12 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					}
 					newVnetOneOfSpec := &ves_io_schema_views.AzureVnetChoiceType_NewVnet{}
 					newVnetOneOfSpec.NewVnet = &ves_io_schema_views.AzureVnetParamsType{}
+					newVnetOneOfSpec.NewVnet.NameChoice = &ves_io_schema_views.AzureVnetParamsType_Autogenerate{
+						Autogenerate: &ves_io_schema.Empty{},
+					}
 					vnetSpec.Choice = newVnetOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> NameChoice
+					// resource modelToSpecNested OneOfField --> NameChoice
 					if !azureVnetSiteNewVnetModel.NameChoice.IsNull() && !azureVnetSiteNewVnetModel.NameChoice.IsUnknown() {
 						newVnetNameChoiceModel := AzureVnetSiteNameChoice{}
 						response.Diagnostics.Append(azureVnetSiteNewVnetModel.NameChoice.As(ctx, &newVnetNameChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -53963,6 +54339,9 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 		// resource modelToSpecRoot PointerField --> WafSignatures
 		if !data.WafSignatures.IsNull() && !data.WafSignatures.IsUnknown() {
 			wafSignaturesSpec := &ves_io_schema_views_common_waf.LiveSignaturesUpdate{}
+			wafSignaturesSpec.SignaturesUpdateModeChoice = &ves_io_schema_views_common_waf.LiveSignaturesUpdate_Manual{
+				Manual: &ves_io_schema.Empty{},
+			}
 			spec.WafSignatures = wafSignaturesSpec
 			var wafSignaturesModel AzureVnetSiteLiveSignaturesUpdate
 
@@ -53973,7 +54352,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> SignaturesUpdateModeChoice
+			// resource modelToSpecNested OneOfField --> SignaturesUpdateModeChoice
 			if !wafSignaturesModel.SignaturesUpdateModeChoice.IsNull() && !wafSignaturesModel.SignaturesUpdateModeChoice.IsUnknown() {
 				wafSignaturesSignaturesUpdateModeChoiceModel := AzureVnetSiteSignaturesUpdateModeChoice{}
 				response.Diagnostics.Append(wafSignaturesModel.SignaturesUpdateModeChoice.As(ctx, &wafSignaturesSignaturesUpdateModeChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -54000,7 +54379,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 		}
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> WorkerNodes
+	// resource modelToSpecRoot OneOfField --> WorkerNodes
 	if !data.WorkerNodesChoice.IsNull() && !data.WorkerNodesChoice.IsUnknown() {
 		workerNodesChoiceModel := AzureVnetSiteWorkerNodesChoice{}
 		response.Diagnostics.Append(data.WorkerNodesChoice.As(ctx, &workerNodesChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -54029,7 +54408,12 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 			spec.WorkerNodes = totalNodesSpecUint
 		}
 
+	} else {
+		spec.WorkerNodes = &ves_io_schema_views_azure_vnet_site.ReplaceSpecType_NoWorkerNodes{
+			NoWorkerNodes: &ves_io_schema.Empty{},
+		}
 	}
+
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
@@ -54041,12 +54425,8 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_views_azure_vnet_site.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_views_azure_vnet_site.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "azure_vnet_site", err),
@@ -54055,7 +54435,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_azure_vnet_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_views_azure_vnet_site.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "azure_vnet_site", err),
@@ -54319,7 +54699,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 		data.AdminPassword = types.ObjectNull(AzureVnetSiteAdminPasswordModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> BlockedServicesChoice
+	// resource SpecToModelRoot OneOfField --> BlockedServicesChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -54477,8 +54857,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.BlockedServicesChoice = types.ObjectNull(AzureVnetSiteBlockedServicesChoiceModelAttributeMap)
 	}
 
@@ -54638,8 +55016,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 						azureVnetSiteAzureVnetTypeModel.ResourceGroup = types.StringNull()
 					}
 
-					// resource specToModelNested RequiredOneOfField --> RoutingType
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> RoutingType
 					if vnetElement.GetRoutingType() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						vnetroutingTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -55165,7 +55542,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 		data.KubernetesUpgradeDrain = types.ObjectNull(AzureVnetSiteKubernetesUpgradeDrainModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> LogsReceiverChoice
+	// resource SpecToModelRoot OneOfField --> LogsReceiverChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -55249,8 +55626,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.LogsReceiverChoice = types.ObjectNull(AzureVnetSiteLogsReceiverChoiceModelAttributeMap)
 	}
 
@@ -55267,8 +55642,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 		var azureVnetSiteOfflineSurvivabilityModeTypeModel = &AzureVnetSiteOfflineSurvivabilityModeType{}
 		offlineSurvivabilityModeElement := specData.GetOfflineSurvivabilityMode()
 
-		// resource specToModelNested RequiredOneOfField --> OfflineSurvivabilityModeChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> OfflineSurvivabilityModeChoice
 		if offlineSurvivabilityModeElement.GetOfflineSurvivabilityModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			offlineSurvivabilityModeofflineSurvivabilityModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -55334,8 +55708,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 		var azureVnetSiteOperatingSystemTypeModel = &AzureVnetSiteOperatingSystemType{}
 		osElement := specData.GetOs()
 
-		// resource specToModelNested RequiredOneOfField --> OperatingSystemVersionChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> OperatingSystemVersionChoice
 		if osElement.GetOperatingSystemVersionChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			osoperatingSystemVersionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -55491,8 +55864,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> AcceleratedNetworking
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> AcceleratedNetworking
 					if acceleratedNetworkingElement.GetAcceleratedNetworking() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -55919,8 +56291,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					ingressEgressGwAttributeMap["azure_certified_hw"] = types.StringNull()
 				}
 
-				// resource specToModelNested RequiredOneOfField --> DcClusterGroupChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> DcClusterGroupChoice
 				if ingressEgressGwElement.GetDcClusterGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwdcClusterGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -56048,8 +56419,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					ingressEgressGwAttributeMap["dc_cluster_group_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwDcClusterGroupChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ForwardProxyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> ForwardProxyChoice
 				if ingressEgressGwElement.GetForwardProxyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwforwardProxyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -56167,8 +56537,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					ingressEgressGwAttributeMap["forward_proxy_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwForwardProxyChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> GlobalNetworkChoice
 				if ingressEgressGwElement.GetGlobalNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwglobalNetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -56476,8 +56845,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 									if isExpressRouteEnabled && expressRouteEnabledOptionsWrapper != nil && expressRouteEnabledOptionsWrapper.ExpressRouteEnabled != nil {
 										expressRouteEnabledElement := expressRouteEnabledOptionsWrapper.ExpressRouteEnabled
 
-										// resource specToModelNested RequiredOneOfField --> AsnChoice
-										// GlobalSpecType
+										// resource specToModelNested OneOfField --> AsnChoice
 										if expressRouteEnabledElement.GetAsnChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											expressRouteEnabledasnChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -56888,8 +57256,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 											// Recursively populate the nested struct
 
-											// resource specToModelNested RequiredOneOfField --> Choice
-											// GlobalSpecType
+											// resource specToModelNested OneOfField --> Choice
 											if gatewaySubnetElement.GetChoice() != nil {
 												// Create a temporary attribute map for the choices within this OneOf
 												gatewaySubnetchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -57051,8 +57418,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 											// Recursively populate the nested struct
 
-											// resource specToModelNested RequiredOneOfField --> Choice
-											// GlobalSpecType
+											// resource specToModelNested OneOfField --> Choice
 											if routeServerSubnetElement.GetChoice() != nil {
 												// Create a temporary attribute map for the choices within this OneOf
 												routeServerSubnetchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -57384,8 +57750,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 										azureVnetSiteVnetPeeringTypeModel.Labels = types.MapNull(types.StringType)
 									}
 
-									// resource specToModelNested RequiredOneOfField --> RoutingChoice
-									// GlobalSpecType
+									// resource specToModelNested OneOfField --> RoutingChoice
 									if spokeVnetsElement.GetRoutingChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										spokeVnetsroutingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -57448,8 +57813,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 											azureVnetSiteAzureVnetTypeModel.ResourceGroup = types.StringNull()
 										}
 
-										// resource specToModelNested RequiredOneOfField --> RoutingType
-										// GlobalSpecType
+										// resource specToModelNested OneOfField --> RoutingType
 										if vnetElement.GetRoutingType() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											vnetroutingTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -57579,8 +57943,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					ingressEgressGwAttributeMap["hub_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwHubChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> InsideStaticRouteChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> InsideStaticRouteChoice
 				if ingressEgressGwElement.GetInsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwinsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -58127,8 +58490,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					ingressEgressGwAttributeMap["inside_static_route_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwInsideStaticRouteChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> NetworkPolicyChoice
 				if ingressEgressGwElement.GetNetworkPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwnetworkPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -58308,8 +58670,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					ingressEgressGwAttributeMap["network_policy_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwNetworkPolicyChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> OutsideStaticRouteChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> OutsideStaticRouteChoice
 				if ingressEgressGwElement.GetOutsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwoutsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -58864,8 +59225,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> PerfModeChoice
 					if performanceEnhancementModeElement.GetPerfModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						performanceEnhancementModeperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -58930,8 +59290,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					ingressEgressGwAttributeMap["performance_enhancement_mode"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwPerformanceEnhancementModeModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SiteMeshGroupChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> SiteMeshGroupChoice
 				if ingressEgressGwElement.GetSiteMeshGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwsiteMeshGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -59007,8 +59366,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> AcceleratedNetworking
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> AcceleratedNetworking
 					if acceleratedNetworkingElement.GetAcceleratedNetworking() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -59081,8 +59439,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					ingressEgressGwArAttributeMap["azure_certified_hw"] = types.StringNull()
 				}
 
-				// resource specToModelNested RequiredOneOfField --> DcClusterGroupChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> DcClusterGroupChoice
 				if ingressEgressGwArElement.GetDcClusterGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwArdcClusterGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -59210,8 +59567,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					ingressEgressGwArAttributeMap["dc_cluster_group_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArDcClusterGroupChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ForwardProxyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> ForwardProxyChoice
 				if ingressEgressGwArElement.GetForwardProxyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwArforwardProxyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -59329,8 +59685,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					ingressEgressGwArAttributeMap["forward_proxy_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArForwardProxyChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> GlobalNetworkChoice
 				if ingressEgressGwArElement.GetGlobalNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwArglobalNetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -59638,8 +59993,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 									if isExpressRouteEnabled && expressRouteEnabledOptionsWrapper != nil && expressRouteEnabledOptionsWrapper.ExpressRouteEnabled != nil {
 										expressRouteEnabledElement := expressRouteEnabledOptionsWrapper.ExpressRouteEnabled
 
-										// resource specToModelNested RequiredOneOfField --> AsnChoice
-										// GlobalSpecType
+										// resource specToModelNested OneOfField --> AsnChoice
 										if expressRouteEnabledElement.GetAsnChoice() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											expressRouteEnabledasnChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -60050,8 +60404,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 											// Recursively populate the nested struct
 
-											// resource specToModelNested RequiredOneOfField --> Choice
-											// GlobalSpecType
+											// resource specToModelNested OneOfField --> Choice
 											if gatewaySubnetElement.GetChoice() != nil {
 												// Create a temporary attribute map for the choices within this OneOf
 												gatewaySubnetchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -60213,8 +60566,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 											// Recursively populate the nested struct
 
-											// resource specToModelNested RequiredOneOfField --> Choice
-											// GlobalSpecType
+											// resource specToModelNested OneOfField --> Choice
 											if routeServerSubnetElement.GetChoice() != nil {
 												// Create a temporary attribute map for the choices within this OneOf
 												routeServerSubnetchoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -60546,8 +60898,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 										azureVnetSiteVnetPeeringTypeModel.Labels = types.MapNull(types.StringType)
 									}
 
-									// resource specToModelNested RequiredOneOfField --> RoutingChoice
-									// GlobalSpecType
+									// resource specToModelNested OneOfField --> RoutingChoice
 									if spokeVnetsElement.GetRoutingChoice() != nil {
 										// Create a temporary attribute map for the choices within this OneOf
 										spokeVnetsroutingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -60610,8 +60961,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 											azureVnetSiteAzureVnetTypeModel.ResourceGroup = types.StringNull()
 										}
 
-										// resource specToModelNested RequiredOneOfField --> RoutingType
-										// GlobalSpecType
+										// resource specToModelNested OneOfField --> RoutingType
 										if vnetElement.GetRoutingType() != nil {
 											// Create a temporary attribute map for the choices within this OneOf
 											vnetroutingTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -60741,8 +61091,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					ingressEgressGwArAttributeMap["hub_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArHubChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> InsideStaticRouteChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> InsideStaticRouteChoice
 				if ingressEgressGwArElement.GetInsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwArinsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -61289,8 +61638,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					ingressEgressGwArAttributeMap["inside_static_route_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArInsideStaticRouteChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> NetworkPolicyChoice
 				if ingressEgressGwArElement.GetNetworkPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwArnetworkPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -61825,8 +62173,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					ingressEgressGwArAttributeMap["node"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArNodeModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> OutsideStaticRouteChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> OutsideStaticRouteChoice
 				if ingressEgressGwArElement.GetOutsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwAroutsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -62381,8 +62728,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> PerfModeChoice
 					if performanceEnhancementModeElement.GetPerfModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						performanceEnhancementModeperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -62447,8 +62793,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					ingressEgressGwArAttributeMap["performance_enhancement_mode"] = types.ObjectNull(AzureVnetSiteSiteTypeIngressEgressGwArPerformanceEnhancementModeModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SiteMeshGroupChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> SiteMeshGroupChoice
 				if ingressEgressGwArElement.GetSiteMeshGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					ingressEgressGwArsiteMeshGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -62524,8 +62869,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> AcceleratedNetworking
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> AcceleratedNetworking
 					if acceleratedNetworkingElement.GetAcceleratedNetworking() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -62800,8 +63144,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> PerfModeChoice
 					if performanceEnhancementModeElement.GetPerfModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						performanceEnhancementModeperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -62895,8 +63238,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> AcceleratedNetworking
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> AcceleratedNetworking
 					if acceleratedNetworkingElement.GetAcceleratedNetworking() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -63172,8 +63514,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> PerfModeChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> PerfModeChoice
 					if performanceEnhancementModeElement.GetPerfModeChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						performanceEnhancementModeperfModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -63267,8 +63608,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> AcceleratedNetworking
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> AcceleratedNetworking
 					if acceleratedNetworkingElement.GetAcceleratedNetworking() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -63535,8 +63875,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					voltstackClusterAttributeMap["azure_certified_hw"] = types.StringNull()
 				}
 
-				// resource specToModelNested RequiredOneOfField --> DcClusterGroupChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> DcClusterGroupChoice
 				if voltstackClusterElement.GetDcClusterGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterdcClusterGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -63619,8 +63958,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					voltstackClusterAttributeMap["dc_cluster_group_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterDcClusterGroupChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ForwardProxyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> ForwardProxyChoice
 				if voltstackClusterElement.GetForwardProxyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterforwardProxyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -63738,8 +64076,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					voltstackClusterAttributeMap["forward_proxy_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterForwardProxyChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> GlobalNetworkChoice
 				if voltstackClusterElement.GetGlobalNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterglobalNetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -63996,8 +64333,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					voltstackClusterAttributeMap["global_network_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterGlobalNetworkChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> K8SClusterChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> K8SClusterChoice
 				if voltstackClusterElement.GetK8SClusterChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterk8sClusterChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -64080,8 +64416,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					voltstackClusterAttributeMap["k8s_cluster_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterK8SClusterChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> NetworkPolicyChoice
 				if voltstackClusterElement.GetNetworkPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusternetworkPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -64261,8 +64596,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					voltstackClusterAttributeMap["network_policy_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterNetworkPolicyChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> OutsideStaticRouteChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> OutsideStaticRouteChoice
 				if voltstackClusterElement.GetOutsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusteroutsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -64809,8 +65143,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					voltstackClusterAttributeMap["outside_static_route_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterOutsideStaticRouteChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SiteMeshGroupChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> SiteMeshGroupChoice
 				if voltstackClusterElement.GetSiteMeshGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClustersiteMeshGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -64857,8 +65190,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					voltstackClusterAttributeMap["site_mesh_group_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterSiteMeshGroupChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> StorageClassChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> StorageClassChoice
 				if voltstackClusterElement.GetStorageClassChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterstorageClassChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -64983,8 +65315,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredOneOfField --> AcceleratedNetworking
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> AcceleratedNetworking
 					if acceleratedNetworkingElement.GetAcceleratedNetworking() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						acceleratedNetworkingacceleratedNetworkingChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -65057,8 +65388,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					voltstackClusterArAttributeMap["azure_certified_hw"] = types.StringNull()
 				}
 
-				// resource specToModelNested RequiredOneOfField --> DcClusterGroupChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> DcClusterGroupChoice
 				if voltstackClusterArElement.GetDcClusterGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterArdcClusterGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -65141,8 +65471,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					voltstackClusterArAttributeMap["dc_cluster_group_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArDcClusterGroupChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> ForwardProxyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> ForwardProxyChoice
 				if voltstackClusterArElement.GetForwardProxyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterArforwardProxyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -65260,8 +65589,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					voltstackClusterArAttributeMap["forward_proxy_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArForwardProxyChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> GlobalNetworkChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> GlobalNetworkChoice
 				if voltstackClusterArElement.GetGlobalNetworkChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterArglobalNetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -65518,8 +65846,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					voltstackClusterArAttributeMap["global_network_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArGlobalNetworkChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> K8SClusterChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> K8SClusterChoice
 				if voltstackClusterArElement.GetK8SClusterChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterArk8sClusterChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -65602,8 +65929,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					voltstackClusterArAttributeMap["k8s_cluster_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArK8SClusterChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> NetworkPolicyChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> NetworkPolicyChoice
 				if voltstackClusterArElement.GetNetworkPolicyChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterArnetworkPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -65978,8 +66304,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					voltstackClusterArAttributeMap["node"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArNodeModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> OutsideStaticRouteChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> OutsideStaticRouteChoice
 				if voltstackClusterArElement.GetOutsideStaticRouteChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterAroutsideStaticRouteChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -66526,8 +66851,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					voltstackClusterArAttributeMap["outside_static_route_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArOutsideStaticRouteChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> SiteMeshGroupChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> SiteMeshGroupChoice
 				if voltstackClusterArElement.GetSiteMeshGroupChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterArsiteMeshGroupChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -66574,8 +66898,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 					voltstackClusterArAttributeMap["site_mesh_group_choice"] = types.ObjectNull(AzureVnetSiteSiteTypeVoltstackClusterArSiteMeshGroupChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> StorageClassChoice
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> StorageClassChoice
 				if voltstackClusterArElement.GetStorageClassChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					voltstackClusterArstorageClassChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -66721,8 +67044,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 		var azureVnetSiteVolterraSoftwareTypeModel = &AzureVnetSiteVolterraSoftwareType{}
 		swElement := specData.GetSw()
 
-		// resource specToModelNested RequiredOneOfField --> VolterraSwVersionChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> VolterraSwVersionChoice
 		if swElement.GetVolterraSwVersionChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			swvolterraSwVersionChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -66855,8 +67177,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 						existingVnetAttributeMap["resource_group"] = types.StringNull()
 					}
 
-					// resource specToModelNested RequiredOneOfField --> RoutingType
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> RoutingType
 					if existingVnetElement.GetRoutingType() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						existingVnetroutingTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -66932,8 +67253,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 				if isNewVnet && newVnetOptionsWrapper != nil && newVnetOptionsWrapper.NewVnet != nil {
 					newVnetElement := newVnetOptionsWrapper.NewVnet
 
-					// resource specToModelNested RequiredOneOfField --> NameChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> NameChoice
 					if newVnetElement.GetNameChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						newVnetnameChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -67038,8 +67358,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 		var azureVnetSiteLiveSignaturesUpdateModel = &AzureVnetSiteLiveSignaturesUpdate{}
 		wafSignaturesElement := specData.GetWafSignatures()
 
-		// resource specToModelNested RequiredOneOfField --> SignaturesUpdateModeChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> SignaturesUpdateModeChoice
 		if wafSignaturesElement.GetSignaturesUpdateModeChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			wafSignaturessignaturesUpdateModeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -67100,7 +67419,7 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 		data.WafSignatures = types.ObjectNull(AzureVnetSiteWafSignaturesModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> WorkerNodes
+	// resource SpecToModelRoot OneOfField --> WorkerNodes
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
@@ -67159,8 +67478,6 @@ func (r *ResourceF5XCAzureVnetSite) Update(ctx context.Context, request resource
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.WorkerNodesChoice = types.ObjectNull(AzureVnetSiteWorkerNodesModelAttributeMap)
 	}
 

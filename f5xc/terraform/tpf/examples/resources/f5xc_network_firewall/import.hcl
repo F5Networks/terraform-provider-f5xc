@@ -1,4 +1,4 @@
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_network_firewall.example"
+	to = f5xc_network_firewall.example
 }

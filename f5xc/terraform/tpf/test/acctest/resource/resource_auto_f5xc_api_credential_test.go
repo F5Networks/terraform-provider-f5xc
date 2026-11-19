@@ -129,13 +129,14 @@ func TestAccResourceAutoF5XCApiCredential_withRenewTrigger(t *testing.T) {
 
 // TestAccResourceAutoF5XCApiCredential_withKubeConfig exercises the KUBE_CONFIG
 // credential variant by supplying virtual_k8s_namespace and virtual_k8s_name
-// inside the spec block.
+// inside the spec block. Step 3 changes expiration_days so the in-place Update
+// path against the vK8s namespace is exercised, followed by a second import.
+//
+// Prerequisite: the target tenant must already contain the namespace
+// "terraform-acceptance-test" with a virtual_k8s named "test-vk8s"; the test does not
+// create them. Re-record VCR cassettes against a tenant that has both objects.
 func TestAccResourceAutoF5XCApiCredential_withKubeConfig(t *testing.T) {
 	t.Parallel()
-
-	if testAccIsCRTTenant() {
-		t.Skip("api_credential kube_config acceptance test is skipped on CRT due to known namespace drift after apply. This happens because api in crt is giving vk8s namespace as system instead of the one provided in the spec block.")
-	}
 
 	namespace := "system"
 	name := "ex-api-cred-" + testAccRunSuffix(t)
@@ -145,24 +146,26 @@ func TestAccResourceAutoF5XCApiCredential_withKubeConfig(t *testing.T) {
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config:           testAccResourceAutoF5XCApiCredentialConfig_withKubeConfig(name, namespace, "example-vk8s-namespace", "example-vk8s"),
+				Config:           testAccResourceAutoF5XCApiCredentialConfig_withKubeConfig(name, namespace, "terraform-acceptance-test", "test-vk8s", 30),
 				ConfigPlanChecks: testAccApiCredentialSensitivePlanChecks(),
+				Check:            testAccCheckApiCredentialVK8sState("terraform-acceptance-test", "30"),
 			},
 			{
 				ResourceName:      "f5xc_api_credential.example",
 				ImportState:       true,
 				ImportStateVerify: false,
-				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_api_credential.example", "namespace", "credential_name"),
+				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_api_credential.example", "spec.virtual_k8s_namespace", "credential_name"),
 			},
 			{
-				Config:           testAccResourceAutoF5XCApiCredentialConfig_withKubeConfig(name, namespace, "example-vk8s-namespace", "example-vk8s"),
+				Config:           testAccResourceAutoF5XCApiCredentialConfig_withKubeConfig(name, namespace, "terraform-acceptance-test", "test-vk8s", 60),
 				ConfigPlanChecks: testAccApiCredentialSensitivePlanChecks(),
+				Check:            testAccCheckApiCredentialVK8sState("terraform-acceptance-test", "60"),
 			},
 			{
 				ResourceName:      "f5xc_api_credential.example",
 				ImportState:       true,
 				ImportStateVerify: false,
-				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_api_credential.example", "namespace", "credential_name"),
+				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_api_credential.example", "spec.virtual_k8s_namespace", "credential_name"),
 			},
 		},
 	})
@@ -171,12 +174,12 @@ func TestAccResourceAutoF5XCApiCredential_withKubeConfig(t *testing.T) {
 // TestAccResourceAutoF5XCApiCredential_full exercises all supported optional
 // fields together: spec with password, virtual_k8s details, expiration_days,
 // and renew_trigger. Tests a full Create → Import → Update cycle.
+//
+// Prerequisite: the target tenant must already contain the namespace
+// "terraform-acceptance-test" with a virtual_k8s named "test-vk8s"; the test does not
+// create them. Re-record VCR cassettes against a tenant that has both objects.
 func TestAccResourceAutoF5XCApiCredential_full(t *testing.T) {
 	t.Parallel()
-
-	if testAccIsCRTTenant() {
-		t.Skip("api_credential full acceptance test is skipped on CRT due to known namespace drift after apply. This happens because api in crt is giving vk8s namespace as system instead of the one provided in the spec block.")
-	}
 
 	namespace := "system"
 	name := "ex-api-cred-" + testAccRunSuffix(t)
@@ -186,24 +189,26 @@ func TestAccResourceAutoF5XCApiCredential_full(t *testing.T) {
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config:           testAccResourceAutoF5XCApiCredentialConfig_full(name, namespace, "example-vk8s-namespace", "example-vk8s"),
+				Config:           testAccResourceAutoF5XCApiCredentialConfig_full(name, namespace, "terraform-acceptance-test", "test-vk8s"),
 				ConfigPlanChecks: testAccApiCredentialSensitivePlanChecks(),
+				Check:            testAccCheckApiCredentialVK8sState("terraform-acceptance-test", "60"),
 			},
 			{
 				ResourceName:      "f5xc_api_credential.example",
 				ImportState:       true,
 				ImportStateVerify: false,
-				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_api_credential.example", "namespace", "credential_name"),
+				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_api_credential.example", "spec.virtual_k8s_namespace", "credential_name"),
 			},
 			{
-				Config:           testAccResourceAutoF5XCApiCredentialConfig_fullUpdated(name, namespace, "example-vk8s-namespace", "example-vk8s"),
+				Config:           testAccResourceAutoF5XCApiCredentialConfig_fullUpdated(name, namespace, "terraform-acceptance-test", "test-vk8s"),
 				ConfigPlanChecks: testAccApiCredentialSensitivePlanChecks(),
+				Check:            testAccCheckApiCredentialVK8sState("terraform-acceptance-test", "90"),
 			},
 			{
 				ResourceName:      "f5xc_api_credential.example",
 				ImportState:       true,
 				ImportStateVerify: false,
-				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_api_credential.example", "namespace", "credential_name"),
+				ImportStateIdFunc: acctest.ImportStateIDWithFields("f5xc_api_credential.example", "spec.virtual_k8s_namespace", "credential_name"),
 			},
 		},
 	})
@@ -264,12 +269,25 @@ resource "f5xc_api_credential" "example" {
 `, namespace, name, renew)
 }
 
-func testAccResourceAutoF5XCApiCredentialConfig_withKubeConfig(name, namespace, vk8sNamespace, vk8sName string) string {
+// testAccCheckApiCredentialVK8sState verifies the state of a vK8s KUBE_CONFIG
+// f5xc_api_credential after apply: the root namespace stays "system" while the
+// credential lives in the vK8s namespace, and the backend credential_name is set.
+func testAccCheckApiCredentialVK8sState(vk8sNamespace, expirationDays string) resource.TestCheckFunc {
+	const addr = "f5xc_api_credential.example"
+	return resource.ComposeAggregateTestCheckFunc(
+		resource.TestCheckResourceAttr(addr, "namespace", "system"),
+		resource.TestCheckResourceAttrSet(addr, "credential_name"),
+		resource.TestCheckResourceAttr(addr, "spec.virtual_k8s_namespace", vk8sNamespace),
+		resource.TestCheckResourceAttr(addr, "expiration_days", expirationDays),
+	)
+}
+
+func testAccResourceAutoF5XCApiCredentialConfig_withKubeConfig(name, namespace, vk8sNamespace, vk8sName string, expirationDays int) string {
 	return fmt.Sprintf(`
 resource "f5xc_api_credential" "example" {
   namespace       = %q
   name            = %q
-  expiration_days = 30
+  expiration_days = %d
 
   spec = {
     type                   = ["KUBE_CONFIG"]
@@ -278,7 +296,7 @@ resource "f5xc_api_credential" "example" {
     virtual_k8s_name       = %q
   }
 }
-`, namespace, name, vk8sNamespace, vk8sName)
+`, namespace, name, expirationDays, vk8sNamespace, vk8sName)
 }
 
 func testAccResourceAutoF5XCApiCredentialConfig_full(name, namespace, vk8sNamespace, vk8sName string) string {

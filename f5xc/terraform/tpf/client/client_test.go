@@ -131,6 +131,31 @@ func TestProviderUserAgent(t *testing.T) {
 	}
 }
 
+func TestProviderUserAgentWithVersion(t *testing.T) {
+	t.Run("explicit-release-version", func(t *testing.T) {
+		ua := providerUserAgentWithVersion("1.8.2", "3.1.4")
+		if ua != "terraform/1.8.2 terraform-provider-f5xc/3.1.4" {
+			t.Fatalf("User-Agent = %q, want %q", ua, "terraform/1.8.2 terraform-provider-f5xc/3.1.4")
+		}
+	})
+
+	t.Run("explicit-version-with-v-prefix", func(t *testing.T) {
+		ua := providerUserAgentWithVersion("1.8.2", "v3.1.4")
+		if ua != "terraform/1.8.2 terraform-provider-f5xc/3.1.4" {
+			t.Fatalf("User-Agent = %q, want %q", ua, "terraform/1.8.2 terraform-provider-f5xc/3.1.4")
+		}
+	})
+
+	t.Run("fallback-on-empty-or-dev", func(t *testing.T) {
+		for _, configured := range []string{"", "dev", "  "} {
+			ua := providerUserAgentWithVersion(testTerraformVersion, configured)
+			if !strings.HasPrefix(ua, "terraform/1.5.7 terraform-provider-f5xc/") {
+				t.Fatalf("User-Agent(%q) = %q, want prefix terraform/1.5.7 terraform-provider-f5xc/", configured, ua)
+			}
+		}
+	})
+}
+
 // ---------------------------------------------------------------------------
 // NewAPITokenAuth
 // ---------------------------------------------------------------------------
@@ -572,21 +597,25 @@ func TestProviderConfig_Fields(t *testing.T) {
 		RespectRetryAfter: true,
 	}
 	cfg := &ProviderConfig{
-		Url:            "https://tenant.example.com",
-		Test:           false,
-		Vesenv:         true,
-		Timeout:        "30s",
-		Throttling:     throttling,
-		ApiCert:        "/path/to/cert",
-		ApiKey:         "/path/to/key",
-		ApiToken:       "my-api-token",
-		ApiCACert:      "/path/to/ca",
-		ApiP12File:     "/path/to/file.p12",
-		ApiP12Password: "p12-password",
+		Url:             "https://tenant.example.com",
+		Test:            false,
+		ProviderVersion: "2.1.0",
+		Vesenv:          true,
+		Timeout:         "30s",
+		Throttling:      throttling,
+		ApiCert:         "/path/to/cert",
+		ApiKey:          "/path/to/key",
+		ApiToken:        "my-api-token",
+		ApiCACert:       "/path/to/ca",
+		ApiP12File:      "/path/to/file.p12",
+		ApiP12Password:  "p12-password",
 	}
 
 	if cfg.Url != "https://tenant.example.com" {
 		t.Errorf("Url = %q", cfg.Url)
+	}
+	if cfg.ProviderVersion != "2.1.0" {
+		t.Errorf("ProviderVersion = %q", cfg.ProviderVersion)
 	}
 	if cfg.Timeout != "30s" {
 		t.Errorf("Timeout = %q", cfg.Timeout)

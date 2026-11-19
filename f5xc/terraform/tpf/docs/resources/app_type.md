@@ -117,7 +117,7 @@ resource "f5xc_app_type" "example" {
 Optional:
 
 - `discovered_api_settings` (Attributes) Discovered API Settings (see [below for nested schema](#nestedatt--business_logic_markup_setting--discovered_api_settings))
-- `learn_from_redirect_traffic_choice` (Attributes) Include or Exclude data in machine learning from traffic with redirect response in API Discovery By default, API Discovery only learns API Endpoints and patterns from traffic with response code 2xx On enabling this, the AI engine will learn API Endpoints from traffic with response code 3xx in addition to 2xx (see [below for nested schema](#nestedatt--business_logic_markup_setting--learn_from_redirect_traffic_choice))
+- `learn_from_redirect_traffic_choice` (Attributes) Include or Exclude data in machine learning from traffic with redirect response in API Discovery By default, API Discovery only learns API Endpoints and patterns from traffic with response code 2xx On enabling this, the AI engine will learn API Endpoints from traffic with response code 3xx in addition to 2xx<br>Exactly one of `disable` or `enable` must be specified when `learn_from_redirect_traffic_choice` is configured. (see [below for nested schema](#nestedatt--business_logic_markup_setting--learn_from_redirect_traffic_choice))
 
 <a id="nestedatt--business_logic_markup_setting--discovered_api_settings"></a>
 ### Nested Schema for `business_logic_markup_setting.discovered_api_settings`
@@ -132,8 +132,8 @@ Optional:
 
 Optional:
 
-- `disable` (Boolean) Disable learning from redirected request traffic Disable learning API patterns from traffic with redirect response codes 3xx
-- `enable` (Boolean) Enable learning from redirected request traffic Enable learning API patterns from traffic with redirect response codes 3xx
+- `disable` (Boolean) Disable learning from redirected request traffic Disable learning API patterns from traffic with redirect response codes 3xx<br>Conflicts with `enable`.
+- `enable` (Boolean) Enable learning from redirected request traffic Enable learning API patterns from traffic with redirect response codes 3xx<br>Conflicts with `disable`.
 
 
 
@@ -175,6 +175,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_app_type.example"
+	to = f5xc_app_type.example
 }
 ```

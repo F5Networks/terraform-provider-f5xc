@@ -82,20 +82,17 @@ resource "f5xc_cdn_loadbalancer" "example" {
 ### Required
 
 - `domains` (List of String) Domains A list of fully qualified domain names. The CDN Distribution will be setup for these FQDN name(s). [This can be a domain or a sub-domain]
-- `l7_ddos_auto_mitigation_action_choice` (Attributes) L7 DDoS Auto Mitigation Action Select an action for auto mitigation (see [below for nested schema](#nestedatt--l7_ddos_auto_mitigation_action_choice))
-- `loadbalancer_type_choice` (Attributes) Proxy choice CDN Distribution type can be 'http' or 'https' (see [below for nested schema](#nestedatt--loadbalancer_type_choice))
+- `loadbalancer_type_choice` (Attributes) Proxy choice CDN Distribution type can be 'http' or 'https'<br>Exactly one of `http`, `https`, or `https_auto_cert` must be specified. (see [below for nested schema](#nestedatt--loadbalancer_type_choice))
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
 - `origin_pool` (Attributes) Origin Pool (see [below for nested schema](#nestedatt--origin_pool))
-- `service_policy_choice` (Attributes) Service Policies Service policies provide the ability to configure security controls such as IP Allow/Deny lists, Geo IP filtering and Custom rules (see [below for nested schema](#nestedatt--service_policy_choice))
-- `slow_ddos_mitigation_choice` (Attributes) Slow DDoS Mitigation 'Slow and low' attacks tie up server resources, leaving none available for servicing requests from actual users.Configuration that protects origins from slow and low attacks. In the case HTTP loadbalancer, only default settings can be applied. For HTTPS load balancer, the request timeout and request headers timeout value can be customized. (see [below for nested schema](#nestedatt--slow_ddos_mitigation_choice))
-- `waf_choice` (Attributes) Enable the WAF (Web Application Firewall) functionality for VirtualHost F5 Distributed Cloud WAF is a next-gen web application firewall that provides signature-based and behavior-based threat detection to protect applications wherever they are deployed. WAF can be configured in Monitoring (log threats) or Blocking (log and block threats) mode. (see [below for nested schema](#nestedatt--waf_choice))
+- `service_policy_choice` (Attributes) Service Policies Service policies provide the ability to configure security controls such as IP Allow/Deny lists, Geo IP filtering and Custom rules<br>Exactly one of `active_service_policies`, `no_service_policies`, or `service_policies_from_namespace` must be specified. (see [below for nested schema](#nestedatt--service_policy_choice))
 
 ### Optional
 
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `blocked_clients` (Attributes List) Client Blocking Rules Define rules to block IP Prefixes or AS numbers. (see [below for nested schema](#nestedatt--blocked_clients))
-- `challenge_type_choice` (Attributes) Challenge Type Malicious User Mitigation is an adaptive response and risk-based challenge capability. Enabling this feature would automatically serve different challenges such as JavaScript challenge, Captcha challenge or block temporarily based on the threat level of the malicious user. Policy based challenge can be used to selectively enable or disable JavaScript or Captcha challenge on a specific client and request match criteria (see [below for nested schema](#nestedatt--challenge_type_choice))
+- `challenge_type_choice` (Attributes) Challenge Type Malicious User Mitigation is an adaptive response and risk-based challenge capability. Enabling this feature would automatically serve different challenges such as JavaScript challenge, Captcha challenge or block temporarily based on the threat level of the malicious user. Policy based challenge can be used to selectively enable or disable JavaScript or Captcha challenge on a specific client and request match criteria<br>Exactly one of `captcha_challenge`, `enable_challenge`, `js_challenge`, `no_challenge`, or `policy_based_challenge` must be specified when `challenge_type_choice` is configured. (see [below for nested schema](#nestedatt--challenge_type_choice))
 - `cors_policy` (Attributes) cors_policy Cross-Origin Resource Sharing requests configuration CORS is a mechanism that uses additional HTTP headers to tell a browser to let a web application running at one origin (domain) have permission to access selected resources from a server at a different origin (see [below for nested schema](#nestedatt--cors_policy))
 - `csrf_policy` (Attributes) csrf_policy Cross-Site Request Forgery (CSRF) is an attack that occurs when a malicious third-party website exploits a vulnerability thats allows them to submit an undesired request on user's behalf. The policy checks where a request is coming from to determine if the request's origin is the same as its destination. The policy relies on two pieces of information used in determining if a request originated from the same host. 1. The origin that caused the user agent to issue the request (source origin). 2. The origin that the request is going to (target origin). When the policy evaluating a request, it ensures both pieces of information are present and compare their values. If the source origin is missing or origins do not match the request is rejected. The exception to this being the source-origin has been added to the policy as valid. Because CSRF attacks specifically target state-changing requests, the policy only acts on the HTTP requests that have state-changing method (PUT,POST, etc.). (see [below for nested schema](#nestedatt--csrf_policy))
 - `custom_cache_rule` (Attributes) Custom Cache Rules Caching policies for CDN. (see [below for nested schema](#nestedatt--custom_cache_rule))
@@ -105,16 +102,19 @@ resource "f5xc_cdn_loadbalancer" "example" {
 - `description` (String) description Human readable description for the object
 - `graphql_rules` (Attributes List) GraphQL Inspection GraphQL is a query language and server-side runtime for APIs which provides a complete and understandable description of the data in API. GraphQL gives clients the power to ask for exactly what they need, makes it easier to evolve APIs over time, and enables powerful developer tools. Policy configuration to analyze GraphQL queries and prevent GraphQL tailored attacks. (see [below for nested schema](#nestedatt--graphql_rules))
 - `host_name` (String) host name Internally generated host name to be used for the virtual host<br>**Default:** ``
-- `ip_reputation_choice` (Attributes) ip_reputation IP reputation service analyzes IP threats and publishes a dynamic data set of millions of high-risk IP addresses, to protect users from inbound traffic from malicious IPs. IP threat categories include Spam Sources, Windows Exploits, Web Attacks, BotNets, Scanners, Denial of Service, Reputation, Phishing, Proxy, Mobile Threats, and TOR Proxy. (see [below for nested schema](#nestedatt--ip_reputation_choice))
+- `ip_reputation_choice` (Attributes) ip_reputation IP reputation service analyzes IP threats and publishes a dynamic data set of millions of high-risk IP addresses, to protect users from inbound traffic from malicious IPs. IP threat categories include Spam Sources, Windows Exploits, Web Attacks, BotNets, Scanners, Denial of Service, Reputation, Phishing, Proxy, Mobile Threats, and TOR Proxy.<br>Exactly one of `disable_ip_reputation` or `enable_ip_reputation` must be specified when `ip_reputation_choice` is configured. (see [below for nested schema](#nestedatt--ip_reputation_choice))
 - `jwt_validation` (Attributes) JWT Validation JWT Validation stops JWT replay attacks and JWT tampering by cryptographically verifying incoming JWTs before they are passed to origin APIs. JWT Validation will also stop requests with expired tokens or tokens that are not yet valid. (see [below for nested schema](#nestedatt--jwt_validation))
+- `l7_ddos_auto_mitigation_action_choice` (Attributes) L7 DDoS Auto Mitigation Action Select an action for auto mitigation<br>Exactly one of `l7_ddos_action_block`, `l7_ddos_action_default`, or `l7_ddos_action_js_challenge` must be specified when `l7_ddos_auto_mitigation_action_choice` is configured. (see [below for nested schema](#nestedatt--l7_ddos_auto_mitigation_action_choice))
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
-- `malicious_user_detection_choice` (Attributes) Malicious User Detection Choice Malicious User Detection performs user behavior analysis and assigns a risk score and threat level of low, medium or high based on the suspicious activity of the user. The risk score of the user is decayed over time, if no further suspicious activity is noticed. The feature can be configured also via external app_type and labeling this HTTP Load Balancer. In this case external app_type configuration overrides internally disabled feature. Enabling the feature internally is allowed only when no labeling to external app_type. (see [below for nested schema](#nestedatt--malicious_user_detection_choice))
+- `malicious_user_detection_choice` (Attributes) Malicious User Detection Choice Malicious User Detection performs user behavior analysis and assigns a risk score and threat level of low, medium or high based on the suspicious activity of the user. The risk score of the user is decayed over time, if no further suspicious activity is noticed. The feature can be configured also via external app_type and labeling this HTTP Load Balancer. In this case external app_type configuration overrides internally disabled feature. Enabling the feature internally is allowed only when no labeling to external app_type.<br>Exactly one of `disable_malicious_user_detection` or `enable_malicious_user_detection` must be specified when `malicious_user_detection_choice` is configured. (see [below for nested schema](#nestedatt--malicious_user_detection_choice))
 - `other_settings` (Attributes) Other Settings (see [below for nested schema](#nestedatt--other_settings))
 - `protected_cookies` (Attributes List) Cookie protection Allows setting attributes (SameSite, Secure, and HttpOnly) on cookies in responses. Cookie Tampering Protection prevents attackers from modifying the value of session cookies. For Cookie Tampering Protection, enabling a web app firewall (WAF) is a prerequisite. The configured mode of WAF (monitoring or blocking) will be enforced on the request when cookie tampering is identified. Note: We recommend enabling Secure and HttpOnly attributes along with cookie tampering protection. (see [below for nested schema](#nestedatt--protected_cookies))
-- `rate_limit_choice` (Attributes) Enable Rate Limiting Rate Limiting allows you to control the rate of requests sent to your origin servers, protect against API traffic surge and denial of services attacks. (see [below for nested schema](#nestedatt--rate_limit_choice))
+- `rate_limit_choice` (Attributes) Enable Rate Limiting Rate Limiting allows you to control the rate of requests sent to your origin servers, protect against API traffic surge and denial of services attacks.<br>Exactly one of `api_rate_limit`, `disable_rate_limit`, or `rate_limit` must be specified when `rate_limit_choice` is configured. (see [below for nested schema](#nestedatt--rate_limit_choice))
+- `slow_ddos_mitigation_choice` (Attributes) Slow DDoS Mitigation 'Slow and low' attacks tie up server resources, leaving none available for servicing requests from actual users.Configuration that protects origins from slow and low attacks. In the case HTTP loadbalancer, only default settings can be applied. For HTTPS load balancer, the request timeout and request headers timeout value can be customized.<br>Exactly one of `slow_ddos_mitigation` or `system_default_timeouts` must be specified when `slow_ddos_mitigation_choice` is configured. (see [below for nested schema](#nestedatt--slow_ddos_mitigation_choice))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 - `trusted_clients` (Attributes List) Trusted Client Rules Define rules to skip processing of one or more features such as WAF, Bot Defense etc. for clients. (see [below for nested schema](#nestedatt--trusted_clients))
-- `user_id_choice` (Attributes) User Identifier Select user identifier for rate limiting and malicious user mitigation. (see [below for nested schema](#nestedatt--user_id_choice))
+- `user_id_choice` (Attributes) User Identifier Select user identifier for rate limiting and malicious user mitigation.<br>Exactly one of `user_id_client_ip` or `user_identification` must be specified when `user_id_choice` is configured. (see [below for nested schema](#nestedatt--user_id_choice))
+- `waf_choice` (Attributes) Enable the WAF (Web Application Firewall) functionality for VirtualHost F5 Distributed Cloud WAF is a next-gen web application firewall that provides signature-based and behavior-based threat detection to protect applications wherever they are deployed. WAF can be configured in Monitoring (log threats) or Blocking (log and block threats) mode.<br>Exactly one of `app_firewall` or `disable_waf` must be specified when `waf_choice` is configured. (see [below for nested schema](#nestedatt--waf_choice))
 - `waf_exclusion` (Attributes) WAF Exclusion Define the Signatures, Violations, Attack Types, and Bot Names that should be excluded from WAF processing for HTTP requests matching specific domain, path, and method criteria. The WAF Exclusion is evaluated sequentially and can only be matched once per request. (see [below for nested schema](#nestedatt--waf_exclusion))
 
 ### Read-Only
@@ -125,34 +125,14 @@ resource "f5xc_cdn_loadbalancer" "example" {
 - `service_domains` (Attributes List) Service Domains CNAME provided from service per domain (see [below for nested schema](#nestedatt--service_domains))
 - `uid` (String) uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.
 
-<a id="nestedatt--l7_ddos_auto_mitigation_action_choice"></a>
-### Nested Schema for `l7_ddos_auto_mitigation_action_choice`
-
-Optional:
-
-- `l7_ddos_action_block` (Boolean) block Block suspicious sources
-- `l7_ddos_action_default` (Boolean) Default Block suspicious sources
-- `l7_ddos_action_js_challenge` (Attributes) JavaScript Challenge Serve JavaScript challenge to suspicious sources (see [below for nested schema](#nestedatt--l7_ddos_auto_mitigation_action_choice--l7_ddos_action_js_challenge))
-
-<a id="nestedatt--l7_ddos_auto_mitigation_action_choice--l7_ddos_action_js_challenge"></a>
-### Nested Schema for `l7_ddos_auto_mitigation_action_choice.l7_ddos_action_js_challenge`
-
-Optional:
-
-- `cookie_expiry` (Number) cookie_expiry Cookie expiration period, in seconds. An expired cookie causes the loadbalancer to issue a new challenge.<br>**Default:** `3600`
-- `custom_page` (String) custom_page Custom message is of type uri_ref. Currently supported URL schemes is string:///. For string:/// scheme, message needs to be encoded in Base64 format. You can specify this message as base64 encoded plain text message e.g. 'Please Wait..' or it can be HTML paragraph or a body string encoded as base64 string E.g. '<p> Please Wait </p>'. Base64 encoded string for this html is 'PHA+IFBsZWFzZSBXYWl0IDwvcD4='<br>**Validation:** `Length LengthAtMost(65536)`
-- `js_script_delay` (Number) js_script_delay Delay introduced by Javascript, in milliseconds.<br>**Default:** `5000`
-
-
-
 <a id="nestedatt--loadbalancer_type_choice"></a>
 ### Nested Schema for `loadbalancer_type_choice`
 
 Optional:
 
-- `http` (Attributes) HTTP CDN Distribution serving content over HTTP (see [below for nested schema](#nestedatt--loadbalancer_type_choice--http))
-- `https` (Attributes) HTTPS CDN Distribution with a custom public/private certificate. This is also known as BYOC (Bring Your Own Certificate). User is responsible for managing DNS. (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https))
-- `https_auto_cert` (Attributes) HTTPS HTTPS based CDN Distribution serving with automatic public certificate provisioning. This requires the domains to be delegated to F5XC using Delegated Domain feature. DNS records will be managed by Volterra. (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https_auto_cert))
+- `http` (Attributes) HTTP CDN Distribution serving content over HTTP<br>Conflicts with `https` and `https_auto_cert`. (see [below for nested schema](#nestedatt--loadbalancer_type_choice--http))
+- `https` (Attributes) HTTPS CDN Distribution with a custom public/private certificate. This is also known as BYOC (Bring Your Own Certificate). User is responsible for managing DNS.<br>Conflicts with `http` and `https_auto_cert`. (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https))
+- `https_auto_cert` (Attributes) HTTPS HTTPS based CDN Distribution serving with automatic public certificate provisioning. This requires the domains to be delegated to F5XC using Delegated Domain feature. DNS records will be managed by Volterra.<br>Conflicts with `http` and `https`. (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https_auto_cert))
 
 <a id="nestedatt--loadbalancer_type_choice--http"></a>
 ### Nested Schema for `loadbalancer_type_choice.http`
@@ -176,15 +156,15 @@ Optional:
 
 Required:
 
-- `tls_certificates_choice` (Attributes) TLS Configuration TLS Certificate Configuration for downstream connections (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice))
+- `tls_certificates_choice` (Attributes) TLS Configuration TLS Certificate Configuration for downstream connections<br>Exactly one of `tls_cert_params` or `tls_inline_params` must be specified. (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice))
 
 <a id="nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice"></a>
 ### Nested Schema for `loadbalancer_type_choice.https.tls_cert_options.tls_certificates_choice`
 
 Optional:
 
-- `tls_cert_params` (Attributes) TLS Certificates Select/Add one or more TLS Certificate objects to associate with this Load Balancer (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_cert_params))
-- `tls_inline_params` (Attributes) Inline TLS Parameters (legacy) Upload a TLS certificate covering all domain names for this Load Balancer (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_inline_params))
+- `tls_cert_params` (Attributes) TLS Certificates Select/Add one or more TLS Certificate objects to associate with this Load Balancer<br>Conflicts with `tls_inline_params`. (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_cert_params))
+- `tls_inline_params` (Attributes) Inline TLS Parameters (legacy) Upload a TLS certificate covering all domain names for this Load Balancer<br>Conflicts with `tls_cert_params`. (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_inline_params))
 
 <a id="nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_cert_params"></a>
 ### Nested Schema for `loadbalancer_type_choice.https.tls_cert_options.tls_certificates_choice.tls_cert_params`
@@ -213,19 +193,19 @@ Read-Only:
 <a id="nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_cert_params--tls_config"></a>
 ### Nested Schema for `loadbalancer_type_choice.https.tls_cert_options.tls_certificates_choice.tls_cert_params.tls_config`
 
-Required:
+Optional:
 
-- `choice` (Attributes) TLS Security Level The security level for TLS handshake between client/server and the platform. (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_cert_params--tls_config--choice))
+- `choice` (Attributes) TLS Security Level The security level for TLS handshake between client/server and the platform.<br>Exactly one of `custom_security`, `default_security`, `low_security`, or `medium_security` must be specified when `choice` is configured. (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_cert_params--tls_config--choice))
 
 <a id="nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_cert_params--tls_config--choice"></a>
 ### Nested Schema for `loadbalancer_type_choice.https.tls_cert_options.tls_certificates_choice.tls_cert_params.tls_config.choice`
 
 Optional:
 
-- `custom_security` (Attributes) Custom Security Custom selection of TLS versions and cipher suites (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_cert_params--tls_config--choice--custom_security))
-- `default_security` (Boolean) Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.
-- `low_security` (Boolean) Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.
-- `medium_security` (Boolean) Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.
+- `custom_security` (Attributes) Custom Security Custom selection of TLS versions and cipher suites<br>Conflicts with `default_security`, `low_security`, and `medium_security`. (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_cert_params--tls_config--choice--custom_security))
+- `default_security` (Boolean) Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.<br>Conflicts with `custom_security`, `low_security`, and `medium_security`.
+- `low_security` (Boolean) Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.<br>Conflicts with `custom_security`, `default_security`, and `medium_security`.
+- `medium_security` (Boolean) Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.<br>Conflicts with `custom_security`, `default_security`, and `low_security`.
 
 <a id="nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_cert_params--tls_config--choice--custom_security"></a>
 ### Nested Schema for `loadbalancer_type_choice.https.tls_cert_options.tls_certificates_choice.tls_cert_params.tls_config.choice.custom_security`
@@ -265,23 +245,23 @@ Required:
 Optional:
 
 - `description` (String) description Description for the certificate
-- `ocsp_stapling_choice` (Attributes) OCSP Response choice OCSP Stapling choice (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_inline_params--tls_certificates--ocsp_stapling_choice))
+- `ocsp_stapling_choice` (Attributes) OCSP Response choice OCSP Stapling choice<br>Exactly one of `custom_hash_algorithms`, `disable_ocsp_stapling`, or `use_system_defaults` must be specified when `ocsp_stapling_choice` is configured. (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_inline_params--tls_certificates--ocsp_stapling_choice))
 
 <a id="nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_inline_params--tls_certificates--private_key"></a>
 ### Nested Schema for `loadbalancer_type_choice.https.tls_cert_options.tls_certificates_choice.tls_inline_params.tls_certificates.private_key`
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_inline_params--tls_certificates--private_key--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_inline_params--tls_certificates--private_key--secret_info_choice))
 
 <a id="nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_inline_params--tls_certificates--private_key--secret_info_choice"></a>
 ### Nested Schema for `loadbalancer_type_choice.https.tls_cert_options.tls_certificates_choice.tls_inline_params.tls_certificates.private_key.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_inline_params--tls_certificates--private_key--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_inline_params--tls_certificates--private_key--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_inline_params--tls_certificates--private_key--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_inline_params--tls_certificates--private_key--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_inline_params--tls_certificates--private_key--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `loadbalancer_type_choice.https.tls_cert_options.tls_certificates_choice.tls_inline_params.tls_certificates.private_key.secret_info_choice.blindfold_secret_info`
@@ -315,9 +295,9 @@ Optional:
 
 Optional:
 
-- `custom_hash_algorithms` (Attributes) Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_inline_params--tls_certificates--ocsp_stapling_choice--custom_hash_algorithms))
-- `disable_ocsp_stapling` (Boolean) Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.
-- `use_system_defaults` (Boolean) Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.
+- `custom_hash_algorithms` (Attributes) Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.<br>Conflicts with `disable_ocsp_stapling` and `use_system_defaults`. (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_inline_params--tls_certificates--ocsp_stapling_choice--custom_hash_algorithms))
+- `disable_ocsp_stapling` (Boolean) Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.<br>Conflicts with `custom_hash_algorithms` and `use_system_defaults`.
+- `use_system_defaults` (Boolean) Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.<br>Conflicts with `custom_hash_algorithms` and `disable_ocsp_stapling`.
 
 <a id="nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_inline_params--tls_certificates--ocsp_stapling_choice--custom_hash_algorithms"></a>
 ### Nested Schema for `loadbalancer_type_choice.https.tls_cert_options.tls_certificates_choice.tls_inline_params.tls_certificates.ocsp_stapling_choice.custom_hash_algorithms`
@@ -332,19 +312,19 @@ Required:
 <a id="nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_inline_params--tls_config"></a>
 ### Nested Schema for `loadbalancer_type_choice.https.tls_cert_options.tls_certificates_choice.tls_inline_params.tls_config`
 
-Required:
+Optional:
 
-- `choice` (Attributes) TLS Security Level The security level for TLS handshake between client/server and the platform. (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_inline_params--tls_config--choice))
+- `choice` (Attributes) TLS Security Level The security level for TLS handshake between client/server and the platform.<br>Exactly one of `custom_security`, `default_security`, `low_security`, or `medium_security` must be specified when `choice` is configured. (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_inline_params--tls_config--choice))
 
 <a id="nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_inline_params--tls_config--choice"></a>
 ### Nested Schema for `loadbalancer_type_choice.https.tls_cert_options.tls_certificates_choice.tls_inline_params.tls_config.choice`
 
 Optional:
 
-- `custom_security` (Attributes) Custom Security Custom selection of TLS versions and cipher suites (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_inline_params--tls_config--choice--custom_security))
-- `default_security` (Boolean) Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.
-- `low_security` (Boolean) Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.
-- `medium_security` (Boolean) Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.
+- `custom_security` (Attributes) Custom Security Custom selection of TLS versions and cipher suites<br>Conflicts with `default_security`, `low_security`, and `medium_security`. (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_inline_params--tls_config--choice--custom_security))
+- `default_security` (Boolean) Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.<br>Conflicts with `custom_security`, `low_security`, and `medium_security`.
+- `low_security` (Boolean) Low Security TLS v1.0+ including non-PFS ciphers and weak crypto algorithms.<br>Conflicts with `custom_security`, `default_security`, and `medium_security`.
+- `medium_security` (Boolean) Medium Security TLS v1.0+ with PFS ciphers and medium strength crypto algorithms.<br>Conflicts with `custom_security`, `default_security`, and `low_security`.
 
 <a id="nestedatt--loadbalancer_type_choice--https--tls_cert_options--tls_certificates_choice--tls_inline_params--tls_config--choice--custom_security"></a>
 ### Nested Schema for `loadbalancer_type_choice.https.tls_cert_options.tls_certificates_choice.tls_inline_params.tls_config.choice.custom_security`
@@ -377,17 +357,17 @@ Optional:
 <a id="nestedatt--loadbalancer_type_choice--https_auto_cert--tls_config"></a>
 ### Nested Schema for `loadbalancer_type_choice.https_auto_cert.tls_config`
 
-Required:
+Optional:
 
-- `choice` (Attributes) TLS Security Level The security level for TLS handshake between client/server and the platform. (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https_auto_cert--tls_config--choice))
+- `choice` (Attributes) TLS Security Level The security level for TLS handshake between client/server and the platform.<br>Exactly one of `tls_11_plus` or `tls_12_plus` must be specified when `choice` is configured. (see [below for nested schema](#nestedatt--loadbalancer_type_choice--https_auto_cert--tls_config--choice))
 
 <a id="nestedatt--loadbalancer_type_choice--https_auto_cert--tls_config--choice"></a>
 ### Nested Schema for `loadbalancer_type_choice.https_auto_cert.tls_config.choice`
 
 Optional:
 
-- `tls_11_plus` (Boolean) Medium Security TLS v1.1+ with PFS ciphers and medium strength crypto algorithms.
-- `tls_12_plus` (Boolean) Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.
+- `tls_11_plus` (Boolean) Medium Security TLS v1.1+ with PFS ciphers and medium strength crypto algorithms.<br>Conflicts with `tls_12_plus`.
+- `tls_12_plus` (Boolean) Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.<br>Conflicts with `tls_11_plus`.
 
 
 
@@ -399,20 +379,20 @@ Optional:
 Required:
 
 - `origin_servers` (Attributes List) List of Origin Servers List of original servers (see [below for nested schema](#nestedatt--origin_pool--origin_servers))
-- `tls_choice` (Attributes) Enable TLS Choice to enable TLS for origin servers (see [below for nested schema](#nestedatt--origin_pool--tls_choice))
 
 Optional:
 
 - `more_origin_options` (Attributes) Advanced Configuration (see [below for nested schema](#nestedatt--origin_pool--more_origin_options))
 - `origin_request_timeout` (String) Origin Request Timeout Configures the time after which a request to the origin will time out waiting for a response<br>**Default:** `60s`
 - `public_name` (Attributes) OriginServerPublicName The DNS name to be used as the host header for the request to the origin server (see [below for nested schema](#nestedatt--origin_pool--public_name))
+- `tls_choice` (Attributes) Enable TLS Choice to enable TLS for origin servers<br>Exactly one of `no_tls` or `use_tls` must be specified when `tls_choice` is configured. (see [below for nested schema](#nestedatt--origin_pool--tls_choice))
 
 <a id="nestedatt--origin_pool--origin_servers"></a>
 ### Nested Schema for `origin_pool.origin_servers`
 
 Required:
 
-- `choice` (Attributes) Origin Server Type Various options to specify origin server (see [below for nested schema](#nestedatt--origin_pool--origin_servers--choice))
+- `choice` (Attributes) Origin Server Type Various options to specify origin server<br>Exactly one of `public_ip` or `public_name` must be specified. (see [below for nested schema](#nestedatt--origin_pool--origin_servers--choice))
 
 Optional:
 
@@ -423,15 +403,15 @@ Optional:
 
 Optional:
 
-- `public_ip` (Attributes) OriginServerPublicName Specify origin server with public IP (see [below for nested schema](#nestedatt--origin_pool--origin_servers--choice--public_ip))
-- `public_name` (Attributes) OriginServerPublicName Specify origin server with public DNS name (see [below for nested schema](#nestedatt--origin_pool--origin_servers--choice--public_name))
+- `public_ip` (Attributes) OriginServerPublicName Specify origin server with public IP<br>Conflicts with `public_name`. (see [below for nested schema](#nestedatt--origin_pool--origin_servers--choice--public_ip))
+- `public_name` (Attributes) OriginServerPublicName Specify origin server with public DNS name<br>Conflicts with `public_ip`. (see [below for nested schema](#nestedatt--origin_pool--origin_servers--choice--public_name))
 
 <a id="nestedatt--origin_pool--origin_servers--choice--public_ip"></a>
 ### Nested Schema for `origin_pool.origin_servers.choice.public_ip`
 
 Required:
 
-- `public_ip_choice` (Attributes) Public IP Choice Origin server public IP - either V4 or V6 (see [below for nested schema](#nestedatt--origin_pool--origin_servers--choice--public_ip--public_ip_choice))
+- `public_ip_choice` (Attributes) Public IP Choice Origin server public IP - either V4 or V6<br>`ip` must be specified. (see [below for nested schema](#nestedatt--origin_pool--origin_servers--choice--public_ip--public_ip_choice))
 
 <a id="nestedatt--origin_pool--origin_servers--choice--public_ip--public_ip_choice"></a>
 ### Nested Schema for `origin_pool.origin_servers.choice.public_ip.public_ip_choice`
@@ -456,15 +436,6 @@ Optional:
 
 
 
-<a id="nestedatt--origin_pool--tls_choice"></a>
-### Nested Schema for `origin_pool.tls_choice`
-
-Optional:
-
-- `no_tls` (Boolean) No TLS Origin servers do not use TLS
-- `use_tls` (Boolean) Use TLS Origin servers use TLS
-
-
 <a id="nestedatt--origin_pool--more_origin_options"></a>
 ### Nested Schema for `origin_pool.more_origin_options`
 
@@ -486,15 +457,24 @@ Optional:
 - `refresh_interval` (Number) refresh_interval Interval for DNS refresh in seconds. Max value is 7 days as per https://datatracker.ietf.org/doc/html/rfc8767<br>**Default:** `300`
 
 
+<a id="nestedatt--origin_pool--tls_choice"></a>
+### Nested Schema for `origin_pool.tls_choice`
+
+Optional:
+
+- `no_tls` (Boolean) No TLS Origin servers do not use TLS<br>Conflicts with `use_tls`.
+- `use_tls` (Boolean) Use TLS Origin servers use TLS<br>Conflicts with `no_tls`.
+
+
 
 <a id="nestedatt--service_policy_choice"></a>
 ### Nested Schema for `service_policy_choice`
 
 Optional:
 
-- `active_service_policies` (Attributes) Apply Specified Service Policies Apply the specified list of service policies and bypass the namespace service policy set (see [below for nested schema](#nestedatt--service_policy_choice--active_service_policies))
-- `no_service_policies` (Boolean) Do Not Apply Service Policies Do not apply any service policies i.e. bypass the namespace service policy set
-- `service_policies_from_namespace` (Boolean) Apply Namespace Service Policies Apply the active service policies configured as part of the namespace service policy set
+- `active_service_policies` (Attributes) Apply Specified Service Policies Apply the specified list of service policies and bypass the namespace service policy set<br>Conflicts with `no_service_policies` and `service_policies_from_namespace`. (see [below for nested schema](#nestedatt--service_policy_choice--active_service_policies))
+- `no_service_policies` (Boolean) Do Not Apply Service Policies Do not apply any service policies i.e. bypass the namespace service policy set<br>Conflicts with `active_service_policies` and `service_policies_from_namespace`.
+- `service_policies_from_namespace` (Boolean) Apply Namespace Service Policies Apply the active service policies configured as part of the namespace service policy set<br>Conflicts with `active_service_policies` and `no_service_policies`.
 
 <a id="nestedatt--service_policy_choice--active_service_policies"></a>
 ### Nested Schema for `service_policy_choice.active_service_policies`
@@ -518,65 +498,13 @@ Read-Only:
 
 
 
-<a id="nestedatt--slow_ddos_mitigation_choice"></a>
-### Nested Schema for `slow_ddos_mitigation_choice`
-
-Optional:
-
-- `slow_ddos_mitigation` (Attributes) Slow DDoS Mitigation Custom Settings for Slow DDoS Mitigation (see [below for nested schema](#nestedatt--slow_ddos_mitigation_choice--slow_ddos_mitigation))
-- `system_default_timeouts` (Boolean) System Default Settings Default Settings for Slow DDoS Mitigation
-
-<a id="nestedatt--slow_ddos_mitigation_choice--slow_ddos_mitigation"></a>
-### Nested Schema for `slow_ddos_mitigation_choice.slow_ddos_mitigation`
-
-Required:
-
-- `request_timeout_choice` (Attributes) Total Request Timeout The amount of time allowed for the entire request stream to be received from the client, in milliseconds. The stream is terminated with a HTTP 408 (Request Timeout) error code if request has not been completed. The default value is 60000 milliseconds. This setting provides protection against Slow POST attacks. (see [below for nested schema](#nestedatt--slow_ddos_mitigation_choice--slow_ddos_mitigation--request_timeout_choice))
-
-Optional:
-
-- `request_headers_timeout` (Number) Request Headers Timeout The amount of time the client has to send only the headers on the request stream before the stream is cancelled. The default value is 10000 milliseconds. This setting provides protection against Slowloris attacks.<br>**Default:** `10000`
-
-<a id="nestedatt--slow_ddos_mitigation_choice--slow_ddos_mitigation--request_timeout_choice"></a>
-### Nested Schema for `slow_ddos_mitigation_choice.slow_ddos_mitigation.request_timeout_choice`
-
-Optional:
-
-- `disable_request_timeout` (Boolean) No Timeout
-- `request_timeout` (Number) Custom Timeout
-
-
-
-
-<a id="nestedatt--waf_choice"></a>
-### Nested Schema for `waf_choice`
-
-Optional:
-
-- `app_firewall` (Attributes) Application Firewall for All Requests Enable WAF configuration for all requests in this distribution (see [below for nested schema](#nestedatt--waf_choice--app_firewall))
-- `disable_waf` (Boolean) Disable WAF No WAF configuration for this load balancer
-
-<a id="nestedatt--waf_choice--app_firewall"></a>
-### Nested Schema for `waf_choice.app_firewall`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-
 <a id="nestedatt--blocked_clients"></a>
 ### Nested Schema for `blocked_clients`
 
 Required:
 
 - `actions` (List of String) actions Actions that should be taken when client identifier matches the rule<br>**Valid Options:** `['SKIP_PROCESSING_API_PROTECTION', 'SKIP_PROCESSING_BOT', 'SKIP_PROCESSING_DDOS_PROTECTION', 'SKIP_PROCESSING_IP_REPUTATION', 'SKIP_PROCESSING_MALWARE_PROTECTION', 'SKIP_PROCESSING_MUM', 'SKIP_PROCESSING_OAS_VALIDATION', 'SKIP_PROCESSING_THREAT_MESH', 'SKIP_PROCESSING_WAF']` (Multiple selection allowed)
-- `client_source_choice` (Attributes) Client Identifier Client identifier that should be used for the client rule (see [below for nested schema](#nestedatt--blocked_clients--client_source_choice))
+- `client_source_choice` (Attributes) Client Identifier Client identifier that should be used for the client rule<br>Exactly one of `as_number`, `http_header`, `ip_prefix`, `ipv6_prefix`, or `user_identifier` must be specified. (see [below for nested schema](#nestedatt--blocked_clients--client_source_choice))
 - `metadata` (Attributes) metadata Common attributes for the rule including name and description. (see [below for nested schema](#nestedatt--blocked_clients--metadata))
 
 Optional:
@@ -588,11 +516,11 @@ Optional:
 
 Optional:
 
-- `as_number` (Number) as number RFC 6793 defined 4-byte AS number
-- `http_header` (Attributes) HTTP Header Request header name and value pairs (see [below for nested schema](#nestedatt--blocked_clients--client_source_choice--http_header))
-- `ip_prefix` (String) ip prefix IPv4 prefix string.
-- `ipv6_prefix` (String) ipv6 prefix IPv6 prefix string.
-- `user_identifier` (String) user identifier Identify user based on user identifier. User identifier value needs to be copied from security event.<br>**Validation:** `Length LengthAtMost(256)`
+- `as_number` (Number) as number RFC 6793 defined 4-byte AS number<br>Conflicts with `http_header`, `ip_prefix`, `ipv6_prefix`, and `user_identifier`.
+- `http_header` (Attributes) HTTP Header Request header name and value pairs<br>Conflicts with `as_number`, `ip_prefix`, `ipv6_prefix`, and `user_identifier`. (see [below for nested schema](#nestedatt--blocked_clients--client_source_choice--http_header))
+- `ip_prefix` (String) ip prefix IPv4 prefix string.<br>Conflicts with `as_number`, `http_header`, `ipv6_prefix`, and `user_identifier`.
+- `ipv6_prefix` (String) ipv6 prefix IPv6 prefix string.<br>Conflicts with `as_number`, `http_header`, `ip_prefix`, and `user_identifier`.
+- `user_identifier` (String) user identifier Identify user based on user identifier. User identifier value needs to be copied from security event.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `as_number`, `http_header`, `ip_prefix`, and `ipv6_prefix`.
 
 <a id="nestedatt--blocked_clients--client_source_choice--http_header"></a>
 ### Nested Schema for `blocked_clients.client_source_choice.http_header`
@@ -611,16 +539,16 @@ Required:
 Optional:
 
 - `invert_match` (Boolean) invert_match Invert the result of the match to detect missing header or non-matching value<br>**Default:** `false`
-- `value_match_choice` (Attributes) value_match The variants of matching a header value (see [below for nested schema](#nestedatt--blocked_clients--client_source_choice--http_header--headers--value_match_choice))
+- `value_match_choice` (Attributes) value_match The variants of matching a header value<br>Exactly one of `exact`, `presence`, or `regex` must be specified when `value_match_choice` is configured. (see [below for nested schema](#nestedatt--blocked_clients--client_source_choice--http_header--headers--value_match_choice))
 
 <a id="nestedatt--blocked_clients--client_source_choice--http_header--headers--value_match_choice"></a>
 ### Nested Schema for `blocked_clients.client_source_choice.http_header.headers.value_match_choice`
 
 Optional:
 
-- `exact` (String) exact Header value to match exactly
-- `presence` (Boolean) presence If true, check for presence of header
-- `regex` (String) regex Regex match of the header value in re2 format
+- `exact` (String) exact Header value to match exactly<br>Conflicts with `presence` and `regex`.
+- `presence` (Boolean) presence If true, check for presence of header<br>Conflicts with `exact` and `regex`.
+- `regex` (String) regex Regex match of the header value in re2 format<br>Conflicts with `exact` and `presence`.
 
 
 
@@ -644,11 +572,11 @@ Optional:
 
 Optional:
 
-- `captcha_challenge` (Attributes) Captcha Challenge Configure Captcha challenge on this load balancer (see [below for nested schema](#nestedatt--challenge_type_choice--captcha_challenge))
-- `enable_challenge` (Attributes) Enable Configure auto mitigation i.e risk based challenges for malicious users for this load balancer (see [below for nested schema](#nestedatt--challenge_type_choice--enable_challenge))
-- `js_challenge` (Attributes) JavaScript Challenge Configure JavaScript challenge on this load balancer (see [below for nested schema](#nestedatt--challenge_type_choice--js_challenge))
-- `no_challenge` (Boolean) Disable No challenge is enabled for this load balancer
-- `policy_based_challenge` (Attributes) policy based challenge Specifies the settings for policy rule based challenge (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge))
+- `captcha_challenge` (Attributes) Captcha Challenge Configure Captcha challenge on this load balancer<br>Conflicts with `enable_challenge`, `js_challenge`, `no_challenge`, and `policy_based_challenge`. (see [below for nested schema](#nestedatt--challenge_type_choice--captcha_challenge))
+- `enable_challenge` (Attributes) Enable Configure auto mitigation i.e risk based challenges for malicious users for this load balancer<br>Conflicts with `captcha_challenge`, `js_challenge`, `no_challenge`, and `policy_based_challenge`. (see [below for nested schema](#nestedatt--challenge_type_choice--enable_challenge))
+- `js_challenge` (Attributes) JavaScript Challenge Configure JavaScript challenge on this load balancer<br>Conflicts with `captcha_challenge`, `enable_challenge`, `no_challenge`, and `policy_based_challenge`. (see [below for nested schema](#nestedatt--challenge_type_choice--js_challenge))
+- `no_challenge` (Boolean) Disable No challenge is enabled for this load balancer<br>Conflicts with `captcha_challenge`, `enable_challenge`, `js_challenge`, and `policy_based_challenge`.
+- `policy_based_challenge` (Attributes) policy based challenge Specifies the settings for policy rule based challenge<br>Conflicts with `captcha_challenge`, `enable_challenge`, `js_challenge`, and `no_challenge`. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge))
 
 <a id="nestedatt--challenge_type_choice--captcha_challenge"></a>
 ### Nested Schema for `challenge_type_choice.captcha_challenge`
@@ -664,17 +592,17 @@ Optional:
 
 Optional:
 
-- `captcha_challenge_parameters_choice` (Attributes) Captcha challenge parameters choice Select Default or Custom Parameters (see [below for nested schema](#nestedatt--challenge_type_choice--enable_challenge--captcha_challenge_parameters_choice))
-- `js_challenge_parameters_choice` (Attributes) JavaScript challenge parameters choice Select Default or Custom Parameters (see [below for nested schema](#nestedatt--challenge_type_choice--enable_challenge--js_challenge_parameters_choice))
-- `malicious_user_mitigation_choice` (Attributes) Malicious user mitigation choice Settings that specify the actions to be taken when malicious users are determined to be at different threat levels. User's activity is monitored and continuously analyzed for malicious behavior. From this analysis, a threat-level is assigned to each user. The settings defined in malicious user mitigation specify what mitigation actions to take for user determined to be at different threat levels. (see [below for nested schema](#nestedatt--challenge_type_choice--enable_challenge--malicious_user_mitigation_choice))
+- `captcha_challenge_parameters_choice` (Attributes) Captcha challenge parameters choice Select Default or Custom Parameters<br>Exactly one of `captcha_challenge_parameters` or `default_captcha_challenge_parameters` must be specified when `captcha_challenge_parameters_choice` is configured. (see [below for nested schema](#nestedatt--challenge_type_choice--enable_challenge--captcha_challenge_parameters_choice))
+- `js_challenge_parameters_choice` (Attributes) JavaScript challenge parameters choice Select Default or Custom Parameters<br>Exactly one of `default_js_challenge_parameters` or `js_challenge_parameters` must be specified when `js_challenge_parameters_choice` is configured. (see [below for nested schema](#nestedatt--challenge_type_choice--enable_challenge--js_challenge_parameters_choice))
+- `malicious_user_mitigation_choice` (Attributes) Malicious user mitigation choice Settings that specify the actions to be taken when malicious users are determined to be at different threat levels. User's activity is monitored and continuously analyzed for malicious behavior. From this analysis, a threat-level is assigned to each user. The settings defined in malicious user mitigation specify what mitigation actions to take for user determined to be at different threat levels.<br>Exactly one of `default_mitigation_settings` or `malicious_user_mitigation` must be specified when `malicious_user_mitigation_choice` is configured. (see [below for nested schema](#nestedatt--challenge_type_choice--enable_challenge--malicious_user_mitigation_choice))
 
 <a id="nestedatt--challenge_type_choice--enable_challenge--captcha_challenge_parameters_choice"></a>
 ### Nested Schema for `challenge_type_choice.enable_challenge.captcha_challenge_parameters_choice`
 
 Optional:
 
-- `captcha_challenge_parameters` (Attributes) Captcha Challenge Configure captcha challenge parameters (see [below for nested schema](#nestedatt--challenge_type_choice--enable_challenge--captcha_challenge_parameters_choice--captcha_challenge_parameters))
-- `default_captcha_challenge_parameters` (Boolean) default parameters Use default parameters
+- `captcha_challenge_parameters` (Attributes) Captcha Challenge Configure captcha challenge parameters<br>Conflicts with `default_captcha_challenge_parameters`. (see [below for nested schema](#nestedatt--challenge_type_choice--enable_challenge--captcha_challenge_parameters_choice--captcha_challenge_parameters))
+- `default_captcha_challenge_parameters` (Boolean) default parameters Use default parameters<br>Conflicts with `captcha_challenge_parameters`.
 
 <a id="nestedatt--challenge_type_choice--enable_challenge--captcha_challenge_parameters_choice--captcha_challenge_parameters"></a>
 ### Nested Schema for `challenge_type_choice.enable_challenge.captcha_challenge_parameters_choice.captcha_challenge_parameters`
@@ -691,8 +619,8 @@ Optional:
 
 Optional:
 
-- `default_js_challenge_parameters` (Boolean) default parameters Use default parameters
-- `js_challenge_parameters` (Attributes) JavaScript Challenge Configure JavaScript challenge parameters (see [below for nested schema](#nestedatt--challenge_type_choice--enable_challenge--js_challenge_parameters_choice--js_challenge_parameters))
+- `default_js_challenge_parameters` (Boolean) default parameters Use default parameters<br>Conflicts with `js_challenge_parameters`.
+- `js_challenge_parameters` (Attributes) JavaScript Challenge Configure JavaScript challenge parameters<br>Conflicts with `default_js_challenge_parameters`. (see [below for nested schema](#nestedatt--challenge_type_choice--enable_challenge--js_challenge_parameters_choice--js_challenge_parameters))
 
 <a id="nestedatt--challenge_type_choice--enable_challenge--js_challenge_parameters_choice--js_challenge_parameters"></a>
 ### Nested Schema for `challenge_type_choice.enable_challenge.js_challenge_parameters_choice.js_challenge_parameters`
@@ -710,8 +638,8 @@ Optional:
 
 Optional:
 
-- `default_mitigation_settings` (Boolean) default parameters For low threat level, JavaScript Challenge will be applied. For medium threat level, Captcha Challenge will be applied. For high level, users will be temporarily blocked.
-- `malicious_user_mitigation` (Attributes) Malicious User Mitigation Define the mitigation actions to be taken for different threat levels (see [below for nested schema](#nestedatt--challenge_type_choice--enable_challenge--malicious_user_mitigation_choice--malicious_user_mitigation))
+- `default_mitigation_settings` (Boolean) default parameters For low threat level, JavaScript Challenge will be applied. For medium threat level, Captcha Challenge will be applied. For high level, users will be temporarily blocked.<br>Conflicts with `malicious_user_mitigation`.
+- `malicious_user_mitigation` (Attributes) Malicious User Mitigation Define the mitigation actions to be taken for different threat levels<br>Conflicts with `default_mitigation_settings`. (see [below for nested schema](#nestedatt--challenge_type_choice--enable_challenge--malicious_user_mitigation_choice--malicious_user_mitigation))
 
 <a id="nestedatt--challenge_type_choice--enable_challenge--malicious_user_mitigation_choice--malicious_user_mitigation"></a>
 ### Nested Schema for `challenge_type_choice.enable_challenge.malicious_user_mitigation_choice.malicious_user_mitigation`
@@ -741,34 +669,21 @@ Optional:
 <a id="nestedatt--challenge_type_choice--policy_based_challenge"></a>
 ### Nested Schema for `challenge_type_choice.policy_based_challenge`
 
-Required:
-
-- `challenge_choice` (Attributes) challenge choice Selection of different types of challenge. Selecting javascript or captcha shallenge will enable it for all traffic served by this load balancer. Policy based challenge can be used to define policy rules to enable or bypass challenge. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--challenge_choice))
-
 Optional:
 
-- `captcha_challenge_parameters_choice` (Attributes) Captcha challenge parameters choice Select Default or Custom Parameters (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--captcha_challenge_parameters_choice))
-- `js_challenge_parameters_choice` (Attributes) JavaScript challenge parameters choice Select Default or Custom Parameters (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--js_challenge_parameters_choice))
-- `malicious_user_mitigation_choice` (Attributes) Malicious user mitigation choice Settings that specify the actions to be taken when malicious users are determined to be at different threat levels. User's activity is monitored and continuously analyzed for malicious behavior. From this analysis, a threat-level is assigned to each user. The settings defined in malicious user mitigation specify what mitigation actions to take for user determined to be at different threat levels. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--malicious_user_mitigation_choice))
+- `captcha_challenge_parameters_choice` (Attributes) Captcha challenge parameters choice Select Default or Custom Parameters<br>Exactly one of `captcha_challenge_parameters` or `default_captcha_challenge_parameters` must be specified when `captcha_challenge_parameters_choice` is configured. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--captcha_challenge_parameters_choice))
+- `challenge_choice` (Attributes) challenge choice Selection of different types of challenge. Selecting javascript or captcha shallenge will enable it for all traffic served by this load balancer. Policy based challenge can be used to define policy rules to enable or bypass challenge.<br>Exactly one of `always_enable_captcha_challenge`, `always_enable_js_challenge`, or `no_challenge` must be specified when `challenge_choice` is configured. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--challenge_choice))
+- `js_challenge_parameters_choice` (Attributes) JavaScript challenge parameters choice Select Default or Custom Parameters<br>Exactly one of `default_js_challenge_parameters` or `js_challenge_parameters` must be specified when `js_challenge_parameters_choice` is configured. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--js_challenge_parameters_choice))
+- `malicious_user_mitigation_choice` (Attributes) Malicious user mitigation choice Settings that specify the actions to be taken when malicious users are determined to be at different threat levels. User's activity is monitored and continuously analyzed for malicious behavior. From this analysis, a threat-level is assigned to each user. The settings defined in malicious user mitigation specify what mitigation actions to take for user determined to be at different threat levels.<br>Exactly one of `default_mitigation_settings` or `malicious_user_mitigation` must be specified when `malicious_user_mitigation_choice` is configured. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--malicious_user_mitigation_choice))
 - `rule_list` (Attributes) Challenge rule list list challenge rules to be used in policy based challenge (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list))
-
-<a id="nestedatt--challenge_type_choice--policy_based_challenge--challenge_choice"></a>
-### Nested Schema for `challenge_type_choice.policy_based_challenge.challenge_choice`
-
-Optional:
-
-- `always_enable_captcha_challenge` (Boolean) always enable captcha challenge Enable Captcha challenge for all requests. Challenge rules can be used to selectively disable Captcha challenge or enable JavaScript challenge for some requests.
-- `always_enable_js_challenge` (Boolean) always enable JS challenge Enable JavaScript challenge for all requests. Challenge rules can be used to selectively disable JavaScript challenge or enable Captcha challenge for some requests.
-- `no_challenge` (Boolean) no_challenge Disable JavaScript and Captcha challenge for all requests. Challenge rules can be used to selectively enable JavaScript or Captcha challenge for some requests.
-
 
 <a id="nestedatt--challenge_type_choice--policy_based_challenge--captcha_challenge_parameters_choice"></a>
 ### Nested Schema for `challenge_type_choice.policy_based_challenge.captcha_challenge_parameters_choice`
 
 Optional:
 
-- `captcha_challenge_parameters` (Attributes) Captcha Challenge Configure captcha challenge parameters (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--captcha_challenge_parameters_choice--captcha_challenge_parameters))
-- `default_captcha_challenge_parameters` (Boolean) default parameters Use default parameters
+- `captcha_challenge_parameters` (Attributes) Captcha Challenge Configure captcha challenge parameters<br>Conflicts with `default_captcha_challenge_parameters`. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--captcha_challenge_parameters_choice--captcha_challenge_parameters))
+- `default_captcha_challenge_parameters` (Boolean) default parameters Use default parameters<br>Conflicts with `captcha_challenge_parameters`.
 
 <a id="nestedatt--challenge_type_choice--policy_based_challenge--captcha_challenge_parameters_choice--captcha_challenge_parameters"></a>
 ### Nested Schema for `challenge_type_choice.policy_based_challenge.captcha_challenge_parameters_choice.captcha_challenge_parameters`
@@ -780,13 +695,23 @@ Optional:
 
 
 
+<a id="nestedatt--challenge_type_choice--policy_based_challenge--challenge_choice"></a>
+### Nested Schema for `challenge_type_choice.policy_based_challenge.challenge_choice`
+
+Optional:
+
+- `always_enable_captcha_challenge` (Boolean) always enable captcha challenge Enable Captcha challenge for all requests. Challenge rules can be used to selectively disable Captcha challenge or enable JavaScript challenge for some requests.<br>Conflicts with `always_enable_js_challenge` and `no_challenge`.
+- `always_enable_js_challenge` (Boolean) always enable JS challenge Enable JavaScript challenge for all requests. Challenge rules can be used to selectively disable JavaScript challenge or enable Captcha challenge for some requests.<br>Conflicts with `always_enable_captcha_challenge` and `no_challenge`.
+- `no_challenge` (Boolean) no_challenge Disable JavaScript and Captcha challenge for all requests. Challenge rules can be used to selectively enable JavaScript or Captcha challenge for some requests.<br>Conflicts with `always_enable_captcha_challenge` and `always_enable_js_challenge`.
+
+
 <a id="nestedatt--challenge_type_choice--policy_based_challenge--js_challenge_parameters_choice"></a>
 ### Nested Schema for `challenge_type_choice.policy_based_challenge.js_challenge_parameters_choice`
 
 Optional:
 
-- `default_js_challenge_parameters` (Boolean) default parameters Use default parameters
-- `js_challenge_parameters` (Attributes) JavaScript Challenge Configure JavaScript challenge parameters (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--js_challenge_parameters_choice--js_challenge_parameters))
+- `default_js_challenge_parameters` (Boolean) default parameters Use default parameters<br>Conflicts with `js_challenge_parameters`.
+- `js_challenge_parameters` (Attributes) JavaScript Challenge Configure JavaScript challenge parameters<br>Conflicts with `default_js_challenge_parameters`. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--js_challenge_parameters_choice--js_challenge_parameters))
 
 <a id="nestedatt--challenge_type_choice--policy_based_challenge--js_challenge_parameters_choice--js_challenge_parameters"></a>
 ### Nested Schema for `challenge_type_choice.policy_based_challenge.js_challenge_parameters_choice.js_challenge_parameters`
@@ -804,8 +729,8 @@ Optional:
 
 Optional:
 
-- `default_mitigation_settings` (Boolean) default parameters For low threat level, JavaScript Challenge will be applied. For medium threat level, Captcha Challenge will be applied. For high level, users will be temporarily blocked.
-- `malicious_user_mitigation` (Attributes) Malicious User Mitigation Define the mitigation actions to be taken for different threat levels (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--malicious_user_mitigation_choice--malicious_user_mitigation))
+- `default_mitigation_settings` (Boolean) default parameters For low threat level, JavaScript Challenge will be applied. For medium threat level, Captcha Challenge will be applied. For high level, users will be temporarily blocked.<br>Conflicts with `malicious_user_mitigation`.
+- `malicious_user_mitigation` (Attributes) Malicious User Mitigation Define the mitigation actions to be taken for different threat levels<br>Conflicts with `default_mitigation_settings`. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--malicious_user_mitigation_choice--malicious_user_mitigation))
 
 <a id="nestedatt--challenge_type_choice--policy_based_challenge--malicious_user_mitigation_choice--malicious_user_mitigation"></a>
 ### Nested Schema for `challenge_type_choice.policy_based_challenge.malicious_user_mitigation_choice.malicious_user_mitigation`
@@ -851,42 +776,29 @@ Optional:
 <a id="nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec"></a>
 ### Nested Schema for `challenge_type_choice.policy_based_challenge.rule_list.rules.spec`
 
-Required:
-
-- `challenge_action_choice` (Attributes) Select Action Type Select challenge action, enable or disable challenge When enabled, the challenge type selected in PolicyBasedChallenge will be launched when match conditions in this challenge rule are met When the challenge type selected in PolicyBasedChallenge is always enable JS/Captcha challenge, the challenge can be disabled for certain requests which match the predicates defined in this rule by setting the action to disable_challenge (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--challenge_action_choice))
-
 Optional:
 
 - `arg_matchers` (Attributes List) (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--arg_matchers))
-- `asn_choice` (Attributes) (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--asn_choice))
+- `asn_choice` (Attributes) Exactly one of `any_asn`, `asn_list`, or `asn_matcher` must be specified when `asn_choice` is configured. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--asn_choice))
 - `body_matcher` (Attributes) (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--body_matcher))
-- `client_choice` (Attributes) (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--client_choice))
+- `challenge_action_choice` (Attributes) Select Action Type Select challenge action, enable or disable challenge When enabled, the challenge type selected in PolicyBasedChallenge will be launched when match conditions in this challenge rule are met When the challenge type selected in PolicyBasedChallenge is always enable JS/Captcha challenge, the challenge can be disabled for certain requests which match the predicates defined in this rule by setting the action to disable_challenge<br>Exactly one of `disable_challenge`, `enable_captcha_challenge`, or `enable_javascript_challenge` must be specified when `challenge_action_choice` is configured. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--challenge_action_choice))
+- `client_choice` (Attributes) Exactly one of `any_client` or `client_selector` must be specified when `client_choice` is configured. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--client_choice))
 - `cookie_matchers` (Attributes List) (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--cookie_matchers))
 - `domain_matcher` (Attributes) (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--domain_matcher))
 - `expiration_timestamp` (String)
 - `headers` (Attributes List) (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--headers))
 - `http_method` (Attributes) (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--http_method))
-- `ip_choice` (Attributes) (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--ip_choice))
+- `ip_choice` (Attributes) Exactly one of `any_ip`, `ip_matcher`, or `ip_prefix_list` must be specified when `ip_choice` is configured. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--ip_choice))
 - `path` (Attributes) (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--path))
 - `query_params` (Attributes List) (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--query_params))
-- `tls_fingerprint_choice` (Attributes) (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--tls_fingerprint_choice))
-
-<a id="nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--challenge_action_choice"></a>
-### Nested Schema for `challenge_type_choice.policy_based_challenge.rule_list.rules.spec.challenge_action_choice`
-
-Optional:
-
-- `disable_challenge` (Boolean) Disable challenge Disable the challenge type selected in PolicyBasedChallenge
-- `enable_captcha_challenge` (Boolean) Enable captcha challenge Enable captcha challenge
-- `enable_javascript_challenge` (Boolean) Enable javascript challenge Enable javascript challenge
-
+- `tls_fingerprint_choice` (Attributes) `tls_fingerprint_matcher` must be specified when `tls_fingerprint_choice` is configured. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--tls_fingerprint_choice))
 
 <a id="nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--arg_matchers"></a>
 ### Nested Schema for `challenge_type_choice.policy_based_challenge.rule_list.rules.spec.arg_matchers`
 
 Required:
 
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--arg_matchers--match_choice))
+- `match_choice` (Attributes) match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--arg_matchers--match_choice))
 - `name` (String) name A case-sensitive JSON path in the HTTP request body.
 
 Optional:
@@ -898,9 +810,9 @@ Optional:
 
 Optional:
 
-- `check_not_present` (Boolean) check_not_present Check that the argument is not present.
-- `check_present` (Boolean) check_present Check that the argument is present.
-- `item` (Attributes) item Criteria for matching the values for the Arg. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--arg_matchers--match_choice--item))
+- `check_not_present` (Boolean) check_not_present Check that the argument is not present.<br>Conflicts with `check_present` and `item`.
+- `check_present` (Boolean) check_present Check that the argument is present.<br>Conflicts with `check_not_present` and `item`.
+- `item` (Attributes) item Criteria for matching the values for the Arg. The match is successful if any of the values in the input satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--arg_matchers--match_choice--item))
 
 <a id="nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--arg_matchers--match_choice--item"></a>
 ### Nested Schema for `challenge_type_choice.policy_based_challenge.rule_list.rules.spec.arg_matchers.match_choice.item`
@@ -918,9 +830,9 @@ Optional:
 
 Optional:
 
-- `any_asn` (Boolean)
-- `asn_list` (Attributes) (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--asn_choice--asn_list))
-- `asn_matcher` (Attributes) (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--asn_choice--asn_matcher))
+- `any_asn` (Boolean) Conflicts with `asn_list` and `asn_matcher`.
+- `asn_list` (Attributes) Conflicts with `any_asn` and `asn_matcher`. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--asn_choice--asn_list))
+- `asn_matcher` (Attributes) Conflicts with `any_asn` and `asn_list`. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--asn_choice--asn_matcher))
 
 <a id="nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--asn_choice--asn_list"></a>
 ### Nested Schema for `challenge_type_choice.policy_based_challenge.rule_list.rules.spec.asn_choice.asn_list`
@@ -961,13 +873,23 @@ Optional:
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
 
 
+<a id="nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--challenge_action_choice"></a>
+### Nested Schema for `challenge_type_choice.policy_based_challenge.rule_list.rules.spec.challenge_action_choice`
+
+Optional:
+
+- `disable_challenge` (Boolean) Disable challenge Disable the challenge type selected in PolicyBasedChallenge<br>Conflicts with `enable_captcha_challenge` and `enable_javascript_challenge`.
+- `enable_captcha_challenge` (Boolean) Enable captcha challenge Enable captcha challenge<br>Conflicts with `disable_challenge` and `enable_javascript_challenge`.
+- `enable_javascript_challenge` (Boolean) Enable javascript challenge Enable javascript challenge<br>Conflicts with `disable_challenge` and `enable_captcha_challenge`.
+
+
 <a id="nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--client_choice"></a>
 ### Nested Schema for `challenge_type_choice.policy_based_challenge.rule_list.rules.spec.client_choice`
 
 Optional:
 
-- `any_client` (Boolean)
-- `client_selector` (Attributes) (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--client_choice--client_selector))
+- `any_client` (Boolean) Conflicts with `client_selector`.
+- `client_selector` (Attributes) Conflicts with `any_client`. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--client_choice--client_selector))
 
 <a id="nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--client_choice--client_selector"></a>
 ### Nested Schema for `challenge_type_choice.policy_based_challenge.rule_list.rules.spec.client_choice.client_selector`
@@ -983,7 +905,7 @@ Required:
 
 Required:
 
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--cookie_matchers--match_choice))
+- `match_choice` (Attributes) match Select Match Options.<br>`item` must be specified. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--cookie_matchers--match_choice))
 - `name` (String) name A case-sensitive cookie name.
 
 <a id="nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--cookie_matchers--match_choice"></a>
@@ -1018,7 +940,7 @@ Optional:
 
 Required:
 
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--headers--match_choice))
+- `match_choice` (Attributes) match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--headers--match_choice))
 - `name` (String) name A case-insensitive HTTP header name.
 
 Optional:
@@ -1030,9 +952,9 @@ Optional:
 
 Optional:
 
-- `check_not_present` (Boolean) check_not_present Check that the header is not present.
-- `check_present` (Boolean) check_present Check that the header is present.
-- `item` (Attributes) item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--headers--match_choice--item))
+- `check_not_present` (Boolean) check_not_present Check that the header is not present.<br>Conflicts with `check_present` and `item`.
+- `check_present` (Boolean) check_present Check that the header is present.<br>Conflicts with `check_not_present` and `item`.
+- `item` (Attributes) item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--headers--match_choice--item))
 
 <a id="nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--headers--match_choice--item"></a>
 ### Nested Schema for `challenge_type_choice.policy_based_challenge.rule_list.rules.spec.headers.match_choice.item`
@@ -1059,9 +981,9 @@ Optional:
 
 Optional:
 
-- `any_ip` (Boolean)
-- `ip_matcher` (Attributes) (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--ip_choice--ip_matcher))
-- `ip_prefix_list` (Attributes) (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--ip_choice--ip_prefix_list))
+- `any_ip` (Boolean) Conflicts with `ip_matcher` and `ip_prefix_list`.
+- `ip_matcher` (Attributes) Conflicts with `any_ip` and `ip_prefix_list`. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--ip_choice--ip_matcher))
+- `ip_prefix_list` (Attributes) Conflicts with `any_ip` and `ip_matcher`. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--ip_choice--ip_prefix_list))
 
 <a id="nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--ip_choice--ip_matcher"></a>
 ### Nested Schema for `challenge_type_choice.policy_based_challenge.rule_list.rules.spec.ip_choice.ip_matcher`
@@ -1119,7 +1041,7 @@ Optional:
 Required:
 
 - `key` (String) key A case-sensitive HTTP query parameter name.
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--query_params--match_choice))
+- `match_choice` (Attributes) match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--query_params--match_choice))
 
 Optional:
 
@@ -1130,9 +1052,9 @@ Optional:
 
 Optional:
 
-- `check_not_present` (Boolean) check_not_present Check that the query parameter is not present.
-- `check_present` (Boolean) check_present Check that the query parameter is present.
-- `item` (Attributes) item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--query_params--match_choice--item))
+- `check_not_present` (Boolean) check_not_present Check that the query parameter is not present.<br>Conflicts with `check_present` and `item`.
+- `check_present` (Boolean) check_present Check that the query parameter is present.<br>Conflicts with `check_not_present` and `item`.
+- `item` (Attributes) item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`. (see [below for nested schema](#nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--query_params--match_choice--item))
 
 <a id="nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--query_params--match_choice--item"></a>
 ### Nested Schema for `challenge_type_choice.policy_based_challenge.rule_list.rules.spec.query_params.match_choice.item`
@@ -1186,18 +1108,18 @@ Optional:
 <a id="nestedatt--csrf_policy"></a>
 ### Nested Schema for `csrf_policy`
 
-Required:
+Optional:
 
-- `allowed_domains_choice` (Attributes) allowed_domains The list of source origin that should be allowed. (see [below for nested schema](#nestedatt--csrf_policy--allowed_domains_choice))
+- `allowed_domains_choice` (Attributes) allowed_domains The list of source origin that should be allowed.<br>Exactly one of `all_load_balancer_domains`, `custom_domain_list`, or `disabled` must be specified when `allowed_domains_choice` is configured. (see [below for nested schema](#nestedatt--csrf_policy--allowed_domains_choice))
 
 <a id="nestedatt--csrf_policy--allowed_domains_choice"></a>
 ### Nested Schema for `csrf_policy.allowed_domains_choice`
 
 Optional:
 
-- `all_load_balancer_domains` (Boolean) all_load_balancer_domains Add All load balancer domains to source origin (allow) list.
-- `custom_domain_list` (Attributes) custom_domain_list Add one or more domains to source origin (allow) list. (see [below for nested schema](#nestedatt--csrf_policy--allowed_domains_choice--custom_domain_list))
-- `disabled` (Boolean) disabled Allow all source origin domains.
+- `all_load_balancer_domains` (Boolean) all_load_balancer_domains Add All load balancer domains to source origin (allow) list.<br>Conflicts with `custom_domain_list` and `disabled`.
+- `custom_domain_list` (Attributes) custom_domain_list Add one or more domains to source origin (allow) list.<br>Conflicts with `all_load_balancer_domains` and `disabled`. (see [below for nested schema](#nestedatt--csrf_policy--allowed_domains_choice--custom_domain_list))
+- `disabled` (Boolean) disabled Allow all source origin domains.<br>Conflicts with `all_load_balancer_domains` and `custom_domain_list`.
 
 <a id="nestedatt--csrf_policy--allowed_domains_choice--custom_domain_list"></a>
 ### Nested Schema for `csrf_policy.allowed_domains_choice.custom_domain_list`
@@ -1235,29 +1157,13 @@ Read-Only:
 
 Required:
 
-- `action_choice` (Attributes) action choice Specify the action to be taken for the domain and path match condition. (see [below for nested schema](#nestedatt--data_guard_rules--action_choice))
-- `domain_choice` (Attributes) Domain Domain to be matched (see [below for nested schema](#nestedatt--data_guard_rules--domain_choice))
 - `metadata` (Attributes) metadata Common attributes for the rule including name and description. (see [below for nested schema](#nestedatt--data_guard_rules--metadata))
 - `path` (Attributes) Path URI path matcher. (see [below for nested schema](#nestedatt--data_guard_rules--path))
 
-<a id="nestedatt--data_guard_rules--action_choice"></a>
-### Nested Schema for `data_guard_rules.action_choice`
-
 Optional:
 
-- `apply_data_guard` (Boolean) apply_data_guard
-- `skip_data_guard` (Boolean) skip_data_guard
-
-
-<a id="nestedatt--data_guard_rules--domain_choice"></a>
-### Nested Schema for `data_guard_rules.domain_choice`
-
-Optional:
-
-- `any_domain` (Boolean) Any domain Enable Data Guard for any domain
-- `exact_value` (String) exact value Exact domain name<br>**Validation:** `Length LengthBetween(1, 256)`
-- `suffix_value` (String) suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`
-
+- `action_choice` (Attributes) action choice Specify the action to be taken for the domain and path match condition.<br>Exactly one of `apply_data_guard` or `skip_data_guard` must be specified when `action_choice` is configured. (see [below for nested schema](#nestedatt--data_guard_rules--action_choice))
+- `domain_choice` (Attributes) Domain Domain to be matched<br>Exactly one of `any_domain`, `exact_value`, or `suffix_value` must be specified when `domain_choice` is configured. (see [below for nested schema](#nestedatt--data_guard_rules--domain_choice))
 
 <a id="nestedatt--data_guard_rules--metadata"></a>
 ### Nested Schema for `data_guard_rules.metadata`
@@ -1276,17 +1182,36 @@ Optional:
 
 Required:
 
-- `path_match_choice` (Attributes) path_match A specification of path match (see [below for nested schema](#nestedatt--data_guard_rules--path--path_match_choice))
+- `path_match_choice` (Attributes) path_match A specification of path match<br>Exactly one of `path`, `prefix`, or `regex` must be specified. (see [below for nested schema](#nestedatt--data_guard_rules--path--path_match_choice))
 
 <a id="nestedatt--data_guard_rules--path--path_match_choice"></a>
 ### Nested Schema for `data_guard_rules.path.path_match_choice`
 
 Optional:
 
-- `path` (String) exact Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`
-- `prefix` (String) prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`
-- `regex` (String) regex Regular expression of path match (e.g. the value .* will match on all paths)
+- `path` (String) exact Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `prefix` and `regex`.
+- `prefix` (String) prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `path` and `regex`.
+- `regex` (String) regex Regular expression of path match (e.g. the value .* will match on all paths)<br>Conflicts with `path` and `prefix`.
 
+
+
+<a id="nestedatt--data_guard_rules--action_choice"></a>
+### Nested Schema for `data_guard_rules.action_choice`
+
+Optional:
+
+- `apply_data_guard` (Boolean) apply_data_guard<br>Conflicts with `skip_data_guard`.
+- `skip_data_guard` (Boolean) skip_data_guard<br>Conflicts with `apply_data_guard`.
+
+
+<a id="nestedatt--data_guard_rules--domain_choice"></a>
+### Nested Schema for `data_guard_rules.domain_choice`
+
+Optional:
+
+- `any_domain` (Boolean) Any domain Enable Data Guard for any domain<br>Conflicts with `exact_value` and `suffix_value`.
+- `exact_value` (String) exact value Exact domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_domain` and `suffix_value`.
+- `suffix_value` (String) suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_domain` and `exact_value`.
 
 
 
@@ -1296,12 +1221,12 @@ Optional:
 Required:
 
 - `metadata` (Attributes) metadata Common attributes for the rule including name and description. (see [below for nested schema](#nestedatt--ddos_mitigation_rules--metadata))
-- `mitigation_action_choice` (Attributes) mitigation action The action to be taken for a specified mitigation choice (see [below for nested schema](#nestedatt--ddos_mitigation_rules--mitigation_action_choice))
-- `mitigation_choice` (Attributes) Mitigation Choice Mitigation source to be matched (see [below for nested schema](#nestedatt--ddos_mitigation_rules--mitigation_choice))
+- `mitigation_choice` (Attributes) Mitigation Choice Mitigation source to be matched<br>Exactly one of `ddos_client_source` or `ip_prefix_list` must be specified. (see [below for nested schema](#nestedatt--ddos_mitigation_rules--mitigation_choice))
 
 Optional:
 
 - `expiration_timestamp` (String) expiration timestamp The expiration_timestamp is the RFC 3339 format timestamp at which the containing rule is considered to be logically expired. The rule continues to exist in the configuration but is not applied anymore.
+- `mitigation_action_choice` (Attributes) mitigation action The action to be taken for a specified mitigation choice<br>`block` must be specified when `mitigation_action_choice` is configured. (see [below for nested schema](#nestedatt--ddos_mitigation_rules--mitigation_action_choice))
 
 <a id="nestedatt--ddos_mitigation_rules--metadata"></a>
 ### Nested Schema for `ddos_mitigation_rules.metadata`
@@ -1315,21 +1240,13 @@ Optional:
 - `description` (String) description Human readable description.<br>**Validation:** `Length LengthAtMost(256)`
 
 
-<a id="nestedatt--ddos_mitigation_rules--mitigation_action_choice"></a>
-### Nested Schema for `ddos_mitigation_rules.mitigation_action_choice`
-
-Optional:
-
-- `block` (Boolean) Block User Block user for a duration determined by the expiration time
-
-
 <a id="nestedatt--ddos_mitigation_rules--mitigation_choice"></a>
 ### Nested Schema for `ddos_mitigation_rules.mitigation_choice`
 
 Optional:
 
-- `ddos_client_source` (Attributes) ddos_client_source Combination of Region, ASN and TLS Fingerprints (see [below for nested schema](#nestedatt--ddos_mitigation_rules--mitigation_choice--ddos_client_source))
-- `ip_prefix_list` (Attributes) ip source IP prefix string. (see [below for nested schema](#nestedatt--ddos_mitigation_rules--mitigation_choice--ip_prefix_list))
+- `ddos_client_source` (Attributes) ddos_client_source Combination of Region, ASN and TLS Fingerprints<br>Conflicts with `ip_prefix_list`. (see [below for nested schema](#nestedatt--ddos_mitigation_rules--mitigation_choice--ddos_client_source))
+- `ip_prefix_list` (Attributes) ip source IP prefix string.<br>Conflicts with `ddos_client_source`. (see [below for nested schema](#nestedatt--ddos_mitigation_rules--mitigation_choice--ip_prefix_list))
 
 <a id="nestedatt--ddos_mitigation_rules--mitigation_choice--ddos_client_source"></a>
 ### Nested Schema for `ddos_mitigation_rules.mitigation_choice.ddos_client_source`
@@ -1379,22 +1296,30 @@ Optional:
 
 
 
+<a id="nestedatt--ddos_mitigation_rules--mitigation_action_choice"></a>
+### Nested Schema for `ddos_mitigation_rules.mitigation_action_choice`
+
+Optional:
+
+- `block` (Boolean) Block User Block user for a duration determined by the expiration time
+
+
 
 <a id="nestedatt--default_cache_action"></a>
 ### Nested Schema for `default_cache_action`
 
 Optional:
 
-- `cache_actions_choice` (Attributes) Cache TTL Behaviour Configure the Cache Actions for a rule. (see [below for nested schema](#nestedatt--default_cache_action--cache_actions_choice))
+- `cache_actions_choice` (Attributes) Cache TTL Behaviour Configure the Cache Actions for a rule.<br>Exactly one of `cache_disabled`, `cache_ttl_default`, or `cache_ttl_override` must be specified when `cache_actions_choice` is configured. (see [below for nested schema](#nestedatt--default_cache_action--cache_actions_choice))
 
 <a id="nestedatt--default_cache_action--cache_actions_choice"></a>
 ### Nested Schema for `default_cache_action.cache_actions_choice`
 
 Optional:
 
-- `cache_disabled` (Boolean) Disable Caching Ignore all caching specified by origin headers
-- `cache_ttl_default` (String) Use Cache TTL Provided by Origin Use Cache TTL Provided by Origin, and set a contigency TTL value in case one is not provided
-- `cache_ttl_override` (String) Override Cache TTL Provided by Origin Always override the Cahce TTL provided by Origin
+- `cache_disabled` (Boolean) Disable Caching Ignore all caching specified by origin headers<br>Conflicts with `cache_ttl_default` and `cache_ttl_override`.
+- `cache_ttl_default` (String) Use Cache TTL Provided by Origin Use Cache TTL Provided by Origin, and set a contigency TTL value in case one is not provided<br>Conflicts with `cache_disabled` and `cache_ttl_override`.
+- `cache_ttl_override` (String) Override Cache TTL Provided by Origin Always override the Cahce TTL provided by Origin<br>Conflicts with `cache_disabled` and `cache_ttl_default`.
 
 
 
@@ -1403,24 +1328,14 @@ Optional:
 
 Required:
 
-- `domain_choice` (Attributes) Domain Domain to be matched (see [below for nested schema](#nestedatt--graphql_rules--domain_choice))
 - `metadata` (Attributes) metadata Common attributes for the rule including name and description. (see [below for nested schema](#nestedatt--graphql_rules--metadata))
-- `method_choice` (Attributes) Http Method Specifies the HTTP method used to access the GraphQL endpoint. Default value is GET. (see [below for nested schema](#nestedatt--graphql_rules--method_choice))
 
 Optional:
 
+- `domain_choice` (Attributes) Domain Domain to be matched<br>Exactly one of `any_domain`, `exact_value`, or `suffix_value` must be specified when `domain_choice` is configured. (see [below for nested schema](#nestedatt--graphql_rules--domain_choice))
 - `exact_path` (String) Path Specifies the exact path to GraphQL endpoint. Default value is /graphql.<br>**Default:** `/graphql`<br>**Validation:** `Length LengthAtMost(256)`
 - `graphql_settings` (Attributes) GraphQL Settings GraphQL configuration. (see [below for nested schema](#nestedatt--graphql_rules--graphql_settings))
-
-<a id="nestedatt--graphql_rules--domain_choice"></a>
-### Nested Schema for `graphql_rules.domain_choice`
-
-Optional:
-
-- `any_domain` (Boolean) Any domain Enable GraphQL inspection for any domain
-- `exact_value` (String) exact value Exact domain name<br>**Validation:** `Length LengthBetween(1, 256)`
-- `suffix_value` (String) suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`
-
+- `method_choice` (Attributes) Http Method Specifies the HTTP method used to access the GraphQL endpoint. Default value is GET.<br>Exactly one of `method_get` or `method_post` must be specified when `method_choice` is configured. (see [below for nested schema](#nestedatt--graphql_rules--method_choice))
 
 <a id="nestedatt--graphql_rules--metadata"></a>
 ### Nested Schema for `graphql_rules.metadata`
@@ -1434,24 +1349,22 @@ Optional:
 - `description` (String) description Human readable description.<br>**Validation:** `Length LengthAtMost(256)`
 
 
-<a id="nestedatt--graphql_rules--method_choice"></a>
-### Nested Schema for `graphql_rules.method_choice`
+<a id="nestedatt--graphql_rules--domain_choice"></a>
+### Nested Schema for `graphql_rules.domain_choice`
 
 Optional:
 
-- `method_get` (Boolean) Get
-- `method_post` (Boolean) Post
+- `any_domain` (Boolean) Any domain Enable GraphQL inspection for any domain<br>Conflicts with `exact_value` and `suffix_value`.
+- `exact_value` (String) exact value Exact domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_domain` and `suffix_value`.
+- `suffix_value` (String) suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_domain` and `exact_value`.
 
 
 <a id="nestedatt--graphql_rules--graphql_settings"></a>
 ### Nested Schema for `graphql_rules.graphql_settings`
 
-Required:
-
-- `allow_introspection_queries_choice` (Attributes) Introspection Queries Introspection is the ability to query which resources are available in the current API schema. Enable access to the introspection endpoint. (see [below for nested schema](#nestedatt--graphql_rules--graphql_settings--allow_introspection_queries_choice))
-
 Optional:
 
+- `allow_introspection_queries_choice` (Attributes) Introspection Queries Introspection is the ability to query which resources are available in the current API schema. Enable access to the introspection endpoint.<br>Exactly one of `disable_introspection` or `enable_introspection` must be specified when `allow_introspection_queries_choice` is configured. (see [below for nested schema](#nestedatt--graphql_rules--graphql_settings--allow_introspection_queries_choice))
 - `max_batched_queries` (Number) Max Batched Queries Specify maximum number of queries in a single batched request.<br>**Default:** `10`
 - `max_depth` (Number) Max Depth Specify maximum depth for the GraphQL query.<br>**Default:** `10`
 - `max_total_length` (Number) Max Total Length Specify maximum length in bytes for the GraphQL query.<br>**Default:** `5000`
@@ -1461,9 +1374,18 @@ Optional:
 
 Optional:
 
-- `disable_introspection` (Boolean) Disable Introspection Queries Disable introspection queries for the load balancer.
-- `enable_introspection` (Boolean) Enable Introspection Queries Enable introspection queries for the load balancer.
+- `disable_introspection` (Boolean) Disable Introspection Queries Disable introspection queries for the load balancer.<br>Conflicts with `enable_introspection`.
+- `enable_introspection` (Boolean) Enable Introspection Queries Enable introspection queries for the load balancer.<br>Conflicts with `disable_introspection`.
 
+
+
+<a id="nestedatt--graphql_rules--method_choice"></a>
+### Nested Schema for `graphql_rules.method_choice`
+
+Optional:
+
+- `method_get` (Boolean) Get<br>Conflicts with `method_post`.
+- `method_post` (Boolean) Post<br>Conflicts with `method_get`.
 
 
 
@@ -1472,8 +1394,8 @@ Optional:
 
 Optional:
 
-- `disable_ip_reputation` (Boolean) disable_ip_reputation No IP reputation configured this distribution
-- `enable_ip_reputation` (Attributes) enable_ip_reputation Enable IP reputation for all requests in this distribution (see [below for nested schema](#nestedatt--ip_reputation_choice--enable_ip_reputation))
+- `disable_ip_reputation` (Boolean) disable_ip_reputation No IP reputation configured this distribution<br>Conflicts with `enable_ip_reputation`.
+- `enable_ip_reputation` (Attributes) enable_ip_reputation Enable IP reputation for all requests in this distribution<br>Conflicts with `disable_ip_reputation`. (see [below for nested schema](#nestedatt--ip_reputation_choice--enable_ip_reputation))
 
 <a id="nestedatt--ip_reputation_choice--enable_ip_reputation"></a>
 ### Nested Schema for `ip_reputation_choice.enable_ip_reputation`
@@ -1490,16 +1412,16 @@ Required:
 Required:
 
 - `action` (Attributes) action (see [below for nested schema](#nestedatt--jwt_validation--action))
-- `jwks_configuration_choice` (Attributes) jwks_configuration Configuration of the encryption keys that are used for JWT signature validation. You can enter the JWKS locally or use a defined Authorization Server to remotely fetch JWKS automatically. (see [below for nested schema](#nestedatt--jwt_validation--jwks_configuration_choice))
+- `jwks_configuration_choice` (Attributes) jwks_configuration Configuration of the encryption keys that are used for JWT signature validation. You can enter the JWKS locally or use a defined Authorization Server to remotely fetch JWKS automatically.<br>Exactly one of `authorization_server` or `jwks_config` must be specified. (see [below for nested schema](#nestedatt--jwt_validation--jwks_configuration_choice))
 - `target` (Attributes) target Define endpoints for which JWT token validation will be performed (see [below for nested schema](#nestedatt--jwt_validation--target))
 - `token_location` (Attributes) token location Define where in the HTTP request the JWT token will be extracted (see [below for nested schema](#nestedatt--jwt_validation--token_location))
 
 <a id="nestedatt--jwt_validation--action"></a>
 ### Nested Schema for `jwt_validation.action`
 
-Required:
+Optional:
 
-- `action_choice` (Attributes) action Action to be taken (see [below for nested schema](#nestedatt--jwt_validation--action--action_choice))
+- `action_choice` (Attributes) action Action to be taken<br>`block` must be specified when `action_choice` is configured. (see [below for nested schema](#nestedatt--jwt_validation--action--action_choice))
 
 <a id="nestedatt--jwt_validation--action--action_choice"></a>
 ### Nested Schema for `jwt_validation.action.action_choice`
@@ -1515,8 +1437,8 @@ Optional:
 
 Optional:
 
-- `authorization_server` (Attributes) authorization_server Automatically fetch JWKS from URI endpoint (see [below for nested schema](#nestedatt--jwt_validation--jwks_configuration_choice--authorization_server))
-- `jwks_config` (Attributes) jwks_config Manually provide JWKS (see [below for nested schema](#nestedatt--jwt_validation--jwks_configuration_choice--jwks_config))
+- `authorization_server` (Attributes) authorization_server Automatically fetch JWKS from URI endpoint<br>Conflicts with `jwks_config`. (see [below for nested schema](#nestedatt--jwt_validation--jwks_configuration_choice--authorization_server))
+- `jwks_config` (Attributes) jwks_config Manually provide JWKS<br>Conflicts with `authorization_server`. (see [below for nested schema](#nestedatt--jwt_validation--jwks_configuration_choice--jwks_config))
 
 <a id="nestedatt--jwt_validation--jwks_configuration_choice--authorization_server"></a>
 ### Nested Schema for `jwt_validation.jwks_configuration_choice.authorization_server`
@@ -1553,7 +1475,7 @@ Optional:
 
 Required:
 
-- `target_choice` (Attributes) target Define endpoints for which JWT token validation will be performed (see [below for nested schema](#nestedatt--jwt_validation--target--target_choice))
+- `target_choice` (Attributes) target Define endpoints for which JWT token validation will be performed<br>`base_paths` must be specified. (see [below for nested schema](#nestedatt--jwt_validation--target--target_choice))
 
 <a id="nestedatt--jwt_validation--target--target_choice"></a>
 ### Nested Schema for `jwt_validation.target.target_choice`
@@ -1575,9 +1497,9 @@ Required:
 <a id="nestedatt--jwt_validation--token_location"></a>
 ### Nested Schema for `jwt_validation.token_location`
 
-Required:
+Optional:
 
-- `token_location_choice` (Attributes) token location Define where in the HTTP request the JWT token will be extracted (see [below for nested schema](#nestedatt--jwt_validation--token_location--token_location_choice))
+- `token_location_choice` (Attributes) token location Define where in the HTTP request the JWT token will be extracted<br>`bearer_token` must be specified when `token_location_choice` is configured. (see [below for nested schema](#nestedatt--jwt_validation--token_location--token_location_choice))
 
 <a id="nestedatt--jwt_validation--token_location--token_location_choice"></a>
 ### Nested Schema for `jwt_validation.token_location.token_location_choice`
@@ -1589,13 +1511,33 @@ Optional:
 
 
 
+<a id="nestedatt--l7_ddos_auto_mitigation_action_choice"></a>
+### Nested Schema for `l7_ddos_auto_mitigation_action_choice`
+
+Optional:
+
+- `l7_ddos_action_block` (Boolean) block Block suspicious sources<br>Conflicts with `l7_ddos_action_default` and `l7_ddos_action_js_challenge`.
+- `l7_ddos_action_default` (Boolean) Default Block suspicious sources<br>Conflicts with `l7_ddos_action_block` and `l7_ddos_action_js_challenge`.
+- `l7_ddos_action_js_challenge` (Attributes) JavaScript Challenge Serve JavaScript challenge to suspicious sources<br>Conflicts with `l7_ddos_action_block` and `l7_ddos_action_default`. (see [below for nested schema](#nestedatt--l7_ddos_auto_mitigation_action_choice--l7_ddos_action_js_challenge))
+
+<a id="nestedatt--l7_ddos_auto_mitigation_action_choice--l7_ddos_action_js_challenge"></a>
+### Nested Schema for `l7_ddos_auto_mitigation_action_choice.l7_ddos_action_js_challenge`
+
+Optional:
+
+- `cookie_expiry` (Number) cookie_expiry Cookie expiration period, in seconds. An expired cookie causes the loadbalancer to issue a new challenge.<br>**Default:** `3600`
+- `custom_page` (String) custom_page Custom message is of type uri_ref. Currently supported URL schemes is string:///. For string:/// scheme, message needs to be encoded in Base64 format. You can specify this message as base64 encoded plain text message e.g. 'Please Wait..' or it can be HTML paragraph or a body string encoded as base64 string E.g. '<p> Please Wait </p>'. Base64 encoded string for this html is 'PHA+IFBsZWFzZSBXYWl0IDwvcD4='<br>**Validation:** `Length LengthAtMost(65536)`
+- `js_script_delay` (Number) js_script_delay Delay introduced by Javascript, in milliseconds.<br>**Default:** `5000`
+
+
+
 <a id="nestedatt--malicious_user_detection_choice"></a>
 ### Nested Schema for `malicious_user_detection_choice`
 
 Optional:
 
-- `disable_malicious_user_detection` (Boolean) Disable malicious user detection Disable malicious user detection for this distribution
-- `enable_malicious_user_detection` (Boolean) Enable malicious user detection Enable malicious user detection for all requests in this distribution
+- `disable_malicious_user_detection` (Boolean) Disable malicious user detection Disable malicious user detection for this distribution<br>Conflicts with `enable_malicious_user_detection`.
+- `enable_malicious_user_detection` (Boolean) Enable malicious user detection Enable malicious user detection for all requests in this distribution<br>Conflicts with `disable_malicious_user_detection`.
 
 
 <a id="nestedatt--other_settings"></a>
@@ -1623,31 +1565,31 @@ Optional:
 Required:
 
 - `name` (String) name Name of the HTTP header.<br>**Validation:** `Length LengthAtMost(256)`
-- `value_choice` (Attributes) value Enter Header value as string or blindfolded secret. (see [below for nested schema](#nestedatt--other_settings--header_options--request_headers_to_add--value_choice))
+- `value_choice` (Attributes) value Enter Header value as string or blindfolded secret.<br>Exactly one of `secret_value` or `value` must be specified. (see [below for nested schema](#nestedatt--other_settings--header_options--request_headers_to_add--value_choice))
 
 <a id="nestedatt--other_settings--header_options--request_headers_to_add--value_choice"></a>
 ### Nested Schema for `other_settings.header_options.request_headers_to_add.value_choice`
 
 Optional:
 
-- `secret_value` (Attributes) Secret Value Secret Value of the HTTP header. (see [below for nested schema](#nestedatt--other_settings--header_options--request_headers_to_add--value_choice--secret_value))
-- `value` (String) value Value of the HTTP header.<br>**Validation:** `Length LengthAtMost(8096)`
+- `secret_value` (Attributes) Secret Value Secret Value of the HTTP header.<br>Conflicts with `value`. (see [below for nested schema](#nestedatt--other_settings--header_options--request_headers_to_add--value_choice--secret_value))
+- `value` (String) value Value of the HTTP header.<br>**Validation:** `Length LengthAtMost(8096)`<br>Conflicts with `secret_value`.
 
 <a id="nestedatt--other_settings--header_options--request_headers_to_add--value_choice--secret_value"></a>
 ### Nested Schema for `other_settings.header_options.request_headers_to_add.value_choice.secret_value`
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--other_settings--header_options--request_headers_to_add--value_choice--secret_value--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--other_settings--header_options--request_headers_to_add--value_choice--secret_value--secret_info_choice))
 
 <a id="nestedatt--other_settings--header_options--request_headers_to_add--value_choice--secret_value--secret_info_choice"></a>
 ### Nested Schema for `other_settings.header_options.request_headers_to_add.value_choice.secret_value.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--other_settings--header_options--request_headers_to_add--value_choice--secret_value--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--other_settings--header_options--request_headers_to_add--value_choice--secret_value--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--other_settings--header_options--request_headers_to_add--value_choice--secret_value--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--other_settings--header_options--request_headers_to_add--value_choice--secret_value--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--other_settings--header_options--request_headers_to_add--value_choice--secret_value--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `other_settings.header_options.request_headers_to_add.value_choice.secret_value.secret_info_choice.blindfold_secret_info`
@@ -1684,31 +1626,31 @@ Optional:
 Required:
 
 - `name` (String) name Name of the HTTP header.<br>**Validation:** `Length LengthAtMost(256)`
-- `value_choice` (Attributes) value Enter Header value as string or blindfolded secret. (see [below for nested schema](#nestedatt--other_settings--header_options--response_headers_to_add--value_choice))
+- `value_choice` (Attributes) value Enter Header value as string or blindfolded secret.<br>Exactly one of `secret_value` or `value` must be specified. (see [below for nested schema](#nestedatt--other_settings--header_options--response_headers_to_add--value_choice))
 
 <a id="nestedatt--other_settings--header_options--response_headers_to_add--value_choice"></a>
 ### Nested Schema for `other_settings.header_options.response_headers_to_add.value_choice`
 
 Optional:
 
-- `secret_value` (Attributes) Secret Value Secret Value of the HTTP header. (see [below for nested schema](#nestedatt--other_settings--header_options--response_headers_to_add--value_choice--secret_value))
-- `value` (String) value Value of the HTTP header.<br>**Validation:** `Length LengthAtMost(8096)`
+- `secret_value` (Attributes) Secret Value Secret Value of the HTTP header.<br>Conflicts with `value`. (see [below for nested schema](#nestedatt--other_settings--header_options--response_headers_to_add--value_choice--secret_value))
+- `value` (String) value Value of the HTTP header.<br>**Validation:** `Length LengthAtMost(8096)`<br>Conflicts with `secret_value`.
 
 <a id="nestedatt--other_settings--header_options--response_headers_to_add--value_choice--secret_value"></a>
 ### Nested Schema for `other_settings.header_options.response_headers_to_add.value_choice.secret_value`
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--other_settings--header_options--response_headers_to_add--value_choice--secret_value--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--other_settings--header_options--response_headers_to_add--value_choice--secret_value--secret_info_choice))
 
 <a id="nestedatt--other_settings--header_options--response_headers_to_add--value_choice--secret_value--secret_info_choice"></a>
 ### Nested Schema for `other_settings.header_options.response_headers_to_add.value_choice.secret_value.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--other_settings--header_options--response_headers_to_add--value_choice--secret_value--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--other_settings--header_options--response_headers_to_add--value_choice--secret_value--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--other_settings--header_options--response_headers_to_add--value_choice--secret_value--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--other_settings--header_options--response_headers_to_add--value_choice--secret_value--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--other_settings--header_options--response_headers_to_add--value_choice--secret_value--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `other_settings.header_options.response_headers_to_add.value_choice.secret_value.secret_info_choice.blindfold_secret_info`
@@ -1771,22 +1713,22 @@ Optional:
 
 Required:
 
-- `cookie_tampering_choice` (Attributes) cookie_tampering Cookie Tampering Protection prevents attackers from modifying the value of session cookies. To use this feature, Web Application Firewall must be enabled. (see [below for nested schema](#nestedatt--protected_cookies--cookie_tampering_choice))
 - `name` (String) name Name of the Cookie<br>**Validation:** `Length LengthAtMost(256)`
 
 Optional:
 
-- `httponly_choice` (Attributes) httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript. (see [below for nested schema](#nestedatt--protected_cookies--httponly_choice))
-- `samesite_choice` (Attributes) samesite Controls whether or not a cookie is sent with cross-site requests (see [below for nested schema](#nestedatt--protected_cookies--samesite_choice))
-- `secure_choice` (Attributes) secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks. (see [below for nested schema](#nestedatt--protected_cookies--secure_choice))
+- `cookie_tampering_choice` (Attributes) cookie_tampering Cookie Tampering Protection prevents attackers from modifying the value of session cookies. To use this feature, Web Application Firewall must be enabled.<br>Exactly one of `disable_tampering_protection` or `enable_tampering_protection` must be specified when `cookie_tampering_choice` is configured. (see [below for nested schema](#nestedatt--protected_cookies--cookie_tampering_choice))
+- `httponly_choice` (Attributes) httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript.<br>Exactly one of `add_httponly` or `ignore_httponly` must be specified when `httponly_choice` is configured. (see [below for nested schema](#nestedatt--protected_cookies--httponly_choice))
+- `samesite_choice` (Attributes) samesite Controls whether or not a cookie is sent with cross-site requests<br>Exactly one of `ignore_samesite`, `samesite_lax`, `samesite_none`, or `samesite_strict` must be specified when `samesite_choice` is configured. (see [below for nested schema](#nestedatt--protected_cookies--samesite_choice))
+- `secure_choice` (Attributes) secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks.<br>Exactly one of `add_secure` or `ignore_secure` must be specified when `secure_choice` is configured. (see [below for nested schema](#nestedatt--protected_cookies--secure_choice))
 
 <a id="nestedatt--protected_cookies--cookie_tampering_choice"></a>
 ### Nested Schema for `protected_cookies.cookie_tampering_choice`
 
 Optional:
 
-- `disable_tampering_protection` (Boolean) disable
-- `enable_tampering_protection` (Boolean) enable
+- `disable_tampering_protection` (Boolean) disable<br>Conflicts with `enable_tampering_protection`.
+- `enable_tampering_protection` (Boolean) enable<br>Conflicts with `disable_tampering_protection`.
 
 
 <a id="nestedatt--protected_cookies--httponly_choice"></a>
@@ -1794,8 +1736,8 @@ Optional:
 
 Optional:
 
-- `add_httponly` (Boolean) add_httponly
-- `ignore_httponly` (Boolean) ignore_httponly
+- `add_httponly` (Boolean) add_httponly<br>Conflicts with `ignore_httponly`.
+- `ignore_httponly` (Boolean) ignore_httponly<br>Conflicts with `add_httponly`.
 
 
 <a id="nestedatt--protected_cookies--samesite_choice"></a>
@@ -1803,10 +1745,10 @@ Optional:
 
 Optional:
 
-- `ignore_samesite` (Boolean) ignore_samesite Ignore Samesite attribute
-- `samesite_lax` (Boolean) lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests
-- `samesite_none` (Boolean) none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests
-- `samesite_strict` (Boolean) strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests
+- `ignore_samesite` (Boolean) ignore_samesite Ignore Samesite attribute<br>Conflicts with `samesite_lax`, `samesite_none`, and `samesite_strict`.
+- `samesite_lax` (Boolean) lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests<br>Conflicts with `ignore_samesite`, `samesite_none`, and `samesite_strict`.
+- `samesite_none` (Boolean) none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests<br>Conflicts with `ignore_samesite`, `samesite_lax`, and `samesite_strict`.
+- `samesite_strict` (Boolean) strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests<br>Conflicts with `ignore_samesite`, `samesite_lax`, and `samesite_none`.
 
 
 <a id="nestedatt--protected_cookies--secure_choice"></a>
@@ -1814,8 +1756,8 @@ Optional:
 
 Optional:
 
-- `add_secure` (Boolean) add_secure
-- `ignore_secure` (Boolean) ignore_secure
+- `add_secure` (Boolean) add_secure<br>Conflicts with `ignore_secure`.
+- `ignore_secure` (Boolean) ignore_secure<br>Conflicts with `add_secure`.
 
 
 
@@ -1824,382 +1766,18 @@ Optional:
 
 Optional:
 
-- `api_rate_limit` (Attributes) Rate Limiting Parameters Define rate limiting for one or more API endpoints (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit))
-- `disable_rate_limit` (Boolean) Disable Rate Limiting Rate limiting is not currently enabled for this load balancer
-- `rate_limit` (Attributes) Custom Rate Limiting Parameters Define custom rate limiting parameters for this load balancer (see [below for nested schema](#nestedatt--rate_limit_choice--rate_limit))
+- `api_rate_limit` (Attributes) Rate Limiting Parameters Define rate limiting for one or more API endpoints<br>Conflicts with `disable_rate_limit` and `rate_limit`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit))
+- `disable_rate_limit` (Boolean) Disable Rate Limiting Rate limiting is not currently enabled for this load balancer<br>Conflicts with `api_rate_limit` and `rate_limit`.
+- `rate_limit` (Attributes) Custom Rate Limiting Parameters Define custom rate limiting parameters for this load balancer<br>Conflicts with `api_rate_limit` and `disable_rate_limit`. (see [below for nested schema](#nestedatt--rate_limit_choice--rate_limit))
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit"></a>
 ### Nested Schema for `rate_limit_choice.api_rate_limit`
 
-Required:
-
-- `ip_allowed_list_choice` (Attributes) IP Allowed List Allowed List of IPs for which rate limiting will be disabled. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice))
-
 Optional:
 
 - `api_endpoint_rules` (Attributes List) api_endpoint_policy Sets of rules for a specific endpoints. Order is matter as it uses first match policy. For creating rule that contain a whole domain or group of endpoints, please use the server URL rules above. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules))
+- `ip_allowed_list_choice` (Attributes) IP Allowed List Allowed List of IPs for which rate limiting will be disabled.<br>Exactly one of `bypass_rate_limiting_rules`, `custom_ip_allowed_list`, `ip_allowed_list`, or `no_ip_allowed_list` must be specified when `ip_allowed_list_choice` is configured. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice))
 - `server_url_rules` (Attributes List) server_url_policy Set of rules for entire domain or base path that contain multiple endpoints. Order is matter as it uses first match policy. For matching also specific endpoints you can use the API endpoint rules set bellow. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules))
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice`
-
-Optional:
-
-- `bypass_rate_limiting_rules` (Attributes) bypass_rate_limiting_policy This category defines rules per URL or API group. If request matches any of these rules, skip Rate Limiting. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules))
-- `custom_ip_allowed_list` (Attributes) Custom IP list IP Allowed list using existing ip_prefix_set objects. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--custom_ip_allowed_list))
-- `ip_allowed_list` (Attributes) IP Allowed List List of IP(s) for which rate limiting will be disabled. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--ip_allowed_list))
-- `no_ip_allowed_list` (Boolean) No IP Allowed List There is no ip allowed list for rate limiting, all clients go through rate limiting.
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules`
-
-Optional:
-
-- `bypass_rate_limiting_rules` (Attributes List) bypass_rate_limiting_policy This category defines rules per URL or API group. If request matches any of these rules, skip Rate Limiting. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules))
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules`
-
-Required:
-
-- `destination_type_choice` (Attributes) TYpe (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--destination_type_choice))
-- `domain_choice` (Attributes) domain choices Choose if the rule will apply for all domains or a specific one. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--domain_choice))
-
-Optional:
-
-- `client_matcher` (Attributes) client_matcher Conditions related to the origin of the request, such as client IP, TLS fingerprint, etc. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher))
-- `request_matcher` (Attributes) request_matcher Conditions related to the request, such as query parameters, headers, etc. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher))
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--destination_type_choice"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.destination_type_choice`
-
-Optional:
-
-- `any_url` (Boolean) any_url Any URL
-- `api_endpoint` (Attributes) api endpoint path The endpoint (path) of the request. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--destination_type_choice--api_endpoint))
-- `api_groups` (Attributes) api group Validation will be performed for the endpoints mentioned in the API Groups (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--destination_type_choice--api_groups))
-- `base_path` (String) base path The base path which this validation applies to<br>**Validation:** `Length LengthAtMost(128)`
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--destination_type_choice--api_endpoint"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.destination_type_choice.api_endpoint`
-
-Required:
-
-- `path` (String) Path Path to be matched<br>**Validation:** `Length LengthAtMost(1024)`
-
-Optional:
-
-- `methods` (List of String) Methods Methods to be matched<br>**Valid Options:** `['ANY', 'CONNECT', 'COPY', 'DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT', 'TRACE']` (Multiple selection allowed)
-
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--destination_type_choice--api_groups"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.destination_type_choice.api_groups`
-
-Required:
-
-- `api_groups` (List of String) api group
-
-
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--domain_choice"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.domain_choice`
-
-Optional:
-
-- `any_domain` (Boolean) any domain The rule will apply for all domains.
-- `specific_domain` (String) domain The rule will apply for a specific domain. For example: api.example.com<br>**Validation:** `Length LengthAtMost(128)`
-
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.client_matcher`
-
-Required:
-
-- `client_choice` (Attributes) client choice Select clients for which the rule will be applied. The actual names of the client are extracted from its TLS certificate. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--client_choice))
-- `ip_asn_choice` (Attributes) ip asn choice Match source IP address/ASN  of the request (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice))
-
-Optional:
-
-- `tls_fingerprint_matcher` (Attributes) TLS JA3 fingerprint matcher TLS JA3 fingerprints to be matched. The predicate evaluates to true if the TLS fingerprint matches any of the exact values or classes of known TLS fingerprints. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--tls_fingerprint_matcher))
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--client_choice"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.client_matcher.client_choice`
-
-Optional:
-
-- `any_client` (Boolean) any ip Any Client
-- `client_selector` (Attributes) client selector A label selector that describes the expected set of clients. The labels associated with the client making the API request are used to evaluate the label expressions in the selector. These labels can be derived from the client TLS certificate or from the volterra internal control plane. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--client_choice--client_selector))
-- `ip_threat_category_list` (Attributes) IP Threat Category List IP threat categories to choose from (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--client_choice--ip_threat_category_list))
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--client_choice--client_selector"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.client_matcher.client_choice.client_selector`
-
-Required:
-
-- `expressions` (List of String) expressions expressions contains the kubernetes style label expression for selections.
-
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--client_choice--ip_threat_category_list"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.client_matcher.client_choice.ip_threat_category_list`
-
-Required:
-
-- `ip_threat_categories` (List of String) IP Threat Categories The IP threat categories is obtained from the list and is used to auto-generate equivalent label selection expressions<br>**Valid Options:** `['BOTNETS', 'DENIAL_OF_SERVICE', 'MOBILE_THREATS', 'NETWORK', 'PHISHING', 'PROXY', 'REPUTATION', 'SCANNERS', 'SPAM_SOURCES', 'TOR_PROXY', 'WEB_ATTACKS', 'WINDOWS_EXPLOITS']` (Multiple selection allowed)
-
-
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.client_matcher.ip_asn_choice`
-
-Optional:
-
-- `any_ip` (Boolean) any ip Any Source IP
-- `asn_list` (Attributes) asn list List of 4-byte ASN values. The predicate evaluates to true if the origin ASN is present in the ASN list. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice--asn_list))
-- `asn_matcher` (Attributes) asn matcher List of references to BGP ASN Set objects. The predicate evaluates to true if the origin ASN is present in one of the BGP ASN Set objects. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice--asn_matcher))
-- `ip_matcher` (Attributes) ip matcher List of references to IP Prefix Set objects. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes in the IP Prefix Sets. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice--ip_matcher))
-- `ip_prefix_list` (Attributes) ip prefix list List of IP Prefixes values. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes from the list. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice--ip_prefix_list))
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice--asn_list"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.client_matcher.ip_asn_choice.asn_list`
-
-Required:
-
-- `as_numbers` (List of Number) as numbers An unordered set of RFC 6793 defined 4-byte AS numbers that can be used to create allow or deny lists for use in network policy or service policy. It can be used to create the allow list only for DNS Load Balancer.
-
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice--asn_matcher"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.client_matcher.ip_asn_choice.asn_matcher`
-
-Required:
-
-- `asn_sets` (Attributes List) asn_sets A list of references to bgp_asn_set objects. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice--asn_matcher--asn_sets))
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice--asn_matcher--asn_sets"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.client_matcher.ip_asn_choice.asn_matcher.asn_sets`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice--ip_matcher"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.client_matcher.ip_asn_choice.ip_matcher`
-
-Required:
-
-- `prefix_sets` (Attributes List) prefix_sets A list of references to ip_prefix_set objects. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice--ip_matcher--prefix_sets))
-
-Optional:
-
-- `invert_matcher` (Boolean) invert_matcher Invert the match result.<br>**Default:** `false`
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice--ip_matcher--prefix_sets"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.client_matcher.ip_asn_choice.ip_matcher.prefix_sets`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice--ip_prefix_list"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.client_matcher.ip_asn_choice.ip_prefix_list`
-
-Optional:
-
-- `invert_match` (Boolean) invert_matcher Invert the match result.<br>**Default:** `false`
-- `ip_prefixes` (List of String) ip prefixes List of IPv4 prefix strings.
-- `ipv6_prefixes` (List of String) ipv6 prefixes List of IPv6 prefix strings.
-
-
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--tls_fingerprint_matcher"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.client_matcher.tls_fingerprint_matcher`
-
-Optional:
-
-- `classes` (List of String) classes A list of known classes of TLS fingerprints to match the input TLS JA3 fingerprint against.<br>**Valid Options:** `['ADWARE', 'ADWIND', 'ANY_MALICIOUS_FINGERPRINT', 'DRIDEX', 'GOOTKIT', 'GOZI', 'JBIFROST', 'QUAKBOT', 'RANSOMWARE', 'TOFSEE', 'TORRENTLOCKER', 'TRICKBOT', 'TROLDESH']` (Multiple selection allowed)
-- `exact_values` (List of String) exact values A list of exact TLS JA3 fingerprints to match the input TLS JA3 fingerprint against.
-- `excluded_values` (List of String) excluded values A list of TLS JA3 fingerprints to be excluded when matching the input TLS JA3 fingerprint. This can be used to skip known false positives when using one or more known TLS fingerprint classes in the enclosing matcher.
-
-
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.request_matcher`
-
-Optional:
-
-- `cookie_matchers` (Attributes List) cookie matchers A list of predicates for all cookies that need to be matched. The criteria for matching each cookie is described in individual instances of CookieMatcherType. The actual cookie values are extracted from the request API as a list of strings for each cookie name. Note that all specified cookie matcher predicates must evaluate to true. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--cookie_matchers))
-- `headers` (Attributes List) headers A list of predicates for various HTTP headers that need to match. The criteria for matching each HTTP header are described in individual HeaderMatcherType instances. The actual HTTP header values are extracted from the request API as a list of strings for each HTTP header type. Note that all specified header predicates must evaluate to true. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--headers))
-- `jwt_claims` (Attributes List) JWT claims A list of predicates for various JWT claims that need to match. The criteria for matching each JWT claim are described in individual JWTClaimMatcherType instances. The actual JWT claims values are extracted from the JWT payload as a list of strings. Note that all specified JWT claim predicates must evaluate to true. Note that this feature only works on LBs with JWT Validation feature enabled. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--jwt_claims))
-- `query_params` (Attributes List) query params A list of predicates for all query parameters that need to be matched. The criteria for matching each query parameter are described in individual instances of QueryParameterMatcherType. The actual query parameter values are extracted from the request API as a list of strings for each query parameter name. Note that all specified query parameter predicates must evaluate to true. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--query_params))
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--cookie_matchers"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.request_matcher.cookie_matchers`
-
-Required:
-
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--cookie_matchers--match_choice))
-- `name` (String) name A case-sensitive cookie name.
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--cookie_matchers--match_choice"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.request_matcher.cookie_matchers.match_choice`
-
-Optional:
-
-- `item` (Attributes) item Criteria for matching the values for the cookie. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--cookie_matchers--match_choice--item))
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--cookie_matchers--match_choice--item"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.request_matcher.cookie_matchers.match_choice.item`
-
-Optional:
-
-- `exact_values` (List of String) exact values A list of exact values to match the input against.
-- `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-
-
-
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--headers"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.request_matcher.headers`
-
-Required:
-
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--headers--match_choice))
-- `name` (String) name A case-insensitive HTTP header name.
-
-Optional:
-
-- `invert_matcher` (Boolean) invert_matcher Invert the match result.<br>**Default:** `false`
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--headers--match_choice"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.request_matcher.headers.match_choice`
-
-Optional:
-
-- `check_not_present` (Boolean) check_not_present Check that the header is not present.
-- `check_present` (Boolean) check_present Check that the header is present.
-- `item` (Attributes) item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--headers--match_choice--item))
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--headers--match_choice--item"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.request_matcher.headers.match_choice.item`
-
-Optional:
-
-- `exact_values` (List of String) exact values A list of exact values to match the input against.
-- `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-
-
-
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--jwt_claims"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.request_matcher.jwt_claims`
-
-Required:
-
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--jwt_claims--match_choice))
-- `name` (String) name JWT claim name.
-
-Optional:
-
-- `invert_matcher` (Boolean) invert_matcher Invert the match result.<br>**Default:** `false`
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--jwt_claims--match_choice"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.request_matcher.jwt_claims.match_choice`
-
-Optional:
-
-- `check_not_present` (Boolean) check_not_present Check that the JWT Claim is not present.
-- `check_present` (Boolean) check_present Check that the JWT Claim is present.
-- `item` (Attributes) item Criteria for matching the values for the JWT Claim. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--jwt_claims--match_choice--item))
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--jwt_claims--match_choice--item"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.request_matcher.jwt_claims.match_choice.item`
-
-Optional:
-
-- `exact_values` (List of String) exact values A list of exact values to match the input against.
-- `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-
-
-
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--query_params"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.request_matcher.query_params`
-
-Required:
-
-- `key` (String) key A case-sensitive HTTP query parameter name.
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--query_params--match_choice))
-
-Optional:
-
-- `invert_matcher` (Boolean) invert_matcher Invert the match result.<br>**Default:** `false`
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--query_params--match_choice"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.request_matcher.query_params.match_choice`
-
-Optional:
-
-- `check_not_present` (Boolean) check_not_present Check that the query parameter is not present.
-- `check_present` (Boolean) check_present Check that the query parameter is present.
-- `item` (Attributes) item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--query_params--match_choice--item))
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--query_params--match_choice--item"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.request_matcher.query_params.match_choice.item`
-
-Optional:
-
-- `exact_values` (List of String) exact values A list of exact values to match the input against.
-- `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-
-
-
-
-
-
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--custom_ip_allowed_list"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.custom_ip_allowed_list`
-
-Required:
-
-- `rate_limiter_allowed_prefixes` (Attributes List) rate_limiter_allowed_prefixes References to ip_prefix_set objects. Requests from source IP addresses that are covered by one of the allowed IP Prefixes are not subjected to rate limiting. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--custom_ip_allowed_list--rate_limiter_allowed_prefixes))
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--custom_ip_allowed_list--rate_limiter_allowed_prefixes"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.custom_ip_allowed_list.rate_limiter_allowed_prefixes`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--ip_allowed_list"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.ip_allowed_list`
-
-Optional:
-
-- `ipv6_prefixes` (List of String) ipv6 prefixes List of IPv6 prefix strings.
-- `prefixes` (List of String) ipv4 prefix list List of IPv4 prefixes that represent an endpoint
-
-
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules"></a>
 ### Nested Schema for `rate_limit_choice.api_rate_limit.api_endpoint_rules`
@@ -2207,42 +1785,33 @@ Optional:
 Required:
 
 - `api_endpoint_path` (String) api endpoint path The endpoint (path) of the request.<br>**Validation:** `Length LengthAtMost(1024)`
-- `domain_choice` (Attributes) domain choices Choose if the rule will apply for all domains or a specific one. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--domain_choice))
-- `rate_limiter_choice` (Attributes) Rate limit values This defines the values of the rate limiter. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--rate_limiter_choice))
+- `rate_limiter_choice` (Attributes) Rate limit values This defines the values of the rate limiter.<br>Exactly one of `inline_rate_limiter` or `ref_rate_limiter` must be specified. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--rate_limiter_choice))
 
 Optional:
 
 - `api_endpoint_method` (Attributes) method The list of expected values for the HTTP method in the request API. The actual value of the HTTP method is extracted from the HTTP request. The predicate evaluates to true if the actual HTTP method belongs is present in the list of expected values. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--api_endpoint_method))
 - `client_matcher` (Attributes) client_matcher Conditions related to the origin of the request, such as client IP, TLS fingerprint, etc. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--client_matcher))
+- `domain_choice` (Attributes) domain choices Choose if the rule will apply for all domains or a specific one.<br>Exactly one of `any_domain` or `specific_domain` must be specified when `domain_choice` is configured. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--domain_choice))
 - `request_matcher` (Attributes) request_matcher Conditions related to the request, such as query parameters, headers, etc. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--request_matcher))
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--domain_choice"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.api_endpoint_rules.domain_choice`
-
-Optional:
-
-- `any_domain` (Boolean) any domain The rule will apply for all domains.
-- `specific_domain` (String) domain The rule will apply for a specific domain.<br>**Validation:** `Length LengthAtMost(128)`
-
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--rate_limiter_choice"></a>
 ### Nested Schema for `rate_limit_choice.api_rate_limit.api_endpoint_rules.rate_limiter_choice`
 
 Optional:
 
-- `inline_rate_limiter` (Attributes) Inline Rate Limiter Specify rate values for the rule. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--rate_limiter_choice--inline_rate_limiter))
-- `ref_rate_limiter` (Attributes) External Rate Limiter Select external rate limiter. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--rate_limiter_choice--ref_rate_limiter))
+- `inline_rate_limiter` (Attributes) Inline Rate Limiter Specify rate values for the rule.<br>Conflicts with `ref_rate_limiter`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--rate_limiter_choice--inline_rate_limiter))
+- `ref_rate_limiter` (Attributes) External Rate Limiter Select external rate limiter.<br>Conflicts with `inline_rate_limiter`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--rate_limiter_choice--ref_rate_limiter))
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--rate_limiter_choice--inline_rate_limiter"></a>
 ### Nested Schema for `rate_limit_choice.api_rate_limit.api_endpoint_rules.rate_limiter_choice.inline_rate_limiter`
 
 Required:
 
-- `count_by_choice` (Attributes) Count by The classification criteria for requests counts. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--rate_limiter_choice--inline_rate_limiter--count_by_choice))
 - `unit` (List of String) rate Unit for the period per which the rate limit is applied.<br>**Allowed Values (choose one):** `['DAY', 'HOUR', 'MINUTE', 'SECOND']`
 
 Optional:
 
+- `count_by_choice` (Attributes) Count by The classification criteria for requests counts.<br>Exactly one of `ref_user_id` or `use_http_lb_user_id` must be specified when `count_by_choice` is configured. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--rate_limiter_choice--inline_rate_limiter--count_by_choice))
 - `threshold` (Number) threshold The total number of allowed requests for 1 unit (e.g. SECOND/MINUTE/HOUR etc.) of the specified period.<br>**Default:** `1`
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--rate_limiter_choice--inline_rate_limiter--count_by_choice"></a>
@@ -2250,8 +1819,8 @@ Optional:
 
 Optional:
 
-- `ref_user_id` (Attributes) ref_user_id A reference to user_identification object. The rules in the user_identification object are evaluated to determine the user identifier to be rate limited. If traffic cannot be identified by the rules in the user_identification object, by default it will be identified by the HTTP-LB User Identifier. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--rate_limiter_choice--inline_rate_limiter--count_by_choice--ref_user_id))
-- `use_http_lb_user_id` (Boolean) use_http_lb_user_id Defined in HTTP-LB Security Configuration -> User Identifier.
+- `ref_user_id` (Attributes) ref_user_id A reference to user_identification object. The rules in the user_identification object are evaluated to determine the user identifier to be rate limited. If traffic cannot be identified by the rules in the user_identification object, by default it will be identified by the HTTP-LB User Identifier.<br>Conflicts with `use_http_lb_user_id`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--rate_limiter_choice--inline_rate_limiter--count_by_choice--ref_user_id))
+- `use_http_lb_user_id` (Boolean) use_http_lb_user_id Defined in HTTP-LB Security Configuration -> User Identifier.<br>Conflicts with `ref_user_id`.
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--rate_limiter_choice--inline_rate_limiter--count_by_choice--ref_user_id"></a>
 ### Nested Schema for `rate_limit_choice.api_rate_limit.api_endpoint_rules.rate_limiter_choice.inline_rate_limiter.count_by_choice.ref_user_id`
@@ -2294,13 +1863,10 @@ Optional:
 <a id="nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--client_matcher"></a>
 ### Nested Schema for `rate_limit_choice.api_rate_limit.api_endpoint_rules.client_matcher`
 
-Required:
-
-- `client_choice` (Attributes) client choice Select clients for which the rule will be applied. The actual names of the client are extracted from its TLS certificate. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--client_matcher--client_choice))
-- `ip_asn_choice` (Attributes) ip asn choice Match source IP address/ASN  of the request (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--client_matcher--ip_asn_choice))
-
 Optional:
 
+- `client_choice` (Attributes) client choice Select clients for which the rule will be applied. The actual names of the client are extracted from its TLS certificate.<br>Exactly one of `any_client`, `client_selector`, or `ip_threat_category_list` must be specified when `client_choice` is configured. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--client_matcher--client_choice))
+- `ip_asn_choice` (Attributes) ip asn choice Match source IP address/ASN  of the request<br>Exactly one of `any_ip`, `asn_list`, `asn_matcher`, `ip_matcher`, or `ip_prefix_list` must be specified when `ip_asn_choice` is configured. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--client_matcher--ip_asn_choice))
 - `tls_fingerprint_matcher` (Attributes) TLS JA3 fingerprint matcher TLS JA3 fingerprints to be matched. The predicate evaluates to true if the TLS fingerprint matches any of the exact values or classes of known TLS fingerprints. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--client_matcher--tls_fingerprint_matcher))
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--client_matcher--client_choice"></a>
@@ -2308,9 +1874,9 @@ Optional:
 
 Optional:
 
-- `any_client` (Boolean) any ip Any Client
-- `client_selector` (Attributes) client selector A label selector that describes the expected set of clients. The labels associated with the client making the API request are used to evaluate the label expressions in the selector. These labels can be derived from the client TLS certificate or from the volterra internal control plane. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--client_matcher--client_choice--client_selector))
-- `ip_threat_category_list` (Attributes) IP Threat Category List IP threat categories to choose from (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--client_matcher--client_choice--ip_threat_category_list))
+- `any_client` (Boolean) any ip Any Client<br>Conflicts with `client_selector` and `ip_threat_category_list`.
+- `client_selector` (Attributes) client selector A label selector that describes the expected set of clients. The labels associated with the client making the API request are used to evaluate the label expressions in the selector. These labels can be derived from the client TLS certificate or from the volterra internal control plane. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.<br>Conflicts with `any_client` and `ip_threat_category_list`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--client_matcher--client_choice--client_selector))
+- `ip_threat_category_list` (Attributes) IP Threat Category List IP threat categories to choose from<br>Conflicts with `any_client` and `client_selector`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--client_matcher--client_choice--ip_threat_category_list))
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--client_matcher--client_choice--client_selector"></a>
 ### Nested Schema for `rate_limit_choice.api_rate_limit.api_endpoint_rules.client_matcher.client_choice.client_selector`
@@ -2334,11 +1900,11 @@ Required:
 
 Optional:
 
-- `any_ip` (Boolean) any ip Any Source IP
-- `asn_list` (Attributes) asn list List of 4-byte ASN values. The predicate evaluates to true if the origin ASN is present in the ASN list. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--client_matcher--ip_asn_choice--asn_list))
-- `asn_matcher` (Attributes) asn matcher List of references to BGP ASN Set objects. The predicate evaluates to true if the origin ASN is present in one of the BGP ASN Set objects. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--client_matcher--ip_asn_choice--asn_matcher))
-- `ip_matcher` (Attributes) ip matcher List of references to IP Prefix Set objects. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes in the IP Prefix Sets. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--client_matcher--ip_asn_choice--ip_matcher))
-- `ip_prefix_list` (Attributes) ip prefix list List of IP Prefixes values. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes from the list. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--client_matcher--ip_asn_choice--ip_prefix_list))
+- `any_ip` (Boolean) any ip Any Source IP<br>Conflicts with `asn_list`, `asn_matcher`, `ip_matcher`, and `ip_prefix_list`.
+- `asn_list` (Attributes) asn list List of 4-byte ASN values. The predicate evaluates to true if the origin ASN is present in the ASN list.<br>Conflicts with `any_ip`, `asn_matcher`, `ip_matcher`, and `ip_prefix_list`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--client_matcher--ip_asn_choice--asn_list))
+- `asn_matcher` (Attributes) asn matcher List of references to BGP ASN Set objects. The predicate evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.<br>Conflicts with `any_ip`, `asn_list`, `ip_matcher`, and `ip_prefix_list`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--client_matcher--ip_asn_choice--asn_matcher))
+- `ip_matcher` (Attributes) ip matcher List of references to IP Prefix Set objects. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes in the IP Prefix Sets.<br>Conflicts with `any_ip`, `asn_list`, `asn_matcher`, and `ip_prefix_list`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--client_matcher--ip_asn_choice--ip_matcher))
+- `ip_prefix_list` (Attributes) ip prefix list List of IP Prefixes values. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes from the list.<br>Conflicts with `any_ip`, `asn_list`, `asn_matcher`, and `ip_matcher`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--client_matcher--ip_asn_choice--ip_prefix_list))
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--client_matcher--ip_asn_choice--asn_list"></a>
 ### Nested Schema for `rate_limit_choice.api_rate_limit.api_endpoint_rules.client_matcher.ip_asn_choice.asn_list`
@@ -2416,6 +1982,15 @@ Optional:
 
 
 
+<a id="nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--domain_choice"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.api_endpoint_rules.domain_choice`
+
+Optional:
+
+- `any_domain` (Boolean) any domain The rule will apply for all domains.<br>Conflicts with `specific_domain`.
+- `specific_domain` (String) domain The rule will apply for a specific domain.<br>**Validation:** `Length LengthAtMost(128)`<br>Conflicts with `any_domain`.
+
+
 <a id="nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--request_matcher"></a>
 ### Nested Schema for `rate_limit_choice.api_rate_limit.api_endpoint_rules.request_matcher`
 
@@ -2431,7 +2006,7 @@ Optional:
 
 Required:
 
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--request_matcher--cookie_matchers--match_choice))
+- `match_choice` (Attributes) match Select Match Options.<br>`item` must be specified. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--request_matcher--cookie_matchers--match_choice))
 - `name` (String) name A case-sensitive cookie name.
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--request_matcher--cookie_matchers--match_choice"></a>
@@ -2457,7 +2032,7 @@ Optional:
 
 Required:
 
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--request_matcher--headers--match_choice))
+- `match_choice` (Attributes) match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--request_matcher--headers--match_choice))
 - `name` (String) name A case-insensitive HTTP header name.
 
 Optional:
@@ -2469,9 +2044,9 @@ Optional:
 
 Optional:
 
-- `check_not_present` (Boolean) check_not_present Check that the header is not present.
-- `check_present` (Boolean) check_present Check that the header is present.
-- `item` (Attributes) item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--request_matcher--headers--match_choice--item))
+- `check_not_present` (Boolean) check_not_present Check that the header is not present.<br>Conflicts with `check_present` and `item`.
+- `check_present` (Boolean) check_present Check that the header is present.<br>Conflicts with `check_not_present` and `item`.
+- `item` (Attributes) item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--request_matcher--headers--match_choice--item))
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--request_matcher--headers--match_choice--item"></a>
 ### Nested Schema for `rate_limit_choice.api_rate_limit.api_endpoint_rules.request_matcher.headers.match_choice.item`
@@ -2489,7 +2064,7 @@ Optional:
 
 Required:
 
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--request_matcher--jwt_claims--match_choice))
+- `match_choice` (Attributes) match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--request_matcher--jwt_claims--match_choice))
 - `name` (String) name JWT claim name.
 
 Optional:
@@ -2501,9 +2076,9 @@ Optional:
 
 Optional:
 
-- `check_not_present` (Boolean) check_not_present Check that the JWT Claim is not present.
-- `check_present` (Boolean) check_present Check that the JWT Claim is present.
-- `item` (Attributes) item Criteria for matching the values for the JWT Claim. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--request_matcher--jwt_claims--match_choice--item))
+- `check_not_present` (Boolean) check_not_present Check that the JWT Claim is not present.<br>Conflicts with `check_present` and `item`.
+- `check_present` (Boolean) check_present Check that the JWT Claim is present.<br>Conflicts with `check_not_present` and `item`.
+- `item` (Attributes) item Criteria for matching the values for the JWT Claim. The match is successful if any of the values in the input satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--request_matcher--jwt_claims--match_choice--item))
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--request_matcher--jwt_claims--match_choice--item"></a>
 ### Nested Schema for `rate_limit_choice.api_rate_limit.api_endpoint_rules.request_matcher.jwt_claims.match_choice.item`
@@ -2522,7 +2097,7 @@ Optional:
 Required:
 
 - `key` (String) key A case-sensitive HTTP query parameter name.
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--request_matcher--query_params--match_choice))
+- `match_choice` (Attributes) match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--request_matcher--query_params--match_choice))
 
 Optional:
 
@@ -2533,9 +2108,9 @@ Optional:
 
 Optional:
 
-- `check_not_present` (Boolean) check_not_present Check that the query parameter is not present.
-- `check_present` (Boolean) check_present Check that the query parameter is present.
-- `item` (Attributes) item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--request_matcher--query_params--match_choice--item))
+- `check_not_present` (Boolean) check_not_present Check that the query parameter is not present.<br>Conflicts with `check_present` and `item`.
+- `check_present` (Boolean) check_present Check that the query parameter is present.<br>Conflicts with `check_not_present` and `item`.
+- `item` (Attributes) item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--request_matcher--query_params--match_choice--item))
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--request_matcher--query_params--match_choice--item"></a>
 ### Nested Schema for `rate_limit_choice.api_rate_limit.api_endpoint_rules.request_matcher.query_params.match_choice.item`
@@ -2550,48 +2125,394 @@ Optional:
 
 
 
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice`
+
+Optional:
+
+- `bypass_rate_limiting_rules` (Attributes) bypass_rate_limiting_policy This category defines rules per URL or API group. If request matches any of these rules, skip Rate Limiting.<br>Conflicts with `custom_ip_allowed_list`, `ip_allowed_list`, and `no_ip_allowed_list`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules))
+- `custom_ip_allowed_list` (Attributes) Custom IP list IP Allowed list using existing ip_prefix_set objects.<br>Conflicts with `bypass_rate_limiting_rules`, `ip_allowed_list`, and `no_ip_allowed_list`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--custom_ip_allowed_list))
+- `ip_allowed_list` (Attributes) IP Allowed List List of IP(s) for which rate limiting will be disabled.<br>Conflicts with `bypass_rate_limiting_rules`, `custom_ip_allowed_list`, and `no_ip_allowed_list`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--ip_allowed_list))
+- `no_ip_allowed_list` (Boolean) No IP Allowed List There is no ip allowed list for rate limiting, all clients go through rate limiting.<br>Conflicts with `bypass_rate_limiting_rules`, `custom_ip_allowed_list`, and `ip_allowed_list`.
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules`
+
+Optional:
+
+- `bypass_rate_limiting_rules` (Attributes List) bypass_rate_limiting_policy This category defines rules per URL or API group. If request matches any of these rules, skip Rate Limiting. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules))
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules`
+
+Optional:
+
+- `client_matcher` (Attributes) client_matcher Conditions related to the origin of the request, such as client IP, TLS fingerprint, etc. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher))
+- `destination_type_choice` (Attributes) TYpe<br>Exactly one of `any_url`, `api_endpoint`, `api_groups`, or `base_path` must be specified when `destination_type_choice` is configured. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--destination_type_choice))
+- `domain_choice` (Attributes) domain choices Choose if the rule will apply for all domains or a specific one.<br>Exactly one of `any_domain` or `specific_domain` must be specified when `domain_choice` is configured. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--domain_choice))
+- `request_matcher` (Attributes) request_matcher Conditions related to the request, such as query parameters, headers, etc. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher))
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.client_matcher`
+
+Optional:
+
+- `client_choice` (Attributes) client choice Select clients for which the rule will be applied. The actual names of the client are extracted from its TLS certificate.<br>Exactly one of `any_client`, `client_selector`, or `ip_threat_category_list` must be specified when `client_choice` is configured. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--client_choice))
+- `ip_asn_choice` (Attributes) ip asn choice Match source IP address/ASN  of the request<br>Exactly one of `any_ip`, `asn_list`, `asn_matcher`, `ip_matcher`, or `ip_prefix_list` must be specified when `ip_asn_choice` is configured. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice))
+- `tls_fingerprint_matcher` (Attributes) TLS JA3 fingerprint matcher TLS JA3 fingerprints to be matched. The predicate evaluates to true if the TLS fingerprint matches any of the exact values or classes of known TLS fingerprints. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--tls_fingerprint_matcher))
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--client_choice"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.client_matcher.client_choice`
+
+Optional:
+
+- `any_client` (Boolean) any ip Any Client<br>Conflicts with `client_selector` and `ip_threat_category_list`.
+- `client_selector` (Attributes) client selector A label selector that describes the expected set of clients. The labels associated with the client making the API request are used to evaluate the label expressions in the selector. These labels can be derived from the client TLS certificate or from the volterra internal control plane. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.<br>Conflicts with `any_client` and `ip_threat_category_list`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--client_choice--client_selector))
+- `ip_threat_category_list` (Attributes) IP Threat Category List IP threat categories to choose from<br>Conflicts with `any_client` and `client_selector`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--client_choice--ip_threat_category_list))
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--client_choice--client_selector"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.client_matcher.client_choice.client_selector`
+
+Required:
+
+- `expressions` (List of String) expressions expressions contains the kubernetes style label expression for selections.
+
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--client_choice--ip_threat_category_list"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.client_matcher.client_choice.ip_threat_category_list`
+
+Required:
+
+- `ip_threat_categories` (List of String) IP Threat Categories The IP threat categories is obtained from the list and is used to auto-generate equivalent label selection expressions<br>**Valid Options:** `['BOTNETS', 'DENIAL_OF_SERVICE', 'MOBILE_THREATS', 'NETWORK', 'PHISHING', 'PROXY', 'REPUTATION', 'SCANNERS', 'SPAM_SOURCES', 'TOR_PROXY', 'WEB_ATTACKS', 'WINDOWS_EXPLOITS']` (Multiple selection allowed)
+
+
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.client_matcher.ip_asn_choice`
+
+Optional:
+
+- `any_ip` (Boolean) any ip Any Source IP<br>Conflicts with `asn_list`, `asn_matcher`, `ip_matcher`, and `ip_prefix_list`.
+- `asn_list` (Attributes) asn list List of 4-byte ASN values. The predicate evaluates to true if the origin ASN is present in the ASN list.<br>Conflicts with `any_ip`, `asn_matcher`, `ip_matcher`, and `ip_prefix_list`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice--asn_list))
+- `asn_matcher` (Attributes) asn matcher List of references to BGP ASN Set objects. The predicate evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.<br>Conflicts with `any_ip`, `asn_list`, `ip_matcher`, and `ip_prefix_list`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice--asn_matcher))
+- `ip_matcher` (Attributes) ip matcher List of references to IP Prefix Set objects. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes in the IP Prefix Sets.<br>Conflicts with `any_ip`, `asn_list`, `asn_matcher`, and `ip_prefix_list`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice--ip_matcher))
+- `ip_prefix_list` (Attributes) ip prefix list List of IP Prefixes values. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes from the list.<br>Conflicts with `any_ip`, `asn_list`, `asn_matcher`, and `ip_matcher`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice--ip_prefix_list))
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice--asn_list"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.client_matcher.ip_asn_choice.asn_list`
+
+Required:
+
+- `as_numbers` (List of Number) as numbers An unordered set of RFC 6793 defined 4-byte AS numbers that can be used to create allow or deny lists for use in network policy or service policy. It can be used to create the allow list only for DNS Load Balancer.
+
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice--asn_matcher"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.client_matcher.ip_asn_choice.asn_matcher`
+
+Required:
+
+- `asn_sets` (Attributes List) asn_sets A list of references to bgp_asn_set objects. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice--asn_matcher--asn_sets))
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice--asn_matcher--asn_sets"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.client_matcher.ip_asn_choice.asn_matcher.asn_sets`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice--ip_matcher"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.client_matcher.ip_asn_choice.ip_matcher`
+
+Required:
+
+- `prefix_sets` (Attributes List) prefix_sets A list of references to ip_prefix_set objects. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice--ip_matcher--prefix_sets))
+
+Optional:
+
+- `invert_matcher` (Boolean) invert_matcher Invert the match result.<br>**Default:** `false`
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice--ip_matcher--prefix_sets"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.client_matcher.ip_asn_choice.ip_matcher.prefix_sets`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--ip_asn_choice--ip_prefix_list"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.client_matcher.ip_asn_choice.ip_prefix_list`
+
+Optional:
+
+- `invert_match` (Boolean) invert_matcher Invert the match result.<br>**Default:** `false`
+- `ip_prefixes` (List of String) ip prefixes List of IPv4 prefix strings.
+- `ipv6_prefixes` (List of String) ipv6 prefixes List of IPv6 prefix strings.
+
+
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--client_matcher--tls_fingerprint_matcher"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.client_matcher.tls_fingerprint_matcher`
+
+Optional:
+
+- `classes` (List of String) classes A list of known classes of TLS fingerprints to match the input TLS JA3 fingerprint against.<br>**Valid Options:** `['ADWARE', 'ADWIND', 'ANY_MALICIOUS_FINGERPRINT', 'DRIDEX', 'GOOTKIT', 'GOZI', 'JBIFROST', 'QUAKBOT', 'RANSOMWARE', 'TOFSEE', 'TORRENTLOCKER', 'TRICKBOT', 'TROLDESH']` (Multiple selection allowed)
+- `exact_values` (List of String) exact values A list of exact TLS JA3 fingerprints to match the input TLS JA3 fingerprint against.
+- `excluded_values` (List of String) excluded values A list of TLS JA3 fingerprints to be excluded when matching the input TLS JA3 fingerprint. This can be used to skip known false positives when using one or more known TLS fingerprint classes in the enclosing matcher.
+
+
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--destination_type_choice"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.destination_type_choice`
+
+Optional:
+
+- `any_url` (Boolean) any_url Any URL<br>Conflicts with `api_endpoint`, `api_groups`, and `base_path`.
+- `api_endpoint` (Attributes) api endpoint path The endpoint (path) of the request.<br>Conflicts with `any_url`, `api_groups`, and `base_path`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--destination_type_choice--api_endpoint))
+- `api_groups` (Attributes) api group Validation will be performed for the endpoints mentioned in the API Groups<br>Conflicts with `any_url`, `api_endpoint`, and `base_path`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--destination_type_choice--api_groups))
+- `base_path` (String) base path The base path which this validation applies to<br>**Validation:** `Length LengthAtMost(128)`<br>Conflicts with `any_url`, `api_endpoint`, and `api_groups`.
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--destination_type_choice--api_endpoint"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.destination_type_choice.api_endpoint`
+
+Required:
+
+- `path` (String) Path Path to be matched<br>**Validation:** `Length LengthAtMost(1024)`
+
+Optional:
+
+- `methods` (List of String) Methods Methods to be matched<br>**Valid Options:** `['ANY', 'CONNECT', 'COPY', 'DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT', 'TRACE']` (Multiple selection allowed)
+
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--destination_type_choice--api_groups"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.destination_type_choice.api_groups`
+
+Required:
+
+- `api_groups` (List of String) api group
+
+
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--domain_choice"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.domain_choice`
+
+Optional:
+
+- `any_domain` (Boolean) any domain The rule will apply for all domains.<br>Conflicts with `specific_domain`.
+- `specific_domain` (String) domain The rule will apply for a specific domain. For example: api.example.com<br>**Validation:** `Length LengthAtMost(128)`<br>Conflicts with `any_domain`.
+
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.request_matcher`
+
+Optional:
+
+- `cookie_matchers` (Attributes List) cookie matchers A list of predicates for all cookies that need to be matched. The criteria for matching each cookie is described in individual instances of CookieMatcherType. The actual cookie values are extracted from the request API as a list of strings for each cookie name. Note that all specified cookie matcher predicates must evaluate to true. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--cookie_matchers))
+- `headers` (Attributes List) headers A list of predicates for various HTTP headers that need to match. The criteria for matching each HTTP header are described in individual HeaderMatcherType instances. The actual HTTP header values are extracted from the request API as a list of strings for each HTTP header type. Note that all specified header predicates must evaluate to true. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--headers))
+- `jwt_claims` (Attributes List) JWT claims A list of predicates for various JWT claims that need to match. The criteria for matching each JWT claim are described in individual JWTClaimMatcherType instances. The actual JWT claims values are extracted from the JWT payload as a list of strings. Note that all specified JWT claim predicates must evaluate to true. Note that this feature only works on LBs with JWT Validation feature enabled. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--jwt_claims))
+- `query_params` (Attributes List) query params A list of predicates for all query parameters that need to be matched. The criteria for matching each query parameter are described in individual instances of QueryParameterMatcherType. The actual query parameter values are extracted from the request API as a list of strings for each query parameter name. Note that all specified query parameter predicates must evaluate to true. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--query_params))
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--cookie_matchers"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.request_matcher.cookie_matchers`
+
+Required:
+
+- `match_choice` (Attributes) match Select Match Options.<br>`item` must be specified. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--cookie_matchers--match_choice))
+- `name` (String) name A case-sensitive cookie name.
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--cookie_matchers--match_choice"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.request_matcher.cookie_matchers.match_choice`
+
+Optional:
+
+- `item` (Attributes) item Criteria for matching the values for the cookie. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--cookie_matchers--match_choice--item))
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--cookie_matchers--match_choice--item"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.request_matcher.cookie_matchers.match_choice.item`
+
+Optional:
+
+- `exact_values` (List of String) exact values A list of exact values to match the input against.
+- `regex_values` (List of String) regex values A list of regular expressions to match the input against.
+
+
+
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--headers"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.request_matcher.headers`
+
+Required:
+
+- `match_choice` (Attributes) match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--headers--match_choice))
+- `name` (String) name A case-insensitive HTTP header name.
+
+Optional:
+
+- `invert_matcher` (Boolean) invert_matcher Invert the match result.<br>**Default:** `false`
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--headers--match_choice"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.request_matcher.headers.match_choice`
+
+Optional:
+
+- `check_not_present` (Boolean) check_not_present Check that the header is not present.<br>Conflicts with `check_present` and `item`.
+- `check_present` (Boolean) check_present Check that the header is present.<br>Conflicts with `check_not_present` and `item`.
+- `item` (Attributes) item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--headers--match_choice--item))
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--headers--match_choice--item"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.request_matcher.headers.match_choice.item`
+
+Optional:
+
+- `exact_values` (List of String) exact values A list of exact values to match the input against.
+- `regex_values` (List of String) regex values A list of regular expressions to match the input against.
+
+
+
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--jwt_claims"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.request_matcher.jwt_claims`
+
+Required:
+
+- `match_choice` (Attributes) match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--jwt_claims--match_choice))
+- `name` (String) name JWT claim name.
+
+Optional:
+
+- `invert_matcher` (Boolean) invert_matcher Invert the match result.<br>**Default:** `false`
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--jwt_claims--match_choice"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.request_matcher.jwt_claims.match_choice`
+
+Optional:
+
+- `check_not_present` (Boolean) check_not_present Check that the JWT Claim is not present.<br>Conflicts with `check_present` and `item`.
+- `check_present` (Boolean) check_present Check that the JWT Claim is present.<br>Conflicts with `check_not_present` and `item`.
+- `item` (Attributes) item Criteria for matching the values for the JWT Claim. The match is successful if any of the values in the input satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--jwt_claims--match_choice--item))
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--jwt_claims--match_choice--item"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.request_matcher.jwt_claims.match_choice.item`
+
+Optional:
+
+- `exact_values` (List of String) exact values A list of exact values to match the input against.
+- `regex_values` (List of String) regex values A list of regular expressions to match the input against.
+
+
+
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--query_params"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.request_matcher.query_params`
+
+Required:
+
+- `key` (String) key A case-sensitive HTTP query parameter name.
+- `match_choice` (Attributes) match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--query_params--match_choice))
+
+Optional:
+
+- `invert_matcher` (Boolean) invert_matcher Invert the match result.<br>**Default:** `false`
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--query_params--match_choice"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.request_matcher.query_params.match_choice`
+
+Optional:
+
+- `check_not_present` (Boolean) check_not_present Check that the query parameter is not present.<br>Conflicts with `check_present` and `item`.
+- `check_present` (Boolean) check_present Check that the query parameter is present.<br>Conflicts with `check_not_present` and `item`.
+- `item` (Attributes) item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--query_params--match_choice--item))
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--request_matcher--query_params--match_choice--item"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.bypass_rate_limiting_rules.bypass_rate_limiting_rules.request_matcher.query_params.match_choice.item`
+
+Optional:
+
+- `exact_values` (List of String) exact values A list of exact values to match the input against.
+- `regex_values` (List of String) regex values A list of regular expressions to match the input against.
+
+
+
+
+
+
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--custom_ip_allowed_list"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.custom_ip_allowed_list`
+
+Required:
+
+- `rate_limiter_allowed_prefixes` (Attributes List) rate_limiter_allowed_prefixes References to ip_prefix_set objects. Requests from source IP addresses that are covered by one of the allowed IP Prefixes are not subjected to rate limiting. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--custom_ip_allowed_list--rate_limiter_allowed_prefixes))
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--custom_ip_allowed_list--rate_limiter_allowed_prefixes"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.custom_ip_allowed_list.rate_limiter_allowed_prefixes`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+
+<a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--ip_allowed_list"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.ip_allowed_list_choice.ip_allowed_list`
+
+Optional:
+
+- `ipv6_prefixes` (List of String) ipv6 prefixes List of IPv6 prefix strings.
+- `prefixes` (List of String) ipv4 prefix list List of IPv4 prefixes that represent an endpoint
+
+
+
 <a id="nestedatt--rate_limit_choice--api_rate_limit--server_url_rules"></a>
 ### Nested Schema for `rate_limit_choice.api_rate_limit.server_url_rules`
 
 Required:
 
-- `domain_choice` (Attributes) domain choices Choose if the rule will apply for all domains or a specific one. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--domain_choice))
-- `rate_limiter_choice` (Attributes) Rate limit values This defines the values of the rate limiter. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--rate_limiter_choice))
+- `rate_limiter_choice` (Attributes) Rate limit values This defines the values of the rate limiter.<br>Exactly one of `inline_rate_limiter` or `ref_rate_limiter` must be specified. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--rate_limiter_choice))
 
 Optional:
 
 - `api_group` (String) api_group API groups derived from API Definition swaggers. For example oas-all-operations including all paths and methods from the swaggers, oas-base-urls covering all requests under base-paths from the swaggers.<br>**Validation:** `Length LengthAtMost(128)`
 - `base_path` (String) base path Prefix of the request path.<br>**Default:** `/`<br>**Validation:** `Length LengthAtMost(128)`
 - `client_matcher` (Attributes) client_matcher Conditions related to the origin of the request, such as client IP, TLS fingerprint, etc. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--client_matcher))
+- `domain_choice` (Attributes) domain choices Choose if the rule will apply for all domains or a specific one.<br>Exactly one of `any_domain` or `specific_domain` must be specified when `domain_choice` is configured. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--domain_choice))
 - `request_matcher` (Attributes) request_matcher Conditions related to the request, such as query parameters, headers, etc. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--request_matcher))
-
-<a id="nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--domain_choice"></a>
-### Nested Schema for `rate_limit_choice.api_rate_limit.server_url_rules.domain_choice`
-
-Optional:
-
-- `any_domain` (Boolean) any domain The rule will apply for all domains.
-- `specific_domain` (String) domain The rule will apply for a specific domain.<br>**Validation:** `Length LengthAtMost(128)`
-
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--rate_limiter_choice"></a>
 ### Nested Schema for `rate_limit_choice.api_rate_limit.server_url_rules.rate_limiter_choice`
 
 Optional:
 
-- `inline_rate_limiter` (Attributes) Inline Rate Limiter Specify rate values for the rule. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--rate_limiter_choice--inline_rate_limiter))
-- `ref_rate_limiter` (Attributes) External Rate Limiter Use external rate limiter. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--rate_limiter_choice--ref_rate_limiter))
+- `inline_rate_limiter` (Attributes) Inline Rate Limiter Specify rate values for the rule.<br>Conflicts with `ref_rate_limiter`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--rate_limiter_choice--inline_rate_limiter))
+- `ref_rate_limiter` (Attributes) External Rate Limiter Use external rate limiter.<br>Conflicts with `inline_rate_limiter`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--rate_limiter_choice--ref_rate_limiter))
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--rate_limiter_choice--inline_rate_limiter"></a>
 ### Nested Schema for `rate_limit_choice.api_rate_limit.server_url_rules.rate_limiter_choice.inline_rate_limiter`
 
 Required:
 
-- `count_by_choice` (Attributes) Count by The classification criteria for requests counts. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--rate_limiter_choice--inline_rate_limiter--count_by_choice))
 - `unit` (List of String) rate Unit for the period per which the rate limit is applied.<br>**Allowed Values (choose one):** `['DAY', 'HOUR', 'MINUTE', 'SECOND']`
 
 Optional:
 
+- `count_by_choice` (Attributes) Count by The classification criteria for requests counts.<br>Exactly one of `ref_user_id` or `use_http_lb_user_id` must be specified when `count_by_choice` is configured. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--rate_limiter_choice--inline_rate_limiter--count_by_choice))
 - `threshold` (Number) threshold The total number of allowed requests for 1 unit (e.g. SECOND/MINUTE/HOUR etc.) of the specified period.<br>**Default:** `1`
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--rate_limiter_choice--inline_rate_limiter--count_by_choice"></a>
@@ -2599,8 +2520,8 @@ Optional:
 
 Optional:
 
-- `ref_user_id` (Attributes) ref_user_id A reference to user_identification object. The rules in the user_identification object are evaluated to determine the user identifier to be rate limited. If traffic cannot be identified by the rules in the user_identification object, by default it will be identified by the HTTP-LB User Identifier. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--rate_limiter_choice--inline_rate_limiter--count_by_choice--ref_user_id))
-- `use_http_lb_user_id` (Boolean) use_http_lb_user_id Defined in HTTP-LB Security Configuration -> User Identifier.
+- `ref_user_id` (Attributes) ref_user_id A reference to user_identification object. The rules in the user_identification object are evaluated to determine the user identifier to be rate limited. If traffic cannot be identified by the rules in the user_identification object, by default it will be identified by the HTTP-LB User Identifier.<br>Conflicts with `use_http_lb_user_id`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--rate_limiter_choice--inline_rate_limiter--count_by_choice--ref_user_id))
+- `use_http_lb_user_id` (Boolean) use_http_lb_user_id Defined in HTTP-LB Security Configuration -> User Identifier.<br>Conflicts with `ref_user_id`.
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--rate_limiter_choice--inline_rate_limiter--count_by_choice--ref_user_id"></a>
 ### Nested Schema for `rate_limit_choice.api_rate_limit.server_url_rules.rate_limiter_choice.inline_rate_limiter.count_by_choice.ref_user_id`
@@ -2634,13 +2555,10 @@ Read-Only:
 <a id="nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--client_matcher"></a>
 ### Nested Schema for `rate_limit_choice.api_rate_limit.server_url_rules.client_matcher`
 
-Required:
-
-- `client_choice` (Attributes) client choice Select clients for which the rule will be applied. The actual names of the client are extracted from its TLS certificate. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--client_matcher--client_choice))
-- `ip_asn_choice` (Attributes) ip asn choice Match source IP address/ASN  of the request (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--client_matcher--ip_asn_choice))
-
 Optional:
 
+- `client_choice` (Attributes) client choice Select clients for which the rule will be applied. The actual names of the client are extracted from its TLS certificate.<br>Exactly one of `any_client`, `client_selector`, or `ip_threat_category_list` must be specified when `client_choice` is configured. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--client_matcher--client_choice))
+- `ip_asn_choice` (Attributes) ip asn choice Match source IP address/ASN  of the request<br>Exactly one of `any_ip`, `asn_list`, `asn_matcher`, `ip_matcher`, or `ip_prefix_list` must be specified when `ip_asn_choice` is configured. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--client_matcher--ip_asn_choice))
 - `tls_fingerprint_matcher` (Attributes) TLS JA3 fingerprint matcher TLS JA3 fingerprints to be matched. The predicate evaluates to true if the TLS fingerprint matches any of the exact values or classes of known TLS fingerprints. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--client_matcher--tls_fingerprint_matcher))
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--client_matcher--client_choice"></a>
@@ -2648,9 +2566,9 @@ Optional:
 
 Optional:
 
-- `any_client` (Boolean) any ip Any Client
-- `client_selector` (Attributes) client selector A label selector that describes the expected set of clients. The labels associated with the client making the API request are used to evaluate the label expressions in the selector. These labels can be derived from the client TLS certificate or from the volterra internal control plane. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--client_matcher--client_choice--client_selector))
-- `ip_threat_category_list` (Attributes) IP Threat Category List IP threat categories to choose from (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--client_matcher--client_choice--ip_threat_category_list))
+- `any_client` (Boolean) any ip Any Client<br>Conflicts with `client_selector` and `ip_threat_category_list`.
+- `client_selector` (Attributes) client selector A label selector that describes the expected set of clients. The labels associated with the client making the API request are used to evaluate the label expressions in the selector. These labels can be derived from the client TLS certificate or from the volterra internal control plane. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.<br>Conflicts with `any_client` and `ip_threat_category_list`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--client_matcher--client_choice--client_selector))
+- `ip_threat_category_list` (Attributes) IP Threat Category List IP threat categories to choose from<br>Conflicts with `any_client` and `client_selector`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--client_matcher--client_choice--ip_threat_category_list))
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--client_matcher--client_choice--client_selector"></a>
 ### Nested Schema for `rate_limit_choice.api_rate_limit.server_url_rules.client_matcher.client_choice.client_selector`
@@ -2674,11 +2592,11 @@ Required:
 
 Optional:
 
-- `any_ip` (Boolean) any ip Any Source IP
-- `asn_list` (Attributes) asn list List of 4-byte ASN values. The predicate evaluates to true if the origin ASN is present in the ASN list. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--client_matcher--ip_asn_choice--asn_list))
-- `asn_matcher` (Attributes) asn matcher List of references to BGP ASN Set objects. The predicate evaluates to true if the origin ASN is present in one of the BGP ASN Set objects. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--client_matcher--ip_asn_choice--asn_matcher))
-- `ip_matcher` (Attributes) ip matcher List of references to IP Prefix Set objects. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes in the IP Prefix Sets. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--client_matcher--ip_asn_choice--ip_matcher))
-- `ip_prefix_list` (Attributes) ip prefix list List of IP Prefixes values. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes from the list. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--client_matcher--ip_asn_choice--ip_prefix_list))
+- `any_ip` (Boolean) any ip Any Source IP<br>Conflicts with `asn_list`, `asn_matcher`, `ip_matcher`, and `ip_prefix_list`.
+- `asn_list` (Attributes) asn list List of 4-byte ASN values. The predicate evaluates to true if the origin ASN is present in the ASN list.<br>Conflicts with `any_ip`, `asn_matcher`, `ip_matcher`, and `ip_prefix_list`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--client_matcher--ip_asn_choice--asn_list))
+- `asn_matcher` (Attributes) asn matcher List of references to BGP ASN Set objects. The predicate evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.<br>Conflicts with `any_ip`, `asn_list`, `ip_matcher`, and `ip_prefix_list`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--client_matcher--ip_asn_choice--asn_matcher))
+- `ip_matcher` (Attributes) ip matcher List of references to IP Prefix Set objects. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes in the IP Prefix Sets.<br>Conflicts with `any_ip`, `asn_list`, `asn_matcher`, and `ip_prefix_list`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--client_matcher--ip_asn_choice--ip_matcher))
+- `ip_prefix_list` (Attributes) ip prefix list List of IP Prefixes values. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes from the list.<br>Conflicts with `any_ip`, `asn_list`, `asn_matcher`, and `ip_matcher`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--client_matcher--ip_asn_choice--ip_prefix_list))
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--client_matcher--ip_asn_choice--asn_list"></a>
 ### Nested Schema for `rate_limit_choice.api_rate_limit.server_url_rules.client_matcher.ip_asn_choice.asn_list`
@@ -2756,6 +2674,15 @@ Optional:
 
 
 
+<a id="nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--domain_choice"></a>
+### Nested Schema for `rate_limit_choice.api_rate_limit.server_url_rules.domain_choice`
+
+Optional:
+
+- `any_domain` (Boolean) any domain The rule will apply for all domains.<br>Conflicts with `specific_domain`.
+- `specific_domain` (String) domain The rule will apply for a specific domain.<br>**Validation:** `Length LengthAtMost(128)`<br>Conflicts with `any_domain`.
+
+
 <a id="nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--request_matcher"></a>
 ### Nested Schema for `rate_limit_choice.api_rate_limit.server_url_rules.request_matcher`
 
@@ -2771,7 +2698,7 @@ Optional:
 
 Required:
 
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--request_matcher--cookie_matchers--match_choice))
+- `match_choice` (Attributes) match Select Match Options.<br>`item` must be specified. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--request_matcher--cookie_matchers--match_choice))
 - `name` (String) name A case-sensitive cookie name.
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--request_matcher--cookie_matchers--match_choice"></a>
@@ -2797,7 +2724,7 @@ Optional:
 
 Required:
 
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--request_matcher--headers--match_choice))
+- `match_choice` (Attributes) match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--request_matcher--headers--match_choice))
 - `name` (String) name A case-insensitive HTTP header name.
 
 Optional:
@@ -2809,9 +2736,9 @@ Optional:
 
 Optional:
 
-- `check_not_present` (Boolean) check_not_present Check that the header is not present.
-- `check_present` (Boolean) check_present Check that the header is present.
-- `item` (Attributes) item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--request_matcher--headers--match_choice--item))
+- `check_not_present` (Boolean) check_not_present Check that the header is not present.<br>Conflicts with `check_present` and `item`.
+- `check_present` (Boolean) check_present Check that the header is present.<br>Conflicts with `check_not_present` and `item`.
+- `item` (Attributes) item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--request_matcher--headers--match_choice--item))
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--request_matcher--headers--match_choice--item"></a>
 ### Nested Schema for `rate_limit_choice.api_rate_limit.server_url_rules.request_matcher.headers.match_choice.item`
@@ -2829,7 +2756,7 @@ Optional:
 
 Required:
 
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--request_matcher--jwt_claims--match_choice))
+- `match_choice` (Attributes) match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--request_matcher--jwt_claims--match_choice))
 - `name` (String) name JWT claim name.
 
 Optional:
@@ -2841,9 +2768,9 @@ Optional:
 
 Optional:
 
-- `check_not_present` (Boolean) check_not_present Check that the JWT Claim is not present.
-- `check_present` (Boolean) check_present Check that the JWT Claim is present.
-- `item` (Attributes) item Criteria for matching the values for the JWT Claim. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--request_matcher--jwt_claims--match_choice--item))
+- `check_not_present` (Boolean) check_not_present Check that the JWT Claim is not present.<br>Conflicts with `check_present` and `item`.
+- `check_present` (Boolean) check_present Check that the JWT Claim is present.<br>Conflicts with `check_not_present` and `item`.
+- `item` (Attributes) item Criteria for matching the values for the JWT Claim. The match is successful if any of the values in the input satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--request_matcher--jwt_claims--match_choice--item))
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--request_matcher--jwt_claims--match_choice--item"></a>
 ### Nested Schema for `rate_limit_choice.api_rate_limit.server_url_rules.request_matcher.jwt_claims.match_choice.item`
@@ -2862,7 +2789,7 @@ Optional:
 Required:
 
 - `key` (String) key A case-sensitive HTTP query parameter name.
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--request_matcher--query_params--match_choice))
+- `match_choice` (Attributes) match Select Match Options.<br>Exactly one of `check_not_present`, `check_present`, or `item` must be specified. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--request_matcher--query_params--match_choice))
 
 Optional:
 
@@ -2873,9 +2800,9 @@ Optional:
 
 Optional:
 
-- `check_not_present` (Boolean) check_not_present Check that the query parameter is not present.
-- `check_present` (Boolean) check_present Check that the query parameter is present.
-- `item` (Attributes) item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--request_matcher--query_params--match_choice--item))
+- `check_not_present` (Boolean) check_not_present Check that the query parameter is not present.<br>Conflicts with `check_present` and `item`.
+- `check_present` (Boolean) check_present Check that the query parameter is present.<br>Conflicts with `check_not_present` and `item`.
+- `item` (Attributes) item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher.<br>Conflicts with `check_not_present` and `check_present`. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--request_matcher--query_params--match_choice--item))
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--request_matcher--query_params--match_choice--item"></a>
 ### Nested Schema for `rate_limit_choice.api_rate_limit.server_url_rules.request_matcher.query_params.match_choice.item`
@@ -2894,13 +2821,10 @@ Optional:
 <a id="nestedatt--rate_limit_choice--rate_limit"></a>
 ### Nested Schema for `rate_limit_choice.rate_limit`
 
-Required:
-
-- `ip_allowed_list_choice` (Attributes) IP Allowed List Allowed List of IPs for which rate limiting will be disabled. (see [below for nested schema](#nestedatt--rate_limit_choice--rate_limit--ip_allowed_list_choice))
-- `policy_choice` (Attributes) policy choice Manage rate limiter policies. Note that an implicit policy based on the IP Allowed List is always applied as the first policy. (see [below for nested schema](#nestedatt--rate_limit_choice--rate_limit--policy_choice))
-
 Optional:
 
+- `ip_allowed_list_choice` (Attributes) IP Allowed List Allowed List of IPs for which rate limiting will be disabled.<br>Exactly one of `custom_ip_allowed_list`, `ip_allowed_list`, or `no_ip_allowed_list` must be specified when `ip_allowed_list_choice` is configured. (see [below for nested schema](#nestedatt--rate_limit_choice--rate_limit--ip_allowed_list_choice))
+- `policy_choice` (Attributes) policy choice Manage rate limiter policies. Note that an implicit policy based on the IP Allowed List is always applied as the first policy.<br>Exactly one of `no_policies` or `policies` must be specified when `policy_choice` is configured. (see [below for nested schema](#nestedatt--rate_limit_choice--rate_limit--policy_choice))
 - `rate_limiter` (Attributes) rate_limiter Requests to the virtual_host are rate limited based on the parameters specified in the rate_limiter. (see [below for nested schema](#nestedatt--rate_limit_choice--rate_limit--rate_limiter))
 
 <a id="nestedatt--rate_limit_choice--rate_limit--ip_allowed_list_choice"></a>
@@ -2908,9 +2832,9 @@ Optional:
 
 Optional:
 
-- `custom_ip_allowed_list` (Attributes) Custom IP list IP Allowed list using existing ip_prefix_set objects. (see [below for nested schema](#nestedatt--rate_limit_choice--rate_limit--ip_allowed_list_choice--custom_ip_allowed_list))
-- `ip_allowed_list` (Attributes) IP Allowed List List of IP(s) for which rate limiting will be disabled. (see [below for nested schema](#nestedatt--rate_limit_choice--rate_limit--ip_allowed_list_choice--ip_allowed_list))
-- `no_ip_allowed_list` (Boolean) No IP Allowed List There is no ip allowed list for rate limiting, all clients go through rate limiting.
+- `custom_ip_allowed_list` (Attributes) Custom IP list IP Allowed list using existing ip_prefix_set objects.<br>Conflicts with `ip_allowed_list` and `no_ip_allowed_list`. (see [below for nested schema](#nestedatt--rate_limit_choice--rate_limit--ip_allowed_list_choice--custom_ip_allowed_list))
+- `ip_allowed_list` (Attributes) IP Allowed List List of IP(s) for which rate limiting will be disabled.<br>Conflicts with `custom_ip_allowed_list` and `no_ip_allowed_list`. (see [below for nested schema](#nestedatt--rate_limit_choice--rate_limit--ip_allowed_list_choice--ip_allowed_list))
+- `no_ip_allowed_list` (Boolean) No IP Allowed List There is no ip allowed list for rate limiting, all clients go through rate limiting.<br>Conflicts with `custom_ip_allowed_list` and `ip_allowed_list`.
 
 <a id="nestedatt--rate_limit_choice--rate_limit--ip_allowed_list_choice--custom_ip_allowed_list"></a>
 ### Nested Schema for `rate_limit_choice.rate_limit.ip_allowed_list_choice.custom_ip_allowed_list`
@@ -2948,8 +2872,8 @@ Optional:
 
 Optional:
 
-- `no_policies` (Boolean) no_policies Do not apply additional rate limiter policies.
-- `policies` (Attributes) policies Apply rate limiter policies to requests that are not from the IP Allowed List. The policies are evaluated sequentially until a matching rule is identified. If there's a match, the rate limiting behavior is modified according to the action configured in the rule. If there's no match, the rate limiting configuration for the HTTP load balancer is honored. (see [below for nested schema](#nestedatt--rate_limit_choice--rate_limit--policy_choice--policies))
+- `no_policies` (Boolean) no_policies Do not apply additional rate limiter policies.<br>Conflicts with `policies`.
+- `policies` (Attributes) policies Apply rate limiter policies to requests that are not from the IP Allowed List. The policies are evaluated sequentially until a matching rule is identified. If there's a match, the rate limiting behavior is modified according to the action configured in the rule. If there's no match, the rate limiting configuration for the HTTP load balancer is honored.<br>Conflicts with `no_policies`. (see [below for nested schema](#nestedatt--rate_limit_choice--rate_limit--policy_choice--policies))
 
 <a id="nestedatt--rate_limit_choice--rate_limit--policy_choice--policies"></a>
 ### Nested Schema for `rate_limit_choice.rate_limit.policy_choice.policies`
@@ -2982,7 +2906,7 @@ Required:
 
 Optional:
 
-- `action_choice` (Attributes) Rate Limiter Action Applies the specified action to the user after threshold is reached. (see [below for nested schema](#nestedatt--rate_limit_choice--rate_limit--rate_limiter--action_choice))
+- `action_choice` (Attributes) Rate Limiter Action Applies the specified action to the user after threshold is reached.<br>Exactly one of `action_block` or `disabled` must be specified when `action_choice` is configured. (see [below for nested schema](#nestedatt--rate_limit_choice--rate_limit--rate_limiter--action_choice))
 - `burst_multiplier` (Number) burst_multiplier The maximum burst of requests to accommodate, expressed as a multiple of the rate.<br>**Default:** `1`
 - `period_multiplier` (Number) period_multiplier This setting, combined with Per Period units, provides a duration<br>**Default:** `1`
 - `total_number` (Number) total_number The total number of allowed requests per rate-limiting period.<br>**Default:** `1`
@@ -2992,24 +2916,24 @@ Optional:
 
 Optional:
 
-- `action_block` (Attributes) Block Action Blocks the user for a specified duration of time (see [below for nested schema](#nestedatt--rate_limit_choice--rate_limit--rate_limiter--action_choice--action_block))
-- `disabled` (Boolean) Disabled
+- `action_block` (Attributes) Block Action Blocks the user for a specified duration of time<br>Conflicts with `disabled`. (see [below for nested schema](#nestedatt--rate_limit_choice--rate_limit--rate_limiter--action_choice--action_block))
+- `disabled` (Boolean) Disabled<br>Conflicts with `action_block`.
 
 <a id="nestedatt--rate_limit_choice--rate_limit--rate_limiter--action_choice--action_block"></a>
 ### Nested Schema for `rate_limit_choice.rate_limit.rate_limiter.action_choice.action_block`
 
 Optional:
 
-- `block_duration_choice` (Attributes) block_duration_choice Period of time after rate limit threshold is exceeded where a user is blocked from making further requests. (see [below for nested schema](#nestedatt--rate_limit_choice--rate_limit--rate_limiter--action_choice--action_block--block_duration_choice))
+- `block_duration_choice` (Attributes) block_duration_choice Period of time after rate limit threshold is exceeded where a user is blocked from making further requests.<br>Exactly one of `hours`, `minutes`, or `seconds` must be specified when `block_duration_choice` is configured. (see [below for nested schema](#nestedatt--rate_limit_choice--rate_limit--rate_limiter--action_choice--action_block--block_duration_choice))
 
 <a id="nestedatt--rate_limit_choice--rate_limit--rate_limiter--action_choice--action_block--block_duration_choice"></a>
 ### Nested Schema for `rate_limit_choice.rate_limit.rate_limiter.action_choice.action_block.block_duration_choice`
 
 Optional:
 
-- `hours` (Attributes) Hours User block mitigation time in Hours (see [below for nested schema](#nestedatt--rate_limit_choice--rate_limit--rate_limiter--action_choice--action_block--block_duration_choice--hours))
-- `minutes` (Attributes) Minutes User block mitigation time in Minutes (see [below for nested schema](#nestedatt--rate_limit_choice--rate_limit--rate_limiter--action_choice--action_block--block_duration_choice--minutes))
-- `seconds` (Attributes) Seconds User block mitigation time in Seconds (see [below for nested schema](#nestedatt--rate_limit_choice--rate_limit--rate_limiter--action_choice--action_block--block_duration_choice--seconds))
+- `hours` (Attributes) Hours User block mitigation time in Hours<br>Conflicts with `minutes` and `seconds`. (see [below for nested schema](#nestedatt--rate_limit_choice--rate_limit--rate_limiter--action_choice--action_block--block_duration_choice--hours))
+- `minutes` (Attributes) Minutes User block mitigation time in Minutes<br>Conflicts with `hours` and `seconds`. (see [below for nested schema](#nestedatt--rate_limit_choice--rate_limit--rate_limiter--action_choice--action_block--block_duration_choice--minutes))
+- `seconds` (Attributes) Seconds User block mitigation time in Seconds<br>Conflicts with `hours` and `minutes`. (see [below for nested schema](#nestedatt--rate_limit_choice--rate_limit--rate_limiter--action_choice--action_block--block_duration_choice--seconds))
 
 <a id="nestedatt--rate_limit_choice--rate_limit--rate_limiter--action_choice--action_block--block_duration_choice--hours"></a>
 ### Nested Schema for `rate_limit_choice.rate_limit.rate_limiter.action_choice.action_block.block_duration_choice.hours`
@@ -3041,6 +2965,36 @@ Optional:
 
 
 
+<a id="nestedatt--slow_ddos_mitigation_choice"></a>
+### Nested Schema for `slow_ddos_mitigation_choice`
+
+Optional:
+
+- `slow_ddos_mitigation` (Attributes) Slow DDoS Mitigation Custom Settings for Slow DDoS Mitigation<br>Conflicts with `system_default_timeouts`. (see [below for nested schema](#nestedatt--slow_ddos_mitigation_choice--slow_ddos_mitigation))
+- `system_default_timeouts` (Boolean) System Default Settings Default Settings for Slow DDoS Mitigation<br>Conflicts with `slow_ddos_mitigation`.
+
+<a id="nestedatt--slow_ddos_mitigation_choice--slow_ddos_mitigation"></a>
+### Nested Schema for `slow_ddos_mitigation_choice.slow_ddos_mitigation`
+
+Required:
+
+- `request_timeout_choice` (Attributes) Total Request Timeout The amount of time allowed for the entire request stream to be received from the client, in milliseconds. The stream is terminated with a HTTP 408 (Request Timeout) error code if request has not been completed. The default value is 60000 milliseconds. This setting provides protection against Slow POST attacks.<br>Exactly one of `disable_request_timeout` or `request_timeout` must be specified. (see [below for nested schema](#nestedatt--slow_ddos_mitigation_choice--slow_ddos_mitigation--request_timeout_choice))
+
+Optional:
+
+- `request_headers_timeout` (Number) Request Headers Timeout The amount of time the client has to send only the headers on the request stream before the stream is cancelled. The default value is 10000 milliseconds. This setting provides protection against Slowloris attacks.<br>**Default:** `10000`
+
+<a id="nestedatt--slow_ddos_mitigation_choice--slow_ddos_mitigation--request_timeout_choice"></a>
+### Nested Schema for `slow_ddos_mitigation_choice.slow_ddos_mitigation.request_timeout_choice`
+
+Optional:
+
+- `disable_request_timeout` (Boolean) No Timeout<br>Conflicts with `request_timeout`.
+- `request_timeout` (Number) Custom Timeout<br>Conflicts with `disable_request_timeout`.
+
+
+
+
 <a id="nestedatt--timeouts"></a>
 ### Nested Schema for `timeouts`
 
@@ -3058,7 +3012,7 @@ Optional:
 Required:
 
 - `actions` (List of String) actions Actions that should be taken when client identifier matches the rule<br>**Valid Options:** `['SKIP_PROCESSING_API_PROTECTION', 'SKIP_PROCESSING_BOT', 'SKIP_PROCESSING_DDOS_PROTECTION', 'SKIP_PROCESSING_IP_REPUTATION', 'SKIP_PROCESSING_MALWARE_PROTECTION', 'SKIP_PROCESSING_MUM', 'SKIP_PROCESSING_OAS_VALIDATION', 'SKIP_PROCESSING_THREAT_MESH', 'SKIP_PROCESSING_WAF']` (Multiple selection allowed)
-- `client_source_choice` (Attributes) Client Identifier Client identifier that should be used for the client rule (see [below for nested schema](#nestedatt--trusted_clients--client_source_choice))
+- `client_source_choice` (Attributes) Client Identifier Client identifier that should be used for the client rule<br>Exactly one of `as_number`, `http_header`, `ip_prefix`, `ipv6_prefix`, or `user_identifier` must be specified. (see [below for nested schema](#nestedatt--trusted_clients--client_source_choice))
 - `metadata` (Attributes) metadata Common attributes for the rule including name and description. (see [below for nested schema](#nestedatt--trusted_clients--metadata))
 
 Optional:
@@ -3070,11 +3024,11 @@ Optional:
 
 Optional:
 
-- `as_number` (Number) as number RFC 6793 defined 4-byte AS number
-- `http_header` (Attributes) HTTP Header Request header name and value pairs (see [below for nested schema](#nestedatt--trusted_clients--client_source_choice--http_header))
-- `ip_prefix` (String) ip prefix IPv4 prefix string.
-- `ipv6_prefix` (String) ipv6 prefix IPv6 prefix string.
-- `user_identifier` (String) user identifier Identify user based on user identifier. User identifier value needs to be copied from security event.<br>**Validation:** `Length LengthAtMost(256)`
+- `as_number` (Number) as number RFC 6793 defined 4-byte AS number<br>Conflicts with `http_header`, `ip_prefix`, `ipv6_prefix`, and `user_identifier`.
+- `http_header` (Attributes) HTTP Header Request header name and value pairs<br>Conflicts with `as_number`, `ip_prefix`, `ipv6_prefix`, and `user_identifier`. (see [below for nested schema](#nestedatt--trusted_clients--client_source_choice--http_header))
+- `ip_prefix` (String) ip prefix IPv4 prefix string.<br>Conflicts with `as_number`, `http_header`, `ipv6_prefix`, and `user_identifier`.
+- `ipv6_prefix` (String) ipv6 prefix IPv6 prefix string.<br>Conflicts with `as_number`, `http_header`, `ip_prefix`, and `user_identifier`.
+- `user_identifier` (String) user identifier Identify user based on user identifier. User identifier value needs to be copied from security event.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `as_number`, `http_header`, `ip_prefix`, and `ipv6_prefix`.
 
 <a id="nestedatt--trusted_clients--client_source_choice--http_header"></a>
 ### Nested Schema for `trusted_clients.client_source_choice.http_header`
@@ -3093,16 +3047,16 @@ Required:
 Optional:
 
 - `invert_match` (Boolean) invert_match Invert the result of the match to detect missing header or non-matching value<br>**Default:** `false`
-- `value_match_choice` (Attributes) value_match The variants of matching a header value (see [below for nested schema](#nestedatt--trusted_clients--client_source_choice--http_header--headers--value_match_choice))
+- `value_match_choice` (Attributes) value_match The variants of matching a header value<br>Exactly one of `exact`, `presence`, or `regex` must be specified when `value_match_choice` is configured. (see [below for nested schema](#nestedatt--trusted_clients--client_source_choice--http_header--headers--value_match_choice))
 
 <a id="nestedatt--trusted_clients--client_source_choice--http_header--headers--value_match_choice"></a>
 ### Nested Schema for `trusted_clients.client_source_choice.http_header.headers.value_match_choice`
 
 Optional:
 
-- `exact` (String) exact Header value to match exactly
-- `presence` (Boolean) presence If true, check for presence of header
-- `regex` (String) regex Regex match of the header value in re2 format
+- `exact` (String) exact Header value to match exactly<br>Conflicts with `presence` and `regex`.
+- `presence` (Boolean) presence If true, check for presence of header<br>Conflicts with `exact` and `regex`.
+- `regex` (String) regex Regex match of the header value in re2 format<br>Conflicts with `exact` and `presence`.
 
 
 
@@ -3126,11 +3080,33 @@ Optional:
 
 Optional:
 
-- `user_id_client_ip` (Boolean) user_id_client_ip Use the Client IP address as the user identifier.
-- `user_identification` (Attributes) user_identification A reference to user_identification object. The rules in the user_identification object are evaluated to determine the user identifier. (see [below for nested schema](#nestedatt--user_id_choice--user_identification))
+- `user_id_client_ip` (Boolean) user_id_client_ip Use the Client IP address as the user identifier.<br>Conflicts with `user_identification`.
+- `user_identification` (Attributes) user_identification A reference to user_identification object. The rules in the user_identification object are evaluated to determine the user identifier.<br>Conflicts with `user_id_client_ip`. (see [below for nested schema](#nestedatt--user_id_choice--user_identification))
 
 <a id="nestedatt--user_id_choice--user_identification"></a>
 ### Nested Schema for `user_id_choice.user_identification`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+
+<a id="nestedatt--waf_choice"></a>
+### Nested Schema for `waf_choice`
+
+Optional:
+
+- `app_firewall` (Attributes) Application Firewall for All Requests Enable WAF configuration for all requests in this distribution<br>Conflicts with `disable_waf`. (see [below for nested schema](#nestedatt--waf_choice--app_firewall))
+- `disable_waf` (Boolean) Disable WAF No WAF configuration for this load balancer<br>Conflicts with `app_firewall`.
+
+<a id="nestedatt--waf_choice--app_firewall"></a>
+### Nested Schema for `waf_choice.app_firewall`
 
 Required:
 
@@ -3148,7 +3124,7 @@ Read-Only:
 
 Optional:
 
-- `waf_exclusion_choice` (Attributes) WAF Exclusion Choice Define the Signatures, Violations, Attack Types, and Bot Names that should be excluded from WAF processing for HTTP requests matching specific domain, path, and method criteria. The WAF Exclusion is evaluated sequentially and can only be matched once per request. (see [below for nested schema](#nestedatt--waf_exclusion--waf_exclusion_choice))
+- `waf_exclusion_choice` (Attributes) WAF Exclusion Choice Define the Signatures, Violations, Attack Types, and Bot Names that should be excluded from WAF processing for HTTP requests matching specific domain, path, and method criteria. The WAF Exclusion is evaluated sequentially and can only be matched once per request.<br>`waf_exclusion_inline_rules` must be specified when `waf_exclusion_choice` is configured. (see [below for nested schema](#nestedatt--waf_exclusion--waf_exclusion_choice))
 
 <a id="nestedatt--waf_exclusion--waf_exclusion_choice"></a>
 ### Nested Schema for `waf_exclusion.waf_exclusion_choice`
@@ -3169,25 +3145,15 @@ Optional:
 
 Required:
 
-- `domain_choice` (Attributes) Domain Domain to be matched (see [below for nested schema](#nestedatt--waf_exclusion--waf_exclusion_choice--waf_exclusion_inline_rules--rules--domain_choice))
 - `metadata` (Attributes) metadata Common attributes for the rule including name and description. (see [below for nested schema](#nestedatt--waf_exclusion--waf_exclusion_choice--waf_exclusion_inline_rules--rules--metadata))
-- `path_choice` (Attributes) Path Path to be matched (see [below for nested schema](#nestedatt--waf_exclusion--waf_exclusion_choice--waf_exclusion_inline_rules--rules--path_choice))
 
 Optional:
 
+- `domain_choice` (Attributes) Domain Domain to be matched<br>Exactly one of `any_domain`, `exact_value`, or `suffix_value` must be specified when `domain_choice` is configured. (see [below for nested schema](#nestedatt--waf_exclusion--waf_exclusion_choice--waf_exclusion_inline_rules--rules--domain_choice))
 - `expiration_timestamp` (String) expiration timestamp The expiration_timestamp is the RFC 3339 format timestamp at which the containing rule is considered to be logically expired. The rule continues to exist in the configuration but is not applied anymore.
 - `methods` (List of String) Methods methods to be matched<br>**Valid Options:** `['ANY', 'CONNECT', 'COPY', 'DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT', 'TRACE']` (Multiple selection allowed)
-- `waf_advanced_configuration_choice` (Attributes) WAF Exclusion Rule Action WAF Exclusion Rule action to be enforced if the input request matches the rule. (see [below for nested schema](#nestedatt--waf_exclusion--waf_exclusion_choice--waf_exclusion_inline_rules--rules--waf_advanced_configuration_choice))
-
-<a id="nestedatt--waf_exclusion--waf_exclusion_choice--waf_exclusion_inline_rules--rules--domain_choice"></a>
-### Nested Schema for `waf_exclusion.waf_exclusion_choice.waf_exclusion_inline_rules.rules.domain_choice`
-
-Optional:
-
-- `any_domain` (Boolean) Any domain Apply this WAF exclusion rule for any domain
-- `exact_value` (String) exact value Exact domain name<br>**Validation:** `Length LengthBetween(1, 256)`
-- `suffix_value` (String) suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`
-
+- `path_choice` (Attributes) Path Path to be matched<br>Exactly one of `any_path`, `path_prefix`, or `path_regex` must be specified when `path_choice` is configured. (see [below for nested schema](#nestedatt--waf_exclusion--waf_exclusion_choice--waf_exclusion_inline_rules--rules--path_choice))
+- `waf_advanced_configuration_choice` (Attributes) WAF Exclusion Rule Action WAF Exclusion Rule action to be enforced if the input request matches the rule.<br>Exactly one of `app_firewall_detection_control` or `waf_skip_processing` must be specified when `waf_advanced_configuration_choice` is configured. (see [below for nested schema](#nestedatt--waf_exclusion--waf_exclusion_choice--waf_exclusion_inline_rules--rules--waf_advanced_configuration_choice))
 
 <a id="nestedatt--waf_exclusion--waf_exclusion_choice--waf_exclusion_inline_rules--rules--metadata"></a>
 ### Nested Schema for `waf_exclusion.waf_exclusion_choice.waf_exclusion_inline_rules.rules.metadata`
@@ -3201,14 +3167,24 @@ Optional:
 - `description` (String) description Human readable description.<br>**Validation:** `Length LengthAtMost(256)`
 
 
+<a id="nestedatt--waf_exclusion--waf_exclusion_choice--waf_exclusion_inline_rules--rules--domain_choice"></a>
+### Nested Schema for `waf_exclusion.waf_exclusion_choice.waf_exclusion_inline_rules.rules.domain_choice`
+
+Optional:
+
+- `any_domain` (Boolean) Any domain Apply this WAF exclusion rule for any domain<br>Conflicts with `exact_value` and `suffix_value`.
+- `exact_value` (String) exact value Exact domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_domain` and `suffix_value`.
+- `suffix_value` (String) suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_domain` and `exact_value`.
+
+
 <a id="nestedatt--waf_exclusion--waf_exclusion_choice--waf_exclusion_inline_rules--rules--path_choice"></a>
 ### Nested Schema for `waf_exclusion.waf_exclusion_choice.waf_exclusion_inline_rules.rules.path_choice`
 
 Optional:
 
-- `any_path` (Boolean) Any path Match all paths
-- `path_prefix` (String) prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`
-- `path_regex` (String) Path Regex Define the regex for the path. For example, the regex ^/.*$ will match on all paths
+- `any_path` (Boolean) Any path Match all paths<br>Conflicts with `path_prefix` and `path_regex`.
+- `path_prefix` (String) prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `any_path` and `path_regex`.
+- `path_regex` (String) Path Regex Define the regex for the path. For example, the regex ^/.*$ will match on all paths<br>Conflicts with `any_path` and `path_prefix`.
 
 
 <a id="nestedatt--waf_exclusion--waf_exclusion_choice--waf_exclusion_inline_rules--rules--waf_advanced_configuration_choice"></a>
@@ -3216,8 +3192,8 @@ Optional:
 
 Optional:
 
-- `app_firewall_detection_control` (Attributes) App Firewall Detection control Define the list of Signature IDs, Violations, Attack Types and Bot Names that should be excluded from triggering on the defined match criteria. (see [below for nested schema](#nestedatt--waf_exclusion--waf_exclusion_choice--waf_exclusion_inline_rules--rules--waf_advanced_configuration_choice--app_firewall_detection_control))
-- `waf_skip_processing` (Boolean) Skip App Firewall Processing Skip all App Firewall processing for this request
+- `app_firewall_detection_control` (Attributes) App Firewall Detection control Define the list of Signature IDs, Violations, Attack Types and Bot Names that should be excluded from triggering on the defined match criteria.<br>Conflicts with `waf_skip_processing`. (see [below for nested schema](#nestedatt--waf_exclusion--waf_exclusion_choice--waf_exclusion_inline_rules--rules--waf_advanced_configuration_choice--app_firewall_detection_control))
+- `waf_skip_processing` (Boolean) Skip App Firewall Processing Skip all App Firewall processing for this request<br>Conflicts with `app_firewall_detection_control`.
 
 <a id="nestedatt--waf_exclusion--waf_exclusion_choice--waf_exclusion_inline_rules--rules--waf_advanced_configuration_choice--app_firewall_detection_control"></a>
 ### Nested Schema for `waf_exclusion.waf_exclusion_choice.waf_exclusion_inline_rules.rules.waf_advanced_configuration_choice.app_firewall_detection_control`
@@ -3355,6 +3331,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_cdn_loadbalancer.example"
+	to = f5xc_cdn_loadbalancer.example
 }
 ```

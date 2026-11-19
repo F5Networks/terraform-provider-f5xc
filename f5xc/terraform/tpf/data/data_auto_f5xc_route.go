@@ -7,6 +7,7 @@ package data
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"time"
 
@@ -6545,6 +6546,9 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 					// data specToModelNested StringField --> ResponseBodyEncoded
 					if routeDirectResponseElement.GetResponseBodyEncoded() != "" {
 						routeDirectResponseAttributeMap["response_body_encoded"] = types.StringValue(routeDirectResponseElement.GetResponseBodyEncoded())
+					} else if legacyVal := routeDirectResponseElement.GetResponseBody(); legacyVal != "" {
+						// Objects from the UI, REST API, or SDKv2 can hold the content only in the hidden legacy field.
+						routeDirectResponseAttributeMap["response_body_encoded"] = types.StringValue("string:///" + base64.StdEncoding.EncodeToString([]byte(legacyVal)))
 					} else {
 						// Empty string, set to null
 						routeDirectResponseAttributeMap["response_body_encoded"] = types.StringNull()

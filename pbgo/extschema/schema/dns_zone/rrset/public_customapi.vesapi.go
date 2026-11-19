@@ -1240,7 +1240,6 @@ var CustomAPISwaggerJSON string = `{
             "description": "CERT algorithm value must be compatible with the specified algorithm.\n\n - RESERVEDALGORITHM: RESERVEDALGORITHM\n\n - RSAMD5: RSAMD5\n\n - DH: DH\n\n - DSASHA1: DSASHA1\n\n - ECC: ECC\n\n - RSASHA1ALGORITHM: RSA-SHA1\n\n - INDIRECT: INDIRECT\n\n - PRIVATEDNS: PRIVATEDNS\n\n - PRIVATEOID: PRIVATEOID\n",
             "title": "CERT Algorithm",
             "enum": [
-                "RESERVEDALGORITHM",
                 "RSAMD5",
                 "DH",
                 "DSASHA1",
@@ -1357,7 +1356,6 @@ var CustomAPISwaggerJSON string = `{
             "description": "CERT type value must be compatible with the specified types.\n\n - INVALIDCERTTYPE: INVALIDCERTTYPE\n\n - PKIX: PKIX\n\n - SPKI: SPKI\n\n - PGP: PGP\n\n - IPKIX: IPKIX\n\n - ISPKI: ISPKI\n\n - IPGP: IPGP\n\n - ACPKIX: ACPKIX\n\n - IACPKIX: IACPKIX\n\n - URI_: URI\n\n - OID: OID\n",
             "title": "CERT Type",
             "enum": [
-                "INVALIDCERTTYPE",
                 "PKIX",
                 "SPKI",
                 "PGP",
@@ -2746,7 +2744,6 @@ var CustomAPISwaggerJSON string = `{
             "description": "SSHFP algorithm value must be compatible with the specified algorithm.\n\n - UNSPECIFIEDALGORITHM: UNSPECIFIEDALGORITHM\n\n - RSA: RSA\n\n - DSA: DSA\n\n - ECDSA: ECDSA\n\n - Ed25519: Ed25519\n\n - Ed448: Ed448\n",
             "title": "SSHFP Algorithm",
             "enum": [
-                "UNSPECIFIEDALGORITHM",
                 "RSA",
                 "DSA",
                 "ECDSA",

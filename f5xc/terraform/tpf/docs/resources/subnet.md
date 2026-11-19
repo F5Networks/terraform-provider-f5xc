@@ -84,7 +84,7 @@ resource "f5xc_subnet" "example" {
 ### Optional
 
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
-- `connection_choice` (Attributes) Connection Choice Select the network this subnet should optionally be conected to (see [below for nested schema](#nestedatt--connection_choice))
+- `connection_choice` (Attributes) Connection Choice Select the network this subnet should optionally be conected to<br>Exactly one of `connect_to_layer2`, `connect_to_slo`, or `isolated_nw` must be specified when `connection_choice` is configured. (see [below for nested schema](#nestedatt--connection_choice))
 - `description` (String) description Human readable description for the object
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
@@ -102,7 +102,7 @@ Required:
 
 Optional:
 
-- `address_choice` (Attributes) Subnet IP Addressing Select whether IP addresses are allocated statically or using DHCP (see [below for nested schema](#nestedatt--site_subnet_params--address_choice))
+- `address_choice` (Attributes) Subnet IP Addressing Select whether IP addresses are allocated statically or using DHCP<br>Exactly one of `dhcp` or `static_ip` must be specified when `address_choice` is configured. (see [below for nested schema](#nestedatt--site_subnet_params--address_choice))
 - `subnet_dhcp_server_params` (Attributes) Subnet DHCP server parameters DHCP parameters for a subnet on a site (see [below for nested schema](#nestedatt--site_subnet_params--subnet_dhcp_server_params))
 
 <a id="nestedatt--site_subnet_params--site"></a>
@@ -123,8 +123,8 @@ Read-Only:
 
 Optional:
 
-- `dhcp` (Boolean) DHCP Subnet uses DHCP for address allocation
-- `static_ip` (Boolean) Static IP Subnet uses static IP addresses
+- `dhcp` (Boolean) DHCP Subnet uses DHCP for address allocation<br>Conflicts with `static_ip`.
+- `static_ip` (Boolean) Static IP Subnet uses static IP addresses<br>Conflicts with `dhcp`.
 
 
 <a id="nestedatt--site_subnet_params--subnet_dhcp_server_params"></a>
@@ -139,15 +139,15 @@ Optional:
 
 Optional:
 
-- `network_prefix_choice` (Attributes) Network Prefix choice DHCP network prefix for subnet (see [below for nested schema](#nestedatt--site_subnet_params--subnet_dhcp_server_params--dhcp_networks--network_prefix_choice))
+- `network_prefix_choice` (Attributes) Network Prefix choice DHCP network prefix for subnet<br>Exactly one of `network_prefix` or `network_prefix_ipv6` must be specified when `network_prefix_choice` is configured. (see [below for nested schema](#nestedatt--site_subnet_params--subnet_dhcp_server_params--dhcp_networks--network_prefix_choice))
 
 <a id="nestedatt--site_subnet_params--subnet_dhcp_server_params--dhcp_networks--network_prefix_choice"></a>
 ### Nested Schema for `site_subnet_params.subnet_dhcp_server_params.dhcp_networks.network_prefix_choice`
 
 Optional:
 
-- `network_prefix` (String) Network Prefix Network prefix for subnet
-- `network_prefix_ipv6` (String) Network IPV6 Prefix Network prefix for IPV6 subnet
+- `network_prefix` (String) Network Prefix Network prefix for subnet<br>Conflicts with `network_prefix_ipv6`.
+- `network_prefix_ipv6` (String) Network IPV6 Prefix Network prefix for IPV6 subnet<br>Conflicts with `network_prefix`.
 
 
 
@@ -158,9 +158,9 @@ Optional:
 
 Optional:
 
-- `connect_to_layer2` (Attributes) Connect to Layer2 interface (see [below for nested schema](#nestedatt--connection_choice--connect_to_layer2))
-- `connect_to_slo` (Boolean) Connect to site-local-outside-network
-- `isolated_nw` (Boolean) Isolated network
+- `connect_to_layer2` (Attributes) Connect to Layer2 interface<br>Conflicts with `connect_to_slo` and `isolated_nw`. (see [below for nested schema](#nestedatt--connection_choice--connect_to_layer2))
+- `connect_to_slo` (Boolean) Connect to site-local-outside-network<br>Conflicts with `connect_to_layer2` and `isolated_nw`.
+- `isolated_nw` (Boolean) Isolated network<br>Conflicts with `connect_to_layer2` and `connect_to_slo`.
 
 <a id="nestedatt--connection_choice--connect_to_layer2"></a>
 ### Nested Schema for `connection_choice.connect_to_layer2`
@@ -213,6 +213,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_subnet.example"
+	to = f5xc_subnet.example
 }
 ```

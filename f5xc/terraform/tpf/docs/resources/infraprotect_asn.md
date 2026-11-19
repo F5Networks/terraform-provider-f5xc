@@ -57,13 +57,13 @@ resource "f5xc_infraprotect_asn" "example" {
 ### Required
 
 - `asn` (Number) ASN 2-byte or 4-byte Autonomous System Number (ASN)
-- `bgp_session_choice` (Attributes) Use as BGP Neighbor When enabled it will allow you to use this AS number to establish BGP sessions between F5 and your devices. Downstream AS numbers (your customers' AS numbers for instance) must have this option disabled. (see [below for nested schema](#nestedatt--bgp_session_choice))
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
 
 ### Optional
 
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
+- `bgp_session_choice` (Attributes) Use as BGP Neighbor When enabled it will allow you to use this AS number to establish BGP sessions between F5 and your devices. Downstream AS numbers (your customers' AS numbers for instance) must have this option disabled.<br>Exactly one of `bgp_session_disabled` or `bgp_session_enabled` must be specified when `bgp_session_choice` is configured. (see [below for nested schema](#nestedatt--bgp_session_choice))
 - `description` (String) description Human readable description for the object
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
@@ -78,8 +78,8 @@ resource "f5xc_infraprotect_asn" "example" {
 
 Optional:
 
-- `bgp_session_disabled` (Boolean) BGP Sessions Not Enabled BGP Sessions Not Enabled
-- `bgp_session_enabled` (Boolean) BGP Sessions Enabled BGP Sessions Enabled
+- `bgp_session_disabled` (Boolean) BGP Sessions Not Enabled BGP Sessions Not Enabled<br>Conflicts with `bgp_session_enabled`.
+- `bgp_session_enabled` (Boolean) BGP Sessions Enabled BGP Sessions Enabled<br>Conflicts with `bgp_session_disabled`.
 
 
 <a id="nestedatt--timeouts"></a>
@@ -122,6 +122,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_infraprotect_asn.example"
+	to = f5xc_infraprotect_asn.example
 }
 ```

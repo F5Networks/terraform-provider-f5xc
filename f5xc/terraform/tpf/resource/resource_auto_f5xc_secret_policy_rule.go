@@ -217,7 +217,7 @@ func (r *ResourceF5XCSecretPolicyRule) Schema(ctx context.Context, request resou
 			},
 			"client_choice": schema.SingleNestedAttribute{
 				Description:         "client choice Select clients for which the rule will be applied. The actual names/labels of the client are extracted from its TLS certificate.",
-				MarkdownDescription: "client choice Select clients for which the rule will be applied. The actual names/labels of the client are extracted from its TLS certificate.",
+				MarkdownDescription: "client choice Select clients for which the rule will be applied. The actual names/labels of the client are extracted from its TLS certificate.<br>Exactly one of `client_name`, `client_name_matcher`, or `client_selector` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -231,7 +231,7 @@ func (r *ResourceF5XCSecretPolicyRule) Schema(ctx context.Context, request resou
 				Attributes: map[string]schema.Attribute{
 					"client_name": schema.StringAttribute{
 						Description:         "client name The name of the client trying to access the secret. Name of the client will be extracted from client TLS certificate. This predicate evaluates to true if client name matches the configured name",
-						MarkdownDescription: "client name The name of the client trying to access the secret. Name of the client will be extracted from client TLS certificate. This predicate evaluates to true if client name matches the configured name",
+						MarkdownDescription: "client name The name of the client trying to access the secret. Name of the client will be extracted from client TLS certificate. This predicate evaluates to true if client name matches the configured name<br>Conflicts with `client_name_matcher` and `client_selector`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -241,7 +241,7 @@ func (r *ResourceF5XCSecretPolicyRule) Schema(ctx context.Context, request resou
 					},
 					"client_name_matcher": schema.SingleNestedAttribute{
 						Description:         "client name matcher A list of exact values and/or regular expressions for the expected name of the client. The actual names of the client are extracted from its TLS certificate. This is a generalized version of the client name predicate that allows the same rule to be applicable to a set of clients rather than a single client. The predicate evaluates to true if any of the client's actual names match any of the exact values or regular expressions in the client name matcher.",
-						MarkdownDescription: "client name matcher A list of exact values and/or regular expressions for the expected name of the client. The actual names of the client are extracted from its TLS certificate. This is a generalized version of the client name predicate that allows the same rule to be applicable to a set of clients rather than a single client. The predicate evaluates to true if any of the client's actual names match any of the exact values or regular expressions in the client name matcher.",
+						MarkdownDescription: "client name matcher A list of exact values and/or regular expressions for the expected name of the client. The actual names of the client are extracted from its TLS certificate. This is a generalized version of the client name predicate that allows the same rule to be applicable to a set of clients rather than a single client. The predicate evaluates to true if any of the client's actual names match any of the exact values or regular expressions in the client name matcher.<br>Conflicts with `client_name` and `client_selector`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -278,7 +278,7 @@ func (r *ResourceF5XCSecretPolicyRule) Schema(ctx context.Context, request resou
 					},
 					"client_selector": schema.SingleNestedAttribute{
 						Description:         "client selector A label selector that describes the expected set of clients. The labels associated with the client trying to access the secret are used to evaluate the label expressions in the selector. These labels are derived from the client TLS certificate. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.",
-						MarkdownDescription: "client selector A label selector that describes the expected set of clients. The labels associated with the client trying to access the secret are used to evaluate the label expressions in the selector. These labels are derived from the client TLS certificate. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.",
+						MarkdownDescription: "client selector A label selector that describes the expected set of clients. The labels associated with the client trying to access the secret are used to evaluate the label expressions in the selector. These labels are derived from the client TLS certificate. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.<br>Conflicts with `client_name` and `client_name_matcher`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -996,15 +996,14 @@ func (r *ResourceF5XCSecretPolicyRule) Read(ctx context.Context, request resourc
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
 	readGetRspType := strings.Replace(ves_io_schema_secret_policy_rule.ObjectType, "Object", "GetResponse", 1)
 	readGetProtoMsgType := proto.MessageType(readGetRspType).Elem()
 	readCallRsp := &server.CallResponse{
 		ProtoMsg: reflect.New(readGetProtoMsgType).Interface().(proto.Message),
 	}
-	opts = append(opts, vesapi.WithOutCallResponse(readCallRsp))
+	opts := []vesapi.CallOpt{
+		vesapi.WithOutCallResponse(readCallRsp),
+	}
 
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_secret_policy_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 	if err != nil {
@@ -1604,12 +1603,8 @@ func (r *ResourceF5XCSecretPolicyRule) Update(ctx context.Context, request resou
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_secret_policy_rule.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_secret_policy_rule.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "secret_policy_rule", err),
@@ -1621,7 +1616,9 @@ func (r *ResourceF5XCSecretPolicyRule) Update(ctx context.Context, request resou
 	updateCallRsp := &server.CallResponse{
 		ProtoMsg: reflect.New(updateGetProtoMsgType).Interface().(proto.Message),
 	}
-	opts = append(opts, vesapi.WithOutCallResponse(updateCallRsp))
+	opts := []vesapi.CallOpt{
+		vesapi.WithOutCallResponse(updateCallRsp),
+	}
 
 	// Read the replaced object
 	httpResp, err := r.client.GetObject(ctx, ves_io_schema_secret_policy_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)

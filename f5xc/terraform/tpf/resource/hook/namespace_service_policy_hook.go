@@ -2,9 +2,6 @@
 // Copyright (c) 2026 F5, Inc. All rights reserved.
 //
 
-// Package hook contains custom lifecycle hooks for F5XC Terraform resources.
-// These hooks are called at specific points in the resource lifecycle (e.g. pre-delete)
-// and are NOT auto-generated – they are maintained manually.
 package hook
 
 import (

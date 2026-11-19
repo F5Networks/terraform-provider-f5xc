@@ -29,6 +29,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -43,6 +44,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/portsvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/requiredifvalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -281,7 +283,7 @@ var AdvertisePolicyTlsParametersModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> ClientCertificateVerifyChoice
+// Attribute map for OneOfField --> ClientCertificateVerifyChoice
 var AdvertisePolicyTlsParametersClientCertificateVerifyChoiceModelAttributeMap = map[string]attr.Type{
 
 	"client_certificate_optional": types.BoolType,
@@ -484,7 +486,7 @@ var AdvertisePolicyWhereRefOrSelectorSiteModelAttributeMap = map[string]attr.Typ
 	},
 }
 
-// Attribute map for RequiredOneOfField --> InternetVipChoice
+// Attribute map for OneOfField --> InternetVipChoice
 var AdvertisePolicyWhereRefOrSelectorSiteInternetVipChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disable_internet_vip": types.BoolType,
@@ -535,7 +537,7 @@ var AdvertisePolicyWhereRefOrSelectorVirtualSiteModelAttributeMap = map[string]a
 	},
 }
 
-// Attribute map for RequiredOneOfField --> InternetVipChoice
+// Attribute map for OneOfField --> InternetVipChoice
 var AdvertisePolicyWhereRefOrSelectorVirtualSiteInternetVipChoiceModelAttributeMap = map[string]attr.Type{
 
 	"disable_internet_vip": types.BoolType,
@@ -636,7 +638,7 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 			},
 			"address_type_choice": schema.SingleNestedAttribute{
 				Description:         "address_type Indicates the VIP address family to use for this advertise policy. Select ipv4, ipv6 or dualstack. Defaults to ipv4.",
-				MarkdownDescription: "address_type Indicates the VIP address family to use for this advertise policy. Select ipv4, ipv6 or dualstack. Defaults to ipv4.",
+				MarkdownDescription: "address_type Indicates the VIP address family to use for this advertise policy. Select ipv4, ipv6 or dualstack. Defaults to ipv4.<br>Exactly one of `dualstack`, `ipv4`, or `ipv6` must be specified when `address_type_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -650,7 +652,7 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 				Attributes: map[string]schema.Attribute{
 					"dualstack": schema.BoolAttribute{
 						Description:         "Dual Stack Advertise on both IPv4 and IPv6 simultaneously.",
-						MarkdownDescription: "Dual Stack Advertise on both IPv4 and IPv6 simultaneously.",
+						MarkdownDescription: "Dual Stack Advertise on both IPv4 and IPv6 simultaneously.<br>Conflicts with `ipv4` and `ipv6`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -660,7 +662,7 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 					},
 					"ipv4": schema.BoolAttribute{
 						Description:         "IPv4 Advertise on IPv4 only.",
-						MarkdownDescription: "IPv4 Advertise on IPv4 only.",
+						MarkdownDescription: "IPv4 Advertise on IPv4 only.<br>Conflicts with `dualstack` and `ipv6`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -670,7 +672,7 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 					},
 					"ipv6": schema.BoolAttribute{
 						Description:         "IPv6 Advertise on IPv6 only.",
-						MarkdownDescription: "IPv6 Advertise on IPv6 only.",
+						MarkdownDescription: "IPv6 Advertise on IPv6 only.<br>Conflicts with `dualstack` and `ipv4`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -682,7 +684,7 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 			},
 			"port_choice": schema.SingleNestedAttribute{
 				Description:         "Port Port to advertise.",
-				MarkdownDescription: "Port Port to advertise.",
+				MarkdownDescription: "Port Port to advertise.<br>Exactly one of `port` or `port_ranges` must be specified.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
@@ -695,7 +697,7 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 				Attributes: map[string]schema.Attribute{
 					"port": schema.Int64Attribute{
 						Description:         "Port Port to advertise.",
-						MarkdownDescription: "Port Port to advertise.",
+						MarkdownDescription: "Port Port to advertise.<br>Conflicts with `port_ranges`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -708,7 +710,7 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 					},
 					"port_ranges": schema.StringAttribute{
 						Description:         "Port_ranges A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.",
-						MarkdownDescription: "Port_ranges A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.<br>**Validation:** `Length LengthBetween(1, 512)`",
+						MarkdownDescription: "Port_ranges A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.<br>**Validation:** `Length LengthBetween(1, 512)`<br>Conflicts with `port`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -758,8 +760,12 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 							Required:            false,
 							Optional:            true,
 							Computed:            true,
+							Validators: []validator.String{
+								requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+							},
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseNonNullStateForUnknown(),
+								requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 							},
 						},
 					},
@@ -782,21 +788,24 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 				Attributes: map[string]schema.Attribute{
 					"client_certificate_verify_choice": schema.SingleNestedAttribute{
 						Description:         "Client certificate verification Configuration to indicate whether client certificate verification is required",
-						MarkdownDescription: "Client certificate verification Configuration to indicate whether client certificate verification is required",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "Client certificate verification Configuration to indicate whether client certificate verification is required<br>Exactly one of `client_certificate_optional`, `client_certificate_required`, or `no_client_certificate` must be specified when `client_certificate_verify_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"client_certificate_optional",
 								"client_certificate_required",
 								"no_client_certificate",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"client_certificate_optional": schema.BoolAttribute{
 								Description:         "client_certificate_optional Client certificate is optional. If the client has provided a certificate, the load balancer will verify it. If certification verification fails, the connection will be terminated. If the client does not provide a certificate, the connection will be accepted.",
-								MarkdownDescription: "client_certificate_optional Client certificate is optional. If the client has provided a certificate, the load balancer will verify it. If certification verification fails, the connection will be terminated. If the client does not provide a certificate, the connection will be accepted.",
+								MarkdownDescription: "client_certificate_optional Client certificate is optional. If the client has provided a certificate, the load balancer will verify it. If certification verification fails, the connection will be terminated. If the client does not provide a certificate, the connection will be accepted.<br>Conflicts with `client_certificate_required` and `no_client_certificate`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -806,7 +815,7 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 							},
 							"client_certificate_required": schema.BoolAttribute{
 								Description:         "client_certificate_required Client certificate is mandatory. F5XC will reject connections without a valid client certificate.",
-								MarkdownDescription: "client_certificate_required Client certificate is mandatory. F5XC will reject connections without a valid client certificate.",
+								MarkdownDescription: "client_certificate_required Client certificate is mandatory. F5XC will reject connections without a valid client certificate.<br>Conflicts with `client_certificate_optional` and `no_client_certificate`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -816,7 +825,7 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 							},
 							"no_client_certificate": schema.BoolAttribute{
 								Description:         "no_client_certificate Client certificate is not required. If the client has provided a certificate, it will be ignored (not used for verification)",
-								MarkdownDescription: "no_client_certificate Client certificate is not required. If the client has provided a certificate, it will be ignored (not used for verification)",
+								MarkdownDescription: "no_client_certificate Client certificate is not required. If the client has provided a certificate, it will be ignored (not used for verification)<br>Conflicts with `client_certificate_optional` and `client_certificate_required`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -902,7 +911,7 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 										},
 										"ocsp_stapling_choice": schema.SingleNestedAttribute{
 											Description:         "OCSP Response choice OCSP Stapling choice",
-											MarkdownDescription: "OCSP Response choice OCSP Stapling choice",
+											MarkdownDescription: "OCSP Response choice OCSP Stapling choice<br>Exactly one of `custom_hash_algorithms`, `disable_ocsp_stapling`, or `use_system_defaults` must be specified when `ocsp_stapling_choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -916,7 +925,7 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 											Attributes: map[string]schema.Attribute{
 												"custom_hash_algorithms": schema.SingleNestedAttribute{
 													Description:         "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.",
-													MarkdownDescription: "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.",
+													MarkdownDescription: "Use Custom Order for Hash Algorithms Use hash algorithms in the custom order. F5XC will try to fetch ocsp response from the CA in the given order. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set.<br>Conflicts with `disable_ocsp_stapling` and `use_system_defaults`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -938,7 +947,7 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 												},
 												"disable_ocsp_stapling": schema.BoolAttribute{
 													Description:         "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.",
-													MarkdownDescription: "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.",
+													MarkdownDescription: "Disable OCSP Stapling Disable OCSP Stapling. F5XC will not fetch and staple OCSP Response for this certificate. This is the default behavior if no choice is selected.<br>Conflicts with `custom_hash_algorithms` and `use_system_defaults`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -948,7 +957,7 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 												},
 												"use_system_defaults": schema.BoolAttribute{
 													Description:         "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.",
-													MarkdownDescription: "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.",
+													MarkdownDescription: "Fetch with F5XC default settings Use F5XC Default Settings to fetch and staple OCSP Response. OCSP Response will be stapled if it can be fetched. Additionally, LoadBalancer will not become active until ocspResponse cannot be fetched if the certificate has MustStaple extension set. F5XC will try to fetch OCSPResponse with sha256 and sha1 as HashAlgorithm, in that order.<br>Conflicts with `custom_hash_algorithms` and `disable_ocsp_stapling`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -967,7 +976,7 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 											Attributes: map[string]schema.Attribute{
 												"secret_info_choice": schema.SingleNestedAttribute{
 													Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-													MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+													MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -981,7 +990,7 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 													Attributes: map[string]schema.Attribute{
 														"blindfold_secret_info": schema.SingleNestedAttribute{
 															Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-															MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+															MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1021,7 +1030,7 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 														},
 														"clear_secret_info": schema.SingleNestedAttribute{
 															Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-															MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+															MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1056,7 +1065,7 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 														},
 														"none": schema.BoolAttribute{
 															Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-															MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+															MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1088,7 +1097,7 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 									},
 									"trusted_ca_choice": schema.SingleNestedAttribute{
 										Description:         "trusted_ca_choice Root CA configuration for downstream TLS connections",
-										MarkdownDescription: "trusted_ca_choice Root CA configuration for downstream TLS connections",
+										MarkdownDescription: "trusted_ca_choice Root CA configuration for downstream TLS connections<br>Exactly one of `trusted_ca` or `trusted_ca_url` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -1101,7 +1110,7 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 										Attributes: map[string]schema.Attribute{
 											"trusted_ca": schema.SingleNestedAttribute{
 												Description:         "trusted_ca Root CA Certificate",
-												MarkdownDescription: "trusted_ca Root CA Certificate",
+												MarkdownDescription: "trusted_ca Root CA Certificate<br>Conflicts with `trusted_ca_url`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1137,8 +1146,12 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            true,
+																	Validators: []validator.String{
+																		requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+																	},
 																	PlanModifiers: []planmodifier.String{
 																		stringplanmodifier.UseNonNullStateForUnknown(),
+																		requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 																	},
 																},
 															},
@@ -1148,7 +1161,7 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 											},
 											"trusted_ca_url": schema.StringAttribute{
 												Description:         "trusted_ca_url Inline Root CA Certificate",
-												MarkdownDescription: "trusted_ca_url Inline Root CA Certificate",
+												MarkdownDescription: "trusted_ca_url Inline Root CA Certificate<br>Conflicts with `trusted_ca`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1181,7 +1194,7 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 				Attributes: map[string]schema.Attribute{
 					"ref_or_selector_choice": schema.SingleNestedAttribute{
 						Description:         "ref_or_selector One of following",
-						MarkdownDescription: "ref_or_selector One of following",
+						MarkdownDescription: "ref_or_selector One of following<br>Exactly one of `site`, `virtual_network`, or `virtual_site` must be specified.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -1195,27 +1208,30 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 						Attributes: map[string]schema.Attribute{
 							"site": schema.SingleNestedAttribute{
 								Description:         "site Direct reference to site object",
-								MarkdownDescription: "site Direct reference to site object",
+								MarkdownDescription: "site Direct reference to site object<br>Conflicts with `virtual_network` and `virtual_site`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
 								Attributes: map[string]schema.Attribute{
 									"internet_vip_choice": schema.SingleNestedAttribute{
 										Description:         "Internet VIP Choice Internet VIP Choice",
-										MarkdownDescription: "Internet VIP Choice Internet VIP Choice",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Internet VIP Choice Internet VIP Choice<br>Exactly one of `disable_internet_vip` or `enable_internet_vip` must be specified when `internet_vip_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"disable_internet_vip",
 												"enable_internet_vip",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"disable_internet_vip": schema.BoolAttribute{
 												Description:         "Disable advertise on internet vip Do not enable advertise on external internet vip.",
-												MarkdownDescription: "Disable advertise on internet vip Do not enable advertise on external internet vip.",
+												MarkdownDescription: "Disable advertise on internet vip Do not enable advertise on external internet vip.<br>Conflicts with `enable_internet_vip`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1225,7 +1241,7 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 											},
 											"enable_internet_vip": schema.BoolAttribute{
 												Description:         "Enable advertise on internet vip Enable advertise on internet vip. Only supported for AWS TGW Site or AWS VPC Site.",
-												MarkdownDescription: "Enable advertise on internet vip Enable advertise on internet vip. Only supported for AWS TGW Site or AWS VPC Site.",
+												MarkdownDescription: "Enable advertise on internet vip Enable advertise on internet vip. Only supported for AWS TGW Site or AWS VPC Site.<br>Conflicts with `disable_internet_vip`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1279,8 +1295,12 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 													Required:            false,
 													Optional:            true,
 													Computed:            true,
+													Validators: []validator.String{
+														requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+													},
 													PlanModifiers: []planmodifier.String{
 														stringplanmodifier.UseNonNullStateForUnknown(),
+														requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 													},
 												},
 											},
@@ -1290,7 +1310,7 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 							},
 							"virtual_network": schema.SingleNestedAttribute{
 								Description:         "virtual_network Direct reference to virtual network object",
-								MarkdownDescription: "virtual_network Direct reference to virtual network object",
+								MarkdownDescription: "virtual_network Direct reference to virtual network object<br>Conflicts with `site` and `virtual_site`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1326,8 +1346,12 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 													Required:            false,
 													Optional:            true,
 													Computed:            true,
+													Validators: []validator.String{
+														requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+													},
 													PlanModifiers: []planmodifier.String{
 														stringplanmodifier.UseNonNullStateForUnknown(),
+														requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 													},
 												},
 											},
@@ -1337,27 +1361,30 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 							},
 							"virtual_site": schema.SingleNestedAttribute{
 								Description:         "virtual_site Direct reference to virtual site object",
-								MarkdownDescription: "virtual_site Direct reference to virtual site object",
+								MarkdownDescription: "virtual_site Direct reference to virtual site object<br>Conflicts with `site` and `virtual_network`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
 								Attributes: map[string]schema.Attribute{
 									"internet_vip_choice": schema.SingleNestedAttribute{
 										Description:         "Internet VIP Choice Internet VIP Choice",
-										MarkdownDescription: "Internet VIP Choice Internet VIP Choice",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
+										MarkdownDescription: "Internet VIP Choice Internet VIP Choice<br>Exactly one of `disable_internet_vip` or `enable_internet_vip` must be specified when `internet_vip_choice` is configured.",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
 										Validators: []validator.Object{
-											exactlyoneofvalidator.RequiredExactlyOneOf(
+											exactlyoneofvalidator.ExactlyOneOf(
 												"disable_internet_vip",
 												"enable_internet_vip",
 											),
 										},
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseNonNullStateForUnknown(),
+										},
 										Attributes: map[string]schema.Attribute{
 											"disable_internet_vip": schema.BoolAttribute{
 												Description:         "Disable advertise on internet vip Do not enable advertise on external internet vip.",
-												MarkdownDescription: "Disable advertise on internet vip Do not enable advertise on external internet vip.",
+												MarkdownDescription: "Disable advertise on internet vip Do not enable advertise on external internet vip.<br>Conflicts with `enable_internet_vip`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1367,7 +1394,7 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 											},
 											"enable_internet_vip": schema.BoolAttribute{
 												Description:         "Enable advertise on internet vip Enable advertise on internet vip. Only supported for AWS TGW Site or AWS VPC Site.",
-												MarkdownDescription: "Enable advertise on internet vip Enable advertise on internet vip. Only supported for AWS TGW Site or AWS VPC Site.",
+												MarkdownDescription: "Enable advertise on internet vip Enable advertise on internet vip. Only supported for AWS TGW Site or AWS VPC Site.<br>Conflicts with `disable_internet_vip`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1421,8 +1448,12 @@ func (r *ResourceF5XCAdvertisePolicy) Schema(ctx context.Context, request resour
 													Required:            false,
 													Optional:            true,
 													Computed:            true,
+													Validators: []validator.String{
+														requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+													},
 													PlanModifiers: []planmodifier.String{
 														stringplanmodifier.UseNonNullStateForUnknown(),
+														requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 													},
 												},
 											},
@@ -1708,6 +1739,9 @@ func (r *ResourceF5XCAdvertisePolicy) Create(ctx context.Context, request resour
 		// resource modelToSpecRoot PointerField --> TlsParameters
 		if !data.TlsParameters.IsNull() && !data.TlsParameters.IsUnknown() {
 			tlsParametersSpec := &ves_io_schema.DownstreamTlsParamsType{}
+			tlsParametersSpec.ClientCertificateVerifyChoice = &ves_io_schema.DownstreamTlsParamsType_NoClientCertificate{
+				NoClientCertificate: &ves_io_schema.Empty{},
+			}
 			spec.TlsParameters = tlsParametersSpec
 			var tlsParametersModel AdvertisePolicyDownstreamTlsParamsType
 
@@ -1718,7 +1752,7 @@ func (r *ResourceF5XCAdvertisePolicy) Create(ctx context.Context, request resour
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ClientCertificateVerifyChoice
+			// resource modelToSpecNested OneOfField --> ClientCertificateVerifyChoice
 			if !tlsParametersModel.ClientCertificateVerifyChoice.IsNull() && !tlsParametersModel.ClientCertificateVerifyChoice.IsUnknown() {
 				tlsParametersClientCertificateVerifyChoiceModel := AdvertisePolicyClientCertVerifyChoice{}
 				response.Diagnostics.Append(tlsParametersModel.ClientCertificateVerifyChoice.As(ctx, &tlsParametersClientCertificateVerifyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2132,9 +2166,12 @@ func (r *ResourceF5XCAdvertisePolicy) Create(ctx context.Context, request resour
 					}
 					siteOneOfSpec := &ves_io_schema.NetworkSiteRefSelector_Site{}
 					siteOneOfSpec.Site = &ves_io_schema.SiteRefType{}
+					siteOneOfSpec.Site.InternetVipChoice = &ves_io_schema.SiteRefType_DisableInternetVip{
+						DisableInternetVip: &ves_io_schema.Empty{},
+					}
 					whereSpec.RefOrSelector = siteOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> InternetVipChoice
+					// resource modelToSpecNested OneOfField --> InternetVipChoice
 					if !advertisePolicySiteModel.InternetVipChoice.IsNull() && !advertisePolicySiteModel.InternetVipChoice.IsUnknown() {
 						siteInternetVipChoiceModel := AdvertisePolicyInternetVipChoice{}
 						response.Diagnostics.Append(advertisePolicySiteModel.InternetVipChoice.As(ctx, &siteInternetVipChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2282,9 +2319,12 @@ func (r *ResourceF5XCAdvertisePolicy) Create(ctx context.Context, request resour
 					}
 					virtualSiteOneOfSpec := &ves_io_schema.NetworkSiteRefSelector_VirtualSite{}
 					virtualSiteOneOfSpec.VirtualSite = &ves_io_schema.VSiteRefType{}
+					virtualSiteOneOfSpec.VirtualSite.InternetVipChoice = &ves_io_schema.VSiteRefType_DisableInternetVip{
+						DisableInternetVip: &ves_io_schema.Empty{},
+					}
 					whereSpec.RefOrSelector = virtualSiteOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> InternetVipChoice
+					// resource modelToSpecNested OneOfField --> InternetVipChoice
 					if !advertisePolicyVirtualSiteModel.InternetVipChoice.IsNull() && !advertisePolicyVirtualSiteModel.InternetVipChoice.IsUnknown() {
 						virtualSiteInternetVipChoiceModel := AdvertisePolicyVSiteRefTypeInternetVipChoice{}
 						response.Diagnostics.Append(advertisePolicyVirtualSiteModel.InternetVipChoice.As(ctx, &virtualSiteInternetVipChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2716,8 +2756,7 @@ func (r *ResourceF5XCAdvertisePolicy) Create(ctx context.Context, request resour
 		var advertisePolicyDownstreamTlsParamsTypeModel = &AdvertisePolicyDownstreamTlsParamsType{}
 		tlsParametersElement := specData.GetTlsParameters()
 
-		// resource specToModelNested RequiredOneOfField --> ClientCertificateVerifyChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> ClientCertificateVerifyChoice
 		if tlsParametersElement.GetClientCertificateVerifyChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			tlsParametersclientCertificateVerifyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3318,8 +3357,7 @@ func (r *ResourceF5XCAdvertisePolicy) Create(ctx context.Context, request resour
 				if isSite && siteOptionsWrapper != nil && siteOptionsWrapper.Site != nil {
 					siteElement := siteOptionsWrapper.Site
 
-					// resource specToModelNested RequiredOneOfField --> InternetVipChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> InternetVipChoice
 					if siteElement.GetInternetVipChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						siteinternetVipChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3524,8 +3562,7 @@ func (r *ResourceF5XCAdvertisePolicy) Create(ctx context.Context, request resour
 				if isVirtualSite && virtualSiteOptionsWrapper != nil && virtualSiteOptionsWrapper.VirtualSite != nil {
 					virtualSiteElement := virtualSiteOptionsWrapper.VirtualSite
 
-					// resource specToModelNested RequiredOneOfField --> InternetVipChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> InternetVipChoice
 					if virtualSiteElement.GetInternetVipChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						virtualSiteinternetVipChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3726,11 +3763,7 @@ func (r *ResourceF5XCAdvertisePolicy) Read(ctx context.Context, request resource
 	defer cancel()
 	priorTlsParameters := data.TlsParameters
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_advertise_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_advertise_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "advertise_policy", err),
@@ -4052,8 +4085,7 @@ func (r *ResourceF5XCAdvertisePolicy) Read(ctx context.Context, request resource
 		var advertisePolicyDownstreamTlsParamsTypeModel = &AdvertisePolicyDownstreamTlsParamsType{}
 		tlsParametersElement := specData.GetTlsParameters()
 
-		// resource specToModelNested RequiredOneOfField --> ClientCertificateVerifyChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> ClientCertificateVerifyChoice
 		if tlsParametersElement.GetClientCertificateVerifyChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			tlsParametersclientCertificateVerifyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -4670,8 +4702,7 @@ func (r *ResourceF5XCAdvertisePolicy) Read(ctx context.Context, request resource
 				if isSite && siteOptionsWrapper != nil && siteOptionsWrapper.Site != nil {
 					siteElement := siteOptionsWrapper.Site
 
-					// resource specToModelNested RequiredOneOfField --> InternetVipChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> InternetVipChoice
 					if siteElement.GetInternetVipChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						siteinternetVipChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -4879,8 +4910,7 @@ func (r *ResourceF5XCAdvertisePolicy) Read(ctx context.Context, request resource
 				if isVirtualSite && virtualSiteOptionsWrapper != nil && virtualSiteOptionsWrapper.VirtualSite != nil {
 					virtualSiteElement := virtualSiteOptionsWrapper.VirtualSite
 
-					// resource specToModelNested RequiredOneOfField --> InternetVipChoice
-					// <no value>
+					// resource specToModelNested OneOfField --> InternetVipChoice
 					if virtualSiteElement.GetInternetVipChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						virtualSiteinternetVipChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5277,6 +5307,9 @@ func (r *ResourceF5XCAdvertisePolicy) Update(ctx context.Context, request resour
 		// resource modelToSpecRoot PointerField --> TlsParameters
 		if !data.TlsParameters.IsNull() && !data.TlsParameters.IsUnknown() {
 			tlsParametersSpec := &ves_io_schema.DownstreamTlsParamsType{}
+			tlsParametersSpec.ClientCertificateVerifyChoice = &ves_io_schema.DownstreamTlsParamsType_NoClientCertificate{
+				NoClientCertificate: &ves_io_schema.Empty{},
+			}
 			spec.TlsParameters = tlsParametersSpec
 			var tlsParametersModel AdvertisePolicyDownstreamTlsParamsType
 
@@ -5287,7 +5320,7 @@ func (r *ResourceF5XCAdvertisePolicy) Update(ctx context.Context, request resour
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ClientCertificateVerifyChoice
+			// resource modelToSpecNested OneOfField --> ClientCertificateVerifyChoice
 			if !tlsParametersModel.ClientCertificateVerifyChoice.IsNull() && !tlsParametersModel.ClientCertificateVerifyChoice.IsUnknown() {
 				tlsParametersClientCertificateVerifyChoiceModel := AdvertisePolicyClientCertVerifyChoice{}
 				response.Diagnostics.Append(tlsParametersModel.ClientCertificateVerifyChoice.As(ctx, &tlsParametersClientCertificateVerifyChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5701,9 +5734,12 @@ func (r *ResourceF5XCAdvertisePolicy) Update(ctx context.Context, request resour
 					}
 					siteOneOfSpec := &ves_io_schema.NetworkSiteRefSelector_Site{}
 					siteOneOfSpec.Site = &ves_io_schema.SiteRefType{}
+					siteOneOfSpec.Site.InternetVipChoice = &ves_io_schema.SiteRefType_DisableInternetVip{
+						DisableInternetVip: &ves_io_schema.Empty{},
+					}
 					whereSpec.RefOrSelector = siteOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> InternetVipChoice
+					// resource modelToSpecNested OneOfField --> InternetVipChoice
 					if !advertisePolicySiteModel.InternetVipChoice.IsNull() && !advertisePolicySiteModel.InternetVipChoice.IsUnknown() {
 						siteInternetVipChoiceModel := AdvertisePolicyInternetVipChoice{}
 						response.Diagnostics.Append(advertisePolicySiteModel.InternetVipChoice.As(ctx, &siteInternetVipChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5851,9 +5887,12 @@ func (r *ResourceF5XCAdvertisePolicy) Update(ctx context.Context, request resour
 					}
 					virtualSiteOneOfSpec := &ves_io_schema.NetworkSiteRefSelector_VirtualSite{}
 					virtualSiteOneOfSpec.VirtualSite = &ves_io_schema.VSiteRefType{}
+					virtualSiteOneOfSpec.VirtualSite.InternetVipChoice = &ves_io_schema.VSiteRefType_DisableInternetVip{
+						DisableInternetVip: &ves_io_schema.Empty{},
+					}
 					whereSpec.RefOrSelector = virtualSiteOneOfSpec
 
-					// resource modelToSpecNested RequiredOneOfField --> InternetVipChoice
+					// resource modelToSpecNested OneOfField --> InternetVipChoice
 					if !advertisePolicyVirtualSiteModel.InternetVipChoice.IsNull() && !advertisePolicyVirtualSiteModel.InternetVipChoice.IsUnknown() {
 						virtualSiteInternetVipChoiceModel := AdvertisePolicyVSiteRefTypeInternetVipChoice{}
 						response.Diagnostics.Append(advertisePolicyVirtualSiteModel.InternetVipChoice.As(ctx, &virtualSiteInternetVipChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5957,12 +5996,8 @@ func (r *ResourceF5XCAdvertisePolicy) Update(ctx context.Context, request resour
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_advertise_policy.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_advertise_policy.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "advertise_policy", err),
@@ -5971,7 +6006,7 @@ func (r *ResourceF5XCAdvertisePolicy) Update(ctx context.Context, request resour
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_advertise_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_advertise_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "advertise_policy", err),
@@ -6286,8 +6321,7 @@ func (r *ResourceF5XCAdvertisePolicy) Update(ctx context.Context, request resour
 		var advertisePolicyDownstreamTlsParamsTypeModel = &AdvertisePolicyDownstreamTlsParamsType{}
 		tlsParametersElement := specData.GetTlsParameters()
 
-		// resource specToModelNested RequiredOneOfField --> ClientCertificateVerifyChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> ClientCertificateVerifyChoice
 		if tlsParametersElement.GetClientCertificateVerifyChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			tlsParametersclientCertificateVerifyChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -6888,8 +6922,7 @@ func (r *ResourceF5XCAdvertisePolicy) Update(ctx context.Context, request resour
 				if isSite && siteOptionsWrapper != nil && siteOptionsWrapper.Site != nil {
 					siteElement := siteOptionsWrapper.Site
 
-					// resource specToModelNested RequiredOneOfField --> InternetVipChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> InternetVipChoice
 					if siteElement.GetInternetVipChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						siteinternetVipChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -7094,8 +7127,7 @@ func (r *ResourceF5XCAdvertisePolicy) Update(ctx context.Context, request resour
 				if isVirtualSite && virtualSiteOptionsWrapper != nil && virtualSiteOptionsWrapper.VirtualSite != nil {
 					virtualSiteElement := virtualSiteOptionsWrapper.VirtualSite
 
-					// resource specToModelNested RequiredOneOfField --> InternetVipChoice
-					// GlobalSpecType
+					// resource specToModelNested OneOfField --> InternetVipChoice
 					if virtualSiteElement.GetInternetVipChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
 						virtualSiteinternetVipChoiceChoicesAttributeMap := make(map[string]attr.Value)

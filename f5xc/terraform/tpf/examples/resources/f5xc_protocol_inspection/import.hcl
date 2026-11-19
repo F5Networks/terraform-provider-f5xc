@@ -1,4 +1,4 @@
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_protocol_inspection.example"
+	to = f5xc_protocol_inspection.example
 }

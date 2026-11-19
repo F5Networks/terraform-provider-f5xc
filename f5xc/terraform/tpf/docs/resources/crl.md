@@ -78,7 +78,7 @@ resource "f5xc_crl" "example" {
 
 ### Optional
 
-- `access_info_choice` (Attributes) CRL Access information (see [below for nested schema](#nestedatt--access_info_choice))
+- `access_info_choice` (Attributes) CRL Access information<br>`http_access` must be specified when `access_info_choice` is configured. (see [below for nested schema](#nestedatt--access_info_choice))
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `description` (String) description Human readable description for the object
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
@@ -137,6 +137,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_crl.example"
+	to = f5xc_crl.example
 }
 ```

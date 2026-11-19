@@ -25,6 +25,7 @@ import (
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/requiredifvalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -119,8 +120,12 @@ func (r *ResourceF5XCActiveNetworkPolicies) Schema(ctx context.Context, request 
 							Required:            false,
 							Optional:            true,
 							Computed:            true,
+							Validators: []validator.String{
+								requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+							},
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseNonNullStateForUnknown(),
+								requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 							},
 						},
 					},

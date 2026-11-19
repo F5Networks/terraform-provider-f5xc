@@ -84,7 +84,7 @@ resource "f5xc_service_credential" "example" {
 - `namespace` (String) Namespace Value of namespace is always 'system'.
 - `namespace_roles` (Attributes List) Roles list of roles per namespace to be assigned to service credentials. (see [below for nested schema](#nestedatt--namespace_roles))
 - `renew_trigger` (Boolean) Local Terraform trigger flag for API token renewal.
-- `service_credential_choice` (Attributes) Service Credential Spec Credential specification can be one of the following types - * service api token * service api certificate * service kube config * site global kube config (see [below for nested schema](#nestedatt--service_credential_choice))
+- `service_credential_choice` (Attributes) Service Credential Spec Credential specification can be one of the following types - * service api token * service api certificate * service kube config * site global kube config<br>Exactly one of `api_certificate`, `api_token`, `site_kubeconfig`, or `vk8s_kubeconfig` must be specified when `service_credential_choice` is configured. (see [below for nested schema](#nestedatt--service_credential_choice))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 - `user_group_names` (List of String) User Groups Names list of user_groups assigned to this service credential
 
@@ -106,10 +106,10 @@ Required:
 
 Optional:
 
-- `api_certificate` (Attributes) api_certificate Service API Certificate parameters (see [below for nested schema](#nestedatt--service_credential_choice--api_certificate))
-- `api_token` (Boolean) api_token Service API Token parameters
-- `site_kubeconfig` (Attributes, Deprecated) site_kubeconfig Site Global Kube Config parameters (see [below for nested schema](#nestedatt--service_credential_choice--site_kubeconfig))
-- `vk8s_kubeconfig` (Attributes, Deprecated) vk8s_kubeconfig Service Kube Config parameters (see [below for nested schema](#nestedatt--service_credential_choice--vk8s_kubeconfig))
+- `api_certificate` (Attributes) api_certificate Service API Certificate parameters<br>Conflicts with `api_token`, `site_kubeconfig`, and `vk8s_kubeconfig`. (see [below for nested schema](#nestedatt--service_credential_choice--api_certificate))
+- `api_token` (Boolean) api_token Service API Token parameters<br>Conflicts with `api_certificate`, `site_kubeconfig`, and `vk8s_kubeconfig`.
+- `site_kubeconfig` (Attributes, Deprecated) site_kubeconfig Site Global Kube Config parameters<br>Conflicts with `api_certificate`, `api_token`, and `vk8s_kubeconfig`. (see [below for nested schema](#nestedatt--service_credential_choice--site_kubeconfig))
+- `vk8s_kubeconfig` (Attributes, Deprecated) vk8s_kubeconfig Service Kube Config parameters<br>Conflicts with `api_certificate`, `api_token`, and `site_kubeconfig`. (see [below for nested schema](#nestedatt--service_credential_choice--vk8s_kubeconfig))
 
 <a id="nestedatt--service_credential_choice--api_certificate"></a>
 ### Nested Schema for `service_credential_choice.api_certificate`
@@ -157,6 +157,10 @@ In Terraform v1.5.0 and later, use an `import` block to import this resource by 
 Use the following `command` to import this resource from the command line:
 
 ```shell
+# System-scoped credentials: system/<credential_name>
+# vK8s kubeconfig credentials (service_credential_choice.vk8s_kubeconfig): system/<vk8s_namespace>/<credential_name> or <vk8s_namespace>/<credential_name>
+# After import, name, expiration_days and service_credential_choice (except vk8s_kubeconfig.vk8s_namespace) are not populated from the API and remain unset.
+# Because name and service_credential_choice require replacement, the first plan after import proposes replacing the credential; add lifecycle { ignore_changes = [name, service_credential_choice, expiration_days] } to keep the imported credential.
 terraform import f5xc_service_credential.example <namespace>/<credential_name>
 ```
 
@@ -166,7 +170,11 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 
 ```hcl
 import {
+	# System-scoped credentials: system/<credential_name>
+	# vK8s kubeconfig credentials (service_credential_choice.vk8s_kubeconfig): system/<vk8s_namespace>/<credential_name> or <vk8s_namespace>/<credential_name>
+	# After import, name, expiration_days and service_credential_choice (except vk8s_kubeconfig.vk8s_namespace) are not populated from the API and remain unset.
+	# Because name and service_credential_choice require replacement, the first plan after import proposes replacing the credential; add lifecycle { ignore_changes = [name, service_credential_choice, expiration_days] } to keep the imported credential.
 	id = "<namespace>/<credential_name>"
-	to = "f5xc_service_credential.example"
+	to = f5xc_service_credential.example
 }
 ```

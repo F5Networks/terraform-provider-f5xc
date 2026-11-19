@@ -18,6 +18,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -30,7 +31,6 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
 
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -218,7 +218,7 @@ func (r *ResourceF5XCServiceCredential) Schema(ctx context.Context, request reso
 			},
 			"service_credential_choice": schema.SingleNestedAttribute{
 				Description:         "Service Credential Spec Credential specification can be one of the following types - * service api token * service api certificate * service kube config * site global kube config",
-				MarkdownDescription: "Service Credential Spec Credential specification can be one of the following types - * service api token * service api certificate * service kube config * site global kube config",
+				MarkdownDescription: "Service Credential Spec Credential specification can be one of the following types - * service api token * service api certificate * service kube config * site global kube config<br>Exactly one of `api_certificate`, `api_token`, `site_kubeconfig`, or `vk8s_kubeconfig` must be specified when `service_credential_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -230,10 +230,13 @@ func (r *ResourceF5XCServiceCredential) Schema(ctx context.Context, request reso
 						"vk8s_kubeconfig",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.RequiresReplace(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"api_certificate": schema.SingleNestedAttribute{
 						Description:         "api_certificate Service API Certificate parameters",
-						MarkdownDescription: "api_certificate Service API Certificate parameters",
+						MarkdownDescription: "api_certificate Service API Certificate parameters<br>Conflicts with `api_token`, `site_kubeconfig`, and `vk8s_kubeconfig`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -253,7 +256,7 @@ func (r *ResourceF5XCServiceCredential) Schema(ctx context.Context, request reso
 					},
 					"api_token": schema.BoolAttribute{
 						Description:         "api_token Service API Token parameters",
-						MarkdownDescription: "api_token Service API Token parameters",
+						MarkdownDescription: "api_token Service API Token parameters<br>Conflicts with `api_certificate`, `site_kubeconfig`, and `vk8s_kubeconfig`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -263,7 +266,7 @@ func (r *ResourceF5XCServiceCredential) Schema(ctx context.Context, request reso
 					},
 					"site_kubeconfig": schema.SingleNestedAttribute{
 						Description:         "site_kubeconfig Site Global Kube Config parameters",
-						MarkdownDescription: "site_kubeconfig Site Global Kube Config parameters",
+						MarkdownDescription: "site_kubeconfig Site Global Kube Config parameters<br>Conflicts with `api_certificate`, `api_token`, and `vk8s_kubeconfig`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -283,7 +286,7 @@ func (r *ResourceF5XCServiceCredential) Schema(ctx context.Context, request reso
 					},
 					"vk8s_kubeconfig": schema.SingleNestedAttribute{
 						Description:         "vk8s_kubeconfig Service Kube Config parameters",
-						MarkdownDescription: "vk8s_kubeconfig Service Kube Config parameters",
+						MarkdownDescription: "vk8s_kubeconfig Service Kube Config parameters<br>Conflicts with `api_certificate`, `api_token`, and `site_kubeconfig`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -666,7 +669,7 @@ func (r *ResourceF5XCServiceCredential) Read(ctx context.Context, request resour
 
 	// CustomAPI Read (IsCustomAPIOnly): ListServiceCredentials
 	customReadRPCFQN := "ves.io.schema.api_credential.CustomAPI.ListServiceCredentials"
-	customReadURI := fmt.Sprintf("/public/namespaces/%s/service_credentials", data.Namespace.ValueString())
+	customReadURI := fmt.Sprintf("/public/namespaces/%s/service_credentials", hook.ResolveServiceCredentialNamespace(ctx, data.Namespace, data.ServiceCredentialChoice))
 
 	readRespMsg, err := r.client.CustomAPI(ctx, "GET", customReadURI, customReadRPCFQN, "")
 	if err != nil {
@@ -698,14 +701,6 @@ func (r *ResourceF5XCServiceCredential) Read(ctx context.Context, request resour
 	}
 	// Write back the CustomAPI read response to the model
 	specData := readRespItem
-
-	// resource SpecToModelRoot StringField --> Namespace
-	if specData.GetNamespace() != "" {
-		data.Namespace = types.StringValue(specData.GetNamespace())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Namespace = types.StringNull()
-	}
 
 	// resource specToModelRootOld ArrayOfStringField --> UserGroupNames
 	{
@@ -815,7 +810,7 @@ func (r *ResourceF5XCServiceCredential) Update(ctx context.Context, request reso
 		return
 	}
 	// Pre-Update Hook: hook.ServiceCredentialPreUpdateHook
-	if hookErr := hook.ServiceCredentialPreUpdateHook(ctx, r.client, req, data.NamespaceRoles, data.Namespace.ValueString(), data.CredentialName.ValueString(), priorData.RenewTrigger.ValueBool(), data.RenewTrigger.ValueBool(), data.ExpirationDays.ValueInt64()); hookErr != nil {
+	if hookErr := hook.ServiceCredentialPreUpdateHook(ctx, r.client, req, data.NamespaceRoles, hook.ResolveServiceCredentialNamespace(ctx, data.Namespace, data.ServiceCredentialChoice), data.CredentialName.ValueString(), priorData.RenewTrigger.ValueBool(), data.RenewTrigger.ValueBool(), data.ExpirationDays.ValueInt64()); hookErr != nil {
 		response.Diagnostics.AddError(
 			"Pre-Update Hook Error",
 			fmt.Sprintf("Pre-update hook failed for %s: %s", "service_credential", hookErr),
@@ -825,7 +820,7 @@ func (r *ResourceF5XCServiceCredential) Update(ctx context.Context, request reso
 
 	// CustomAPI Update (IsCustomAPIOnly): ReplaceServiceCredentials
 	customUpdateRPCFQN := "ves.io.schema.api_credential.CustomAPI.ReplaceServiceCredentials"
-	customUpdateURI := fmt.Sprintf("/public/namespaces/%s/service_credentials/%s", data.Namespace.ValueString(), data.CredentialName.ValueString())
+	customUpdateURI := fmt.Sprintf("/public/namespaces/%s/service_credentials/%s", hook.ResolveServiceCredentialNamespace(ctx, data.Namespace, data.ServiceCredentialChoice), data.CredentialName.ValueString())
 
 	yamlReq, err := codec.ToYAML(req)
 	if err != nil {
@@ -896,7 +891,7 @@ func (r *ResourceF5XCServiceCredential) Delete(ctx context.Context, request reso
 	// CustomAPI Delete: RevokeServiceCredentials
 	customDeleteRPCFQN := "ves.io.schema.api_credential.CustomAPI.RevokeServiceCredentials"
 
-	customDeleteURI := fmt.Sprintf("/public/namespaces/%s/revoke/service_credentials", data.Namespace.ValueString())
+	customDeleteURI := fmt.Sprintf("/public/namespaces/%s/revoke/service_credentials", hook.ResolveServiceCredentialNamespace(ctx, data.Namespace, data.ServiceCredentialChoice))
 	// Build delete request body: primary key is a body field, not a URI path parameter.
 	deleteReqBodyMap := map[string]interface{}{
 		"name": data.CredentialName.ValueString(),
@@ -935,29 +930,6 @@ func (r *ResourceF5XCServiceCredential) Delete(ctx context.Context, request reso
 
 }
 func (r *ResourceF5XCServiceCredential) ImportState(ctx context.Context, req resource.ImportStateRequest, response *resource.ImportStateResponse) {
-	// Import ID format: namespace/credential_name
-	parts := strings.Split(req.ID, "/")
-	if len(parts) != 2 {
-		response.Diagnostics.AddError(
-			"Invalid Import ID",
-			fmt.Sprintf("Expected import ID format: namespace/credential_name, got: %s", req.ID),
-		)
-		return
-	}
-	if parts[0] == "" {
-		response.Diagnostics.AddError(
-			"Invalid Import ID",
-			fmt.Sprintf("Expected import ID format: namespace/credential_name, got: %s (namespace is empty)", req.ID),
-		)
-		return
-	}
-	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("namespace"), parts[0])...)
-	if parts[1] == "" {
-		response.Diagnostics.AddError(
-			"Invalid Import ID",
-			fmt.Sprintf("Expected import ID format: namespace/credential_name, got: %s (credential_name is empty)", req.ID),
-		)
-		return
-	}
-	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("credential_name"), parts[1])...)
+	// Override-Import Hook: hook.ServiceCredentialOverrideImportHook
+	hook.ServiceCredentialOverrideImportHook(ctx, req, response)
 }

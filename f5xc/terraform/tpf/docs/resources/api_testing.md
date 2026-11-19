@@ -120,7 +120,6 @@ resource "f5xc_api_testing" "example" {
 ### Required
 
 - `domains` (Attributes List) API Testing Add and configure testing domains and credentials (see [below for nested schema](#nestedatt--domains))
-- `frequency_choice` (Attributes) Frequency of Api Testing (see [below for nested schema](#nestedatt--frequency_choice))
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
 
@@ -129,6 +128,7 @@ resource "f5xc_api_testing" "example" {
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `custom_header_value` (String) Custom Header Value<br>**Validation:** `Length LengthAtMost(128)`<br>**Default:** ``
 - `description` (String) description Human readable description for the object
+- `frequency_choice` (Attributes) Frequency of Api Testing<br>Exactly one of `every_day`, `every_month`, or `every_week` must be specified when `frequency_choice` is configured. (see [below for nested schema](#nestedatt--frequency_choice))
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -154,18 +154,21 @@ Optional:
 Required:
 
 - `credential_name` (String) Credential Name Enter a unique name for the credentials used in API testing<br>**Validation:** `Length LengthAtMost(64)`
-- `credentials_choice` (Attributes) Credential Type (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice))
-- `role_choice` (Attributes) Role Configure role type(.e.g.,Standard, Admin) (see [below for nested schema](#nestedatt--domains--credentials--role_choice))
+- `credentials_choice` (Attributes) Credential Type<br>Exactly one of `api_key`, `basic_auth`, `bearer_token`, or `login_endpoint` must be specified. (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice))
+
+Optional:
+
+- `role_choice` (Attributes) Role Configure role type(.e.g.,Standard, Admin)<br>Exactly one of `admin` or `standard` must be specified when `role_choice` is configured. (see [below for nested schema](#nestedatt--domains--credentials--role_choice))
 
 <a id="nestedatt--domains--credentials--credentials_choice"></a>
 ### Nested Schema for `domains.credentials.credentials_choice`
 
 Optional:
 
-- `api_key` (Attributes) Field Aggregation (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--api_key))
-- `basic_auth` (Attributes) Basic authentication (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--basic_auth))
-- `bearer_token` (Attributes) Bearer Token (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--bearer_token))
-- `login_endpoint` (Attributes) Login Endpoint (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--login_endpoint))
+- `api_key` (Attributes) Field Aggregation<br>Conflicts with `basic_auth`, `bearer_token`, and `login_endpoint`. (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--api_key))
+- `basic_auth` (Attributes) Basic authentication<br>Conflicts with `api_key`, `bearer_token`, and `login_endpoint`. (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--basic_auth))
+- `bearer_token` (Attributes) Bearer Token<br>Conflicts with `api_key`, `basic_auth`, and `login_endpoint`. (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--bearer_token))
+- `login_endpoint` (Attributes) Login Endpoint<br>Conflicts with `api_key`, `basic_auth`, and `bearer_token`. (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--login_endpoint))
 
 <a id="nestedatt--domains--credentials--credentials_choice--api_key"></a>
 ### Nested Schema for `domains.credentials.credentials_choice.api_key`
@@ -180,16 +183,16 @@ Required:
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--api_key--value--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--api_key--value--secret_info_choice))
 
 <a id="nestedatt--domains--credentials--credentials_choice--api_key--value--secret_info_choice"></a>
 ### Nested Schema for `domains.credentials.credentials_choice.api_key.value.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--api_key--value--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--api_key--value--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--api_key--value--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--api_key--value--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--domains--credentials--credentials_choice--api_key--value--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `domains.credentials.credentials_choice.api_key.value.secret_info_choice.blindfold_secret_info`
@@ -232,16 +235,16 @@ Required:
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--basic_auth--password--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--basic_auth--password--secret_info_choice))
 
 <a id="nestedatt--domains--credentials--credentials_choice--basic_auth--password--secret_info_choice"></a>
 ### Nested Schema for `domains.credentials.credentials_choice.basic_auth.password.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--basic_auth--password--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--basic_auth--password--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--basic_auth--password--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--basic_auth--password--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--domains--credentials--credentials_choice--basic_auth--password--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `domains.credentials.credentials_choice.basic_auth.password.secret_info_choice.blindfold_secret_info`
@@ -283,16 +286,16 @@ Required:
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--bearer_token--token--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--bearer_token--token--secret_info_choice))
 
 <a id="nestedatt--domains--credentials--credentials_choice--bearer_token--token--secret_info_choice"></a>
 ### Nested Schema for `domains.credentials.credentials_choice.bearer_token.token.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--bearer_token--token--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--bearer_token--token--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--bearer_token--token--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--bearer_token--token--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--domains--credentials--credentials_choice--bearer_token--token--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `domains.credentials.credentials_choice.bearer_token.token.secret_info_choice.blindfold_secret_info`
@@ -337,16 +340,16 @@ Required:
 
 Required:
 
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--login_endpoint--json_payload--secret_info_choice))
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--login_endpoint--json_payload--secret_info_choice))
 
 <a id="nestedatt--domains--credentials--credentials_choice--login_endpoint--json_payload--secret_info_choice"></a>
 ### Nested Schema for `domains.credentials.credentials_choice.login_endpoint.json_payload.secret_info_choice`
 
 Optional:
 
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--login_endpoint--json_payload--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--login_endpoint--json_payload--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--login_endpoint--json_payload--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--domains--credentials--credentials_choice--login_endpoint--json_payload--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
 
 <a id="nestedatt--domains--credentials--credentials_choice--login_endpoint--json_payload--secret_info_choice--blindfold_secret_info"></a>
 ### Nested Schema for `domains.credentials.credentials_choice.login_endpoint.json_payload.secret_info_choice.blindfold_secret_info`
@@ -382,8 +385,8 @@ Optional:
 
 Optional:
 
-- `admin` (Boolean) Admin Role
-- `standard` (Boolean) Standard Role
+- `admin` (Boolean) Admin Role<br>Conflicts with `standard`.
+- `standard` (Boolean) Standard Role<br>Conflicts with `admin`.
 
 
 
@@ -393,9 +396,9 @@ Optional:
 
 Optional:
 
-- `every_day` (Boolean) Every Day
-- `every_month` (Boolean) Every Month
-- `every_week` (Boolean) Every Week
+- `every_day` (Boolean) Every Day<br>Conflicts with `every_month` and `every_week`.
+- `every_month` (Boolean) Every Month<br>Conflicts with `every_day` and `every_week`.
+- `every_week` (Boolean) Every Week<br>Conflicts with `every_day` and `every_month`.
 
 
 <a id="nestedatt--timeouts"></a>
@@ -428,6 +431,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_api_testing.example"
+	to = f5xc_api_testing.example
 }
 ```

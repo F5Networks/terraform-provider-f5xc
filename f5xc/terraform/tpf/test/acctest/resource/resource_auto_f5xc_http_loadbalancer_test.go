@@ -1632,7 +1632,6 @@ func testAccResourceAutoF5XCHttpLoadbalancerConfig_extensive(lbName, opName, nam
           }
           http_method = ["GET"]
           route_direct_response = {
-            response_body         = "ok"
             response_body_encoded = "string:///b2s="
             response_code         = 200
           }

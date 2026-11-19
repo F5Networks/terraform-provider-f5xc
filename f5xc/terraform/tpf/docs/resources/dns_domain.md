@@ -57,7 +57,6 @@ resource "f5xc_dns_domain" "example" {
 
 ### Required
 
-- `domain_choice` (Attributes) Choice to Handle Domain Select method to handle this domain (see [below for nested schema](#nestedatt--domain_choice))
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
 
@@ -66,6 +65,7 @@ resource "f5xc_dns_domain" "example" {
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `description` (String) description Human readable description for the object
 - `dnssec_mode` (List of String) DNSSEC Mode Control whether DNSSEC is enabled on the dns domain or not<br>**Allowed Values (choose one):** `['DNSSEC_DISABLE', 'DNSSEC_ENABLE']`<br>**Default:** `DNSSEC_DISABLE`
+- `domain_choice` (Attributes) Choice to Handle Domain Select method to handle this domain<br>`volterra_managed` must be specified when `domain_choice` is configured. (see [below for nested schema](#nestedatt--domain_choice))
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -112,6 +112,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_dns_domain.example"
+	to = f5xc_dns_domain.example
 }
 ```

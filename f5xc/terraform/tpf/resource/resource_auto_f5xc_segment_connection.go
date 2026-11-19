@@ -35,6 +35,7 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/listuniquevalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/requiredifvalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -231,7 +232,7 @@ func (r *ResourceF5XCSegmentConnection) Schema(ctx context.Context, request reso
 					Attributes: map[string]schema.Attribute{
 						"connection_choice": schema.SingleNestedAttribute{
 							Description:         "Connector Type Choose how source Segments are connected to destination Segments. Choose ‘Direct’ to connect without using NAT, which will allow traffic to flow bi-directionally. Choose ‘SNAT’ options to connect using Source NAT, which will allow traffic to flow when initiated by source Segments",
-							MarkdownDescription: "Connector Type Choose how source Segments are connected to destination Segments. Choose ‘Direct’ to connect without using NAT, which will allow traffic to flow bi-directionally. Choose ‘SNAT’ options to connect using Source NAT, which will allow traffic to flow when initiated by source Segments",
+							MarkdownDescription: "Connector Type Choose how source Segments are connected to destination Segments. Choose ‘Direct’ to connect without using NAT, which will allow traffic to flow bi-directionally. Choose ‘SNAT’ options to connect using Source NAT, which will allow traffic to flow when initiated by source Segments<br>`direct` must be specified when `connection_choice` is configured.",
 							Required:            false,
 							Optional:            true,
 							Computed:            false,
@@ -285,8 +286,12 @@ func (r *ResourceF5XCSegmentConnection) Schema(ctx context.Context, request reso
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
+										Validators: []validator.String{
+											requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+										},
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseNonNullStateForUnknown(),
+											requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 										},
 									},
 								},
@@ -324,8 +329,12 @@ func (r *ResourceF5XCSegmentConnection) Schema(ctx context.Context, request reso
 										Required:            false,
 										Optional:            true,
 										Computed:            true,
+										Validators: []validator.String{
+											requiredifvalidator.RequireTenantForCrossNamespaceShared(),
+										},
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseNonNullStateForUnknown(),
+											requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 										},
 									},
 								},
@@ -613,11 +622,7 @@ func (r *ResourceF5XCSegmentConnection) Create(ctx context.Context, request reso
 	}
 
 	// prefer-update-over-create: emulate Create via Replace (upsert semantics)
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	err = r.client.ReplaceObject(ctx, ves_io_schema_segment_connection.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_segment_connection.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "create via replace", "segment_connection", err),
@@ -671,11 +676,7 @@ func (r *ResourceF5XCSegmentConnection) Read(ctx context.Context, request resour
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_segment_connection.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_segment_connection.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "segment_connection", err),
@@ -1210,12 +1211,8 @@ func (r *ResourceF5XCSegmentConnection) Update(ctx context.Context, request reso
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_segment_connection.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_segment_connection.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "segment_connection", err),
@@ -1224,7 +1221,7 @@ func (r *ResourceF5XCSegmentConnection) Update(ctx context.Context, request reso
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_segment_connection.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_segment_connection.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "segment_connection", err),

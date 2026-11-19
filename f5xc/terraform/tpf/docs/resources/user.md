@@ -97,6 +97,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<email>"
-	to = "f5xc_user.example"
+	to = f5xc_user.example
 }
 ```

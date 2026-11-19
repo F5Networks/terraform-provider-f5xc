@@ -5423,13 +5423,13 @@ var APISwaggerJSON string = `{
                 },
                 "mtu": {
                     "type": "integer",
-                    "description": " Maximum packet size (Maximum Transfer Unit) of the interface\n When configured, mtu must be between 512 and 8000\n\nExample: - \"1450\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-8000\n",
+                    "description": " Maximum packet size (Maximum Transfer Unit) of the interface\n When configured, mtu must be between 512 and 9000\n\nExample: - \"1450\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-9000\n",
                     "title": "Maximum Packet Size (MTU)",
                     "format": "int64",
                     "x-displayname": "Maximum Packet Size (MTU)",
                     "x-ves-example": "1450",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.uint32.ranges": "0,512-8000"
+                        "ves.io.schema.rules.uint32.ranges": "0,512-9000"
                     }
                 },
                 "node": {
@@ -5495,13 +5495,13 @@ var APISwaggerJSON string = `{
                 },
                 "mtu": {
                     "type": "integer",
-                    "description": " Maximum packet size (Maximum Transfer Unit) of the interface\n When configured, mtu must be between 512 and 8000\n\nExample: - \"1450\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-8000\n",
+                    "description": " Maximum packet size (Maximum Transfer Unit) of the interface\n When configured, mtu must be between 512 and 9000\n\nExample: - \"1450\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-9000\n",
                     "title": "Maximum Packet Size (MTU)",
                     "format": "int64",
                     "x-displayname": "Maximum Packet Size (MTU)",
                     "x-ves-example": "1450",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.uint32.ranges": "0,512-8000"
+                        "ves.io.schema.rules.uint32.ranges": "0,512-9000"
                     }
                 },
                 "node": {
@@ -5591,13 +5591,13 @@ var APISwaggerJSON string = `{
                 },
                 "mtu": {
                     "type": "integer",
-                    "description": " Maximum packet size (Maximum Transfer Unit) of the interface\n When configured, mtu must be between 512 and 8000\n\nExample: - \"1450\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-8000\n",
+                    "description": " Maximum packet size (Maximum Transfer Unit) of the interface\n When configured, mtu must be between 512 and 9000\n\nExample: - \"1450\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-9000\n",
                     "title": "Maximum Packet Size (MTU)",
                     "format": "int64",
                     "x-displayname": "Maximum Packet Size (MTU)",
                     "x-ves-example": "1450",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.uint32.ranges": "0,512-8000"
+                        "ves.io.schema.rules.uint32.ranges": "0,512-9000"
                     }
                 },
                 "no_ipv6_address": {
@@ -5863,7 +5863,7 @@ var APISwaggerJSON string = `{
                 },
                 "mtu": {
                     "type": "integer",
-                    "description": "x-displayName: \"Maximum Packet Size (MTU)\"\nx-example: \"1450\"\nMaximum packet size (Maximum Transfer Unit) of the interface\nWhen configured, mtu must be between 512 and 8000",
+                    "description": "x-displayName: \"Maximum Packet Size (MTU)\"\nx-example: \"1450\"\nMaximum packet size (Maximum Transfer Unit) of the interface\nWhen configured, mtu must be between 512 and 9000",
                     "title": "Maximum Packet Size (MTU)",
                     "format": "int64"
                 },
@@ -6005,13 +6005,13 @@ var APISwaggerJSON string = `{
             "properties": {
                 "mtu": {
                     "type": "integer",
-                    "description": " Maximum packet size (Maximum Transfer Unit) of the interface\n When configured, mtu must be between 512 and 8000\n\nExample: - \"1450\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-8000\n",
+                    "description": " Maximum packet size (Maximum Transfer Unit) of the interface\n When configured, mtu must be between 512 and 9000\n\nExample: - \"1450\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-9000\n",
                     "title": "Maximum Packet Size (MTU)",
                     "format": "int64",
                     "x-displayname": "Maximum Packet Size (MTU)",
                     "x-ves-example": "1450",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.uint32.ranges": "0,512-8000"
+                        "ves.io.schema.rules.uint32.ranges": "0,512-9000"
                     }
                 },
                 "node": {
@@ -6210,12 +6210,12 @@ var APISwaggerJSON string = `{
                 },
                 "status": {
                     "type": "string",
-                    "description": " Status of the condition\n \"Success\" Validtion has succeded. Requested operation was successful.\n \"Failed\"  Validation has failed.\n \"Incomplete\" Validation of configuration has failed due to missing configuration.\n \"Installed\" Validation has passed and configuration has been installed in data path or K8s\n \"Down\" Configuration is operationally down. e.g. down interface\n \"Disabled\" Configuration is administratively disabled i.e. ObjectMetaType.Disable = true.\n \"NotApplicable\" Configuration is not applicable e.g. tenant service_policy_set(s) in system namespace are not applicable on REs\n\nExample: - \"Failed\"-\n\nValidation Rules:\n  ves.io.schema.rules.string.in: [\\\"Success\\\",\\\"Failed\\\",\\\"Incomplete\\\",\\\"Installed\\\",\\\"Down\\\",\\\"Disabled\\\",\\\"NotApplicable\\\"]\n",
+                    "description": " Status of the condition\n \"Success\" Validation has succeeded. Requested operation was successful.\n \"Failed\"  Validation or operation has failed.\n \"Incomplete\" Validation of configuration has failed due to missing configuration.\n \"Installed\" Validation has passed and configuration has been installed in data path or K8s.\n \"Down\" Configuration is operationally down. e.g. down interface.\n \"Disabled\" Configuration is administratively disabled i.e. ObjectMetaType.Disable = true.\n \"NotApplicable\" Configuration is not applicable e.g. tenant service_policy_set(s) in system namespace are not applicable on REs.\n \"InProgress\" Operation is in progress.\n\nExample: - \"Failed\"-\n\nValidation Rules:\n  ves.io.schema.rules.string.in: [\\\"Success\\\",\\\"Failed\\\",\\\"Incomplete\\\",\\\"Installed\\\",\\\"Down\\\",\\\"Disabled\\\",\\\"NotApplicable\\\",\\\"InProgress\\\"]\n",
                     "title": "status",
                     "x-displayname": "Status",
                     "x-ves-example": "Failed",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.string.in": "[\\\"Success\\\",\\\"Failed\\\",\\\"Incomplete\\\",\\\"Installed\\\",\\\"Down\\\",\\\"Disabled\\\",\\\"NotApplicable\\\"]"
+                        "ves.io.schema.rules.string.in": "[\\\"Success\\\",\\\"Failed\\\",\\\"Incomplete\\\",\\\"Installed\\\",\\\"Down\\\",\\\"Disabled\\\",\\\"NotApplicable\\\",\\\"InProgress\\\"]"
                     }
                 },
                 "type": {
@@ -6715,20 +6715,26 @@ var APISwaggerJSON string = `{
             "description": "SecretType is used in an object to indicate a sensitive/confidential field",
             "title": "SecretType",
             "x-displayname": "Secret",
-            "x-ves-oneof-field-secret_info_oneof": "[\"blindfold_secret_info\",\"clear_secret_info\"]",
+            "x-ves-oneof-field-secret_info_oneof": "[\"blindfold_secret_info\",\"clear_secret_info\",\"none\"]",
             "x-ves-proto-message": "ves.io.schema.SecretType",
             "properties": {
                 "blindfold_secret_info": {
-                    "description": "Exclusive with [clear_secret_info]\n Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+                    "description": "Exclusive with [clear_secret_info none]\n Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
                     "title": "Blindfold Secret",
                     "$ref": "#/definitions/schemaBlindfoldSecretInfoType",
                     "x-displayname": "Blindfold Secret"
                 },
                 "clear_secret_info": {
-                    "description": "Exclusive with [blindfold_secret_info]\n Clear Secret is used for the secrets that are not encrypted",
+                    "description": "Exclusive with [blindfold_secret_info none]\n Clear Secret is used for the secrets that are not encrypted",
                     "title": "Clear Secret",
                     "$ref": "#/definitions/schemaClearSecretInfoType",
                     "x-displayname": "Clear Secret"
+                },
+                "none": {
+                    "description": "Exclusive with [blindfold_secret_info clear_secret_info]\n No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+                    "title": "None",
+                    "$ref": "#/definitions/ioschemaEmpty",
+                    "x-displayname": "None"
                 }
             }
         },

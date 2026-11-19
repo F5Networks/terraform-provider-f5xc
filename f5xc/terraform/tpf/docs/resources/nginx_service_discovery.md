@@ -85,15 +85,15 @@ resource "f5xc_nginx_service_discovery" "example" {
 
 Required:
 
-- `target_choice` (Attributes) Target choice (see [below for nested schema](#nestedatt--discovery_target--target_choice))
+- `target_choice` (Attributes) Target choice<br>Exactly one of `config_sync_group` or `nginx_instance` must be specified. (see [below for nested schema](#nestedatt--discovery_target--target_choice))
 
 <a id="nestedatt--discovery_target--target_choice"></a>
 ### Nested Schema for `discovery_target.target_choice`
 
 Optional:
 
-- `config_sync_group` (Attributes) Config Sync Group (see [below for nested schema](#nestedatt--discovery_target--target_choice--config_sync_group))
-- `nginx_instance` (Attributes) NGINX Instance (see [below for nested schema](#nestedatt--discovery_target--target_choice--nginx_instance))
+- `config_sync_group` (Attributes) Config Sync Group<br>Conflicts with `nginx_instance`. (see [below for nested schema](#nestedatt--discovery_target--target_choice--config_sync_group))
+- `nginx_instance` (Attributes) NGINX Instance<br>Conflicts with `config_sync_group`. (see [below for nested schema](#nestedatt--discovery_target--target_choice--nginx_instance))
 
 <a id="nestedatt--discovery_target--target_choice--config_sync_group"></a>
 ### Nested Schema for `discovery_target.target_choice.config_sync_group`
@@ -178,6 +178,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_nginx_service_discovery.example"
+	to = f5xc_nginx_service_discovery.example
 }
 ```

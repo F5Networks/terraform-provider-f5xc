@@ -7,6 +7,7 @@ package data
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"time"
 
@@ -2453,7 +2454,6 @@ type HttpLoadbalancerPortMatchChoice struct {
 }
 
 type HttpLoadbalancerRouteDirectResp struct {
-	ResponseBody        types.String `tfsdk:"response_body"`
 	ResponseBodyEncoded types.String `tfsdk:"response_body_encoded"`
 	ResponseCode        types.Int64  `tfsdk:"response_code"`
 }
@@ -13398,7 +13398,6 @@ var HttpLoadbalancerRoutesChoiceDirectResponseRouteModelAttributeMap = map[strin
 			}},
 	}, "route_direct_response": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
-			"response_body":         types.StringType,
 			"response_body_encoded": types.StringType,
 			"response_code":         types.Int64Type},
 	},
@@ -13457,7 +13456,6 @@ var HttpLoadbalancerRoutesChoiceDirectResponseRoutePathPathMatchModelAttributeMa
 // Attribute map for PointerField --> RouteDirectResponse
 var HttpLoadbalancerRoutesChoiceDirectResponseRouteRouteDirectResponseModelAttributeMap = map[string]attr.Type{
 
-	"response_body":         types.StringType,
 	"response_body_encoded": types.StringType,
 	"response_code":         types.Int64Type,
 }
@@ -29809,13 +29807,6 @@ func (r *DataSourceF5XCHttpLoadbalancer) Schema(ctx context.Context, request dat
 											Optional:    false,
 											Computed:    true,
 											Attributes: map[string]schema.Attribute{
-												"response_body": schema.StringAttribute{
-													Description:        "response_body response body to send",
-													Required:           false,
-													Optional:           false,
-													Computed:           true,
-													DeprecationMessage: "Replaced by response_body_encoded",
-												},
 												"response_body_encoded": schema.StringAttribute{
 													Description: "response_body Response body to send. Currently supported URL schemes is string:/// for which message should be encoded in Base64 format. The message can be either plain text or html. E.g. '<p> Access Denied </p>'. Base64 encoded string url for this is string:///PHA+IEFjY2VzcyBEZW5pZWQgPC9wPg==",
 													Required:    false,
@@ -65448,17 +65439,12 @@ func (d *DataSourceF5XCHttpLoadbalancer) Read(ctx context.Context, request datas
 
 							// Recursively populate the nested struct
 
-							// data specToModelNested StringField --> ResponseBody
-							if routeDirectResponseElement.GetResponseBody() != "" {
-								httpLoadbalancerRouteDirectRespModel.ResponseBody = types.StringValue(routeDirectResponseElement.GetResponseBody())
-							} else {
-								// Empty string, set to null
-								httpLoadbalancerRouteDirectRespModel.ResponseBody = types.StringNull()
-							}
-
 							// data specToModelNested StringField --> ResponseBodyEncoded
 							if routeDirectResponseElement.GetResponseBodyEncoded() != "" {
 								httpLoadbalancerRouteDirectRespModel.ResponseBodyEncoded = types.StringValue(routeDirectResponseElement.GetResponseBodyEncoded())
+							} else if legacyVal := routeDirectResponseElement.GetResponseBody(); legacyVal != "" {
+								// Objects from the UI, REST API, or SDKv2 can hold the content only in the hidden legacy field.
+								httpLoadbalancerRouteDirectRespModel.ResponseBodyEncoded = types.StringValue("string:///" + base64.StdEncoding.EncodeToString([]byte(legacyVal)))
 							} else {
 								// Empty string, set to null
 								httpLoadbalancerRouteDirectRespModel.ResponseBodyEncoded = types.StringNull()

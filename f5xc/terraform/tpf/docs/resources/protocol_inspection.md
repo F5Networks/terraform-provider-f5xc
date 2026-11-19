@@ -119,15 +119,15 @@ resource "f5xc_protocol_inspection" "example" {
 
 Required:
 
-- `compliance_check_choice` (Attributes) Enable Compliance Check (see [below for nested schema](#nestedatt--enable_disable_compliance_checks--compliance_check_choice))
+- `compliance_check_choice` (Attributes) Enable Compliance Check<br>Exactly one of `disable_compliance_checks` or `enable_compliance_checks` must be specified. (see [below for nested schema](#nestedatt--enable_disable_compliance_checks--compliance_check_choice))
 
 <a id="nestedatt--enable_disable_compliance_checks--compliance_check_choice"></a>
 ### Nested Schema for `enable_disable_compliance_checks.compliance_check_choice`
 
 Optional:
 
-- `disable_compliance_checks` (Boolean) Disable Compliance Check
-- `enable_compliance_checks` (Attributes) Enable Compliance Check Enabling compliance checks and selecting a type by default (right now this enables dns_compliance_checks) (see [below for nested schema](#nestedatt--enable_disable_compliance_checks--compliance_check_choice--enable_compliance_checks))
+- `disable_compliance_checks` (Boolean) Disable Compliance Check<br>Conflicts with `enable_compliance_checks`.
+- `enable_compliance_checks` (Attributes) Enable Compliance Check Enabling compliance checks and selecting a type by default (right now this enables dns_compliance_checks)<br>Conflicts with `disable_compliance_checks`. (see [below for nested schema](#nestedatt--enable_disable_compliance_checks--compliance_check_choice--enable_compliance_checks))
 
 <a id="nestedatt--enable_disable_compliance_checks--compliance_check_choice--enable_compliance_checks"></a>
 ### Nested Schema for `enable_disable_compliance_checks.compliance_check_choice.enable_compliance_checks`
@@ -147,17 +147,17 @@ Optional:
 <a id="nestedatt--enable_disable_signatures"></a>
 ### Nested Schema for `enable_disable_signatures`
 
-Required:
+Optional:
 
-- `signature_choice` (Attributes) Enable Signature (see [below for nested schema](#nestedatt--enable_disable_signatures--signature_choice))
+- `signature_choice` (Attributes) Enable Signature<br>Exactly one of `disable_signature` or `enable_signature` must be specified when `signature_choice` is configured. (see [below for nested schema](#nestedatt--enable_disable_signatures--signature_choice))
 
 <a id="nestedatt--enable_disable_signatures--signature_choice"></a>
 ### Nested Schema for `enable_disable_signatures.signature_choice`
 
 Optional:
 
-- `disable_signature` (Boolean) Disable Signature
-- `enable_signature` (Boolean) Enable Signature
+- `disable_signature` (Boolean) Disable Signature<br>Conflicts with `enable_signature`.
+- `enable_signature` (Boolean) Enable Signature<br>Conflicts with `disable_signature`.
 
 
 
@@ -191,6 +191,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_protocol_inspection.example"
+	to = f5xc_protocol_inspection.example
 }
 ```

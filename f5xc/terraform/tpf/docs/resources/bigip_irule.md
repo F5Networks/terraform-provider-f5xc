@@ -103,6 +103,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<backend_name>"
-	to = "f5xc_bigip_irule.example"
+	to = f5xc_bigip_irule.example
 }
 ```

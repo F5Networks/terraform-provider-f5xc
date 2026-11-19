@@ -32,7 +32,6 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/requiredifvalidator"
 
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -160,7 +159,7 @@ func (r *ResourceF5XCApiCredential) Schema(ctx context.Context, request resource
 			},
 			"self_credential_choice": schema.SingleNestedAttribute{
 				Description:         "API Credential Spec The credential specification can be one of the following types: - API token - API certificate",
-				MarkdownDescription: "API Credential Spec The credential specification can be one of the following types: - API token - API certificate",
+				MarkdownDescription: "API Credential Spec The credential specification can be one of the following types: - API token - API certificate<br>Exactly one of `api_certificate` or `api_token` must be specified when `self_credential_choice` is configured.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
@@ -173,7 +172,7 @@ func (r *ResourceF5XCApiCredential) Schema(ctx context.Context, request resource
 				Attributes: map[string]schema.Attribute{
 					"api_certificate": schema.SingleNestedAttribute{
 						Description:         "api_certificate API certificate parameters.",
-						MarkdownDescription: "api_certificate API certificate parameters.",
+						MarkdownDescription: "api_certificate API certificate parameters.<br>Conflicts with `api_token`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -193,7 +192,7 @@ func (r *ResourceF5XCApiCredential) Schema(ctx context.Context, request resource
 					},
 					"api_token": schema.BoolAttribute{
 						Description:         "api_token API token parameters.",
-						MarkdownDescription: "api_token API token parameters.",
+						MarkdownDescription: "api_token API token parameters.<br>Conflicts with `api_certificate`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -574,7 +573,7 @@ func (r *ResourceF5XCApiCredential) Read(ctx context.Context, request resource.R
 
 	// CustomAPI Read (IsCustomAPIOnly): List
 	customReadRPCFQN := "ves.io.schema.api_credential.CustomAPI.List"
-	customReadURI := fmt.Sprintf("/public/namespaces/%s/api_credentials", data.Namespace.ValueString())
+	customReadURI := fmt.Sprintf("/public/namespaces/%s/api_credentials", hook.ResolveApiCredentialNamespace(ctx, data.Namespace, data.Spec))
 
 	readRespMsg, err := r.client.CustomAPI(ctx, "GET", customReadURI, customReadRPCFQN, "")
 	if err != nil {
@@ -605,16 +604,6 @@ func (r *ResourceF5XCApiCredential) Read(ctx context.Context, request resource.R
 		return
 	}
 	// Write back the CustomAPI read response to the model
-	specData := readRespItem
-
-	// resource SpecToModelRoot StringField --> Namespace
-	if specData.GetNamespace() != "" {
-		data.Namespace = types.StringValue(specData.GetNamespace())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Namespace = types.StringNull()
-	}
-
 	// Restore prior state for SelfCredentialChoice. The API redacts sensitive fields
 	// in GET responses. Preserve prior state to keep state consistent.
 	if !priorSelfCredentialChoice.IsNull() && !priorSelfCredentialChoice.IsUnknown() {
@@ -797,7 +786,7 @@ func (r *ResourceF5XCApiCredential) Update(ctx context.Context, request resource
 	_ = req
 
 	// Override-Update Hook: hook.ApiCredentialOverrideUpdateHook
-	if hookErr := hook.ApiCredentialOverrideUpdateHook(ctx, r.client, data.Namespace.ValueString(), data.CredentialName.ValueString(), priorData.RenewTrigger.ValueBool(), data.RenewTrigger.ValueBool(), data.ExpirationDays.ValueInt64()); hookErr != nil {
+	if hookErr := hook.ApiCredentialOverrideUpdateHook(ctx, r.client, hook.ResolveApiCredentialNamespace(ctx, data.Namespace, data.Spec), data.CredentialName.ValueString(), priorData.RenewTrigger.ValueBool(), data.RenewTrigger.ValueBool(), data.ExpirationDays.ValueInt64()); hookErr != nil {
 		response.Diagnostics.AddError(
 			"Override-Update Hook Error",
 			fmt.Sprintf("Override-update hook failed for %s: %s", "api_credential", hookErr),
@@ -856,7 +845,7 @@ func (r *ResourceF5XCApiCredential) Delete(ctx context.Context, request resource
 	// CustomAPI Delete: Revoke
 	customDeleteRPCFQN := "ves.io.schema.api_credential.CustomAPI.Revoke"
 
-	customDeleteURI := fmt.Sprintf("/public/namespaces/%s/revoke/api_credentials", data.Namespace.ValueString())
+	customDeleteURI := fmt.Sprintf("/public/namespaces/%s/revoke/api_credentials", hook.ResolveApiCredentialNamespace(ctx, data.Namespace, data.Spec))
 	// Build delete request body: primary key is a body field, not a URI path parameter.
 	deleteReqBodyMap := map[string]interface{}{
 		"name": data.CredentialName.ValueString(),
@@ -895,29 +884,6 @@ func (r *ResourceF5XCApiCredential) Delete(ctx context.Context, request resource
 
 }
 func (r *ResourceF5XCApiCredential) ImportState(ctx context.Context, req resource.ImportStateRequest, response *resource.ImportStateResponse) {
-	// Import ID format: namespace/credential_name
-	parts := strings.Split(req.ID, "/")
-	if len(parts) != 2 {
-		response.Diagnostics.AddError(
-			"Invalid Import ID",
-			fmt.Sprintf("Expected import ID format: namespace/credential_name, got: %s", req.ID),
-		)
-		return
-	}
-	if parts[0] == "" {
-		response.Diagnostics.AddError(
-			"Invalid Import ID",
-			fmt.Sprintf("Expected import ID format: namespace/credential_name, got: %s (namespace is empty)", req.ID),
-		)
-		return
-	}
-	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("namespace"), parts[0])...)
-	if parts[1] == "" {
-		response.Diagnostics.AddError(
-			"Invalid Import ID",
-			fmt.Sprintf("Expected import ID format: namespace/credential_name, got: %s (credential_name is empty)", req.ID),
-		)
-		return
-	}
-	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("credential_name"), parts[1])...)
+	// Override-Import Hook: hook.ApiCredentialOverrideImportHook
+	hook.ApiCredentialOverrideImportHook(ctx, req, response)
 }

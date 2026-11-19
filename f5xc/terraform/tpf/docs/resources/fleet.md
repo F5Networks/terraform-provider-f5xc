@@ -99,50 +99,936 @@ resource "f5xc_fleet" "example" {
 
 ### Required
 
-- `bond_choice` (Attributes) Select Bond Configuration Add bond interface devices to the fleet (see [below for nested schema](#nestedatt--bond_choice))
-- `dc_cluster_group_choice` (Attributes) Select DC Cluster Group Configure DC cluster group for this fleet (see [below for nested schema](#nestedatt--dc_cluster_group_choice))
 - `fleet_label` (String) fleet_label fleet_label value is used to create known_label 'ves.io/fleet=<fleet_label>' The known_label is created in the 'shared' namespace for the tenant. A virtual_site object with name <fleet_label> is also created in 'shared' namespace for tenant. The virtual_site object will select all sites configured with the known_label above fleet_label with 'sfo' will create a known_label 'ves.io/fleet=sfo' in tenant for the fleet
-- `gpu_choice` (Attributes) Select GPU Enable/Disable Enable or Disable GPU for this fleet (see [below for nested schema](#nestedatt--gpu_choice))
-- `interface_choice` (Attributes) Select Interface Config Select how interfaces are configured for this fleet (see [below for nested schema](#nestedatt--interface_choice))
-- `logs_receiver_choice` (Attributes) Logs Streaming Select Logs receiver for logs streaming (see [below for nested schema](#nestedatt--logs_receiver_choice))
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
-- `sriov_interface_choice` (Attributes) Configure SR-IOV interfaces Select to use default or custom Single Root I/O Virtualization interfaces Configuration (see [below for nested schema](#nestedatt--sriov_interface_choice))
-- `storage_class_choice` (Attributes) Storage Class Configuration Configure custom storage classes in kubernetes for this fleet (see [below for nested schema](#nestedatt--storage_class_choice))
-- `storage_device_choice` (Attributes) Storage Device Configuration Configure external storage devices for this fleet (see [below for nested schema](#nestedatt--storage_device_choice))
-- `storage_interface_choice` (Attributes) Storage Interfaces Select if storage interfaces are configured (see [below for nested schema](#nestedatt--storage_interface_choice))
-- `storage_static_routes_choice` (Attributes) Storage Static Routes Select Storage Static Routes (see [below for nested schema](#nestedatt--storage_static_routes_choice))
-- `usb_policy_choice` (Attributes) USB Device Policy Select USB device policy (see [below for nested schema](#nestedatt--usb_policy_choice))
+- `storage_device_choice` (Attributes) Storage Device Configuration Configure external storage devices for this fleet<br>Exactly one of `no_storage_device` or `storage_device_list` must be specified. (see [below for nested schema](#nestedatt--storage_device_choice))
 
 ### Optional
 
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `blocked_services` (Attributes List) Disable Node Local Services Disable node local services on this site. (see [below for nested schema](#nestedatt--blocked_services))
+- `bond_choice` (Attributes) Select Bond Configuration Add bond interface devices to the fleet<br>Exactly one of `bond_device_list` or `no_bond_devices` must be specified when `bond_choice` is configured. (see [below for nested schema](#nestedatt--bond_choice))
+- `dc_cluster_group_choice` (Attributes) Select DC Cluster Group Configure DC cluster group for this fleet<br>Exactly one of `dc_cluster_group`, `dc_cluster_group_inside`, or `no_dc_cluster_group` must be specified when `dc_cluster_group_choice` is configured. (see [below for nested schema](#nestedatt--dc_cluster_group_choice))
 - `description` (String) description Human readable description for the object
 - `enable_default_fleet_config_download` (Boolean) Enable default fleet config download Enable default fleet config, It must be set for storage config and gpu config<br>**Default:** `true`
+- `gpu_choice` (Attributes) Select GPU Enable/Disable Enable or Disable GPU for this fleet<br>Exactly one of `disable_gpu`, `enable_gpu`, or `enable_vgpu` must be specified when `gpu_choice` is configured. (see [below for nested schema](#nestedatt--gpu_choice))
 - `inside_virtual_network` (Attributes List) Inside Virtual Network Default inside (site local) virtual network for the fleet (see [below for nested schema](#nestedatt--inside_virtual_network))
+- `interface_choice` (Attributes) Select Interface Config Select how interfaces are configured for this fleet<br>Exactly one of `default_config`, `device_list`, or `interface_list` must be specified when `interface_choice` is configured. (see [below for nested schema](#nestedatt--interface_choice))
 - `kubernetes_upgrade_drain` (Attributes) Enable Drain Enable Kubernetes Drain during OS or SW upgrade (see [below for nested schema](#nestedatt--kubernetes_upgrade_drain))
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
+- `logs_receiver_choice` (Attributes) Logs Streaming Select Logs receiver for logs streaming<br>Exactly one of `log_receiver` or `logs_streaming_disabled` must be specified when `logs_receiver_choice` is configured. (see [below for nested schema](#nestedatt--logs_receiver_choice))
 - `network_connectors` (Attributes List) Network Connectors Network Connector defines connection between two virtual networks in a given site. Fleet defines one or more such network connectors. The network connectors configuration is applied on all sites that are member of the fleet. (see [below for nested schema](#nestedatt--network_connectors))
 - `network_firewall` (Attributes List) Network Firewall Network Firewall defines firewall to be applied for the virtual networks in the fleet. The network firewall configuration is applied on all sites that are member of the fleet. Constraints The Network Firewall is applied on Virtual Networks of type site local network and site local inside network (see [below for nested schema](#nestedatt--network_firewall))
 - `operating_system_version` (String) Operating System Version Desired Operating System version that is applied to all sites that are member of the fleet. Current Operating System version can be overridden via site config.<br>**Validation:** `Length LengthAtMost(256)`<br>**Default:** ``
 - `outside_virtual_network` (Attributes List) Outside Virtual Network Default outside (site local) virtual network for the fleet (see [below for nested schema](#nestedatt--outside_virtual_network))
 - `performance_enhancement_mode` (Attributes) Performance Enhancement Choice Performance Enhancement Mode to optimize for L3 or L7 networking (see [below for nested schema](#nestedatt--performance_enhancement_mode))
+- `sriov_interface_choice` (Attributes) Configure SR-IOV interfaces Select to use default or custom Single Root I/O Virtualization interfaces Configuration<br>Exactly one of `default_sriov_interface` or `sriov_interfaces` must be specified when `sriov_interface_choice` is configured. (see [below for nested schema](#nestedatt--sriov_interface_choice))
+- `storage_class_choice` (Attributes) Storage Class Configuration Configure custom storage classes in kubernetes for this fleet<br>Exactly one of `default_storage_class` or `storage_class_list` must be specified when `storage_class_choice` is configured. (see [below for nested schema](#nestedatt--storage_class_choice))
+- `storage_interface_choice` (Attributes) Storage Interfaces Select if storage interfaces are configured<br>Exactly one of `no_storage_interfaces` or `storage_interface_list` must be specified when `storage_interface_choice` is configured. (see [below for nested schema](#nestedatt--storage_interface_choice))
+- `storage_static_routes_choice` (Attributes) Storage Static Routes Select Storage Static Routes<br>Exactly one of `no_storage_static_routes` or `storage_static_routes` must be specified when `storage_static_routes_choice` is configured. (see [below for nested schema](#nestedatt--storage_static_routes_choice))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
-- `vm_choice` (Attributes) Select VMs support Enable/Disable Enable or Disable VM support for this fleet (see [below for nested schema](#nestedatt--vm_choice))
+- `usb_policy_choice` (Attributes) USB Device Policy Select USB device policy<br>Exactly one of `allow_all_usb`, `deny_all_usb`, or `usb_policy` must be specified when `usb_policy_choice` is configured. (see [below for nested schema](#nestedatt--usb_policy_choice))
+- `vm_choice` (Attributes) Select VMs support Enable/Disable Enable or Disable VM support for this fleet<br>Exactly one of `disable_vm` or `enable_vm` must be specified when `vm_choice` is configured. (see [below for nested schema](#nestedatt--vm_choice))
 - `volterra_software_version` (String) Software Version F5XC software version is human readable string matching released set of version components. The given software version is applied to all sites that are member of the fleet. Current software installed can be overridden via site config.<br>**Validation:** `Length LengthAtMost(256)`<br>**Default:** ``
 
 ### Read-Only
 
 - `uid` (String) uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.
 
+<a id="nestedatt--storage_device_choice"></a>
+### Nested Schema for `storage_device_choice`
+
+Optional:
+
+- `no_storage_device` (Boolean) No Storage Devices This fleet does not have any storage devices<br>Conflicts with `storage_device_list`.
+- `storage_device_list` (Attributes) List of Storage Interfaces Add all storage devices belonging to this fleet<br>Conflicts with `no_storage_device`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list))
+
+<a id="nestedatt--storage_device_choice--storage_device_list"></a>
+### Nested Schema for `storage_device_choice.storage_device_list`
+
+Optional:
+
+- `storage_devices` (Attributes List) List of Storage Devices List of custom storage devices (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices))
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices`
+
+Required:
+
+- `device_choice` (Attributes) Select Storage Device Configuration Select type of storage device driver to configure<br>Exactly one of `custom_storage`, `hpe_storage`, `netapp_trident`, or `pure_service_orchestrator` must be specified. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice))
+- `storage_device` (String) Storage Device Storage device and device unit<br>**Validation:** `Length LengthAtMost(64)`
+
+Optional:
+
+- `advanced_advanced_parameters` (Map of String) Advanced Parameters Map of parameter name and string value
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice`
+
+Optional:
+
+- `custom_storage` (Boolean) Custom Storage Device configuration for Custom Storage<br>Conflicts with `hpe_storage`, `netapp_trident`, and `pure_service_orchestrator`.
+- `hpe_storage` (Attributes) HPE Storage Device configuration for HPE Storage<br>Conflicts with `custom_storage`, `netapp_trident`, and `pure_service_orchestrator`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage))
+- `netapp_trident` (Attributes) NetApp Trident Device configuration for NetApp Trident<br>Conflicts with `custom_storage`, `hpe_storage`, and `pure_service_orchestrator`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident))
+- `pure_service_orchestrator` (Attributes) Pure Storage Service Orchestrator Device configuration for Pure Storage Service Orchestrator<br>Conflicts with `custom_storage`, `hpe_storage`, and `netapp_trident`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator))
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.hpe_storage`
+
+Required:
+
+- `username` (String) Username Username to connect to the HPE storage management IP<br>**Validation:** `Length LengthBetween(1, 256)`
+
+Optional:
+
+- `api_server_port` (Number) Storage server Port Enter Storage Server Port
+- `iscsi_chap_password` (Attributes) iscsi chapPassword chap Password to connect to the HPE storage (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--iscsi_chap_password))
+- `iscsi_chap_user` (String) iscsi chapUser chap Username to connect to the HPE storage<br>**Validation:** `Length LengthAtMost(256)`
+- `password` (Attributes) Password Please Enter you password. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--password))
+- `storage_server_ip_address` (String) Storage Server IP address Enter storage server IP address
+- `storage_server_name` (String) Storage Server Name Enter storage server Name
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--iscsi_chap_password"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.hpe_storage.iscsi_chap_password`
+
+Required:
+
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--iscsi_chap_password--secret_info_choice))
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--iscsi_chap_password--secret_info_choice"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.hpe_storage.iscsi_chap_password.secret_info_choice`
+
+Optional:
+
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--iscsi_chap_password--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--iscsi_chap_password--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--iscsi_chap_password--secret_info_choice--blindfold_secret_info"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.hpe_storage.iscsi_chap_password.secret_info_choice.blindfold_secret_info`
+
+Required:
+
+- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+
+Optional:
+
+- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
+- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--iscsi_chap_password--secret_info_choice--clear_secret_info"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.hpe_storage.iscsi_chap_password.secret_info_choice.clear_secret_info`
+
+Required:
+
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+
+Optional:
+
+- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--password"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.hpe_storage.password`
+
+Required:
+
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--password--secret_info_choice))
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--password--secret_info_choice"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.hpe_storage.password.secret_info_choice`
+
+Optional:
+
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--password--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--password--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--password--secret_info_choice--blindfold_secret_info"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.hpe_storage.password.secret_info_choice.blindfold_secret_info`
+
+Required:
+
+- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+
+Optional:
+
+- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
+- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--password--secret_info_choice--clear_secret_info"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.hpe_storage.password.secret_info_choice.clear_secret_info`
+
+Required:
+
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+
+Optional:
+
+- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident`
+
+Required:
+
+- `backend_choice` (Attributes) Select NetApp Trident Backend Select type of backend to configure<br>Exactly one of `netapp_backend_ontap_nas` or `netapp_backend_ontap_san` must be specified. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice))
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice`
+
+Optional:
+
+- `netapp_backend_ontap_nas` (Attributes) ONTAP NAS Backend configuration for ONTAP NAS<br>Conflicts with `netapp_backend_ontap_san`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas))
+- `netapp_backend_ontap_san` (Attributes) ONTAP SAN Backend configuration for ONTAP SAN<br>Conflicts with `netapp_backend_ontap_nas`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san))
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas`
+
+Required:
+
+- `management_lif_choice` (Attributes) Backend Management LIF FQDN or IP address of a cluster or SVM management LIF<br>Exactly one of `management_lif_dns_name` or `management_lif_ip` must be specified. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--management_lif_choice))
+- `username` (String) Username Username to connect to the cluster/SVM<br>**Validation:** `Length LengthBetween(1, 256)`
+
+Optional:
+
+- `auto_export_cidrs` (Attributes) Auto Export CIDRs List of CIDRs to filter Kubernetes’ node IPs against when autoExportPolicy is enabled (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--auto_export_cidrs))
+- `auto_export_policy` (Boolean) Auto Export Policy Enable automatic export policy creation and updating<br>**Default:** `false`
+- `backend_name` (String) Storage Backend Name Configuration of Backend Name. Driver is name + '_' + dataLIF<br>**Validation:** `Length LengthBetween(1, 50)`
+- `client_certificate` (String) Client Certificate Please Enter Base64-encoded value of client certificate. Used for certificate-based auth.<br>**Validation:** `Length LengthAtMost(8192)`
+- `client_private_key` (Attributes) Client Private Key Please Enter value of client private key. Used for certificate-based auth. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--client_private_key))
+- `data_lif_choice` (Attributes) Backend Data LIF FQDN or IP address of protocol LIF. Use square brackets for IPv6. Once set this cannot be updated. Derived by the SVM unless specified.<br>Exactly one of `data_lif_dns_name` or `data_lif_ip` must be specified when `data_lif_choice` is configured. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--data_lif_choice))
+- `labels` (Map of String) Backend Labels List of labels for Storage Device used in NetApp ONTAP. It is used for storage class selection.
+- `limit_aggregate_usage` (String) Limit Aggregate Usage Fail provisioning if usage is above this percentage. Not enforced by default.
+- `limit_volume_size` (String) Limit Volume Size Fail provisioning if requested volume size is above this value. Not enforced by default.
+- `nfs_mount_options` (String) NFS Mount Options Comma-separated list of NFS mount options. Not enforced by default.
+- `password` (Attributes) Password Please Enter you password. Password to connect to the cluster/SVM (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--password))
+- `region` (String) Backend Region Virtual Pool Region
+- `storage` (Attributes List) Virtual Storage Pools List of Virtual Storage Pool definitions which are referred back by Storage Class label match selection. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--storage))
+- `storage_driver_name` (String) Storage Backend Driver Configuration of Backend Name<br>**Default:** `ontap-nas`<br>**Allowed Values (choose one):** `['ontap-nas', 'ontap-nas-economy', 'ontap-nas-flexgroup']`
+- `storage_prefix` (String) Storage Prefix Prefix used when provisioning new volumes in the SVM. Once set this cannot be updated
+- `svm` (String) Backend SVM Storage virtual machine to use. Derived if an SVM managementLIF is specified<br>**Validation:** `Length LengthBetween(1, 256)`
+- `trusted_ca_certificate` (String) Trusted CA Certificate Please Enter Base64-encoded value of trusted CA certificate. Optional. Used for certificate-based auth..<br>**Validation:** `Length LengthAtMost(8192)`
+- `volume_defaults` (Attributes) Backend Volume Defaults List of QoS volume defaults types (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--volume_defaults))
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--management_lif_choice"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.management_lif_choice`
+
+Optional:
+
+- `management_lif_dns_name` (String) Backend Management LIF Name Backend Management LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `management_lif_ip`.
+- `management_lif_ip` (String) Backend Management LIF IP Address Backend Management LIF IP Address is reachable at the given ip address<br>Conflicts with `management_lif_dns_name`.
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--auto_export_cidrs"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.auto_export_cidrs`
+
+Optional:
+
+- `ipv6_prefixes` (List of String) ipv6 prefixes List of IPv6 prefix strings.
+- `prefixes` (List of String) ipv4 prefix list List of IPv4 prefixes that represent an endpoint
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--client_private_key"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.client_private_key`
+
+Required:
+
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--client_private_key--secret_info_choice))
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--client_private_key--secret_info_choice"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.client_private_key.secret_info_choice`
+
+Optional:
+
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--client_private_key--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--client_private_key--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--client_private_key--secret_info_choice--blindfold_secret_info"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.client_private_key.secret_info_choice.blindfold_secret_info`
+
+Required:
+
+- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+
+Optional:
+
+- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
+- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--client_private_key--secret_info_choice--clear_secret_info"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.client_private_key.secret_info_choice.clear_secret_info`
+
+Required:
+
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+
+Optional:
+
+- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--data_lif_choice"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.data_lif_choice`
+
+Optional:
+
+- `data_lif_dns_name` (String) Backend Data LIF Name Backend Data LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `data_lif_ip`.
+- `data_lif_ip` (String) Backend Data LIF IP Address Backend Data LIF IP Address is reachable at the given ip address<br>Conflicts with `data_lif_dns_name`.
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--password"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.password`
+
+Required:
+
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--password--secret_info_choice))
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--password--secret_info_choice"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.password.secret_info_choice`
+
+Optional:
+
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--password--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--password--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--password--secret_info_choice--blindfold_secret_info"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.password.secret_info_choice.blindfold_secret_info`
+
+Required:
+
+- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+
+Optional:
+
+- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
+- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--password--secret_info_choice--clear_secret_info"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.password.secret_info_choice.clear_secret_info`
+
+Required:
+
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+
+Optional:
+
+- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--storage"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.storage`
+
+Optional:
+
+- `labels` (Map of String) Storage Pool Labels List of labels for Storage Device used in NetApp ONTAP. It is used for storage class label match selection.
+- `volume_defaults` (Attributes) Backend Volume Defaults List of QoS volume default types (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--storage--volume_defaults))
+- `zone` (String) Pool Zone Virtual Storage Pool zone definition.
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--storage--volume_defaults"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.storage.volume_defaults`
+
+Optional:
+
+- `encryption` (Boolean) Enable Encryption Enable NetApp volume encryption.<br>**Default:** `false`
+- `export_policy` (String) Export Policy Export policy to use.
+- `qos_policy_choice` (Attributes) QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.<br>Exactly one of `adaptive_qos_policy`, `no_qos`, or `qos_policy` must be specified when `qos_policy_choice` is configured. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--storage--volume_defaults--qos_policy_choice))
+- `security_style` (String) Security Style Security style for new volumes.
+- `snapshot_dir` (Boolean) Access to Snapshot Directory Access to the .snapshot directory.<br>**Default:** `false`
+- `snapshot_policy` (String) Snapshot Policy Snapshot policy to use
+- `snapshot_reserve` (String) Snapshot Rerserved Percentage of volume reserved for snapshots. '0' if snapshot policy is 'none', else ''
+- `space_reserve` (String) Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`<br>**Allowed Values (choose one):** `['none', 'thick']`
+- `split_on_clone` (Boolean) Split on Clone Split a clone from its parent upon creation.<br>**Default:** `false`
+- `tiering_policy` (String) Tiering Policy Tiering policy to use. 'none' is default.
+- `unix_permissions` (Number) Unix Mode Permissions Unix permission mode for new volumes. All allowed 777
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--storage--volume_defaults--qos_policy_choice"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.storage.volume_defaults.qos_policy_choice`
+
+Optional:
+
+- `adaptive_qos_policy` (String) Storage Server IP address Enter Adaptive QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`<br>Conflicts with `no_qos` and `qos_policy`.
+- `no_qos` (Boolean) No QoS No QoS configured<br>Conflicts with `adaptive_qos_policy` and `qos_policy`.
+- `qos_policy` (String) QoS Policy Name Enter QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`<br>Conflicts with `adaptive_qos_policy` and `no_qos`.
+
+
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--volume_defaults"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.volume_defaults`
+
+Optional:
+
+- `encryption` (Boolean) Enable Encryption Enable NetApp volume encryption.<br>**Default:** `false`
+- `export_policy` (String) Export Policy Export policy to use.
+- `qos_policy_choice` (Attributes) QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.<br>Exactly one of `adaptive_qos_policy`, `no_qos`, or `qos_policy` must be specified when `qos_policy_choice` is configured. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--volume_defaults--qos_policy_choice))
+- `security_style` (String) Security Style Security style for new volumes.
+- `snapshot_dir` (Boolean) Access to Snapshot Directory Access to the .snapshot directory.<br>**Default:** `false`
+- `snapshot_policy` (String) Snapshot Policy Snapshot policy to use
+- `snapshot_reserve` (String) Snapshot Rerserved Percentage of volume reserved for snapshots. '0' if snapshot policy is 'none', else ''
+- `space_reserve` (String) Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`<br>**Allowed Values (choose one):** `['none', 'thick']`
+- `split_on_clone` (Boolean) Split on Clone Split a clone from its parent upon creation.<br>**Default:** `false`
+- `tiering_policy` (String) Tiering Policy Tiering policy to use. 'none' is default.
+- `unix_permissions` (Number) Unix Mode Permissions Unix permission mode for new volumes. All allowed 777
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--volume_defaults--qos_policy_choice"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.volume_defaults.qos_policy_choice`
+
+Optional:
+
+- `adaptive_qos_policy` (String) Storage Server IP address Enter Adaptive QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`<br>Conflicts with `no_qos` and `qos_policy`.
+- `no_qos` (Boolean) No QoS No QoS configured<br>Conflicts with `adaptive_qos_policy` and `qos_policy`.
+- `qos_policy` (String) QoS Policy Name Enter QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`<br>Conflicts with `adaptive_qos_policy` and `no_qos`.
+
+
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san`
+
+Required:
+
+- `management_lif_choice` (Attributes) Backend Management LIF FQDN or IP address of a cluster or SVM management LIF<br>Exactly one of `management_lif_dns_name` or `management_lif_ip` must be specified. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--management_lif_choice))
+- `username` (String) Username Username to connect to the cluster/SVM<br>**Validation:** `Length LengthBetween(1, 256)`
+
+Optional:
+
+- `chap_choice` (Attributes) Use CHAP Use CHAP to authenticate iSCSI for ONTAP SAN drivers.<br>Exactly one of `no_chap` or `use_chap` must be specified when `chap_choice` is configured. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice))
+- `client_certificate` (String) Client Certificate Please Enter Base64-encoded value of client certificate. Used for certificate-based auth.<br>**Validation:** `Length LengthAtMost(8192)`
+- `client_private_key` (Attributes) Client Private Key Please Enter value of client private key. Used for certificate-based auth. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--client_private_key))
+- `data_lif_choice` (Attributes) Backend Data LIF FQDN or IP address of protocol LIF. Use square brackets for IPv6. Once set this cannot be updated. Derived by the SVM unless specified.<br>Exactly one of `data_lif_dns_name` or `data_lif_ip` must be specified when `data_lif_choice` is configured. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--data_lif_choice))
+- `igroup_name` (String) iGroup Name Name of the igroup for SAN volumes to use<br>**Validation:** `Length LengthBetween(1, 256)`
+- `labels` (Map of String) Backend Labels List of labels for Storage Device used in NetApp ONTAP. It is used for storage class selection.
+- `limit_aggregate_usage` (Number) Limit Aggregate Usage Fail provisioning if usage is above this percentage. Not enforced by default.
+- `limit_volume_size` (Number) Limit Volume Size Fail provisioning if requested volume size in GBi is above this value. Not enforced by default.
+- `password` (Attributes) Password Please Enter you password. Password to connect to the cluster/SVM (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--password))
+- `region` (String) Backend Region Virtual Pool Region
+- `storage` (Attributes List) Virtual Storage Pools List of Virtual Storage Pool definitions which are referred back by Storage Class label match selection. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--storage))
+- `storage_driver_name` (String) Storage Backend Driver Configuration of Backend Name<br>**Default:** `ontap-san`<br>**Allowed Values (choose one):** `['ontap-san', 'ontap-san-economy', 'ontap-nas-flexgroup']`
+- `storage_prefix` (String) Storage Prefix Prefix used when provisioning new volumes in the SVM. Once set this cannot be updated<br>**Validation:** `Length LengthBetween(1, 80)`
+- `svm` (String) Backend SVM Storage virtual machine to use. Derived if an SVM managementLIF is specified<br>**Validation:** `Length LengthBetween(1, 256)`
+- `trusted_ca_certificate` (String) Trusted CA Certificate Please Enter Base64-encoded value of trusted CA certificate. Optional. Used for certificate-based auth..<br>**Validation:** `Length LengthAtMost(8192)`
+- `volume_defaults` (Attributes) Backend Volume Defaults List of QoS volume defaults types (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--volume_defaults))
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--management_lif_choice"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.management_lif_choice`
+
+Optional:
+
+- `management_lif_dns_name` (String) Backend Management LIF Name Backend Management LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `management_lif_ip`.
+- `management_lif_ip` (String) Backend Management LIF IP Address Backend Management LIF IP Address is reachable at the given ip address<br>Conflicts with `management_lif_dns_name`.
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.chap_choice`
+
+Optional:
+
+- `no_chap` (Boolean) CHAP Disabled CHAP disabled<br>Conflicts with `use_chap`.
+- `use_chap` (Attributes) Use Device NetApp Backend ONTAP SAN CHAP configuration Device NetApp Backend ONTAP SAN CHAP configuration options for enabled CHAP<br>Conflicts with `no_chap`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap))
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.chap_choice.use_chap`
+
+Optional:
+
+- `chap_initiator_secret` (Attributes) CHAP Intiator Secret CHAP initiator secret. Required if useCHAP=true (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_initiator_secret))
+- `chap_target_initiator_secret` (Attributes) CHAP Target Initiator Secret CHAP target initiator secret. Required if useCHAP=true (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_target_initiator_secret))
+- `chap_target_username` (String) CHAP Target Username Target username. Required if useCHAP=true<br>**Validation:** `Length LengthBetween(1, 256)`
+- `chap_username` (String) CHAP Username Inbound username. Required if useCHAP=true<br>**Validation:** `Length LengthBetween(1, 256)`
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_initiator_secret"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.chap_choice.use_chap.chap_initiator_secret`
+
+Required:
+
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_initiator_secret--secret_info_choice))
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_initiator_secret--secret_info_choice"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.chap_choice.use_chap.chap_initiator_secret.secret_info_choice`
+
+Optional:
+
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_initiator_secret--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_initiator_secret--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_initiator_secret--secret_info_choice--blindfold_secret_info"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.chap_choice.use_chap.chap_initiator_secret.secret_info_choice.blindfold_secret_info`
+
+Required:
+
+- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+
+Optional:
+
+- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
+- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_initiator_secret--secret_info_choice--clear_secret_info"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.chap_choice.use_chap.chap_initiator_secret.secret_info_choice.clear_secret_info`
+
+Required:
+
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+
+Optional:
+
+- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_target_initiator_secret"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.chap_choice.use_chap.chap_target_initiator_secret`
+
+Required:
+
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_target_initiator_secret--secret_info_choice))
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_target_initiator_secret--secret_info_choice"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.chap_choice.use_chap.chap_target_initiator_secret.secret_info_choice`
+
+Optional:
+
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_target_initiator_secret--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_target_initiator_secret--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_target_initiator_secret--secret_info_choice--blindfold_secret_info"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.chap_choice.use_chap.chap_target_initiator_secret.secret_info_choice.blindfold_secret_info`
+
+Required:
+
+- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+
+Optional:
+
+- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
+- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_target_initiator_secret--secret_info_choice--clear_secret_info"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.chap_choice.use_chap.chap_target_initiator_secret.secret_info_choice.clear_secret_info`
+
+Required:
+
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+
+Optional:
+
+- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+
+
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--client_private_key"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.client_private_key`
+
+Required:
+
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--client_private_key--secret_info_choice))
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--client_private_key--secret_info_choice"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.client_private_key.secret_info_choice`
+
+Optional:
+
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--client_private_key--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--client_private_key--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--client_private_key--secret_info_choice--blindfold_secret_info"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.client_private_key.secret_info_choice.blindfold_secret_info`
+
+Required:
+
+- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+
+Optional:
+
+- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
+- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--client_private_key--secret_info_choice--clear_secret_info"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.client_private_key.secret_info_choice.clear_secret_info`
+
+Required:
+
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+
+Optional:
+
+- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--data_lif_choice"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.data_lif_choice`
+
+Optional:
+
+- `data_lif_dns_name` (String) Backend Data LIF Name Backend Data LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `data_lif_ip`.
+- `data_lif_ip` (String) Backend Data LIF IP Address Backend Data LIF IP Address is reachable at the given ip address<br>Conflicts with `data_lif_dns_name`.
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--password"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.password`
+
+Required:
+
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--password--secret_info_choice))
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--password--secret_info_choice"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.password.secret_info_choice`
+
+Optional:
+
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--password--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--password--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--password--secret_info_choice--blindfold_secret_info"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.password.secret_info_choice.blindfold_secret_info`
+
+Required:
+
+- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+
+Optional:
+
+- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
+- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--password--secret_info_choice--clear_secret_info"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.password.secret_info_choice.clear_secret_info`
+
+Required:
+
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+
+Optional:
+
+- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--storage"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.storage`
+
+Optional:
+
+- `labels` (Map of String) Storage Pool Labels List of labels for Storage Device used in NetApp ONTAP. It is used for storage class label match selection.
+- `volume_defaults` (Attributes) Backend Volume Defaults List of QoS volume default types (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--storage--volume_defaults))
+- `zone` (String) Pool Zone Virtual Storage Pool zone definition.
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--storage--volume_defaults"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.storage.volume_defaults`
+
+Optional:
+
+- `encryption` (Boolean) Enable Encryption Enable NetApp volume encryption.<br>**Default:** `false`
+- `export_policy` (String) Export Policy Export policy to use.
+- `qos_policy_choice` (Attributes) QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.<br>Exactly one of `adaptive_qos_policy`, `no_qos`, or `qos_policy` must be specified when `qos_policy_choice` is configured. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--storage--volume_defaults--qos_policy_choice))
+- `security_style` (String) Security Style Security style for new volumes.
+- `snapshot_dir` (Boolean) Access to Snapshot Directory Access to the .snapshot directory.<br>**Default:** `false`
+- `snapshot_policy` (String) Snapshot Policy Snapshot policy to use
+- `snapshot_reserve` (String) Snapshot Rerserved Percentage of volume reserved for snapshots. '0' if snapshot policy is 'none', else ''
+- `space_reserve` (String) Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`<br>**Allowed Values (choose one):** `['none', 'thick']`
+- `split_on_clone` (Boolean) Split on Clone Split a clone from its parent upon creation.<br>**Default:** `false`
+- `tiering_policy` (String) Tiering Policy Tiering policy to use. 'none' is default.
+- `unix_permissions` (Number) Unix Mode Permissions Unix permission mode for new volumes. All allowed 777
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--storage--volume_defaults--qos_policy_choice"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.storage.volume_defaults.qos_policy_choice`
+
+Optional:
+
+- `adaptive_qos_policy` (String) Storage Server IP address Enter Adaptive QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`<br>Conflicts with `no_qos` and `qos_policy`.
+- `no_qos` (Boolean) No QoS No QoS configured<br>Conflicts with `adaptive_qos_policy` and `qos_policy`.
+- `qos_policy` (String) QoS Policy Name Enter QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`<br>Conflicts with `adaptive_qos_policy` and `no_qos`.
+
+
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--volume_defaults"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.volume_defaults`
+
+Optional:
+
+- `encryption` (Boolean) Enable Encryption Enable NetApp volume encryption.<br>**Default:** `false`
+- `export_policy` (String) Export Policy Export policy to use.
+- `qos_policy_choice` (Attributes) QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend.<br>Exactly one of `adaptive_qos_policy`, `no_qos`, or `qos_policy` must be specified when `qos_policy_choice` is configured. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--volume_defaults--qos_policy_choice))
+- `security_style` (String) Security Style Security style for new volumes.
+- `snapshot_dir` (Boolean) Access to Snapshot Directory Access to the .snapshot directory.<br>**Default:** `false`
+- `snapshot_policy` (String) Snapshot Policy Snapshot policy to use
+- `snapshot_reserve` (String) Snapshot Rerserved Percentage of volume reserved for snapshots. '0' if snapshot policy is 'none', else ''
+- `space_reserve` (String) Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`<br>**Allowed Values (choose one):** `['none', 'thick']`
+- `split_on_clone` (Boolean) Split on Clone Split a clone from its parent upon creation.<br>**Default:** `false`
+- `tiering_policy` (String) Tiering Policy Tiering policy to use. 'none' is default.
+- `unix_permissions` (Number) Unix Mode Permissions Unix permission mode for new volumes. All allowed 777
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--volume_defaults--qos_policy_choice"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.volume_defaults.qos_policy_choice`
+
+Optional:
+
+- `adaptive_qos_policy` (String) Storage Server IP address Enter Adaptive QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`<br>Conflicts with `no_qos` and `qos_policy`.
+- `no_qos` (Boolean) No QoS No QoS configured<br>Conflicts with `adaptive_qos_policy` and `qos_policy`.
+- `qos_policy` (String) QoS Policy Name Enter QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`<br>Conflicts with `adaptive_qos_policy` and `no_qos`.
+
+
+
+
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator`
+
+Required:
+
+- `arrays` (Attributes) Arrays Configuration This section configure PSO storage arrays (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays))
+- `cluster_id` (String) Cluster ID clusterID is added as a prefix for all volumes created by this PSO installation. clusterID is also used to identify the volumes used by the datastore, pso-db. clusterID MUST BE UNIQUE for multiple K8s clusters running on top of the same storage arrays. characters allowed: alphanumeric and underscores<br>**Validation:** `Length LengthBetween(1, 22)`
+
+Optional:
+
+- `enable_storage_topology` (Boolean) Enable Storage Topology This option is to enable/disable the csi topology feature for pso-csi<br>**Default:** `false`
+- `enable_strict_topology` (Boolean) Enable Strict Topology This option is to enable/disable the strict csi topology feature for pso-csi<br>**Default:** `false`
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays`
+
+Optional:
+
+- `flash_array` (Attributes) Flash Arrays Specify what storage flash arrays should be managed the plugin For FlashArrays you must set the 'mgmt_endpoint' and 'api_token' (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array))
+- `flash_blade` (Attributes) Flash Blade Specify what storage flash blades should be managed the plugin (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade))
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_array`
+
+Required:
+
+- `flash_arrays` (Attributes List) Flash Arrays For FlashArrays you must set the 'mgmt_endpoint' and 'api_token' (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays))
+
+Optional:
+
+- `default_fs_opt` (String) Default Filesystem Options Block volume default mkfs options. Not recommended to change!<br>**Validation:** `Length LengthBetween(1, 128)`
+- `default_fs_type` (String) Default Filesystem Type Block volume default filesystem type. Not recommended to change!<br>**Default:** `xfs`<br>**Allowed Values (choose one):** `['xfs', 'ext4']`
+- `default_mount_opts` (List of String) Default Mount Options Block volume default filesystem mount options. Not recommended to change!
+- `disable_preempt_attachments` (Boolean) Disable Preempt Attachments Enable/Disable attachment preemption!<br>**Default:** `false`
+- `iscsi_login_timeout` (Number) iSCSI Login Timeout iSCSI login timeout in seconds. Not recommended to change!<br>**Default:** `20`
+- `san_type` (String) SAN Type Block volume access protocol, either ISCSI or FC<br>**Default:** `ISCSI`<br>**Allowed Values (choose one):** `['ISCSI', 'FC']`
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_array.flash_arrays`
+
+Required:
+
+- `mgmt_endpoint_choice` (Attributes) Management Endpoint FQDN or IP address of PSO Management endpoint<br>Exactly one of `mgmt_dns_name` or `mgmt_ip` must be specified. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays--mgmt_endpoint_choice))
+
+Optional:
+
+- `api_token` (Attributes) API Token Please Enter API TOken. Token to connect to management interface (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays--api_token))
+- `labels` (Map of String) Labels The labels are optional, and can be any key-value pair for use with the PSO 'fleet' provisioner.
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays--mgmt_endpoint_choice"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_array.flash_arrays.mgmt_endpoint_choice`
+
+Optional:
+
+- `mgmt_dns_name` (String) dns_name Management Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `mgmt_ip`.
+- `mgmt_ip` (String) Management Endpoint IP Address Management Endpoint is reachable at the given ip address<br>Conflicts with `mgmt_dns_name`.
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays--api_token"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_array.flash_arrays.api_token`
+
+Required:
+
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays--api_token--secret_info_choice))
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays--api_token--secret_info_choice"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_array.flash_arrays.api_token.secret_info_choice`
+
+Optional:
+
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays--api_token--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays--api_token--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays--api_token--secret_info_choice--blindfold_secret_info"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_array.flash_arrays.api_token.secret_info_choice.blindfold_secret_info`
+
+Required:
+
+- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+
+Optional:
+
+- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
+- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays--api_token--secret_info_choice--clear_secret_info"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_array.flash_arrays.api_token.secret_info_choice.clear_secret_info`
+
+Required:
+
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+
+Optional:
+
+- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+
+
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_blade`
+
+Required:
+
+- `flash_blades` (Attributes List) Flash Blades For FlashBlades you must set the 'mgmt_endpoint', 'api_token' and nfs_endpoint (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades))
+
+Optional:
+
+- `enable_snapshot_directory` (Boolean) Enable Snapshot Directory Enable/Disable FlashBlade snapshots<br>**Default:** `false`
+- `export_rules` (String) NFS Export Rules NFS Export rules<br>**Validation:** `Length LengthBetween(1, 250)`
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_blade.flash_blades`
+
+Required:
+
+- `mgmt_endpoint_choice` (Attributes) Management Endpoint FQDN or IP address of PSO Management endpoint<br>Exactly one of `mgmt_dns_name` or `mgmt_ip` must be specified. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--mgmt_endpoint_choice))
+- `nfs_endpoint_choice` (Attributes) NFS Endpoint FQDN or IP address of PSO NFS endpoint<br>Exactly one of `nfs_endpoint_dns_name` or `nfs_endpoint_ip` must be specified. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--nfs_endpoint_choice))
+
+Optional:
+
+- `api_token` (Attributes) API Token Please Enter API TOken. Token to connect to management interface (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--api_token))
+- `lables` (Map of String) Labels The labels are optional, and can be any key-value pair for use with the PSO 'fleet' provisioner.
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--mgmt_endpoint_choice"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_blade.flash_blades.mgmt_endpoint_choice`
+
+Optional:
+
+- `mgmt_dns_name` (String) dns_name Management Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `mgmt_ip`.
+- `mgmt_ip` (String) Management Endpoint IP Address Management Endpoint is reachable at the given ip address<br>Conflicts with `mgmt_dns_name`.
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--nfs_endpoint_choice"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_blade.flash_blades.nfs_endpoint_choice`
+
+Optional:
+
+- `nfs_endpoint_dns_name` (String) NFS DNS Name Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `nfs_endpoint_ip`.
+- `nfs_endpoint_ip` (String) NFS IP Address Endpoint is reachable at the given ip address<br>Conflicts with `nfs_endpoint_dns_name`.
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--api_token"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_blade.flash_blades.api_token`
+
+Required:
+
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--api_token--secret_info_choice))
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--api_token--secret_info_choice"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_blade.flash_blades.api_token.secret_info_choice`
+
+Optional:
+
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--api_token--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--api_token--secret_info_choice--clear_secret_info))
+- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--api_token--secret_info_choice--blindfold_secret_info"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_blade.flash_blades.api_token.secret_info_choice.blindfold_secret_info`
+
+Required:
+
+- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+
+Optional:
+
+- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
+- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--api_token--secret_info_choice--clear_secret_info"></a>
+### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_blade.flash_blades.api_token.secret_info_choice.clear_secret_info`
+
+Required:
+
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+
+Optional:
+
+- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+
+
+
+
+
+
+
+
+
+
+<a id="nestedatt--blocked_services"></a>
+### Nested Schema for `blocked_services`
+
+Optional:
+
+- `blocked_services_value_type_choice` (Attributes) blocked_services_type_choice Choose the Nodel Local Service to disable<br>Exactly one of `dns`, `ssh`, or `web_user_interface` must be specified when `blocked_services_value_type_choice` is configured. (see [below for nested schema](#nestedatt--blocked_services--blocked_services_value_type_choice))
+- `network_type` (List of String) network_type Site Local VRF on which this service will be disabled<br>**Allowed Values (choose one):** `['VIRTUAL_NETWORK_GLOBAL', 'VIRTUAL_NETWORK_MANAGEMENT', 'VIRTUAL_NETWORK_PER_SITE', 'VIRTUAL_NETWORK_SEGMENT', 'VIRTUAL_NETWORK_SITE_LOCAL', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE', 'VIRTUAL_NETWORK_SITE_SERVICE']`<br>**Default:** `VIRTUAL_NETWORK_SITE_LOCAL`
+
+<a id="nestedatt--blocked_services--blocked_services_value_type_choice"></a>
+### Nested Schema for `blocked_services.blocked_services_value_type_choice`
+
+Optional:
+
+- `dns` (Boolean) DNS Matches DNS port 53<br>Conflicts with `ssh` and `web_user_interface`.
+- `ssh` (Boolean) SSH<br>Conflicts with `dns` and `web_user_interface`.
+- `web_user_interface` (Boolean) Web UI<br>Conflicts with `dns` and `ssh`.
+
+
+
 <a id="nestedatt--bond_choice"></a>
 ### Nested Schema for `bond_choice`
 
 Optional:
 
-- `bond_device_list` (Attributes) Configure Bond Devices Configure Bond Devices for this fleet (see [below for nested schema](#nestedatt--bond_choice--bond_device_list))
-- `no_bond_devices` (Boolean) No Bond Devices No Bond Devices configured for this Fleet
+- `bond_device_list` (Attributes) Configure Bond Devices Configure Bond Devices for this fleet<br>Conflicts with `no_bond_devices`. (see [below for nested schema](#nestedatt--bond_choice--bond_device_list))
+- `no_bond_devices` (Boolean) No Bond Devices No Bond Devices configured for this Fleet<br>Conflicts with `bond_device_list`.
 
 <a id="nestedatt--bond_choice--bond_device_list"></a>
 ### Nested Schema for `bond_choice.bond_device_list`
@@ -157,7 +1043,7 @@ Required:
 Required:
 
 - `devices` (List of String) Member Ethernet Devices Ethernet devices that will make up this bond
-- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP (see [below for nested schema](#nestedatt--bond_choice--bond_device_list--bond_devices--lacp_choice))
+- `lacp_choice` (Attributes) Select Bond Mode Select how bonding will happen, Active/Backup or LACP<br>Exactly one of `active_backup` or `lacp` must be specified. (see [below for nested schema](#nestedatt--bond_choice--bond_device_list--bond_devices--lacp_choice))
 - `name` (String) Bond Device Name for the Bond. Ex 'bond0'<br>**Validation:** `Length LengthAtMost(64)`
 
 Optional:
@@ -170,8 +1056,8 @@ Optional:
 
 Optional:
 
-- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device
-- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device (see [below for nested schema](#nestedatt--bond_choice--bond_device_list--bond_devices--lacp_choice--lacp))
+- `active_backup` (Boolean) Active/Backup Configure active/backup based bond device<br>Conflicts with `lacp`.
+- `lacp` (Attributes) LACP (802.3ad) Configure LACP (802.3ad) based bond device<br>Conflicts with `active_backup`. (see [below for nested schema](#nestedatt--bond_choice--bond_device_list--bond_devices--lacp_choice--lacp))
 
 <a id="nestedatt--bond_choice--bond_device_list--bond_devices--lacp_choice--lacp"></a>
 ### Nested Schema for `bond_choice.bond_device_list.bond_devices.lacp_choice.lacp`
@@ -190,9 +1076,9 @@ Optional:
 
 Optional:
 
-- `dc_cluster_group` (Attributes) Member of DC cluster Group This fleet is member of dc cluster group via site local network (see [below for nested schema](#nestedatt--dc_cluster_group_choice--dc_cluster_group))
-- `dc_cluster_group_inside` (Attributes) Member of DC cluster Group This fleet is member of dc cluster group via site local inside network (see [below for nested schema](#nestedatt--dc_cluster_group_choice--dc_cluster_group_inside))
-- `no_dc_cluster_group` (Boolean) Not a Member This fleet is not a member of a DC cluster group
+- `dc_cluster_group` (Attributes) Member of DC cluster Group This fleet is member of dc cluster group via site local network<br>Conflicts with `dc_cluster_group_inside` and `no_dc_cluster_group`. (see [below for nested schema](#nestedatt--dc_cluster_group_choice--dc_cluster_group))
+- `dc_cluster_group_inside` (Attributes) Member of DC cluster Group This fleet is member of dc cluster group via site local inside network<br>Conflicts with `dc_cluster_group` and `no_dc_cluster_group`. (see [below for nested schema](#nestedatt--dc_cluster_group_choice--dc_cluster_group_inside))
+- `no_dc_cluster_group` (Boolean) Not a Member This fleet is not a member of a DC cluster group<br>Conflicts with `dc_cluster_group` and `dc_cluster_group_inside`.
 
 <a id="nestedatt--dc_cluster_group_choice--dc_cluster_group"></a>
 ### Nested Schema for `dc_cluster_group_choice.dc_cluster_group`
@@ -226,9 +1112,9 @@ Read-Only:
 
 Optional:
 
-- `disable_gpu` (Boolean) GPU Disabled GPU is not enabled for this fleet
-- `enable_gpu` (Boolean) Member of DC cluster Group GPU is enabled for this fleet
-- `enable_vgpu` (Attributes) vGPU Enabled Enable NVIDIA vGPU hosted on VMware (see [below for nested schema](#nestedatt--gpu_choice--enable_vgpu))
+- `disable_gpu` (Boolean) GPU Disabled GPU is not enabled for this fleet<br>Conflicts with `enable_gpu` and `enable_vgpu`.
+- `enable_gpu` (Boolean) Member of DC cluster Group GPU is enabled for this fleet<br>Conflicts with `disable_gpu` and `enable_vgpu`.
+- `enable_vgpu` (Attributes) vGPU Enabled Enable NVIDIA vGPU hosted on VMware<br>Conflicts with `disable_gpu` and `enable_gpu`. (see [below for nested schema](#nestedatt--gpu_choice--enable_vgpu))
 
 <a id="nestedatt--gpu_choice--enable_vgpu"></a>
 ### Nested Schema for `gpu_choice.enable_vgpu`
@@ -244,14 +1130,27 @@ Optional:
 
 
 
+<a id="nestedatt--inside_virtual_network"></a>
+### Nested Schema for `inside_virtual_network`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
 <a id="nestedatt--interface_choice"></a>
 ### Nested Schema for `interface_choice`
 
 Optional:
 
-- `default_config` (Boolean) No Interfaces Use default configuration for interfaces belonging to this fleet
-- `device_list` (Attributes) Legacy Device Config Add device for all interfaces belonging to this fleet (see [below for nested schema](#nestedatt--interface_choice--device_list))
-- `interface_list` (Attributes) List of Interfaces Add all interfaces belonging to this fleet (see [below for nested schema](#nestedatt--interface_choice--interface_list))
+- `default_config` (Boolean) No Interfaces Use default configuration for interfaces belonging to this fleet<br>Conflicts with `device_list` and `interface_list`.
+- `device_list` (Attributes) Legacy Device Config Add device for all interfaces belonging to this fleet<br>Conflicts with `default_config` and `interface_list`. (see [below for nested schema](#nestedatt--interface_choice--device_list))
+- `interface_list` (Attributes) List of Interfaces Add all interfaces belonging to this fleet<br>Conflicts with `default_config` and `device_list`. (see [below for nested schema](#nestedatt--interface_choice--interface_list))
 
 <a id="nestedatt--interface_choice--device_list"></a>
 ### Nested Schema for `interface_choice.device_list`
@@ -265,7 +1164,7 @@ Optional:
 
 Required:
 
-- `device_instance_choice` (Attributes) Device Instance Device Instance specifies the type of interface and its characteristics (see [below for nested schema](#nestedatt--interface_choice--device_list--devices--device_instance_choice))
+- `device_instance_choice` (Attributes) Device Instance Device Instance specifies the type of interface and its characteristics<br>`network_device` must be specified. (see [below for nested schema](#nestedatt--interface_choice--device_list--devices--device_instance_choice))
 - `owner` (List of String) Owner Defines ownership of the device. A device can be owned by, * VER : Devices like ethernet are owned by VER * VK8S Workload : The devices is available for VK8S workload use. This option is not yet supported * HOST : Device is owned by host-os. The devices can be exposed via some other services like TPM. This option is not yet supported<br>**Allowed Values (choose one):** `['DEVICE_OWNER_HOST', 'DEVICE_OWNER_INVALID', 'DEVICE_OWNER_VER', 'DEVICE_OWNER_VK8S_WORK_LOAD']`
 
 Optional:
@@ -326,13 +1225,50 @@ Read-Only:
 
 
 
+<a id="nestedatt--kubernetes_upgrade_drain"></a>
+### Nested Schema for `kubernetes_upgrade_drain`
+
+Required:
+
+- `kubernetes_upgrade_drain_enable_choice` (Attributes) F5XC Enable/Disable Node by Node Upgrade Specify how nodes within a site will be upgraded. If enabled, you can specify number of Worker nodes to be upgraded in parallel. Note: This does not influence Control nodes. This is benefitial for sites with large number of nodes.<br>Exactly one of `disable_upgrade_drain` or `enable_upgrade_drain` must be specified. (see [below for nested schema](#nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice))
+
+<a id="nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice"></a>
+### Nested Schema for `kubernetes_upgrade_drain.kubernetes_upgrade_drain_enable_choice`
+
+Optional:
+
+- `disable_upgrade_drain` (Boolean) Disable upgrade drain<br>Conflicts with `enable_upgrade_drain`.
+- `enable_upgrade_drain` (Attributes) Enable Node by Node Upgrade<br>Conflicts with `disable_upgrade_drain`. (see [below for nested schema](#nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice--enable_upgrade_drain))
+
+<a id="nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice--enable_upgrade_drain"></a>
+### Nested Schema for `kubernetes_upgrade_drain.kubernetes_upgrade_drain_enable_choice.enable_upgrade_drain`
+
+Required:
+
+- `drain_max_unavailable_choice` (Attributes) Node Batch Size Max number of worker nodes to be upgraded in parallel<br>`drain_max_unavailable_node_count` must be specified. (see [below for nested schema](#nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice--enable_upgrade_drain--drain_max_unavailable_choice))
+
+Optional:
+
+- `drain_node_timeout` (Number) Upgrade Wait Time Seconds to wait before initiating upgrade on the next set of nodes. Setting it to 0 will wait indefinitely for all services on nodes to be upgraded gracefully before proceeding to the next set of nodes. (Warning: It may block upgrade if services on a node cannot be gracefully upgraded. It is recommended to use the default value).<br>**Default:** `300`
+
+<a id="nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice--enable_upgrade_drain--drain_max_unavailable_choice"></a>
+### Nested Schema for `kubernetes_upgrade_drain.kubernetes_upgrade_drain_enable_choice.enable_upgrade_drain.drain_max_unavailable_choice`
+
+Optional:
+
+- `drain_max_unavailable_node_count` (Number) Node Batch Size Count
+
+
+
+
+
 <a id="nestedatt--logs_receiver_choice"></a>
 ### Nested Schema for `logs_receiver_choice`
 
 Optional:
 
-- `log_receiver` (Attributes) Disable Logs Streaming Select log receiver for logs streaming (see [below for nested schema](#nestedatt--logs_receiver_choice--log_receiver))
-- `logs_streaming_disabled` (Boolean) Disable Logs Receiver Logs Streaming is disabled
+- `log_receiver` (Attributes) Disable Logs Streaming Select log receiver for logs streaming<br>Conflicts with `logs_streaming_disabled`. (see [below for nested schema](#nestedatt--logs_receiver_choice--log_receiver))
+- `logs_streaming_disabled` (Boolean) Disable Logs Receiver Logs Streaming is disabled<br>Conflicts with `log_receiver`.
 
 <a id="nestedatt--logs_receiver_choice--log_receiver"></a>
 ### Nested Schema for `logs_receiver_choice.log_receiver`
@@ -348,13 +1284,103 @@ Read-Only:
 
 
 
+<a id="nestedatt--network_connectors"></a>
+### Nested Schema for `network_connectors`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+<a id="nestedatt--network_firewall"></a>
+### Nested Schema for `network_firewall`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+<a id="nestedatt--outside_virtual_network"></a>
+### Nested Schema for `outside_virtual_network`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+<a id="nestedatt--performance_enhancement_mode"></a>
+### Nested Schema for `performance_enhancement_mode`
+
+Required:
+
+- `perf_mode_choice` (Attributes) Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation.<br>Exactly one of `perf_mode_l3_enhanced` or `perf_mode_l7_enhanced` must be specified. (see [below for nested schema](#nestedatt--performance_enhancement_mode--perf_mode_choice))
+
+<a id="nestedatt--performance_enhancement_mode--perf_mode_choice"></a>
+### Nested Schema for `performance_enhancement_mode.perf_mode_choice`
+
+Optional:
+
+- `perf_mode_l3_enhanced` (Attributes) L3 Mode Enhanced Performance Site optimized for L3 traffic processing<br>Conflicts with `perf_mode_l7_enhanced`. (see [below for nested schema](#nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l3_enhanced))
+- `perf_mode_l7_enhanced` (Attributes) Default Performance Mode Site optimized for L7 traffic processing<br>Conflicts with `perf_mode_l3_enhanced`. (see [below for nested schema](#nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l7_enhanced))
+
+<a id="nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l3_enhanced"></a>
+### Nested Schema for `performance_enhancement_mode.perf_mode_choice.perf_mode_l3_enhanced`
+
+Optional:
+
+- `perf_mode_choice` (Attributes) L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads.<br>Exactly one of `jumbo` or `no_jumbo` must be specified when `perf_mode_choice` is configured. (see [below for nested schema](#nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l3_enhanced--perf_mode_choice))
+
+<a id="nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l3_enhanced--perf_mode_choice"></a>
+### Nested Schema for `performance_enhancement_mode.perf_mode_choice.perf_mode_l3_enhanced.perf_mode_choice`
+
+Optional:
+
+- `jumbo` (Boolean) L3 Mode Enhanced Performance with jumbo frame support(9000)<br>Conflicts with `no_jumbo`.
+- `no_jumbo` (Boolean) L3 Mode Enhanced Performance with no jumbo frame support<br>Conflicts with `jumbo`.
+
+
+
+<a id="nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l7_enhanced"></a>
+### Nested Schema for `performance_enhancement_mode.perf_mode_choice.perf_mode_l7_enhanced`
+
+Optional:
+
+- `perf_mode_choice` (Attributes) L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads.<br>Exactly one of `jumbo_disabled` or `jumbo_enabled` must be specified when `perf_mode_choice` is configured. (see [below for nested schema](#nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l7_enhanced--perf_mode_choice))
+
+<a id="nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l7_enhanced--perf_mode_choice"></a>
+### Nested Schema for `performance_enhancement_mode.perf_mode_choice.perf_mode_l7_enhanced.perf_mode_choice`
+
+Optional:
+
+- `jumbo_disabled` (Boolean) L7 Mode Enhanced Performance with no jumbo frame support<br>Conflicts with `jumbo_enabled`.
+- `jumbo_enabled` (Boolean) L7 Mode Enhanced Performance with jumbo frame support(9000)<br>Conflicts with `jumbo_disabled`.
+
+
+
+
+
 <a id="nestedatt--sriov_interface_choice"></a>
 ### Nested Schema for `sriov_interface_choice`
 
 Optional:
 
-- `default_sriov_interface` (Boolean) Default SR-IOV interfaces Configuration Disable Single Root I/O Virtualization interfaces
-- `sriov_interfaces` (Attributes) Custom SR-IOV interfaces Configuration Use custom Single Root I/O Virtualization interfaces (see [below for nested schema](#nestedatt--sriov_interface_choice--sriov_interfaces))
+- `default_sriov_interface` (Boolean) Default SR-IOV interfaces Configuration Disable Single Root I/O Virtualization interfaces<br>Conflicts with `sriov_interfaces`.
+- `sriov_interfaces` (Attributes) Custom SR-IOV interfaces Configuration Use custom Single Root I/O Virtualization interfaces<br>Conflicts with `default_sriov_interface`. (see [below for nested schema](#nestedatt--sriov_interface_choice--sriov_interfaces))
 
 <a id="nestedatt--sriov_interface_choice--sriov_interfaces"></a>
 ### Nested Schema for `sriov_interface_choice.sriov_interfaces`
@@ -383,8 +1409,8 @@ Optional:
 
 Optional:
 
-- `default_storage_class` (Boolean) Default Storage Class Use only default storage class in kubernetes
-- `storage_class_list` (Attributes) Custom Storage Class Add additional custom storage classes in kubernetes for this fleet (see [below for nested schema](#nestedatt--storage_class_choice--storage_class_list))
+- `default_storage_class` (Boolean) Default Storage Class Use only default storage class in kubernetes<br>Conflicts with `storage_class_list`.
+- `storage_class_list` (Attributes) Custom Storage Class Add additional custom storage classes in kubernetes for this fleet<br>Conflicts with `default_storage_class`. (see [below for nested schema](#nestedatt--storage_class_choice--storage_class_list))
 
 <a id="nestedatt--storage_class_choice--storage_class_list"></a>
 ### Nested Schema for `storage_class_choice.storage_class_list`
@@ -398,7 +1424,7 @@ Optional:
 
 Required:
 
-- `device_choice` (Attributes) Select Storage Class Configuration Select storage Class configuration (see [below for nested schema](#nestedatt--storage_class_choice--storage_class_list--storage_classes--device_choice))
+- `device_choice` (Attributes) Select Storage Class Configuration Select storage Class configuration<br>Exactly one of `custom_storage`, `hpe_storage`, `netapp_trident`, or `pure_service_orchestrator` must be specified. (see [below for nested schema](#nestedatt--storage_class_choice--storage_class_list--storage_classes--device_choice))
 - `storage_class_name` (String) Storage Class Name Name of the storage class as it will appear in K8s.
 - `storage_device` (String) Storage Device Storage device that this class will use. The Device name defined at previous step.
 
@@ -415,10 +1441,10 @@ Optional:
 
 Optional:
 
-- `custom_storage` (Attributes) Custom Storage Storage configuration for Custom Storage (see [below for nested schema](#nestedatt--storage_class_choice--storage_class_list--storage_classes--device_choice--custom_storage))
-- `hpe_storage` (Attributes) HPE Storage Storage configuration for HPE Storage (see [below for nested schema](#nestedatt--storage_class_choice--storage_class_list--storage_classes--device_choice--hpe_storage))
-- `netapp_trident` (Attributes) NetApp Trident Storage class Device configuration for NetApp Trident (see [below for nested schema](#nestedatt--storage_class_choice--storage_class_list--storage_classes--device_choice--netapp_trident))
-- `pure_service_orchestrator` (Attributes) Pure Storage Service Orchestrator Storage class Device configuration for Pure Service Orchestrator (see [below for nested schema](#nestedatt--storage_class_choice--storage_class_list--storage_classes--device_choice--pure_service_orchestrator))
+- `custom_storage` (Attributes) Custom Storage Storage configuration for Custom Storage<br>Conflicts with `hpe_storage`, `netapp_trident`, and `pure_service_orchestrator`. (see [below for nested schema](#nestedatt--storage_class_choice--storage_class_list--storage_classes--device_choice--custom_storage))
+- `hpe_storage` (Attributes) HPE Storage Storage configuration for HPE Storage<br>Conflicts with `custom_storage`, `netapp_trident`, and `pure_service_orchestrator`. (see [below for nested schema](#nestedatt--storage_class_choice--storage_class_list--storage_classes--device_choice--hpe_storage))
+- `netapp_trident` (Attributes) NetApp Trident Storage class Device configuration for NetApp Trident<br>Conflicts with `custom_storage`, `hpe_storage`, and `pure_service_orchestrator`. (see [below for nested schema](#nestedatt--storage_class_choice--storage_class_list--storage_classes--device_choice--netapp_trident))
+- `pure_service_orchestrator` (Attributes) Pure Storage Service Orchestrator Storage class Device configuration for Pure Service Orchestrator<br>Conflicts with `custom_storage`, `hpe_storage`, and `netapp_trident`. (see [below for nested schema](#nestedatt--storage_class_choice--storage_class_list--storage_classes--device_choice--pure_service_orchestrator))
 
 <a id="nestedatt--storage_class_choice--storage_class_list--storage_classes--device_choice--custom_storage"></a>
 ### Nested Schema for `storage_class_choice.storage_class_list.storage_classes.device_choice.custom_storage`
@@ -474,892 +1500,13 @@ Optional:
 
 
 
-<a id="nestedatt--storage_device_choice"></a>
-### Nested Schema for `storage_device_choice`
-
-Optional:
-
-- `no_storage_device` (Boolean) No Storage Devices This fleet does not have any storage devices
-- `storage_device_list` (Attributes) List of Storage Interfaces Add all storage devices belonging to this fleet (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list))
-
-<a id="nestedatt--storage_device_choice--storage_device_list"></a>
-### Nested Schema for `storage_device_choice.storage_device_list`
-
-Optional:
-
-- `storage_devices` (Attributes List) List of Storage Devices List of custom storage devices (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices))
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices`
-
-Required:
-
-- `device_choice` (Attributes) Select Storage Device Configuration Select type of storage device driver to configure (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice))
-- `storage_device` (String) Storage Device Storage device and device unit<br>**Validation:** `Length LengthAtMost(64)`
-
-Optional:
-
-- `advanced_advanced_parameters` (Map of String) Advanced Parameters Map of parameter name and string value
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice`
-
-Optional:
-
-- `custom_storage` (Boolean) Custom Storage Device configuration for Custom Storage
-- `hpe_storage` (Attributes) HPE Storage Device configuration for HPE Storage (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage))
-- `netapp_trident` (Attributes) NetApp Trident Device configuration for NetApp Trident (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident))
-- `pure_service_orchestrator` (Attributes) Pure Storage Service Orchestrator Device configuration for Pure Storage Service Orchestrator (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator))
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.hpe_storage`
-
-Required:
-
-- `username` (String) Username Username to connect to the HPE storage management IP<br>**Validation:** `Length LengthBetween(1, 256)`
-
-Optional:
-
-- `api_server_port` (Number) Storage server Port Enter Storage Server Port
-- `iscsi_chap_password` (Attributes) iscsi chapPassword chap Password to connect to the HPE storage (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--iscsi_chap_password))
-- `iscsi_chap_user` (String) iscsi chapUser chap Username to connect to the HPE storage<br>**Validation:** `Length LengthAtMost(256)`
-- `password` (Attributes) Password Please Enter you password. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--password))
-- `storage_server_ip_address` (String) Storage Server IP address Enter storage server IP address
-- `storage_server_name` (String) Storage Server Name Enter storage server Name
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--iscsi_chap_password"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.hpe_storage.iscsi_chap_password`
-
-Required:
-
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--iscsi_chap_password--secret_info_choice))
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--iscsi_chap_password--secret_info_choice"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.hpe_storage.iscsi_chap_password.secret_info_choice`
-
-Optional:
-
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--iscsi_chap_password--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--iscsi_chap_password--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--iscsi_chap_password--secret_info_choice--blindfold_secret_info"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.hpe_storage.iscsi_chap_password.secret_info_choice.blindfold_secret_info`
-
-Required:
-
-- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
-
-Optional:
-
-- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
-- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--iscsi_chap_password--secret_info_choice--clear_secret_info"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.hpe_storage.iscsi_chap_password.secret_info_choice.clear_secret_info`
-
-Required:
-
-- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
-
-Optional:
-
-- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--password"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.hpe_storage.password`
-
-Required:
-
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--password--secret_info_choice))
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--password--secret_info_choice"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.hpe_storage.password.secret_info_choice`
-
-Optional:
-
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--password--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--password--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--password--secret_info_choice--blindfold_secret_info"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.hpe_storage.password.secret_info_choice.blindfold_secret_info`
-
-Required:
-
-- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
-
-Optional:
-
-- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
-- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--hpe_storage--password--secret_info_choice--clear_secret_info"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.hpe_storage.password.secret_info_choice.clear_secret_info`
-
-Required:
-
-- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
-
-Optional:
-
-- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident`
-
-Required:
-
-- `backend_choice` (Attributes) Select NetApp Trident Backend Select type of backend to configure (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice))
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice`
-
-Optional:
-
-- `netapp_backend_ontap_nas` (Attributes) ONTAP NAS Backend configuration for ONTAP NAS (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas))
-- `netapp_backend_ontap_san` (Attributes) ONTAP SAN Backend configuration for ONTAP SAN (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san))
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas`
-
-Required:
-
-- `management_lif_choice` (Attributes) Backend Management LIF FQDN or IP address of a cluster or SVM management LIF (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--management_lif_choice))
-- `username` (String) Username Username to connect to the cluster/SVM<br>**Validation:** `Length LengthBetween(1, 256)`
-
-Optional:
-
-- `auto_export_cidrs` (Attributes) Auto Export CIDRs List of CIDRs to filter Kubernetes’ node IPs against when autoExportPolicy is enabled (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--auto_export_cidrs))
-- `auto_export_policy` (Boolean) Auto Export Policy Enable automatic export policy creation and updating<br>**Default:** `false`
-- `backend_name` (String) Storage Backend Name Configuration of Backend Name. Driver is name + '_' + dataLIF<br>**Validation:** `Length LengthBetween(1, 50)`
-- `client_certificate` (String) Client Certificate Please Enter Base64-encoded value of client certificate. Used for certificate-based auth.<br>**Validation:** `Length LengthAtMost(8192)`
-- `client_private_key` (Attributes) Client Private Key Please Enter value of client private key. Used for certificate-based auth. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--client_private_key))
-- `data_lif_choice` (Attributes) Backend Data LIF FQDN or IP address of protocol LIF. Use square brackets for IPv6. Once set this cannot be updated. Derived by the SVM unless specified. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--data_lif_choice))
-- `labels` (Map of String) Backend Labels List of labels for Storage Device used in NetApp ONTAP. It is used for storage class selection.
-- `limit_aggregate_usage` (String) Limit Aggregate Usage Fail provisioning if usage is above this percentage. Not enforced by default.
-- `limit_volume_size` (String) Limit Volume Size Fail provisioning if requested volume size is above this value. Not enforced by default.
-- `nfs_mount_options` (String) NFS Mount Options Comma-separated list of NFS mount options. Not enforced by default.
-- `password` (Attributes) Password Please Enter you password. Password to connect to the cluster/SVM (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--password))
-- `region` (String) Backend Region Virtual Pool Region
-- `storage` (Attributes List) Virtual Storage Pools List of Virtual Storage Pool definitions which are referred back by Storage Class label match selection. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--storage))
-- `storage_driver_name` (String) Storage Backend Driver Configuration of Backend Name<br>**Default:** `ontap-nas`<br>**Allowed Values (choose one):** `['ontap-nas', 'ontap-nas-economy', 'ontap-nas-flexgroup']`
-- `storage_prefix` (String) Storage Prefix Prefix used when provisioning new volumes in the SVM. Once set this cannot be updated
-- `svm` (String) Backend SVM Storage virtual machine to use. Derived if an SVM managementLIF is specified<br>**Validation:** `Length LengthBetween(1, 256)`
-- `trusted_ca_certificate` (String) Trusted CA Certificate Please Enter Base64-encoded value of trusted CA certificate. Optional. Used for certificate-based auth..<br>**Validation:** `Length LengthAtMost(8192)`
-- `volume_defaults` (Attributes) Backend Volume Defaults List of QoS volume defaults types (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--volume_defaults))
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--management_lif_choice"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.management_lif_choice`
-
-Optional:
-
-- `management_lif_dns_name` (String) Backend Management LIF Name Backend Management LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`
-- `management_lif_ip` (String) Backend Management LIF IP Address Backend Management LIF IP Address is reachable at the given ip address
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--auto_export_cidrs"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.auto_export_cidrs`
-
-Optional:
-
-- `ipv6_prefixes` (List of String) ipv6 prefixes List of IPv6 prefix strings.
-- `prefixes` (List of String) ipv4 prefix list List of IPv4 prefixes that represent an endpoint
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--client_private_key"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.client_private_key`
-
-Required:
-
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--client_private_key--secret_info_choice))
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--client_private_key--secret_info_choice"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.client_private_key.secret_info_choice`
-
-Optional:
-
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--client_private_key--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--client_private_key--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--client_private_key--secret_info_choice--blindfold_secret_info"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.client_private_key.secret_info_choice.blindfold_secret_info`
-
-Required:
-
-- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
-
-Optional:
-
-- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
-- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--client_private_key--secret_info_choice--clear_secret_info"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.client_private_key.secret_info_choice.clear_secret_info`
-
-Required:
-
-- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
-
-Optional:
-
-- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--data_lif_choice"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.data_lif_choice`
-
-Optional:
-
-- `data_lif_dns_name` (String) Backend Data LIF Name Backend Data LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`
-- `data_lif_ip` (String) Backend Data LIF IP Address Backend Data LIF IP Address is reachable at the given ip address
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--password"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.password`
-
-Required:
-
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--password--secret_info_choice))
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--password--secret_info_choice"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.password.secret_info_choice`
-
-Optional:
-
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--password--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--password--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--password--secret_info_choice--blindfold_secret_info"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.password.secret_info_choice.blindfold_secret_info`
-
-Required:
-
-- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
-
-Optional:
-
-- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
-- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--password--secret_info_choice--clear_secret_info"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.password.secret_info_choice.clear_secret_info`
-
-Required:
-
-- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
-
-Optional:
-
-- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--storage"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.storage`
-
-Optional:
-
-- `labels` (Map of String) Storage Pool Labels List of labels for Storage Device used in NetApp ONTAP. It is used for storage class label match selection.
-- `volume_defaults` (Attributes) Backend Volume Defaults List of QoS volume default types (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--storage--volume_defaults))
-- `zone` (String) Pool Zone Virtual Storage Pool zone definition.
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--storage--volume_defaults"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.storage.volume_defaults`
-
-Required:
-
-- `qos_policy_choice` (Attributes) QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--storage--volume_defaults--qos_policy_choice))
-
-Optional:
-
-- `encryption` (Boolean) Enable Encryption Enable NetApp volume encryption.<br>**Default:** `false`
-- `export_policy` (String) Export Policy Export policy to use.
-- `security_style` (String) Security Style Security style for new volumes.
-- `snapshot_dir` (Boolean) Access to Snapshot Directory Access to the .snapshot directory.<br>**Default:** `false`
-- `snapshot_policy` (String) Snapshot Policy Snapshot policy to use
-- `snapshot_reserve` (String) Snapshot Rerserved Percentage of volume reserved for snapshots. '0' if snapshot policy is 'none', else ''
-- `space_reserve` (String) Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`<br>**Allowed Values (choose one):** `['none', 'thick']`
-- `split_on_clone` (Boolean) Split on Clone Split a clone from its parent upon creation.<br>**Default:** `false`
-- `tiering_policy` (String) Tiering Policy Tiering policy to use. 'none' is default.
-- `unix_permissions` (Number) Unix Mode Permissions Unix permission mode for new volumes. All allowed 777
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--storage--volume_defaults--qos_policy_choice"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.storage.volume_defaults.qos_policy_choice`
-
-Optional:
-
-- `adaptive_qos_policy` (String) Storage Server IP address Enter Adaptive QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`
-- `no_qos` (Boolean) No QoS No QoS configured
-- `qos_policy` (String) QoS Policy Name Enter QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`
-
-
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--volume_defaults"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.volume_defaults`
-
-Required:
-
-- `qos_policy_choice` (Attributes) QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--volume_defaults--qos_policy_choice))
-
-Optional:
-
-- `encryption` (Boolean) Enable Encryption Enable NetApp volume encryption.<br>**Default:** `false`
-- `export_policy` (String) Export Policy Export policy to use.
-- `security_style` (String) Security Style Security style for new volumes.
-- `snapshot_dir` (Boolean) Access to Snapshot Directory Access to the .snapshot directory.<br>**Default:** `false`
-- `snapshot_policy` (String) Snapshot Policy Snapshot policy to use
-- `snapshot_reserve` (String) Snapshot Rerserved Percentage of volume reserved for snapshots. '0' if snapshot policy is 'none', else ''
-- `space_reserve` (String) Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`<br>**Allowed Values (choose one):** `['none', 'thick']`
-- `split_on_clone` (Boolean) Split on Clone Split a clone from its parent upon creation.<br>**Default:** `false`
-- `tiering_policy` (String) Tiering Policy Tiering policy to use. 'none' is default.
-- `unix_permissions` (Number) Unix Mode Permissions Unix permission mode for new volumes. All allowed 777
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_nas--volume_defaults--qos_policy_choice"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_nas.volume_defaults.qos_policy_choice`
-
-Optional:
-
-- `adaptive_qos_policy` (String) Storage Server IP address Enter Adaptive QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`
-- `no_qos` (Boolean) No QoS No QoS configured
-- `qos_policy` (String) QoS Policy Name Enter QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`
-
-
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san`
-
-Required:
-
-- `management_lif_choice` (Attributes) Backend Management LIF FQDN or IP address of a cluster or SVM management LIF (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--management_lif_choice))
-- `username` (String) Username Username to connect to the cluster/SVM<br>**Validation:** `Length LengthBetween(1, 256)`
-
-Optional:
-
-- `chap_choice` (Attributes) Use CHAP Use CHAP to authenticate iSCSI for ONTAP SAN drivers. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice))
-- `client_certificate` (String) Client Certificate Please Enter Base64-encoded value of client certificate. Used for certificate-based auth.<br>**Validation:** `Length LengthAtMost(8192)`
-- `client_private_key` (Attributes) Client Private Key Please Enter value of client private key. Used for certificate-based auth. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--client_private_key))
-- `data_lif_choice` (Attributes) Backend Data LIF FQDN or IP address of protocol LIF. Use square brackets for IPv6. Once set this cannot be updated. Derived by the SVM unless specified. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--data_lif_choice))
-- `igroup_name` (String) iGroup Name Name of the igroup for SAN volumes to use<br>**Validation:** `Length LengthBetween(1, 256)`
-- `labels` (Map of String) Backend Labels List of labels for Storage Device used in NetApp ONTAP. It is used for storage class selection.
-- `limit_aggregate_usage` (Number) Limit Aggregate Usage Fail provisioning if usage is above this percentage. Not enforced by default.
-- `limit_volume_size` (Number) Limit Volume Size Fail provisioning if requested volume size in GBi is above this value. Not enforced by default.
-- `password` (Attributes) Password Please Enter you password. Password to connect to the cluster/SVM (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--password))
-- `region` (String) Backend Region Virtual Pool Region
-- `storage` (Attributes List) Virtual Storage Pools List of Virtual Storage Pool definitions which are referred back by Storage Class label match selection. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--storage))
-- `storage_driver_name` (String) Storage Backend Driver Configuration of Backend Name<br>**Default:** `ontap-san`<br>**Allowed Values (choose one):** `['ontap-san', 'ontap-san-economy', 'ontap-nas-flexgroup']`
-- `storage_prefix` (String) Storage Prefix Prefix used when provisioning new volumes in the SVM. Once set this cannot be updated<br>**Validation:** `Length LengthBetween(1, 80)`
-- `svm` (String) Backend SVM Storage virtual machine to use. Derived if an SVM managementLIF is specified<br>**Validation:** `Length LengthBetween(1, 256)`
-- `trusted_ca_certificate` (String) Trusted CA Certificate Please Enter Base64-encoded value of trusted CA certificate. Optional. Used for certificate-based auth..<br>**Validation:** `Length LengthAtMost(8192)`
-- `volume_defaults` (Attributes) Backend Volume Defaults List of QoS volume defaults types (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--volume_defaults))
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--management_lif_choice"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.management_lif_choice`
-
-Optional:
-
-- `management_lif_dns_name` (String) Backend Management LIF Name Backend Management LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`
-- `management_lif_ip` (String) Backend Management LIF IP Address Backend Management LIF IP Address is reachable at the given ip address
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.chap_choice`
-
-Optional:
-
-- `no_chap` (Boolean) CHAP Disabled CHAP disabled
-- `use_chap` (Attributes) Use Device NetApp Backend ONTAP SAN CHAP configuration Device NetApp Backend ONTAP SAN CHAP configuration options for enabled CHAP (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap))
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.chap_choice.use_chap`
-
-Optional:
-
-- `chap_initiator_secret` (Attributes) CHAP Intiator Secret CHAP initiator secret. Required if useCHAP=true (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_initiator_secret))
-- `chap_target_initiator_secret` (Attributes) CHAP Target Initiator Secret CHAP target initiator secret. Required if useCHAP=true (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_target_initiator_secret))
-- `chap_target_username` (String) CHAP Target Username Target username. Required if useCHAP=true<br>**Validation:** `Length LengthBetween(1, 256)`
-- `chap_username` (String) CHAP Username Inbound username. Required if useCHAP=true<br>**Validation:** `Length LengthBetween(1, 256)`
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_initiator_secret"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.chap_choice.use_chap.chap_initiator_secret`
-
-Required:
-
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_initiator_secret--secret_info_choice))
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_initiator_secret--secret_info_choice"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.chap_choice.use_chap.chap_initiator_secret.secret_info_choice`
-
-Optional:
-
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_initiator_secret--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_initiator_secret--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_initiator_secret--secret_info_choice--blindfold_secret_info"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.chap_choice.use_chap.chap_initiator_secret.secret_info_choice.blindfold_secret_info`
-
-Required:
-
-- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
-
-Optional:
-
-- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
-- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_initiator_secret--secret_info_choice--clear_secret_info"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.chap_choice.use_chap.chap_initiator_secret.secret_info_choice.clear_secret_info`
-
-Required:
-
-- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
-
-Optional:
-
-- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_target_initiator_secret"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.chap_choice.use_chap.chap_target_initiator_secret`
-
-Required:
-
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_target_initiator_secret--secret_info_choice))
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_target_initiator_secret--secret_info_choice"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.chap_choice.use_chap.chap_target_initiator_secret.secret_info_choice`
-
-Optional:
-
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_target_initiator_secret--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_target_initiator_secret--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_target_initiator_secret--secret_info_choice--blindfold_secret_info"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.chap_choice.use_chap.chap_target_initiator_secret.secret_info_choice.blindfold_secret_info`
-
-Required:
-
-- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
-
-Optional:
-
-- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
-- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--chap_choice--use_chap--chap_target_initiator_secret--secret_info_choice--clear_secret_info"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.chap_choice.use_chap.chap_target_initiator_secret.secret_info_choice.clear_secret_info`
-
-Required:
-
-- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
-
-Optional:
-
-- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-
-
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--client_private_key"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.client_private_key`
-
-Required:
-
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--client_private_key--secret_info_choice))
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--client_private_key--secret_info_choice"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.client_private_key.secret_info_choice`
-
-Optional:
-
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--client_private_key--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--client_private_key--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--client_private_key--secret_info_choice--blindfold_secret_info"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.client_private_key.secret_info_choice.blindfold_secret_info`
-
-Required:
-
-- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
-
-Optional:
-
-- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
-- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--client_private_key--secret_info_choice--clear_secret_info"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.client_private_key.secret_info_choice.clear_secret_info`
-
-Required:
-
-- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
-
-Optional:
-
-- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--data_lif_choice"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.data_lif_choice`
-
-Optional:
-
-- `data_lif_dns_name` (String) Backend Data LIF Name Backend Data LIF IP Address's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`
-- `data_lif_ip` (String) Backend Data LIF IP Address Backend Data LIF IP Address is reachable at the given ip address
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--password"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.password`
-
-Required:
-
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--password--secret_info_choice))
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--password--secret_info_choice"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.password.secret_info_choice`
-
-Optional:
-
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--password--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--password--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--password--secret_info_choice--blindfold_secret_info"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.password.secret_info_choice.blindfold_secret_info`
-
-Required:
-
-- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
-
-Optional:
-
-- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
-- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--password--secret_info_choice--clear_secret_info"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.password.secret_info_choice.clear_secret_info`
-
-Required:
-
-- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
-
-Optional:
-
-- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--storage"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.storage`
-
-Optional:
-
-- `labels` (Map of String) Storage Pool Labels List of labels for Storage Device used in NetApp ONTAP. It is used for storage class label match selection.
-- `volume_defaults` (Attributes) Backend Volume Defaults List of QoS volume default types (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--storage--volume_defaults))
-- `zone` (String) Pool Zone Virtual Storage Pool zone definition.
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--storage--volume_defaults"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.storage.volume_defaults`
-
-Required:
-
-- `qos_policy_choice` (Attributes) QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--storage--volume_defaults--qos_policy_choice))
-
-Optional:
-
-- `encryption` (Boolean) Enable Encryption Enable NetApp volume encryption.<br>**Default:** `false`
-- `export_policy` (String) Export Policy Export policy to use.
-- `security_style` (String) Security Style Security style for new volumes.
-- `snapshot_dir` (Boolean) Access to Snapshot Directory Access to the .snapshot directory.<br>**Default:** `false`
-- `snapshot_policy` (String) Snapshot Policy Snapshot policy to use
-- `snapshot_reserve` (String) Snapshot Rerserved Percentage of volume reserved for snapshots. '0' if snapshot policy is 'none', else ''
-- `space_reserve` (String) Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`<br>**Allowed Values (choose one):** `['none', 'thick']`
-- `split_on_clone` (Boolean) Split on Clone Split a clone from its parent upon creation.<br>**Default:** `false`
-- `tiering_policy` (String) Tiering Policy Tiering policy to use. 'none' is default.
-- `unix_permissions` (Number) Unix Mode Permissions Unix permission mode for new volumes. All allowed 777
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--storage--volume_defaults--qos_policy_choice"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.storage.volume_defaults.qos_policy_choice`
-
-Optional:
-
-- `adaptive_qos_policy` (String) Storage Server IP address Enter Adaptive QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`
-- `no_qos` (Boolean) No QoS No QoS configured
-- `qos_policy` (String) QoS Policy Name Enter QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`
-
-
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--volume_defaults"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.volume_defaults`
-
-Required:
-
-- `qos_policy_choice` (Attributes) QoS Policy Choose one of QoS Policy or Adaptive QoS Policy per storage pool/backend. (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--volume_defaults--qos_policy_choice))
-
-Optional:
-
-- `encryption` (Boolean) Enable Encryption Enable NetApp volume encryption.<br>**Default:** `false`
-- `export_policy` (String) Export Policy Export policy to use.
-- `security_style` (String) Security Style Security style for new volumes.
-- `snapshot_dir` (Boolean) Access to Snapshot Directory Access to the .snapshot directory.<br>**Default:** `false`
-- `snapshot_policy` (String) Snapshot Policy Snapshot policy to use
-- `snapshot_reserve` (String) Snapshot Rerserved Percentage of volume reserved for snapshots. '0' if snapshot policy is 'none', else ''
-- `space_reserve` (String) Space Reservation Mode Space reservation mode; “none” (thin) or “volume” (thick)<br>**Default:** `none`<br>**Allowed Values (choose one):** `['none', 'thick']`
-- `split_on_clone` (Boolean) Split on Clone Split a clone from its parent upon creation.<br>**Default:** `false`
-- `tiering_policy` (String) Tiering Policy Tiering policy to use. 'none' is default.
-- `unix_permissions` (Number) Unix Mode Permissions Unix permission mode for new volumes. All allowed 777
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--netapp_trident--backend_choice--netapp_backend_ontap_san--volume_defaults--qos_policy_choice"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.netapp_trident.backend_choice.netapp_backend_ontap_san.volume_defaults.qos_policy_choice`
-
-Optional:
-
-- `adaptive_qos_policy` (String) Storage Server IP address Enter Adaptive QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`
-- `no_qos` (Boolean) No QoS No QoS configured
-- `qos_policy` (String) QoS Policy Name Enter QoS Policy Name<br>**Validation:** `Length LengthBetween(1, 128)`
-
-
-
-
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator`
-
-Required:
-
-- `arrays` (Attributes) Arrays Configuration This section configure PSO storage arrays (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays))
-- `cluster_id` (String) Cluster ID clusterID is added as a prefix for all volumes created by this PSO installation. clusterID is also used to identify the volumes used by the datastore, pso-db. clusterID MUST BE UNIQUE for multiple K8s clusters running on top of the same storage arrays. characters allowed: alphanumeric and underscores<br>**Validation:** `Length LengthBetween(1, 22)`
-
-Optional:
-
-- `enable_storage_topology` (Boolean) Enable Storage Topology This option is to enable/disable the csi topology feature for pso-csi<br>**Default:** `false`
-- `enable_strict_topology` (Boolean) Enable Strict Topology This option is to enable/disable the strict csi topology feature for pso-csi<br>**Default:** `false`
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays`
-
-Optional:
-
-- `flash_array` (Attributes) Flash Arrays Specify what storage flash arrays should be managed the plugin For FlashArrays you must set the 'mgmt_endpoint' and 'api_token' (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array))
-- `flash_blade` (Attributes) Flash Blade Specify what storage flash blades should be managed the plugin (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade))
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_array`
-
-Required:
-
-- `flash_arrays` (Attributes List) Flash Arrays For FlashArrays you must set the 'mgmt_endpoint' and 'api_token' (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays))
-
-Optional:
-
-- `default_fs_opt` (String) Default Filesystem Options Block volume default mkfs options. Not recommended to change!<br>**Validation:** `Length LengthBetween(1, 128)`
-- `default_fs_type` (String) Default Filesystem Type Block volume default filesystem type. Not recommended to change!<br>**Default:** `xfs`<br>**Allowed Values (choose one):** `['xfs', 'ext4']`
-- `default_mount_opts` (List of String) Default Mount Options Block volume default filesystem mount options. Not recommended to change!
-- `disable_preempt_attachments` (Boolean) Disable Preempt Attachments Enable/Disable attachment preemption!<br>**Default:** `false`
-- `iscsi_login_timeout` (Number) iSCSI Login Timeout iSCSI login timeout in seconds. Not recommended to change!<br>**Default:** `20`
-- `san_type` (String) SAN Type Block volume access protocol, either ISCSI or FC<br>**Default:** `ISCSI`<br>**Allowed Values (choose one):** `['ISCSI', 'FC']`
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_array.flash_arrays`
-
-Required:
-
-- `mgmt_endpoint_choice` (Attributes) Management Endpoint FQDN or IP address of PSO Management endpoint (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays--mgmt_endpoint_choice))
-
-Optional:
-
-- `api_token` (Attributes) API Token Please Enter API TOken. Token to connect to management interface (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays--api_token))
-- `labels` (Map of String) Labels The labels are optional, and can be any key-value pair for use with the PSO 'fleet' provisioner.
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays--mgmt_endpoint_choice"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_array.flash_arrays.mgmt_endpoint_choice`
-
-Optional:
-
-- `mgmt_dns_name` (String) dns_name Management Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`
-- `mgmt_ip` (String) Management Endpoint IP Address Management Endpoint is reachable at the given ip address
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays--api_token"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_array.flash_arrays.api_token`
-
-Required:
-
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays--api_token--secret_info_choice))
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays--api_token--secret_info_choice"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_array.flash_arrays.api_token.secret_info_choice`
-
-Optional:
-
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays--api_token--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays--api_token--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays--api_token--secret_info_choice--blindfold_secret_info"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_array.flash_arrays.api_token.secret_info_choice.blindfold_secret_info`
-
-Required:
-
-- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
-
-Optional:
-
-- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
-- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_array--flash_arrays--api_token--secret_info_choice--clear_secret_info"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_array.flash_arrays.api_token.secret_info_choice.clear_secret_info`
-
-Required:
-
-- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
-
-Optional:
-
-- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-
-
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_blade`
-
-Required:
-
-- `flash_blades` (Attributes List) Flash Blades For FlashBlades you must set the 'mgmt_endpoint', 'api_token' and nfs_endpoint (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades))
-
-Optional:
-
-- `enable_snapshot_directory` (Boolean) Enable Snapshot Directory Enable/Disable FlashBlade snapshots<br>**Default:** `false`
-- `export_rules` (String) NFS Export Rules NFS Export rules<br>**Validation:** `Length LengthBetween(1, 250)`
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_blade.flash_blades`
-
-Required:
-
-- `mgmt_endpoint_choice` (Attributes) Management Endpoint FQDN or IP address of PSO Management endpoint (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--mgmt_endpoint_choice))
-- `nfs_endpoint_choice` (Attributes) NFS Endpoint FQDN or IP address of PSO NFS endpoint (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--nfs_endpoint_choice))
-
-Optional:
-
-- `api_token` (Attributes) API Token Please Enter API TOken. Token to connect to management interface (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--api_token))
-- `lables` (Map of String) Labels The labels are optional, and can be any key-value pair for use with the PSO 'fleet' provisioner.
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--mgmt_endpoint_choice"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_blade.flash_blades.mgmt_endpoint_choice`
-
-Optional:
-
-- `mgmt_dns_name` (String) dns_name Management Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`
-- `mgmt_ip` (String) Management Endpoint IP Address Management Endpoint is reachable at the given ip address
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--nfs_endpoint_choice"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_blade.flash_blades.nfs_endpoint_choice`
-
-Optional:
-
-- `nfs_endpoint_dns_name` (String) NFS DNS Name Endpoint's ip address is discovered using DNS name resolution. The name given here is fully qualified domain name.<br>**Validation:** `Length LengthAtMost(256)`
-- `nfs_endpoint_ip` (String) NFS IP Address Endpoint is reachable at the given ip address
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--api_token"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_blade.flash_blades.api_token`
-
-Required:
-
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--api_token--secret_info_choice))
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--api_token--secret_info_choice"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_blade.flash_blades.api_token.secret_info_choice`
-
-Optional:
-
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--api_token--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--api_token--secret_info_choice--clear_secret_info))
-- `none` (Boolean) None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--api_token--secret_info_choice--blindfold_secret_info"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_blade.flash_blades.api_token.secret_info_choice.blindfold_secret_info`
-
-Required:
-
-- `location` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
-
-Optional:
-
-- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
-- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-<a id="nestedatt--storage_device_choice--storage_device_list--storage_devices--device_choice--pure_service_orchestrator--arrays--flash_blade--flash_blades--api_token--secret_info_choice--clear_secret_info"></a>
-### Nested Schema for `storage_device_choice.storage_device_list.storage_devices.device_choice.pure_service_orchestrator.arrays.flash_blade.flash_blades.api_token.secret_info_choice.clear_secret_info`
-
-Required:
-
-- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
-
-Optional:
-
-- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-
-
-
-
-
-
-
-
-
-
 <a id="nestedatt--storage_interface_choice"></a>
 ### Nested Schema for `storage_interface_choice`
 
 Optional:
 
-- `no_storage_interfaces` (Boolean) No Storage Interfaces This fleet does not have any storage interfaces
-- `storage_interface_list` (Attributes) List of Storage Interfaces Add all storage interfaces belonging to this fleet (see [below for nested schema](#nestedatt--storage_interface_choice--storage_interface_list))
+- `no_storage_interfaces` (Boolean) No Storage Interfaces This fleet does not have any storage interfaces<br>Conflicts with `storage_interface_list`.
+- `storage_interface_list` (Attributes) List of Storage Interfaces Add all storage interfaces belonging to this fleet<br>Conflicts with `no_storage_interfaces`. (see [below for nested schema](#nestedatt--storage_interface_choice--storage_interface_list))
 
 <a id="nestedatt--storage_interface_choice--storage_interface_list"></a>
 ### Nested Schema for `storage_interface_choice.storage_interface_list`
@@ -1388,8 +1535,8 @@ Read-Only:
 
 Optional:
 
-- `no_storage_static_routes` (Boolean) No Storage Static Routes This fleet does not have any storage static routes
-- `storage_static_routes` (Attributes) List of Storage Interfaces Add all storage storage static routes (see [below for nested schema](#nestedatt--storage_static_routes_choice--storage_static_routes))
+- `no_storage_static_routes` (Boolean) No Storage Static Routes This fleet does not have any storage static routes<br>Conflicts with `storage_static_routes`.
+- `storage_static_routes` (Attributes) List of Storage Interfaces Add all storage storage static routes<br>Conflicts with `no_storage_static_routes`. (see [below for nested schema](#nestedatt--storage_static_routes_choice--storage_static_routes))
 
 <a id="nestedatt--storage_static_routes_choice--storage_static_routes"></a>
 ### Nested Schema for `storage_static_routes_choice.storage_static_routes`
@@ -1416,15 +1563,15 @@ Optional:
 
 Required:
 
-- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address (see [below for nested schema](#nestedatt--storage_static_routes_choice--storage_static_routes--storage_routes--subnets--ver_choice))
+- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 subnet address or IPv6 subnet address<br>Exactly one of `ipv4` or `ipv6` must be specified. (see [below for nested schema](#nestedatt--storage_static_routes_choice--storage_static_routes--storage_routes--subnets--ver_choice))
 
 <a id="nestedatt--storage_static_routes_choice--storage_static_routes--storage_routes--subnets--ver_choice"></a>
 ### Nested Schema for `storage_static_routes_choice.storage_static_routes.storage_routes.subnets.ver_choice`
 
 Optional:
 
-- `ipv4` (Attributes) IPv4 Subnet IPv4 Subnet Address (see [below for nested schema](#nestedatt--storage_static_routes_choice--storage_static_routes--storage_routes--subnets--ver_choice--ipv4))
-- `ipv6` (Attributes) IPv6 Subnet IPv6 Subnet Address (see [below for nested schema](#nestedatt--storage_static_routes_choice--storage_static_routes--storage_routes--subnets--ver_choice--ipv6))
+- `ipv4` (Attributes) IPv4 Subnet IPv4 Subnet Address<br>Conflicts with `ipv6`. (see [below for nested schema](#nestedatt--storage_static_routes_choice--storage_static_routes--storage_routes--subnets--ver_choice--ipv4))
+- `ipv6` (Attributes) IPv6 Subnet IPv6 Subnet Address<br>Conflicts with `ipv4`. (see [below for nested schema](#nestedatt--storage_static_routes_choice--storage_static_routes--storage_routes--subnets--ver_choice--ipv6))
 
 <a id="nestedatt--storage_static_routes_choice--storage_static_routes--storage_routes--subnets--ver_choice--ipv4"></a>
 ### Nested Schema for `storage_static_routes_choice.storage_static_routes.storage_routes.subnets.ver_choice.ipv4`
@@ -1473,16 +1620,16 @@ Read-Only:
 
 Optional:
 
-- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 Address or IPv6 Address (see [below for nested schema](#nestedatt--storage_static_routes_choice--storage_static_routes--storage_routes--nexthop--nexthop_address--ver_choice))
+- `ver_choice` (Attributes) Version IP Address version. Can be IPv4 Address or IPv6 Address<br>Exactly one of `dual_stack`, `ipv4`, or `ipv6` must be specified when `ver_choice` is configured. (see [below for nested schema](#nestedatt--storage_static_routes_choice--storage_static_routes--storage_routes--nexthop--nexthop_address--ver_choice))
 
 <a id="nestedatt--storage_static_routes_choice--storage_static_routes--storage_routes--nexthop--nexthop_address--ver_choice"></a>
 ### Nested Schema for `storage_static_routes_choice.storage_static_routes.storage_routes.nexthop.nexthop_address.ver_choice`
 
 Optional:
 
-- `dual_stack` (Attributes) Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together (see [below for nested schema](#nestedatt--storage_static_routes_choice--storage_static_routes--storage_routes--nexthop--nexthop_address--ver_choice--dual_stack))
-- `ipv4` (Attributes) IPv4 Address IPv4 Address (see [below for nested schema](#nestedatt--storage_static_routes_choice--storage_static_routes--storage_routes--nexthop--nexthop_address--ver_choice--ipv4))
-- `ipv6` (Attributes) IPv6 ADDRESS IPv6 Address (see [below for nested schema](#nestedatt--storage_static_routes_choice--storage_static_routes--storage_routes--nexthop--nexthop_address--ver_choice--ipv6))
+- `dual_stack` (Attributes) Dual-stack Address (IPv4 + IPv6) Both IPv4 and IPv6 addresses are specified together<br>Conflicts with `ipv4` and `ipv6`. (see [below for nested schema](#nestedatt--storage_static_routes_choice--storage_static_routes--storage_routes--nexthop--nexthop_address--ver_choice--dual_stack))
+- `ipv4` (Attributes) IPv4 Address IPv4 Address<br>Conflicts with `dual_stack` and `ipv6`. (see [below for nested schema](#nestedatt--storage_static_routes_choice--storage_static_routes--storage_routes--nexthop--nexthop_address--ver_choice--ipv4))
+- `ipv6` (Attributes) IPv6 ADDRESS IPv6 Address<br>Conflicts with `dual_stack` and `ipv4`. (see [below for nested schema](#nestedatt--storage_static_routes_choice--storage_static_routes--storage_routes--nexthop--nexthop_address--ver_choice--ipv6))
 
 <a id="nestedatt--storage_static_routes_choice--storage_static_routes--storage_routes--nexthop--nexthop_address--ver_choice--dual_stack"></a>
 ### Nested Schema for `storage_static_routes_choice.storage_static_routes.storage_routes.nexthop.nexthop_address.ver_choice.dual_stack`
@@ -1531,14 +1678,25 @@ Optional:
 
 
 
+<a id="nestedatt--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
+- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+
+
 <a id="nestedatt--usb_policy_choice"></a>
 ### Nested Schema for `usb_policy_choice`
 
 Optional:
 
-- `allow_all_usb` (Boolean) Allow All USB Devices All USB devices are allowed
-- `deny_all_usb` (Boolean) Deny All USB Devices All USB devices are denied
-- `usb_policy` (Attributes) USB Device Policy Allow only specific USB devices (see [below for nested schema](#nestedatt--usb_policy_choice--usb_policy))
+- `allow_all_usb` (Boolean) Allow All USB Devices All USB devices are allowed<br>Conflicts with `deny_all_usb` and `usb_policy`.
+- `deny_all_usb` (Boolean) Deny All USB Devices All USB devices are denied<br>Conflicts with `allow_all_usb` and `usb_policy`.
+- `usb_policy` (Attributes) USB Device Policy Allow only specific USB devices<br>Conflicts with `allow_all_usb` and `deny_all_usb`. (see [below for nested schema](#nestedatt--usb_policy_choice--usb_policy))
 
 <a id="nestedatt--usb_policy_choice--usb_policy"></a>
 ### Nested Schema for `usb_policy_choice.usb_policy`
@@ -1554,183 +1712,13 @@ Read-Only:
 
 
 
-<a id="nestedatt--blocked_services"></a>
-### Nested Schema for `blocked_services`
-
-Optional:
-
-- `blocked_services_value_type_choice` (Attributes) blocked_services_type_choice Choose the Nodel Local Service to disable (see [below for nested schema](#nestedatt--blocked_services--blocked_services_value_type_choice))
-- `network_type` (List of String) network_type Site Local VRF on which this service will be disabled<br>**Allowed Values (choose one):** `['VIRTUAL_NETWORK_GLOBAL', 'VIRTUAL_NETWORK_MANAGEMENT', 'VIRTUAL_NETWORK_PER_SITE', 'VIRTUAL_NETWORK_SEGMENT', 'VIRTUAL_NETWORK_SITE_LOCAL', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE', 'VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE', 'VIRTUAL_NETWORK_SITE_SERVICE']`<br>**Default:** `VIRTUAL_NETWORK_SITE_LOCAL`
-
-<a id="nestedatt--blocked_services--blocked_services_value_type_choice"></a>
-### Nested Schema for `blocked_services.blocked_services_value_type_choice`
-
-Optional:
-
-- `dns` (Boolean) DNS Matches DNS port 53
-- `ssh` (Boolean) SSH
-- `web_user_interface` (Boolean) Web UI
-
-
-
-<a id="nestedatt--inside_virtual_network"></a>
-### Nested Schema for `inside_virtual_network`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-<a id="nestedatt--kubernetes_upgrade_drain"></a>
-### Nested Schema for `kubernetes_upgrade_drain`
-
-Required:
-
-- `kubernetes_upgrade_drain_enable_choice` (Attributes) F5XC Enable/Disable Node by Node Upgrade Specify how nodes within a site will be upgraded. If enabled, you can specify number of Worker nodes to be upgraded in parallel. Note: This does not influence Control nodes. This is benefitial for sites with large number of nodes. (see [below for nested schema](#nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice))
-
-<a id="nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice"></a>
-### Nested Schema for `kubernetes_upgrade_drain.kubernetes_upgrade_drain_enable_choice`
-
-Optional:
-
-- `disable_upgrade_drain` (Boolean) Disable upgrade drain
-- `enable_upgrade_drain` (Attributes) Enable Node by Node Upgrade (see [below for nested schema](#nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice--enable_upgrade_drain))
-
-<a id="nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice--enable_upgrade_drain"></a>
-### Nested Schema for `kubernetes_upgrade_drain.kubernetes_upgrade_drain_enable_choice.enable_upgrade_drain`
-
-Required:
-
-- `drain_max_unavailable_choice` (Attributes) Node Batch Size Max number of worker nodes to be upgraded in parallel (see [below for nested schema](#nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice--enable_upgrade_drain--drain_max_unavailable_choice))
-
-Optional:
-
-- `drain_node_timeout` (Number) Upgrade Wait Time Seconds to wait before initiating upgrade on the next set of nodes. Setting it to 0 will wait indefinitely for all services on nodes to be upgraded gracefully before proceeding to the next set of nodes. (Warning: It may block upgrade if services on a node cannot be gracefully upgraded. It is recommended to use the default value).<br>**Default:** `300`
-
-<a id="nestedatt--kubernetes_upgrade_drain--kubernetes_upgrade_drain_enable_choice--enable_upgrade_drain--drain_max_unavailable_choice"></a>
-### Nested Schema for `kubernetes_upgrade_drain.kubernetes_upgrade_drain_enable_choice.enable_upgrade_drain.drain_max_unavailable_choice`
-
-Optional:
-
-- `drain_max_unavailable_node_count` (Number) Node Batch Size Count
-
-
-
-
-
-<a id="nestedatt--network_connectors"></a>
-### Nested Schema for `network_connectors`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-<a id="nestedatt--network_firewall"></a>
-### Nested Schema for `network_firewall`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-<a id="nestedatt--outside_virtual_network"></a>
-### Nested Schema for `outside_virtual_network`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-<a id="nestedatt--performance_enhancement_mode"></a>
-### Nested Schema for `performance_enhancement_mode`
-
-Required:
-
-- `perf_mode_choice` (Attributes) Performance Mode Optimize the site for L3 or L7 traffic processing. L7 optimized is the default. When the mode is toggled, dataplane services will restart and traffic disruption will be seen. It is recommended to set this mode during site creation. (see [below for nested schema](#nestedatt--performance_enhancement_mode--perf_mode_choice))
-
-<a id="nestedatt--performance_enhancement_mode--perf_mode_choice"></a>
-### Nested Schema for `performance_enhancement_mode.perf_mode_choice`
-
-Optional:
-
-- `perf_mode_l3_enhanced` (Attributes) L3 Mode Enhanced Performance Site optimized for L3 traffic processing (see [below for nested schema](#nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l3_enhanced))
-- `perf_mode_l7_enhanced` (Attributes) Default Performance Mode Site optimized for L7 traffic processing (see [below for nested schema](#nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l7_enhanced))
-
-<a id="nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l3_enhanced"></a>
-### Nested Schema for `performance_enhancement_mode.perf_mode_choice.perf_mode_l3_enhanced`
-
-Required:
-
-- `perf_mode_choice` (Attributes) L3 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L3 optimized workloads. (see [below for nested schema](#nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l3_enhanced--perf_mode_choice))
-
-<a id="nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l3_enhanced--perf_mode_choice"></a>
-### Nested Schema for `performance_enhancement_mode.perf_mode_choice.perf_mode_l3_enhanced.perf_mode_choice`
-
-Optional:
-
-- `jumbo` (Boolean) L3 Mode Enhanced Performance with jumbo frame support(9000)
-- `no_jumbo` (Boolean) L3 Mode Enhanced Performance with no jumbo frame support
-
-
-
-<a id="nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l7_enhanced"></a>
-### Nested Schema for `performance_enhancement_mode.perf_mode_choice.perf_mode_l7_enhanced`
-
-Required:
-
-- `perf_mode_choice` (Attributes) L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads. (see [below for nested schema](#nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l7_enhanced--perf_mode_choice))
-
-<a id="nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l7_enhanced--perf_mode_choice"></a>
-### Nested Schema for `performance_enhancement_mode.perf_mode_choice.perf_mode_l7_enhanced.perf_mode_choice`
-
-Optional:
-
-- `jumbo_disabled` (Boolean) L7 Mode Enhanced Performance with no jumbo frame support
-- `jumbo_enabled` (Boolean) L7 Mode Enhanced Performance with jumbo frame support(9000)
-
-
-
-
-
-<a id="nestedatt--timeouts"></a>
-### Nested Schema for `timeouts`
-
-Optional:
-
-- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
-- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
-- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
-- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
-
-
 <a id="nestedatt--vm_choice"></a>
 ### Nested Schema for `vm_choice`
 
 Optional:
 
-- `disable_vm` (Boolean) VMs support Disabled VMs support is not enabled for this fleet
-- `enable_vm` (Boolean) Member of DC cluster Group VMs support is enabled for this fleet
+- `disable_vm` (Boolean) VMs support Disabled VMs support is not enabled for this fleet<br>Conflicts with `enable_vm`.
+- `enable_vm` (Boolean) Member of DC cluster Group VMs support is enabled for this fleet<br>Conflicts with `disable_vm`.
 ## Import
 
 In Terraform v1.5.0 and later, use an `import` block to import this resource by ID.
@@ -1752,6 +1740,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_fleet.example"
+	to = f5xc_fleet.example
 }
 ```

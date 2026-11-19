@@ -2676,7 +2676,8 @@ var CustomDataAPISwaggerJSON string = `{
                 "UNIT_REQUESTS_PER_SECOND",
                 "UNIT_PACKETS",
                 "UNIT_PERCENTAGE",
-                "UNIT_COUNT"
+                "UNIT_COUNT",
+                "UNIT_SESSIONS"
             ],
             "default": "UNIT_MILLISECONDS",
             "x-displayname": "Unit",
@@ -2769,7 +2770,6 @@ var CustomDataAPISwaggerJSON string = `{
             "description": "Defines different types of Mesh\n\nInvalid mesh type\nMesh of type Hub\nMesh of type Spoke\nFull mesh of tunnels are created between all sites",
             "title": "Site Mesh Group Type",
             "enum": [
-                "SITE_MESH_GROUP_TYPE_INVALID",
                 "SITE_MESH_GROUP_TYPE_HUB_FULL_MESH",
                 "SITE_MESH_GROUP_TYPE_SPOKE",
                 "SITE_MESH_GROUP_TYPE_FULL_MESH"

@@ -27,6 +27,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -277,7 +278,7 @@ var CdnCacheRuleCacheRulesModelAttributeMap = map[string]attr.Type{
 	"rule_name": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> CacheActions
+// Attribute map for OneOfField --> CacheActions
 var CdnCacheRuleCacheRulesCacheActionsModelAttributeMap = map[string]attr.Type{
 
 	"cache_bypass": types.BoolType,
@@ -655,20 +656,23 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 				Attributes: map[string]schema.Attribute{
 					"cache_actions_choice": schema.SingleNestedAttribute{
 						Description:         "Cache Actions Configure the Cache Actions for a rule.",
-						MarkdownDescription: "Cache Actions Configure the Cache Actions for a rule.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "Cache Actions Configure the Cache Actions for a rule.<br>Exactly one of `cache_bypass` or `eligible_for_cache` must be specified when `cache_actions_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"cache_bypass",
 								"eligible_for_cache",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"cache_bypass": schema.BoolAttribute{
 								Description:         "Bypass Cache Do not cache content if rule match occurs",
-								MarkdownDescription: "Bypass Cache Do not cache content if rule match occurs",
+								MarkdownDescription: "Bypass Cache Do not cache content if rule match occurs<br>Conflicts with `eligible_for_cache`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -678,14 +682,14 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 							},
 							"eligible_for_cache": schema.SingleNestedAttribute{
 								Description:         "Eligible For Cache Cache content if rule match occurs",
-								MarkdownDescription: "Eligible For Cache Cache content if rule match occurs",
+								MarkdownDescription: "Eligible For Cache Cache content if rule match occurs<br>Conflicts with `cache_bypass`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
 								Attributes: map[string]schema.Attribute{
 									"eligible_for_cache_choice": schema.SingleNestedAttribute{
 										Description:         "Eligible For Cache Compose Eligible For Cache",
-										MarkdownDescription: "Eligible For Cache Compose Eligible For Cache",
+										MarkdownDescription: "Eligible For Cache Compose Eligible For Cache<br>Exactly one of `scheme_proxy_host_request_uri` or `scheme_proxy_host_uri` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -698,7 +702,7 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 										Attributes: map[string]schema.Attribute{
 											"scheme_proxy_host_request_uri": schema.SingleNestedAttribute{
 												Description:         "Scheme + Proxy Host + Request URI",
-												MarkdownDescription: "Scheme + Proxy Host + Request URI",
+												MarkdownDescription: "Scheme + Proxy Host + Request URI<br>Conflicts with `scheme_proxy_host_uri`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -736,7 +740,7 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 											},
 											"scheme_proxy_host_uri": schema.SingleNestedAttribute{
 												Description:         "Scheme + Proxy Host + URI",
-												MarkdownDescription: "Scheme + Proxy Host + URI",
+												MarkdownDescription: "Scheme + Proxy Host + URI<br>Conflicts with `scheme_proxy_host_request_uri`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -835,7 +839,7 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 															Attributes: map[string]schema.Attribute{
 																"cache_operator_choice": schema.SingleNestedAttribute{
 																	Description:         "Cache Operator Match Operator",
-																	MarkdownDescription: "Cache Operator Match Operator",
+																	MarkdownDescription: "Cache Operator Match Operator<br>Exactly one of `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, or `startswith` must be specified.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
@@ -855,56 +859,56 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 																	Attributes: map[string]schema.Attribute{
 																		"contains": schema.StringAttribute{
 																			Description:         "Contains The header value must include the specified value as a substring.",
-																			MarkdownDescription: "Contains The header value must include the specified value as a substring.",
+																			MarkdownDescription: "Contains The header value must include the specified value as a substring.<br>Conflicts with `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
 																		"does_not_contain": schema.StringAttribute{
 																			Description:         "Does Not Contain The header value must not include the specified value as a substring.",
-																			MarkdownDescription: "Does Not Contain The header value must not include the specified value as a substring.",
+																			MarkdownDescription: "Does Not Contain The header value must not include the specified value as a substring.<br>Conflicts with `contains`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
 																		"does_not_end_with": schema.StringAttribute{
 																			Description:         "Does Not End With The header value must not end with the specified value.",
-																			MarkdownDescription: "Does Not End With The header value must not end with the specified value.",
+																			MarkdownDescription: "Does Not End With The header value must not end with the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
 																		"does_not_equal": schema.StringAttribute{
 																			Description:         "Does Not Equal The header value must not match the specified value.",
-																			MarkdownDescription: "Does Not Equal The header value must not match the specified value.",
+																			MarkdownDescription: "Does Not Equal The header value must not match the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
 																		"does_not_start_with": schema.StringAttribute{
 																			Description:         "Does Not Start With The header value must not begin with the specified value.",
-																			MarkdownDescription: "Does Not Start With The header value must not begin with the specified value.",
+																			MarkdownDescription: "Does Not Start With The header value must not begin with the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `endswith`, `equals`, `match_regex`, and `startswith`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
 																		"endswith": schema.StringAttribute{
 																			Description:         "Ends With The header value must end with the specified value.",
-																			MarkdownDescription: "Ends With The header value must end with the specified value.",
+																			MarkdownDescription: "Ends With The header value must end with the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `equals`, `match_regex`, and `startswith`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
 																		"equals": schema.StringAttribute{
 																			Description:         "Equals The header value must exactly match the specified value.",
-																			MarkdownDescription: "Equals The header value must exactly match the specified value.",
+																			MarkdownDescription: "Equals The header value must exactly match the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `match_regex`, and `startswith`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
 																		"match_regex": schema.StringAttribute{
 																			Description:         "Matches Regex The header value must match the specified regular expression pattern.",
-																			MarkdownDescription: "Matches Regex The header value must match the specified regular expression pattern.<br>**Validation:** `Length LengthBetween(1, 256)`",
+																			MarkdownDescription: "Matches Regex The header value must match the specified regular expression pattern.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, and `startswith`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -914,7 +918,7 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 																		},
 																		"startswith": schema.StringAttribute{
 																			Description:         "Starts With The header value must begin with the specified value.",
-																			MarkdownDescription: "Starts With The header value must begin with the specified value.",
+																			MarkdownDescription: "Starts With The header value must begin with the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, and `match_regex`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -957,7 +961,7 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 															Attributes: map[string]schema.Attribute{
 																"cache_operator_choice": schema.SingleNestedAttribute{
 																	Description:         "Cache Operator Match Operator",
-																	MarkdownDescription: "Cache Operator Match Operator",
+																	MarkdownDescription: "Cache Operator Match Operator<br>Exactly one of `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, or `startswith` must be specified.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
@@ -977,56 +981,56 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 																	Attributes: map[string]schema.Attribute{
 																		"contains": schema.StringAttribute{
 																			Description:         "Contains The cookie value must include the specified value as a substring.",
-																			MarkdownDescription: "Contains The cookie value must include the specified value as a substring.",
+																			MarkdownDescription: "Contains The cookie value must include the specified value as a substring.<br>Conflicts with `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
 																		"does_not_contain": schema.StringAttribute{
 																			Description:         "Does Not Contain The cookie value must not include the specified value as a substring.",
-																			MarkdownDescription: "Does Not Contain The cookie value must not include the specified value as a substring.",
+																			MarkdownDescription: "Does Not Contain The cookie value must not include the specified value as a substring.<br>Conflicts with `contains`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
 																		"does_not_end_with": schema.StringAttribute{
 																			Description:         "Does Not End With The cookie value must not end with the specified value.",
-																			MarkdownDescription: "Does Not End With The cookie value must not end with the specified value.",
+																			MarkdownDescription: "Does Not End With The cookie value must not end with the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
 																		"does_not_equal": schema.StringAttribute{
 																			Description:         "Does Not Equal The cookie value must not match the specified value.",
-																			MarkdownDescription: "Does Not Equal The cookie value must not match the specified value.",
+																			MarkdownDescription: "Does Not Equal The cookie value must not match the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
 																		"does_not_start_with": schema.StringAttribute{
 																			Description:         "Does Not Start With The cookie value must not begin with the specified value.",
-																			MarkdownDescription: "Does Not Start With The cookie value must not begin with the specified value.",
+																			MarkdownDescription: "Does Not Start With The cookie value must not begin with the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `endswith`, `equals`, `match_regex`, and `startswith`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
 																		"endswith": schema.StringAttribute{
 																			Description:         "Ends With The cookie value must end with the specified value.",
-																			MarkdownDescription: "Ends With The cookie value must end with the specified value.",
+																			MarkdownDescription: "Ends With The cookie value must end with the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `equals`, `match_regex`, and `startswith`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
 																		"equals": schema.StringAttribute{
 																			Description:         "Equals The cookie value must exactly match the specified value.",
-																			MarkdownDescription: "Equals The cookie value must exactly match the specified value.",
+																			MarkdownDescription: "Equals The cookie value must exactly match the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `match_regex`, and `startswith`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
 																		"match_regex": schema.StringAttribute{
 																			Description:         "Matches Regex The cookie value must match the specified regular expression pattern in PCRE format.",
-																			MarkdownDescription: "Matches Regex The cookie value must match the specified regular expression pattern in PCRE format.<br>**Validation:** `Length LengthBetween(1, 256)`",
+																			MarkdownDescription: "Matches Regex The cookie value must match the specified regular expression pattern in PCRE format.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, and `startswith`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -1036,7 +1040,7 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 																		},
 																		"startswith": schema.StringAttribute{
 																			Description:         "Starts With The cookie value must begin with the specified value.",
-																			MarkdownDescription: "Starts With The cookie value must begin with the specified value.",
+																			MarkdownDescription: "Starts With The cookie value must begin with the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, and `match_regex`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -1064,7 +1068,7 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 														Attributes: map[string]schema.Attribute{
 															"cache_operator_choice": schema.SingleNestedAttribute{
 																Description:         "Cache Operator Normalized URI path up to filename and extension but not including query parameters",
-																MarkdownDescription: "Cache Operator Normalized URI path up to filename and extension but not including query parameters",
+																MarkdownDescription: "Cache Operator Normalized URI path up to filename and extension but not including query parameters<br>Exactly one of `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, or `startswith` must be specified.",
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
@@ -1084,56 +1088,56 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 																Attributes: map[string]schema.Attribute{
 																	"contains": schema.StringAttribute{
 																		Description:         "Contains The path must include the specified value as a substring, up to the filename.",
-																		MarkdownDescription: "Contains The path must include the specified value as a substring, up to the filename.",
+																		MarkdownDescription: "Contains The path must include the specified value as a substring, up to the filename.<br>Conflicts with `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
 																	},
 																	"does_not_contain": schema.StringAttribute{
 																		Description:         "Does Not Contain The path must not include the specified value as a substring, up to the filename.",
-																		MarkdownDescription: "Does Not Contain The path must not include the specified value as a substring, up to the filename.",
+																		MarkdownDescription: "Does Not Contain The path must not include the specified value as a substring, up to the filename.<br>Conflicts with `contains`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
 																	},
 																	"does_not_end_with": schema.StringAttribute{
 																		Description:         "Does Not End With The path must not end with the specified value, up to the filename.",
-																		MarkdownDescription: "Does Not End With The path must not end with the specified value, up to the filename.",
+																		MarkdownDescription: "Does Not End With The path must not end with the specified value, up to the filename.<br>Conflicts with `contains`, `does_not_contain`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
 																	},
 																	"does_not_equal": schema.StringAttribute{
 																		Description:         "Does Not Equal The path must not match the specified value, up to the filename.",
-																		MarkdownDescription: "Does Not Equal The path must not match the specified value, up to the filename.",
+																		MarkdownDescription: "Does Not Equal The path must not match the specified value, up to the filename.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
 																	},
 																	"does_not_start_with": schema.StringAttribute{
 																		Description:         "Does Not Start With The path must not begin with the specified value, up to the filename.",
-																		MarkdownDescription: "Does Not Start With The path must not begin with the specified value, up to the filename.",
+																		MarkdownDescription: "Does Not Start With The path must not begin with the specified value, up to the filename.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `endswith`, `equals`, `match_regex`, and `startswith`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
 																	},
 																	"endswith": schema.StringAttribute{
 																		Description:         "Ends With The path must end with the specified value, up to the filename.",
-																		MarkdownDescription: "Ends With The path must end with the specified value, up to the filename.",
+																		MarkdownDescription: "Ends With The path must end with the specified value, up to the filename.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `equals`, `match_regex`, and `startswith`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
 																	},
 																	"equals": schema.StringAttribute{
 																		Description:         "Equals The path must exactly match the specified value, up to the filename.",
-																		MarkdownDescription: "Equals The path must exactly match the specified value, up to the filename.",
+																		MarkdownDescription: "Equals The path must exactly match the specified value, up to the filename.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `match_regex`, and `startswith`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
 																	},
 																	"match_regex": schema.StringAttribute{
 																		Description:         "Matches Regex The path must match the specified regular expression pattern in PCRE format.",
-																		MarkdownDescription: "Matches Regex The path must match the specified regular expression pattern in PCRE format.<br>**Validation:** `Length LengthBetween(1, 256)`",
+																		MarkdownDescription: "Matches Regex The path must match the specified regular expression pattern in PCRE format.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, and `startswith`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -1143,7 +1147,7 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 																	},
 																	"startswith": schema.StringAttribute{
 																		Description:         "Starts With The path must begin with the specified value, up to the filename.",
-																		MarkdownDescription: "Starts With The path must begin with the specified value, up to the filename.",
+																		MarkdownDescription: "Starts With The path must begin with the specified value, up to the filename.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, and `match_regex`.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -1185,7 +1189,7 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 															Attributes: map[string]schema.Attribute{
 																"cache_operator_choice": schema.SingleNestedAttribute{
 																	Description:         "Cache Operator Match Operator",
-																	MarkdownDescription: "Cache Operator Match Operator",
+																	MarkdownDescription: "Cache Operator Match Operator<br>Exactly one of `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, or `startswith` must be specified.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
@@ -1205,56 +1209,56 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 																	Attributes: map[string]schema.Attribute{
 																		"contains": schema.StringAttribute{
 																			Description:         "Contains The query parameter value must include the specified value as a substring.",
-																			MarkdownDescription: "Contains The query parameter value must include the specified value as a substring.",
+																			MarkdownDescription: "Contains The query parameter value must include the specified value as a substring.<br>Conflicts with `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
 																		"does_not_contain": schema.StringAttribute{
 																			Description:         "Does Not Contain The query parameter value must not include the specified value as a substring.",
-																			MarkdownDescription: "Does Not Contain The query parameter value must not include the specified value as a substring.",
+																			MarkdownDescription: "Does Not Contain The query parameter value must not include the specified value as a substring.<br>Conflicts with `contains`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
 																		"does_not_end_with": schema.StringAttribute{
 																			Description:         "Does Not End With The query parameter value must not end with the specified value.",
-																			MarkdownDescription: "Does Not End With The query parameter value must not end with the specified value.",
+																			MarkdownDescription: "Does Not End With The query parameter value must not end with the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
 																		"does_not_equal": schema.StringAttribute{
 																			Description:         "Does Not Equal The query parameter value must not match the specified value.",
-																			MarkdownDescription: "Does Not Equal The query parameter value must not match the specified value.",
+																			MarkdownDescription: "Does Not Equal The query parameter value must not match the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_start_with`, `endswith`, `equals`, `match_regex`, and `startswith`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
 																		"does_not_start_with": schema.StringAttribute{
 																			Description:         "Does Not Start With The query parameter value must not begin with the specified value.",
-																			MarkdownDescription: "Does Not Start With The query parameter value must not begin with the specified value.",
+																			MarkdownDescription: "Does Not Start With The query parameter value must not begin with the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `endswith`, `equals`, `match_regex`, and `startswith`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
 																		"endswith": schema.StringAttribute{
 																			Description:         "Ends With The query parameter value must end with the specified value.",
-																			MarkdownDescription: "Ends With The query parameter value must end with the specified value.",
+																			MarkdownDescription: "Ends With The query parameter value must end with the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `equals`, `match_regex`, and `startswith`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
 																		"equals": schema.StringAttribute{
 																			Description:         "Equals The query parameter value must exactly match the specified value.",
-																			MarkdownDescription: "Equals The query parameter value must exactly match the specified value.",
+																			MarkdownDescription: "Equals The query parameter value must exactly match the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `match_regex`, and `startswith`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
 																		"match_regex": schema.StringAttribute{
 																			Description:         "Matches Regex The query parameter value must match the specified regular expression pattern in PCRE format.",
-																			MarkdownDescription: "Matches Regex The query parameter value must match the specified regular expression pattern in PCRE format.<br>**Validation:** `Length LengthBetween(1, 256)`",
+																			MarkdownDescription: "Matches Regex The query parameter value must match the specified regular expression pattern in PCRE format.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, and `startswith`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -1264,7 +1268,7 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 																		},
 																		"startswith": schema.StringAttribute{
 																			Description:         "Starts With The query parameter value must begin with the specified value.",
-																			MarkdownDescription: "Starts With The query parameter value must begin with the specified value.",
+																			MarkdownDescription: "Starts With The query parameter value must begin with the specified value.<br>Conflicts with `contains`, `does_not_contain`, `does_not_end_with`, `does_not_equal`, `does_not_start_with`, `endswith`, `equals`, and `match_regex`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -1461,6 +1465,9 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 		// resource modelToSpecRoot PointerField --> CacheRules
 		if !data.CacheRules.IsNull() && !data.CacheRules.IsUnknown() {
 			cacheRulesSpec := &ves_io_schema_cdn_cache_rule.CDNCacheRule{}
+			cacheRulesSpec.CacheActions = &ves_io_schema_cdn_cache_rule.CDNCacheRule_CacheBypass{
+				CacheBypass: &ves_io_schema.Empty{},
+			}
 			spec.CacheRules = cacheRulesSpec
 			var cacheRulesModel CdnCacheRuleCDNCacheRule
 
@@ -1471,7 +1478,7 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> CacheActions
+			// resource modelToSpecNested OneOfField --> CacheActions
 			if !cacheRulesModel.CacheActionsChoice.IsNull() && !cacheRulesModel.CacheActionsChoice.IsUnknown() {
 				cacheRulesCacheActionsChoiceModel := CdnCacheRuleCacheActionsChoice{}
 				response.Diagnostics.Append(cacheRulesModel.CacheActionsChoice.As(ctx, &cacheRulesCacheActionsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -2243,8 +2250,7 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 		var cdnCacheRuleCDNCacheRuleModel = &CdnCacheRuleCDNCacheRule{}
 		cacheRulesElement := specData.GetCacheRules()
 
-		// resource specToModelNested RequiredOneOfField --> CacheActions
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> CacheActions
 		if cacheRulesElement.GetCacheActions() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			cacheRulescacheActionsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3248,11 +3254,7 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cdn_cache_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cdn_cache_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "cdn_cache_rule", err),
@@ -3378,8 +3380,7 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 		var cdnCacheRuleCDNCacheRuleModel = &CdnCacheRuleCDNCacheRule{}
 		cacheRulesElement := specData.GetCacheRules()
 
-		// resource specToModelNested RequiredOneOfField --> CacheActions
-		// <no value>
+		// resource specToModelNested OneOfField --> CacheActions
 		if cacheRulesElement.GetCacheActions() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			cacheRulescacheActionsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -4462,6 +4463,9 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 		// resource modelToSpecRoot PointerField --> CacheRules
 		if !data.CacheRules.IsNull() && !data.CacheRules.IsUnknown() {
 			cacheRulesSpec := &ves_io_schema_cdn_cache_rule.CDNCacheRule{}
+			cacheRulesSpec.CacheActions = &ves_io_schema_cdn_cache_rule.CDNCacheRule_CacheBypass{
+				CacheBypass: &ves_io_schema.Empty{},
+			}
 			spec.CacheRules = cacheRulesSpec
 			var cacheRulesModel CdnCacheRuleCDNCacheRule
 
@@ -4472,7 +4476,7 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> CacheActions
+			// resource modelToSpecNested OneOfField --> CacheActions
 			if !cacheRulesModel.CacheActionsChoice.IsNull() && !cacheRulesModel.CacheActionsChoice.IsUnknown() {
 				cacheRulesCacheActionsChoiceModel := CdnCacheRuleCacheActionsChoice{}
 				response.Diagnostics.Append(cacheRulesModel.CacheActionsChoice.As(ctx, &cacheRulesCacheActionsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -5106,12 +5110,8 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_cdn_cache_rule.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_cdn_cache_rule.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "cdn_cache_rule", err),
@@ -5120,7 +5120,7 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cdn_cache_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_cdn_cache_rule.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "cdn_cache_rule", err),
@@ -5245,8 +5245,7 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 		var cdnCacheRuleCDNCacheRuleModel = &CdnCacheRuleCDNCacheRule{}
 		cacheRulesElement := specData.GetCacheRules()
 
-		// resource specToModelNested RequiredOneOfField --> CacheActions
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> CacheActions
 		if cacheRulesElement.GetCacheActions() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			cacheRulescacheActionsChoiceChoicesAttributeMap := make(map[string]attr.Value)

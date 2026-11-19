@@ -84,8 +84,6 @@ resource "f5xc_v1_http_monitor" "example" {
 ### Required
 
 - `external_sources` (Attributes List) External Sources Internet facing monitor sources (see [below for nested schema](#nestedatt--external_sources))
-- `interval_choice` (Attributes) interval How often the monitor will run from each source location (see [below for nested schema](#nestedatt--interval_choice))
-- `method_choice` (Attributes) method Must select POST, PATCH, PUT, or DELETE to enable Body Content (see [below for nested schema](#nestedatt--method_choice))
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
 - `response_codes` (List of String) response_codes HTTP response codes which will result in a healthy monitor. Use '*' as a wildcard character.
@@ -98,7 +96,9 @@ resource "f5xc_v1_http_monitor" "example" {
 - `follow_redirects` (Boolean) follow_redirects Controls if the monitor will follow redirects while determining health<br>**Default:** `false`
 - `health_policy` (Attributes) health_policy (see [below for nested schema](#nestedatt--health_policy))
 - `ignore_cert_errors` (Boolean) ignore_cert_errors Controls if an SSL error will result in a change of health status<br>**Default:** `false`
+- `interval_choice` (Attributes) interval How often the monitor will run from each source location<br>Exactly one of `interval_12_hours`, `interval_15_mins`, `interval_1_day`, `interval_1_hour`, `interval_1_min`, `interval_30_mins`, `interval_30_secs`, `interval_5_mins`, or `interval_6_hours` must be specified when `interval_choice` is configured. (see [below for nested schema](#nestedatt--interval_choice))
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
+- `method_choice` (Attributes) method Must select POST, PATCH, PUT, or DELETE to enable Body Content<br>Exactly one of `delete`, `get`, `head`, `options`, `patch`, `post`, or `put` must be specified when `method_choice` is configured. (see [below for nested schema](#nestedatt--method_choice))
 - `on_failure_count` (Number) on_failure_count The number of times a monitor must fail before the global monitor changes health<br>**Default:** `2`
 - `receive` (String) receive The regex pattern that the monitor looks for in the returned resource. If the text string is returned, the monitor is healthy. Note, headers are not considered in the matching.<br>**Validation:** `Length LengthAtMost(2048)`<br>**Default:** ``
 - `request_headers` (Attributes List) request_headers (see [below for nested schema](#nestedatt--request_headers))
@@ -116,15 +116,15 @@ resource "f5xc_v1_http_monitor" "example" {
 
 Required:
 
-- `source_choice` (Attributes) Source Choice A data plane source for execution of monitors (see [below for nested schema](#nestedatt--external_sources--source_choice))
+- `source_choice` (Attributes) Source Choice A data plane source for execution of monitors<br>Exactly one of `aws` or `f5xc` must be specified. (see [below for nested schema](#nestedatt--external_sources--source_choice))
 
 <a id="nestedatt--external_sources--source_choice"></a>
 ### Nested Schema for `external_sources.source_choice`
 
 Optional:
 
-- `aws` (Attributes) AWS Region Amazon Web Services (see [below for nested schema](#nestedatt--external_sources--source_choice--aws))
-- `f5xc` (Attributes) F5 Distributed Cloud F5 Distributed Cloud (see [below for nested schema](#nestedatt--external_sources--source_choice--f5xc))
+- `aws` (Attributes) AWS Region Amazon Web Services<br>Conflicts with `f5xc`. (see [below for nested schema](#nestedatt--external_sources--source_choice--aws))
+- `f5xc` (Attributes) F5 Distributed Cloud F5 Distributed Cloud<br>Conflicts with `aws`. (see [below for nested schema](#nestedatt--external_sources--source_choice--f5xc))
 
 <a id="nestedatt--external_sources--source_choice--aws"></a>
 ### Nested Schema for `external_sources.source_choice.aws`
@@ -144,20 +144,90 @@ Required:
 
 
 
+<a id="nestedatt--health_policy"></a>
+### Nested Schema for `health_policy`
+
+Optional:
+
+- `dynamic_threshold_policy_choice` (Attributes) dynamic_threshold_policy Sets a daily threshold on response time based on the standard deviation of the past week's data. Turns the monitor critical if the threshold is exceeded for the specified duration.<br>Exactly one of `dynamic_threshold` or `dynamic_threshold_disabled` must be specified when `dynamic_threshold_policy_choice` is configured. (see [below for nested schema](#nestedatt--health_policy--dynamic_threshold_policy_choice))
+- `static_max_threshold_policy_choice` (Attributes) static_max_threshold_policy Sets a fixed maximum threshold on response time that turns the monitor critical if it is exceeded for the specified duration.<br>Exactly one of `static_max_threshold` or `static_max_threshold_disabled` must be specified when `static_max_threshold_policy_choice` is configured. (see [below for nested schema](#nestedatt--health_policy--static_max_threshold_policy_choice))
+- `static_min_threshold_policy_choice` (Attributes) static_min_threshold_policy Sets a fixed minimum threshold that turns the monitor critical if response time falls below the threshold for the specified duration.<br>Exactly one of `static_min_threshold` or `static_min_threshold_disabled` must be specified when `static_min_threshold_policy_choice` is configured. (see [below for nested schema](#nestedatt--health_policy--static_min_threshold_policy_choice))
+
+<a id="nestedatt--health_policy--dynamic_threshold_policy_choice"></a>
+### Nested Schema for `health_policy.dynamic_threshold_policy_choice`
+
+Optional:
+
+- `dynamic_threshold` (Attributes) dynamic_threshold<br>Conflicts with `dynamic_threshold_disabled`. (see [below for nested schema](#nestedatt--health_policy--dynamic_threshold_policy_choice--dynamic_threshold))
+- `dynamic_threshold_disabled` (Boolean) dynamic_threshold_disabled<br>Conflicts with `dynamic_threshold`.
+
+<a id="nestedatt--health_policy--dynamic_threshold_policy_choice--dynamic_threshold"></a>
+### Nested Schema for `health_policy.dynamic_threshold_policy_choice.dynamic_threshold`
+
+Required:
+
+- `eval_period` (List of String) eval_period The duration that the response time value must exceed the set threshold before the monitor turns critical.<br>**Allowed Values (choose one):** `['EVAL_PERIOD_10_MINS', 'EVAL_PERIOD_15_MINS', 'EVAL_PERIOD_3_MINS', 'EVAL_PERIOD_5_MINS']`
+- `std_dev_val` (List of String) std_dev_val The number of standard deviations response time value must exceed before the monitor turns critical.<br>**Allowed Values (choose one):** `['STD_DEV_VAL_3', 'STD_DEV_VAL_4', 'STD_DEV_VAL_5', 'STD_DEV_VAL_6']`
+
+
+
+<a id="nestedatt--health_policy--static_max_threshold_policy_choice"></a>
+### Nested Schema for `health_policy.static_max_threshold_policy_choice`
+
+Optional:
+
+- `static_max_threshold` (Attributes) static_max_threshold<br>Conflicts with `static_max_threshold_disabled`. (see [below for nested schema](#nestedatt--health_policy--static_max_threshold_policy_choice--static_max_threshold))
+- `static_max_threshold_disabled` (Boolean) static_max_threshold_disabled<br>Conflicts with `static_max_threshold`.
+
+<a id="nestedatt--health_policy--static_max_threshold_policy_choice--static_max_threshold"></a>
+### Nested Schema for `health_policy.static_max_threshold_policy_choice.static_max_threshold`
+
+Required:
+
+- `eval_period` (List of String) eval_period The duration that the response time value must exceed the set threshold before the monitor turns critical.<br>**Allowed Values (choose one):** `['EVAL_PERIOD_10_MINS', 'EVAL_PERIOD_15_MINS', 'EVAL_PERIOD_3_MINS', 'EVAL_PERIOD_5_MINS']`
+
+Optional:
+
+- `max_response_time` (Number) max_response_time The maximum response time value that must be exceeded before the monitor turns critical.<br>**Default:** `1000`
+
+
+
+<a id="nestedatt--health_policy--static_min_threshold_policy_choice"></a>
+### Nested Schema for `health_policy.static_min_threshold_policy_choice`
+
+Optional:
+
+- `static_min_threshold` (Attributes) static_max_threshold<br>Conflicts with `static_min_threshold_disabled`. (see [below for nested schema](#nestedatt--health_policy--static_min_threshold_policy_choice--static_min_threshold))
+- `static_min_threshold_disabled` (Boolean) static_min_threshold_disabled<br>Conflicts with `static_min_threshold`.
+
+<a id="nestedatt--health_policy--static_min_threshold_policy_choice--static_min_threshold"></a>
+### Nested Schema for `health_policy.static_min_threshold_policy_choice.static_min_threshold`
+
+Required:
+
+- `eval_period` (List of String) eval_period The duration that the response time value must fall below the set threshold before the monitor turns critical.<br>**Allowed Values (choose one):** `['EVAL_PERIOD_10_MINS', 'EVAL_PERIOD_15_MINS', 'EVAL_PERIOD_3_MINS', 'EVAL_PERIOD_5_MINS']`
+
+Optional:
+
+- `min_response_time` (Number) min_response_time The minimum value that response time must fall below before the monitor turns critical.<br>**Default:** `50`
+
+
+
+
 <a id="nestedatt--interval_choice"></a>
 ### Nested Schema for `interval_choice`
 
 Optional:
 
-- `interval_12_hours` (Boolean) 12 hours
-- `interval_15_mins` (Boolean) 15 minutes
-- `interval_1_day` (Boolean) 1 day
-- `interval_1_hour` (Boolean) 1 hour
-- `interval_1_min` (Boolean) 1 minute
-- `interval_30_mins` (Boolean) 30 minutes
-- `interval_30_secs` (Boolean) 30 seconds
-- `interval_5_mins` (Boolean) 5 minutes
-- `interval_6_hours` (Boolean) 6 hours
+- `interval_12_hours` (Boolean) 12 hours<br>Conflicts with `interval_15_mins`, `interval_1_day`, `interval_1_hour`, `interval_1_min`, `interval_30_mins`, `interval_30_secs`, `interval_5_mins`, and `interval_6_hours`.
+- `interval_15_mins` (Boolean) 15 minutes<br>Conflicts with `interval_12_hours`, `interval_1_day`, `interval_1_hour`, `interval_1_min`, `interval_30_mins`, `interval_30_secs`, `interval_5_mins`, and `interval_6_hours`.
+- `interval_1_day` (Boolean) 1 day<br>Conflicts with `interval_12_hours`, `interval_15_mins`, `interval_1_hour`, `interval_1_min`, `interval_30_mins`, `interval_30_secs`, `interval_5_mins`, and `interval_6_hours`.
+- `interval_1_hour` (Boolean) 1 hour<br>Conflicts with `interval_12_hours`, `interval_15_mins`, `interval_1_day`, `interval_1_min`, `interval_30_mins`, `interval_30_secs`, `interval_5_mins`, and `interval_6_hours`.
+- `interval_1_min` (Boolean) 1 minute<br>Conflicts with `interval_12_hours`, `interval_15_mins`, `interval_1_day`, `interval_1_hour`, `interval_30_mins`, `interval_30_secs`, `interval_5_mins`, and `interval_6_hours`.
+- `interval_30_mins` (Boolean) 30 minutes<br>Conflicts with `interval_12_hours`, `interval_15_mins`, `interval_1_day`, `interval_1_hour`, `interval_1_min`, `interval_30_secs`, `interval_5_mins`, and `interval_6_hours`.
+- `interval_30_secs` (Boolean) 30 seconds<br>Conflicts with `interval_12_hours`, `interval_15_mins`, `interval_1_day`, `interval_1_hour`, `interval_1_min`, `interval_30_mins`, `interval_5_mins`, and `interval_6_hours`.
+- `interval_5_mins` (Boolean) 5 minutes<br>Conflicts with `interval_12_hours`, `interval_15_mins`, `interval_1_day`, `interval_1_hour`, `interval_1_min`, `interval_30_mins`, `interval_30_secs`, and `interval_6_hours`.
+- `interval_6_hours` (Boolean) 6 hours<br>Conflicts with `interval_12_hours`, `interval_15_mins`, `interval_1_day`, `interval_1_hour`, `interval_1_min`, `interval_30_mins`, `interval_30_secs`, and `interval_5_mins`.
 
 
 <a id="nestedatt--method_choice"></a>
@@ -165,13 +235,13 @@ Optional:
 
 Optional:
 
-- `delete` (Attributes) DELETE DELETE method (see [below for nested schema](#nestedatt--method_choice--delete))
-- `get` (Boolean) GET GET method
-- `head` (Boolean) HEAD HEAD method
-- `options` (Boolean) OPTIONS OPTIONS method
-- `patch` (Attributes) PATCH PATCH method (see [below for nested schema](#nestedatt--method_choice--patch))
-- `post` (Attributes) POST POST method (see [below for nested schema](#nestedatt--method_choice--post))
-- `put` (Attributes) PUT PUT method (see [below for nested schema](#nestedatt--method_choice--put))
+- `delete` (Attributes) DELETE DELETE method<br>Conflicts with `get`, `head`, `options`, `patch`, `post`, and `put`. (see [below for nested schema](#nestedatt--method_choice--delete))
+- `get` (Boolean) GET GET method<br>Conflicts with `delete`, `head`, `options`, `patch`, `post`, and `put`.
+- `head` (Boolean) HEAD HEAD method<br>Conflicts with `delete`, `get`, `options`, `patch`, `post`, and `put`.
+- `options` (Boolean) OPTIONS OPTIONS method<br>Conflicts with `delete`, `get`, `head`, `patch`, `post`, and `put`.
+- `patch` (Attributes) PATCH PATCH method<br>Conflicts with `delete`, `get`, `head`, `options`, `post`, and `put`. (see [below for nested schema](#nestedatt--method_choice--patch))
+- `post` (Attributes) POST POST method<br>Conflicts with `delete`, `get`, `head`, `options`, `patch`, and `put`. (see [below for nested schema](#nestedatt--method_choice--post))
+- `put` (Attributes) PUT PUT method<br>Conflicts with `delete`, `get`, `head`, `options`, `patch`, and `post`. (see [below for nested schema](#nestedatt--method_choice--put))
 
 <a id="nestedatt--method_choice--delete"></a>
 ### Nested Schema for `method_choice.delete`
@@ -203,76 +273,6 @@ Optional:
 Optional:
 
 - `request_body` (String) content Ensure appropriate request headers are added based on the content type added here<br>**Validation:** `Length LengthAtMost(65535)`<br>**Default:** ``
-
-
-
-<a id="nestedatt--health_policy"></a>
-### Nested Schema for `health_policy`
-
-Required:
-
-- `dynamic_threshold_policy_choice` (Attributes) dynamic_threshold_policy Sets a daily threshold on response time based on the standard deviation of the past week's data. Turns the monitor critical if the threshold is exceeded for the specified duration. (see [below for nested schema](#nestedatt--health_policy--dynamic_threshold_policy_choice))
-- `static_max_threshold_policy_choice` (Attributes) static_max_threshold_policy Sets a fixed maximum threshold on response time that turns the monitor critical if it is exceeded for the specified duration. (see [below for nested schema](#nestedatt--health_policy--static_max_threshold_policy_choice))
-- `static_min_threshold_policy_choice` (Attributes) static_min_threshold_policy Sets a fixed minimum threshold that turns the monitor critical if response time falls below the threshold for the specified duration. (see [below for nested schema](#nestedatt--health_policy--static_min_threshold_policy_choice))
-
-<a id="nestedatt--health_policy--dynamic_threshold_policy_choice"></a>
-### Nested Schema for `health_policy.dynamic_threshold_policy_choice`
-
-Optional:
-
-- `dynamic_threshold` (Attributes) dynamic_threshold (see [below for nested schema](#nestedatt--health_policy--dynamic_threshold_policy_choice--dynamic_threshold))
-- `dynamic_threshold_disabled` (Boolean) dynamic_threshold_disabled
-
-<a id="nestedatt--health_policy--dynamic_threshold_policy_choice--dynamic_threshold"></a>
-### Nested Schema for `health_policy.dynamic_threshold_policy_choice.dynamic_threshold`
-
-Required:
-
-- `eval_period` (List of String) eval_period The duration that the response time value must exceed the set threshold before the monitor turns critical.<br>**Allowed Values (choose one):** `['EVAL_PERIOD_10_MINS', 'EVAL_PERIOD_15_MINS', 'EVAL_PERIOD_3_MINS', 'EVAL_PERIOD_5_MINS']`
-- `std_dev_val` (List of String) std_dev_val The number of standard deviations response time value must exceed before the monitor turns critical.<br>**Allowed Values (choose one):** `['STD_DEV_VAL_3', 'STD_DEV_VAL_4', 'STD_DEV_VAL_5', 'STD_DEV_VAL_6']`
-
-
-
-<a id="nestedatt--health_policy--static_max_threshold_policy_choice"></a>
-### Nested Schema for `health_policy.static_max_threshold_policy_choice`
-
-Optional:
-
-- `static_max_threshold` (Attributes) static_max_threshold (see [below for nested schema](#nestedatt--health_policy--static_max_threshold_policy_choice--static_max_threshold))
-- `static_max_threshold_disabled` (Boolean) static_max_threshold_disabled
-
-<a id="nestedatt--health_policy--static_max_threshold_policy_choice--static_max_threshold"></a>
-### Nested Schema for `health_policy.static_max_threshold_policy_choice.static_max_threshold`
-
-Required:
-
-- `eval_period` (List of String) eval_period The duration that the response time value must exceed the set threshold before the monitor turns critical.<br>**Allowed Values (choose one):** `['EVAL_PERIOD_10_MINS', 'EVAL_PERIOD_15_MINS', 'EVAL_PERIOD_3_MINS', 'EVAL_PERIOD_5_MINS']`
-
-Optional:
-
-- `max_response_time` (Number) max_response_time The maximum response time value that must be exceeded before the monitor turns critical.<br>**Default:** `1000`
-
-
-
-<a id="nestedatt--health_policy--static_min_threshold_policy_choice"></a>
-### Nested Schema for `health_policy.static_min_threshold_policy_choice`
-
-Optional:
-
-- `static_min_threshold` (Attributes) static_max_threshold (see [below for nested schema](#nestedatt--health_policy--static_min_threshold_policy_choice--static_min_threshold))
-- `static_min_threshold_disabled` (Boolean) static_min_threshold_disabled
-
-<a id="nestedatt--health_policy--static_min_threshold_policy_choice--static_min_threshold"></a>
-### Nested Schema for `health_policy.static_min_threshold_policy_choice.static_min_threshold`
-
-Required:
-
-- `eval_period` (List of String) eval_period The duration that the response time value must fall below the set threshold before the monitor turns critical.<br>**Allowed Values (choose one):** `['EVAL_PERIOD_10_MINS', 'EVAL_PERIOD_15_MINS', 'EVAL_PERIOD_3_MINS', 'EVAL_PERIOD_5_MINS']`
-
-Optional:
-
-- `min_response_time` (Number) min_response_time The minimum value that response time must fall below before the monitor turns critical.<br>**Default:** `50`
-
 
 
 
@@ -318,6 +318,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_v1_http_monitor.example"
+	to = f5xc_v1_http_monitor.example
 }
 ```

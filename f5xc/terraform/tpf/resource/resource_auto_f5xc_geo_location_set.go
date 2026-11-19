@@ -25,6 +25,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -94,7 +95,7 @@ var GeoLocationSetDnsLoadBalancersObjectRefModelAttributeMap = map[string]attr.T
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> LocationChoice
+// Attribute map for OneOfField --> LocationChoice
 var GeoLocationSetLocationChoiceModelAttributeMap = map[string]attr.Type{
 
 	"custom_geo_location_selector": types.ObjectType{
@@ -226,20 +227,23 @@ func (r *ResourceF5XCGeoLocationSet) Schema(ctx context.Context, request resourc
 			},
 			"location_choice": schema.SingleNestedAttribute{
 				Description:         "Geolocation Set Select the geo_location_set.",
-				MarkdownDescription: "Geolocation Set Select the geo_location_set.",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
+				MarkdownDescription: "Geolocation Set Select the geo_location_set.<br>Exactly one of `custom_geo_location_selector` or `global` must be specified when `location_choice` is configured.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Object{
-					exactlyoneofvalidator.RequiredExactlyOneOf(
+					exactlyoneofvalidator.ExactlyOneOf(
 						"custom_geo_location_selector",
 						"global",
 					),
 				},
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseNonNullStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"custom_geo_location_selector": schema.SingleNestedAttribute{
 						Description:         "Geolocation Selector Select multiple geo locations",
-						MarkdownDescription: "Geolocation Selector Select multiple geo locations",
+						MarkdownDescription: "Geolocation Selector Select multiple geo locations<br>Conflicts with `global`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -260,7 +264,7 @@ func (r *ResourceF5XCGeoLocationSet) Schema(ctx context.Context, request resourc
 					},
 					"global": schema.BoolAttribute{
 						Description:         "Global Geolocation Includes all geo locations",
-						MarkdownDescription: "Global Geolocation Includes all geo locations",
+						MarkdownDescription: "Global Geolocation Includes all geo locations<br>Conflicts with `custom_geo_location_selector`.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -423,7 +427,7 @@ func (r *ResourceF5XCGeoLocationSet) Create(ctx context.Context, request resourc
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> LocationChoice
+	// resource modelToSpecRoot OneOfField --> LocationChoice
 	if !data.LocationChoice.IsNull() && !data.LocationChoice.IsUnknown() {
 		locationChoiceModel := GeoLocationSetLocationChoice{}
 		response.Diagnostics.Append(data.LocationChoice.As(ctx, &locationChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -462,7 +466,12 @@ func (r *ResourceF5XCGeoLocationSet) Create(ctx context.Context, request resourc
 			spec.LocationChoice = globalSpecBool
 		}
 
+	} else {
+		spec.LocationChoice = &ves_io_schema_geo_location_set.CreateSpecType_Global{
+			Global: &ves_io_schema.Empty{},
+		}
 	}
+
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
@@ -667,7 +676,7 @@ func (r *ResourceF5XCGeoLocationSet) Create(ctx context.Context, request resourc
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> LocationChoice
+	// resource SpecToModelRoot OneOfField --> LocationChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -741,8 +750,6 @@ func (r *ResourceF5XCGeoLocationSet) Create(ctx context.Context, request resourc
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.LocationChoice = types.ObjectNull(GeoLocationSetLocationChoiceModelAttributeMap)
 	}
 
@@ -789,11 +796,7 @@ func (r *ResourceF5XCGeoLocationSet) Read(ctx context.Context, request resource.
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_geo_location_set.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_geo_location_set.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "geo_location_set", err),
@@ -974,7 +977,7 @@ func (r *ResourceF5XCGeoLocationSet) Read(ctx context.Context, request resource.
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> LocationChoice
+	// resource SpecToModelRoot OneOfField --> LocationChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -1048,8 +1051,6 @@ func (r *ResourceF5XCGeoLocationSet) Read(ctx context.Context, request resource.
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 
 		if data.LocationChoice.IsNull() || data.LocationChoice.IsUnknown() || ((data.LocationChoice.Attributes()["custom_geo_location_selector"].(types.Object).IsNull() || data.LocationChoice.Attributes()["custom_geo_location_selector"].(types.Object).IsUnknown() || (data.LocationChoice.Attributes()["custom_geo_location_selector"].(types.Object).Attributes()["expressions"].IsNull() || data.LocationChoice.Attributes()["custom_geo_location_selector"].(types.Object).Attributes()["expressions"].IsUnknown())) && (data.LocationChoice.Attributes()["global"].IsNull() || data.LocationChoice.Attributes()["global"].IsUnknown())) {
 			data.LocationChoice = types.ObjectValueMust(GeoLocationSetLocationChoiceModelAttributeMap, map[string]attr.Value{
@@ -1174,7 +1175,7 @@ func (r *ResourceF5XCGeoLocationSet) Update(ctx context.Context, request resourc
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> LocationChoice
+	// resource modelToSpecRoot OneOfField --> LocationChoice
 	if !data.LocationChoice.IsNull() && !data.LocationChoice.IsUnknown() {
 		locationChoiceModel := GeoLocationSetLocationChoice{}
 		response.Diagnostics.Append(data.LocationChoice.As(ctx, &locationChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1213,7 +1214,12 @@ func (r *ResourceF5XCGeoLocationSet) Update(ctx context.Context, request resourc
 			spec.LocationChoice = globalSpecBool
 		}
 
+	} else {
+		spec.LocationChoice = &ves_io_schema_geo_location_set.ReplaceSpecType_Global{
+			Global: &ves_io_schema.Empty{},
+		}
 	}
+
 	// Strip backend-injected label keys that must not be sent in Create/Update requests.
 	// These keys are stored in state (for drift-free plans) but must be omitted from the
 	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
@@ -1225,12 +1231,8 @@ func (r *ResourceF5XCGeoLocationSet) Update(ctx context.Context, request resourc
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_geo_location_set.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_geo_location_set.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "geo_location_set", err),
@@ -1239,7 +1241,7 @@ func (r *ResourceF5XCGeoLocationSet) Update(ctx context.Context, request resourc
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_geo_location_set.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_geo_location_set.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "geo_location_set", err),
@@ -1419,7 +1421,7 @@ func (r *ResourceF5XCGeoLocationSet) Update(ctx context.Context, request resourc
 		}
 	}
 
-	// resource SpecToModelRoot RequiredOneOfField --> LocationChoice
+	// resource SpecToModelRoot OneOfField --> LocationChoice
 	// false
 	// true
 	// This resource uses standard struct-based resolution.
@@ -1493,8 +1495,6 @@ func (r *ResourceF5XCGeoLocationSet) Update(ctx context.Context, request resourc
 		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
-		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.LocationChoice = types.ObjectNull(GeoLocationSetLocationChoiceModelAttributeMap)
 	}
 

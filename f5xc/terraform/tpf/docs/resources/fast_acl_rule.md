@@ -109,7 +109,7 @@ resource "f5xc_fast_acl_rule" "example" {
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
 - `port` (Attributes List) ports L4 port numbers to match (see [below for nested schema](#nestedatt--port))
-- `source_choice` (Attributes) source IP match criteria, source can be either a prefix list or reference to IP prefix set (see [below for nested schema](#nestedatt--source_choice))
+- `source_choice` (Attributes) source IP match criteria, source can be either a prefix list or reference to IP prefix set<br>Exactly one of `ip_prefix_set` or `prefix` must be specified. (see [below for nested schema](#nestedatt--source_choice))
 
 ### Optional
 
@@ -127,16 +127,16 @@ resource "f5xc_fast_acl_rule" "example" {
 
 Optional:
 
-- `action_choice` (Attributes) action The type of action to perform (see [below for nested schema](#nestedatt--action--action_choice))
+- `action_choice` (Attributes) action The type of action to perform<br>Exactly one of `policer_action`, `protocol_policer_action`, or `simple_action` must be specified when `action_choice` is configured. (see [below for nested schema](#nestedatt--action--action_choice))
 
 <a id="nestedatt--action--action_choice"></a>
 ### Nested Schema for `action.action_choice`
 
 Optional:
 
-- `policer_action` (Attributes) policer_action Reference to policer object to which traffic would be subjected (see [below for nested schema](#nestedatt--action--action_choice--policer_action))
-- `protocol_policer_action` (Attributes) protocol_policer_action Reference to protocol based policer object (see [below for nested schema](#nestedatt--action--action_choice--protocol_policer_action))
-- `simple_action` (List of String) simple_action Simple action like dropping or forwarding the traffic<br>**Allowed Values (choose one):** `['ALLOW', 'DENY']`
+- `policer_action` (Attributes) policer_action Reference to policer object to which traffic would be subjected<br>Conflicts with `protocol_policer_action` and `simple_action`. (see [below for nested schema](#nestedatt--action--action_choice--policer_action))
+- `protocol_policer_action` (Attributes) protocol_policer_action Reference to protocol based policer object<br>Conflicts with `policer_action` and `simple_action`. (see [below for nested schema](#nestedatt--action--action_choice--protocol_policer_action))
+- `simple_action` (List of String) simple_action Simple action like dropping or forwarding the traffic<br>**Allowed Values (choose one):** `['ALLOW', 'DENY']`<br>Conflicts with `policer_action` and `protocol_policer_action`.
 
 <a id="nestedatt--action--action_choice--policer_action"></a>
 ### Nested Schema for `action.action_choice.policer_action`
@@ -187,16 +187,16 @@ Read-Only:
 
 Optional:
 
-- `port_value_type_choice` (Attributes) port_value_type_choice Match criteria for port (see [below for nested schema](#nestedatt--port--port_value_type_choice))
+- `port_value_type_choice` (Attributes) port_value_type_choice Match criteria for port<br>Exactly one of `all`, `dns`, or `user_defined` must be specified when `port_value_type_choice` is configured. (see [below for nested schema](#nestedatt--port--port_value_type_choice))
 
 <a id="nestedatt--port--port_value_type_choice"></a>
 ### Nested Schema for `port.port_value_type_choice`
 
 Optional:
 
-- `all` (Boolean) All port Matches all port
-- `dns` (Boolean) DNS port Matches dns port 53
-- `user_defined` (Number) User defined Port Matches the user defined port
+- `all` (Boolean) All port Matches all port<br>Conflicts with `dns` and `user_defined`.
+- `dns` (Boolean) DNS port Matches dns port 53<br>Conflicts with `all` and `user_defined`.
+- `user_defined` (Number) User defined Port Matches the user defined port<br>Conflicts with `all` and `dns`.
 
 
 
@@ -205,8 +205,8 @@ Optional:
 
 Optional:
 
-- `ip_prefix_set` (Attributes) ip_prefix_set Reference to IP prefix set object (see [below for nested schema](#nestedatt--source_choice--ip_prefix_set))
-- `prefix` (Attributes) prefix List of IP prefixes (see [below for nested schema](#nestedatt--source_choice--prefix))
+- `ip_prefix_set` (Attributes) ip_prefix_set Reference to IP prefix set object<br>Conflicts with `prefix`. (see [below for nested schema](#nestedatt--source_choice--ip_prefix_set))
+- `prefix` (Attributes) prefix List of IP prefixes<br>Conflicts with `ip_prefix_set`. (see [below for nested schema](#nestedatt--source_choice--prefix))
 
 <a id="nestedatt--source_choice--ip_prefix_set"></a>
 ### Nested Schema for `source_choice.ip_prefix_set`
@@ -269,6 +269,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_fast_acl_rule.example"
+	to = f5xc_fast_acl_rule.example
 }
 ```

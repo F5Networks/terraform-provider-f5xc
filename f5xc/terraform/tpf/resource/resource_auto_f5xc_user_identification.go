@@ -26,6 +26,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -107,7 +108,7 @@ var UserIdentificationRulesModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> Identifier
+// Attribute map for OneOfField --> Identifier
 var UserIdentificationRulesIdentifierModelAttributeMap = map[string]attr.Type{
 
 	"client_asn":                 types.BoolType,
@@ -219,12 +220,12 @@ func (r *ResourceF5XCUserIdentification) Schema(ctx context.Context, request res
 					Attributes: map[string]schema.Attribute{
 						"identifier_choice": schema.SingleNestedAttribute{
 							Description:         "identifier Type of identifier to be used in rule.",
-							MarkdownDescription: "identifier Type of identifier to be used in rule.",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
+							MarkdownDescription: "identifier Type of identifier to be used in rule.<br>Exactly one of `client_asn`, `client_city`, `client_country`, `client_ip`, `client_region`, `cookie_name`, `http_header_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `none`, `query_param_key`, or `tls_fingerprint` must be specified when `identifier_choice` is configured.",
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
 							Validators: []validator.Object{
-								exactlyoneofvalidator.RequiredExactlyOneOf(
+								exactlyoneofvalidator.ExactlyOneOf(
 									"client_asn",
 									"client_city",
 									"client_country",
@@ -242,10 +243,13 @@ func (r *ResourceF5XCUserIdentification) Schema(ctx context.Context, request res
 									"tls_fingerprint",
 								),
 							},
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.UseNonNullStateForUnknown(),
+							},
 							Attributes: map[string]schema.Attribute{
 								"client_asn": schema.BoolAttribute{
 									Description:         "client asn Use client ASN as user identifier. The client ASN is obtained by performing a lookup for the client IP Address in a GeoIP DB.",
-									MarkdownDescription: "client asn Use client ASN as user identifier. The client ASN is obtained by performing a lookup for the client IP Address in a GeoIP DB.",
+									MarkdownDescription: "client asn Use client ASN as user identifier. The client ASN is obtained by performing a lookup for the client IP Address in a GeoIP DB.<br>Conflicts with `client_city`, `client_country`, `client_ip`, `client_region`, `cookie_name`, `http_header_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `none`, `query_param_key`, and `tls_fingerprint`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -255,7 +259,7 @@ func (r *ResourceF5XCUserIdentification) Schema(ctx context.Context, request res
 								},
 								"client_city": schema.BoolAttribute{
 									Description:         "client city Use client city as user identifier. The client city is obtained by performing a lookup for the client IP Address in a GeoIP DB.",
-									MarkdownDescription: "client city Use client city as user identifier. The client city is obtained by performing a lookup for the client IP Address in a GeoIP DB.",
+									MarkdownDescription: "client city Use client city as user identifier. The client city is obtained by performing a lookup for the client IP Address in a GeoIP DB.<br>Conflicts with `client_asn`, `client_country`, `client_ip`, `client_region`, `cookie_name`, `http_header_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `none`, `query_param_key`, and `tls_fingerprint`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -265,7 +269,7 @@ func (r *ResourceF5XCUserIdentification) Schema(ctx context.Context, request res
 								},
 								"client_country": schema.BoolAttribute{
 									Description:         "client country Use client country as user identifier. The client country is obtained by performing a lookup for the client IP Address in a GeoIP DB.",
-									MarkdownDescription: "client country Use client country as user identifier. The client country is obtained by performing a lookup for the client IP Address in a GeoIP DB.",
+									MarkdownDescription: "client country Use client country as user identifier. The client country is obtained by performing a lookup for the client IP Address in a GeoIP DB.<br>Conflicts with `client_asn`, `client_city`, `client_ip`, `client_region`, `cookie_name`, `http_header_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `none`, `query_param_key`, and `tls_fingerprint`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -275,7 +279,7 @@ func (r *ResourceF5XCUserIdentification) Schema(ctx context.Context, request res
 								},
 								"client_ip": schema.BoolAttribute{
 									Description:         "client ip address Use client IP address as user identifier.",
-									MarkdownDescription: "client ip address Use client IP address as user identifier.",
+									MarkdownDescription: "client ip address Use client IP address as user identifier.<br>Conflicts with `client_asn`, `client_city`, `client_country`, `client_region`, `cookie_name`, `http_header_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `none`, `query_param_key`, and `tls_fingerprint`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -285,7 +289,7 @@ func (r *ResourceF5XCUserIdentification) Schema(ctx context.Context, request res
 								},
 								"client_region": schema.BoolAttribute{
 									Description:         "client region Use client region as user identifier. The client region is obtained by performing a lookup for the client IP Address in a GeoIP DB.",
-									MarkdownDescription: "client region Use client region as user identifier. The client region is obtained by performing a lookup for the client IP Address in a GeoIP DB.",
+									MarkdownDescription: "client region Use client region as user identifier. The client region is obtained by performing a lookup for the client IP Address in a GeoIP DB.<br>Conflicts with `client_asn`, `client_city`, `client_country`, `client_ip`, `cookie_name`, `http_header_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `none`, `query_param_key`, and `tls_fingerprint`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -295,7 +299,7 @@ func (r *ResourceF5XCUserIdentification) Schema(ctx context.Context, request res
 								},
 								"cookie_name": schema.StringAttribute{
 									Description:         "Cookie Name Use the HTTP cookie value for the given name as user identifier.",
-									MarkdownDescription: "Cookie Name Use the HTTP cookie value for the given name as user identifier.",
+									MarkdownDescription: "Cookie Name Use the HTTP cookie value for the given name as user identifier.<br>Conflicts with `client_asn`, `client_city`, `client_country`, `client_ip`, `client_region`, `http_header_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `none`, `query_param_key`, and `tls_fingerprint`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -305,7 +309,7 @@ func (r *ResourceF5XCUserIdentification) Schema(ctx context.Context, request res
 								},
 								"http_header_name": schema.StringAttribute{
 									Description:         "HTTP header name Use the HTTP header value for the given name as user identifier.",
-									MarkdownDescription: "HTTP header name Use the HTTP header value for the given name as user identifier.",
+									MarkdownDescription: "HTTP header name Use the HTTP header value for the given name as user identifier.<br>Conflicts with `client_asn`, `client_city`, `client_country`, `client_ip`, `client_region`, `cookie_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `none`, `query_param_key`, and `tls_fingerprint`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -319,7 +323,7 @@ func (r *ResourceF5XCUserIdentification) Schema(ctx context.Context, request res
 								},
 								"ip_and_http_header_name": schema.StringAttribute{
 									Description:         "HTTP header name Name of HTTP header from which the value should be extracted.",
-									MarkdownDescription: "HTTP header name Name of HTTP header from which the value should be extracted.",
+									MarkdownDescription: "HTTP header name Name of HTTP header from which the value should be extracted.<br>Conflicts with `client_asn`, `client_city`, `client_country`, `client_ip`, `client_region`, `cookie_name`, `http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `none`, `query_param_key`, and `tls_fingerprint`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -333,7 +337,7 @@ func (r *ResourceF5XCUserIdentification) Schema(ctx context.Context, request res
 								},
 								"ip_and_ja4_tls_fingerprint": schema.BoolAttribute{
 									Description:         "ip_and_ja4_tls_fingerprint Use the combination of Client IP and JA4 TLS Fingerprint as user identifier",
-									MarkdownDescription: "ip_and_ja4_tls_fingerprint Use the combination of Client IP and JA4 TLS Fingerprint as user identifier",
+									MarkdownDescription: "ip_and_ja4_tls_fingerprint Use the combination of Client IP and JA4 TLS Fingerprint as user identifier<br>Conflicts with `client_asn`, `client_city`, `client_country`, `client_ip`, `client_region`, `cookie_name`, `http_header_name`, `ip_and_http_header_name`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `none`, `query_param_key`, and `tls_fingerprint`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -343,7 +347,7 @@ func (r *ResourceF5XCUserIdentification) Schema(ctx context.Context, request res
 								},
 								"ip_and_tls_fingerprint": schema.BoolAttribute{
 									Description:         "tls_fingerprint Use the combination of Client IP and JA3 TLS Fingerprint as user identifier",
-									MarkdownDescription: "tls_fingerprint Use the combination of Client IP and JA3 TLS Fingerprint as user identifier",
+									MarkdownDescription: "tls_fingerprint Use the combination of Client IP and JA3 TLS Fingerprint as user identifier<br>Conflicts with `client_asn`, `client_city`, `client_country`, `client_ip`, `client_region`, `cookie_name`, `http_header_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `none`, `query_param_key`, and `tls_fingerprint`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -353,7 +357,7 @@ func (r *ResourceF5XCUserIdentification) Schema(ctx context.Context, request res
 								},
 								"ja4_tls_fingerprint": schema.BoolAttribute{
 									Description:         "ja4_tls_fingerprint Use JA4 TLS Fingerprint as user identifier",
-									MarkdownDescription: "ja4_tls_fingerprint Use JA4 TLS Fingerprint as user identifier",
+									MarkdownDescription: "ja4_tls_fingerprint Use JA4 TLS Fingerprint as user identifier<br>Conflicts with `client_asn`, `client_city`, `client_country`, `client_ip`, `client_region`, `cookie_name`, `http_header_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `jwt_claim_name`, `none`, `query_param_key`, and `tls_fingerprint`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -363,7 +367,7 @@ func (r *ResourceF5XCUserIdentification) Schema(ctx context.Context, request res
 								},
 								"jwt_claim_name": schema.StringAttribute{
 									Description:         "JWT claim name Use the JWT claim value as user identifier.",
-									MarkdownDescription: "JWT claim name Use the JWT claim value as user identifier.",
+									MarkdownDescription: "JWT claim name Use the JWT claim value as user identifier.<br>Conflicts with `client_asn`, `client_city`, `client_country`, `client_ip`, `client_region`, `cookie_name`, `http_header_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `none`, `query_param_key`, and `tls_fingerprint`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -373,7 +377,7 @@ func (r *ResourceF5XCUserIdentification) Schema(ctx context.Context, request res
 								},
 								"none": schema.BoolAttribute{
 									Description:         "none Do not use any user identifier.",
-									MarkdownDescription: "none Do not use any user identifier.",
+									MarkdownDescription: "none Do not use any user identifier.<br>Conflicts with `client_asn`, `client_city`, `client_country`, `client_ip`, `client_region`, `cookie_name`, `http_header_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `query_param_key`, and `tls_fingerprint`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -383,7 +387,7 @@ func (r *ResourceF5XCUserIdentification) Schema(ctx context.Context, request res
 								},
 								"query_param_key": schema.StringAttribute{
 									Description:         "query param key Use the query parameter value for the given key as user identifier.",
-									MarkdownDescription: "query param key Use the query parameter value for the given key as user identifier.",
+									MarkdownDescription: "query param key Use the query parameter value for the given key as user identifier.<br>Conflicts with `client_asn`, `client_city`, `client_country`, `client_ip`, `client_region`, `cookie_name`, `http_header_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `none`, and `tls_fingerprint`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -393,7 +397,7 @@ func (r *ResourceF5XCUserIdentification) Schema(ctx context.Context, request res
 								},
 								"tls_fingerprint": schema.BoolAttribute{
 									Description:         "tls_fingerprint User JA3 TLS Fingerprint as user identifier",
-									MarkdownDescription: "tls_fingerprint User JA3 TLS Fingerprint as user identifier",
+									MarkdownDescription: "tls_fingerprint User JA3 TLS Fingerprint as user identifier<br>Conflicts with `client_asn`, `client_city`, `client_country`, `client_ip`, `client_region`, `cookie_name`, `http_header_name`, `ip_and_http_header_name`, `ip_and_ja4_tls_fingerprint`, `ip_and_tls_fingerprint`, `ja4_tls_fingerprint`, `jwt_claim_name`, `none`, and `query_param_key`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -571,8 +575,11 @@ func (r *ResourceF5XCUserIdentification) Create(ctx context.Context, request res
 
 		for i, rulesElement := range rulesElementsModelToSpec {
 			rulesSpec[i] = &ves_io_schema_user_identification.UserIdentificationRule{}
+			rulesSpec[i].Identifier = &ves_io_schema_user_identification.UserIdentificationRule_ClientIp{
+				ClientIp: &ves_io_schema.Empty{},
+			}
 
-			// resource modelToSpecNested RequiredOneOfField --> Identifier
+			// resource modelToSpecNested OneOfField --> Identifier
 			if !rulesElement.IdentifierChoice.IsNull() && !rulesElement.IdentifierChoice.IsUnknown() {
 				rulesIdentifierChoiceModel := UserIdentificationIdentifierChoice{}
 				response.Diagnostics.Append(rulesElement.IdentifierChoice.As(ctx, &rulesIdentifierChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -842,8 +849,7 @@ func (r *ResourceF5XCUserIdentification) Create(ctx context.Context, request res
 		for _, rulesElement := range specData.GetRules() {
 			userIdentificationUserIdentificationRuleModel := UserIdentificationUserIdentificationRule{}
 
-			// resource specToModelNested RequiredOneOfField --> Identifier
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> Identifier
 			if rulesElement.GetIdentifier() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				rulesidentifierChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -1072,11 +1078,7 @@ func (r *ResourceF5XCUserIdentification) Read(ctx context.Context, request resou
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_user_identification.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_user_identification.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "user_identification", err),
@@ -1203,8 +1205,7 @@ func (r *ResourceF5XCUserIdentification) Read(ctx context.Context, request resou
 		for _, rulesElement := range specData.GetRules() {
 			userIdentificationUserIdentificationRuleModel := UserIdentificationUserIdentificationRule{}
 
-			// resource specToModelNested RequiredOneOfField --> Identifier
-			// <no value>
+			// resource specToModelNested OneOfField --> Identifier
 			if rulesElement.GetIdentifier() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				rulesidentifierChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -1533,8 +1534,11 @@ func (r *ResourceF5XCUserIdentification) Update(ctx context.Context, request res
 
 		for i, rulesElement := range rulesElementsModelToSpec {
 			rulesSpec[i] = &ves_io_schema_user_identification.UserIdentificationRule{}
+			rulesSpec[i].Identifier = &ves_io_schema_user_identification.UserIdentificationRule_ClientIp{
+				ClientIp: &ves_io_schema.Empty{},
+			}
 
-			// resource modelToSpecNested RequiredOneOfField --> Identifier
+			// resource modelToSpecNested OneOfField --> Identifier
 			if !rulesElement.IdentifierChoice.IsNull() && !rulesElement.IdentifierChoice.IsUnknown() {
 				rulesIdentifierChoiceModel := UserIdentificationIdentifierChoice{}
 				response.Diagnostics.Append(rulesElement.IdentifierChoice.As(ctx, &rulesIdentifierChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1665,12 +1669,8 @@ func (r *ResourceF5XCUserIdentification) Update(ctx context.Context, request res
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_user_identification.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_user_identification.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "user_identification", err),
@@ -1679,7 +1679,7 @@ func (r *ResourceF5XCUserIdentification) Update(ctx context.Context, request res
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_user_identification.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_user_identification.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "user_identification", err),
@@ -1805,8 +1805,7 @@ func (r *ResourceF5XCUserIdentification) Update(ctx context.Context, request res
 		for _, rulesElement := range specData.GetRules() {
 			userIdentificationUserIdentificationRuleModel := UserIdentificationUserIdentificationRule{}
 
-			// resource specToModelNested RequiredOneOfField --> Identifier
-			// GlobalSpecType
+			// resource specToModelNested OneOfField --> Identifier
 			if rulesElement.GetIdentifier() != nil {
 				// Create a temporary attribute map for the choices within this OneOf
 				rulesidentifierChoiceChoicesAttributeMap := make(map[string]attr.Value)

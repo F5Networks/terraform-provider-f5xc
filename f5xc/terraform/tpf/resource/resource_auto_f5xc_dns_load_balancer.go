@@ -28,6 +28,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -170,7 +171,7 @@ var DnsLoadBalancerResponseCacheModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> ResponseCacheParametersChoice
+// Attribute map for OneOfField --> ResponseCacheParametersChoice
 var DnsLoadBalancerResponseCacheResponseCacheParametersChoiceModelAttributeMap = map[string]attr.Type{
 
 	"default_response_cache_parameters": types.BoolType,
@@ -506,21 +507,24 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 				Attributes: map[string]schema.Attribute{
 					"response_cache_parameters_choice": schema.SingleNestedAttribute{
 						Description:         "Response Cache Parameters Choice When Response Cache is enabled, clients will receive persistent answers",
-						MarkdownDescription: "Response Cache Parameters Choice When Response Cache is enabled, clients will receive persistent answers",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "Response Cache Parameters Choice When Response Cache is enabled, clients will receive persistent answers<br>Exactly one of `default_response_cache_parameters`, `disable`, or `response_cache_parameters` must be specified when `response_cache_parameters_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"default_response_cache_parameters",
 								"disable",
 								"response_cache_parameters",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"default_response_cache_parameters": schema.BoolAttribute{
 								Description:         "Default Response Cache Parameters Default Parameters for caching the DNS responses",
-								MarkdownDescription: "Default Response Cache Parameters Default Parameters for caching the DNS responses",
+								MarkdownDescription: "Default Response Cache Parameters Default Parameters for caching the DNS responses<br>Conflicts with `disable` and `response_cache_parameters`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -530,7 +534,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 							},
 							"disable": schema.BoolAttribute{
 								Description:         "Disable Response Cache When Response Cache is disabled, responses will be computed for each request",
-								MarkdownDescription: "Disable Response Cache When Response Cache is disabled, responses will be computed for each request",
+								MarkdownDescription: "Disable Response Cache When Response Cache is disabled, responses will be computed for each request<br>Conflicts with `default_response_cache_parameters` and `response_cache_parameters`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -540,7 +544,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 							},
 							"response_cache_parameters": schema.SingleNestedAttribute{
 								Description:         "Response Cache Parameters Customize the parameters for Response cache",
-								MarkdownDescription: "Response Cache Parameters Customize the parameters for Response cache",
+								MarkdownDescription: "Response Cache Parameters Customize the parameters for Response cache<br>Conflicts with `default_response_cache_parameters` and `disable`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -605,7 +609,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 							Attributes: map[string]schema.Attribute{
 								"action_choice": schema.SingleNestedAttribute{
 									Description:         "action choice Action for the DNS Load Balancing Rule",
-									MarkdownDescription: "action choice Action for the DNS Load Balancing Rule",
+									MarkdownDescription: "action choice Action for the DNS Load Balancing Rule<br>`pool` must be specified.",
 									Required:            true,
 									Optional:            false,
 									Computed:            false,
@@ -652,7 +656,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 								},
 								"client_choice": schema.SingleNestedAttribute{
 									Description:         "client_choice Selects the clients for which the DNS Load Balancing Rule will be applied. The conditions are limited to the geo location, ASN, and IP prefix from where the client DNS request originates. This geo location, ASN, and IP prefix is derived from the EDNS0 client subnet.",
-									MarkdownDescription: "client_choice Selects the clients for which the DNS Load Balancing Rule will be applied. The conditions are limited to the geo location, ASN, and IP prefix from where the client DNS request originates. This geo location, ASN, and IP prefix is derived from the EDNS0 client subnet.",
+									MarkdownDescription: "client_choice Selects the clients for which the DNS Load Balancing Rule will be applied. The conditions are limited to the geo location, ASN, and IP prefix from where the client DNS request originates. This geo location, ASN, and IP prefix is derived from the EDNS0 client subnet.<br>Exactly one of `asn_list`, `asn_matcher`, `geo_location_label_selector`, `geo_location_set`, `ip_prefix_list`, or `ip_prefix_set` must be specified.",
 									Required:            true,
 									Optional:            false,
 									Computed:            false,
@@ -669,7 +673,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 									Attributes: map[string]schema.Attribute{
 										"asn_list": schema.SingleNestedAttribute{
 											Description:         "asn list List of 4-byte ASN values. The rule evaluates to true if the origin ASN is present in the ASN list.",
-											MarkdownDescription: "asn list List of 4-byte ASN values. The rule evaluates to true if the origin ASN is present in the ASN list.",
+											MarkdownDescription: "asn list List of 4-byte ASN values. The rule evaluates to true if the origin ASN is present in the ASN list.<br>Conflicts with `asn_matcher`, `geo_location_label_selector`, `geo_location_set`, `ip_prefix_list`, and `ip_prefix_set`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -690,7 +694,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 										},
 										"asn_matcher": schema.SingleNestedAttribute{
 											Description:         "asn matcher List of references to BGP ASN Set objects. The rule evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.",
-											MarkdownDescription: "asn matcher List of references to BGP ASN Set objects. The rule evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.",
+											MarkdownDescription: "asn matcher List of references to BGP ASN Set objects. The rule evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.<br>Conflicts with `asn_list`, `geo_location_label_selector`, `geo_location_set`, `ip_prefix_list`, and `ip_prefix_set`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -737,7 +741,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 										},
 										"geo_location_label_selector": schema.SingleNestedAttribute{
 											Description:         "geo_location label selector A label selector that describes the expected set of geo locations for the clients. The selected geo locations are matched with the translated geo locations derived from incoming EDNS0 client-subnet in the DNS request.",
-											MarkdownDescription: "geo_location label selector A label selector that describes the expected set of geo locations for the clients. The selected geo locations are matched with the translated geo locations derived from incoming EDNS0 client-subnet in the DNS request.",
+											MarkdownDescription: "geo_location label selector A label selector that describes the expected set of geo locations for the clients. The selected geo locations are matched with the translated geo locations derived from incoming EDNS0 client-subnet in the DNS request.<br>Conflicts with `asn_list`, `asn_matcher`, `geo_location_set`, `ip_prefix_list`, and `ip_prefix_set`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -758,7 +762,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 										},
 										"geo_location_set": schema.SingleNestedAttribute{
 											Description:         "geo_location selector Select the pre-defined geo location set. The selected locations in the geo location set are matched with the translated geo locations derived from incoming EDNS0 client-subnet in the DNS request.",
-											MarkdownDescription: "geo_location selector Select the pre-defined geo location set. The selected locations in the geo location set are matched with the translated geo locations derived from incoming EDNS0 client-subnet in the DNS request.",
+											MarkdownDescription: "geo_location selector Select the pre-defined geo location set. The selected locations in the geo location set are matched with the translated geo locations derived from incoming EDNS0 client-subnet in the DNS request.<br>Conflicts with `asn_list`, `asn_matcher`, `geo_location_label_selector`, `ip_prefix_list`, and `ip_prefix_set`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -791,7 +795,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 										},
 										"ip_prefix_list": schema.SingleNestedAttribute{
 											Description:         "IP prefix list List of IP Prefix values. The rule evaluates to true if the EDNS0 client subnet is covered by one or more of the IP prefixes in the IP Prefix list.",
-											MarkdownDescription: "IP prefix list List of IP Prefix values. The rule evaluates to true if the EDNS0 client subnet is covered by one or more of the IP prefixes in the IP Prefix list.",
+											MarkdownDescription: "IP prefix list List of IP Prefix values. The rule evaluates to true if the EDNS0 client subnet is covered by one or more of the IP prefixes in the IP Prefix list.<br>Conflicts with `asn_list`, `asn_matcher`, `geo_location_label_selector`, `geo_location_set`, and `ip_prefix_set`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -834,7 +838,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 										},
 										"ip_prefix_set": schema.SingleNestedAttribute{
 											Description:         "IP prefix set List of references to IP Prefix Set objects. The rule evaluates to true if the EDNS0 client subnet is covered by one or more of the IP prefixes in the IP Prefix set.",
-											MarkdownDescription: "IP prefix set List of references to IP Prefix Set objects. The rule evaluates to true if the EDNS0 client subnet is covered by one or more of the IP prefixes in the IP Prefix set.",
+											MarkdownDescription: "IP prefix set List of references to IP Prefix Set objects. The rule evaluates to true if the EDNS0 client subnet is covered by one or more of the IP prefixes in the IP Prefix set.<br>Conflicts with `asn_list`, `asn_matcher`, `geo_location_label_selector`, `geo_location_set`, and `ip_prefix_list`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -1111,6 +1115,9 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 		// resource modelToSpecRoot PointerField --> ResponseCache
 		if !data.ResponseCache.IsNull() && !data.ResponseCache.IsUnknown() {
 			responseCacheSpec := &ves_io_schema_dns_load_balancer.ResponseCache{}
+			responseCacheSpec.ResponseCacheParametersChoice = &ves_io_schema_dns_load_balancer.ResponseCache_Disable{
+				Disable: &ves_io_schema.Empty{},
+			}
 			spec.ResponseCache = responseCacheSpec
 			var responseCacheModel DnsLoadBalancerRespCache
 
@@ -1121,7 +1128,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ResponseCacheParametersChoice
+			// resource modelToSpecNested OneOfField --> ResponseCacheParametersChoice
 			if !responseCacheModel.ResponseCacheParametersChoice.IsNull() && !responseCacheModel.ResponseCacheParametersChoice.IsUnknown() {
 				responseCacheResponseCacheParametersChoiceModel := DnsLoadBalancerRespCacheParametersChoice{}
 				response.Diagnostics.Append(responseCacheModel.ResponseCacheParametersChoice.As(ctx, &responseCacheResponseCacheParametersChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -1752,8 +1759,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 		var dnsLoadBalancerRespCacheModel = &DnsLoadBalancerRespCache{}
 		responseCacheElement := specData.GetResponseCache()
 
-		// resource specToModelNested RequiredOneOfField --> ResponseCacheParametersChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> ResponseCacheParametersChoice
 		if responseCacheElement.GetResponseCacheParametersChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			responseCacheresponseCacheParametersChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -2393,11 +2399,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_load_balancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_load_balancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "dns_load_balancer", err),
@@ -2643,8 +2645,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 		var dnsLoadBalancerRespCacheModel = &DnsLoadBalancerRespCache{}
 		responseCacheElement := specData.GetResponseCache()
 
-		// resource specToModelNested RequiredOneOfField --> ResponseCacheParametersChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> ResponseCacheParametersChoice
 		if responseCacheElement.GetResponseCacheParametersChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			responseCacheresponseCacheParametersChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -3421,6 +3422,9 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 		// resource modelToSpecRoot PointerField --> ResponseCache
 		if !data.ResponseCache.IsNull() && !data.ResponseCache.IsUnknown() {
 			responseCacheSpec := &ves_io_schema_dns_load_balancer.ResponseCache{}
+			responseCacheSpec.ResponseCacheParametersChoice = &ves_io_schema_dns_load_balancer.ResponseCache_Disable{
+				Disable: &ves_io_schema.Empty{},
+			}
 			spec.ResponseCache = responseCacheSpec
 			var responseCacheModel DnsLoadBalancerRespCache
 
@@ -3431,7 +3435,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> ResponseCacheParametersChoice
+			// resource modelToSpecNested OneOfField --> ResponseCacheParametersChoice
 			if !responseCacheModel.ResponseCacheParametersChoice.IsNull() && !responseCacheModel.ResponseCacheParametersChoice.IsUnknown() {
 				responseCacheResponseCacheParametersChoiceModel := DnsLoadBalancerRespCacheParametersChoice{}
 				response.Diagnostics.Append(responseCacheModel.ResponseCacheParametersChoice.As(ctx, &responseCacheResponseCacheParametersChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3804,12 +3808,8 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_dns_load_balancer.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_dns_load_balancer.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "dns_load_balancer", err),
@@ -3818,7 +3818,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_load_balancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_load_balancer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "dns_load_balancer", err),
@@ -4063,8 +4063,7 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 		var dnsLoadBalancerRespCacheModel = &DnsLoadBalancerRespCache{}
 		responseCacheElement := specData.GetResponseCache()
 
-		// resource specToModelNested RequiredOneOfField --> ResponseCacheParametersChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> ResponseCacheParametersChoice
 		if responseCacheElement.GetResponseCacheParametersChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			responseCacheresponseCacheParametersChoiceChoicesAttributeMap := make(map[string]attr.Value)

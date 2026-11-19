@@ -127,14 +127,14 @@ resource "f5xc_forward_proxy_policy" "example" {
 
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
-- `proxy_choice` (Attributes) Choose Forward Proxy Select Forward Proxy where this policy will be applied (see [below for nested schema](#nestedatt--proxy_choice))
-- `rule_choice` (Attributes) Select Policy Rules Select how rules are configured for forward proxy (see [below for nested schema](#nestedatt--rule_choice))
 
 ### Optional
 
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `description` (String) description Human readable description for the object
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
+- `proxy_choice` (Attributes) Choose Forward Proxy Select Forward Proxy where this policy will be applied<br>Exactly one of `any_proxy`, `drp_http_connect`, `network_connector`, or `proxy_label_selector` must be specified when `proxy_choice` is configured. (see [below for nested schema](#nestedatt--proxy_choice))
+- `rule_choice` (Attributes) Select Policy Rules Select how rules are configured for forward proxy<br>Exactly one of `allow_all`, `allow_list`, `deny_list`, or `rule_list` must be specified when `rule_choice` is configured. (see [below for nested schema](#nestedatt--rule_choice))
 - `segment_policy` (Attributes) Segments Select source and destination segments where rule is applied Skip the configuration or set option as Any to ignore corresponding segment match (see [below for nested schema](#nestedatt--segment_policy))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
@@ -147,10 +147,10 @@ resource "f5xc_forward_proxy_policy" "example" {
 
 Optional:
 
-- `any_proxy` (Boolean) All Proxies on this site This policy is applied to all forward proxies on this site, and not drp/http-connect proxies
-- `drp_http_connect` (Boolean) DRP or HTTP Connect Proxy This policy is applied to attached DRP/HTTP-Connect Proxy (applicable only in App namespace)
-- `network_connector` (Attributes) Specific Network Connector Proxy for given network connector (see [below for nested schema](#nestedatt--proxy_choice--network_connector))
-- `proxy_label_selector` (Attributes) Network Connector Label selector Proxy for Network Connector or HTTP connect proxy selected by Label selector (see [below for nested schema](#nestedatt--proxy_choice--proxy_label_selector))
+- `any_proxy` (Boolean) All Proxies on this site This policy is applied to all forward proxies on this site, and not drp/http-connect proxies<br>Conflicts with `drp_http_connect`, `network_connector`, and `proxy_label_selector`.
+- `drp_http_connect` (Boolean) DRP or HTTP Connect Proxy This policy is applied to attached DRP/HTTP-Connect Proxy (applicable only in App namespace)<br>Conflicts with `any_proxy`, `network_connector`, and `proxy_label_selector`.
+- `network_connector` (Attributes) Specific Network Connector Proxy for given network connector<br>Conflicts with `any_proxy`, `drp_http_connect`, and `proxy_label_selector`. (see [below for nested schema](#nestedatt--proxy_choice--network_connector))
+- `proxy_label_selector` (Attributes) Network Connector Label selector Proxy for Network Connector or HTTP connect proxy selected by Label selector<br>Conflicts with `any_proxy`, `drp_http_connect`, and `network_connector`. (see [below for nested schema](#nestedatt--proxy_choice--proxy_label_selector))
 
 <a id="nestedatt--proxy_choice--network_connector"></a>
 ### Nested Schema for `proxy_choice.network_connector`
@@ -179,20 +179,17 @@ Required:
 
 Optional:
 
-- `allow_all` (Boolean) Allow all connections Allow all connections through this forward proxy
-- `allow_list` (Attributes) List of allowed connections List of allowed connections (see [below for nested schema](#nestedatt--rule_choice--allow_list))
-- `deny_list` (Attributes) List of denied connections List of denied connections (see [below for nested schema](#nestedatt--rule_choice--deny_list))
-- `rule_list` (Attributes) List of custom rules List of custom rules (see [below for nested schema](#nestedatt--rule_choice--rule_list))
+- `allow_all` (Boolean) Allow all connections Allow all connections through this forward proxy<br>Conflicts with `allow_list`, `deny_list`, and `rule_list`.
+- `allow_list` (Attributes) List of allowed connections List of allowed connections<br>Conflicts with `allow_all`, `deny_list`, and `rule_list`. (see [below for nested schema](#nestedatt--rule_choice--allow_list))
+- `deny_list` (Attributes) List of denied connections List of denied connections<br>Conflicts with `allow_all`, `allow_list`, and `rule_list`. (see [below for nested schema](#nestedatt--rule_choice--deny_list))
+- `rule_list` (Attributes) List of custom rules List of custom rules<br>Conflicts with `allow_all`, `allow_list`, and `deny_list`. (see [below for nested schema](#nestedatt--rule_choice--rule_list))
 
 <a id="nestedatt--rule_choice--allow_list"></a>
 ### Nested Schema for `rule_choice.allow_list`
 
-Required:
-
-- `default_action_choice` (Attributes) Default Action Default action for connections that do not match any items in the HTTP, TLS and L4 lists (see [below for nested schema](#nestedatt--rule_choice--allow_list--default_action_choice))
-
 Optional:
 
+- `default_action_choice` (Attributes) Default Action Default action for connections that do not match any items in the HTTP, TLS and L4 lists<br>Exactly one of `default_action_allow`, `default_action_deny`, or `default_action_next_policy` must be specified when `default_action_choice` is configured. (see [below for nested schema](#nestedatt--rule_choice--allow_list--default_action_choice))
 - `dest_list` (Attributes List) L4 Destinations L4 destinations for non-HTTP and non-TLS connections and TLS connections without SNI (see [below for nested schema](#nestedatt--rule_choice--allow_list--dest_list))
 - `http_list` (Attributes List) HTTP URLs URLs for HTTP connections (see [below for nested schema](#nestedatt--rule_choice--allow_list--http_list))
 - `tls_list` (Attributes List) TLS Domains Domains in SNI for TLS connections (see [below for nested schema](#nestedatt--rule_choice--allow_list--tls_list))
@@ -202,9 +199,9 @@ Optional:
 
 Optional:
 
-- `default_action_allow` (Boolean) Allow Allow all connections
-- `default_action_deny` (Boolean) Deny Deny all connections
-- `default_action_next_policy` (Boolean) Next Policy Evaluate the next forward proxy policy in the active list
+- `default_action_allow` (Boolean) Allow Allow all connections<br>Conflicts with `default_action_deny` and `default_action_next_policy`.
+- `default_action_deny` (Boolean) Deny Deny all connections<br>Conflicts with `default_action_allow` and `default_action_next_policy`.
+- `default_action_next_policy` (Boolean) Next Policy Evaluate the next forward proxy policy in the active list<br>Conflicts with `default_action_allow` and `default_action_deny`.
 
 
 <a id="nestedatt--rule_choice--allow_list--dest_list"></a>
@@ -222,17 +219,20 @@ Optional:
 
 Required:
 
-- `domain_choice` (Attributes) Select Domain Domain part of the URL (see [below for nested schema](#nestedatt--rule_choice--allow_list--http_list--domain_choice))
-- `path_choice` (Attributes) Select Path for Domain Path part of the URL (see [below for nested schema](#nestedatt--rule_choice--allow_list--http_list--path_choice))
+- `domain_choice` (Attributes) Select Domain Domain part of the URL<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified. (see [below for nested schema](#nestedatt--rule_choice--allow_list--http_list--domain_choice))
+
+Optional:
+
+- `path_choice` (Attributes) Select Path for Domain Path part of the URL<br>Exactly one of `any_path`, `path_exact_value`, `path_prefix_value`, or `path_regex_value` must be specified when `path_choice` is configured. (see [below for nested schema](#nestedatt--rule_choice--allow_list--http_list--path_choice))
 
 <a id="nestedatt--rule_choice--allow_list--http_list--domain_choice"></a>
 ### Nested Schema for `rule_choice.allow_list.http_list.domain_choice`
 
 Optional:
 
-- `exact_value` (String) exact value Exact domain name<br>**Validation:** `Length LengthBetween(1, 256)`
-- `regex_value` (String) regex value of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`
-- `suffix_value` (String) suffix value Suffix of domain names e.g 'xyz.com' will match '*.xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`
+- `exact_value` (String) exact value Exact domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.
+- `regex_value` (String) regex value of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.
+- `suffix_value` (String) suffix value Suffix of domain names e.g 'xyz.com' will match '*.xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.
 
 
 <a id="nestedatt--rule_choice--allow_list--http_list--path_choice"></a>
@@ -240,10 +240,10 @@ Optional:
 
 Optional:
 
-- `any_path` (Boolean) Any Path All paths are considered match
-- `path_exact_value` (String) exact value Exact Path to match.<br>**Validation:** `Length LengthBetween(1, 256)`
-- `path_prefix_value` (String) Prefix value Prefix of Path  e.g '/abc/xyz' will match '/abc/xyz/.*'<br>**Validation:** `Length LengthBetween(1, 256)`
-- `path_regex_value` (String) regex value of Paths Regular Expression value for the Path to match<br>**Validation:** `Length LengthBetween(1, 256)`
+- `any_path` (Boolean) Any Path All paths are considered match<br>Conflicts with `path_exact_value`, `path_prefix_value`, and `path_regex_value`.
+- `path_exact_value` (String) exact value Exact Path to match.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_path`, `path_prefix_value`, and `path_regex_value`.
+- `path_prefix_value` (String) Prefix value Prefix of Path  e.g '/abc/xyz' will match '/abc/xyz/.*'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_path`, `path_exact_value`, and `path_regex_value`.
+- `path_regex_value` (String) regex value of Paths Regular Expression value for the Path to match<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_path`, `path_exact_value`, and `path_prefix_value`.
 
 
 
@@ -252,16 +252,16 @@ Optional:
 
 Required:
 
-- `domain_choice` (Attributes) Domain choice Method to specify domain part (see [below for nested schema](#nestedatt--rule_choice--allow_list--tls_list--domain_choice))
+- `domain_choice` (Attributes) Domain choice Method to specify domain part<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified. (see [below for nested schema](#nestedatt--rule_choice--allow_list--tls_list--domain_choice))
 
 <a id="nestedatt--rule_choice--allow_list--tls_list--domain_choice"></a>
 ### Nested Schema for `rule_choice.allow_list.tls_list.domain_choice`
 
 Optional:
 
-- `exact_value` (String) exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`
-- `regex_value` (String) regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`
-- `suffix_value` (String) suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`
+- `exact_value` (String) exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.
+- `regex_value` (String) regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.
+- `suffix_value` (String) suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.
 
 
 
@@ -269,12 +269,9 @@ Optional:
 <a id="nestedatt--rule_choice--deny_list"></a>
 ### Nested Schema for `rule_choice.deny_list`
 
-Required:
-
-- `default_action_choice` (Attributes) Default Action Default action for connections that do not match any items in the HTTP, TLS and L4 lists (see [below for nested schema](#nestedatt--rule_choice--deny_list--default_action_choice))
-
 Optional:
 
+- `default_action_choice` (Attributes) Default Action Default action for connections that do not match any items in the HTTP, TLS and L4 lists<br>Exactly one of `default_action_allow`, `default_action_deny`, or `default_action_next_policy` must be specified when `default_action_choice` is configured. (see [below for nested schema](#nestedatt--rule_choice--deny_list--default_action_choice))
 - `dest_list` (Attributes List) L4 Destinations L4 destinations for non-HTTP and non-TLS connections and TLS connections without SNI (see [below for nested schema](#nestedatt--rule_choice--deny_list--dest_list))
 - `http_list` (Attributes List) HTTP URLs URLs for HTTP connections (see [below for nested schema](#nestedatt--rule_choice--deny_list--http_list))
 - `tls_list` (Attributes List) TLS Domains Domains in SNI for TLS connections (see [below for nested schema](#nestedatt--rule_choice--deny_list--tls_list))
@@ -284,9 +281,9 @@ Optional:
 
 Optional:
 
-- `default_action_allow` (Boolean) Allow Allow all connections
-- `default_action_deny` (Boolean) Deny Deny all connections
-- `default_action_next_policy` (Boolean) Next Policy Evaluate the next forward proxy policy in the active list
+- `default_action_allow` (Boolean) Allow Allow all connections<br>Conflicts with `default_action_deny` and `default_action_next_policy`.
+- `default_action_deny` (Boolean) Deny Deny all connections<br>Conflicts with `default_action_allow` and `default_action_next_policy`.
+- `default_action_next_policy` (Boolean) Next Policy Evaluate the next forward proxy policy in the active list<br>Conflicts with `default_action_allow` and `default_action_deny`.
 
 
 <a id="nestedatt--rule_choice--deny_list--dest_list"></a>
@@ -304,17 +301,20 @@ Optional:
 
 Required:
 
-- `domain_choice` (Attributes) Select Domain Domain part of the URL (see [below for nested schema](#nestedatt--rule_choice--deny_list--http_list--domain_choice))
-- `path_choice` (Attributes) Select Path for Domain Path part of the URL (see [below for nested schema](#nestedatt--rule_choice--deny_list--http_list--path_choice))
+- `domain_choice` (Attributes) Select Domain Domain part of the URL<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified. (see [below for nested schema](#nestedatt--rule_choice--deny_list--http_list--domain_choice))
+
+Optional:
+
+- `path_choice` (Attributes) Select Path for Domain Path part of the URL<br>Exactly one of `any_path`, `path_exact_value`, `path_prefix_value`, or `path_regex_value` must be specified when `path_choice` is configured. (see [below for nested schema](#nestedatt--rule_choice--deny_list--http_list--path_choice))
 
 <a id="nestedatt--rule_choice--deny_list--http_list--domain_choice"></a>
 ### Nested Schema for `rule_choice.deny_list.http_list.domain_choice`
 
 Optional:
 
-- `exact_value` (String) exact value Exact domain name<br>**Validation:** `Length LengthBetween(1, 256)`
-- `regex_value` (String) regex value of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`
-- `suffix_value` (String) suffix value Suffix of domain names e.g 'xyz.com' will match '*.xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`
+- `exact_value` (String) exact value Exact domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.
+- `regex_value` (String) regex value of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.
+- `suffix_value` (String) suffix value Suffix of domain names e.g 'xyz.com' will match '*.xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.
 
 
 <a id="nestedatt--rule_choice--deny_list--http_list--path_choice"></a>
@@ -322,10 +322,10 @@ Optional:
 
 Optional:
 
-- `any_path` (Boolean) Any Path All paths are considered match
-- `path_exact_value` (String) exact value Exact Path to match.<br>**Validation:** `Length LengthBetween(1, 256)`
-- `path_prefix_value` (String) Prefix value Prefix of Path  e.g '/abc/xyz' will match '/abc/xyz/.*'<br>**Validation:** `Length LengthBetween(1, 256)`
-- `path_regex_value` (String) regex value of Paths Regular Expression value for the Path to match<br>**Validation:** `Length LengthBetween(1, 256)`
+- `any_path` (Boolean) Any Path All paths are considered match<br>Conflicts with `path_exact_value`, `path_prefix_value`, and `path_regex_value`.
+- `path_exact_value` (String) exact value Exact Path to match.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_path`, `path_prefix_value`, and `path_regex_value`.
+- `path_prefix_value` (String) Prefix value Prefix of Path  e.g '/abc/xyz' will match '/abc/xyz/.*'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_path`, `path_exact_value`, and `path_regex_value`.
+- `path_regex_value` (String) regex value of Paths Regular Expression value for the Path to match<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_path`, `path_exact_value`, and `path_prefix_value`.
 
 
 
@@ -334,16 +334,16 @@ Optional:
 
 Required:
 
-- `domain_choice` (Attributes) Domain choice Method to specify domain part (see [below for nested schema](#nestedatt--rule_choice--deny_list--tls_list--domain_choice))
+- `domain_choice` (Attributes) Domain choice Method to specify domain part<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified. (see [below for nested schema](#nestedatt--rule_choice--deny_list--tls_list--domain_choice))
 
 <a id="nestedatt--rule_choice--deny_list--tls_list--domain_choice"></a>
 ### Nested Schema for `rule_choice.deny_list.tls_list.domain_choice`
 
 Optional:
 
-- `exact_value` (String) exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`
-- `regex_value` (String) regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`
-- `suffix_value` (String) suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`
+- `exact_value` (String) exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.
+- `regex_value` (String) regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.
+- `suffix_value` (String) suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.
 
 
 
@@ -361,28 +361,40 @@ Required:
 Required:
 
 - `action` (List of String) action Action to be enforced if the input request matches the rule.<br>**Allowed Values (choose one):** `['ALLOW', 'DENY', 'GOTO_POLICY', 'LAST_POLICY', 'NEXT_POLICY', 'NEXT_POLICY_SET']`
-- `destination_choice` (Attributes) Destination Choice Destinations of the proxy connections (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice))
 - `metadata` (Attributes) metadata Common attributes for the rule including name and description. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--metadata))
-- `source_choice` (Attributes) Choose Source Select source for proxy policy. Source can be a particular endpoint or set of endpoints. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--source_choice))
 
 Optional:
 
-- `http_connect_choice` (Attributes) Destination port Match on destination port for connections (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--http_connect_choice))
+- `destination_choice` (Attributes) Destination Choice Destinations of the proxy connections<br>Exactly one of `all_destinations`, `dst_asn_list`, `dst_asn_set`, `dst_ip_prefix_set`, `dst_label_selector`, `dst_prefix_list`, `http_list`, `tls_list`, or `url_category_list` must be specified when `destination_choice` is configured. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice))
+- `http_connect_choice` (Attributes) Destination port Match on destination port for connections<br>Exactly one of `no_http_connect_port` or `port_matcher` must be specified when `http_connect_choice` is configured. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--http_connect_choice))
+- `source_choice` (Attributes) Choose Source Select source for proxy policy. Source can be a particular endpoint or set of endpoints.<br>Exactly one of `all_sources`, `ip_prefix_set`, `label_selector`, or `prefix_list` must be specified when `source_choice` is configured. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--source_choice))
+
+<a id="nestedatt--rule_choice--rule_list--rules--metadata"></a>
+### Nested Schema for `rule_choice.rule_list.rules.metadata`
+
+Required:
+
+- `name` (String) name This is the name of the message. The value of name has to follow DNS-1035 format.<br>**Validation:** `Length LengthAtLeast(1)`
+
+Optional:
+
+- `description` (String) description Human readable description.<br>**Validation:** `Length LengthAtMost(256)`
+
 
 <a id="nestedatt--rule_choice--rule_list--rules--destination_choice"></a>
 ### Nested Schema for `rule_choice.rule_list.rules.destination_choice`
 
 Optional:
 
-- `all_destinations` (Boolean) All Destinations Match on all destinations
-- `dst_asn_list` (Attributes) Dst ASN List Addresses that belong to the ASNs in the given list The ASN is obtained by performing a lookup for the destination IPv4 Address in a GeoIP DB. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--dst_asn_list))
-- `dst_asn_set` (Attributes) Dst ASN Set Addresses that belong to the ASNs in the given bgp_asn_set The ASN is obtained by performing a lookup for the destination IPv4 Address in a GeoIP DB. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--dst_asn_set))
-- `dst_ip_prefix_set` (Attributes) Dst IP Prefix Set Addresses that are covered by the prefixes in the given ip_prefix_set (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--dst_ip_prefix_set))
-- `dst_label_selector` (Attributes) Dst Label Selector Destination is the set of prefixes determined by the label selector expression (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--dst_label_selector))
-- `dst_prefix_list` (Attributes) Dst IP Prefix List Addresses that are covered by the given list of IPv4 prefixes (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--dst_prefix_list))
-- `http_list` (Attributes) HTTP URLs URLs for HTTP connections (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--http_list))
-- `tls_list` (Attributes) TLS Domains Domains in SNI for TLS connections (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--tls_list))
-- `url_category_list` (Attributes) URL Category List URL categories to choose, so that the corresponding label selector expressions can be derived from it (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--url_category_list))
+- `all_destinations` (Boolean) All Destinations Match on all destinations<br>Conflicts with `dst_asn_list`, `dst_asn_set`, `dst_ip_prefix_set`, `dst_label_selector`, `dst_prefix_list`, `http_list`, `tls_list`, and `url_category_list`.
+- `dst_asn_list` (Attributes) Dst ASN List Addresses that belong to the ASNs in the given list The ASN is obtained by performing a lookup for the destination IPv4 Address in a GeoIP DB.<br>Conflicts with `all_destinations`, `dst_asn_set`, `dst_ip_prefix_set`, `dst_label_selector`, `dst_prefix_list`, `http_list`, `tls_list`, and `url_category_list`. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--dst_asn_list))
+- `dst_asn_set` (Attributes) Dst ASN Set Addresses that belong to the ASNs in the given bgp_asn_set The ASN is obtained by performing a lookup for the destination IPv4 Address in a GeoIP DB.<br>Conflicts with `all_destinations`, `dst_asn_list`, `dst_ip_prefix_set`, `dst_label_selector`, `dst_prefix_list`, `http_list`, `tls_list`, and `url_category_list`. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--dst_asn_set))
+- `dst_ip_prefix_set` (Attributes) Dst IP Prefix Set Addresses that are covered by the prefixes in the given ip_prefix_set<br>Conflicts with `all_destinations`, `dst_asn_list`, `dst_asn_set`, `dst_label_selector`, `dst_prefix_list`, `http_list`, `tls_list`, and `url_category_list`. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--dst_ip_prefix_set))
+- `dst_label_selector` (Attributes) Dst Label Selector Destination is the set of prefixes determined by the label selector expression<br>Conflicts with `all_destinations`, `dst_asn_list`, `dst_asn_set`, `dst_ip_prefix_set`, `dst_prefix_list`, `http_list`, `tls_list`, and `url_category_list`. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--dst_label_selector))
+- `dst_prefix_list` (Attributes) Dst IP Prefix List Addresses that are covered by the given list of IPv4 prefixes<br>Conflicts with `all_destinations`, `dst_asn_list`, `dst_asn_set`, `dst_ip_prefix_set`, `dst_label_selector`, `http_list`, `tls_list`, and `url_category_list`. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--dst_prefix_list))
+- `http_list` (Attributes) HTTP URLs URLs for HTTP connections<br>Conflicts with `all_destinations`, `dst_asn_list`, `dst_asn_set`, `dst_ip_prefix_set`, `dst_label_selector`, `dst_prefix_list`, `tls_list`, and `url_category_list`. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--http_list))
+- `tls_list` (Attributes) TLS Domains Domains in SNI for TLS connections<br>Conflicts with `all_destinations`, `dst_asn_list`, `dst_asn_set`, `dst_ip_prefix_set`, `dst_label_selector`, `dst_prefix_list`, `http_list`, and `url_category_list`. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--tls_list))
+- `url_category_list` (Attributes) URL Category List URL categories to choose, so that the corresponding label selector expressions can be derived from it<br>Conflicts with `all_destinations`, `dst_asn_list`, `dst_asn_set`, `dst_ip_prefix_set`, `dst_label_selector`, `dst_prefix_list`, `http_list`, and `tls_list`. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--url_category_list))
 
 <a id="nestedatt--rule_choice--rule_list--rules--destination_choice--dst_asn_list"></a>
 ### Nested Schema for `rule_choice.rule_list.rules.destination_choice.dst_asn_list`
@@ -447,17 +459,20 @@ Optional:
 
 Required:
 
-- `domain_choice` (Attributes) Select Domain Domain part of the URL (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--http_list--http_list--domain_choice))
-- `path_choice` (Attributes) Select Path for Domain Path part of the URL (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--http_list--http_list--path_choice))
+- `domain_choice` (Attributes) Select Domain Domain part of the URL<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--http_list--http_list--domain_choice))
+
+Optional:
+
+- `path_choice` (Attributes) Select Path for Domain Path part of the URL<br>Exactly one of `any_path`, `path_exact_value`, `path_prefix_value`, or `path_regex_value` must be specified when `path_choice` is configured. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--http_list--http_list--path_choice))
 
 <a id="nestedatt--rule_choice--rule_list--rules--destination_choice--http_list--http_list--domain_choice"></a>
 ### Nested Schema for `rule_choice.rule_list.rules.destination_choice.http_list.http_list.domain_choice`
 
 Optional:
 
-- `exact_value` (String) exact value Exact domain name<br>**Validation:** `Length LengthBetween(1, 256)`
-- `regex_value` (String) regex value of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`
-- `suffix_value` (String) suffix value Suffix of domain names e.g 'xyz.com' will match '*.xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`
+- `exact_value` (String) exact value Exact domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.
+- `regex_value` (String) regex value of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.
+- `suffix_value` (String) suffix value Suffix of domain names e.g 'xyz.com' will match '*.xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.
 
 
 <a id="nestedatt--rule_choice--rule_list--rules--destination_choice--http_list--http_list--path_choice"></a>
@@ -465,10 +480,10 @@ Optional:
 
 Optional:
 
-- `any_path` (Boolean) Any Path All paths are considered match
-- `path_exact_value` (String) exact value Exact Path to match.<br>**Validation:** `Length LengthBetween(1, 256)`
-- `path_prefix_value` (String) Prefix value Prefix of Path  e.g '/abc/xyz' will match '/abc/xyz/.*'<br>**Validation:** `Length LengthBetween(1, 256)`
-- `path_regex_value` (String) regex value of Paths Regular Expression value for the Path to match<br>**Validation:** `Length LengthBetween(1, 256)`
+- `any_path` (Boolean) Any Path All paths are considered match<br>Conflicts with `path_exact_value`, `path_prefix_value`, and `path_regex_value`.
+- `path_exact_value` (String) exact value Exact Path to match.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_path`, `path_prefix_value`, and `path_regex_value`.
+- `path_prefix_value` (String) Prefix value Prefix of Path  e.g '/abc/xyz' will match '/abc/xyz/.*'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_path`, `path_exact_value`, and `path_regex_value`.
+- `path_regex_value` (String) regex value of Paths Regular Expression value for the Path to match<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `any_path`, `path_exact_value`, and `path_prefix_value`.
 
 
 
@@ -485,16 +500,16 @@ Optional:
 
 Required:
 
-- `domain_choice` (Attributes) Domain choice Method to specify domain part (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--tls_list--tls_list--domain_choice))
+- `domain_choice` (Attributes) Domain choice Method to specify domain part<br>Exactly one of `exact_value`, `regex_value`, or `suffix_value` must be specified. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice--tls_list--tls_list--domain_choice))
 
 <a id="nestedatt--rule_choice--rule_list--rules--destination_choice--tls_list--tls_list--domain_choice"></a>
 ### Nested Schema for `rule_choice.rule_list.rules.destination_choice.tls_list.tls_list.domain_choice`
 
 Optional:
 
-- `exact_value` (String) exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`
-- `regex_value` (String) regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`
-- `suffix_value` (String) suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`
+- `exact_value` (String) exact value Exact domain name.<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `regex_value` and `suffix_value`.
+- `regex_value` (String) regex values of Domains Regular Expression value for the domain name<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `suffix_value`.
+- `suffix_value` (String) suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `exact_value` and `regex_value`.
 
 
 
@@ -508,16 +523,25 @@ Required:
 
 
 
-<a id="nestedatt--rule_choice--rule_list--rules--metadata"></a>
-### Nested Schema for `rule_choice.rule_list.rules.metadata`
-
-Required:
-
-- `name` (String) name This is the name of the message. The value of name has to follow DNS-1035 format.<br>**Validation:** `Length LengthAtLeast(1)`
+<a id="nestedatt--rule_choice--rule_list--rules--http_connect_choice"></a>
+### Nested Schema for `rule_choice.rule_list.rules.http_connect_choice`
 
 Optional:
 
-- `description` (String) description Human readable description.<br>**Validation:** `Length LengthAtMost(256)`
+- `no_http_connect_port` (Boolean) Do not Match Ignore destination ports for connections<br>Conflicts with `port_matcher`.
+- `port_matcher` (Attributes) port matcher The list of port ranges to which the destination port should belong. In case of an HTTP Connect, the destination port is extracted from the connect destination.<br>Conflicts with `no_http_connect_port`. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--http_connect_choice--port_matcher))
+
+<a id="nestedatt--rule_choice--rule_list--rules--http_connect_choice--port_matcher"></a>
+### Nested Schema for `rule_choice.rule_list.rules.http_connect_choice.port_matcher`
+
+Required:
+
+- `ports` (List of String) port ranges A list of strings, each of which is a single port value or a tuple of start and end port values separated by '-'. The start and end values are considered to be part of the range.
+
+Optional:
+
+- `invert_matcher` (Boolean) invert_matcher Invert the match result.<br>**Default:** `false`
+
 
 
 <a id="nestedatt--rule_choice--rule_list--rules--source_choice"></a>
@@ -525,10 +549,10 @@ Optional:
 
 Optional:
 
-- `all_sources` (Boolean) All Sources Any source that matches 0/0 ip prefix
-- `ip_prefix_set` (Attributes) IP Prefix Set All ip prefixes that are in a given ip prefix set. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--source_choice--ip_prefix_set))
-- `label_selector` (Attributes) Source Label selector Sources is set of prefixes determined by label selector expression (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--source_choice--label_selector))
-- `prefix_list` (Attributes) ip prefix list list of ip prefixes that are representing source of traffic seen by proxy list is a sublist of both V4 and V6 prefix list (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--source_choice--prefix_list))
+- `all_sources` (Boolean) All Sources Any source that matches 0/0 ip prefix<br>Conflicts with `ip_prefix_set`, `label_selector`, and `prefix_list`.
+- `ip_prefix_set` (Attributes) IP Prefix Set All ip prefixes that are in a given ip prefix set.<br>Conflicts with `all_sources`, `label_selector`, and `prefix_list`. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--source_choice--ip_prefix_set))
+- `label_selector` (Attributes) Source Label selector Sources is set of prefixes determined by label selector expression<br>Conflicts with `all_sources`, `ip_prefix_set`, and `prefix_list`. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--source_choice--label_selector))
+- `prefix_list` (Attributes) ip prefix list list of ip prefixes that are representing source of traffic seen by proxy list is a sublist of both V4 and V6 prefix list<br>Conflicts with `all_sources`, `ip_prefix_set`, and `label_selector`. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--source_choice--prefix_list))
 
 <a id="nestedatt--rule_choice--rule_list--rules--source_choice--ip_prefix_set"></a>
 ### Nested Schema for `rule_choice.rule_list.rules.source_choice.ip_prefix_set`
@@ -561,27 +585,6 @@ Optional:
 
 
 
-<a id="nestedatt--rule_choice--rule_list--rules--http_connect_choice"></a>
-### Nested Schema for `rule_choice.rule_list.rules.http_connect_choice`
-
-Optional:
-
-- `no_http_connect_port` (Boolean) Do not Match Ignore destination ports for connections
-- `port_matcher` (Attributes) port matcher The list of port ranges to which the destination port should belong. In case of an HTTP Connect, the destination port is extracted from the connect destination. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--http_connect_choice--port_matcher))
-
-<a id="nestedatt--rule_choice--rule_list--rules--http_connect_choice--port_matcher"></a>
-### Nested Schema for `rule_choice.rule_list.rules.http_connect_choice.port_matcher`
-
-Required:
-
-- `ports` (List of String) port ranges A list of strings, each of which is a single port value or a tuple of start and end port values separated by '-'. The start and end values are considered to be part of the range.
-
-Optional:
-
-- `invert_matcher` (Boolean) invert_matcher Invert the match result.<br>**Default:** `false`
-
-
-
 
 
 
@@ -590,17 +593,17 @@ Optional:
 
 Optional:
 
-- `dst_segment_choice` (Attributes) Destination Segments Select destination segment where rule is applied Configure option as Any to ignore segment match (see [below for nested schema](#nestedatt--segment_policy--dst_segment_choice))
-- `src_segment_choice` (Attributes) Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match (see [below for nested schema](#nestedatt--segment_policy--src_segment_choice))
+- `dst_segment_choice` (Attributes) Destination Segments Select destination segment where rule is applied Configure option as Any to ignore segment match<br>Exactly one of `dst_any`, `dst_segments`, or `intra_segment` must be specified when `dst_segment_choice` is configured. (see [below for nested schema](#nestedatt--segment_policy--dst_segment_choice))
+- `src_segment_choice` (Attributes) Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match<br>Exactly one of `src_any` or `src_segments` must be specified when `src_segment_choice` is configured. (see [below for nested schema](#nestedatt--segment_policy--src_segment_choice))
 
 <a id="nestedatt--segment_policy--dst_segment_choice"></a>
 ### Nested Schema for `segment_policy.dst_segment_choice`
 
 Optional:
 
-- `dst_any` (Boolean) Any segment Traffic is not matched against any segment
-- `dst_segments` (Attributes) List of segments Traffic is matched against destination segment in selected segments (see [below for nested schema](#nestedatt--segment_policy--dst_segment_choice--dst_segments))
-- `intra_segment` (Boolean) Intra Segment Policy Traffic is matched for source and destination on the same segment
+- `dst_any` (Boolean) Any segment Traffic is not matched against any segment<br>Conflicts with `dst_segments` and `intra_segment`.
+- `dst_segments` (Attributes) List of segments Traffic is matched against destination segment in selected segments<br>Conflicts with `dst_any` and `intra_segment`. (see [below for nested schema](#nestedatt--segment_policy--dst_segment_choice--dst_segments))
+- `intra_segment` (Boolean) Intra Segment Policy Traffic is matched for source and destination on the same segment<br>Conflicts with `dst_any` and `dst_segments`.
 
 <a id="nestedatt--segment_policy--dst_segment_choice--dst_segments"></a>
 ### Nested Schema for `segment_policy.dst_segment_choice.dst_segments`
@@ -629,8 +632,8 @@ Read-Only:
 
 Optional:
 
-- `src_any` (Boolean) Any segment Traffic is not matched against any segment
-- `src_segments` (Attributes) List of segments Source traffic is matched against selected segments (see [below for nested schema](#nestedatt--segment_policy--src_segment_choice--src_segments))
+- `src_any` (Boolean) Any segment Traffic is not matched against any segment<br>Conflicts with `src_segments`.
+- `src_segments` (Attributes) List of segments Source traffic is matched against selected segments<br>Conflicts with `src_any`. (see [below for nested schema](#nestedatt--segment_policy--src_segment_choice--src_segments))
 
 <a id="nestedatt--segment_policy--src_segment_choice--src_segments"></a>
 ### Nested Schema for `segment_policy.src_segment_choice.src_segments`
@@ -685,6 +688,6 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 ```hcl
 import {
 	id = "<namespace>/<name>"
-	to = "f5xc_forward_proxy_policy.example"
+	to = f5xc_forward_proxy_policy.example
 }
 ```

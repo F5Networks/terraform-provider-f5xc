@@ -30,6 +30,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -341,7 +342,7 @@ var DnsProxyCacheProfileModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> CacheProfileChoice
+// Attribute map for OneOfField --> CacheProfileChoice
 var DnsProxyCacheProfileCacheProfileChoiceModelAttributeMap = map[string]attr.Type{
 
 	"cache_size":            types.Int64Type,
@@ -379,7 +380,7 @@ var DnsProxyLbAlgorithmModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> LbAlgorithmChoice
+// Attribute map for OneOfField --> LbAlgorithmChoice
 var DnsProxyLbAlgorithmLbAlgorithmChoiceModelAttributeMap = map[string]attr.Type{
 
 	"round_robin": types.BoolType,
@@ -531,7 +532,7 @@ var DnsProxyOriginServersOriginServersChoiceK8SServiceModelAttributeMap = map[st
 	},
 }
 
-// Attribute map for RequiredOneOfField --> NetworkChoice
+// Attribute map for OneOfField --> NetworkChoice
 var DnsProxyOriginServersOriginServersChoiceK8SServiceNetworkChoiceModelAttributeMap = map[string]attr.Type{
 
 	"inside_network":  types.BoolType,
@@ -678,7 +679,7 @@ var DnsProxyProxyAdvertisementModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> AdvertiseChoice
+// Attribute map for OneOfField --> AdvertiseChoice
 var DnsProxyProxyAdvertisementAdvertiseChoiceModelAttributeMap = map[string]attr.Type{
 
 	"advertise_custom": types.ObjectType{
@@ -934,7 +935,7 @@ var DnsProxyProxyAdvertisementAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoice
 	"tenant":    types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> PortChoice
+// Attribute map for OneOfField --> PortChoice
 var DnsProxyProxyAdvertisementAdvertiseChoiceAdvertiseCustomAdvertiseWherePortChoiceModelAttributeMap = map[string]attr.Type{
 
 	"port":             types.Int64Type,
@@ -1083,20 +1084,23 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 				Attributes: map[string]schema.Attribute{
 					"cache_profile_choice": schema.SingleNestedAttribute{
 						Description:         "DNS Cache Choice Options for enabling and disabling the DNS cache profile for the DNS Proxy. On enabling this feature, a default cache profile is applied to the DNS proxy which caches DNS replies from the origin DNS servers.",
-						MarkdownDescription: "DNS Cache Choice Options for enabling and disabling the DNS cache profile for the DNS Proxy. On enabling this feature, a default cache profile is applied to the DNS proxy which caches DNS replies from the origin DNS servers.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "DNS Cache Choice Options for enabling and disabling the DNS cache profile for the DNS Proxy. On enabling this feature, a default cache profile is applied to the DNS proxy which caches DNS replies from the origin DNS servers.<br>Exactly one of `cache_size` or `disable_cache_profile` must be specified when `cache_profile_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"cache_size",
 								"disable_cache_profile",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"cache_size": schema.Int64Attribute{
 								Description:         "Cache size cache size",
-								MarkdownDescription: "Cache size cache size",
+								MarkdownDescription: "Cache size cache size<br>Conflicts with `disable_cache_profile`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1106,7 +1110,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 							},
 							"disable_cache_profile": schema.BoolAttribute{
 								Description:         "Disable DNS Cache",
-								MarkdownDescription: "Disable DNS Cache",
+								MarkdownDescription: "Disable DNS Cache<br>Conflicts with `cache_size`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1127,7 +1131,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 				Attributes: map[string]schema.Attribute{
 					"ddos_mitigation_choice": schema.SingleNestedAttribute{
 						Description:         "DDoS Protection Choice Options for enabling and disabling the DNS DDoS profile for the DNS Proxy. On enabling this feature, a default DDoS profile is applied to the DNS proxy to protect the origin DNS servers from external DDoS attacks.",
-						MarkdownDescription: "DDoS Protection Choice Options for enabling and disabling the DNS DDoS profile for the DNS Proxy. On enabling this feature, a default DDoS profile is applied to the DNS proxy to protect the origin DNS servers from external DDoS attacks.",
+						MarkdownDescription: "DDoS Protection Choice Options for enabling and disabling the DNS DDoS profile for the DNS Proxy. On enabling this feature, a default DDoS profile is applied to the DNS proxy to protect the origin DNS servers from external DDoS attacks.<br>Exactly one of `disable_ddos_mitigation` or `enable_ddos_mitigation` must be specified when `ddos_mitigation_choice` is configured.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -1140,7 +1144,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 						Attributes: map[string]schema.Attribute{
 							"disable_ddos_mitigation": schema.BoolAttribute{
 								Description:         "Disable DDoS Protection",
-								MarkdownDescription: "Disable DDoS Protection",
+								MarkdownDescription: "Disable DDoS Protection<br>Conflicts with `enable_ddos_mitigation`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1150,7 +1154,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 							},
 							"enable_ddos_mitigation": schema.BoolAttribute{
 								Description:         "Enable DDoS Protection",
-								MarkdownDescription: "Enable DDoS Protection",
+								MarkdownDescription: "Enable DDoS Protection<br>Conflicts with `disable_ddos_mitigation`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1210,14 +1214,17 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 				Attributes: map[string]schema.Attribute{
 					"lb_algorithm_choice": schema.SingleNestedAttribute{
 						Description:         "Type of Load Balancing Algorithm The load balancing algorithm can be 'Round Robin'",
-						MarkdownDescription: "Type of Load Balancing Algorithm The load balancing algorithm can be 'Round Robin'",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "Type of Load Balancing Algorithm The load balancing algorithm can be 'Round Robin'<br>`round_robin` must be specified when `lb_algorithm_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"round_robin",
 							),
+						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
 						},
 						Attributes: map[string]schema.Attribute{
 							"round_robin": schema.BoolAttribute{
@@ -1262,7 +1269,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 									Attributes: map[string]schema.Attribute{
 										"choice": schema.SingleNestedAttribute{
 											Description:         "DNS Server Health check Options for including the Server Health check",
-											MarkdownDescription: "DNS Server Health check Options for including the Server Health check",
+											MarkdownDescription: "DNS Server Health check Options for including the Server Health check<br>Exactly one of `dns_health_check`, `icmp_health_check`, or `tcp_health_check` must be specified when `choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -1276,7 +1283,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 											Attributes: map[string]schema.Attribute{
 												"dns_health_check": schema.SingleNestedAttribute{
 													Description:         "DNS Health Check DNS Health Check",
-													MarkdownDescription: "DNS Health Check DNS Health Check",
+													MarkdownDescription: "DNS Health Check DNS Health Check<br>Conflicts with `icmp_health_check` and `tcp_health_check`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1350,7 +1357,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 												},
 												"icmp_health_check": schema.BoolAttribute{
 													Description:         "ICMP Health Check ICMP Health Check",
-													MarkdownDescription: "ICMP Health Check ICMP Health Check",
+													MarkdownDescription: "ICMP Health Check ICMP Health Check<br>Conflicts with `dns_health_check` and `tcp_health_check`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1360,7 +1367,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 												},
 												"tcp_health_check": schema.SingleNestedAttribute{
 													Description:         "TCP Health Check TCP Health Check",
-													MarkdownDescription: "TCP Health Check TCP Health Check",
+													MarkdownDescription: "TCP Health Check TCP Health Check<br>Conflicts with `dns_health_check` and `icmp_health_check`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1452,7 +1459,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 							Attributes: map[string]schema.Attribute{
 								"choice": schema.SingleNestedAttribute{
 									Description:         "Origin Server Type Various options to specify the origin server",
-									MarkdownDescription: "Origin Server Type Various options to specify the origin server",
+									MarkdownDescription: "Origin Server Type Various options to specify the origin server<br>Exactly one of `k8s_service`, `public_ip`, or `public_name` must be specified.",
 									Required:            true,
 									Optional:            false,
 									Computed:            false,
@@ -1466,28 +1473,31 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 									Attributes: map[string]schema.Attribute{
 										"k8s_service": schema.SingleNestedAttribute{
 											Description:         "OriginServerK8SService Specify origin server with K8s service name and site information",
-											MarkdownDescription: "OriginServerK8SService Specify origin server with K8s service name and site information",
+											MarkdownDescription: "OriginServerK8SService Specify origin server with K8s service name and site information<br>Conflicts with `public_ip` and `public_name`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
 											Attributes: map[string]schema.Attribute{
 												"network_choice": schema.SingleNestedAttribute{
 													Description:         "Site Network Inside or Outside Network",
-													MarkdownDescription: "Site Network Inside or Outside Network",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
+													MarkdownDescription: "Site Network Inside or Outside Network<br>Exactly one of `inside_network`, `outside_network`, or `vk8s_networks` must be specified when `network_choice` is configured.",
+													Required:            false,
+													Optional:            true,
+													Computed:            true,
 													Validators: []validator.Object{
-														exactlyoneofvalidator.RequiredExactlyOneOf(
+														exactlyoneofvalidator.ExactlyOneOf(
 															"inside_network",
 															"outside_network",
 															"vk8s_networks",
 														),
 													},
+													PlanModifiers: []planmodifier.Object{
+														objectplanmodifier.UseNonNullStateForUnknown(),
+													},
 													Attributes: map[string]schema.Attribute{
 														"inside_network": schema.BoolAttribute{
 															Description:         "Inside Network Inside network on the site",
-															MarkdownDescription: "Inside Network Inside network on the site",
+															MarkdownDescription: "Inside Network Inside network on the site<br>Conflicts with `outside_network` and `vk8s_networks`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1497,7 +1507,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 														},
 														"outside_network": schema.BoolAttribute{
 															Description:         "Outside Network Outside network on the site",
-															MarkdownDescription: "Outside Network Outside network on the site",
+															MarkdownDescription: "Outside Network Outside network on the site<br>Conflicts with `inside_network` and `vk8s_networks`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1507,7 +1517,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 														},
 														"vk8s_networks": schema.BoolAttribute{
 															Description:         "vK8s Networks on site origin server are on vK8s network on the site",
-															MarkdownDescription: "vK8s Networks on site origin server are on vK8s network on the site",
+															MarkdownDescription: "vK8s Networks on site origin server are on vK8s network on the site<br>Conflicts with `inside_network` and `outside_network`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1532,7 +1542,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 												},
 												"service_info_choice": schema.SingleNestedAttribute{
 													Description:         "service_info Specifies whether service discovery has to be done using service name or labels",
-													MarkdownDescription: "service_info Specifies whether service discovery has to be done using service name or labels",
+													MarkdownDescription: "service_info Specifies whether service discovery has to be done using service name or labels<br>`service_name` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -1566,7 +1576,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 													Attributes: map[string]schema.Attribute{
 														"choice": schema.SingleNestedAttribute{
 															Description:         "SiteLocator",
-															MarkdownDescription: "SiteLocator",
+															MarkdownDescription: "SiteLocator<br>Exactly one of `site` or `virtual_site` must be specified.",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
@@ -1579,7 +1589,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 															Attributes: map[string]schema.Attribute{
 																"site": schema.SingleNestedAttribute{
 																	Description:         "site Reference to site object",
-																	MarkdownDescription: "site Reference to site object",
+																	MarkdownDescription: "site Reference to site object<br>Conflicts with `virtual_site`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1612,7 +1622,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 																},
 																"virtual_site": schema.SingleNestedAttribute{
 																	Description:         "Virtual Site Reference to virtual site object",
-																	MarkdownDescription: "Virtual Site Reference to virtual site object",
+																	MarkdownDescription: "Virtual Site Reference to virtual site object<br>Conflicts with `site`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1656,7 +1666,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 													Attributes: map[string]schema.Attribute{
 														"snat_pool_choice": schema.SingleNestedAttribute{
 															Description:         "Snat Pool Choice Snat Pool for the origin server",
-															MarkdownDescription: "Snat Pool Choice Snat Pool for the origin server",
+															MarkdownDescription: "Snat Pool Choice Snat Pool for the origin server<br>Exactly one of `no_snat_pool` or `snat_pool` must be specified when `snat_pool_choice` is configured.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1669,7 +1679,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 															Attributes: map[string]schema.Attribute{
 																"no_snat_pool": schema.BoolAttribute{
 																	Description:         "No SNAT Pool No configured SNAT Pool to reach Origin Server",
-																	MarkdownDescription: "No SNAT Pool No configured SNAT Pool to reach Origin Server",
+																	MarkdownDescription: "No SNAT Pool No configured SNAT Pool to reach Origin Server<br>Conflicts with `snat_pool`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1679,7 +1689,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 																},
 																"snat_pool": schema.SingleNestedAttribute{
 																	Description:         "SNAT Pool Configure SNAT Pool to reach Origin Server",
-																	MarkdownDescription: "SNAT Pool Configure SNAT Pool to reach Origin Server",
+																	MarkdownDescription: "SNAT Pool Configure SNAT Pool to reach Origin Server<br>Conflicts with `no_snat_pool`.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -1726,14 +1736,14 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 										},
 										"public_ip": schema.SingleNestedAttribute{
 											Description:         "OriginServerPublicIP Specify origin server with public IP",
-											MarkdownDescription: "OriginServerPublicIP Specify origin server with public IP",
+											MarkdownDescription: "OriginServerPublicIP Specify origin server with public IP<br>Conflicts with `k8s_service` and `public_name`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
 											Attributes: map[string]schema.Attribute{
 												"public_ip_choice": schema.SingleNestedAttribute{
 													Description:         "Public IP Choice Origin server public IP - either V4 or V6",
-													MarkdownDescription: "Public IP Choice Origin server public IP - either V4 or V6",
+													MarkdownDescription: "Public IP Choice Origin server public IP - either V4 or V6<br>Exactly one of `ip` or `ipv6` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -1746,7 +1756,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 													Attributes: map[string]schema.Attribute{
 														"ip": schema.StringAttribute{
 															Description:         "IP Public IPV4 address",
-															MarkdownDescription: "IP Public IPV4 address",
+															MarkdownDescription: "IP Public IPV4 address<br>Conflicts with `ipv6`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1759,7 +1769,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 														},
 														"ipv6": schema.StringAttribute{
 															Description:         "IPV6 Public IPV6 address",
-															MarkdownDescription: "IPV6 Public IPV6 address",
+															MarkdownDescription: "IPV6 Public IPV6 address<br>Conflicts with `ip`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1776,7 +1786,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 										},
 										"public_name": schema.SingleNestedAttribute{
 											Description:         "OriginServerPublicName Specify origin server with public DNS name",
-											MarkdownDescription: "OriginServerPublicName Specify origin server with public DNS name",
+											MarkdownDescription: "OriginServerPublicName Specify origin server with public DNS name<br>Conflicts with `k8s_service` and `public_ip`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -1815,7 +1825,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 								},
 								"proximity_choice": schema.SingleNestedAttribute{
 									Description:         "Preference Rules Preference rules define how the origins are selected as part of LB Proximity Rules???",
-									MarkdownDescription: "Preference Rules Preference rules define how the origins are selected as part of LB Proximity Rules???",
+									MarkdownDescription: "Preference Rules Preference rules define how the origins are selected as part of LB Proximity Rules???<br>Exactly one of `no_preference` or `site_preferences` must be specified when `proximity_choice` is configured.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1828,7 +1838,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 									Attributes: map[string]schema.Attribute{
 										"no_preference": schema.BoolAttribute{
 											Description:         "NoChoice Use all the discovered origins",
-											MarkdownDescription: "NoChoice Use all the discovered origins",
+											MarkdownDescription: "NoChoice Use all the discovered origins<br>Conflicts with `site_preferences`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -1838,7 +1848,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 										},
 										"site_preferences": schema.SingleNestedAttribute{
 											Description:         "Site Preference List of sites where this origin is preferred over others From a set of origins, LB on a site prefers origin containing the site If site is not in preference list of any origins, then it will use all discovered origins",
-											MarkdownDescription: "Site Preference List of sites where this origin is preferred over others From a set of origins, LB on a site prefers origin containing the site If site is not in preference list of any origins, then it will use all discovered origins",
+											MarkdownDescription: "Site Preference List of sites where this origin is preferred over others From a set of origins, LB on a site prefers origin containing the site If site is not in preference list of any origins, then it will use all discovered origins<br>Conflicts with `no_preference`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -1932,12 +1942,12 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 				Attributes: map[string]schema.Attribute{
 					"advertise_choice": schema.SingleNestedAttribute{
 						Description:         "Proxy Advertisement choice Proxy Advertisement choice, Internet or Custom.",
-						MarkdownDescription: "Proxy Advertisement choice Proxy Advertisement choice, Internet or Custom.",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
+						MarkdownDescription: "Proxy Advertisement choice Proxy Advertisement choice, Internet or Custom.<br>Exactly one of `advertise_custom`, `advertise_dualstack_on_public`, `advertise_on_public`, `advertise_on_public_default_dualstack_vip`, `advertise_on_public_default_ipv6_vip`, `advertise_on_public_default_vip`, `advertise_v6_on_public`, or `do_not_advertise` must be specified when `advertise_choice` is configured.",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.Object{
-							exactlyoneofvalidator.RequiredExactlyOneOf(
+							exactlyoneofvalidator.ExactlyOneOf(
 								"advertise_custom",
 								"advertise_dualstack_on_public",
 								"advertise_on_public",
@@ -1948,10 +1958,13 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 								"do_not_advertise",
 							),
 						},
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseNonNullStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 							"advertise_custom": schema.SingleNestedAttribute{
 								Description:         "Advertise Custom Advertise this load balancer on specific sites",
-								MarkdownDescription: "Advertise Custom Advertise this load balancer on specific sites",
+								MarkdownDescription: "Advertise Custom Advertise this load balancer on specific sites<br>Conflicts with `advertise_dualstack_on_public`, `advertise_on_public`, `advertise_on_public_default_dualstack_vip`, `advertise_on_public_default_ipv6_vip`, `advertise_on_public_default_vip`, `advertise_v6_on_public`, and `do_not_advertise`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -1970,7 +1983,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 											Attributes: map[string]schema.Attribute{
 												"choice": schema.SingleNestedAttribute{
 													Description:         "Advertise choice This defines various options where a Loadbalancer could be advertised",
-													MarkdownDescription: "Advertise choice This defines various options where a Loadbalancer could be advertised",
+													MarkdownDescription: "Advertise choice This defines various options where a Loadbalancer could be advertised<br>Exactly one of `site`, `site_segment`, `virtual_network`, `virtual_site`, `virtual_site_segment`, or `vk8s_service` must be specified.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -1987,7 +2000,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 													Attributes: map[string]schema.Attribute{
 														"site": schema.SingleNestedAttribute{
 															Description:         "Site Advertise on a customer site and a given network.",
-															MarkdownDescription: "Site Advertise on a customer site and a given network.",
+															MarkdownDescription: "Site Advertise on a customer site and a given network.<br>Conflicts with `site_segment`, `virtual_network`, `virtual_site`, `virtual_site_segment`, and `vk8s_service`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -2067,7 +2080,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 														},
 														"site_segment": schema.SingleNestedAttribute{
 															Description:         "Segment on Site Advertise on a segment on a site",
-															MarkdownDescription: "Segment on Site Advertise on a segment on a site",
+															MarkdownDescription: "Segment on Site Advertise on a segment on a site<br>Conflicts with `site`, `virtual_network`, `virtual_site`, `virtual_site_segment`, and `vk8s_service`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -2168,14 +2181,14 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 														},
 														"virtual_network": schema.SingleNestedAttribute{
 															Description:         "Virtual Network Advertise on a virtual network",
-															MarkdownDescription: "Virtual Network Advertise on a virtual network",
+															MarkdownDescription: "Virtual Network Advertise on a virtual network<br>Conflicts with `site`, `site_segment`, `virtual_site`, `virtual_site_segment`, and `vk8s_service`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
 															Attributes: map[string]schema.Attribute{
 																"v6_vip_choice": schema.SingleNestedAttribute{
 																	Description:         "Select V6 VIP Select default V6 VIP or specify IPv6 address",
-																	MarkdownDescription: "Select V6 VIP Select default V6 VIP or specify IPv6 address",
+																	MarkdownDescription: "Select V6 VIP Select default V6 VIP or specify IPv6 address<br>Exactly one of `default_v6_vip` or `specific_v6_vip` must be specified when `v6_vip_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -2188,7 +2201,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 																	Attributes: map[string]schema.Attribute{
 																		"default_v6_vip": schema.BoolAttribute{
 																			Description:         "Default V6 VIP for virtual Network Use the default VIP, system allocated or configured in the virtual network",
-																			MarkdownDescription: "Default V6 VIP for virtual Network Use the default VIP, system allocated or configured in the virtual network",
+																			MarkdownDescription: "Default V6 VIP for virtual Network Use the default VIP, system allocated or configured in the virtual network<br>Conflicts with `specific_v6_vip`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -2198,7 +2211,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 																		},
 																		"specific_v6_vip": schema.StringAttribute{
 																			Description:         "Specific V6 VIP Use given IPV6 address as VIP on virtual Network",
-																			MarkdownDescription: "Specific V6 VIP Use given IPV6 address as VIP on virtual Network",
+																			MarkdownDescription: "Specific V6 VIP Use given IPV6 address as VIP on virtual Network<br>Conflicts with `default_v6_vip`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -2213,7 +2226,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 																},
 																"vip_choice": schema.SingleNestedAttribute{
 																	Description:         "Select VIP Select default V4 VIP or specify V4 ip address",
-																	MarkdownDescription: "Select VIP Select default V4 VIP or specify V4 ip address",
+																	MarkdownDescription: "Select VIP Select default V4 VIP or specify V4 ip address<br>Exactly one of `default_vip` or `specific_vip` must be specified when `vip_choice` is configured.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -2226,7 +2239,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 																	Attributes: map[string]schema.Attribute{
 																		"default_vip": schema.BoolAttribute{
 																			Description:         "Default V4 VIP for Virtual Network Use the default VIP, system allocated or configured in the virtual network",
-																			MarkdownDescription: "Default V4 VIP for Virtual Network Use the default VIP, system allocated or configured in the virtual network",
+																			MarkdownDescription: "Default V4 VIP for Virtual Network Use the default VIP, system allocated or configured in the virtual network<br>Conflicts with `specific_vip`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -2236,7 +2249,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 																		},
 																		"specific_vip": schema.StringAttribute{
 																			Description:         "Specific VIP Use given IPV4 address as VIP on virtual Network",
-																			MarkdownDescription: "Specific VIP Use given IPV4 address as VIP on virtual Network",
+																			MarkdownDescription: "Specific VIP Use given IPV4 address as VIP on virtual Network<br>Conflicts with `default_vip`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -2286,7 +2299,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 														},
 														"virtual_site": schema.SingleNestedAttribute{
 															Description:         "Virtual Site Advertise on a customer virtual site and a given network.",
-															MarkdownDescription: "Virtual Site Advertise on a customer virtual site and a given network.",
+															MarkdownDescription: "Virtual Site Advertise on a customer virtual site and a given network.<br>Conflicts with `site`, `site_segment`, `virtual_network`, `virtual_site_segment`, and `vk8s_service`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -2340,7 +2353,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 														},
 														"virtual_site_segment": schema.SingleNestedAttribute{
 															Description:         "Segment on Virtual Site Advertise on a segment on a virtual site",
-															MarkdownDescription: "Segment on Virtual Site Advertise on a segment on a virtual site",
+															MarkdownDescription: "Segment on Virtual Site Advertise on a segment on a virtual site<br>Conflicts with `site`, `site_segment`, `virtual_network`, `virtual_site`, and `vk8s_service`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -2441,14 +2454,14 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 														},
 														"vk8s_service": schema.SingleNestedAttribute{
 															Description:         "vK8s services network Advertise on vK8s Service Network on RE.",
-															MarkdownDescription: "vK8s services network Advertise on vK8s Service Network on RE.",
+															MarkdownDescription: "vK8s services network Advertise on vK8s Service Network on RE.<br>Conflicts with `site`, `site_segment`, `virtual_network`, `virtual_site`, and `virtual_site_segment`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
 															Attributes: map[string]schema.Attribute{
 																"choice": schema.SingleNestedAttribute{
 																	Description:         "RE or RE Virtual Site This defines a reference to a RE site or virtual site where a VIP could be advertised in the vK8s service network",
-																	MarkdownDescription: "RE or RE Virtual Site This defines a reference to a RE site or virtual site where a VIP could be advertised in the vK8s service network",
+																	MarkdownDescription: "RE or RE Virtual Site This defines a reference to a RE site or virtual site where a VIP could be advertised in the vK8s service network<br>Exactly one of `site` or `virtual_site` must be specified.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
@@ -2461,7 +2474,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 																	Attributes: map[string]schema.Attribute{
 																		"site": schema.SingleNestedAttribute{
 																			Description:         "RE Site Reference to site object",
-																			MarkdownDescription: "RE Site Reference to site object",
+																			MarkdownDescription: "RE Site Reference to site object<br>Conflicts with `virtual_site`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -2494,7 +2507,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 																		},
 																		"virtual_site": schema.SingleNestedAttribute{
 																			Description:         "Virtual Site Reference to virtual site object",
-																			MarkdownDescription: "Virtual Site Reference to virtual site object",
+																			MarkdownDescription: "Virtual Site Reference to virtual site object<br>Conflicts with `site`.",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
@@ -2533,21 +2546,24 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 												},
 												"port_choice": schema.SingleNestedAttribute{
 													Description:         "Listen Port Choice Available options: user provided port or inherit from the load balancer configuration.",
-													MarkdownDescription: "Listen Port Choice Available options: user provided port or inherit from the load balancer configuration.",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
+													MarkdownDescription: "Listen Port Choice Available options: user provided port or inherit from the load balancer configuration.<br>Exactly one of `port`, `port_ranges`, or `use_default_port` must be specified when `port_choice` is configured.",
+													Required:            false,
+													Optional:            true,
+													Computed:            true,
 													Validators: []validator.Object{
-														exactlyoneofvalidator.RequiredExactlyOneOf(
+														exactlyoneofvalidator.ExactlyOneOf(
 															"port",
 															"port_ranges",
 															"use_default_port",
 														),
 													},
+													PlanModifiers: []planmodifier.Object{
+														objectplanmodifier.UseNonNullStateForUnknown(),
+													},
 													Attributes: map[string]schema.Attribute{
 														"port": schema.Int64Attribute{
 															Description:         "Port to listen Port to Listen.",
-															MarkdownDescription: "Port to listen Port to Listen.",
+															MarkdownDescription: "Port to listen Port to Listen.<br>Conflicts with `port_ranges` and `use_default_port`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -2557,7 +2573,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 														},
 														"port_ranges": schema.StringAttribute{
 															Description:         "Port ranges to listen A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.",
-															MarkdownDescription: "Port ranges to listen A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.<br>**Validation:** `Length LengthBetween(1, 512)`",
+															MarkdownDescription: "Port ranges to listen A string containing a comma separated list of port ranges. Each port range consists of a single port or two ports separated by '-'.<br>**Validation:** `Length LengthBetween(1, 512)`<br>Conflicts with `port` and `use_default_port`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -2568,7 +2584,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 														},
 														"use_default_port": schema.BoolAttribute{
 															Description:         "Use Default port Inherit the Load Balancer's Listen Port.",
-															MarkdownDescription: "Use Default port Inherit the Load Balancer's Listen Port.",
+															MarkdownDescription: "Use Default port Inherit the Load Balancer's Listen Port.<br>Conflicts with `port` and `port_ranges`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -2585,7 +2601,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 							},
 							"advertise_dualstack_on_public": schema.SingleNestedAttribute{
 								Description:         "Advertise Dualstack On Public Advertise this Dualstack load balancer address on public network",
-								MarkdownDescription: "Advertise Dualstack On Public Advertise this Dualstack load balancer address on public network",
+								MarkdownDescription: "Advertise Dualstack On Public Advertise this Dualstack load balancer address on public network<br>Conflicts with `advertise_custom`, `advertise_on_public`, `advertise_on_public_default_dualstack_vip`, `advertise_on_public_default_ipv6_vip`, `advertise_on_public_default_vip`, `advertise_v6_on_public`, and `do_not_advertise`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2627,7 +2643,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 							},
 							"advertise_on_public": schema.SingleNestedAttribute{
 								Description:         "Advertise IPv4 On Public Advertise this IPv4 proxy address on public network",
-								MarkdownDescription: "Advertise IPv4 On Public Advertise this IPv4 proxy address on public network",
+								MarkdownDescription: "Advertise IPv4 On Public Advertise this IPv4 proxy address on public network<br>Conflicts with `advertise_custom`, `advertise_dualstack_on_public`, `advertise_on_public_default_dualstack_vip`, `advertise_on_public_default_ipv6_vip`, `advertise_on_public_default_vip`, `advertise_v6_on_public`, and `do_not_advertise`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2669,7 +2685,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 							},
 							"advertise_on_public_default_dualstack_vip": schema.BoolAttribute{
 								Description:         "Advertise On Public Default VIP (Dualstack) Advertise this proxy on public network with default Dualstack VIP",
-								MarkdownDescription: "Advertise On Public Default VIP (Dualstack) Advertise this proxy on public network with default Dualstack VIP",
+								MarkdownDescription: "Advertise On Public Default VIP (Dualstack) Advertise this proxy on public network with default Dualstack VIP<br>Conflicts with `advertise_custom`, `advertise_dualstack_on_public`, `advertise_on_public`, `advertise_on_public_default_ipv6_vip`, `advertise_on_public_default_vip`, `advertise_v6_on_public`, and `do_not_advertise`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2679,7 +2695,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 							},
 							"advertise_on_public_default_ipv6_vip": schema.BoolAttribute{
 								Description:         "Advertise On Public Default VIP (IPv6) Advertise this proxy on public network with default IPv6 VIP",
-								MarkdownDescription: "Advertise On Public Default VIP (IPv6) Advertise this proxy on public network with default IPv6 VIP",
+								MarkdownDescription: "Advertise On Public Default VIP (IPv6) Advertise this proxy on public network with default IPv6 VIP<br>Conflicts with `advertise_custom`, `advertise_dualstack_on_public`, `advertise_on_public`, `advertise_on_public_default_dualstack_vip`, `advertise_on_public_default_vip`, `advertise_v6_on_public`, and `do_not_advertise`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2689,7 +2705,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 							},
 							"advertise_on_public_default_vip": schema.BoolAttribute{
 								Description:         "Advertise On Public Default VIP Advertise this proxy on public network with default VIP Advertise this load balancer on public network with default VIP",
-								MarkdownDescription: "Advertise On Public Default VIP Advertise this proxy on public network with default VIP Advertise this load balancer on public network with default VIP",
+								MarkdownDescription: "Advertise On Public Default VIP Advertise this proxy on public network with default VIP Advertise this load balancer on public network with default VIP<br>Conflicts with `advertise_custom`, `advertise_dualstack_on_public`, `advertise_on_public`, `advertise_on_public_default_dualstack_vip`, `advertise_on_public_default_ipv6_vip`, `advertise_v6_on_public`, and `do_not_advertise`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2699,7 +2715,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 							},
 							"advertise_v6_on_public": schema.SingleNestedAttribute{
 								Description:         "Advertise IPv6 On Public Advertise this IPv6 proxy address on public network",
-								MarkdownDescription: "Advertise IPv6 On Public Advertise this IPv6 proxy address on public network",
+								MarkdownDescription: "Advertise IPv6 On Public Advertise this IPv6 proxy address on public network<br>Conflicts with `advertise_custom`, `advertise_dualstack_on_public`, `advertise_on_public`, `advertise_on_public_default_dualstack_vip`, `advertise_on_public_default_ipv6_vip`, `advertise_on_public_default_vip`, and `do_not_advertise`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2741,7 +2757,7 @@ func (r *ResourceF5XCDnsProxy) Schema(ctx context.Context, request resource.Sche
 							},
 							"do_not_advertise": schema.BoolAttribute{
 								Description:         "Do Not Advertise this proxy Do not advertise this proxy",
-								MarkdownDescription: "Do Not Advertise this proxy Do not advertise this proxy",
+								MarkdownDescription: "Do Not Advertise this proxy Do not advertise this proxy<br>Conflicts with `advertise_custom`, `advertise_dualstack_on_public`, `advertise_on_public`, `advertise_on_public_default_dualstack_vip`, `advertise_on_public_default_ipv6_vip`, `advertise_on_public_default_vip`, and `advertise_v6_on_public`.",
 								Required:            false,
 								Optional:            true,
 								Computed:            false,
@@ -2922,6 +2938,9 @@ func (r *ResourceF5XCDnsProxy) Create(ctx context.Context, request resource.Crea
 		// resource modelToSpecRoot RequiredPointerField --> CacheProfile
 		if !data.CacheProfile.IsNull() && !data.CacheProfile.IsUnknown() {
 			cacheProfileSpec := &ves_io_schema_virtual_host.DNSCacheProfile{}
+			cacheProfileSpec.CacheProfileChoice = &ves_io_schema_virtual_host.DNSCacheProfile_DisableCacheProfile{
+				DisableCacheProfile: &ves_io_schema.Empty{},
+			}
 			spec.CacheProfile = cacheProfileSpec
 			var cacheProfileModel DnsProxyDNSCacheProfile
 
@@ -2932,7 +2951,7 @@ func (r *ResourceF5XCDnsProxy) Create(ctx context.Context, request resource.Crea
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> CacheProfileChoice
+			// resource modelToSpecNested OneOfField --> CacheProfileChoice
 			if !cacheProfileModel.CacheProfileChoice.IsNull() && !cacheProfileModel.CacheProfileChoice.IsUnknown() {
 				cacheProfileCacheProfileChoiceModel := DnsProxyCacheProfileChoice{}
 				response.Diagnostics.Append(cacheProfileModel.CacheProfileChoice.As(ctx, &cacheProfileCacheProfileChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3035,6 +3054,9 @@ func (r *ResourceF5XCDnsProxy) Create(ctx context.Context, request resource.Crea
 		// resource modelToSpecRoot PointerField --> LbAlgorithm
 		if !data.LbAlgorithm.IsNull() && !data.LbAlgorithm.IsUnknown() {
 			lbAlgorithmSpec := &ves_io_schema_dns_proxy.LBAlgorithmType{}
+			lbAlgorithmSpec.LbAlgorithmChoice = &ves_io_schema_dns_proxy.LBAlgorithmType_RoundRobin{
+				RoundRobin: &ves_io_schema.Empty{},
+			}
 			spec.LbAlgorithm = lbAlgorithmSpec
 			var lbAlgorithmModel DnsProxyLBAlgorithmType
 
@@ -3045,7 +3067,7 @@ func (r *ResourceF5XCDnsProxy) Create(ctx context.Context, request resource.Crea
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> LbAlgorithmChoice
+			// resource modelToSpecNested OneOfField --> LbAlgorithmChoice
 			if !lbAlgorithmModel.LbAlgorithmChoice.IsNull() && !lbAlgorithmModel.LbAlgorithmChoice.IsUnknown() {
 				lbAlgorithmLbAlgorithmChoiceModel := DnsProxyLbAlgorithmChoice{}
 				response.Diagnostics.Append(lbAlgorithmModel.LbAlgorithmChoice.As(ctx, &lbAlgorithmLbAlgorithmChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3306,9 +3328,12 @@ func (r *ResourceF5XCDnsProxy) Create(ctx context.Context, request resource.Crea
 							}
 							k8sServiceOneOfSpec := &ves_io_schema_dns_proxy.OriginServerType_K8SService{}
 							k8sServiceOneOfSpec.K8SService = &ves_io_schema_views_origin_pool.OriginServerK8SService{}
+							k8sServiceOneOfSpec.K8SService.NetworkChoice = &ves_io_schema_views_origin_pool.OriginServerK8SService_InsideNetwork{
+								InsideNetwork: &ves_io_schema.Empty{},
+							}
 							originServersSpec.OriginServers[i].Choice = k8sServiceOneOfSpec
 
-							// resource modelToSpecNested RequiredOneOfField --> NetworkChoice
+							// resource modelToSpecNested OneOfField --> NetworkChoice
 							if !dnsProxyK8SSvcModel.NetworkChoice.IsNull() && !dnsProxyK8SSvcModel.NetworkChoice.IsUnknown() {
 								k8sServiceNetworkChoiceModel := DnsProxyNetChoice{}
 								response.Diagnostics.Append(dnsProxyK8SSvcModel.NetworkChoice.As(ctx, &k8sServiceNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3684,6 +3709,9 @@ func (r *ResourceF5XCDnsProxy) Create(ctx context.Context, request resource.Crea
 		// resource modelToSpecRoot PointerField --> ProxyAdvertisement
 		if !data.ProxyAdvertisement.IsNull() && !data.ProxyAdvertisement.IsUnknown() {
 			proxyAdvertisementSpec := &ves_io_schema_dns_proxy.ProxyAdvertisementType{}
+			proxyAdvertisementSpec.AdvertiseChoice = &ves_io_schema_dns_proxy.ProxyAdvertisementType_DoNotAdvertise{
+				DoNotAdvertise: &ves_io_schema.Empty{},
+			}
 			spec.ProxyAdvertisement = proxyAdvertisementSpec
 			var proxyAdvertisementModel DnsProxyProxyAdvertisementType
 
@@ -3694,7 +3722,7 @@ func (r *ResourceF5XCDnsProxy) Create(ctx context.Context, request resource.Crea
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> AdvertiseChoice
+			// resource modelToSpecNested OneOfField --> AdvertiseChoice
 			if !proxyAdvertisementModel.AdvertiseChoice.IsNull() && !proxyAdvertisementModel.AdvertiseChoice.IsUnknown() {
 				proxyAdvertisementAdvertiseChoiceModel := DnsProxyAdvertiseChoice{}
 				response.Diagnostics.Append(proxyAdvertisementModel.AdvertiseChoice.As(ctx, &proxyAdvertisementAdvertiseChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -3730,6 +3758,9 @@ func (r *ResourceF5XCDnsProxy) Create(ctx context.Context, request resource.Crea
 						for i, advertiseWhereElement := range advertiseWhereElements {
 							// Initialize the spec struct for the current element
 							advertiseCustomOneOfSpec.AdvertiseCustom.AdvertiseWhere[i] = &ves_io_schema_views.WhereType{}
+							advertiseCustomOneOfSpec.AdvertiseCustom.AdvertiseWhere[i].PortChoice = &ves_io_schema_views.WhereType_UseDefaultPort{
+								UseDefaultPort: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
@@ -4164,7 +4195,7 @@ func (r *ResourceF5XCDnsProxy) Create(ctx context.Context, request resource.Crea
 
 							}
 
-							// resource modelToSpecNested RequiredOneOfField --> PortChoice
+							// resource modelToSpecNested OneOfField --> PortChoice
 							if !advertiseWhereElement.PortChoice.IsNull() && !advertiseWhereElement.PortChoice.IsUnknown() {
 								advertiseWherePortChoiceModel := DnsProxyPortChoice{}
 								response.Diagnostics.Append(advertiseWhereElement.PortChoice.As(ctx, &advertiseWherePortChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -4515,8 +4546,7 @@ func (r *ResourceF5XCDnsProxy) Create(ctx context.Context, request resource.Crea
 		var dnsProxyDNSCacheProfileModel = &DnsProxyDNSCacheProfile{}
 		cacheProfileElement := specData.GetCacheProfile()
 
-		// resource specToModelNested RequiredOneOfField --> CacheProfileChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> CacheProfileChoice
 		if cacheProfileElement.GetCacheProfileChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			cacheProfilecacheProfileChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -4709,8 +4739,7 @@ func (r *ResourceF5XCDnsProxy) Create(ctx context.Context, request resource.Crea
 		var dnsProxyLBAlgorithmTypeModel = &DnsProxyLBAlgorithmType{}
 		lbAlgorithmElement := specData.GetLbAlgorithm()
 
-		// resource specToModelNested RequiredOneOfField --> LbAlgorithmChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> LbAlgorithmChoice
 		if lbAlgorithmElement.GetLbAlgorithmChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			lbAlgorithmlbAlgorithmChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5023,8 +5052,7 @@ func (r *ResourceF5XCDnsProxy) Create(ctx context.Context, request resource.Crea
 						if isK8SService && k8sServiceOptionsWrapper != nil && k8sServiceOptionsWrapper.K8SService != nil {
 							k8sServiceElement := k8sServiceOptionsWrapper.K8SService
 
-							// resource specToModelNested RequiredOneOfField --> NetworkChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> NetworkChoice
 							if k8sServiceElement.GetNetworkChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								k8sServicenetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -5717,8 +5745,7 @@ func (r *ResourceF5XCDnsProxy) Create(ctx context.Context, request resource.Crea
 		var dnsProxyProxyAdvertisementTypeModel = &DnsProxyProxyAdvertisementType{}
 		proxyAdvertisementElement := specData.GetProxyAdvertisement()
 
-		// resource specToModelNested RequiredOneOfField --> AdvertiseChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> AdvertiseChoice
 		if proxyAdvertisementElement.GetAdvertiseChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			proxyAdvertisementadvertiseChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -6548,8 +6575,7 @@ func (r *ResourceF5XCDnsProxy) Create(ctx context.Context, request resource.Crea
 								dnsProxyWhereTypeModel.Choice = types.ObjectNull(DnsProxyProxyAdvertisementAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceModelAttributeMap)
 							}
 
-							// resource specToModelNested RequiredOneOfField --> PortChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> PortChoice
 							if advertiseWhereElement.GetPortChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								advertiseWhereportChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -6978,11 +7004,7 @@ func (r *ResourceF5XCDnsProxy) Read(ctx context.Context, request resource.ReadRe
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_proxy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_proxy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "dns_proxy", err),
@@ -7108,8 +7130,7 @@ func (r *ResourceF5XCDnsProxy) Read(ctx context.Context, request resource.ReadRe
 		var dnsProxyDNSCacheProfileModel = &DnsProxyDNSCacheProfile{}
 		cacheProfileElement := specData.GetCacheProfile()
 
-		// resource specToModelNested RequiredOneOfField --> CacheProfileChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> CacheProfileChoice
 		if cacheProfileElement.GetCacheProfileChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			cacheProfilecacheProfileChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -7313,8 +7334,7 @@ func (r *ResourceF5XCDnsProxy) Read(ctx context.Context, request resource.ReadRe
 		var dnsProxyLBAlgorithmTypeModel = &DnsProxyLBAlgorithmType{}
 		lbAlgorithmElement := specData.GetLbAlgorithm()
 
-		// resource specToModelNested RequiredOneOfField --> LbAlgorithmChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> LbAlgorithmChoice
 		if lbAlgorithmElement.GetLbAlgorithmChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			lbAlgorithmlbAlgorithmChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -7629,8 +7649,7 @@ func (r *ResourceF5XCDnsProxy) Read(ctx context.Context, request resource.ReadRe
 						if isK8SService && k8sServiceOptionsWrapper != nil && k8sServiceOptionsWrapper.K8SService != nil {
 							k8sServiceElement := k8sServiceOptionsWrapper.K8SService
 
-							// resource specToModelNested RequiredOneOfField --> NetworkChoice
-							// <no value>
+							// resource specToModelNested OneOfField --> NetworkChoice
 							if k8sServiceElement.GetNetworkChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								k8sServicenetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -8327,8 +8346,7 @@ func (r *ResourceF5XCDnsProxy) Read(ctx context.Context, request resource.ReadRe
 		var dnsProxyProxyAdvertisementTypeModel = &DnsProxyProxyAdvertisementType{}
 		proxyAdvertisementElement := specData.GetProxyAdvertisement()
 
-		// resource specToModelNested RequiredOneOfField --> AdvertiseChoice
-		// <no value>
+		// resource specToModelNested OneOfField --> AdvertiseChoice
 		if proxyAdvertisementElement.GetAdvertiseChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			proxyAdvertisementadvertiseChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -9158,8 +9176,7 @@ func (r *ResourceF5XCDnsProxy) Read(ctx context.Context, request resource.ReadRe
 								dnsProxyWhereTypeModel.Choice = types.ObjectNull(DnsProxyProxyAdvertisementAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceModelAttributeMap)
 							}
 
-							// resource specToModelNested RequiredOneOfField --> PortChoice
-							// <no value>
+							// resource specToModelNested OneOfField --> PortChoice
 							if advertiseWhereElement.GetPortChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								advertiseWhereportChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -9677,6 +9694,9 @@ func (r *ResourceF5XCDnsProxy) Update(ctx context.Context, request resource.Upda
 		// resource modelToSpecRoot RequiredPointerField --> CacheProfile
 		if !data.CacheProfile.IsNull() && !data.CacheProfile.IsUnknown() {
 			cacheProfileSpec := &ves_io_schema_virtual_host.DNSCacheProfile{}
+			cacheProfileSpec.CacheProfileChoice = &ves_io_schema_virtual_host.DNSCacheProfile_DisableCacheProfile{
+				DisableCacheProfile: &ves_io_schema.Empty{},
+			}
 			spec.CacheProfile = cacheProfileSpec
 			var cacheProfileModel DnsProxyDNSCacheProfile
 
@@ -9687,7 +9707,7 @@ func (r *ResourceF5XCDnsProxy) Update(ctx context.Context, request resource.Upda
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> CacheProfileChoice
+			// resource modelToSpecNested OneOfField --> CacheProfileChoice
 			if !cacheProfileModel.CacheProfileChoice.IsNull() && !cacheProfileModel.CacheProfileChoice.IsUnknown() {
 				cacheProfileCacheProfileChoiceModel := DnsProxyCacheProfileChoice{}
 				response.Diagnostics.Append(cacheProfileModel.CacheProfileChoice.As(ctx, &cacheProfileCacheProfileChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -9790,6 +9810,9 @@ func (r *ResourceF5XCDnsProxy) Update(ctx context.Context, request resource.Upda
 		// resource modelToSpecRoot PointerField --> LbAlgorithm
 		if !data.LbAlgorithm.IsNull() && !data.LbAlgorithm.IsUnknown() {
 			lbAlgorithmSpec := &ves_io_schema_dns_proxy.LBAlgorithmType{}
+			lbAlgorithmSpec.LbAlgorithmChoice = &ves_io_schema_dns_proxy.LBAlgorithmType_RoundRobin{
+				RoundRobin: &ves_io_schema.Empty{},
+			}
 			spec.LbAlgorithm = lbAlgorithmSpec
 			var lbAlgorithmModel DnsProxyLBAlgorithmType
 
@@ -9800,7 +9823,7 @@ func (r *ResourceF5XCDnsProxy) Update(ctx context.Context, request resource.Upda
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> LbAlgorithmChoice
+			// resource modelToSpecNested OneOfField --> LbAlgorithmChoice
 			if !lbAlgorithmModel.LbAlgorithmChoice.IsNull() && !lbAlgorithmModel.LbAlgorithmChoice.IsUnknown() {
 				lbAlgorithmLbAlgorithmChoiceModel := DnsProxyLbAlgorithmChoice{}
 				response.Diagnostics.Append(lbAlgorithmModel.LbAlgorithmChoice.As(ctx, &lbAlgorithmLbAlgorithmChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -10061,9 +10084,12 @@ func (r *ResourceF5XCDnsProxy) Update(ctx context.Context, request resource.Upda
 							}
 							k8sServiceOneOfSpec := &ves_io_schema_dns_proxy.OriginServerType_K8SService{}
 							k8sServiceOneOfSpec.K8SService = &ves_io_schema_views_origin_pool.OriginServerK8SService{}
+							k8sServiceOneOfSpec.K8SService.NetworkChoice = &ves_io_schema_views_origin_pool.OriginServerK8SService_InsideNetwork{
+								InsideNetwork: &ves_io_schema.Empty{},
+							}
 							originServersSpec.OriginServers[i].Choice = k8sServiceOneOfSpec
 
-							// resource modelToSpecNested RequiredOneOfField --> NetworkChoice
+							// resource modelToSpecNested OneOfField --> NetworkChoice
 							if !dnsProxyK8SSvcModel.NetworkChoice.IsNull() && !dnsProxyK8SSvcModel.NetworkChoice.IsUnknown() {
 								k8sServiceNetworkChoiceModel := DnsProxyNetChoice{}
 								response.Diagnostics.Append(dnsProxyK8SSvcModel.NetworkChoice.As(ctx, &k8sServiceNetworkChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -10439,6 +10465,9 @@ func (r *ResourceF5XCDnsProxy) Update(ctx context.Context, request resource.Upda
 		// resource modelToSpecRoot PointerField --> ProxyAdvertisement
 		if !data.ProxyAdvertisement.IsNull() && !data.ProxyAdvertisement.IsUnknown() {
 			proxyAdvertisementSpec := &ves_io_schema_dns_proxy.ProxyAdvertisementType{}
+			proxyAdvertisementSpec.AdvertiseChoice = &ves_io_schema_dns_proxy.ProxyAdvertisementType_DoNotAdvertise{
+				DoNotAdvertise: &ves_io_schema.Empty{},
+			}
 			spec.ProxyAdvertisement = proxyAdvertisementSpec
 			var proxyAdvertisementModel DnsProxyProxyAdvertisementType
 
@@ -10449,7 +10478,7 @@ func (r *ResourceF5XCDnsProxy) Update(ctx context.Context, request resource.Upda
 				return
 			}
 
-			// resource modelToSpecNested RequiredOneOfField --> AdvertiseChoice
+			// resource modelToSpecNested OneOfField --> AdvertiseChoice
 			if !proxyAdvertisementModel.AdvertiseChoice.IsNull() && !proxyAdvertisementModel.AdvertiseChoice.IsUnknown() {
 				proxyAdvertisementAdvertiseChoiceModel := DnsProxyAdvertiseChoice{}
 				response.Diagnostics.Append(proxyAdvertisementModel.AdvertiseChoice.As(ctx, &proxyAdvertisementAdvertiseChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -10485,6 +10514,9 @@ func (r *ResourceF5XCDnsProxy) Update(ctx context.Context, request resource.Upda
 						for i, advertiseWhereElement := range advertiseWhereElements {
 							// Initialize the spec struct for the current element
 							advertiseCustomOneOfSpec.AdvertiseCustom.AdvertiseWhere[i] = &ves_io_schema_views.WhereType{}
+							advertiseCustomOneOfSpec.AdvertiseCustom.AdvertiseWhere[i].PortChoice = &ves_io_schema_views.WhereType_UseDefaultPort{
+								UseDefaultPort: &ves_io_schema.Empty{},
+							}
 
 							// Recursively process nested elements
 
@@ -10919,7 +10951,7 @@ func (r *ResourceF5XCDnsProxy) Update(ctx context.Context, request resource.Upda
 
 							}
 
-							// resource modelToSpecNested RequiredOneOfField --> PortChoice
+							// resource modelToSpecNested OneOfField --> PortChoice
 							if !advertiseWhereElement.PortChoice.IsNull() && !advertiseWhereElement.PortChoice.IsUnknown() {
 								advertiseWherePortChoiceModel := DnsProxyPortChoice{}
 								response.Diagnostics.Append(advertiseWhereElement.PortChoice.As(ctx, &advertiseWherePortChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -11132,12 +11164,8 @@ func (r *ResourceF5XCDnsProxy) Update(ctx context.Context, request resource.Upda
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_dns_proxy.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_dns_proxy.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "dns_proxy", err),
@@ -11146,7 +11174,7 @@ func (r *ResourceF5XCDnsProxy) Update(ctx context.Context, request resource.Upda
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_proxy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_dns_proxy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "dns_proxy", err),
@@ -11271,8 +11299,7 @@ func (r *ResourceF5XCDnsProxy) Update(ctx context.Context, request resource.Upda
 		var dnsProxyDNSCacheProfileModel = &DnsProxyDNSCacheProfile{}
 		cacheProfileElement := specData.GetCacheProfile()
 
-		// resource specToModelNested RequiredOneOfField --> CacheProfileChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> CacheProfileChoice
 		if cacheProfileElement.GetCacheProfileChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			cacheProfilecacheProfileChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -11465,8 +11492,7 @@ func (r *ResourceF5XCDnsProxy) Update(ctx context.Context, request resource.Upda
 		var dnsProxyLBAlgorithmTypeModel = &DnsProxyLBAlgorithmType{}
 		lbAlgorithmElement := specData.GetLbAlgorithm()
 
-		// resource specToModelNested RequiredOneOfField --> LbAlgorithmChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> LbAlgorithmChoice
 		if lbAlgorithmElement.GetLbAlgorithmChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			lbAlgorithmlbAlgorithmChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -11779,8 +11805,7 @@ func (r *ResourceF5XCDnsProxy) Update(ctx context.Context, request resource.Upda
 						if isK8SService && k8sServiceOptionsWrapper != nil && k8sServiceOptionsWrapper.K8SService != nil {
 							k8sServiceElement := k8sServiceOptionsWrapper.K8SService
 
-							// resource specToModelNested RequiredOneOfField --> NetworkChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> NetworkChoice
 							if k8sServiceElement.GetNetworkChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								k8sServicenetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -12473,8 +12498,7 @@ func (r *ResourceF5XCDnsProxy) Update(ctx context.Context, request resource.Upda
 		var dnsProxyProxyAdvertisementTypeModel = &DnsProxyProxyAdvertisementType{}
 		proxyAdvertisementElement := specData.GetProxyAdvertisement()
 
-		// resource specToModelNested RequiredOneOfField --> AdvertiseChoice
-		// GlobalSpecType
+		// resource specToModelNested OneOfField --> AdvertiseChoice
 		if proxyAdvertisementElement.GetAdvertiseChoice() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
 			proxyAdvertisementadvertiseChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -13304,8 +13328,7 @@ func (r *ResourceF5XCDnsProxy) Update(ctx context.Context, request resource.Upda
 								dnsProxyWhereTypeModel.Choice = types.ObjectNull(DnsProxyProxyAdvertisementAdvertiseChoiceAdvertiseCustomAdvertiseWhereChoiceModelAttributeMap)
 							}
 
-							// resource specToModelNested RequiredOneOfField --> PortChoice
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> PortChoice
 							if advertiseWhereElement.GetPortChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								advertiseWhereportChoiceChoicesAttributeMap := make(map[string]attr.Value)

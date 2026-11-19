@@ -7,6 +7,7 @@ package resource
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -495,6 +496,9 @@ var (
 	_ resource.ResourceWithImportState    = &ResourceF5XCRoute{}
 	_ resource.ResourceWithValidateConfig = &ResourceF5XCRoute{}
 )
+
+// Keeps the base64 import valid when no Read path renders the legacy fallback.
+var _ = base64.StdEncoding
 
 // --- Attribute Maps for Nested Structs ---
 // Attribute map for RequiredArrayOfPointerField --> Routes
@@ -1290,7 +1294,7 @@ var RouteRoutesRouteActionRouteDestinationCsrfPolicyModelAttributeMap = map[stri
 	},
 }
 
-// Attribute map for RequiredOneOfField --> AllowedDomains
+// Attribute map for OneOfField --> AllowedDomains
 var RouteRoutesRouteActionRouteDestinationCsrfPolicyAllowedDomainsModelAttributeMap = map[string]attr.Type{
 
 	"all_load_balancer_domains": types.BoolType,
@@ -1440,7 +1444,7 @@ var RouteRoutesRouteActionRouteDestinationQueryParamsModelAttributeMap = map[str
 	},
 }
 
-// Attribute map for RequiredOneOfField --> QueryParams
+// Attribute map for OneOfField --> QueryParams
 var RouteRoutesRouteActionRouteDestinationQueryParamsQueryParamsModelAttributeMap = map[string]attr.Type{
 
 	"remove_all_params": types.BoolType,
@@ -1575,7 +1579,7 @@ var RouteRoutesWafTypeModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for RequiredOneOfField --> RefType
+// Attribute map for OneOfField --> RefType
 var RouteRoutesWafTypeRefTypeModelAttributeMap = map[string]attr.Type{
 
 	"app_firewall": types.ObjectType{
@@ -1699,7 +1703,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 					Attributes: map[string]schema.Attribute{
 						"bot_defense_javascript_injection_choice": schema.SingleNestedAttribute{
 							Description:         "Oneof Bot Defense Javascript Injection Insert JavaScript Tags for Bot Defense Advance and Fraud Services",
-							MarkdownDescription: "Oneof Bot Defense Javascript Injection Insert JavaScript Tags for Bot Defense Advance and Fraud Services",
+							MarkdownDescription: "Oneof Bot Defense Javascript Injection Insert JavaScript Tags for Bot Defense Advance and Fraud Services<br>Exactly one of `bot_defense_javascript_injection` or `inherited_bot_defense_javascript_injection` must be specified when `bot_defense_javascript_injection_choice` is configured.",
 							Required:            false,
 							Optional:            true,
 							Computed:            false,
@@ -1712,7 +1716,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 							Attributes: map[string]schema.Attribute{
 								"bot_defense_javascript_injection": schema.SingleNestedAttribute{
 									Description:         "Bot Defense Javascript Injection for inline bot defense deployments Configuration for Bot Defense Javascript Injection",
-									MarkdownDescription: "Bot Defense Javascript Injection for inline bot defense deployments Configuration for Bot Defense Javascript Injection",
+									MarkdownDescription: "Bot Defense Javascript Injection for inline bot defense deployments Configuration for Bot Defense Javascript Injection<br>Conflicts with `inherited_bot_defense_javascript_injection`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1797,7 +1801,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 								},
 								"inherited_bot_defense_javascript_injection": schema.BoolAttribute{
 									Description:         "Inherited Bot Defense Javascript Injection Bot Defense Javascript Injection configuration is taken from Load Balancer. Hence no custom configuration is applied on the route",
-									MarkdownDescription: "Inherited Bot Defense Javascript Injection Bot Defense Javascript Injection configuration is taken from Load Balancer. Hence no custom configuration is applied on the route",
+									MarkdownDescription: "Inherited Bot Defense Javascript Injection Bot Defense Javascript Injection configuration is taken from Load Balancer. Hence no custom configuration is applied on the route<br>Conflicts with `bot_defense_javascript_injection`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -1862,7 +1866,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"value_match_choice": schema.SingleNestedAttribute{
 													Description:         "value_match The variants of matching a header value",
-													MarkdownDescription: "value_match The variants of matching a header value",
+													MarkdownDescription: "value_match The variants of matching a header value<br>Exactly one of `exact`, `presence`, or `regex` must be specified when `value_match_choice` is configured.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -1876,7 +1880,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 													Attributes: map[string]schema.Attribute{
 														"exact": schema.StringAttribute{
 															Description:         "exact Header value to match exactly",
-															MarkdownDescription: "exact Header value to match exactly",
+															MarkdownDescription: "exact Header value to match exactly<br>Conflicts with `presence` and `regex`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1887,14 +1891,14 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 														},
 														"presence": schema.BoolAttribute{
 															Description:         "presence If true, check for presence of header",
-															MarkdownDescription: "presence If true, check for presence of header",
+															MarkdownDescription: "presence If true, check for presence of header<br>Conflicts with `exact` and `regex`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
 														},
 														"regex": schema.StringAttribute{
 															Description:         "regex Regex match of the header value in re2 format",
-															MarkdownDescription: "regex Regex match of the header value in re2 format",
+															MarkdownDescription: "regex Regex match of the header value in re2 format<br>Conflicts with `exact` and `presence`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -1929,7 +1933,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 										Attributes: map[string]schema.Attribute{
 											"port_match_choice": schema.SingleNestedAttribute{
 												Description:         "port_match A specification of port match",
-												MarkdownDescription: "port_match A specification of port match",
+												MarkdownDescription: "port_match A specification of port match<br>Exactly one of `no_port_match`, `port`, or `port_ranges` must be specified when `port_match_choice` is configured.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -1943,7 +1947,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 												Attributes: map[string]schema.Attribute{
 													"no_port_match": schema.BoolAttribute{
 														Description:         "disable port Match Disable matching of ports",
-														MarkdownDescription: "disable port Match Disable matching of ports",
+														MarkdownDescription: "disable port Match Disable matching of ports<br>Conflicts with `port` and `port_ranges`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1953,7 +1957,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 													},
 													"port": schema.Int64Attribute{
 														Description:         "port Exact Port to match",
-														MarkdownDescription: "port Exact Port to match",
+														MarkdownDescription: "port Exact Port to match<br>Conflicts with `no_port_match` and `port_ranges`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1963,7 +1967,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 													},
 													"port_ranges": schema.StringAttribute{
 														Description:         "port_range Port range to match",
-														MarkdownDescription: "port_range Port range to match<br>**Validation:** `Length LengthBetween(1, 32)`",
+														MarkdownDescription: "port_range Port range to match<br>**Validation:** `Length LengthBetween(1, 32)`<br>Conflicts with `no_port_match` and `port`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -1988,7 +1992,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 										Attributes: map[string]schema.Attribute{
 											"path_match_choice": schema.SingleNestedAttribute{
 												Description:         "path_match A specification of path match",
-												MarkdownDescription: "path_match A specification of path match",
+												MarkdownDescription: "path_match A specification of path match<br>Exactly one of `path`, `prefix`, or `regex` must be specified.",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
@@ -2002,7 +2006,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 												Attributes: map[string]schema.Attribute{
 													"path": schema.StringAttribute{
 														Description:         "exact Exact path value to match",
-														MarkdownDescription: "exact Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`",
+														MarkdownDescription: "exact Exact path value to match<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `prefix` and `regex`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -2016,7 +2020,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 													},
 													"prefix": schema.StringAttribute{
 														Description:         "prefix Path prefix to match (e.g. the value / will match on all paths)",
-														MarkdownDescription: "prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`",
+														MarkdownDescription: "prefix Path prefix to match (e.g. the value / will match on all paths)<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `path` and `regex`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -2030,7 +2034,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 													},
 													"regex": schema.StringAttribute{
 														Description:         "regex Regular expression of path match (e.g. the value .* will match on all paths)",
-														MarkdownDescription: "regex Regular expression of path match (e.g. the value .* will match on all paths)",
+														MarkdownDescription: "regex Regular expression of path match (e.g. the value .* will match on all paths)<br>Conflicts with `path` and `prefix`.",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -2066,7 +2070,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"value_match_choice": schema.SingleNestedAttribute{
 													Description:         "value_match Query parameter value regex match or exact match In the above example, xxyyxx is the value for the matching key",
-													MarkdownDescription: "value_match Query parameter value regex match or exact match In the above example, xxyyxx is the value for the matching key",
+													MarkdownDescription: "value_match Query parameter value regex match or exact match In the above example, xxyyxx is the value for the matching key<br>Exactly one of `exact` or `regex` must be specified when `value_match_choice` is configured.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -2079,14 +2083,14 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 													Attributes: map[string]schema.Attribute{
 														"exact": schema.StringAttribute{
 															Description:         "exact Exact match value for the query parameter key",
-															MarkdownDescription: "exact Exact match value for the query parameter key",
+															MarkdownDescription: "exact Exact match value for the query parameter key<br>Conflicts with `regex`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
 														},
 														"regex": schema.StringAttribute{
 															Description:         "regex Regex match value for the query parameter key",
-															MarkdownDescription: "regex Regex match value for the query parameter key",
+															MarkdownDescription: "regex Regex match value for the query parameter key<br>Conflicts with `exact`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -2134,7 +2138,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 									},
 									"value_choice": schema.SingleNestedAttribute{
 										Description:         "value Enter Cookie value as string or blindfolded secret.",
-										MarkdownDescription: "value Enter Cookie value as string or blindfolded secret.",
+										MarkdownDescription: "value Enter Cookie value as string or blindfolded secret.<br>Exactly one of `secret_value` or `value` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -2147,14 +2151,14 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 										Attributes: map[string]schema.Attribute{
 											"secret_value": schema.SingleNestedAttribute{
 												Description:         "Secret Value Secret Value of the Cookie header",
-												MarkdownDescription: "Secret Value Secret Value of the Cookie header",
+												MarkdownDescription: "Secret Value Secret Value of the Cookie header<br>Conflicts with `value`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
 												Attributes: map[string]schema.Attribute{
 													"secret_info_choice": schema.SingleNestedAttribute{
 														Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-														MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+														MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
@@ -2168,7 +2172,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 														Attributes: map[string]schema.Attribute{
 															"blindfold_secret_info": schema.SingleNestedAttribute{
 																Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -2208,7 +2212,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 															},
 															"clear_secret_info": schema.SingleNestedAttribute{
 																Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -2243,7 +2247,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 															},
 															"none": schema.BoolAttribute{
 																Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -2257,7 +2261,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 											},
 											"value": schema.StringAttribute{
 												Description:         "value Value of the Cookie header.",
-												MarkdownDescription: "value Value of the Cookie header.<br>**Validation:** `Length LengthAtMost(8096)`",
+												MarkdownDescription: "value Value of the Cookie header.<br>**Validation:** `Length LengthAtMost(8096)`<br>Conflicts with `secret_value`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2314,7 +2318,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 									},
 									"value_choice": schema.SingleNestedAttribute{
 										Description:         "value Enter Header value as string or blindfolded secret.",
-										MarkdownDescription: "value Enter Header value as string or blindfolded secret.",
+										MarkdownDescription: "value Enter Header value as string or blindfolded secret.<br>Exactly one of `secret_value` or `value` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -2327,14 +2331,14 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 										Attributes: map[string]schema.Attribute{
 											"secret_value": schema.SingleNestedAttribute{
 												Description:         "Secret Value Secret Value of the HTTP header.",
-												MarkdownDescription: "Secret Value Secret Value of the HTTP header.",
+												MarkdownDescription: "Secret Value Secret Value of the HTTP header.<br>Conflicts with `value`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
 												Attributes: map[string]schema.Attribute{
 													"secret_info_choice": schema.SingleNestedAttribute{
 														Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-														MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+														MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
@@ -2348,7 +2352,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 														Attributes: map[string]schema.Attribute{
 															"blindfold_secret_info": schema.SingleNestedAttribute{
 																Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -2388,7 +2392,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 															},
 															"clear_secret_info": schema.SingleNestedAttribute{
 																Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -2423,7 +2427,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 															},
 															"none": schema.BoolAttribute{
 																Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -2437,7 +2441,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 											},
 											"value": schema.StringAttribute{
 												Description:         "value Value of the HTTP header.",
-												MarkdownDescription: "value Value of the HTTP header.<br>**Validation:** `Length LengthAtMost(8096)`",
+												MarkdownDescription: "value Value of the HTTP header.<br>**Validation:** `Length LengthAtMost(8096)`<br>Conflicts with `secret_value`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2476,7 +2480,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 								Attributes: map[string]schema.Attribute{
 									"domain_choice": schema.SingleNestedAttribute{
 										Description:         "domain Domain to which cookie will be sent during request",
-										MarkdownDescription: "domain Domain to which cookie will be sent during request",
+										MarkdownDescription: "domain Domain to which cookie will be sent during request<br>Exactly one of `add_domain` or `ignore_domain` must be specified when `domain_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2489,7 +2493,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 										Attributes: map[string]schema.Attribute{
 											"add_domain": schema.StringAttribute{
 												Description:         "add_domain Add domain attribute",
-												MarkdownDescription: "add_domain Add domain attribute<br>**Validation:** `Length LengthBetween(1, 256)`",
+												MarkdownDescription: "add_domain Add domain attribute<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `ignore_domain`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2503,7 +2507,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 											},
 											"ignore_domain": schema.BoolAttribute{
 												Description:         "ignore_domain Ignore max age attribute",
-												MarkdownDescription: "ignore_domain Ignore max age attribute",
+												MarkdownDescription: "ignore_domain Ignore max age attribute<br>Conflicts with `add_domain`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2515,7 +2519,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 									},
 									"expiry_choice": schema.SingleNestedAttribute{
 										Description:         "Expiry Indicates the maximum lifetime of the cookie as an HTTP-date timestamp. Eg. Mon, 01 Dec 2008 00:23:53 GMT",
-										MarkdownDescription: "Expiry Indicates the maximum lifetime of the cookie as an HTTP-date timestamp. Eg. Mon, 01 Dec 2008 00:23:53 GMT",
+										MarkdownDescription: "Expiry Indicates the maximum lifetime of the cookie as an HTTP-date timestamp. Eg. Mon, 01 Dec 2008 00:23:53 GMT<br>Exactly one of `add_expiry` or `ignore_expiry` must be specified when `expiry_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2528,7 +2532,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 										Attributes: map[string]schema.Attribute{
 											"add_expiry": schema.StringAttribute{
 												Description:         "add_expiry Add expiry attribute",
-												MarkdownDescription: "add_expiry Add expiry attribute<br>**Validation:** `Length LengthAtMost(256)`",
+												MarkdownDescription: "add_expiry Add expiry attribute<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `ignore_expiry`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2538,7 +2542,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 											},
 											"ignore_expiry": schema.BoolAttribute{
 												Description:         "ignore_expiry Ignore expiry attribute",
-												MarkdownDescription: "ignore_expiry Ignore expiry attribute",
+												MarkdownDescription: "ignore_expiry Ignore expiry attribute<br>Conflicts with `add_expiry`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2550,7 +2554,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 									},
 									"httponly_choice": schema.SingleNestedAttribute{
 										Description:         "httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript.",
-										MarkdownDescription: "httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript.",
+										MarkdownDescription: "httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript.<br>Exactly one of `add_httponly` or `ignore_httponly` must be specified when `httponly_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2563,7 +2567,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 										Attributes: map[string]schema.Attribute{
 											"add_httponly": schema.BoolAttribute{
 												Description:         "add_httponly",
-												MarkdownDescription: "add_httponly",
+												MarkdownDescription: "add_httponly<br>Conflicts with `ignore_httponly`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2573,7 +2577,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 											},
 											"ignore_httponly": schema.BoolAttribute{
 												Description:         "ignore_httponly",
-												MarkdownDescription: "ignore_httponly",
+												MarkdownDescription: "ignore_httponly<br>Conflicts with `add_httponly`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2585,7 +2589,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 									},
 									"max_age_choice": schema.SingleNestedAttribute{
 										Description:         "max_age Enter the maximum age in minutes for session cookies after which cookies are automatically expired",
-										MarkdownDescription: "max_age Enter the maximum age in minutes for session cookies after which cookies are automatically expired",
+										MarkdownDescription: "max_age Enter the maximum age in minutes for session cookies after which cookies are automatically expired<br>Exactly one of `ignore_max_age` or `max_age_value` must be specified when `max_age_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2598,7 +2602,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 										Attributes: map[string]schema.Attribute{
 											"ignore_max_age": schema.BoolAttribute{
 												Description:         "ignore_max_age Ignore max age attribute",
-												MarkdownDescription: "ignore_max_age Ignore max age attribute",
+												MarkdownDescription: "ignore_max_age Ignore max age attribute<br>Conflicts with `max_age_value`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2608,7 +2612,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 											},
 											"max_age_value": schema.Int32Attribute{
 												Description:         "add_max_age Add max age attribute",
-												MarkdownDescription: "add_max_age Add max age attribute",
+												MarkdownDescription: "add_max_age Add max age attribute<br>Conflicts with `ignore_max_age`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2635,7 +2639,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 									},
 									"partitioned_choice": schema.SingleNestedAttribute{
 										Description:         "Partitioned A cookie with the Partitioned attribute is stored using partitioned storage.",
-										MarkdownDescription: "Partitioned A cookie with the Partitioned attribute is stored using partitioned storage.",
+										MarkdownDescription: "Partitioned A cookie with the Partitioned attribute is stored using partitioned storage.<br>Exactly one of `add_partitioned` or `ignore_partitioned` must be specified when `partitioned_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2648,7 +2652,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 										Attributes: map[string]schema.Attribute{
 											"add_partitioned": schema.BoolAttribute{
 												Description:         "add_partitioned",
-												MarkdownDescription: "add_partitioned",
+												MarkdownDescription: "add_partitioned<br>Conflicts with `ignore_partitioned`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2658,7 +2662,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 											},
 											"ignore_partitioned": schema.BoolAttribute{
 												Description:         "ignore_partitioned",
-												MarkdownDescription: "ignore_partitioned",
+												MarkdownDescription: "ignore_partitioned<br>Conflicts with `add_partitioned`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2670,7 +2674,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 									},
 									"path_choice": schema.SingleNestedAttribute{
 										Description:         "path The path that must exist in the requested URL for the browser to send the Cookie header.",
-										MarkdownDescription: "path The path that must exist in the requested URL for the browser to send the Cookie header.",
+										MarkdownDescription: "path The path that must exist in the requested URL for the browser to send the Cookie header.<br>Exactly one of `add_path` or `ignore_path` must be specified when `path_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2683,7 +2687,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 										Attributes: map[string]schema.Attribute{
 											"add_path": schema.StringAttribute{
 												Description:         "add_path Add path attribute",
-												MarkdownDescription: "add_path Add path attribute<br>**Validation:** `Length LengthAtMost(256)`",
+												MarkdownDescription: "add_path Add path attribute<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `ignore_path`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2697,7 +2701,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 											},
 											"ignore_path": schema.BoolAttribute{
 												Description:         "ignore_domain Ignore path attribute",
-												MarkdownDescription: "ignore_domain Ignore path attribute",
+												MarkdownDescription: "ignore_domain Ignore path attribute<br>Conflicts with `add_path`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2709,7 +2713,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 									},
 									"samesite_choice": schema.SingleNestedAttribute{
 										Description:         "samesite Controls whether or not a cookie is sent with cross-site requests",
-										MarkdownDescription: "samesite Controls whether or not a cookie is sent with cross-site requests",
+										MarkdownDescription: "samesite Controls whether or not a cookie is sent with cross-site requests<br>Exactly one of `ignore_samesite`, `samesite_lax`, `samesite_none`, or `samesite_strict` must be specified when `samesite_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2724,7 +2728,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 										Attributes: map[string]schema.Attribute{
 											"ignore_samesite": schema.BoolAttribute{
 												Description:         "ignore_samesite Ignore Samesite attribute",
-												MarkdownDescription: "ignore_samesite Ignore Samesite attribute",
+												MarkdownDescription: "ignore_samesite Ignore Samesite attribute<br>Conflicts with `samesite_lax`, `samesite_none`, and `samesite_strict`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2734,7 +2738,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 											},
 											"samesite_lax": schema.BoolAttribute{
 												Description:         "lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests",
-												MarkdownDescription: "lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests",
+												MarkdownDescription: "lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests<br>Conflicts with `ignore_samesite`, `samesite_none`, and `samesite_strict`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2744,7 +2748,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 											},
 											"samesite_none": schema.BoolAttribute{
 												Description:         "none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests",
-												MarkdownDescription: "none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests",
+												MarkdownDescription: "none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests<br>Conflicts with `ignore_samesite`, `samesite_lax`, and `samesite_strict`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2754,7 +2758,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 											},
 											"samesite_strict": schema.BoolAttribute{
 												Description:         "strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests",
-												MarkdownDescription: "strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests",
+												MarkdownDescription: "strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests<br>Conflicts with `ignore_samesite`, `samesite_lax`, and `samesite_none`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2766,7 +2770,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 									},
 									"secure_choice": schema.SingleNestedAttribute{
 										Description:         "secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks.",
-										MarkdownDescription: "secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks.",
+										MarkdownDescription: "secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks.<br>Exactly one of `add_secure` or `ignore_secure` must be specified when `secure_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2779,7 +2783,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 										Attributes: map[string]schema.Attribute{
 											"add_secure": schema.BoolAttribute{
 												Description:         "add_secure",
-												MarkdownDescription: "add_secure",
+												MarkdownDescription: "add_secure<br>Conflicts with `ignore_secure`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2789,7 +2793,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 											},
 											"ignore_secure": schema.BoolAttribute{
 												Description:         "ignore_secure",
-												MarkdownDescription: "ignore_secure",
+												MarkdownDescription: "ignore_secure<br>Conflicts with `add_secure`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2801,7 +2805,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 									},
 									"value_choice": schema.SingleNestedAttribute{
 										Description:         "value Enter Cookie value as string or blindfolded secret.",
-										MarkdownDescription: "value Enter Cookie value as string or blindfolded secret.",
+										MarkdownDescription: "value Enter Cookie value as string or blindfolded secret.<br>Exactly one of `ignore_value`, `secret_value`, or `value` must be specified when `value_choice` is configured.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
@@ -2815,7 +2819,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 										Attributes: map[string]schema.Attribute{
 											"ignore_value": schema.BoolAttribute{
 												Description:         "ignore_value Ignore value of cookie",
-												MarkdownDescription: "ignore_value Ignore value of cookie",
+												MarkdownDescription: "ignore_value Ignore value of cookie<br>Conflicts with `secret_value` and `value`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2825,14 +2829,14 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 											},
 											"secret_value": schema.SingleNestedAttribute{
 												Description:         "Secret Value Secret Value of the Cookie header",
-												MarkdownDescription: "Secret Value Secret Value of the Cookie header",
+												MarkdownDescription: "Secret Value Secret Value of the Cookie header<br>Conflicts with `ignore_value` and `value`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
 												Attributes: map[string]schema.Attribute{
 													"secret_info_choice": schema.SingleNestedAttribute{
 														Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-														MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+														MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
@@ -2846,7 +2850,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 														Attributes: map[string]schema.Attribute{
 															"blindfold_secret_info": schema.SingleNestedAttribute{
 																Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -2886,7 +2890,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 															},
 															"clear_secret_info": schema.SingleNestedAttribute{
 																Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -2921,7 +2925,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 															},
 															"none": schema.BoolAttribute{
 																Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -2935,7 +2939,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 											},
 											"value": schema.StringAttribute{
 												Description:         "value Value of the Cookie header.",
-												MarkdownDescription: "value Value of the Cookie header.<br>**Validation:** `Length LengthAtMost(8096)`",
+												MarkdownDescription: "value Value of the Cookie header.<br>**Validation:** `Length LengthAtMost(8096)`<br>Conflicts with `ignore_value` and `secret_value`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -2992,7 +2996,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 									},
 									"value_choice": schema.SingleNestedAttribute{
 										Description:         "value Enter Header value as string or blindfolded secret.",
-										MarkdownDescription: "value Enter Header value as string or blindfolded secret.",
+										MarkdownDescription: "value Enter Header value as string or blindfolded secret.<br>Exactly one of `secret_value` or `value` must be specified.",
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
@@ -3005,14 +3009,14 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 										Attributes: map[string]schema.Attribute{
 											"secret_value": schema.SingleNestedAttribute{
 												Description:         "Secret Value Secret Value of the HTTP header.",
-												MarkdownDescription: "Secret Value Secret Value of the HTTP header.",
+												MarkdownDescription: "Secret Value Secret Value of the HTTP header.<br>Conflicts with `value`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
 												Attributes: map[string]schema.Attribute{
 													"secret_info_choice": schema.SingleNestedAttribute{
 														Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-														MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+														MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted<br>Exactly one of `blindfold_secret_info`, `clear_secret_info`, or `none` must be specified.",
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
@@ -3026,7 +3030,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 														Attributes: map[string]schema.Attribute{
 															"blindfold_secret_info": schema.SingleNestedAttribute{
 																Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service<br>Conflicts with `clear_secret_info` and `none`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -3066,7 +3070,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 															},
 															"clear_secret_info": schema.SingleNestedAttribute{
 																Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted<br>Conflicts with `blindfold_secret_info` and `none`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -3101,7 +3105,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 															},
 															"none": schema.BoolAttribute{
 																Description:         "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
-																MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.",
+																MarkdownDescription: "None No private key will be stored or used. Choose this only when you need a public certificate for verification (e.g., validating SAML/JWT signatures). Not suitable for TLS or any use case that requires presenting a certificate, those will fail without a private key.<br>Conflicts with `blindfold_secret_info` and `clear_secret_info`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -3115,7 +3119,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 											},
 											"value": schema.StringAttribute{
 												Description:         "value Value of the HTTP header.",
-												MarkdownDescription: "value Value of the HTTP header.<br>**Validation:** `Length LengthAtMost(8096)`",
+												MarkdownDescription: "value Value of the HTTP header.<br>**Validation:** `Length LengthAtMost(8096)`<br>Conflicts with `secret_value`.",
 												Required:            false,
 												Optional:            true,
 												Computed:            false,
@@ -3142,7 +3146,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 						},
 						"route_action_choice": schema.SingleNestedAttribute{
 							Description:         "route_action one of action to take when match is successful",
-							MarkdownDescription: "route_action one of action to take when match is successful",
+							MarkdownDescription: "route_action one of action to take when match is successful<br>Exactly one of `route_destination`, `route_direct_response`, or `route_redirect` must be specified.",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
@@ -3156,7 +3160,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 							Attributes: map[string]schema.Attribute{
 								"route_destination": schema.SingleNestedAttribute{
 									Description:         "route_destination Send request to one of the destination from list of destinations",
-									MarkdownDescription: "route_destination Send request to one of the destination from list of destinations",
+									MarkdownDescription: "route_destination Send request to one of the destination from list of destinations<br>Conflicts with `route_direct_response` and `route_redirect`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -3190,7 +3194,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 										},
 										"cluster_retract_choice": schema.SingleNestedAttribute{
 											Description:         "Oneof for Cluster retraction Specifies whether retraction of cluster has to be enabled or disabled",
-											MarkdownDescription: "Oneof for Cluster retraction Specifies whether retraction of cluster has to be enabled or disabled",
+											MarkdownDescription: "Oneof for Cluster retraction Specifies whether retraction of cluster has to be enabled or disabled<br>Exactly one of `do_not_retract_cluster` or `retract_cluster` must be specified when `cluster_retract_choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -3203,7 +3207,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 											Attributes: map[string]schema.Attribute{
 												"do_not_retract_cluster": schema.BoolAttribute{
 													Description:         "do_not_retract_cluster When this option is configured, cluster with no healthy endpoints is not retracted from route having weighted cluster configuration.",
-													MarkdownDescription: "do_not_retract_cluster When this option is configured, cluster with no healthy endpoints is not retracted from route having weighted cluster configuration.",
+													MarkdownDescription: "do_not_retract_cluster When this option is configured, cluster with no healthy endpoints is not retracted from route having weighted cluster configuration.<br>Conflicts with `retract_cluster`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -3213,7 +3217,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"retract_cluster": schema.BoolAttribute{
 													Description:         "retract_cluster When this option is enabled, weighted cluster will not be considered for loadbalancing, if all its endpoints are unhealthy. Since the cluster with all unhealthy endpoints is removed, the traffic will be distributed among remaining clusters as per their weight. Also panic-threshold configuration is ignored for retracted cluster. This option is ignored when single destination cluster is configured for route",
-													MarkdownDescription: "retract_cluster When this option is enabled, weighted cluster will not be considered for loadbalancing, if all its endpoints are unhealthy. Since the cluster with all unhealthy endpoints is removed, the traffic will be distributed among remaining clusters as per their weight. Also panic-threshold configuration is ignored for retracted cluster. This option is ignored when single destination cluster is configured for route",
+													MarkdownDescription: "retract_cluster When this option is enabled, weighted cluster will not be considered for loadbalancing, if all its endpoints are unhealthy. Since the cluster with all unhealthy endpoints is removed, the traffic will be distributed among remaining clusters as per their weight. Also panic-threshold configuration is ignored for retracted cluster. This option is ignored when single destination cluster is configured for route<br>Conflicts with `do_not_retract_cluster`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -3320,21 +3324,24 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 											Attributes: map[string]schema.Attribute{
 												"allowed_domains_choice": schema.SingleNestedAttribute{
 													Description:         "allowed_domains The list of source origin that should be allowed.",
-													MarkdownDescription: "allowed_domains The list of source origin that should be allowed.",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
+													MarkdownDescription: "allowed_domains The list of source origin that should be allowed.<br>Exactly one of `all_load_balancer_domains`, `custom_domain_list`, or `disabled` must be specified when `allowed_domains_choice` is configured.",
+													Required:            false,
+													Optional:            true,
+													Computed:            true,
 													Validators: []validator.Object{
-														exactlyoneofvalidator.RequiredExactlyOneOf(
+														exactlyoneofvalidator.ExactlyOneOf(
 															"all_load_balancer_domains",
 															"custom_domain_list",
 															"disabled",
 														),
 													},
+													PlanModifiers: []planmodifier.Object{
+														objectplanmodifier.UseNonNullStateForUnknown(),
+													},
 													Attributes: map[string]schema.Attribute{
 														"all_load_balancer_domains": schema.BoolAttribute{
 															Description:         "all_load_balancer_domains Add All load balancer domains to source origin (allow) list.",
-															MarkdownDescription: "all_load_balancer_domains Add All load balancer domains to source origin (allow) list.",
+															MarkdownDescription: "all_load_balancer_domains Add All load balancer domains to source origin (allow) list.<br>Conflicts with `custom_domain_list` and `disabled`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -3344,7 +3351,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 														},
 														"custom_domain_list": schema.SingleNestedAttribute{
 															Description:         "custom_domain_list Add one or more domains to source origin (allow) list.",
-															MarkdownDescription: "custom_domain_list Add one or more domains to source origin (allow) list.",
+															MarkdownDescription: "custom_domain_list Add one or more domains to source origin (allow) list.<br>Conflicts with `all_load_balancer_domains` and `disabled`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -3370,7 +3377,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 														},
 														"disabled": schema.BoolAttribute{
 															Description:         "disabled Allow all source origin domains.",
-															MarkdownDescription: "disabled Allow all source origin domains.",
+															MarkdownDescription: "disabled Allow all source origin domains.<br>Conflicts with `all_load_balancer_domains` and `custom_domain_list`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -3501,7 +3508,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 												Attributes: map[string]schema.Attribute{
 													"policy_specifier_choice": schema.SingleNestedAttribute{
 														Description:         "PolicySpecifier Specifies whether hashing is done on incoming request header, cookie or source IP",
-														MarkdownDescription: "PolicySpecifier Specifies whether hashing is done on incoming request header, cookie or source IP",
+														MarkdownDescription: "PolicySpecifier Specifies whether hashing is done on incoming request header, cookie or source IP<br>Exactly one of `cookie`, `header_name`, or `source_ip` must be specified.",
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
@@ -3515,14 +3522,14 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 														Attributes: map[string]schema.Attribute{
 															"cookie": schema.SingleNestedAttribute{
 																Description:         "Cookie Hash based on cookie",
-																MarkdownDescription: "Cookie Hash based on cookie",
+																MarkdownDescription: "Cookie Hash based on cookie<br>Conflicts with `header_name` and `source_ip`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
 																Attributes: map[string]schema.Attribute{
 																	"httponly_choice": schema.SingleNestedAttribute{
 																		Description:         "httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript.",
-																		MarkdownDescription: "httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript.",
+																		MarkdownDescription: "httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript.<br>Exactly one of `add_httponly` or `ignore_httponly` must be specified when `httponly_choice` is configured.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -3535,7 +3542,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 																		Attributes: map[string]schema.Attribute{
 																			"add_httponly": schema.BoolAttribute{
 																				Description:         "add_httponly Add httponly attribute",
-																				MarkdownDescription: "add_httponly Add httponly attribute",
+																				MarkdownDescription: "add_httponly Add httponly attribute<br>Conflicts with `ignore_httponly`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -3545,7 +3552,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 																			},
 																			"ignore_httponly": schema.BoolAttribute{
 																				Description:         "ignore_httponly Ignore httponly attribute",
-																				MarkdownDescription: "ignore_httponly Ignore httponly attribute",
+																				MarkdownDescription: "ignore_httponly Ignore httponly attribute<br>Conflicts with `add_httponly`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -3574,7 +3581,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 																	},
 																	"samesite_choice": schema.SingleNestedAttribute{
 																		Description:         "samesite Controls whether or not a cookie is sent with cross-site requests",
-																		MarkdownDescription: "samesite Controls whether or not a cookie is sent with cross-site requests",
+																		MarkdownDescription: "samesite Controls whether or not a cookie is sent with cross-site requests<br>Exactly one of `ignore_samesite`, `samesite_lax`, `samesite_none`, or `samesite_strict` must be specified when `samesite_choice` is configured.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -3589,7 +3596,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 																		Attributes: map[string]schema.Attribute{
 																			"ignore_samesite": schema.BoolAttribute{
 																				Description:         "ignore_samesite Ignore Samesite attribute",
-																				MarkdownDescription: "ignore_samesite Ignore Samesite attribute",
+																				MarkdownDescription: "ignore_samesite Ignore Samesite attribute<br>Conflicts with `samesite_lax`, `samesite_none`, and `samesite_strict`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -3599,7 +3606,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 																			},
 																			"samesite_lax": schema.BoolAttribute{
 																				Description:         "lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests",
-																				MarkdownDescription: "lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests",
+																				MarkdownDescription: "lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests<br>Conflicts with `ignore_samesite`, `samesite_none`, and `samesite_strict`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -3609,7 +3616,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 																			},
 																			"samesite_none": schema.BoolAttribute{
 																				Description:         "none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests",
-																				MarkdownDescription: "none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests",
+																				MarkdownDescription: "none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests<br>Conflicts with `ignore_samesite`, `samesite_lax`, and `samesite_strict`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -3619,7 +3626,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 																			},
 																			"samesite_strict": schema.BoolAttribute{
 																				Description:         "strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests",
-																				MarkdownDescription: "strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests",
+																				MarkdownDescription: "strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests<br>Conflicts with `ignore_samesite`, `samesite_lax`, and `samesite_none`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -3631,7 +3638,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 																	},
 																	"secure_choice": schema.SingleNestedAttribute{
 																		Description:         "secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks.",
-																		MarkdownDescription: "secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks.",
+																		MarkdownDescription: "secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks.<br>Exactly one of `add_secure` or `ignore_secure` must be specified when `secure_choice` is configured.",
 																		Required:            false,
 																		Optional:            true,
 																		Computed:            false,
@@ -3644,7 +3651,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 																		Attributes: map[string]schema.Attribute{
 																			"add_secure": schema.BoolAttribute{
 																				Description:         "add_secure Add secure attribute",
-																				MarkdownDescription: "add_secure Add secure attribute",
+																				MarkdownDescription: "add_secure Add secure attribute<br>Conflicts with `ignore_secure`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -3654,7 +3661,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 																			},
 																			"ignore_secure": schema.BoolAttribute{
 																				Description:         "ignore_secure Ignore secure attribute",
-																				MarkdownDescription: "ignore_secure Ignore secure attribute",
+																				MarkdownDescription: "ignore_secure Ignore secure attribute<br>Conflicts with `add_secure`.",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
@@ -3675,7 +3682,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 															},
 															"header_name": schema.StringAttribute{
 																Description:         "Header The name or key of the request header that will be used to obtain the hash key",
-																MarkdownDescription: "Header The name or key of the request header that will be used to obtain the hash key<br>**Validation:** `Length LengthBetween(1, 256)`",
+																MarkdownDescription: "Header The name or key of the request header that will be used to obtain the hash key<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `cookie` and `source_ip`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -3685,7 +3692,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 															},
 															"source_ip": schema.BoolAttribute{
 																Description:         "Source IP Hash based on source IP address",
-																MarkdownDescription: "Source IP Hash based on source IP address",
+																MarkdownDescription: "Source IP Hash based on source IP address<br>Conflicts with `cookie` and `header_name`.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
@@ -3705,7 +3712,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 										},
 										"host_rewrite_params_choice": schema.SingleNestedAttribute{
 											Description:         "HostRewriteParams Specifies how the host header can be modified during forwarding",
-											MarkdownDescription: "HostRewriteParams Specifies how the host header can be modified during forwarding",
+											MarkdownDescription: "HostRewriteParams Specifies how the host header can be modified during forwarding<br>Exactly one of `auto_host_rewrite` or `host_rewrite` must be specified.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
@@ -3718,14 +3725,14 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 											Attributes: map[string]schema.Attribute{
 												"auto_host_rewrite": schema.BoolAttribute{
 													Description:         "Auto Host Rewrite Indicates that during forwarding, the host header will be swapped with the hostname of the upstream host chosen by the cluster",
-													MarkdownDescription: "Auto Host Rewrite Indicates that during forwarding, the host header will be swapped with the hostname of the upstream host chosen by the cluster",
+													MarkdownDescription: "Auto Host Rewrite Indicates that during forwarding, the host header will be swapped with the hostname of the upstream host chosen by the cluster<br>Conflicts with `host_rewrite`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 												},
 												"host_rewrite": schema.StringAttribute{
 													Description:         "HostRewrite Indicates that during forwarding, the host header will be swapped with this value",
-													MarkdownDescription: "HostRewrite Indicates that during forwarding, the host header will be swapped with this value<br>**Validation:** `Length LengthBetween(1, 256)`",
+													MarkdownDescription: "HostRewrite Indicates that during forwarding, the host header will be swapped with this value<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `auto_host_rewrite`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -3833,21 +3840,24 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 											Attributes: map[string]schema.Attribute{
 												"query_params_choice": schema.SingleNestedAttribute{
 													Description:         "query_params Handling of incoming query parameters in simple route.",
-													MarkdownDescription: "query_params Handling of incoming query parameters in simple route.",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
+													MarkdownDescription: "query_params Handling of incoming query parameters in simple route.<br>Exactly one of `remove_all_params`, `replace_params`, or `retain_all_params` must be specified when `query_params_choice` is configured.",
+													Required:            false,
+													Optional:            true,
+													Computed:            true,
 													Validators: []validator.Object{
-														exactlyoneofvalidator.RequiredExactlyOneOf(
+														exactlyoneofvalidator.ExactlyOneOf(
 															"remove_all_params",
 															"replace_params",
 															"retain_all_params",
 														),
 													},
+													PlanModifiers: []planmodifier.Object{
+														objectplanmodifier.UseNonNullStateForUnknown(),
+													},
 													Attributes: map[string]schema.Attribute{
 														"remove_all_params": schema.BoolAttribute{
 															Description:         "Remove All Params",
-															MarkdownDescription: "Remove All Params",
+															MarkdownDescription: "Remove All Params<br>Conflicts with `replace_params` and `retain_all_params`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -3857,7 +3867,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 														},
 														"replace_params": schema.StringAttribute{
 															Description:         "Replace All Params",
-															MarkdownDescription: "Replace All Params<br>**Validation:** `Length LengthBetween(1, 256)`",
+															MarkdownDescription: "Replace All Params<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `remove_all_params` and `retain_all_params`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -3867,7 +3877,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 														},
 														"retain_all_params": schema.BoolAttribute{
 															Description:         "Retain All Params",
-															MarkdownDescription: "Retain All Params",
+															MarkdownDescription: "Retain All Params<br>Conflicts with `remove_all_params` and `replace_params`.",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
@@ -3963,7 +3973,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 										},
 										"route_destination_rewrite_choice": schema.SingleNestedAttribute{
 											Description:         "RouteDestinationRewrite Specifies how the path can be modified during forwarding",
-											MarkdownDescription: "RouteDestinationRewrite Specifies how the path can be modified during forwarding",
+											MarkdownDescription: "RouteDestinationRewrite Specifies how the path can be modified during forwarding<br>Exactly one of `prefix_rewrite` or `regex_rewrite` must be specified when `route_destination_rewrite_choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -3976,7 +3986,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 											Attributes: map[string]schema.Attribute{
 												"prefix_rewrite": schema.StringAttribute{
 													Description:         "prefix_rewrite prefix_rewrite indicates that during forwarding, the matched prefix (or path) should be swapped with its value. When using regex path matching, the entire path (not including the query string) will be swapped with this value. This option allows application URLs to be rooted at a different path from those exposed at the reverse proxy layer. Example : gcSpec: routes: - match: - headers: [] path: prefix : /register/ query_params: [] - headers: [] path: prefix: /register query_params: [] routeDestination: prefixRewrite: '/' destinations: - cluster: - kind: cluster.Object uid: cluster-1 Having above entries in the config, requests to /register will be stripped to /, while requests to /register/public will be stripped to /public",
-													MarkdownDescription: "prefix_rewrite prefix_rewrite indicates that during forwarding, the matched prefix (or path) should be swapped with its value. When using regex path matching, the entire path (not including the query string) will be swapped with this value. This option allows application URLs to be rooted at a different path from those exposed at the reverse proxy layer. Example : gcSpec: routes: - match: - headers: [] path: prefix : /register/ query_params: [] - headers: [] path: prefix: /register query_params: [] routeDestination: prefixRewrite: '/' destinations: - cluster: - kind: cluster.Object uid: cluster-1 Having above entries in the config, requests to /register will be stripped to /, while requests to /register/public will be stripped to /public<br>**Validation:** `Length LengthAtMost(256)`",
+													MarkdownDescription: "prefix_rewrite prefix_rewrite indicates that during forwarding, the matched prefix (or path) should be swapped with its value. When using regex path matching, the entire path (not including the query string) will be swapped with this value. This option allows application URLs to be rooted at a different path from those exposed at the reverse proxy layer. Example : gcSpec: routes: - match: - headers: [] path: prefix : /register/ query_params: [] - headers: [] path: prefix: /register query_params: [] routeDestination: prefixRewrite: '/' destinations: - cluster: - kind: cluster.Object uid: cluster-1 Having above entries in the config, requests to /register will be stripped to /, while requests to /register/public will be stripped to /public<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `regex_rewrite`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -3990,7 +4000,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"regex_rewrite": schema.SingleNestedAttribute{
 													Description:         "regex_rewrite regex_rewrite indicates that during forwarding, the matched regex should be swapped with the substitution value. Example : gcSpec: routes: - match: - headers: [] path: regex : '^/service/([^/]+)(/.*)$' query_params: [] routeDestination: regexRewrite: pattern: '^/service/([^/]+)(/.*)$' substitution: '\\\\2/instance/\\\\1' destinations: - cluster: - kind: cluster.Object uid: cluster-1 The path pattern '^/service/([^/]+)(/.*)$' paired with a substitution string of '\\\\2/instance/\\\\1' would transform '/service/foo/v1/api' into '/v1/api/instance/foo'.",
-													MarkdownDescription: "regex_rewrite regex_rewrite indicates that during forwarding, the matched regex should be swapped with the substitution value. Example : gcSpec: routes: - match: - headers: [] path: regex : '^/service/([^/]+)(/.*)$' query_params: [] routeDestination: regexRewrite: pattern: '^/service/([^/]+)(/.*)$' substitution: '\\\\2/instance/\\\\1' destinations: - cluster: - kind: cluster.Object uid: cluster-1 The path pattern '^/service/([^/]+)(/.*)$' paired with a substitution string of '\\\\2/instance/\\\\1' would transform '/service/foo/v1/api' into '/v1/api/instance/foo'.",
+													MarkdownDescription: "regex_rewrite regex_rewrite indicates that during forwarding, the matched regex should be swapped with the substitution value. Example : gcSpec: routes: - match: - headers: [] path: regex : '^/service/([^/]+)(/.*)$' query_params: [] routeDestination: regexRewrite: pattern: '^/service/([^/]+)(/.*)$' substitution: '\\\\2/instance/\\\\1' destinations: - cluster: - kind: cluster.Object uid: cluster-1 The path pattern '^/service/([^/]+)(/.*)$' paired with a substitution string of '\\\\2/instance/\\\\1' would transform '/service/foo/v1/api' into '/v1/api/instance/foo'.<br>Conflicts with `prefix_rewrite`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -4070,7 +4080,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 								},
 								"route_direct_response": schema.SingleNestedAttribute{
 									Description:         "route_direct_response Send direct response",
-									MarkdownDescription: "route_direct_response Send direct response",
+									MarkdownDescription: "route_direct_response Send direct response<br>Conflicts with `route_destination` and `route_redirect`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -4103,7 +4113,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 								},
 								"route_redirect": schema.SingleNestedAttribute{
 									Description:         "route_redirect Send redirect response",
-									MarkdownDescription: "route_redirect Send redirect response",
+									MarkdownDescription: "route_redirect Send redirect response<br>Conflicts with `route_destination` and `route_direct_response`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -4127,7 +4137,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 										},
 										"query_params_choice": schema.SingleNestedAttribute{
 											Description:         "query_params handling of incoming query parameters in redirect request.",
-											MarkdownDescription: "query_params handling of incoming query parameters in redirect request.",
+											MarkdownDescription: "query_params handling of incoming query parameters in redirect request.<br>Exactly one of `remove_all_params`, `replace_params`, or `retain_all_params` must be specified when `query_params_choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -4141,7 +4151,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 											Attributes: map[string]schema.Attribute{
 												"remove_all_params": schema.BoolAttribute{
 													Description:         "Remove All Params",
-													MarkdownDescription: "Remove All Params",
+													MarkdownDescription: "Remove All Params<br>Conflicts with `replace_params` and `retain_all_params`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -4151,7 +4161,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"replace_params": schema.StringAttribute{
 													Description:         "Replace All Params",
-													MarkdownDescription: "Replace All Params<br>**Validation:** `Length LengthBetween(1, 256)`",
+													MarkdownDescription: "Replace All Params<br>**Validation:** `Length LengthBetween(1, 256)`<br>Conflicts with `remove_all_params` and `retain_all_params`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -4161,7 +4171,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"retain_all_params": schema.BoolAttribute{
 													Description:         "Retain All Params",
-													MarkdownDescription: "Retain All Params",
+													MarkdownDescription: "Retain All Params<br>Conflicts with `remove_all_params` and `replace_params`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -4173,7 +4183,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 										},
 										"redirect_path_choice": schema.SingleNestedAttribute{
 											Description:         "Redirect Path Path in the redirect response",
-											MarkdownDescription: "Redirect Path Path in the redirect response",
+											MarkdownDescription: "Redirect Path Path in the redirect response<br>Exactly one of `path_redirect` or `prefix_rewrite` must be specified when `redirect_path_choice` is configured.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -4186,7 +4196,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 											Attributes: map[string]schema.Attribute{
 												"path_redirect": schema.StringAttribute{
 													Description:         "path_redirect swap path part of incoming URL in redirect URL",
-													MarkdownDescription: "path_redirect swap path part of incoming URL in redirect URL<br>**Validation:** `Length LengthAtMost(256)`",
+													MarkdownDescription: "path_redirect swap path part of incoming URL in redirect URL<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `prefix_rewrite`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -4200,7 +4210,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 												},
 												"prefix_rewrite": schema.StringAttribute{
 													Description:         "prefix_rewrite In Redirect response, the matched prefix (or path) should be swapped with this value. This option allows redirect URLs be dynamically created based on the request",
-													MarkdownDescription: "prefix_rewrite In Redirect response, the matched prefix (or path) should be swapped with this value. This option allows redirect URLs be dynamically created based on the request<br>**Validation:** `Length LengthAtMost(256)`",
+													MarkdownDescription: "prefix_rewrite In Redirect response, the matched prefix (or path) should be swapped with this value. This option allows redirect URLs be dynamically created based on the request<br>**Validation:** `Length LengthAtMost(256)`<br>Conflicts with `path_redirect`.",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
@@ -4238,7 +4248,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 							Attributes: map[string]schema.Attribute{
 								"service_policy_choice": schema.SingleNestedAttribute{
 									Description:         "service_policy_choice Service Policy configuration details at route level",
-									MarkdownDescription: "service_policy_choice Service Policy configuration details at route level",
+									MarkdownDescription: "service_policy_choice Service Policy configuration details at route level<br>`disable` must be specified when `service_policy_choice` is configured.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -4261,7 +4271,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 						},
 						"waf_exclusion_choice": schema.SingleNestedAttribute{
 							Description:         "Enable the WAF Exclusion functionality for VirtualHost WAF Exclusion details at the route level The WAF Exclusion is evaluated sequentially and can only be matched once per request.",
-							MarkdownDescription: "Enable the WAF Exclusion functionality for VirtualHost WAF Exclusion details at the route level The WAF Exclusion is evaluated sequentially and can only be matched once per request.",
+							MarkdownDescription: "Enable the WAF Exclusion functionality for VirtualHost WAF Exclusion details at the route level The WAF Exclusion is evaluated sequentially and can only be matched once per request.<br>Exactly one of `inherited_waf_exclusion` or `waf_exclusion_policy` must be specified when `waf_exclusion_choice` is configured.",
 							Required:            false,
 							Optional:            true,
 							Computed:            false,
@@ -4274,7 +4284,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 							Attributes: map[string]schema.Attribute{
 								"inherited_waf_exclusion": schema.BoolAttribute{
 									Description:         "Inherit Any WAF Exclusion configuration that was configured on a higher level will be enforced",
-									MarkdownDescription: "Inherit Any WAF Exclusion configuration that was configured on a higher level will be enforced",
+									MarkdownDescription: "Inherit Any WAF Exclusion configuration that was configured on a higher level will be enforced<br>Conflicts with `waf_exclusion_policy`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -4284,7 +4294,7 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 								},
 								"waf_exclusion_policy": schema.SingleNestedAttribute{
 									Description:         "Custom Policy A direct reference to a WAF Exclusion Policy configuration object",
-									MarkdownDescription: "Custom Policy A direct reference to a WAF Exclusion Policy configuration object",
+									MarkdownDescription: "Custom Policy A direct reference to a WAF Exclusion Policy configuration object<br>Conflicts with `inherited_waf_exclusion`.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -4330,15 +4340,18 @@ func (r *ResourceF5XCRoute) Schema(ctx context.Context, request resource.SchemaR
 								"ref_type_choice": schema.SingleNestedAttribute{
 									Description:         "Web Application Firewall (WAF) WAF can be used to analyze inbound and outbound HTTP/HTTPS traffic. WAF can be configured either in BLOCKing Mode or ALERTing Mode. In BLOCKing mode if WAF detects suspicious inbound/outbound traffic it blocks the request or response. In ALERTing mode if suspicious traffic is detected, WAF generates ALERTs with details on the suspicious traffic (instead of blocking traffic).",
 									MarkdownDescription: "Web Application Firewall (WAF) WAF can be used to analyze inbound and outbound HTTP/HTTPS traffic. WAF can be configured either in BLOCKing Mode or ALERTing Mode. In BLOCKing mode if WAF detects suspicious inbound/outbound traffic it blocks the request or response. In ALERTing mode if suspicious traffic is detected, WAF generates ALERTs with details on the suspicious traffic (instead of blocking traffic).",
-									Required:            true,
-									Optional:            false,
-									Computed:            false,
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
 									Validators: []validator.Object{
-										exactlyoneofvalidator.RequiredExactlyOneOf(
+										exactlyoneofvalidator.ExactlyOneOf(
 											"app_firewall",
 											"disable_waf",
 											"inherit_waf",
 										),
+									},
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.UseNonNullStateForUnknown(),
 									},
 									Attributes: map[string]schema.Attribute{
 										"app_firewall": schema.SingleNestedAttribute{
@@ -5933,9 +5946,12 @@ func (r *ResourceF5XCRoute) Create(ctx context.Context, request resource.CreateR
 						}
 
 						csrfPolicySpec := &ves_io_schema.CsrfPolicy{}
+						csrfPolicySpec.AllowedDomains = &ves_io_schema.CsrfPolicy_AllLoadBalancerDomains{
+							AllLoadBalancerDomains: &ves_io_schema.Empty{},
+						}
 						routeDestinationOneOfSpec.RouteDestination.CsrfPolicy = csrfPolicySpec
 
-						// resource modelToSpecNested RequiredOneOfField --> AllowedDomains
+						// resource modelToSpecNested OneOfField --> AllowedDomains
 						if !csrfPolicyModel.AllowedDomainsChoice.IsNull() && !csrfPolicyModel.AllowedDomainsChoice.IsUnknown() {
 							csrfPolicyAllowedDomainsChoiceModel := RouteAllowedDomainsChoice{}
 							response.Diagnostics.Append(csrfPolicyModel.AllowedDomainsChoice.As(ctx, &csrfPolicyAllowedDomainsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -6359,9 +6375,12 @@ func (r *ResourceF5XCRoute) Create(ctx context.Context, request resource.CreateR
 						}
 
 						queryParamsSpec := &ves_io_schema_route.QueryParamsSimpleRoute{}
+						queryParamsSpec.QueryParams = &ves_io_schema_route.QueryParamsSimpleRoute_RetainAllParams{
+							RetainAllParams: &ves_io_schema.Empty{},
+						}
 						routeDestinationOneOfSpec.RouteDestination.QueryParams = queryParamsSpec
 
-						// resource modelToSpecNested RequiredOneOfField --> QueryParams
+						// resource modelToSpecNested OneOfField --> QueryParams
 						if !queryParamsModel.QueryParamsChoice.IsNull() && !queryParamsModel.QueryParamsChoice.IsUnknown() {
 							queryParamsQueryParamsChoiceModel := RouteQueryParamsChoice{}
 							response.Diagnostics.Append(queryParamsModel.QueryParamsChoice.As(ctx, &queryParamsQueryParamsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -8978,8 +8997,7 @@ func (r *ResourceF5XCRoute) Create(ctx context.Context, request resource.CreateR
 
 							// Recursively populate the nested struct
 
-							// resource specToModelNested RequiredOneOfField --> AllowedDomains
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> AllowedDomains
 							if csrfPolicyElement.GetAllowedDomains() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								csrfPolicyallowedDomainsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -9676,8 +9694,7 @@ func (r *ResourceF5XCRoute) Create(ctx context.Context, request resource.CreateR
 
 							// Recursively populate the nested struct
 
-							// resource specToModelNested RequiredOneOfField --> QueryParams
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> QueryParams
 							if queryParamsElement.GetQueryParams() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								queryParamsqueryParamsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -10342,8 +10359,7 @@ func (r *ResourceF5XCRoute) Create(ctx context.Context, request resource.CreateR
 
 				// Recursively populate the nested struct
 
-				// resource specToModelNested RequiredOneOfField --> RefType
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> RefType
 				if wafTypeElement.GetRefType() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					wafTyperefTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -10541,11 +10557,7 @@ func (r *ResourceF5XCRoute) Read(ctx context.Context, request resource.ReadReque
 	defer cancel()
 	priorRoutes := data.Routes
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_route.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_route.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "route", err),
@@ -12822,8 +12834,7 @@ func (r *ResourceF5XCRoute) Read(ctx context.Context, request resource.ReadReque
 
 							// Recursively populate the nested struct
 
-							// resource specToModelNested RequiredOneOfField --> AllowedDomains
-							// <no value>
+							// resource specToModelNested OneOfField --> AllowedDomains
 							if csrfPolicyElement.GetAllowedDomains() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								csrfPolicyallowedDomainsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -13527,8 +13538,7 @@ func (r *ResourceF5XCRoute) Read(ctx context.Context, request resource.ReadReque
 
 							// Recursively populate the nested struct
 
-							// resource specToModelNested RequiredOneOfField --> QueryParams
-							// <no value>
+							// resource specToModelNested OneOfField --> QueryParams
 							if queryParamsElement.GetQueryParams() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								queryParamsqueryParamsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -13859,6 +13869,9 @@ func (r *ResourceF5XCRoute) Read(ctx context.Context, request resource.ReadReque
 						// resource specToModelNested StringField --> ResponseBodyEncoded
 						if routeDirectResponseElement.GetResponseBodyEncoded() != "" {
 							routeDirectResponseAttributeMap["response_body_encoded"] = types.StringValue(routeDirectResponseElement.GetResponseBodyEncoded())
+						} else if legacyVal := routeDirectResponseElement.GetResponseBody(); legacyVal != "" {
+							// Objects from the UI, REST API, or SDKv2 can hold the content only in the hidden legacy field.
+							routeDirectResponseAttributeMap["response_body_encoded"] = types.StringValue("string:///" + base64.StdEncoding.EncodeToString([]byte(legacyVal)))
 						} else {
 							// Empty string, set to null
 							routeDirectResponseAttributeMap["response_body_encoded"] = types.StringNull()
@@ -14197,8 +14210,7 @@ func (r *ResourceF5XCRoute) Read(ctx context.Context, request resource.ReadReque
 
 				// Recursively populate the nested struct
 
-				// resource specToModelNested RequiredOneOfField --> RefType
-				// <no value>
+				// resource specToModelNested OneOfField --> RefType
 				if wafTypeElement.GetRefType() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					wafTyperefTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -15837,9 +15849,12 @@ func (r *ResourceF5XCRoute) Update(ctx context.Context, request resource.UpdateR
 						}
 
 						csrfPolicySpec := &ves_io_schema.CsrfPolicy{}
+						csrfPolicySpec.AllowedDomains = &ves_io_schema.CsrfPolicy_AllLoadBalancerDomains{
+							AllLoadBalancerDomains: &ves_io_schema.Empty{},
+						}
 						routeDestinationOneOfSpec.RouteDestination.CsrfPolicy = csrfPolicySpec
 
-						// resource modelToSpecNested RequiredOneOfField --> AllowedDomains
+						// resource modelToSpecNested OneOfField --> AllowedDomains
 						if !csrfPolicyModel.AllowedDomainsChoice.IsNull() && !csrfPolicyModel.AllowedDomainsChoice.IsUnknown() {
 							csrfPolicyAllowedDomainsChoiceModel := RouteAllowedDomainsChoice{}
 							response.Diagnostics.Append(csrfPolicyModel.AllowedDomainsChoice.As(ctx, &csrfPolicyAllowedDomainsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16263,9 +16278,12 @@ func (r *ResourceF5XCRoute) Update(ctx context.Context, request resource.UpdateR
 						}
 
 						queryParamsSpec := &ves_io_schema_route.QueryParamsSimpleRoute{}
+						queryParamsSpec.QueryParams = &ves_io_schema_route.QueryParamsSimpleRoute_RetainAllParams{
+							RetainAllParams: &ves_io_schema.Empty{},
+						}
 						routeDestinationOneOfSpec.RouteDestination.QueryParams = queryParamsSpec
 
-						// resource modelToSpecNested RequiredOneOfField --> QueryParams
+						// resource modelToSpecNested OneOfField --> QueryParams
 						if !queryParamsModel.QueryParamsChoice.IsNull() && !queryParamsModel.QueryParamsChoice.IsUnknown() {
 							queryParamsQueryParamsChoiceModel := RouteQueryParamsChoice{}
 							response.Diagnostics.Append(queryParamsModel.QueryParamsChoice.As(ctx, &queryParamsQueryParamsChoiceModel, basetypes.ObjectAsOptions{})...)
@@ -16649,12 +16667,8 @@ func (r *ResourceF5XCRoute) Update(ctx context.Context, request resource.UpdateR
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_route.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_route.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "route", err),
@@ -16663,7 +16677,7 @@ func (r *ResourceF5XCRoute) Update(ctx context.Context, request resource.UpdateR
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_route.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_route.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "route", err),
@@ -18883,8 +18897,7 @@ func (r *ResourceF5XCRoute) Update(ctx context.Context, request resource.UpdateR
 
 							// Recursively populate the nested struct
 
-							// resource specToModelNested RequiredOneOfField --> AllowedDomains
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> AllowedDomains
 							if csrfPolicyElement.GetAllowedDomains() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								csrfPolicyallowedDomainsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -19581,8 +19594,7 @@ func (r *ResourceF5XCRoute) Update(ctx context.Context, request resource.UpdateR
 
 							// Recursively populate the nested struct
 
-							// resource specToModelNested RequiredOneOfField --> QueryParams
-							// GlobalSpecType
+							// resource specToModelNested OneOfField --> QueryParams
 							if queryParamsElement.GetQueryParams() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								queryParamsqueryParamsChoiceChoicesAttributeMap := make(map[string]attr.Value)
@@ -20247,8 +20259,7 @@ func (r *ResourceF5XCRoute) Update(ctx context.Context, request resource.UpdateR
 
 				// Recursively populate the nested struct
 
-				// resource specToModelNested RequiredOneOfField --> RefType
-				// GlobalSpecType
+				// resource specToModelNested OneOfField --> RefType
 				if wafTypeElement.GetRefType() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					wafTyperefTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)

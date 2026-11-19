@@ -306,7 +306,7 @@ func (r *ResourceF5XCProtocolPolicer) Schema(ctx context.Context, request resour
 							Attributes: map[string]schema.Attribute{
 								"type_choice": schema.SingleNestedAttribute{
 									Description:         "Type Provide various protocol specific match conditions",
-									MarkdownDescription: "Type Provide various protocol specific match conditions",
+									MarkdownDescription: "Type Provide various protocol specific match conditions<br>Exactly one of `dns`, `icmp`, `tcp`, or `udp` must be specified when `type_choice` is configured.",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
@@ -321,7 +321,7 @@ func (r *ResourceF5XCProtocolPolicer) Schema(ctx context.Context, request resour
 									Attributes: map[string]schema.Attribute{
 										"dns": schema.BoolAttribute{
 											Description:         "DNS packet type Match all DNS packets",
-											MarkdownDescription: "DNS packet type Match all DNS packets",
+											MarkdownDescription: "DNS packet type Match all DNS packets<br>Conflicts with `icmp`, `tcp`, and `udp`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -331,7 +331,7 @@ func (r *ResourceF5XCProtocolPolicer) Schema(ctx context.Context, request resour
 										},
 										"icmp": schema.SingleNestedAttribute{
 											Description:         "ICMP packet type ICMP message types to be matched in packet",
-											MarkdownDescription: "ICMP packet type ICMP message types to be matched in packet",
+											MarkdownDescription: "ICMP packet type ICMP message types to be matched in packet<br>Conflicts with `dns`, `tcp`, and `udp`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -351,7 +351,7 @@ func (r *ResourceF5XCProtocolPolicer) Schema(ctx context.Context, request resour
 										},
 										"tcp": schema.SingleNestedAttribute{
 											Description:         "TCP packet type TCP flags to be matched in packet",
-											MarkdownDescription: "TCP packet type TCP flags to be matched in packet",
+											MarkdownDescription: "TCP packet type TCP flags to be matched in packet<br>Conflicts with `dns`, `icmp`, and `udp`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -371,7 +371,7 @@ func (r *ResourceF5XCProtocolPolicer) Schema(ctx context.Context, request resour
 										},
 										"udp": schema.BoolAttribute{
 											Description:         "UDP packet type Match all UDP packets",
-											MarkdownDescription: "UDP packet type Match all UDP packets",
+											MarkdownDescription: "UDP packet type Match all UDP packets<br>Conflicts with `dns`, `icmp`, and `tcp`.",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -1134,11 +1134,7 @@ func (r *ResourceF5XCProtocolPolicer) Read(ctx context.Context, request resource
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_protocol_policer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_protocol_policer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "read", "protocol_policer", err),
@@ -1793,12 +1789,8 @@ func (r *ResourceF5XCProtocolPolicer) Update(ctx context.Context, request resour
 		return
 	}
 
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
-
 	// Replace object
-	err = r.client.ReplaceObject(ctx, ves_io_schema_protocol_policer.ObjectType, req, opts...)
+	err = r.client.ReplaceObject(ctx, ves_io_schema_protocol_policer.ObjectType, req)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace", "protocol_policer", err),
@@ -1807,7 +1799,7 @@ func (r *ResourceF5XCProtocolPolicer) Update(ctx context.Context, request resour
 	}
 
 	// Read the replaced object
-	httpResp, err := r.client.GetObject(ctx, ves_io_schema_protocol_policer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
+	httpResp, err := r.client.GetObject(ctx, ves_io_schema_protocol_policer.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", utils.SanitizeAPIError(ctx, "replace read", "protocol_policer", err),

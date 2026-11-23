@@ -674,22 +674,22 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
 										"name": schema.StringAttribute{
-											Description:         "",
-											MarkdownDescription: "",
+											Description:         "Name of the referenced object.",
+											MarkdownDescription: "Name of the referenced object.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
 										},
 										"namespace": schema.StringAttribute{
-											Description:         "",
-											MarkdownDescription: "",
+											Description:         "Namespace of the referenced object.",
+											MarkdownDescription: "Namespace of the referenced object.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
 										},
 										"tenant": schema.StringAttribute{
-											Description:         "",
-											MarkdownDescription: "",
+											Description:         "Tenant of the referenced object.",
+											MarkdownDescription: "Tenant of the referenced object.<br>**Cross-Namespace Shared Reference:** Required when referencing an object in the `shared` namespace from a non-`shared` resource namespace (set to `ves-io` for F5 XC system-shared objects such as default IKE profiles or `shared/public`).",
 											Required:            false,
 											Optional:            true,
 											Computed:            true,
@@ -778,22 +778,22 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 																	NestedObject: schema.NestedAttributeObject{
 																		Attributes: map[string]schema.Attribute{
 																			"name": schema.StringAttribute{
-																				Description:         "",
-																				MarkdownDescription: "",
+																				Description:         "Name of the referenced object.",
+																				MarkdownDescription: "Name of the referenced object.",
 																				Required:            true,
 																				Optional:            false,
 																				Computed:            false,
 																			},
 																			"namespace": schema.StringAttribute{
-																				Description:         "",
-																				MarkdownDescription: "",
+																				Description:         "Namespace of the referenced object.",
+																				MarkdownDescription: "Namespace of the referenced object.",
 																				Required:            true,
 																				Optional:            false,
 																				Computed:            false,
 																			},
 																			"tenant": schema.StringAttribute{
-																				Description:         "",
-																				MarkdownDescription: "",
+																				Description:         "Tenant of the referenced object.",
+																				MarkdownDescription: "Tenant of the referenced object.<br>**Cross-Namespace Shared Reference:** Required when referencing an object in the `shared` namespace from a non-`shared` resource namespace (set to `ves-io` for F5 XC system-shared objects such as default IKE profiles or `shared/public`).",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            true,
@@ -1318,22 +1318,22 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 											NestedObject: schema.NestedAttributeObject{
 												Attributes: map[string]schema.Attribute{
 													"name": schema.StringAttribute{
-														Description:         "",
-														MarkdownDescription: "",
+														Description:         "Name of the referenced object.",
+														MarkdownDescription: "Name of the referenced object.",
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
 													},
 													"namespace": schema.StringAttribute{
-														Description:         "",
-														MarkdownDescription: "",
+														Description:         "Namespace of the referenced object.",
+														MarkdownDescription: "Namespace of the referenced object.",
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
 													},
 													"tenant": schema.StringAttribute{
-														Description:         "",
-														MarkdownDescription: "",
+														Description:         "Tenant of the referenced object.",
+														MarkdownDescription: "Tenant of the referenced object.<br>**Cross-Namespace Shared Reference:** Required when referencing an object in the `shared` namespace from a non-`shared` resource namespace (set to `ves-io` for F5 XC system-shared objects such as default IKE profiles or `shared/public`).",
 														Required:            false,
 														Optional:            true,
 														Computed:            true,
@@ -1380,22 +1380,22 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 														NestedObject: schema.NestedAttributeObject{
 															Attributes: map[string]schema.Attribute{
 																"name": schema.StringAttribute{
-																	Description:         "",
-																	MarkdownDescription: "",
+																	Description:         "Name of the referenced object.",
+																	MarkdownDescription: "Name of the referenced object.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
 																},
 																"namespace": schema.StringAttribute{
-																	Description:         "",
-																	MarkdownDescription: "",
+																	Description:         "Namespace of the referenced object.",
+																	MarkdownDescription: "Namespace of the referenced object.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
 																},
 																"tenant": schema.StringAttribute{
-																	Description:         "",
-																	MarkdownDescription: "",
+																	Description:         "Tenant of the referenced object.",
+																	MarkdownDescription: "Tenant of the referenced object.<br>**Cross-Namespace Shared Reference:** Required when referencing an object in the `shared` namespace from a non-`shared` resource namespace (set to `ves-io` for F5 XC system-shared objects such as default IKE profiles or `shared/public`).",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            true,
@@ -1441,22 +1441,22 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 											NestedObject: schema.NestedAttributeObject{
 												Attributes: map[string]schema.Attribute{
 													"name": schema.StringAttribute{
-														Description:         "",
-														MarkdownDescription: "",
+														Description:         "Name of the referenced object.",
+														MarkdownDescription: "Name of the referenced object.",
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
 													},
 													"namespace": schema.StringAttribute{
-														Description:         "",
-														MarkdownDescription: "",
+														Description:         "Namespace of the referenced object.",
+														MarkdownDescription: "Namespace of the referenced object.",
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
 													},
 													"tenant": schema.StringAttribute{
-														Description:         "",
-														MarkdownDescription: "",
+														Description:         "Tenant of the referenced object.",
+														MarkdownDescription: "Tenant of the referenced object.<br>**Cross-Namespace Shared Reference:** Required when referencing an object in the `shared` namespace from a non-`shared` resource namespace (set to `ves-io` for F5 XC system-shared objects such as default IKE profiles or `shared/public`).",
 														Required:            false,
 														Optional:            true,
 														Computed:            true,
@@ -1492,22 +1492,22 @@ func (r *ResourceF5XCNatPolicy) Schema(ctx context.Context, request resource.Sch
 											NestedObject: schema.NestedAttributeObject{
 												Attributes: map[string]schema.Attribute{
 													"name": schema.StringAttribute{
-														Description:         "",
-														MarkdownDescription: "",
+														Description:         "Name of the referenced object.",
+														MarkdownDescription: "Name of the referenced object.",
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
 													},
 													"namespace": schema.StringAttribute{
-														Description:         "",
-														MarkdownDescription: "",
+														Description:         "Namespace of the referenced object.",
+														MarkdownDescription: "Namespace of the referenced object.",
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
 													},
 													"tenant": schema.StringAttribute{
-														Description:         "",
-														MarkdownDescription: "",
+														Description:         "Tenant of the referenced object.",
+														MarkdownDescription: "Tenant of the referenced object.<br>**Cross-Namespace Shared Reference:** Required when referencing an object in the `shared` namespace from a non-`shared` resource namespace (set to `ves-io` for F5 XC system-shared objects such as default IKE profiles or `shared/public`).",
 														Required:            false,
 														Optional:            true,
 														Computed:            true,

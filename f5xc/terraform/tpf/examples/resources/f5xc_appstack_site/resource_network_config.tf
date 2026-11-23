@@ -57,7 +57,7 @@ resource "f5xc_appstack_site" "example" {
       global_network_choice = {
         no_global_network = true
       }
-      vip_vrrp_mode = ["VIP_VRRP_DISABLE"]
+      vip_vrrp_mode       = ["VIP_VRRP_DISABLE"]
       tunnel_dead_timeout = 0
     }
   }

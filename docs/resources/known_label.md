@@ -74,7 +74,9 @@ In Terraform v1.5.0 and later, use an `import` block to import this resource by 
 Use the following `command` to import this resource from the command line:
 
 ```shell
-terraform import f5xc_known_label.example <namespace>/<key>
+# Composite-key import ID format: <namespace>/<key>=<value> (for example: shared/env=prod or shared/ves.io/region=ves-io-par).
+# For labels with an empty value, keep the trailing '=': <namespace>/<key>=
+terraform import f5xc_known_label.example <namespace>/<key>=<value>
 ```
 
 #### HCL Import Block
@@ -83,7 +85,9 @@ Use the following `hcl` block to import this resource during `plan` or `apply`:
 
 ```hcl
 import {
-	id = "<namespace>/<key>"
+	# Composite-key import ID format: <namespace>/<key>=<value> (for example: shared/env=prod or shared/ves.io/region=ves-io-par).
+	# For labels with an empty value, keep the trailing '=': <namespace>/<key>=
+	id = "<namespace>/<key>=<value>"
 	to = f5xc_known_label.example
 }
 ```

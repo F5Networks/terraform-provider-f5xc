@@ -25,10 +25,10 @@ resource "f5xc_dns_zone" "example" {
           description = "public web record"
           ttl         = 300
           type_record_set_choice = {
-					a_record = {
-						name   = "www.example-dns-zone-vvg93b-248000.example.com"
-						values = ["192.168.1.10"]
-					}
+            a_record = {
+              name   = "www.example-dns-zone-vvg93b-248000.example.com"
+              values = ["192.168.1.10"]
+            }
           }
         }
 
@@ -44,10 +44,10 @@ resource "f5xc_dns_zone" "example" {
               description = "app record"
               ttl         = 120
               type_record_set_choice = {
-						a_record = {
-							name   = "app.example-dns-zone-vvg93b-248000.example.com"
-							values = ["10.10.0.10"]
-						}
+                a_record = {
+                  name   = "app.example-dns-zone-vvg93b-248000.example.com"
+                  values = ["10.10.0.10"]
+                }
               }
             }
           ]
@@ -62,10 +62,10 @@ resource "f5xc_dns_zone" "example" {
               description = "api record"
               ttl         = 300
               type_record_set_choice = {
-						a_record = {
-							name   = "api.example-dns-zone-vvg93b-248000.example.com"
-							values = ["10.10.0.20"]
-						}
+                a_record = {
+                  name   = "api.example-dns-zone-vvg93b-248000.example.com"
+                  values = ["10.10.0.20"]
+                }
               }
             }
           ]

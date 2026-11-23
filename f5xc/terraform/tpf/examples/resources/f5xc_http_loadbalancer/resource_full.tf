@@ -37,7 +37,7 @@ resource "f5xc_http_loadbalancer" "example" {
   namespace = "default"
 
   description = "Acceptance test HTTP load balancer updated"
-  labels = { env = "staging", tier = "edge" }
+  labels      = { env = "staging", tier = "edge" }
 
   domains = ["example-http-lb-n602nzk4.example.com"]
 
@@ -128,7 +128,7 @@ resource "f5xc_http_loadbalancer" "example" {
     disable_malware_protection = true
   }
 
-  
-  
-  
+
+
+
 }

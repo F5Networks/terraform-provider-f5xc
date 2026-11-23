@@ -76,12 +76,12 @@ resource "f5xc_fast_acls_for_internet_vips" "example" {
 
 Required:
 
-- `name` (String)
-- `namespace` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
 
 Optional:
 
-- `tenant` (String)
+- `tenant` (String) Tenant of the referenced object.<br>**Cross-Namespace Shared Reference:** Required when referencing an object in the `shared` namespace from a non-`shared` resource namespace (set to `ves-io` for F5 XC system-shared objects such as default IKE profiles or `shared/public`).
 
 
 <a id="nestedatt--timeouts"></a>

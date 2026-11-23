@@ -163,11 +163,20 @@ jobs:
           echo "Successfully generated signature ${SIG_FILE}"
           cd ..
 
-      - name: Create GitHub Release and upload assets
+      # Create as draft first so release.published only fires after all assets finish uploading.
+      - name: Create Draft GitHub Release and upload assets
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.vars.outputs.tag }}
           body_path: RELEASE_NOTES.md
           files: dist/*
+          draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.vars.outputs.tag }}
+        run: |
+          gh release edit "${TAG}" --draft=false

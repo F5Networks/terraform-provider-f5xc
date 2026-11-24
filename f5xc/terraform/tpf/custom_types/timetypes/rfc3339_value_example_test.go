@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/custom_types/timetypes"
 )
 
 type TimeResourceModel struct {

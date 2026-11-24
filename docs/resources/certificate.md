@@ -79,12 +79,12 @@ resource "f5xc_certificate" "example" {
 
 Required:
 
-- `name` (String)
-- `namespace` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
 
 Read-Only:
 
-- `tenant` (String)
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--ocsp_stapling_choice"></a>
@@ -216,12 +216,12 @@ Required:
 
 Required:
 
-- `name` (String)
-- `namespace` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
 
 Read-Only:
 
-- `tenant` (String)
+- `tenant` (String) Tenant of the referenced object.
 
 
 
@@ -244,9 +244,9 @@ Optional:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--infos"></a>
@@ -267,9 +267,9 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 ## Import
 
 In Terraform v1.5.0 and later, use an `import` block to import this resource by ID.

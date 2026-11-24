@@ -8,6 +8,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework/function"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -165,5 +166,53 @@ func TestBytesBetween_Description(t *testing.T) {
 	desc := v.Description(context.Background())
 	if desc == "" {
 		t.Error("expected non-empty description")
+	}
+}
+
+// TestBytesBetween_ParameterString verifies that function parameter
+// validation matches attribute validation: null and unknown values pass,
+// out-of-range lengths fail, and invalid bounds report an error.
+func TestBytesBetween_ParameterString(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name      string
+		validator function.StringParameterValidator
+		value     types.String
+		wantErr   bool
+	}{
+		{"valid", bytesvalidator.BytesBetween(1, 10), types.StringValue("hello"), false},
+		{"too_short", bytesvalidator.BytesBetween(6, 10), types.StringValue("hello"), true},
+		{"too_long", bytesvalidator.BytesBetween(1, 3), types.StringValue("hello"), true},
+		{"null", bytesvalidator.BytesBetween(1, 3), types.StringNull(), false},
+		{"unknown", bytesvalidator.BytesBetween(1, 3), types.StringUnknown(), false},
+		{"invalid_negative", bytesvalidator.BytesBetween(-1, 3), types.StringValue("x"), true},
+		{"invalid_order", bytesvalidator.BytesBetween(5, 3), types.StringValue("x"), true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			req := function.StringParameterValidatorRequest{ArgumentPosition: 0, Value: tt.value}
+			resp := &function.StringParameterValidatorResponse{}
+			tt.validator.ValidateParameterString(context.Background(), req, resp)
+
+			if gotErr := resp.Error != nil; gotErr != tt.wantErr {
+				t.Errorf("ValidateParameterString() error = %v, wantErr %v", resp.Error, tt.wantErr)
+			}
+		})
+	}
+}
+
+// TestBytesBetween_MarkdownDescription verifies that the markdown description
+// equals the plain description.
+func TestBytesBetween_MarkdownDescription(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	v := bytesvalidator.BytesBetween(1, 2)
+	if got, want := v.MarkdownDescription(ctx), v.Description(ctx); got != want || got == "" {
+		t.Errorf("MarkdownDescription() = %q, want %q", got, want)
 	}
 }

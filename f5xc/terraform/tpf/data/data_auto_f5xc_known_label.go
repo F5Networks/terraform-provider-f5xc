@@ -154,8 +154,7 @@ func (d *DataSourceF5XCKnownLabel) Read(ctx context.Context, request datasource.
 	// ListMatchExpr defines which Go expression to compare against (defaults to data.Name.ValueString()).
 	var readRespItem *ves_io_schema_known_label.LabelType
 	for _, item := range readResp.GetLabel() {
-		itemName := item.GetKey()
-		if itemName == data.Key.ValueString() {
+		if item.GetKey() == data.Key.ValueString() && ((data.Value.IsNull() || data.Value.IsUnknown()) || item.GetValue() == data.Value.ValueString()) {
 			readRespItem = item
 			break
 		}

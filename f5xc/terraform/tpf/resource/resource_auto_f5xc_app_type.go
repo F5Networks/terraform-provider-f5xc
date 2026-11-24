@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 
@@ -198,6 +199,10 @@ func (r *ResourceF5XCAppType) Schema(ctx context.Context, request resource.Schem
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^\S+$`),
+						"must match pattern `^\\S+$`",
+					),
 					namespacetypevalidator.AllowedIn("shared"),
 				},
 			},

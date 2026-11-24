@@ -199,3 +199,46 @@ func stringListValue(t *testing.T, values ...string) types.List {
 	require.False(t, diags.HasError(), "failed to create string list: %v", diags)
 	return list
 }
+
+// A null plan has no branch value, so the selected branch comes from config.
+func TestPlanModifyObject_NullPlanUsesConfigBranch(t *testing.T) {
+	m := preserveSelectedBranchModifier{}
+	config := endpointChoiceObject(t, map[string]attr.Value{
+		"any":         types.BoolValue(true),
+		"prefix_list": types.ObjectNull(prefixListAttrTypes()),
+	})
+
+	req := planmodifier.ObjectRequest{
+		ConfigValue: config,
+		PlanValue:   types.ObjectNull(endpointChoiceAttrTypes()),
+	}
+	resp := &planmodifier.ObjectResponse{PlanValue: req.PlanValue}
+
+	m.PlanModifyObject(context.Background(), req, resp)
+
+	require.False(t, resp.Diagnostics.HasError())
+	assert.True(t, config.Equal(resp.PlanValue))
+}
+
+// A plan branch whose type differs from the config schema yields error
+// diagnostics and leaves the plan unchanged.
+func TestPlanModifyObject_MismatchedPlanBranchType(t *testing.T) {
+	m := preserveSelectedBranchModifier{}
+	config := endpointChoiceObject(t, map[string]attr.Value{
+		"any":         types.BoolValue(true),
+		"prefix_list": types.ObjectNull(prefixListAttrTypes()),
+	})
+	plan, diags := types.ObjectValue(
+		map[string]attr.Type{"any": types.StringType},
+		map[string]attr.Value{"any": types.StringValue("x")},
+	)
+	require.False(t, diags.HasError())
+
+	req := planmodifier.ObjectRequest{ConfigValue: config, PlanValue: plan}
+	resp := &planmodifier.ObjectResponse{PlanValue: plan}
+
+	m.PlanModifyObject(context.Background(), req, resp)
+
+	assert.True(t, resp.Diagnostics.HasError())
+	assert.True(t, plan.Equal(resp.PlanValue))
+}

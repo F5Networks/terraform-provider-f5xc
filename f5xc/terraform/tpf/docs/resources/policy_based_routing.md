@@ -118,12 +118,12 @@ resource "f5xc_policy_based_routing" "example" {
 
 Required:
 
-- `name` (String)
-- `namespace` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
 
 Read-Only:
 
-- `tenant` (String)
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--policy_choice"></a>
@@ -159,12 +159,12 @@ Optional:
 
 Required:
 
-- `name` (String)
-- `namespace` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
 
 Read-Only:
 
-- `tenant` (String)
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--policy_choice--forward_proxy_pbr--forward_proxy_pbr_rules--metadata"></a>
@@ -271,12 +271,12 @@ Optional:
 
 Required:
 
-- `name` (String)
-- `namespace` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
 
 Read-Only:
 
-- `tenant` (String)
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--policy_choice--forward_proxy_pbr--forward_proxy_pbr_rules--source_choice--label_selector"></a>
@@ -325,12 +325,12 @@ Optional:
 
 Required:
 
-- `name` (String)
-- `namespace` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
 
 Read-Only:
 
-- `tenant` (String)
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--policy_choice--network_pbr--network_pbr_rules--metadata"></a>
@@ -367,12 +367,12 @@ Optional:
 
 Required:
 
-- `name` (String)
-- `namespace` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
 
 Read-Only:
 
-- `tenant` (String)
+- `tenant` (String) Tenant of the referenced object.
 
 
 

@@ -62,9 +62,9 @@ data "f5xc_dns_load_balancer" "example" {
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--fallback_pool"></a>
@@ -72,9 +72,9 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--response_cache"></a>
@@ -133,9 +133,9 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 
@@ -171,9 +171,9 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 
@@ -190,9 +190,9 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--rule_list--rules--client_choice--ip_prefix_list"></a>
@@ -216,6 +216,6 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.

@@ -6,13 +6,17 @@ package hook
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
 	"github.com/gogo/protobuf/proto"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gopkg.volterra.us/stdlib/client/vesapi"
 
 	ves_io_schema_cloud_elastic_ip "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/cloud_elastic_ip"
+	ves_io_schema_virtual_site "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_site"
 )
 
 type cloudElasticIpDeleteStub struct {
@@ -214,4 +218,86 @@ func TestCloudElasticIpOverrideDeleteHook_ForceDeleteErrorIsReturned(t *testing.
 	if stub.getCalls != 0 {
 		t.Fatalf("expected no post-force-delete GetObject call when force delete fails, got %d", stub.getCalls)
 	}
+}
+
+// stubFinalizerWait replaces the finalizer wait for the test and restores it afterwards.
+func stubFinalizerWait(t *testing.T, fn func(getObject func(context.Context, string, string) (*ves_io_schema_cloud_elastic_ip.DBObject, error)) error) {
+	t.Helper()
+	orig := waitForCloudElasticIpPendingFinalizers
+	waitForCloudElasticIpPendingFinalizers = func(ctx context.Context, _, _, _ string,
+		getObject func(context.Context, string, string) (*ves_io_schema_cloud_elastic_ip.DBObject, error)) error {
+		return fn(getObject)
+	}
+	t.Cleanup(func() { waitForCloudElasticIpPendingFinalizers = orig })
+}
+
+// The finalizer getter returns the DBObject, passes through errors, and rejects other types.
+func TestCloudElasticIpOverrideDeleteHook_FinalizerGetter(t *testing.T) {
+	boom := errors.New("boom")
+	stub := &cloudElasticIpDeleteStub{
+		getResps: []vesapi.GetObjectResponse{&ves_io_schema_cloud_elastic_ip.DBObject{}, nil, &ves_io_schema_virtual_site.DBObject{}},
+		getErrs:  []error{nil, boom, nil},
+	}
+	stubFinalizerWait(t, func(get func(context.Context, string, string) (*ves_io_schema_cloud_elastic_ip.DBObject, error)) error {
+		obj, err := get(context.Background(), "ns1", "eip1")
+		require.NoError(t, err)
+		require.NotNil(t, obj)
+
+		_, err = get(context.Background(), "ns1", "eip1")
+		require.ErrorIs(t, err, boom)
+
+		_, err = get(context.Background(), "ns1", "eip1")
+		require.ErrorContains(t, err, "unexpected response type")
+		return nil
+	})
+
+	require.NoError(t, CloudElasticIpOverrideDeleteHook(context.Background(), stub, "ns1", "eip1", "uid1"))
+	assert.Equal(t, 3, stub.getCalls)
+}
+
+// A non-404 delete error is returned without a finalizer wait.
+func TestCloudElasticIpOverrideDeleteHook_DeleteError(t *testing.T) {
+	stub := &cloudElasticIpDeleteStub{deleteErr: errors.New("status code 500")}
+	stubFinalizerWait(t, func(func(context.Context, string, string) (*ves_io_schema_cloud_elastic_ip.DBObject, error)) error {
+		t.Fatal("finalizer wait must not run after a failed delete")
+		return nil
+	})
+	require.ErrorContains(t, CloudElasticIpOverrideDeleteHook(context.Background(), stub, "ns1", "eip1", "uid1"), "standard delete failed")
+}
+
+// A 404 from force delete and from the follow-up GET both mean success.
+func TestCloudElasticIpOverrideDeleteHook_ForceDeleteNotFound(t *testing.T) {
+	timeout := func(func(context.Context, string, string) (*ves_io_schema_cloud_elastic_ip.DBObject, error)) error {
+		return errors.New("resource eip1 still exists after 30 retries")
+	}
+
+	t.Run("force delete 404", func(t *testing.T) {
+		stubFinalizerWait(t, timeout)
+		stub := &cloudElasticIpDeleteStub{customErr: errors.New("status code 404")}
+		require.NoError(t, CloudElasticIpOverrideDeleteHook(context.Background(), stub, "ns1", "eip1", "uid1"))
+		assert.Zero(t, stub.getCalls)
+	})
+	t.Run("object still readable", func(t *testing.T) {
+		stubFinalizerWait(t, timeout)
+		stub := &cloudElasticIpDeleteStub{}
+		require.NoError(t, CloudElasticIpOverrideDeleteHook(context.Background(), stub, "ns1", "eip1", "uid1"))
+		assert.Equal(t, 1, stub.getCalls)
+	})
+}
+
+// A nil error is not a finalizer timeout.
+func TestIsCloudElasticIpFinalizerTimeout_Nil(t *testing.T) {
+	assert.False(t, isCloudElasticIpFinalizerTimeout(nil))
+}
+
+// The default finalizer wait returns nil once the object is gone (404).
+func TestWaitForCloudElasticIpPendingFinalizers_Default(t *testing.T) {
+	if testing.Short() {
+		t.Skip("the production wait sleeps for its initial backoff")
+	}
+	err := waitForCloudElasticIpPendingFinalizers(context.Background(), "eip1", "ns1", "uid1",
+		func(context.Context, string, string) (*ves_io_schema_cloud_elastic_ip.DBObject, error) {
+			return nil, errors.New("status code 404")
+		})
+	require.NoError(t, err)
 }

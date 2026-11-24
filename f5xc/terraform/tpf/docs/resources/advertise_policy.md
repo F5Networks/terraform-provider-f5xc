@@ -139,12 +139,12 @@ Optional:
 
 Required:
 
-- `name` (String)
-- `namespace` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
 
 Optional:
 
-- `tenant` (String)
+- `tenant` (String) Tenant of the referenced object.<br>**Cross-Namespace Shared Reference:** Required when referencing an object in the `shared` namespace from a non-`shared` resource namespace (set to `ves-io` for F5 XC system-shared objects such as default IKE profiles or `shared/public`).
 
 
 <a id="nestedatt--timeouts"></a>
@@ -294,12 +294,12 @@ Optional:
 
 Required:
 
-- `name` (String)
-- `namespace` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
 
 Optional:
 
-- `tenant` (String)
+- `tenant` (String) Tenant of the referenced object.<br>**Cross-Namespace Shared Reference:** Required when referencing an object in the `shared` namespace from a non-`shared` resource namespace (set to `ves-io` for F5 XC system-shared objects such as default IKE profiles or `shared/public`).
 
 
 
@@ -340,12 +340,12 @@ Optional:
 
 Required:
 
-- `name` (String)
-- `namespace` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
 
 Optional:
 
-- `tenant` (String)
+- `tenant` (String) Tenant of the referenced object.<br>**Cross-Namespace Shared Reference:** Required when referencing an object in the `shared` namespace from a non-`shared` resource namespace (set to `ves-io` for F5 XC system-shared objects such as default IKE profiles or `shared/public`).
 
 
 <a id="nestedatt--where--ref_or_selector_choice--site--internet_vip_choice"></a>
@@ -370,12 +370,12 @@ Required:
 
 Required:
 
-- `name` (String)
-- `namespace` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
 
 Optional:
 
-- `tenant` (String)
+- `tenant` (String) Tenant of the referenced object.<br>**Cross-Namespace Shared Reference:** Required when referencing an object in the `shared` namespace from a non-`shared` resource namespace (set to `ves-io` for F5 XC system-shared objects such as default IKE profiles or `shared/public`).
 
 
 
@@ -396,12 +396,12 @@ Optional:
 
 Required:
 
-- `name` (String)
-- `namespace` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
 
 Optional:
 
-- `tenant` (String)
+- `tenant` (String) Tenant of the referenced object.<br>**Cross-Namespace Shared Reference:** Required when referencing an object in the `shared` namespace from a non-`shared` resource namespace (set to `ves-io` for F5 XC system-shared objects such as default IKE profiles or `shared/public`).
 
 
 <a id="nestedatt--where--ref_or_selector_choice--virtual_site--internet_vip_choice"></a>

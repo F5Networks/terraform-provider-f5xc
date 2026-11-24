@@ -7,9 +7,10 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 
-	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/custom_types/timetypes"
 )
 
 func TestDurationTypeValueFromTerraform(t *testing.T) {
@@ -66,5 +67,58 @@ func TestDurationTypeValueFromTerraform(t *testing.T) {
 				t.Errorf("Expected unknown-ness match: expected %t, got %t", testCase.expectation.IsUnknown(), !testCase.in.IsKnown())
 			}
 		})
+	}
+}
+
+// The types report stable names, value types, and equality only with their own kind.
+func TestTypeMetadata(t *testing.T) {
+	ctx := context.Background()
+
+	if got := (timetypes.GoDurationType{}).String(); got != "timetypes.GoDurationType" {
+		t.Errorf("GoDurationType.String() = %q", got)
+	}
+	if _, ok := (timetypes.GoDurationType{}).ValueType(ctx).(timetypes.GoDuration); !ok {
+		t.Error("GoDurationType.ValueType() is not GoDuration")
+	}
+	if !(timetypes.GoDurationType{}).Equal(timetypes.GoDurationType{}) {
+		t.Error("GoDurationType must equal itself")
+	}
+	if (timetypes.GoDurationType{}).Equal(basetypes.StringType{}) {
+		t.Error("GoDurationType must not equal StringType")
+	}
+	if _, ok := timetypes.NewGoDurationNull().Type(ctx).(timetypes.GoDurationType); !ok {
+		t.Error("GoDuration.Type() is not GoDurationType")
+	}
+
+	if got := (timetypes.RFC3339Type{}).String(); got != "timetypes.RFC3339Type" {
+		t.Errorf("RFC3339Type.String() = %q", got)
+	}
+	if _, ok := (timetypes.RFC3339Type{}).ValueType(ctx).(timetypes.RFC3339); !ok {
+		t.Error("RFC3339Type.ValueType() is not RFC3339")
+	}
+	if !(timetypes.RFC3339Type{}).Equal(timetypes.RFC3339Type{}) {
+		t.Error("RFC3339Type must equal itself")
+	}
+	if (timetypes.RFC3339Type{}).Equal(basetypes.StringType{}) {
+		t.Error("RFC3339Type must not equal StringType")
+	}
+	if _, ok := timetypes.NewRFC3339Null().Type(ctx).(timetypes.RFC3339Type); !ok {
+		t.Error("RFC3339.Type() is not RFC3339Type")
+	}
+	if timetypes.NewRFC3339Null().Equal(basetypes.NewStringNull()) {
+		t.Error("RFC3339 must not equal a plain StringValue")
+	}
+}
+
+// ValueFromTerraform returns the underlying string type error for a non-string tftypes value.
+func TestValueFromTerraformWrongType(t *testing.T) {
+	ctx := context.Background()
+	in := tftypes.NewValue(tftypes.Number, 1)
+
+	if _, err := (timetypes.GoDurationType{}).ValueFromTerraform(ctx, in); err == nil {
+		t.Error("GoDurationType: expected error for Number input")
+	}
+	if _, err := (timetypes.RFC3339Type{}).ValueFromTerraform(ctx, in); err == nil {
+		t.Error("RFC3339Type: expected error for Number input")
 	}
 }

@@ -5,6 +5,7 @@
 package blindfold
 
 import (
+	"bytes"
 	"context"
 	"crypto/aes"
 	"crypto/cipher"
@@ -474,5 +475,116 @@ func TestPolicyIDU64_UnmarshalJSON(t *testing.T) {
 				t.Errorf("UnmarshalJSON() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
+	}
+}
+
+// GetPublicKey accepts a response that carries the key fields at the top
+// level, without the "data" wrapper.
+func TestGetPublicKey_FlatResponse(t *testing.T) {
+	base := "https://tenant.example/api"
+	_, key := newTestKey(t)
+	body, err := json.Marshal(key)
+	if err != nil {
+		t.Fatalf("marshal key: %v", err)
+	}
+	c := &Client{
+		Exec: &fakeExec{responses: map[string][]byte{
+			base + "/secret_management/get_public_key": body,
+		}},
+		BaseURL: base + "/",
+	}
+
+	got, err := c.GetPublicKey(context.Background())
+	if err != nil {
+		t.Fatalf("GetPublicKey: %v", err)
+	}
+	if got.ModulusBase64 != key.ModulusBase64 || got.PublicExponentBase64 != key.PublicExponentBase64 {
+		t.Fatalf("unexpected KeyData: %+v", got)
+	}
+}
+
+// An empty JSON string leaves the policy ID unchanged and is not an error.
+func TestPolicyIDU64_UnmarshalJSON_EmptyString(t *testing.T) {
+	p := policyIDU64(9)
+	if err := p.UnmarshalJSON([]byte(`""`)); err != nil {
+		t.Fatalf("UnmarshalJSON: %v", err)
+	}
+	if p != 9 {
+		t.Fatalf("policy ID changed to %d", p)
+	}
+}
+
+// decodeBase64Flexible decodes every standard and URL-safe variant, with and
+// without padding, and rejects empty or invalid input.
+func TestDecodeBase64Flexible(t *testing.T) {
+	// 0xfb 0xff produces '+' and '/' in standard encoding and '-' and '_' in
+	// URL encoding, and needs padding.
+	raw := []byte{0xfb, 0xff, 0xfe, 0x01}
+	inputs := map[string]string{
+		"std":        base64.StdEncoding.EncodeToString(raw),
+		"raw_std":    base64.RawStdEncoding.EncodeToString(raw),
+		"url":        base64.URLEncoding.EncodeToString(raw),
+		"raw_url":    base64.RawURLEncoding.EncodeToString(raw),
+		"whitespace": "  " + base64.StdEncoding.EncodeToString(raw) + "\n",
+	}
+	for name, in := range inputs {
+		t.Run(name, func(t *testing.T) {
+			got, err := decodeBase64Flexible(in)
+			if err != nil {
+				t.Fatalf("decode %q: %v", in, err)
+			}
+			if !bytes.Equal(got, raw) {
+				t.Fatalf("decode %q = %x, want %x", in, got, raw)
+			}
+		})
+	}
+
+	for name, in := range map[string]string{"empty": "   ", "invalid": "@@@"} {
+		t.Run(name, func(t *testing.T) {
+			if _, err := decodeBase64Flexible(in); err == nil {
+				t.Fatalf("expected error for %q", in)
+			}
+		})
+	}
+}
+
+// Blindfold rejects a nil key.
+func TestBlindfold_NilKey(t *testing.T) {
+	if _, err := Blindfold([]byte("x"), nil, &PolicyData{PolicyID: 1}); err == nil {
+		t.Fatal("expected error for nil key")
+	}
+}
+
+// The bundle uses the policy tenant when the key has no tenant.
+func TestBlindfold_TenantFallsBackToPolicy(t *testing.T) {
+	_, key := newTestKey(t)
+	noTenant := *key
+	noTenant.Tenant = ""
+	policy := &PolicyData{Tenant: "policy-tenant", PolicyID: 101}
+
+	out, err := Blindfold([]byte("payload"), &noTenant, policy)
+	if err != nil {
+		t.Fatalf("Blindfold: %v", err)
+	}
+	buf, err := base64.StdEncoding.DecodeString(strings.TrimPrefix(out, "string:///"))
+	if err != nil {
+		t.Fatalf("decode bundle: %v", err)
+	}
+	env, err := parseBlindfoldEnvelope(buf)
+	if err != nil {
+		t.Fatalf("parse envelope: %v", err)
+	}
+	if env.tenant != "policy-tenant" {
+		t.Fatalf("bundle tenant = %q, want %q", env.tenant, "policy-tenant")
+	}
+}
+
+// head truncates strings longer than n and returns shorter strings unchanged.
+func TestHead(t *testing.T) {
+	if got := head("abcdef", 3); got != "abc" {
+		t.Fatalf("head long = %q", got)
+	}
+	if got := head("ab", 3); got != "ab" {
+		t.Fatalf("head short = %q", got)
 	}
 }

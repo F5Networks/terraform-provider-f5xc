@@ -154,6 +154,56 @@ func TestCrossNamespaceSharedTenantValidator(t *testing.T) {
 		assert.False(t, planResp.Diagnostics.HasError())
 	})
 
+	t.Run("case-c-non-shared-to-shared-tenant-empty-string", func(t *testing.T) {
+		t.Parallel()
+		cfg, plan := buildRefConfigAndPlan(t, tftypes.NewValue(tftypes.String, "advp-repro-ns"), tftypes.NewValue(tftypes.String, "shared"), tftypes.NewValue(tftypes.String, ""))
+
+		valResp := &validator.StringResponse{}
+		v.ValidateString(context.Background(), validator.StringRequest{
+			Path:        targetPath,
+			Config:      cfg,
+			ConfigValue: types.StringValue(""),
+		}, valResp)
+		require.True(t, valResp.Diagnostics.HasError())
+		assert.Contains(t, valResp.Diagnostics.Errors()[0].Detail(), "ves-io")
+
+		planResp := &planmodifier.StringResponse{PlanValue: types.StringValue("")}
+		v.PlanModifyString(context.Background(), planmodifier.StringRequest{
+			Path:        targetPath,
+			Config:      cfg,
+			ConfigValue: types.StringValue(""),
+			Plan:        plan,
+			PlanValue:   types.StringValue(""),
+		}, planResp)
+		require.True(t, planResp.Diagnostics.HasError())
+		assert.Contains(t, planResp.Diagnostics.Errors()[0].Detail(), "ves-io")
+	})
+
+	t.Run("case-c-non-shared-to-shared-tenant-whitespace-only", func(t *testing.T) {
+		t.Parallel()
+		cfg, plan := buildRefConfigAndPlan(t, tftypes.NewValue(tftypes.String, "advp-repro-ns"), tftypes.NewValue(tftypes.String, "shared"), tftypes.NewValue(tftypes.String, "   "))
+
+		valResp := &validator.StringResponse{}
+		v.ValidateString(context.Background(), validator.StringRequest{
+			Path:        targetPath,
+			Config:      cfg,
+			ConfigValue: types.StringValue("   "),
+		}, valResp)
+		require.True(t, valResp.Diagnostics.HasError())
+		assert.Contains(t, valResp.Diagnostics.Errors()[0].Detail(), "ves-io")
+
+		planResp := &planmodifier.StringResponse{PlanValue: types.StringValue("   ")}
+		v.PlanModifyString(context.Background(), planmodifier.StringRequest{
+			Path:        targetPath,
+			Config:      cfg,
+			ConfigValue: types.StringValue("   "),
+			Plan:        plan,
+			PlanValue:   types.StringValue("   "),
+		}, planResp)
+		require.True(t, planResp.Diagnostics.HasError())
+		assert.Contains(t, planResp.Diagnostics.Errors()[0].Detail(), "ves-io")
+	})
+
 	t.Run("same-namespace-non-shared-ref-tenant-omitted", func(t *testing.T) {
 		t.Parallel()
 		cfg, plan := buildRefConfigAndPlan(t, tftypes.NewValue(tftypes.String, "advp-repro-ns"), tftypes.NewValue(tftypes.String, "advp-repro-ns"), tftypes.NewValue(tftypes.String, nil))
@@ -267,4 +317,67 @@ func buildRefConfigAndPlan(
 	})
 
 	return tfsdk.Config{Raw: raw, Schema: s}, tfsdk.Plan{Raw: raw, Schema: s}
+}
+
+// TestCrossNamespaceSharedTenant_SkipCases verifies that the tenant check is
+// skipped when the tenant is unknown or when the sibling or root namespace
+// cannot be read.
+func TestCrossNamespaceSharedTenant_SkipCases(t *testing.T) {
+	v := requiredifvalidator.RequireTenantForCrossNamespaceShared()
+	tenantPath := path.Root("ref").AtListIndex(0).AtName("tenant")
+
+	refElemType := tftypes.Object{AttributeTypes: map[string]tftypes.Type{
+		"namespace": tftypes.String,
+		"tenant":    tftypes.String,
+	}}
+	refListType := tftypes.List{ElementType: refElemType}
+	noRootNSConfig := tfsdk.Config{
+		Schema: schema.Schema{Attributes: map[string]schema.Attribute{
+			"ref": schema.ListNestedAttribute{
+				Optional: true,
+				NestedObject: schema.NestedAttributeObject{Attributes: map[string]schema.Attribute{
+					"namespace": schema.StringAttribute{Optional: true},
+					"tenant":    schema.StringAttribute{Optional: true},
+				}},
+			},
+		}},
+		Raw: tftypes.NewValue(tftypes.Object{AttributeTypes: map[string]tftypes.Type{"ref": refListType}}, map[string]tftypes.Value{
+			"ref": tftypes.NewValue(refListType, []tftypes.Value{
+				tftypes.NewValue(refElemType, map[string]tftypes.Value{
+					"namespace": tftypes.NewValue(tftypes.String, "shared"),
+					"tenant":    tftypes.NewValue(tftypes.String, nil),
+				}),
+			}),
+		}),
+	}
+	sharedCfg, _ := buildRefConfigAndPlan(t,
+		tftypes.NewValue(tftypes.String, "app"),
+		tftypes.NewValue(tftypes.String, "shared"),
+		tftypes.NewValue(tftypes.String, nil))
+
+	tests := []struct {
+		name   string
+		path   path.Path
+		cfg    tfsdk.Config
+		tenant types.String
+	}{
+		{"tenant_unknown", tenantPath, sharedCfg, types.StringUnknown()},
+		{"sibling_namespace_unreadable", path.Root("missing").AtName("tenant"), sharedCfg, types.StringNull()},
+		{"root_namespace_unreadable", tenantPath, noRootNSConfig, types.StringNull()},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			resp := &validator.StringResponse{}
+			v.ValidateString(context.Background(), validator.StringRequest{
+				Path:        tt.path,
+				Config:      tt.cfg,
+				ConfigValue: tt.tenant,
+			}, resp)
+
+			if resp.Diagnostics.HasError() {
+				t.Errorf("unexpected error: %v", resp.Diagnostics)
+			}
+		})
+	}
 }

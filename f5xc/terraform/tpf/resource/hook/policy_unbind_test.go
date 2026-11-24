@@ -13,6 +13,9 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 )
 
@@ -382,4 +385,45 @@ func TestIsPolicyReferrerKind_Filtering(t *testing.T) {
 	if isEnhancedFirewallPolicyReferrerKind("enhanced_firewall_policys") {
 		t.Fatalf("expected enhanced_firewall_policys to be filtered out")
 	}
+}
+
+// A referrer without a namespace uses the policy namespace, and a referrer whose
+// JSON cannot be parsed is skipped.
+func TestPolicyUnbind_DefaultNamespaceAndBadJSON(t *testing.T) {
+	f := newFakeConfigServer()
+	okPath := objectPath("config", testPolicyNS, "origin_pools", "op-ok")
+	f.on(http.MethodGet, objectPath("config", testPolicyNS, "origin_pools", "op-bad"), http.StatusOK, `not-json`)
+	f.on(http.MethodGet, okPath, http.StatusOK, mustJSON(t, map[string]any{
+		"spec": map[string]any{fpUnbindSpec.containerKey: map[string]any{
+			fpUnbindSpec.listKey: []any{policyObjRef(testPolicyNS, testPolicyName)},
+		}},
+	}))
+	f.on(http.MethodPut, okPath, http.StatusOK, `{}`)
+	c := startFakeConfigServer(t, f)
+
+	errText := "is still being referred by 2 objects - [" +
+		"ves.io.schema.views.origin_pool.Object " + testPolicyNS + "/op-bad " +
+		"ves.io.schema.views.origin_pool.Object /op-ok]"
+	require.NoError(t, policyUnbindReferencingObjects(context.Background(), c, testPolicyNS, testPolicyName, errText, fpUnbindSpec))
+
+	_, bodies := f.snapshot()
+	spec := decodePutSpec(t, bodies, okPath)
+	assert.Contains(t, spec, "no_forward_proxy_policy")
+}
+
+// The walker descends into lists and ignores containers without a policy list.
+func TestRemovePolicyRefFromNode_ListsAndEmptyContainer(t *testing.T) {
+	spec := map[string]any{
+		"routes": []any{
+			map[string]any{fpUnbindSpec.containerKey: map[string]any{
+				fpUnbindSpec.listKey: []any{"not-a-map", policyObjRef(testPolicyNS, testPolicyName)},
+			}},
+			map[string]any{fpUnbindSpec.containerKey: map[string]any{}},
+		},
+	}
+	assert.True(t, removePolicyRefFromNode(context.Background(), spec, fpUnbindSpec, "k", testPolicyNS, "parent", testPolicyName, testPolicyNS))
+
+	route := spec["routes"].([]any)[0].(map[string]any)
+	list := route[fpUnbindSpec.containerKey].(map[string]any)[fpUnbindSpec.listKey].([]any)
+	assert.Equal(t, []any{"not-a-map"}, list)
 }

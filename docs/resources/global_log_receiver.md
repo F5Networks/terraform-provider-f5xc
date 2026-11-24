@@ -159,12 +159,12 @@ Optional:
 
 Required:
 
-- `name` (String)
-- `namespace` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
 
 Read-Only:
 
-- `tenant` (String)
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--receiver_choice--aws_cloud_watch_receiver--batch"></a>
@@ -659,12 +659,12 @@ Optional:
 
 Required:
 
-- `name` (String)
-- `namespace` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
 
 Read-Only:
 
-- `tenant` (String)
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--receiver_choice--gcp_bucket_receiver--batch"></a>
@@ -1480,12 +1480,12 @@ Optional:
 
 Required:
 
-- `name` (String)
-- `namespace` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
 
 Read-Only:
 
-- `tenant` (String)
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--receiver_choice--s3_receiver--batch"></a>

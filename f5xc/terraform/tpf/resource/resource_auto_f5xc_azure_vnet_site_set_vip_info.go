@@ -116,6 +116,10 @@ func (r *ResourceF5XCAzureVnetSiteSetVipInfo) Schema(ctx context.Context, reques
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^\S+$`),
+						"must match pattern `^\\S+$`",
+					),
 					namespacetypevalidator.AllowedIn("system"),
 				},
 			},

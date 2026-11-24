@@ -225,7 +225,7 @@ By default, the F5 XC provider implements zero-storage ephemerality (`WriteOnly:
 
 However, the HashiCorp Terraform Plugin Framework computes deterministic element hashes over all attributes of each set element in `schema.SetNestedAttribute` and `schema.SetAttribute`. Because attributes marked as `WriteOnly: true` evaluate to `null` in plan and state, the framework strictly prohibits `WriteOnly` attributes inside set-based collections (which would trigger a provider error/panic).
 
-If a schema models a collection containing secret fields as a set, Omnigen automatically falls back from `WriteOnly: true` to `Sensitive: true` (`WriteOnly: false`) to maintain schema compatibility and prevent provider crashes.
+If a schema models a collection containing secret fields as a set, the provider automatically falls back from `WriteOnly: true` to `Sensitive: true` (`WriteOnly: false`) to maintain schema compatibility and prevent provider crashes.
 
 > [!NOTE]
 > `f5xc_http_loadbalancer.routes` is modeled as a `schema.ListNestedAttribute` rather than a set, so its Blindfold secret fields (`blindfold_secret_info.location`) enforce `WriteOnly: true` and are not persisted in state. Note that `clear_secret_info.url` continues to use `Sensitive: true` and is stored in state if configured.

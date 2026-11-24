@@ -1,11 +1,11 @@
 # Example: User Group - Full
 
 resource "f5xc_user" "member" {
-	email      = "user1@example.com"
-	first_name = "User"
-	last_name  = "One"
-	namespace  = "system"
-	type       = ["USER"]
+  email      = "user1@example.com"
+  first_name = "User"
+  last_name  = "One"
+  namespace  = "system"
+  type       = ["USER"]
 }
 
 resource "f5xc_user_group" "example" {
@@ -20,5 +20,5 @@ resource "f5xc_user_group" "example" {
     }
   ]
 
-	usernames = [f5xc_user.member.email]
+  usernames = [f5xc_user.member.email]
 }

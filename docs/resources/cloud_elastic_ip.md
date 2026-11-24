@@ -135,12 +135,12 @@ resource "f5xc_cloud_elastic_ip" "example" {
 
 Required:
 
-- `name` (String)
-- `namespace` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
 
 Read-Only:
 
-- `tenant` (String)
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--timeouts"></a>

@@ -18,10 +18,12 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -2297,4 +2299,324 @@ func TestResourceF5XCApiDefinitionUploader_LargeSpec_WriteOnlyStateMinimal(t *te
 	assert.Equal(t, expectedHash, created.ContentHash.ValueString())
 	assert.True(t, created.StringValue.IsNull())
 	assert.True(t, created.BytesValue.IsNull())
+}
+
+func uploaderSchema(t *testing.T) rschema.Schema {
+	t.Helper()
+	var resp resource.SchemaResponse
+	NewResourceF5XCApiDefinitionUploader().Schema(context.Background(), resource.SchemaRequest{}, &resp)
+	require.False(t, resp.Diagnostics.HasError())
+	return resp.Schema
+}
+
+func uploaderModel(url string) ResourceF5XCApiDefinitionUploaderModel {
+	return ResourceF5XCApiDefinitionUploaderModel{
+		Metadata: ResourceF5XCApiDefinitionUploaderMetadataModel{
+			Url:       types.StringValue(url),
+			Name:      types.StringValue("my-api"),
+			Version:   types.StringValue("v1"),
+			Namespace: types.StringValue("shared"),
+		},
+		StringValue: types.StringValue(`{"openapi":"3.0.0"}`),
+		ForceDelete: types.BoolValue(false),
+		Timeouts:    testTimeoutsValue(),
+	}
+}
+
+func uploaderState(t *testing.T, m ResourceF5XCApiDefinitionUploaderModel) tfsdk.State {
+	t.Helper()
+	s := tfsdk.State{Schema: uploaderSchema(t)}
+	require.False(t, s.Set(context.Background(), &m).HasError())
+	return s
+}
+
+// statusServer returns a server that replies to every request with status
+// and body.
+func statusServer(t *testing.T, status int, body string) *httptest.Server {
+	t.Helper()
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(status)
+		_, _ = w.Write([]byte(body))
+	}))
+	t.Cleanup(srv.Close)
+	return srv
+}
+
+func summary(d diag.Diagnostics) string {
+	if !d.HasError() {
+		return ""
+	}
+	return d.Errors()[0].Summary()
+}
+
+// TestUploader_Metadata verifies the type name suffix.
+func TestUploader_Metadata(t *testing.T) {
+	var resp resource.MetadataResponse
+	NewResourceF5XCApiDefinitionUploader().Metadata(context.Background(), resource.MetadataRequest{ProviderTypeName: "f5xc"}, &resp)
+	assert.Equal(t, "f5xc_api_definition_uploader", resp.TypeName)
+}
+
+// TestUploader_Configure verifies that Configure accepts nil and
+// *client.APIClient, and rejects other types.
+func TestUploader_Configure(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		data    any
+		wantErr bool
+	}{
+		{name: "nil", data: nil},
+		{name: "api client", data: &client.APIClient{}},
+		{name: "wrong type", data: 42, wantErr: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			r := &ResourceF5XCApiDefinitionUploader{}
+			var resp resource.ConfigureResponse
+			r.Configure(context.Background(), resource.ConfigureRequest{ProviderData: tc.data}, &resp)
+			assert.Equal(t, tc.wantErr, resp.Diagnostics.HasError())
+			if !tc.wantErr && tc.data != nil {
+				assert.Same(t, tc.data, r.client)
+			}
+		})
+	}
+}
+
+// TestUploader_ValidateConfig verifies that a valid config has no diagnostics
+// and an undecodable config reports an error.
+func TestUploader_ValidateConfig(t *testing.T) {
+	s := uploaderSchema(t)
+	r := &ResourceF5XCApiDefinitionUploader{}
+
+	var ok resource.ValidateConfigResponse
+	r.ValidateConfig(context.Background(), resource.ValidateConfigRequest{Config: tfsdk.Config{Schema: s, Raw: uploaderState(t, uploaderModel("u")).Raw}}, &ok)
+	assert.False(t, ok.Diagnostics.HasError())
+
+	var bad resource.ValidateConfigResponse
+	r.ValidateConfig(context.Background(), resource.ValidateConfigRequest{Config: tfsdk.Config{Schema: s, Raw: invalidRaw}}, &bad)
+	assert.True(t, bad.Diagnostics.HasError())
+}
+
+// TestUploader_ModifyPlan_Branches verifies the destroy warning, the create
+// path with known and unknown names, and decode errors.
+func TestUploader_ModifyPlan_Branches(t *testing.T) {
+	ctx := context.Background()
+	s := uploaderSchema(t)
+	r := &ResourceF5XCApiDefinitionUploader{}
+	nullObj := tftypes.NewValue(s.Type().TerraformType(ctx), nil)
+
+	t.Run("destroy warns", func(t *testing.T) {
+		var resp resource.ModifyPlanResponse
+		r.ModifyPlan(ctx, resource.ModifyPlanRequest{Plan: tfsdk.Plan{Schema: s, Raw: nullObj}}, &resp)
+		require.Len(t, resp.Diagnostics.Warnings(), 1)
+		assert.Equal(t, "Resource Destruction", resp.Diagnostics.Warnings()[0].Summary())
+	})
+
+	t.Run("create with known name", func(t *testing.T) {
+		var resp resource.ModifyPlanResponse
+		r.ModifyPlan(ctx, resource.ModifyPlanRequest{
+			Plan:  tfsdk.Plan(uploaderState(t, uploaderModel("u"))),
+			State: tfsdk.State{Schema: s, Raw: nullObj},
+		}, &resp)
+		assert.Empty(t, resp.Diagnostics)
+	})
+
+	t.Run("create with unknown name warns", func(t *testing.T) {
+		m := uploaderModel("u")
+		m.Metadata.Name = types.StringUnknown()
+		var resp resource.ModifyPlanResponse
+		r.ModifyPlan(ctx, resource.ModifyPlanRequest{
+			Plan:  tfsdk.Plan(uploaderState(t, m)),
+			State: tfsdk.State{Schema: s, Raw: nullObj},
+		}, &resp)
+		require.Len(t, resp.Diagnostics.Warnings(), 1)
+		assert.Equal(t, "Unknown Resource Name", resp.Diagnostics.Warnings()[0].Summary())
+	})
+
+	t.Run("create with undecodable plan", func(t *testing.T) {
+		var resp resource.ModifyPlanResponse
+		r.ModifyPlan(ctx, resource.ModifyPlanRequest{
+			Plan:  tfsdk.Plan{Schema: s, Raw: invalidRaw},
+			State: tfsdk.State{Schema: s, Raw: nullObj},
+		}, &resp)
+		assert.True(t, resp.Diagnostics.HasError())
+	})
+
+	t.Run("update with undecodable state", func(t *testing.T) {
+		var resp resource.ModifyPlanResponse
+		r.ModifyPlan(ctx, resource.ModifyPlanRequest{
+			Plan:  tfsdk.Plan(uploaderState(t, uploaderModel("u"))),
+			State: tfsdk.State{Schema: s, Raw: invalidRaw},
+		}, &resp)
+		assert.True(t, resp.Diagnostics.HasError())
+	})
+}
+
+// TestUploader_Create_Errors verifies that Create reports decode, timeout,
+// transport, and response parse failures.
+func TestUploader_Create_Errors(t *testing.T) {
+	s := uploaderSchema(t)
+	run := func(r *ResourceF5XCApiDefinitionUploader, plan tfsdk.Plan) diag.Diagnostics {
+		resp := resource.CreateResponse{State: tfsdk.State{Schema: s}}
+		r.Create(context.Background(), resource.CreateRequest{Plan: plan}, &resp)
+		return resp.Diagnostics
+	}
+
+	assert.True(t, run(&ResourceF5XCApiDefinitionUploader{}, tfsdk.Plan{Schema: s, Raw: invalidRaw}).HasError())
+
+	m := uploaderModel("u")
+	m.Timeouts = badTimeoutsValue()
+	assert.Equal(t, "Timeout Cannot Be Parsed", summary(run(&ResourceF5XCApiDefinitionUploader{}, tfsdk.Plan(uploaderState(t, m)))))
+
+	srv := statusServer(t, http.StatusInternalServerError, "boom")
+	assert.Equal(t, "Client Error", summary(run(&ResourceF5XCApiDefinitionUploader{client: newMockAPIClient(srv)}, tfsdk.Plan(uploaderState(t, uploaderModel("u"))))))
+
+	srv = statusServer(t, http.StatusOK, "not-json")
+	assert.Equal(t, "Unable to Create Resource", summary(run(&ResourceF5XCApiDefinitionUploader{client: newMockAPIClient(srv)}, tfsdk.Plan(uploaderState(t, uploaderModel("u"))))))
+}
+
+// TestUploader_Read_Errors verifies that Read reports decode, timeout,
+// non-404 transport, and response parse failures.
+func TestUploader_Read_Errors(t *testing.T) {
+	run := func(r *ResourceF5XCApiDefinitionUploader, state tfsdk.State) diag.Diagnostics {
+		resp := resource.ReadResponse{State: state}
+		r.Read(context.Background(), resource.ReadRequest{State: state}, &resp)
+		return resp.Diagnostics
+	}
+
+	assert.True(t, run(&ResourceF5XCApiDefinitionUploader{}, tfsdk.State{Schema: uploaderSchema(t), Raw: invalidRaw}).HasError())
+
+	m := uploaderModel("u")
+	m.Timeouts = badTimeoutsValue()
+	assert.Equal(t, "Timeout Cannot Be Parsed", summary(run(&ResourceF5XCApiDefinitionUploader{}, uploaderState(t, m))))
+
+	srv := statusServer(t, http.StatusInternalServerError, "boom")
+	assert.Equal(t, "Client Error", summary(run(&ResourceF5XCApiDefinitionUploader{client: newMockAPIClient(srv)}, uploaderState(t, uploaderModel("/v1")))))
+
+	srv = statusServer(t, http.StatusOK, "not-json")
+	assert.Equal(t, "Unable to Read Resource", summary(run(&ResourceF5XCApiDefinitionUploader{client: newMockAPIClient(srv)}, uploaderState(t, uploaderModel("/v1")))))
+}
+
+// TestUploader_Update_Errors verifies that Update reports decode, timeout,
+// transport, and response parse failures when content changes.
+func TestUploader_Update_Errors(t *testing.T) {
+	run := func(r *ResourceF5XCApiDefinitionUploader, plan tfsdk.Plan, state tfsdk.State) diag.Diagnostics {
+		resp := resource.UpdateResponse{State: state}
+		r.Update(context.Background(), resource.UpdateRequest{Plan: plan, State: state}, &resp)
+		return resp.Diagnostics
+	}
+	state := uploaderState(t, uploaderModel("u"))
+	changed := uploaderModel("u")
+	changed.StringValue = types.StringValue(`{"openapi":"3.1.0"}`)
+	plan := tfsdk.Plan(uploaderState(t, changed))
+
+	assert.True(t, run(&ResourceF5XCApiDefinitionUploader{}, tfsdk.Plan{Schema: uploaderSchema(t), Raw: invalidRaw}, state).HasError())
+
+	bad := changed
+	bad.Timeouts = badTimeoutsValue()
+	assert.Equal(t, "Timeout Cannot Be Parsed", summary(run(&ResourceF5XCApiDefinitionUploader{}, tfsdk.Plan(uploaderState(t, bad)), state)))
+
+	srv := statusServer(t, http.StatusInternalServerError, "boom")
+	assert.Equal(t, "Client Error", summary(run(&ResourceF5XCApiDefinitionUploader{client: newMockAPIClient(srv)}, plan, state)))
+
+	srv = statusServer(t, http.StatusOK, "not-json")
+	assert.Equal(t, "Unable to Update Resource", summary(run(&ResourceF5XCApiDefinitionUploader{client: newMockAPIClient(srv)}, plan, state)))
+}
+
+// TestUploader_Delete_Branches verifies force_delete targets the object root,
+// 404 is ignored, and other errors are reported.
+func TestUploader_Delete_Branches(t *testing.T) {
+	run := func(r *ResourceF5XCApiDefinitionUploader, state tfsdk.State) diag.Diagnostics {
+		var resp resource.DeleteResponse
+		r.Delete(context.Background(), resource.DeleteRequest{State: state}, &resp)
+		return resp.Diagnostics
+	}
+
+	assert.True(t, run(&ResourceF5XCApiDefinitionUploader{}, tfsdk.State{Schema: uploaderSchema(t), Raw: invalidRaw}).HasError())
+
+	bad := uploaderModel("u")
+	bad.Timeouts = badTimeoutsValue()
+	assert.Equal(t, "Timeout Cannot Be Parsed", summary(run(&ResourceF5XCApiDefinitionUploader{}, uploaderState(t, bad))))
+
+	var deletedPath string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		deletedPath = r.URL.Path
+	}))
+	t.Cleanup(srv.Close)
+	force := uploaderModel("/v1")
+	force.ForceDelete = types.BoolValue(true)
+	require.False(t, run(&ResourceF5XCApiDefinitionUploader{client: newMockAPIClient(srv)}, uploaderState(t, force)).HasError())
+	assert.Equal(t, "/object_store/namespaces/shared/stored_objects/swagger/my-api", deletedPath)
+
+	srv = statusServer(t, http.StatusNotFound, "")
+	assert.False(t, run(&ResourceF5XCApiDefinitionUploader{client: newMockAPIClient(srv)}, uploaderState(t, uploaderModel("/v1"))).HasError())
+
+	srv = statusServer(t, http.StatusInternalServerError, "boom")
+	assert.Equal(t, "Client Error", summary(run(&ResourceF5XCApiDefinitionUploader{client: newMockAPIClient(srv)}, uploaderState(t, uploaderModel("/v1")))))
+}
+
+// TestUploader_Prune_Branches verifies that pruning is a no-op for
+// non-positive retention, list failures, and bad JSON; skips other objects and
+// the current version; sorts by timestamp then version; builds a URL when the
+// version has none; and continues after a delete failure.
+// requirePruneWarning verifies that pruning failures are reported as exactly
+// one warning with summary, never as an error.
+func requirePruneWarning(t *testing.T, diags diag.Diagnostics, summary string) {
+	t.Helper()
+	require.False(t, diags.HasError(), "pruning failures must not be errors: %v", diags)
+	require.Len(t, diags, 1)
+	assert.Equal(t, diag.SeverityWarning, diags[0].Severity())
+	assert.Equal(t, summary, diags[0].Summary())
+}
+
+func TestUploader_Prune_Branches(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("no-op cases", func(t *testing.T) {
+		diags := (&ResourceF5XCApiDefinitionUploader{}).pruneHistoricalVersions(ctx, "ns", "n", 0, "v")
+		assert.Empty(t, diags, "retain count 0 skips pruning without diagnostics")
+
+		srv := statusServer(t, http.StatusInternalServerError, "boom")
+		diags = (&ResourceF5XCApiDefinitionUploader{client: newMockAPIClient(srv)}).pruneHistoricalVersions(ctx, "ns", "n", 1, "v")
+		requirePruneWarning(t, diags, "Failed to List Historical API Definition Versions")
+
+		srv = statusServer(t, http.StatusOK, "not-json")
+		diags = (&ResourceF5XCApiDefinitionUploader{client: newMockAPIClient(srv)}).pruneHistoricalVersions(ctx, "ns", "n", 1, "v")
+		requirePruneWarning(t, diags, "Failed to Decode Historical API Definition Versions")
+	})
+
+	t.Run("sorting and deletes", func(t *testing.T) {
+		var mu sync.Mutex
+		var deleted []string
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			mu.Lock()
+			defer mu.Unlock()
+			if r.Method == http.MethodGet {
+				_ = json.NewEncoder(w).Encode(storedObjectListResponse{Items: []storedObjectListItem{
+					{Name: "other", Versions: []storedObjectVersionItem{{Version: "x"}}},
+					{Name: "api", Versions: []storedObjectVersionItem{
+						{Version: "v5", CreationTimestamp: "2026-01-05T00:00:00.5Z"},
+						{Version: "v4", CreationTimestamp: "bad-ts"},
+						{Version: "v3", CreationTimestamp: "2026-01-03T00:00:00Z", Url: "/swagger/api/v3"},
+						{Version: "v2", CreationTimestamp: "2026-01-03T00:00:00Z"},
+						{Version: "v1", CreationTimestamp: "not-a-time"},
+					}},
+				}})
+				return
+			}
+			deleted = append(deleted, r.URL.Path)
+			if strings.HasSuffix(r.URL.Path, "/v1") {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+		}))
+		t.Cleanup(srv.Close)
+
+		diags := (&ResourceF5XCApiDefinitionUploader{client: newMockAPIClient(srv)}).pruneHistoricalVersions(ctx, "ns", "api", 1, "v2")
+		requirePruneWarning(t, diags, "Failed to Prune Historical API Definition Version")
+
+		mu.Lock()
+		defer mu.Unlock()
+		assert.NotContains(t, deleted, "/object_store/namespaces/ns/stored_objects/swagger/api/v2", "current version is never pruned")
+		assert.Contains(t, deleted, "/swagger/api/v3")
+		assert.Contains(t, deleted, "/object_store/namespaces/ns/stored_objects/swagger/api/v1")
+		assert.Len(t, deleted, 3)
+	})
 }

@@ -16,6 +16,7 @@ package resource
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -212,6 +213,85 @@ func TestAccResourceAutoF5XCEndpoint_withSNATPrefixes(t *testing.T) {
 				ImportStateVerifyIgnore:              []string{"health_check_port", "port"},
 				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.example"),
 				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+		},
+	})
+}
+
+// TestAccResourceAutoF5XCEndpoint_withOmittedTenant verifies creating and importing an endpoint
+// when ObjectRefType.tenant is omitted in HCL for a same-tenant virtual_site reference.
+//
+// Why: Ensures omitting tenant works end-to-end without causing post-apply inconsistencies or drift.
+//
+// How: Applies an f5xc_endpoint referencing a prerequisite f5xc_virtual_site without setting tenant,
+// verifies idempotent re-plan and ImportStateVerify.
+//
+// Parameters:
+//   - t: *testing.T test runner handle.
+//
+// Returns:
+//   - None.
+func TestAccResourceAutoF5XCEndpoint_withOmittedTenant(t *testing.T) {
+	t.Parallel()
+
+	name := "example-endpoint-" + acctest.RandString(t, 8)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckEndpointDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{Config: testAccResourceAutoF5XCEndpointConfig_withVirtualSiteTenant(name, "system", nil)},
+			{
+				Config:             testAccResourceAutoF5XCEndpointConfig_withVirtualSiteTenant(name, "system", nil),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
+			},
+			{
+				ResourceName:                         "f5xc_endpoint.example",
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIgnore:              []string{"health_check_port", "port"},
+				ImportStateIdFunc:                    acctest.ImportStateID("f5xc_endpoint.example"),
+				ImportStateVerifyIdentifierAttribute: "uid",
+			},
+		},
+	})
+}
+
+// TestAccResourceAutoF5XCEndpoint_withEmptyTenantPlanError verifies that passing an empty or
+// whitespace-only tenant string in f5xc_endpoint.where.ref_or_selector_choice.virtual_site.ref
+// fails during validate/plan rather than reaching apply.
+//
+// Why: Prevents orphaned backend objects (HTTP 409 on retry) and post-apply inconsistent results.
+//
+// How: Runs PlanOnly steps with tenant = "" and tenant = "   " expecting a pattern validation error.
+//
+// Parameters:
+//   - t: *testing.T test runner handle.
+//
+// Returns:
+//   - None.
+func TestAccResourceAutoF5XCEndpoint_withEmptyTenantPlanError(t *testing.T) {
+	t.Parallel()
+
+	name := "example-endpoint-" + acctest.RandString(t, 8)
+	empty := ""
+	whitespace := "   "
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccResourceAutoF5XCEndpointConfig_withVirtualSiteTenant(name, "system", &empty),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile("must match pattern"),
+			},
+			{
+				Config:      testAccResourceAutoF5XCEndpointConfig_withVirtualSiteTenant(name, "system", &whitespace),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile("must match pattern"),
 			},
 		},
 	})
@@ -523,4 +603,58 @@ resource "f5xc_endpoint" "example" {
   }
 }
 `, name, namespace)
+}
+
+// testAccResourceAutoF5XCEndpointConfig_withVirtualSiteTenant builds an f5xc_endpoint config
+// with a prerequisite f5xc_virtual_site where tenant can be omitted or explicitly provided.
+//
+// Why: Supports acceptance testing both omitted tenant success and empty-string plan rejection.
+//
+// How: Conditionally renders a tenant assignment inside where.ref_or_selector_choice.virtual_site.ref.
+//
+// Parameters:
+//   - name:      endpoint base name.
+//   - namespace: target resource namespace.
+//   - tenant:    optional tenant string pointer (omitted when nil).
+//
+// Returns:
+//   - string: rendered Terraform HCL configuration.
+func testAccResourceAutoF5XCEndpointConfig_withVirtualSiteTenant(name, namespace string, tenant *string) string {
+	vsiteName := name + "-vsite"
+	tenantLine := ""
+	if tenant != nil {
+		tenantLine = fmt.Sprintf("\n          tenant    = %q", *tenant)
+	}
+	return fmt.Sprintf(`
+resource "f5xc_virtual_site" "repro_vsite" {
+  name      = %q
+  namespace = %q
+
+  site_selector = {
+    expressions = ["ves.io/siteName in (ny2-nyc-crt)"]
+  }
+
+  site_type = ["CUSTOMER_EDGE"]
+}
+
+resource "f5xc_endpoint" "example" {
+  name      = %q
+  namespace = %q
+
+  endpoint_address_choice = {
+    ip = "10.10.10.10"
+  }
+
+  where = {
+    ref_or_selector_choice = {
+      virtual_site = {
+        ref = [{
+          name      = f5xc_virtual_site.repro_vsite.name
+          namespace = f5xc_virtual_site.repro_vsite.namespace%s
+        }]
+      }
+    }
+  }
+}
+`, vsiteName, namespace, name, namespace, tenantLine)
 }

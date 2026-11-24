@@ -6,8 +6,7 @@
 
 The F5XC Terraform Provider allows managing resources within the F5 XC Distributed Cloud Platform.
 
-We recommend using the latest version of Terraform Core ([the latest version can be found here](https://developer.hashicorp.com/terraform/install)). 
-Minimum version required is >= 1.11.0.
+We recommend using the latest version of Terraform Core ([the latest version can be found here](https://developer.hashicorp.com/terraform/install)).
 
 * [Terraform Website](https://www.terraform.io)
 * [F5XC Provider Documentation](https://registry.terraform.io/providers/F5Networks/f5xc/latest/docs)

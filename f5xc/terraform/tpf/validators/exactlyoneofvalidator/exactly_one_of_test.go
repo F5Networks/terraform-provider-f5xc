@@ -181,3 +181,32 @@ func TestExactlyOneOf_MarkdownDescription(t *testing.T) {
 		t.Error("expected non-empty markdown description")
 	}
 }
+
+// TestExactlyOneOf_DescriptionRequired verifies that both descriptions state
+// the block requirement and that the markdown list joins three or more keys
+// with commas and a final "or".
+func TestExactlyOneOf_DescriptionRequired(t *testing.T) {
+	ctx := context.Background()
+	v := exactlyoneofvalidator.ExactlyOneOfValidator{KeysToCheck: []string{"a", "b", "c"}, Required: true}
+
+	if got, want := v.Description(ctx), "Ensures that exactly one of the following attributes is specified (block is required): [a b c]"; got != want {
+		t.Errorf("Description() = %q, want %q", got, want)
+	}
+	if got, want := v.MarkdownDescription(ctx), "This block is required. Exactly one of the following attributes must be defined: `a`, `b` or `c`."; got != want {
+		t.Errorf("MarkdownDescription() = %q, want %q", got, want)
+	}
+}
+
+// TestExactlyOneOf_KeyMissingFromObject verifies that a key absent from the
+// object attributes is ignored and does not count as set.
+func TestExactlyOneOf_KeyMissingFromObject(t *testing.T) {
+	v := exactlyoneofvalidator.ExactlyOneOfValidator{KeysToCheck: []string{"a", "missing"}}
+	obj := objectWithValues([]string{"a"}, map[string]string{"a": "x"})
+
+	resp := &validator.ObjectResponse{}
+	v.ValidateObject(context.Background(), validator.ObjectRequest{ConfigValue: obj}, resp)
+
+	if resp.Diagnostics.HasError() {
+		t.Errorf("unexpected error: %v", resp.Diagnostics)
+	}
+}

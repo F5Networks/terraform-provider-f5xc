@@ -448,3 +448,55 @@ func mxRecordAttrTypes() map[string]attr.Type {
 		"name": types.StringType,
 	}
 }
+
+// A known config with a null framework plan falls back to the config value.
+func TestPlannedValueOrConfig_NullPlanUsesConfig(t *testing.T) {
+	config := rrsetList(t, aRecordRRSet(t, "www.example.com", "1.2.3.4"))
+	nullList := types.ListNull(types.ObjectType{AttrTypes: rrsetAttrTypes()})
+
+	resp := runPlanModifyListWithPlan(t, rrsetListMergeModifier{}, config, nullList, nullList)
+
+	assert.True(t, config.Equal(resp.PlanValue))
+}
+
+// determineElementType prefers config, then state, then plan element types.
+func TestDetermineElementType_Fallbacks(t *testing.T) {
+	ctx := context.Background()
+	objType := types.ObjectType{AttrTypes: rrsetAttrTypes()}
+
+	fromState := planmodifier.ListRequest{
+		ConfigValue: types.ListNull(nil),
+		StateValue:  types.ListNull(objType),
+		PlanValue:   types.ListNull(nil),
+	}
+	assert.Equal(t, objType, determineElementType(ctx, fromState))
+
+	fromPlan := planmodifier.ListRequest{
+		ConfigValue: types.ListNull(nil),
+		StateValue:  types.ListNull(nil),
+		PlanValue:   types.ListNull(objType),
+	}
+	assert.Equal(t, objType, determineElementType(ctx, fromPlan))
+}
+
+// isRRSetGroupElementType matches only object types with both metadata and rr_set attributes.
+func TestIsRRSetGroupElementType(t *testing.T) {
+	tests := []struct {
+		name string
+		typ  attr.Type
+		want bool
+	}{
+		{name: "nil", typ: nil, want: false},
+		{name: "non-object", typ: types.StringType, want: false},
+		{name: "rrset object", typ: types.ObjectType{AttrTypes: rrsetAttrTypes()}, want: false},
+		{name: "rr_set_group object", typ: types.ObjectType{AttrTypes: map[string]attr.Type{
+			"metadata": types.StringType,
+			"rr_set":   types.StringType,
+		}}, want: true},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, isRRSetGroupElementType(tc.typ))
+		})
+	}
+}

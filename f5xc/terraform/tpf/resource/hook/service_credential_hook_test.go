@@ -6,6 +6,7 @@ package hook
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -17,6 +18,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_api_credential "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/api_credential"
@@ -478,4 +481,91 @@ func TestServiceCredentialPreUpdateHook_InputGuards(t *testing.T) {
 			t.Fatalf("req.Name = %q, want svc-cred-1", req.Name)
 		}
 	})
+}
+
+const (
+	svcCredGet      = "ves.io.schema.api_credential.CustomAPI.GetServiceCredentials"
+	svcCredActivate = "ves.io.schema.api_credential.CustomAPI.ActivateServiceCredentials"
+	svcCredRenew    = "ves.io.schema.api_credential.CustomAPI.RenewServiceCredentials"
+)
+
+// The service_credential renew flow stops at each guard and returns each API error.
+func TestServiceCredentialPreUpdateHook_Branches(t *testing.T) {
+	expired := tsFrom(time.Now().Add(-time.Hour))
+	future := tsFrom(time.Now().Add(time.Hour))
+	boom := errors.New("boom")
+	expiredInactive := &ves_io_schema_api_credential.GetServiceCredentialsResponse{
+		Type: ves_io_schema_api_credential.SERVICE_API_TOKEN, ExpiryTimestamp: expired,
+	}
+
+	cases := []struct {
+		name      string
+		resps     map[string]proto.Message
+		errs      map[string]error
+		wantErr   string
+		wantCalls int
+	}{
+		{"get error", nil, map[string]error{svcCredGet: boom}, "failed to get service_credential", 1},
+		{"wrong get type", map[string]proto.Message{svcCredGet: &ves_io_schema_api_credential.RenewRequest{}}, nil, "unexpected GetServiceCredentials response type", 1},
+		{"not api token", map[string]proto.Message{svcCredGet: &ves_io_schema_api_credential.GetServiceCredentialsResponse{
+			Type: ves_io_schema_api_credential.SERVICE_KUBE_CONFIG,
+		}}, nil, "", 1},
+		{"no expiry", map[string]proto.Message{svcCredGet: &ves_io_schema_api_credential.GetServiceCredentialsResponse{
+			Type: ves_io_schema_api_credential.SERVICE_API_TOKEN,
+		}}, nil, "", 1},
+		{"not expired", map[string]proto.Message{svcCredGet: &ves_io_schema_api_credential.GetServiceCredentialsResponse{
+			Type: ves_io_schema_api_credential.SERVICE_API_TOKEN, ExpiryTimestamp: future,
+		}}, nil, "", 1},
+		{"still active", map[string]proto.Message{svcCredGet: &ves_io_schema_api_credential.GetServiceCredentialsResponse{
+			Type: ves_io_schema_api_credential.SERVICE_API_TOKEN, ExpiryTimestamp: expired, Active: true,
+		}}, nil, "", 1},
+		{"activate error", map[string]proto.Message{svcCredGet: expiredInactive}, map[string]error{svcCredActivate: boom}, "failed to activate", 2},
+		{"renew error", map[string]proto.Message{svcCredGet: expiredInactive}, map[string]error{svcCredRenew: boom}, "failed to renew", 3},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			stub := rpcStub(tc.resps, tc.errs)
+			req := &ves_io_schema_api_credential.ReplaceServiceCredentialsRequest{}
+			err := ServiceCredentialPreUpdateHook(context.Background(), stub, req, types.ListNull(namespaceRoleObjectType()), "system", "svc-1", false, true, 0)
+			if tc.wantErr == "" {
+				require.NoError(t, err)
+			} else {
+				require.ErrorContains(t, err, tc.wantErr)
+			}
+			assert.Len(t, stub.calls, tc.wantCalls)
+		})
+	}
+}
+
+// A namespace_roles list that cannot decode stops the hook before any API call.
+func TestServiceCredentialPreUpdateHook_BadNamespaceRoles(t *testing.T) {
+	bad, diags := types.ListValue(types.StringType, []attr.Value{types.StringValue("x")})
+	require.False(t, diags.HasError())
+	stub := &stubCustomAPIClient{}
+	err := ServiceCredentialPreUpdateHook(context.Background(), stub, &ves_io_schema_api_credential.ReplaceServiceCredentialsRequest{}, bad, "system", "svc-1", false, true, 0)
+	require.ErrorContains(t, err, "failed to decode namespace_roles")
+	assert.Empty(t, stub.calls)
+}
+
+// Role entries with null, unknown, or blank fields are dropped.
+func TestBuildNamespaceAccessFromRoles_SkipsIncompleteEntries(t *testing.T) {
+	objType := namespaceRoleObjectType()
+	mk := func(ns, role attr.Value) attr.Value {
+		v, d := types.ObjectValue(objType.AttrTypes, map[string]attr.Value{"namespace": ns, "role": role})
+		require.False(t, d.HasError())
+		return v
+	}
+	list, diags := types.ListValue(objType, []attr.Value{
+		mk(types.StringNull(), types.StringValue("r")),
+		mk(types.StringValue("ns"), types.StringUnknown()),
+		mk(types.StringValue(" "), types.StringValue("r")),
+		mk(types.StringValue("ns"), types.StringValue("admin")),
+	})
+	require.False(t, diags.HasError())
+
+	access, ok, err := buildNamespaceAccessFromRoles(context.Background(), list)
+	require.NoError(t, err)
+	require.True(t, ok)
+	require.Len(t, access.GetNamespaceRoleMap(), 1)
+	assert.Equal(t, []string{"admin"}, access.GetNamespaceRoleMap()["ns"].GetNames())
 }

@@ -139,3 +139,102 @@ func TestListUniqueValuesIgnoreUnknown(t *testing.T) {
 		})
 	}
 }
+
+// TestListUniqueValuesIgnoreUnknown_Description verifies that the markdown
+// description equals the plain description.
+func TestListUniqueValuesIgnoreUnknown_Description(t *testing.T) {
+	ctx := context.Background()
+	v := listuniquevalidator.ListUniqueValuesIgnoreUnknown()
+
+	if v.Description(ctx) == "" {
+		t.Fatal("Description() is empty")
+	}
+	if got, want := v.MarkdownDescription(ctx), v.Description(ctx); got != want {
+		t.Errorf("MarkdownDescription() = %q, want %q", got, want)
+	}
+}
+
+// TestListUniqueValuesIgnoreUnknown_NestedCollections verifies that elements
+// with an unknown value nested in a list, map, or set are skipped, and fully
+// known duplicates of each collection kind are reported.
+func TestListUniqueValuesIgnoreUnknown_NestedCollections(t *testing.T) {
+	ctx := context.Background()
+	v := listuniquevalidator.ListUniqueValuesIgnoreUnknown()
+
+	listType := types.ListType{ElemType: types.StringType}
+	mapType := types.MapType{ElemType: types.StringType}
+	setType := types.SetType{ElemType: types.StringType}
+	objType := types.ObjectType{AttrTypes: map[string]attr.Type{
+		"l": listType,
+		"m": mapType,
+		"s": setType,
+	}}
+
+	known := func() attr.Value {
+		return types.ObjectValueMust(objType.AttrTypes, map[string]attr.Value{
+			"l": types.ListValueMust(types.StringType, []attr.Value{types.StringValue("a")}),
+			"m": types.MapValueMust(types.StringType, map[string]attr.Value{"k": types.StringValue("v")}),
+			"s": types.SetValueMust(types.StringType, []attr.Value{types.StringValue("x")}),
+		})
+	}
+	withUnknown := func(field string) attr.Value {
+		attrs := map[string]attr.Value{
+			"l": types.ListValueMust(types.StringType, []attr.Value{types.StringValue("a")}),
+			"m": types.MapValueMust(types.StringType, map[string]attr.Value{"k": types.StringValue("v")}),
+			"s": types.SetValueMust(types.StringType, []attr.Value{types.StringValue("x")}),
+		}
+		switch field {
+		case "l":
+			attrs["l"] = types.ListValueMust(types.StringType, []attr.Value{types.StringUnknown()})
+		case "m":
+			attrs["m"] = types.MapValueMust(types.StringType, map[string]attr.Value{"k": types.StringUnknown()})
+		case "s":
+			attrs["s"] = types.SetValueMust(types.StringType, []attr.Value{types.StringUnknown()})
+		}
+		return types.ObjectValueMust(objType.AttrTypes, attrs)
+	}
+
+	tests := []struct {
+		name    string
+		elems   []attr.Value
+		wantErr bool
+	}{
+		{"known_duplicates", []attr.Value{known(), known()}, true},
+		{"unknown_in_list", []attr.Value{withUnknown("l"), withUnknown("l")}, false},
+		{"unknown_in_map", []attr.Value{withUnknown("m"), withUnknown("m")}, false},
+		{"unknown_in_set", []attr.Value{withUnknown("s"), withUnknown("s")}, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			resp := &validator.ListResponse{}
+			v.ValidateList(ctx, validator.ListRequest{
+				Path:        path.Root("items"),
+				ConfigValue: types.ListValueMust(objType, tt.elems),
+			}, resp)
+
+			if got := resp.Diagnostics.HasError(); got != tt.wantErr {
+				t.Errorf("HasError() = %v, want %v: %v", got, tt.wantErr, resp.Diagnostics)
+			}
+		})
+	}
+}
+
+// TestListUniqueValuesIgnoreUnknown_NullOrUnknownList verifies that a null,
+// unknown, or single-element list is not validated.
+func TestListUniqueValuesIgnoreUnknown_NullOrUnknownList(t *testing.T) {
+	ctx := context.Background()
+	v := listuniquevalidator.ListUniqueValuesIgnoreUnknown()
+
+	for _, lv := range []types.List{
+		types.ListNull(types.StringType),
+		types.ListUnknown(types.StringType),
+		types.ListValueMust(types.StringType, []attr.Value{types.StringValue("a")}),
+	} {
+		resp := &validator.ListResponse{}
+		v.ValidateList(ctx, validator.ListRequest{Path: path.Root("items"), ConfigValue: lv}, resp)
+		if resp.Diagnostics.HasError() {
+			t.Errorf("unexpected error for %v: %v", lv, resp.Diagnostics)
+		}
+	}
+}

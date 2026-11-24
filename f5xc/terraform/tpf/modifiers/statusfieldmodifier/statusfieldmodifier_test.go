@@ -560,3 +560,161 @@ func TestKnownPlanValue_Unchanged(t *testing.T) {
 
 	assert.Equal(t, "explicit-plan", resp.PlanValue.ValueString())
 }
+
+var depSchema = schema.Schema{Attributes: map[string]schema.Attribute{
+	"dep": schema.StringAttribute{Optional: true},
+}}
+
+var depObjectType = tftypes.Object{AttributeTypes: map[string]tftypes.Type{"dep": tftypes.String}}
+
+func depRaw(v any) tftypes.Value {
+	return tftypes.NewValue(depObjectType, map[string]tftypes.Value{"dep": tftypes.NewValue(tftypes.String, v)})
+}
+
+func depState(v any) tfsdk.State { return tfsdk.State{Schema: depSchema, Raw: depRaw(v)} }
+func depPlan(v any) tfsdk.Plan   { return tfsdk.Plan{Schema: depSchema, Raw: depRaw(v)} }
+
+var depPath = path.Root("dep")
+
+// dependencyCase describes the dependency value in state and plan and whether
+// isDependencyChanged reports a change for that pair.
+type dependencyCase struct {
+	name        string
+	dep         path.Path
+	state, plan any
+	changed     bool
+}
+
+var dependencyCases = []dependencyCase{
+	{name: "empty path is unchanged", dep: path.Empty(), state: "a", plan: "b", changed: false},
+	{name: "unreadable path is changed", dep: path.Root("missing"), state: "a", plan: "a", changed: true},
+	{name: "unknown plan is changed", dep: depPath, state: "a", plan: tftypes.UnknownValue, changed: true},
+	{name: "unknown state is changed", dep: depPath, state: tftypes.UnknownValue, plan: "a", changed: true},
+	{name: "both null is unchanged", dep: depPath, state: nil, plan: nil, changed: false},
+	{name: "null to value is changed", dep: depPath, state: nil, plan: "a", changed: true},
+	{name: "equal values are unchanged", dep: depPath, state: "a", plan: "a", changed: false},
+	{name: "different values are changed", dep: depPath, state: "a", plan: "b", changed: true},
+}
+
+// PlanModifyString keeps state when the dependency is unchanged and plans unknown when it changes.
+func TestPlanModifyString_DependencyMatrix(t *testing.T) {
+	for _, tc := range dependencyCases {
+		t.Run(tc.name, func(t *testing.T) {
+			m := statusfieldmodifier.UseStateUnlessDependencyChangesString(tc.dep)
+			req := planmodifier.StringRequest{
+				State:       depState(tc.state),
+				Plan:        depPlan(tc.plan),
+				StateValue:  types.StringValue("prior"),
+				PlanValue:   types.StringUnknown(),
+				ConfigValue: types.StringNull(),
+			}
+			// A known response value shows that the changed branch resets it to unknown.
+			resp := &planmodifier.StringResponse{PlanValue: types.StringValue("stale")}
+			m.PlanModifyString(context.Background(), req, resp)
+
+			if tc.changed {
+				assert.True(t, resp.PlanValue.IsUnknown())
+			} else {
+				assert.Equal(t, "prior", resp.PlanValue.ValueString())
+			}
+		})
+	}
+}
+
+// PlanModifyString leaves the response untouched for a known plan or an unknown config.
+func TestPlanModifyString_Guards(t *testing.T) {
+	m := statusfieldmodifier.UseStateUnlessDependencyChangesString(depPath)
+	base := planmodifier.StringRequest{
+		State:       depState("a"),
+		Plan:        depPlan("a"),
+		StateValue:  types.StringValue("prior"),
+		PlanValue:   types.StringUnknown(),
+		ConfigValue: types.StringNull(),
+	}
+
+	known := base
+	known.PlanValue = types.StringValue("known")
+	resp := &planmodifier.StringResponse{PlanValue: known.PlanValue}
+	m.PlanModifyString(context.Background(), known, resp)
+	assert.Equal(t, "known", resp.PlanValue.ValueString())
+
+	unknownCfg := base
+	unknownCfg.ConfigValue = types.StringUnknown()
+	resp = &planmodifier.StringResponse{PlanValue: types.StringUnknown()}
+	m.PlanModifyString(context.Background(), unknownCfg, resp)
+	assert.True(t, resp.PlanValue.IsUnknown())
+}
+
+// PlanModifyList takes the unknown element type from the plan, or from state when the plan has none.
+func TestPlanModifyList_DependencyChanged(t *testing.T) {
+	m := statusfieldmodifier.UseStateUnlessDependencyChangesList(depPath)
+	stateList := types.ListValueMust(types.StringType, nil)
+
+	tests := []struct {
+		name        string
+		planValue   types.List
+		stateValue  types.List
+		wantUnknown bool
+	}{
+		{name: "element type from plan", planValue: types.ListUnknown(types.StringType), stateValue: types.ListNull(types.StringType), wantUnknown: true},
+		{name: "element type from state", planValue: types.ListUnknown(nil), stateValue: stateList, wantUnknown: true},
+		{name: "no element type keeps response", planValue: types.ListUnknown(nil), stateValue: types.ListNull(nil), wantUnknown: false},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			req := planmodifier.ListRequest{
+				State:       depState("a"),
+				Plan:        depPlan("b"),
+				StateValue:  tc.stateValue,
+				PlanValue:   tc.planValue,
+				ConfigValue: types.ListNull(types.StringType),
+			}
+			stale := types.ListValueMust(types.StringType, nil)
+			resp := &planmodifier.ListResponse{PlanValue: stale}
+			m.PlanModifyList(context.Background(), req, resp)
+
+			if tc.wantUnknown {
+				assert.True(t, resp.PlanValue.IsUnknown())
+				assert.Equal(t, types.StringType, resp.PlanValue.ElementType(context.Background()))
+			} else {
+				assert.True(t, resp.PlanValue.Equal(stale))
+			}
+		})
+	}
+}
+
+// PlanModifyList leaves the response untouched for a known plan or an unknown config.
+func TestPlanModifyList_Guards(t *testing.T) {
+	m := statusfieldmodifier.UseStateUnlessDependencyChangesList(depPath)
+	base := planmodifier.ListRequest{
+		State:       depState("a"),
+		Plan:        depPlan("a"),
+		StateValue:  types.ListNull(types.StringType),
+		PlanValue:   types.ListUnknown(types.StringType),
+		ConfigValue: types.ListNull(types.StringType),
+	}
+
+	known := base
+	known.PlanValue = types.ListValueMust(types.StringType, nil)
+	resp := &planmodifier.ListResponse{PlanValue: known.PlanValue}
+	m.PlanModifyList(context.Background(), known, resp)
+	assert.False(t, resp.PlanValue.IsUnknown())
+
+	unknownCfg := base
+	unknownCfg.ConfigValue = types.ListUnknown(types.StringType)
+	resp = &planmodifier.ListResponse{PlanValue: base.PlanValue}
+	m.PlanModifyList(context.Background(), unknownCfg, resp)
+	assert.True(t, resp.PlanValue.IsUnknown())
+}
+
+// PlanModifyList does nothing during create, when prior state is null.
+func TestPlanModifyList_Create(t *testing.T) {
+	m := statusfieldmodifier.UseStateUnlessDependencyChangesList(depPath)
+	req := planmodifier.ListRequest{
+		State:     tfsdk.State{Schema: depSchema, Raw: tftypes.NewValue(depObjectType, nil)},
+		PlanValue: types.ListUnknown(types.StringType),
+	}
+	resp := &planmodifier.ListResponse{PlanValue: req.PlanValue}
+	m.PlanModifyList(context.Background(), req, resp)
+	assert.True(t, resp.PlanValue.IsUnknown())
+}

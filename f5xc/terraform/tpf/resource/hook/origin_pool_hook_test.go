@@ -7,7 +7,11 @@ package hook
 import (
 	"context"
 	"encoding/json"
+	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // poolEntry builds an OriginPoolWithWeight-shaped map with a pool reference.
@@ -368,4 +372,136 @@ func TestIsLoadBalancerKind_FiltersReferrers(t *testing.T) {
 			t.Fatalf("expected %q NOT to be treated as a load balancer referrer", kind)
 		}
 	}
+}
+
+const (
+	testPoolNS   = "default"
+	testPoolName = "pool1"
+	testLBName   = "lb1"
+)
+
+// lbConflictText returns a 409 text for the test pool that lists refs as referrers.
+func lbConflictText(refs ...string) string {
+	w := unbindWrapper{selfSchema: "views.origin_pool"}
+	return w.conflictText(refs...)
+}
+
+func lbPath(prefix, ns, name string) string {
+	return objectPath(prefix, ns, "http_loadbalancers", name)
+}
+
+func lbWithPools(names ...string) map[string]any {
+	pools := make([]any, 0, len(names))
+	for _, n := range names {
+		pools = append(pools, poolEntry(testPoolNS, n, 1))
+	}
+	return map[string]any{
+		"metadata": map[string]any{"name": testLBName, "namespace": testPoolNS},
+		"spec":     map[string]any{"default_route_pools": pools},
+	}
+}
+
+func callOriginPoolUnbind(t *testing.T, f *fakeConfigServer, errText string) error {
+	t.Helper()
+	c := startFakeConfigServer(t, f)
+	return OriginPoolUnbindReferencingObjects(context.Background(), c, testPoolNS, testPoolName, errText)
+}
+
+// An error text without referrers makes no API calls.
+func TestOriginPoolUnbind_NoReferrers(t *testing.T) {
+	f := newFakeConfigServer()
+	require.NoError(t, callOriginPoolUnbind(t, f, "some unrelated error"))
+	reqs, _ := f.snapshot()
+	assert.Empty(t, reqs)
+}
+
+// The hook removes only the deleted pool from a load balancer and PUTs the result
+// to the /config path that served the GET.
+func TestOriginPoolUnbind_RemovesPoolAndKeepsOthers(t *testing.T) {
+	f := newFakeConfigServer()
+	cfgPath := lbPath("config", testPoolNS, testLBName)
+	f.on(http.MethodGet, cfgPath, http.StatusOK, mustJSON(t, lbWithPools(testPoolName, "pool2")))
+	f.on(http.MethodPut, cfgPath, http.StatusOK, `{}`)
+
+	require.NoError(t, callOriginPoolUnbind(t, f, lbConflictText(schemaRef("views.http_loadbalancer", testPoolNS, testLBName))))
+
+	_, bodies := f.snapshot()
+	spec := decodePutSpec(t, bodies, cfgPath)
+	assert.Equal(t, []string{"pool2"}, poolNamesInList(t, spec["default_route_pools"]))
+}
+
+// The hook falls back to the /public path when the /config GET fails, and a
+// referrer without a namespace uses the pool namespace.
+func TestOriginPoolUnbind_PublicFallbackAndDefaultNamespace(t *testing.T) {
+	f := newFakeConfigServer()
+	pubPath := lbPath("public", testPoolNS, testLBName)
+	f.on(http.MethodGet, pubPath, http.StatusOK, mustJSON(t, lbWithPools(testPoolName)))
+	f.on(http.MethodPut, pubPath, http.StatusOK, `{}`)
+
+	// "ves.io.schema.views.http_loadbalancer.Object /lb1" parses to an empty namespace.
+	errText := lbConflictText("ves.io.schema.views.http_loadbalancer.Object /" + testLBName)
+	require.NoError(t, callOriginPoolUnbind(t, f, errText))
+
+	reqs, bodies := f.snapshot()
+	assert.Contains(t, reqs, "GET "+lbPath("config", testPoolNS, testLBName))
+	spec := decodePutSpec(t, bodies, pubPath)
+	_, hasPools := spec["default_route_pools"]
+	assert.False(t, hasPools, "an emptied default_route_pools must be removed")
+}
+
+// Non-load-balancer referrers, objects without a spec, and load balancers that do
+// not reference the pool are skipped without a PUT.
+func TestOriginPoolUnbind_SkipsWithoutPut(t *testing.T) {
+	f := newFakeConfigServer()
+	f.on(http.MethodGet, lbPath("config", testPoolNS, "nospec"), http.StatusOK, `{"metadata":{}}`)
+	f.on(http.MethodGet, lbPath("config", testPoolNS, "other"), http.StatusOK, mustJSON(t, lbWithPools("pool9")))
+
+	errText := lbConflictText(
+		schemaRef("views.origin_pool", testPoolNS, "x"),
+		schemaRef("views.http_loadbalancer", testPoolNS, "nospec"),
+		schemaRef("views.http_loadbalancer", testPoolNS, "other"),
+	)
+	require.NoError(t, callOriginPoolUnbind(t, f, errText))
+
+	reqs, bodies := f.snapshot()
+	assert.Empty(t, bodies)
+	assert.NotContains(t, reqs, "GET "+objectPath("config", testPoolNS, "origin_pools", "x"))
+}
+
+// Fetch, parse, and update failures are returned as errors.
+func TestOriginPoolUnbind_Errors(t *testing.T) {
+	ref := lbConflictText(schemaRef("views.http_loadbalancer", testPoolNS, testLBName))
+	cfgPath := lbPath("config", testPoolNS, testLBName)
+
+	t.Run("fetch", func(t *testing.T) {
+		f := newFakeConfigServer()
+		require.ErrorContains(t, callOriginPoolUnbind(t, f, ref), "failed to fetch")
+	})
+	t.Run("parse", func(t *testing.T) {
+		f := newFakeConfigServer()
+		f.on(http.MethodGet, cfgPath, http.StatusOK, `not-json`)
+		require.ErrorContains(t, callOriginPoolUnbind(t, f, ref), "JSON")
+	})
+	t.Run("update", func(t *testing.T) {
+		f := newFakeConfigServer()
+		f.on(http.MethodGet, cfgPath, http.StatusOK, mustJSON(t, lbWithPools(testPoolName)))
+		f.on(http.MethodPut, cfgPath, http.StatusInternalServerError, `{"error":"x"}`)
+		require.ErrorContains(t, callOriginPoolUnbind(t, f, ref), "failed to update")
+	})
+}
+
+// Malformed route and pool entries are kept unchanged.
+func TestRemoveOriginPoolFromSpec_SkipsMalformedEntries(t *testing.T) {
+	spec := map[string]any{
+		"routes": []any{
+			"not-a-map",
+			map[string]any{"redirect_route": map[string]any{}},
+			map[string]any{"simple_route": map[string]any{"path": "/"}},
+			map[string]any{"simple_route": map[string]any{"origin_pools": []any{
+				"not-a-map",
+				map[string]any{"cluster": map[string]any{}},
+			}}},
+		},
+	}
+	assert.False(t, removeOriginPoolFromSpec(context.Background(), spec, "http_loadbalancers", testPoolNS, testLBName, testPoolName, testPoolNS))
 }

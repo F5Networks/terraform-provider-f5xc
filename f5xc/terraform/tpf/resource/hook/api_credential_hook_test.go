@@ -6,6 +6,7 @@ package hook
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -18,6 +19,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gopkg.volterra.us/stdlib/client/vesapi"
 
 	ves_io_schema_api_credential "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/api_credential"
@@ -395,4 +398,75 @@ func TestCredentialImportHooks_FollowSchema(t *testing.T) {
 			t.Fatal("expected an error when spec.virtual_k8s_namespace is missing from the schema")
 		}
 	})
+}
+
+func tsFrom(t time.Time) *types_pb.Timestamp {
+	return &types_pb.Timestamp{Seconds: t.Unix(), Nanos: int32(t.Nanosecond())}
+}
+
+// rpcStub answers each rpcFQN with the response or error in the maps.
+func rpcStub(resps map[string]proto.Message, errs map[string]error) *stubCustomAPIClient {
+	return &stubCustomAPIClient{handler: func(_, _, rpcFQN, _ string) (proto.Message, error) {
+		return resps[rpcFQN], errs[rpcFQN]
+	}}
+}
+
+const (
+	apiCredGet      = "ves.io.schema.api_credential.CustomAPI.Get"
+	apiCredActivate = "ves.io.schema.api_credential.CustomAPI.Activate"
+	apiCredRenew    = "ves.io.schema.api_credential.CustomAPI.Renew"
+)
+
+func apiCredGetResp(spec *ves_io_schema_api_credential.GlobalSpecType) *ves_io_schema_api_credential.GetResponse {
+	return &ves_io_schema_api_credential.GetResponse{
+		Object: &ves_io_schema_api_credential.Object{Spec: &ves_io_schema_api_credential.SpecType{GcSpec: spec}},
+	}
+}
+
+// The api_credential renew flow stops at each guard and returns each API error.
+func TestApiCredentialOverrideUpdateHook_Branches(t *testing.T) {
+	expired := tsFrom(time.Now().Add(-time.Hour))
+	future := tsFrom(time.Now().Add(time.Hour))
+	boom := errors.New("boom")
+	expiredInactive := apiCredGetResp(&ves_io_schema_api_credential.GlobalSpecType{
+		Type: ves_io_schema_api_credential.API_TOKEN, ExpirationTimestamp: expired,
+	})
+
+	cases := []struct {
+		name      string
+		resps     map[string]proto.Message
+		errs      map[string]error
+		wantErr   string
+		wantCalls int
+	}{
+		{"get error", nil, map[string]error{apiCredGet: boom}, "failed to get api_credential", 1},
+		{"wrong get type", map[string]proto.Message{apiCredGet: &ves_io_schema_api_credential.RenewRequest{}}, nil, "unexpected Get response type", 1},
+		{"no gc spec", map[string]proto.Message{apiCredGet: apiCredGetResp(nil)}, nil, "", 1},
+		{"not api token", map[string]proto.Message{apiCredGet: apiCredGetResp(&ves_io_schema_api_credential.GlobalSpecType{
+			Type: ves_io_schema_api_credential.KUBE_CONFIG,
+		})}, nil, "", 1},
+		{"no expiry", map[string]proto.Message{apiCredGet: apiCredGetResp(&ves_io_schema_api_credential.GlobalSpecType{
+			Type: ves_io_schema_api_credential.API_TOKEN,
+		})}, nil, "", 1},
+		{"not expired", map[string]proto.Message{apiCredGet: apiCredGetResp(&ves_io_schema_api_credential.GlobalSpecType{
+			Type: ves_io_schema_api_credential.API_TOKEN, ExpirationTimestamp: future,
+		})}, nil, "", 1},
+		{"still active", map[string]proto.Message{apiCredGet: apiCredGetResp(&ves_io_schema_api_credential.GlobalSpecType{
+			Type: ves_io_schema_api_credential.API_TOKEN, ExpirationTimestamp: expired, Active: true,
+		})}, nil, "", 1},
+		{"activate error", map[string]proto.Message{apiCredGet: expiredInactive}, map[string]error{apiCredActivate: boom}, "failed to activate", 2},
+		{"renew error", map[string]proto.Message{apiCredGet: expiredInactive}, map[string]error{apiCredRenew: boom}, "failed to renew", 3},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			stub := rpcStub(tc.resps, tc.errs)
+			err := ApiCredentialOverrideUpdateHook(context.Background(), stub, "system", "cred-1", false, true, 0)
+			if tc.wantErr == "" {
+				require.NoError(t, err)
+			} else {
+				require.ErrorContains(t, err, tc.wantErr)
+			}
+			assert.Len(t, stub.calls, tc.wantCalls)
+		})
+	}
 }

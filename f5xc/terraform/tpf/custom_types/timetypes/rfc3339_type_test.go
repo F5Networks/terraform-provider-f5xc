@@ -7,9 +7,10 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 
-	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/custom_types/timetypes"
 )
 
 func TestRFC3339TypeValueFromTerraform(t *testing.T) {
@@ -66,5 +67,37 @@ func TestRFC3339TypeValueFromTerraform(t *testing.T) {
 				t.Errorf("Expected unknown-ness match: expected %t, got %t", testCase.expectation.IsUnknown(), !testCase.in.IsKnown())
 			}
 		})
+	}
+}
+
+// RFC3339Type.ValueFromTerraform rejects a string that is not RFC 3339.
+func TestRFC3339ValueFromTerraformInvalid(t *testing.T) {
+	_, err := (timetypes.RFC3339Type{}).ValueFromTerraform(context.Background(), tftypes.NewValue(tftypes.String, "not-a-time"))
+	if err == nil {
+		t.Error("expected error for invalid RFC3339 string")
+	}
+}
+
+// RFC3339Type.ValueFromString maps empty and structural-nil strings to null, and rejects invalid strings with a null value.
+func TestRFC3339ValueFromStringSpecialCases(t *testing.T) {
+	ctx := context.Background()
+	typ := timetypes.RFC3339Type{}
+
+	for _, s := range []string{"", "(timestamp: nil Timestamp)"} {
+		v, diags := typ.ValueFromString(ctx, basetypes.NewStringValue(s))
+		if diags.HasError() {
+			t.Errorf("%q: unexpected diagnostics %v", s, diags)
+		}
+		if !v.(timetypes.RFC3339).IsNull() {
+			t.Errorf("%q: expected null value", s)
+		}
+	}
+
+	v, diags := typ.ValueFromString(ctx, basetypes.NewStringValue("bad"))
+	if !diags.HasError() {
+		t.Error("expected error diagnostic for invalid string")
+	}
+	if !v.(timetypes.RFC3339).IsNull() {
+		t.Error("expected null value for invalid string")
 	}
 }

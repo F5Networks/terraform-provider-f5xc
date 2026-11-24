@@ -26,12 +26,12 @@ import (
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/noopplan"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
 
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"gopkg.volterra.us/stdlib/codec"
+	hook "gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/resource/hook"
 	ves_io_schema_known_label "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/known_label"
 )
 
@@ -337,8 +337,7 @@ func (r *ResourceF5XCKnownLabel) Read(ctx context.Context, request resource.Read
 	// ListMatchExpr defines which Go expression to compare against (defaults to data.Name.ValueString()).
 	var readRespItem *ves_io_schema_known_label.LabelType
 	for _, item := range readResp.GetLabel() {
-		itemName := item.GetKey()
-		if itemName == data.Key.ValueString() {
+		if item.GetKey() == data.Key.ValueString() && item.GetValue() == data.Value.ValueString() {
 			readRespItem = item
 			break
 		}
@@ -456,29 +455,6 @@ func (r *ResourceF5XCKnownLabel) Delete(ctx context.Context, request resource.De
 
 }
 func (r *ResourceF5XCKnownLabel) ImportState(ctx context.Context, req resource.ImportStateRequest, response *resource.ImportStateResponse) {
-	// Import ID format: namespace/key
-	parts := strings.Split(req.ID, "/")
-	if len(parts) != 2 {
-		response.Diagnostics.AddError(
-			"Invalid Import ID",
-			fmt.Sprintf("Expected import ID format: namespace/key, got: %s", req.ID),
-		)
-		return
-	}
-	if parts[0] == "" {
-		response.Diagnostics.AddError(
-			"Invalid Import ID",
-			fmt.Sprintf("Expected import ID format: namespace/key, got: %s (namespace is empty)", req.ID),
-		)
-		return
-	}
-	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("namespace"), parts[0])...)
-	if parts[1] == "" {
-		response.Diagnostics.AddError(
-			"Invalid Import ID",
-			fmt.Sprintf("Expected import ID format: namespace/key, got: %s (key is empty)", req.ID),
-		)
-		return
-	}
-	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("key"), parts[1])...)
+	// Override-Import Hook: hook.KnownLabelOverrideImportHook
+	hook.KnownLabelOverrideImportHook(ctx, req, response)
 }

@@ -41,8 +41,8 @@ resource "f5xc_cluster" "example" {
 # Example: Cluster - Full
 
 resource "f5xc_cluster" "example" {
-  name      = "example-cluster"
-  namespace = "default"
+  name        = "example-cluster"
+  namespace   = "default"
   description = "Cluster example"
 
   labels = {
@@ -53,9 +53,9 @@ resource "f5xc_cluster" "example" {
     owner = "platform"
   }
 
-  endpoint_selection = ["DISTRIBUTED"]
+  endpoint_selection     = ["DISTRIBUTED"]
   loadbalancer_algorithm = ["ROUND_ROBIN"]
-  connection_timeout = 2000
+  connection_timeout     = 2000
 
   max_requests_per_connection_choice = {
     max_requests_per_connection = 200
@@ -138,12 +138,12 @@ Required:
 
 Required:
 
-- `name` (String)
-- `namespace` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
 
 Read-Only:
 
-- `tenant` (String)
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--health_checks"></a>
@@ -151,12 +151,12 @@ Read-Only:
 
 Required:
 
-- `name` (String)
-- `namespace` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
 
 Read-Only:
 
-- `tenant` (String)
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--http_protocol_type_choice"></a>
@@ -304,12 +304,12 @@ Optional:
 
 Required:
 
-- `name` (String)
-- `namespace` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
 
 Read-Only:
 
-- `tenant` (String)
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--tls_parameters--tls_params_choice--cert_params--server_validation_choice"></a>
@@ -353,12 +353,12 @@ Optional:
 
 Required:
 
-- `name` (String)
-- `namespace` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
 
 Read-Only:
 
-- `tenant` (String)
+- `tenant` (String) Tenant of the referenced object.
 
 
 
@@ -484,12 +484,12 @@ Optional:
 
 Required:
 
-- `name` (String)
-- `namespace` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
 
 Read-Only:
 
-- `tenant` (String)
+- `tenant` (String) Tenant of the referenced object.
 
 
 

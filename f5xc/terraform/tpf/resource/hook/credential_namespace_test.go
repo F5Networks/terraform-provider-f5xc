@@ -6,12 +6,17 @@ package hook
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func apiCredentialSpecAttrTypes() map[string]attr.Type {
@@ -583,4 +588,43 @@ func TestNullValueOf(t *testing.T) {
 			}
 		})
 	}
+}
+
+// The service credential namespace falls back to the configured namespace when the
+// choice object has no vk8s_kubeconfig attribute.
+func TestResolveServiceCredentialNamespace_NoVK8sAttribute(t *testing.T) {
+	choice, diags := types.ObjectValue(map[string]attr.Type{"api_token": types.BoolType}, map[string]attr.Value{"api_token": types.BoolValue(true)})
+	require.False(t, diags.HasError())
+	assert.Equal(t, "my-ns", ResolveServiceCredentialNamespace(context.Background(), types.StringValue("my-ns"), choice))
+}
+
+// fallbackNullType is a string type that is not types.StringType, so nullValueOf
+// uses its ValueFromTerraform fallback.
+type fallbackNullType struct {
+	basetypes.StringType
+	err    error
+	retNil bool
+}
+
+func (f fallbackNullType) ValueFromTerraform(ctx context.Context, v tftypes.Value) (attr.Value, error) {
+	if f.err != nil {
+		return nil, f.err
+	}
+	if f.retNil {
+		return nil, nil
+	}
+	return f.StringType.ValueFromTerraform(ctx, v)
+}
+
+// nullValueOf uses the type's own null value and reports fallback failures.
+func TestNullValueOf_Fallback(t *testing.T) {
+	v, err := nullValueOf(fallbackNullType{})
+	require.NoError(t, err)
+	assert.True(t, v.IsNull())
+
+	_, err = nullValueOf(fallbackNullType{err: errors.New("boom")})
+	require.ErrorContains(t, err, "building null value")
+
+	_, err = nullValueOf(fallbackNullType{retNil: true})
+	require.ErrorContains(t, err, "no value returned")
 }

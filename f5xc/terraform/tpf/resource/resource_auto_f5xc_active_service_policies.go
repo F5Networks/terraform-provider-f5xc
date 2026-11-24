@@ -9,6 +9,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -16,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -88,6 +90,12 @@ func (r *ResourceF5XCActiveServicePolicies) Schema(ctx context.Context, request 
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^\S+$`),
+						"must match pattern `^\\S+$`",
+					),
+				},
 			},
 			"service_policies": schema.ListNestedAttribute{
 				Description:         "service_policies Service Policies is a sequential engine where policies (and rules within the policy) are evaluated one after the other. It's important to define the correct order (policies evaluated from top to bottom in the list) for service policies, to get the intended result. For each request, its characteristics are evaluated based on the match criteria in each service policy starting at the top. If there is a match in the current policy, then the policy takes effect, and no more policies are evaluated. Otherwise, the next policy is evaluated. If all policies are evaluated and none match, then the request will be denied by default.",
@@ -101,26 +109,36 @@ func (r *ResourceF5XCActiveServicePolicies) Schema(ctx context.Context, request 
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"name": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
+							Description:         "Name of the referenced object.",
+							MarkdownDescription: "Name of the referenced object.",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
 						},
 						"namespace": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
+							Description:         "Namespace of the referenced object.",
+							MarkdownDescription: "Namespace of the referenced object.",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
+							Validators: []validator.String{
+								stringvalidator.RegexMatches(
+									regexp.MustCompile(`^\S+$`),
+									"must match pattern `^\\S+$`",
+								),
+							},
 						},
 						"tenant": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
+							Description:         "Tenant of the referenced object.",
+							MarkdownDescription: "Tenant of the referenced object.<br>**Cross-Namespace Shared Reference:** Required when referencing an object in the `shared` namespace from a non-`shared` resource namespace (set to `ves-io` for F5 XC system-shared objects such as default IKE profiles or `shared/public`).",
 							Required:            false,
 							Optional:            true,
 							Computed:            true,
 							Validators: []validator.String{
+								stringvalidator.RegexMatches(
+									regexp.MustCompile(`\S`),
+									"must match pattern `\\S`",
+								),
 								requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 							},
 							PlanModifiers: []planmodifier.String{

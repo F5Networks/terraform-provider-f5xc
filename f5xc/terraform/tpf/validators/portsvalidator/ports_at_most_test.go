@@ -8,6 +8,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework/function"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -133,5 +134,51 @@ func TestPortsAtMost_Description(t *testing.T) {
 	desc := v.Description(context.Background())
 	if desc == "" {
 		t.Error("expected non-empty description")
+	}
+}
+
+// TestPortsAtMost_ParameterString verifies that function parameter validation
+// skips null and unknown values, rejects too many ports, and reports an
+// invalid negative limit.
+func TestPortsAtMost_ParameterString(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name    string
+		max     int
+		value   types.String
+		wantErr bool
+	}{
+		{"valid", 3, types.StringValue("80,443"), false},
+		{"too_many", 1, types.StringValue("80,443"), true},
+		{"null", 1, types.StringNull(), false},
+		{"unknown", 1, types.StringUnknown(), false},
+		{"invalid_usage", -1, types.StringValue("80"), true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			req := function.StringParameterValidatorRequest{Value: tt.value}
+			resp := &function.StringParameterValidatorResponse{}
+			portsvalidator.PortsAtMost(tt.max).ValidateParameterString(context.Background(), req, resp)
+
+			if gotErr := resp.Error != nil; gotErr != tt.wantErr {
+				t.Errorf("ValidateParameterString() error = %v, wantErr %v", resp.Error, tt.wantErr)
+			}
+		})
+	}
+}
+
+// TestPortsAtMost_MarkdownDescription verifies that the markdown description
+// equals the plain description.
+func TestPortsAtMost_MarkdownDescription(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	v := portsvalidator.PortsAtMost(2)
+	if got, want := v.MarkdownDescription(ctx), v.Description(ctx); got != want {
+		t.Errorf("MarkdownDescription() = %q, want %q", got, want)
 	}
 }

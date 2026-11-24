@@ -15,14 +15,23 @@
 package resource
 
 import (
+	"bytes"
+	"crypto"
+	"crypto/ecdsa"
+	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha256"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/base64"
 	"encoding/pem"
 	"fmt"
+	"io"
 	"math/big"
+	"os"
+	"regexp"
+	"strings"
 	"testing"
 	"time"
 
@@ -2366,3 +2375,1092 @@ resource "f5xc_http_loadbalancer" "example" {
 		rootExtraBlock,
 	)
 }
+
+// httpLBScenarios lists the load balancer variants that
+// TestAccResourceAutoF5XCHttpLoadbalancer_scenarios creates in one apply.
+var httpLBScenarios = []string{
+	"http_basic",
+	"https_auto_cert",
+	"https_byoc_basic",
+	"https_byoc_mtls",
+	"with_advertise_public",
+	"with_advertise_custom",
+	"with_routes",
+	"with_waf",
+	"with_user_id_rate_limit",
+	"with_policies",
+	"with_clients_ddos",
+	"with_api_advanced",
+}
+
+// httpLBScenarioDefaultChoices holds the OneOf choices each scenario gets
+// unless its body sets the same attribute.
+var httpLBScenarioDefaultChoices = [][2]string{
+	{"advertise_choice", "{ do_not_advertise = true }"},
+	{"waf_choice", "{ disable_waf = true }"},
+	{"rate_limit_choice", "{ disable_rate_limit = true }"},
+	{"user_id_choice", "{ user_id_client_ip = true }"},
+	{"hash_policy_choice", "{ round_robin = true }"},
+	{"challenge_type_choice", "{ no_challenge = true }"},
+	{"service_policy_choice", "{ service_policies_from_namespace = true }"},
+	{"trust_client_ip_headers_choice", "{ disable_trust_client_ip_headers = true }"},
+	{"sensitive_data_policy_choice", "{ default_sensitive_data_policy = true }"},
+	{"malicious_user_detection_choice", "{ disable_malicious_user_detection = true }"},
+	{"threat_mesh_choice", "{ disable_threat_mesh = true }"},
+	{"malware_protection_choice", "{ disable_malware_protection = true }"},
+	{"api_discovery_choice", "{ disable_api_discovery = true }"},
+	{"api_testing_choice", "{ disable_api_testing = true }"},
+	{"api_definition_choice", "{ disable_api_definition = true }"},
+	{"slow_ddos_mitigation_choice", "{ system_default_timeouts = true }"},
+}
+
+// httpLBScenarioDefaultChoicePatterns matches each default choice only at the
+// two-space indent of a top-level attribute. Nested blocks share some names
+// (e.g. routes[].choice.simple_route.advanced_options.hash_policy_choice) and
+// must not suppress the top-level default.
+var httpLBScenarioDefaultChoicePatterns = func() []*regexp.Regexp {
+	patterns := make([]*regexp.Regexp, len(httpLBScenarioDefaultChoices))
+	for i, c := range httpLBScenarioDefaultChoices {
+		patterns[i] = regexp.MustCompile(`(?m)^  ` + regexp.QuoteMeta(c[0]) + `\s*=`)
+	}
+	return patterns
+}()
+
+// TestAccResourceAutoF5XCHttpLoadbalancer_scenarios creates every HTTP load
+// balancer variant in one configuration and import-verifies each of them.
+//
+// One apply shares the dependency objects across all variants, which keeps the
+// run time and the number of backend transactions low.
+func TestAccResourceAutoF5XCHttpLoadbalancer_scenarios(t *testing.T) {
+	namespace := acctest.DefaultNamespace()
+	suffix := testAccRunSuffix(t)
+
+	steps := []resource.TestStep{
+		{Config: testAccHTTPLBScenariosConfig(t, namespace, suffix)},
+	}
+	for _, id := range httpLBScenarios {
+		steps = append(steps, testAccHTTPLBScenarioImportStep(id))
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckHttpLoadbalancerDestroyProducer(t),
+		Steps:                    steps,
+	})
+}
+
+// TestAccResourceAutoF5XCHttpLoadbalancer_scenarioBotDefense creates an HTTP
+// load balancer with Bot Defense Standard.
+//
+// The backend rejects bot_defense unless the tenant has the
+// f5xc-bot-defense-standard add-on, so the test runs only when
+// F5XC_BOT_DEFENSE_STANDARD_ENABLED is set.
+func TestAccResourceAutoF5XCHttpLoadbalancer_scenarioBotDefense(t *testing.T) {
+	if strings.TrimSpace(os.Getenv("F5XC_BOT_DEFENSE_STANDARD_ENABLED")) == "" {
+		t.Skip("F5XC_BOT_DEFENSE_STANDARD_ENABLED is not set; tenant needs the f5xc-bot-defense-standard add-on")
+	}
+
+	namespace := acctest.DefaultNamespace()
+	suffix := testAccRunSuffix(t)
+
+	config := testAccHTTPLBScenarioOriginPool(namespace, suffix) +
+		testAccHTTPLBScenarioResource("with_bot_defense", "bot-defense", namespace, suffix, `
+  bot_defense_choice = {
+    bot_defense = {
+      regional_endpoint = ["US"]
+      policy = {
+        javascript_mode = ["ASYNC_JS_NO_CACHING"]
+        java_script_choice = {
+          disable_js_insert = true
+        }
+        mobile_sdk_choice = {
+          disable_mobile_sdk = true
+        }
+        protected_app_endpoints = [
+          {
+            metadata = {
+              name = "login"
+            }
+            http_methods = ["METHOD_POST"]
+            path = {
+              path_match_choice = {
+                prefix = "/login"
+              }
+            }
+            app_traffic_type_choice = {
+              web = true
+            }
+            domain_matcher_choice = {
+              any_domain = true
+            }
+            flow_label_choice = {
+              undefined_flow_label = true
+            }
+            mitigation = {
+              action_type_choice = {
+                flag = {}
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+`)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
+		CheckDestroy:             testAccCheckHttpLoadbalancerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{Config: config},
+			testAccHTTPLBScenarioImportStep("with_bot_defense"),
+		},
+	})
+}
+
+// testAccHTTPLBScenarioImportStep returns an import step that verifies the
+// state of f5xc_http_loadbalancer.<id> against the backend object.
+func testAccHTTPLBScenarioImportStep(id string) resource.TestStep {
+	addr := "f5xc_http_loadbalancer." + id
+	ignore := testAccHttpLoadbalancerImportStateVerifyIgnore()
+	switch id {
+	case "https_auto_cert":
+		ignore = testAccHttpLoadbalancerImportStateVerifyIgnoreAutoCert()
+	case "with_api_advanced":
+		// Timeouts exist only in configuration; import cannot read them back.
+		ignore = append(ignore, "timeouts")
+	}
+
+	return resource.TestStep{
+		ResourceName:                         addr,
+		ImportState:                          true,
+		ImportStateVerify:                    true,
+		ImportStateVerifyIgnore:              ignore,
+		ImportStateIdFunc:                    acctest.ImportStateID(addr),
+		ImportStateVerifyIdentifierAttribute: "uid",
+	}
+}
+
+// testAccHTTPLBScenarioRateLimiterPolicyNamespace returns the namespace for
+// the rate limiter policy. f5xc_rate_limiter_policy rejects "system", so the
+// policy goes to "shared" when the test namespace is "system".
+func testAccHTTPLBScenarioRateLimiterPolicyNamespace(namespace string) string {
+	if namespace == acctest.SystemNamespace() {
+		return "shared"
+	}
+	return namespace
+}
+
+// testAccHTTPLBScenarioName returns the object name for a scenario. The run
+// suffix keeps names unique, because the backend can reject a load balancer
+// that is created again soon after a delete with the same name.
+func testAccHTTPLBScenarioName(kind, suffix string) string {
+	return fmt.Sprintf("acc-lb-%s-%s", kind, suffix)
+}
+
+// testAccHTTPLBScenarioOriginPool returns the origin pool that every scenario
+// uses as its default route pool.
+func testAccHTTPLBScenarioOriginPool(namespace, suffix string) string {
+	return fmt.Sprintf(`
+resource "f5xc_origin_pool" "scenario" {
+  name                   = %q
+  namespace              = %q
+  loadbalancer_algorithm = ["ROUND_ROBIN"]
+  endpoint_selection     = ["DISTRIBUTED"]
+
+  port_choice = {
+    port = 80
+  }
+
+  origin_servers = [
+    {
+      choice = {
+        public_ip = {
+          public_ip_choice = {
+            ip = "203.0.113.10"
+          }
+        }
+      }
+    }
+  ]
+
+  tls_choice = {
+    no_tls = true
+  }
+
+  upstream_conn_pool_reuse_type = {
+    map_downstream_to_upstream_conn_pool_type_choice = {
+      enable_conn_pool_reuse = true
+    }
+  }
+}
+`, testAccHTTPLBScenarioName("op", suffix), namespace)
+}
+
+// testAccHTTPLBScenarioResource returns an f5xc_http_loadbalancer block named
+// id. It adds name, namespace, domains, the shared default route pool and each
+// default OneOf choice that body does not set.
+func testAccHTTPLBScenarioResource(id, kind, namespace, suffix, body string) string {
+	name := testAccHTTPLBScenarioName(kind, suffix)
+
+	var defaults strings.Builder
+	for i, c := range httpLBScenarioDefaultChoices {
+		if httpLBScenarioDefaultChoicePatterns[i].MatchString(body) {
+			continue
+		}
+		fmt.Fprintf(&defaults, "  %s = %s\n", c[0], c[1])
+	}
+
+	return fmt.Sprintf(`
+resource "f5xc_http_loadbalancer" %q {
+  name      = %q
+  namespace = %q
+  domains   = [%q]
+%s
+%s
+  default_route_pools = [
+    {
+      pool_choice = {
+        pool = {
+          name      = f5xc_origin_pool.scenario.name
+          namespace = f5xc_origin_pool.scenario.namespace
+        }
+      }
+      weight   = 1
+      priority = 1
+    }
+  ]
+}
+`, id, name, namespace, name+".example.com", body, defaults.String())
+}
+
+// testAccHTTPLBScenarioHTTPPort80 is the plain HTTP listener most scenarios use.
+const testAccHTTPLBScenarioHTTPPort80 = `
+  loadbalancer_type_choice = {
+    http = {
+      port_choice = {
+        port = 80
+      }
+    }
+  }
+`
+
+// testAccHTTPLBScenarioCertificateB64 returns a base64 PEM self-signed CA
+// certificate for *.example.com and its base64 PEM PKCS#8 key.
+//
+// The output is the same on every run, which VCR replay needs, yet no key
+// material is stored: the P-256 key comes from a hash of a fixed label, and
+// ECDSA signs with RFC 6979 deterministic nonces. The backend accepts an HTTPS
+// certificate only if it covers the load balancer domain, and every scenario
+// domain is a single label under example.com. CA:TRUE lets the same
+// certificate act as the trusted CA.
+func testAccHTTPLBScenarioCertificateB64(t *testing.T) (string, string) {
+	t.Helper()
+
+	seed := sha256.Sum256([]byte("f5xc-acc-http-lb-scenarios"))
+	key, err := ecdsa.ParseRawPrivateKey(elliptic.P256(), seed[:])
+	if err != nil {
+		t.Fatalf("derive scenario key: %v", err)
+	}
+
+	tmpl := &x509.Certificate{
+		SerialNumber:          big.NewInt(1),
+		Subject:               pkix.Name{CommonName: "*.example.com"},
+		DNSNames:              []string{"*.example.com"},
+		NotBefore:             time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
+		NotAfter:              time.Date(2036, 1, 1, 0, 0, 0, 0, time.UTC),
+		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		BasicConstraintsValid: true,
+		IsCA:                  true,
+	}
+	// CreateCertificate needs a non-nil reader; the signer ignores it.
+	der, err := x509.CreateCertificate(bytes.NewReader(nil), tmpl, tmpl, &key.PublicKey, rfc6979Signer{key})
+	if err != nil {
+		t.Fatalf("create scenario certificate: %v", err)
+	}
+	keyDER, err := x509.MarshalPKCS8PrivateKey(key)
+	if err != nil {
+		t.Fatalf("marshal scenario key: %v", err)
+	}
+
+	certPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: der})
+	keyPEM := pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: keyDER})
+
+	return base64.StdEncoding.EncodeToString(certPEM), base64.StdEncoding.EncodeToString(keyPEM)
+}
+
+// rfc6979Signer signs with a nil random source, which makes ECDSA use
+// deterministic RFC 6979 nonces.
+type rfc6979Signer struct{ key *ecdsa.PrivateKey }
+
+func (s rfc6979Signer) Public() crypto.PublicKey { return &s.key.PublicKey }
+
+func (s rfc6979Signer) Sign(_ io.Reader, digest []byte, opts crypto.SignerOpts) ([]byte, error) {
+	return s.key.Sign(nil, digest, opts)
+}
+
+// testAccHTTPLBScenarioCertificate returns an f5xc_certificate block named id
+// for the given base64 PEM certificate and key.
+func testAccHTTPLBScenarioCertificate(id, name, namespace, certB64, keyB64 string) string {
+	return fmt.Sprintf(`
+resource "f5xc_certificate" %q {
+  name            = %q
+  namespace       = %q
+  certificate_url = "string:///%s"
+
+  private_key = {
+    secret_info_choice = {
+      clear_secret_info = {
+        url = "string:///%s"
+      }
+    }
+  }
+}
+`, id, name, namespace, certB64, keyB64)
+}
+
+// testAccHTTPLBScenarioDependencies returns the objects that the scenarios
+// refer to, other than the origin pool.
+func testAccHTTPLBScenarioDependencies(t *testing.T, namespace, suffix string) string {
+	t.Helper()
+
+	certB64, keyB64 := testAccHTTPLBScenarioCertificateB64(t)
+
+	return testAccHTTPLBScenarioOriginPool(namespace, suffix) +
+		fmt.Sprintf(`
+resource "f5xc_app_firewall" "scenario" {
+  name      = %[1]q
+  namespace = %[2]q
+
+  enforcement_mode_choice = {
+    monitoring = true
+  }
+  detection_setting_choice = {
+    default_detection_settings = true
+  }
+  allowed_response_codes_choice = {
+    allow_all_response_codes = true
+  }
+  anonymization_setting_choice = {
+    default_anonymization = true
+  }
+  blocking_page_choice = {
+    use_default_blocking_page = true
+  }
+  enhance_with_ai_choice = {
+    disable_ai_enhancements = true
+  }
+}
+
+resource "f5xc_trusted_ca_list" "scenario" {
+  name           = %[3]q
+  namespace      = %[2]q
+  trusted_ca_url = "string:///%[4]s"
+}
+
+resource "f5xc_virtual_site" "scenario" {
+  name      = %[5]q
+  namespace = %[2]q
+
+  site_selector = {
+    expressions = ["acc-http-lb in (%[5]s)"]
+  }
+
+  site_type = ["CUSTOMER_EDGE"]
+}
+
+resource "f5xc_rate_limiter_policy" "scenario" {
+  name      = %[6]q
+  namespace = %[8]q
+
+  rules = [
+    {
+      metadata = {
+        name = "bypass-all"
+      }
+      spec = {
+        action_choice = {
+          bypass_rate_limiter = true
+        }
+        country_choice = {
+          any_country = true
+        }
+      }
+    }
+  ]
+}
+
+resource "f5xc_authorization_server" "scenario" {
+  name      = %[7]q
+  namespace = %[2]q
+  jwks_uri  = "https://www.googleapis.com/oauth2/v3/certs"
+}
+
+resource "f5xc_user_identification" "scenario" {
+  name      = %[9]q
+  namespace = %[2]q
+
+  rules = [
+    {
+      identifier_choice = {
+        http_header_name = "X-User-Id"
+      }
+    }
+  ]
+}
+`,
+			testAccHTTPLBScenarioName("waf", suffix),
+			namespace,
+			testAccHTTPLBScenarioName("ca", suffix),
+			certB64,
+			testAccHTTPLBScenarioName("vsite", suffix),
+			testAccHTTPLBScenarioName("rlp", suffix),
+			testAccHTTPLBScenarioName("authz", suffix),
+			testAccHTTPLBScenarioRateLimiterPolicyNamespace(namespace),
+			testAccHTTPLBScenarioName("uid", suffix),
+		) +
+		testAccHTTPLBScenarioCertificate("byoc", testAccHTTPLBScenarioName("cert", suffix), namespace, certB64, keyB64) +
+		testAccHTTPLBScenarioCertificate("mtls", testAccHTTPLBScenarioName("cert-mtls", suffix), namespace, certB64, keyB64)
+}
+
+// testAccHTTPLBScenariosConfig returns the full configuration: all
+// dependencies and one load balancer for each entry in httpLBScenarios.
+func testAccHTTPLBScenariosConfig(t *testing.T, namespace, suffix string) string {
+	t.Helper()
+
+	return testAccHTTPLBScenarioDependencies(t, namespace, suffix) +
+		testAccHTTPLBScenarioResource("http_basic", "http-basic", namespace, suffix,
+			`  description = "Basic HTTP load balancer"`+testAccHTTPLBScenarioHTTPPort80) +
+		testAccHTTPLBScenarioResource("https_auto_cert", "https-auto", namespace, suffix, `
+  loadbalancer_type_choice = {
+    https_auto_cert = {
+      http_redirect = true
+      add_hsts      = true
+      port_choice = {
+        port = 443
+      }
+      mtls_choice = {
+        no_mtls = true
+      }
+      path_normalize_choice = {
+        enable_path_normalize = true
+      }
+      tls_config = {
+        choice = {
+          default_security = true
+        }
+      }
+    }
+  }
+`) +
+		testAccHTTPLBScenarioResource("https_byoc_basic", "https-byoc", namespace, suffix, `
+  loadbalancer_type_choice = {
+    https = {
+      http_redirect = true
+      add_hsts      = true
+      port_choice = {
+        port = 443
+      }
+      path_normalize_choice = {
+        enable_path_normalize = true
+      }
+      tls_certificates_choice = {
+        tls_cert_params = {
+          certificates = [
+            {
+              name      = f5xc_certificate.byoc.name
+              namespace = f5xc_certificate.byoc.namespace
+            }
+          ]
+          mtls_choice = {
+            no_mtls = true
+          }
+          tls_config = {
+            choice = {
+              default_security = true
+            }
+          }
+        }
+      }
+    }
+  }
+`) +
+		testAccHTTPLBScenarioResource("https_byoc_mtls", "https-mtls", namespace, suffix, `
+  loadbalancer_type_choice = {
+    https = {
+      http_redirect = true
+      add_hsts      = true
+      port_choice = {
+        port = 443
+      }
+      path_normalize_choice = {
+        enable_path_normalize = true
+      }
+      tls_certificates_choice = {
+        tls_cert_params = {
+          certificates = [
+            {
+              name      = f5xc_certificate.mtls.name
+              namespace = f5xc_certificate.mtls.namespace
+            }
+          ]
+          mtls_choice = {
+            use_mtls = {
+              trusted_ca_choice = {
+                trusted_ca = {
+                  name      = f5xc_trusted_ca_list.scenario.name
+                  namespace = f5xc_trusted_ca_list.scenario.namespace
+                }
+              }
+              crl_choice = {
+                no_crl = true
+              }
+              xfcc_header_choice = {
+                xfcc_options = {
+                  xfcc_header_elements = ["XFCC_SUBJECT", "XFCC_URI"]
+                }
+              }
+            }
+          }
+          tls_config = {
+            choice = {
+              default_security = true
+            }
+          }
+        }
+      }
+    }
+  }
+`) +
+		testAccHTTPLBScenarioResource("with_advertise_public", "adv-public", namespace, suffix,
+			testAccHTTPLBScenarioHTTPPort80+`
+  advertise_choice = {
+    advertise_on_public_default_vip = true
+  }
+`) +
+		testAccHTTPLBScenarioResource("with_advertise_custom", "adv-custom", namespace, suffix,
+			testAccHTTPLBScenarioHTTPPort80+`
+  advertise_choice = {
+    advertise_custom = {
+      advertise_where = [
+        {
+          choice = {
+            virtual_site = {
+              network = ["SITE_NETWORK_OUTSIDE"]
+              virtual_site = {
+                name      = f5xc_virtual_site.scenario.name
+                namespace = f5xc_virtual_site.scenario.namespace
+              }
+            }
+          }
+          port_choice = {
+            port = 80
+          }
+        }
+      ]
+    }
+  }
+`) +
+		testAccHTTPLBScenarioResource("with_routes", "routes", namespace, suffix,
+			testAccHTTPLBScenarioHTTPPort80+fmt.Sprintf(`
+  routes = [
+    {
+      route_state_choice = {
+        route_state_enabled = true
+      }
+      choice = {
+        simple_route = {
+          http_method = ["ANY"]
+          host_rewrite_params_choice = {
+            disable_host_rewrite = true
+          }
+          path = {
+            path_match_choice = {
+              prefix = "/api"
+            }
+          }
+          origin_pools = [
+            {
+              pool_choice = {
+                pool = {
+                  name      = f5xc_origin_pool.scenario.name
+                  namespace = f5xc_origin_pool.scenario.namespace
+                  tenant    = %q
+                }
+              }
+              weight   = 1
+              priority = 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      route_state_choice = {
+        route_state_enabled = true
+      }
+      choice = {
+        redirect_route = {
+          http_method = ["ANY"]
+          path = {
+            path_match_choice = {
+              prefix = "/old"
+            }
+          }
+          route_redirect = {
+            host_redirect  = "new.example.com"
+            response_code  = 301
+            proto_redirect = "http"
+          }
+        }
+      }
+    }
+  ]
+`, getTestHttpLbTenant())) +
+		testAccHTTPLBScenarioResource("with_waf", "waf", namespace, suffix,
+			testAccHTTPLBScenarioHTTPPort80+`
+  waf_choice = {
+    app_firewall = {
+      name      = f5xc_app_firewall.scenario.name
+      namespace = f5xc_app_firewall.scenario.namespace
+    }
+  }
+`) +
+		testAccHTTPLBScenarioResource("with_user_id_rate_limit", "rate-limit", namespace, suffix,
+			testAccHTTPLBScenarioHTTPPort80+fmt.Sprintf(`
+  user_id_choice = {
+    user_identification = {
+      name      = f5xc_user_identification.scenario.name
+      namespace = f5xc_user_identification.scenario.namespace
+    }
+  }
+
+  rate_limit_choice = {
+    rate_limit = {
+      ip_allowed_list_choice = {
+        no_ip_allowed_list = true
+      }
+      policy_choice = {
+        policies = {
+          policies = [
+            {
+              name      = f5xc_rate_limiter_policy.scenario.name
+              namespace = f5xc_rate_limiter_policy.scenario.namespace
+              tenant    = %q
+            }
+          ]
+        }
+      }
+      rate_limiter = {
+        unit              = ["SECOND"]
+        total_number      = 100
+        burst_multiplier  = 1
+        period_multiplier = 1
+      }
+    }
+  }
+`, getTestHttpLbTenant())) +
+		testAccHTTPLBScenarioResource("with_policies", "policies", namespace, suffix,
+			testAccHTTPLBScenarioHTTPPort80+testAccHTTPLBScenarioPoliciesBody) +
+		testAccHTTPLBScenarioResource("with_clients_ddos", "clients-ddos", namespace, suffix,
+			testAccHTTPLBScenarioHTTPPort80+testAccHTTPLBScenarioClientsDDoSBody) +
+		testAccHTTPLBScenarioResource("with_api_advanced", "api-advanced", namespace, suffix,
+			testAccHTTPLBScenarioHTTPPort80+testAccHTTPLBScenarioAPIAdvancedBody)
+}
+
+// testAccHTTPLBScenarioPoliciesBody sets CORS, CSRF, JWT, cache, data guard,
+// protected cookies, IP reputation, client-side defense and metadata fields.
+//
+// It sets no labels. With labels, the backend intermittently rejects this body
+// with "Setting ves.io/config-propagation-destination label on http load
+// balancer is not supported", although the request does not contain that key.
+const testAccHTTPLBScenarioPoliciesBody = `
+  description = "CORS, CSRF, JWT, cache, data guard, protected cookies, IP reputation, CSD"
+  annotations = {
+    "acc/notes" = "policies coverage variant"
+  }
+  add_location = true
+
+  cors_policy = {
+    allow_credentials  = true
+    allow_headers      = "Content-Type, Authorization"
+    allow_methods      = "GET, POST, OPTIONS"
+    allow_origin       = ["https://app.example.com"]
+    allow_origin_regex = ["https://.*\\.example\\.com"]
+    disabled           = false
+    expose_headers     = "X-Request-Id"
+    maximum_age        = 3600
+  }
+
+  csrf_policy = {
+    allowed_domains_choice = {
+      custom_domain_list = {
+        domains = ["app.example.com", "*.example.com"]
+      }
+    }
+  }
+
+  jwt_validation = {
+    action = {
+      action_choice = {
+        block = true
+      }
+    }
+    jwks_configuration_choice = {
+      authorization_server = {
+        authorization_servers = [
+          {
+            name      = f5xc_authorization_server.scenario.name
+            namespace = f5xc_authorization_server.scenario.namespace
+          }
+        ]
+      }
+    }
+    target = {
+      target_choice = {
+        base_paths = {
+          base_paths = ["/api/v1"]
+        }
+      }
+    }
+    token_location = {
+      token_location_choice = {
+        bearer_token = true
+      }
+    }
+    mandatory_claims = {
+      claim_names = ["sub", "iat"]
+    }
+    reserved_claims = {
+      audience_validation_choice = {
+        audience = {
+          audiences = ["api.example.com"]
+        }
+      }
+      issuer_validation_choice = {
+        issuer = "https://issuer.example.com"
+      }
+      validate_period_choice = {
+        validate_period_enable = true
+      }
+    }
+  }
+
+  cache_options_choice = {
+    disable_caching = true
+  }
+
+  # Data guard needs WAF, and a skip rule must come before an apply rule.
+  waf_choice = {
+    app_firewall = {
+      name      = f5xc_app_firewall.scenario.name
+      namespace = f5xc_app_firewall.scenario.namespace
+    }
+  }
+  data_guard_rules = [
+    {
+      action_choice = {
+        skip_data_guard = true
+      }
+      domain_choice = {
+        exact_value = "static.example.com"
+      }
+      metadata = {
+        name = "dg-skip-static"
+      }
+      path = {
+        path_match_choice = {
+          regex = "^/static/.*$"
+        }
+      }
+    },
+    {
+      action_choice = {
+        apply_data_guard = true
+      }
+      domain_choice = {
+        any_domain = true
+      }
+      metadata = {
+        name        = "dg-apply-all"
+        description = "Apply data guard to /api"
+      }
+      path = {
+        path_match_choice = {
+          prefix = "/api"
+        }
+      }
+    }
+  ]
+
+  protected_cookies = [
+    {
+      name = "sessionid"
+      cookie_tampering_choice = {
+        disable_tampering_protection = true
+      }
+      httponly_choice = {
+        add_httponly = true
+      }
+      samesite_choice = {
+        samesite_strict = true
+      }
+      secure_choice = {
+        add_secure = true
+      }
+    }
+  ]
+
+  ip_reputation_choice = {
+    disable_ip_reputation = true
+  }
+
+  client_side_defense_choice = {
+    disable_client_side_defense = true
+  }
+
+  bot_defense_choice = {
+    disable_bot_defense = true
+  }
+`
+
+// testAccHTTPLBScenarioClientsDDoSBody sets trusted and blocked clients, DDoS
+// mitigation rules and L7 DDoS protection. The backend accepts
+// SKIP_PROCESSING_DDOS_PROTECTION only on an ip_prefix client source.
+const testAccHTTPLBScenarioClientsDDoSBody = `
+  description = "Trusted/blocked clients and L7 DDoS protection"
+
+  trusted_clients = [
+    {
+      actions = ["SKIP_PROCESSING_WAF", "SKIP_PROCESSING_BOT", "SKIP_PROCESSING_DDOS_PROTECTION"]
+      client_source_choice = {
+        ip_prefix = "10.0.0.0/24"
+      }
+      metadata = {
+        name        = "tc-internal-net"
+        description = "Internal IPv4 net trusted"
+      }
+    },
+    {
+      actions = ["SKIP_PROCESSING_WAF"]
+      client_source_choice = {
+        http_header = {
+          headers = [
+            {
+              name = "X-Internal-Client"
+              value_match_choice = {
+                exact = "true"
+              }
+            }
+          ]
+        }
+      }
+      metadata = {
+        name = "tc-internal-header"
+      }
+    }
+  ]
+
+  blocked_clients = [
+    {
+      actions = ["SKIP_PROCESSING_WAF"]
+      client_source_choice = {
+        as_number = 64500
+      }
+      metadata = {
+        name        = "bc-asn"
+        description = "Block specific ASN"
+      }
+    },
+    {
+      actions = ["SKIP_PROCESSING_IP_REPUTATION", "SKIP_PROCESSING_BOT"]
+      client_source_choice = {
+        ipv6_prefix = "2001:0db8:0000:0000:0000:0000:0000:0000/32"
+      }
+      metadata = {
+        name = "bc-ipv6"
+      }
+      expiration_timestamp = "2030-01-01T00:00:00Z"
+    }
+  ]
+
+  ddos_mitigation_rules = [
+    {
+      metadata = {
+        name        = "ddos-block-prefix"
+        description = "Block bad prefixes"
+      }
+      mitigation_action_choice = {
+        block = true
+      }
+      mitigation_choice = {
+        ip_prefix_list = {
+          ip_prefixes   = ["203.0.113.0/24"]
+          ipv6_prefixes = ["2001:0db8:dead:0000:0000:0000:0000:0000/48"]
+          invert_match  = false
+        }
+      }
+    },
+    {
+      metadata = {
+        name = "ddos-block-asn-region"
+      }
+      mitigation_action_choice = {
+        block = true
+      }
+      mitigation_choice = {
+        ddos_client_source = {
+          asn_list = {
+            as_numbers = [64500, 64501]
+          }
+          country_list = ["COUNTRY_KP"]
+        }
+      }
+    }
+  ]
+
+  l7_ddos_protection = {
+    clientside_action_choice = {
+      clientside_action_js_challenge = {
+        cookie_expiry   = 3600
+        js_script_delay = 5000
+      }
+    }
+    ddos_policy_choice = {
+      ddos_policy_none = true
+    }
+    mitigation_action_choice = {
+      mitigation_block = true
+    }
+    rps_threshold_choice = {
+      rps_threshold = 20000
+    }
+  }
+`
+
+// testAccHTTPLBScenarioAPIAdvancedBody sets API protection, GraphQL, WAF
+// exclusion, sensitive data disclosure, origin subset rules and timeouts.
+const testAccHTTPLBScenarioAPIAdvancedBody = `
+  description = "API protection, GraphQL, WAF exclusion, sensitive data, subsets"
+
+  api_protection_rules = {
+    api_endpoint_rules = [
+      {
+        action = {
+          action_choice = {
+            deny = true
+          }
+        }
+        api_endpoint_path = "/api/v1/admin"
+        domain_choice = {
+          any_domain = true
+        }
+        metadata = {
+          name        = "ap-deny-admin"
+          description = "Deny access to admin endpoint"
+        }
+        api_endpoint_method = {
+          methods = ["POST", "DELETE"]
+        }
+      }
+    ]
+  }
+
+  graphql_rules = [
+    {
+      domain_choice = {
+        any_domain = true
+      }
+      metadata = {
+        name = "gql-default"
+      }
+      method_choice = {
+        method_post = true
+      }
+      exact_path = "/graphql"
+      graphql_settings = {
+        allow_introspection_queries_choice = {
+          disable_introspection = true
+        }
+        max_batched_queries = 10
+        max_depth           = 8
+        max_total_length    = 4000
+      }
+    }
+  ]
+
+  waf_exclusion = {
+    waf_exclusion_choice = {
+      waf_exclusion_inline_rules = {
+        rules = [
+          {
+            domain_choice = {
+              exact_value = "api-advanced.example.com"
+            }
+            metadata = {
+              name = "wafx-skip-health"
+            }
+            path_choice = {
+              path_prefix = "/healthz"
+            }
+            methods = ["GET"]
+            waf_advanced_configuration_choice = {
+              waf_skip_processing = true
+            }
+          }
+        ]
+      }
+    }
+  }
+
+  sensitive_data_disclosure_rules = {
+    sensitive_data_types_in_response = [
+      {
+        type_condition_type_choice = {
+          api_endpoint = {
+            path    = "/api/v1/users"
+            methods = ["GET"]
+          }
+        }
+        body = {
+          fields = ["user.ssn", "user.emails[_]"]
+        }
+      }
+    ]
+  }
+
+  origin_server_subset_rule_list = {
+    origin_server_subset_rules = [
+      {
+        asn_choice = {
+          any_asn = true
+        }
+        ip_choice = {
+          ip_prefix_list = {
+            ip_prefixes = ["198.51.100.0/24"]
+          }
+        }
+        metadata = {
+          name        = "subset-eu"
+          description = "Route EU clients to eu subset"
+        }
+        origin_server_subsets_action = {
+          region = "eu"
+        }
+        selector_choice = {
+          none = true
+        }
+      }
+    ]
+  }
+
+  timeouts = {
+    create = "10m"
+    update = "10m"
+    delete = "5m"
+    read   = "1m"
+  }
+`

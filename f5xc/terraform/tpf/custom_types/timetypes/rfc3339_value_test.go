@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	gogo_types "github.com/gogo/protobuf/types"
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-framework/attr/xattr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -14,7 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
-	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/custom_types/timetypes"
 )
 
 func TestRFC3339_StringSemanticEquals(t *testing.T) {
@@ -335,4 +336,63 @@ func TestRFC3339_ValueRFC3339Time(t *testing.T) {
 			}
 		})
 	}
+}
+
+// RFC3339.ValidateParameter skips the empty and structural-nil strings.
+func TestRFC3339ValidateParameterSkipsNilStrings(t *testing.T) {
+	for _, s := range []string{"", "(timestamp: nil Timestamp)"} {
+		resp := &function.ValidateParameterResponse{}
+		timetypes.RFC3339{StringValue: basetypes.NewStringValue(s)}.ValidateParameter(context.Background(), function.ValidateParameterRequest{}, resp)
+		if resp.Error != nil {
+			t.Errorf("%q: unexpected error %v", s, resp.Error)
+		}
+	}
+}
+
+// The RFC3339 constructors produce null for nil input, known values for valid input, and errors or panics for invalid input.
+func TestRFC3339Constructors(t *testing.T) {
+	ts := time.Date(2023, 7, 25, 20, 43, 16, 0, time.UTC)
+	const want = "2023-07-25T20:43:16Z"
+
+	if got := timetypes.NewRFC3339TimeValue(ts).ValueString(); got != want {
+		t.Errorf("NewRFC3339TimeValue = %q", got)
+	}
+	if !timetypes.NewRFC3339TimePointerValue(nil).IsNull() {
+		t.Error("NewRFC3339TimePointerValue(nil) must be null")
+	}
+	if got := timetypes.NewRFC3339TimePointerValue(&ts).ValueString(); got != want {
+		t.Errorf("NewRFC3339TimePointerValue = %q", got)
+	}
+
+	if !timetypes.NewRFC3339ProtobufPointerValue(nil).IsNull() {
+		t.Error("NewRFC3339ProtobufPointerValue(nil) must be null")
+	}
+	pb := &gogo_types.Timestamp{Seconds: ts.Unix()}
+	if got := timetypes.NewRFC3339ProtobufPointerValue(pb).ValueString(); got != want {
+		t.Errorf("NewRFC3339ProtobufPointerValue = %q", got)
+	}
+
+	if v, diags := timetypes.NewRFC3339Value(want); diags.HasError() || v.ValueString() != want {
+		t.Errorf("NewRFC3339Value valid: %v %v", v, diags)
+	}
+	if v, diags := timetypes.NewRFC3339Value("bad"); !diags.HasError() || !v.IsUnknown() {
+		t.Errorf("NewRFC3339Value invalid: %v %v", v, diags)
+	}
+
+	if v, diags := timetypes.NewRFC3339PointerValue(nil); diags.HasError() || !v.IsNull() {
+		t.Errorf("NewRFC3339PointerValue(nil): %v %v", v, diags)
+	}
+	s := want
+	if v, diags := timetypes.NewRFC3339PointerValue(&s); diags.HasError() || v.ValueString() != want {
+		t.Errorf("NewRFC3339PointerValue: %v %v", v, diags)
+	}
+
+	if !timetypes.NewRFC3339PointerValueMust(nil).IsNull() {
+		t.Error("NewRFC3339PointerValueMust(nil) must be null")
+	}
+	if got := timetypes.NewRFC3339PointerValueMust(&s).ValueString(); got != want {
+		t.Errorf("NewRFC3339PointerValueMust = %q", got)
+	}
+
+	assertPanics(t, "NewRFC3339ValueMust", func() { timetypes.NewRFC3339ValueMust("bad") })
 }

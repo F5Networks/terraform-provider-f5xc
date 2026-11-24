@@ -107,12 +107,12 @@ Required:
 
 Required:
 
-- `name` (String)
-- `namespace` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
 
 Read-Only:
 
-- `tenant` (String)
+- `tenant` (String) Tenant of the referenced object.
 
 
 
@@ -128,12 +128,12 @@ Required:
 
 Required:
 
-- `name` (String)
-- `namespace` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
 
 Read-Only:
 
-- `tenant` (String)
+- `tenant` (String) Tenant of the referenced object.
 
 
 

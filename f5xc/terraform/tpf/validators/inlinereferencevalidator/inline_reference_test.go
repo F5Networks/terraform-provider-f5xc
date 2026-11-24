@@ -89,3 +89,23 @@ func TestInlineReferenceValidator_ForbiddenChoiceTriggersError(t *testing.T) {
 		t.Fatalf("expected no errors for null service_policy_choice, got: %v", respNull.Diagnostics.Errors())
 	}
 }
+
+// TestInlineReferenceValidator_Description verifies that both descriptions
+// name the forbidden choices and the suggested resource, and are equal.
+func TestInlineReferenceValidator_Description(t *testing.T) {
+	ctx := context.Background()
+	v := inlinereferencevalidator.InlineReferenceValidator{
+		ForbiddenChoices:  []string{"active_service_policies"},
+		SuggestedResource: "f5xc_policy_attachment",
+	}
+
+	desc := v.Description(ctx)
+	for _, want := range []string{"active_service_policies", "f5xc_policy_attachment"} {
+		if !strings.Contains(desc, want) {
+			t.Errorf("Description() = %q, want to contain %q", desc, want)
+		}
+	}
+	if md := v.MarkdownDescription(ctx); md != desc {
+		t.Errorf("MarkdownDescription() = %q, want %q", md, desc)
+	}
+}

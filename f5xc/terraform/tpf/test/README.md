@@ -295,3 +295,68 @@ Unit tests validate resource schema definitions.
 ```sh
 make test-schema
 ```
+
+---
+
+## CI/CD Webhook Execution (`.tftest.hcl` Suites from `omnigen-data`)
+
+In addition to Go acceptance tests (`acceptance-test`), `.gitlab-ci.yml` provides the `tftest` job to execute the native Terraform 1.6+ `.tftest.hcl` test suites stored in `omnigen-data` against a compiled provider binary using `dev_overrides`.
+
+Webhook and API pipeline triggers use the `TEST_TYPE` variable to select which test suite runs (while skipping `lint`, `unittest`, `build`, `container`, `release`, `publish-release`, and security scans):
+
+| Variable | Default | Description |
+|---|---|---|
+| `TEST_TYPE` | `acc` | Selects the test job for `trigger`/`api` pipelines: `acc` (`acceptance-test`), `tftest` (`tftest`), or `all` (both sequentially). |
+| `OMNIGEN_DATA_BRANCH` | `main` | Branch of `omnigen-data` to clone. |
+| `OMNIGEN_DATA_RELEASE_DIR` | *(latest `release-*`)* | Optional release subdirectory inside `omnigen-data` (e.g. `release-2026-10-0`). |
+| `TFTEST_RESOURCES` | *(all)* | Optional comma-separated list of resources to execute (e.g. `dns_zone,origin_pool` or `f5xc_dns_zone`). |
+| `TFTEST_TIMEOUT` | `300s` | Per-suite execution timeout passed to `timeout`. |
+| `TFTEST_EXCLUDE_BEFORE` | `true` | Exclude `*_before.tftest.hcl` baseline regression-proof files (which assert failure on uncompensated providers). Set to `false` to include them. |
+| `TERRAFORM_VERSION` | *(latest / `1.14.8`)* | Optional Terraform CLI version override. |
+
+### Triggering via GitLab Webhook (`curl`)
+
+Run all `.tftest.hcl` suites against the default `omnigen-data` (`main`) branch and latest `release-*` directory:
+
+```sh
+curl --request POST \
+  --form token="<TRIGGER_TOKEN>" \
+  --form ref="release-2026-10-0" \
+  --form "variables[TEST_TYPE]=tftest" \
+  "https://gitlab.com/api/v4/projects/50750365/trigger/pipeline"
+```
+
+Run specific resources or override `omnigen-data` branch, release directory, timeout, or Terraform version:
+
+```sh
+curl --request POST \
+  --form token="<TRIGGER_TOKEN>" \
+  --form ref="<branch-or-tag>" \
+  --form "variables[TEST_TYPE]=tftest" \
+  --form "variables[TFTEST_RESOURCES]=f5xc_dns_zone,origin_pool" \
+  --form "variables[OMNIGEN_DATA_BRANCH]=main" \
+  --form "variables[OMNIGEN_DATA_RELEASE_DIR]=release-2026-10-0" \
+  --form "variables[TFTEST_TIMEOUT]=300s" \
+  --form "variables[TFTEST_EXCLUDE_BEFORE]=true" \
+  --form "variables[TERRAFORM_VERSION]=1.14.8" \
+  "https://gitlab.com/api/v4/projects/50750365/trigger/pipeline"
+```
+
+### Running `.tftest.hcl` Suites Locally
+
+```sh
+# 1. Build the provider binary into a dedicated directory
+mkdir -p .tftest_bin
+CGO_ENABLED=0 go build -mod=vendor -ldflags="-s -w" \
+  -o .tftest_bin/terraform-provider-f5xc ./cmd/terraform-provider-f5xc
+
+# 2. Export credentials and target omnigen-data test directory
+export F5XCProvider_URL="https://customer1.crt.volterra.us/api"
+export F5XCProvider_API_TOKEN="<your-token>"
+export PROVIDER_BIN_DIR="${PWD}/.tftest_bin"
+export TFTEST_DIR="/path/to/omnigen-data/release-2026-10-0/tests"
+export TFTEST_RESOURCES="f5xc_dns_zone"
+
+# 3. Execute the batch runner
+./scripts/run-tftest.sh
+```

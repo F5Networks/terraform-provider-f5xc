@@ -576,6 +576,10 @@ func (r *ResourceF5XCK8SCluster) Schema(ctx context.Context, request resource.Sc
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^\S+$`),
+						"must match pattern `^\\S+$`",
+					),
 					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
@@ -928,22 +932,28 @@ func (r *ResourceF5XCK8SCluster) Schema(ctx context.Context, request resource.Sc
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
 										"name": schema.StringAttribute{
-											Description:         "",
-											MarkdownDescription: "",
+											Description:         "Name of the referenced object.",
+											MarkdownDescription: "Name of the referenced object.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
 										},
 										"namespace": schema.StringAttribute{
-											Description:         "",
-											MarkdownDescription: "",
+											Description:         "Namespace of the referenced object.",
+											MarkdownDescription: "Namespace of the referenced object.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
+											Validators: []validator.String{
+												stringvalidator.RegexMatches(
+													regexp.MustCompile(`^\S+$`),
+													"must match pattern `^\\S+$`",
+												),
+											},
 										},
 										"tenant": schema.StringAttribute{
-											Description:         "",
-											MarkdownDescription: "",
+											Description:         "Tenant of the referenced object.",
+											MarkdownDescription: "Tenant of the referenced object.",
 											Required:            false,
 											Optional:            false,
 											Computed:            true,
@@ -1004,22 +1014,28 @@ func (r *ResourceF5XCK8SCluster) Schema(ctx context.Context, request resource.Sc
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
 										"name": schema.StringAttribute{
-											Description:         "",
-											MarkdownDescription: "",
+											Description:         "Name of the referenced object.",
+											MarkdownDescription: "Name of the referenced object.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
 										},
 										"namespace": schema.StringAttribute{
-											Description:         "",
-											MarkdownDescription: "",
+											Description:         "Namespace of the referenced object.",
+											MarkdownDescription: "Namespace of the referenced object.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
+											Validators: []validator.String{
+												stringvalidator.RegexMatches(
+													regexp.MustCompile(`^\S+$`),
+													"must match pattern `^\\S+$`",
+												),
+											},
 										},
 										"tenant": schema.StringAttribute{
-											Description:         "",
-											MarkdownDescription: "",
+											Description:         "Tenant of the referenced object.",
+											MarkdownDescription: "Tenant of the referenced object.",
 											Required:            false,
 											Optional:            false,
 											Computed:            true,
@@ -1315,22 +1331,28 @@ func (r *ResourceF5XCK8SCluster) Schema(ctx context.Context, request resource.Sc
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
 							"name": schema.StringAttribute{
-								Description:         "",
-								MarkdownDescription: "",
+								Description:         "Name of the referenced object.",
+								MarkdownDescription: "Name of the referenced object.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
 							},
 							"namespace": schema.StringAttribute{
-								Description:         "",
-								MarkdownDescription: "",
+								Description:         "Namespace of the referenced object.",
+								MarkdownDescription: "Namespace of the referenced object.",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
+								Validators: []validator.String{
+									stringvalidator.RegexMatches(
+										regexp.MustCompile(`^\S+$`),
+										"must match pattern `^\\S+$`",
+									),
+								},
 							},
 							"tenant": schema.StringAttribute{
-								Description:         "",
-								MarkdownDescription: "",
+								Description:         "Tenant of the referenced object.",
+								MarkdownDescription: "Tenant of the referenced object.",
 								Required:            false,
 								Optional:            false,
 								Computed:            true,
@@ -1388,22 +1410,28 @@ func (r *ResourceF5XCK8SCluster) Schema(ctx context.Context, request resource.Sc
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
 										"name": schema.StringAttribute{
-											Description:         "",
-											MarkdownDescription: "",
+											Description:         "Name of the referenced object.",
+											MarkdownDescription: "Name of the referenced object.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
 										},
 										"namespace": schema.StringAttribute{
-											Description:         "",
-											MarkdownDescription: "",
+											Description:         "Namespace of the referenced object.",
+											MarkdownDescription: "Namespace of the referenced object.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
+											Validators: []validator.String{
+												stringvalidator.RegexMatches(
+													regexp.MustCompile(`^\S+$`),
+													"must match pattern `^\\S+$`",
+												),
+											},
 										},
 										"tenant": schema.StringAttribute{
-											Description:         "",
-											MarkdownDescription: "",
+											Description:         "Tenant of the referenced object.",
+											MarkdownDescription: "Tenant of the referenced object.",
 											Required:            false,
 											Optional:            false,
 											Computed:            true,

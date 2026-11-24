@@ -9,6 +9,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -16,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -88,6 +90,12 @@ func (r *ResourceF5XCFastAclsForInternetVips) Schema(ctx context.Context, reques
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^\S+$`),
+						"must match pattern `^\\S+$`",
+					),
+				},
 			},
 			"fast_acls": schema.ListNestedAttribute{
 				Description:         "fast_acls The list of refs of FastACLs",
@@ -101,26 +109,36 @@ func (r *ResourceF5XCFastAclsForInternetVips) Schema(ctx context.Context, reques
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"name": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
+							Description:         "Name of the referenced object.",
+							MarkdownDescription: "Name of the referenced object.",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
 						},
 						"namespace": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
+							Description:         "Namespace of the referenced object.",
+							MarkdownDescription: "Namespace of the referenced object.",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
+							Validators: []validator.String{
+								stringvalidator.RegexMatches(
+									regexp.MustCompile(`^\S+$`),
+									"must match pattern `^\\S+$`",
+								),
+							},
 						},
 						"tenant": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
+							Description:         "Tenant of the referenced object.",
+							MarkdownDescription: "Tenant of the referenced object.<br>**Cross-Namespace Shared Reference:** Required when referencing an object in the `shared` namespace from a non-`shared` resource namespace (set to `ves-io` for F5 XC system-shared objects such as default IKE profiles or `shared/public`).",
 							Required:            false,
 							Optional:            true,
 							Computed:            true,
 							Validators: []validator.String{
+								stringvalidator.RegexMatches(
+									regexp.MustCompile(`\S`),
+									"must match pattern `\\S`",
+								),
 								requiredifvalidator.RequireTenantForCrossNamespaceShared(),
 							},
 							PlanModifiers: []planmodifier.String{

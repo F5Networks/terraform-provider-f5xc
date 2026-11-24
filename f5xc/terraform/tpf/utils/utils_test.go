@@ -16,6 +16,8 @@ import (
 	googleProtobuf "github.com/gogo/protobuf/types"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -2738,4 +2740,714 @@ func testARecordRRSetMultiWithAAAA(t *testing.T, name string, description types.
 	})
 	require.False(t, diags.HasError())
 	return obj
+}
+
+// mismatchNullType is a string-backed custom type whose null value has the
+// plain StringType. Collections of this type cannot hold the resolved null.
+type mismatchNullType struct{ basetypes.StringType }
+
+func (mismatchNullType) Equal(o attr.Type) bool {
+	_, ok := o.(mismatchNullType)
+	return ok
+}
+
+func (mismatchNullType) String() string { return "mismatchNullType" }
+
+func (mismatchNullType) ValueType(context.Context) attr.Value { return mismatchNullValue{} }
+
+func (mismatchNullType) ValueFromTerraform(context.Context, tftypes.Value) (attr.Value, error) {
+	return types.StringNull(), nil
+}
+
+type mismatchNullValue struct{ basetypes.StringValue }
+
+func (mismatchNullValue) Type(context.Context) attr.Type { return mismatchNullType{} }
+
+// failingNullType cannot build a null value.
+type failingNullType struct{ basetypes.StringType }
+
+func (failingNullType) ValueFromTerraform(context.Context, tftypes.Value) (attr.Value, error) {
+	return nil, errors.New("no null value")
+}
+
+func unknownMismatch() mismatchNullValue {
+	return mismatchNullValue{StringValue: types.StringUnknown()}
+}
+
+// --- retry and wait helpers ---
+
+// The public delete wrapper uses the default config and returns nil on success.
+func TestDeleteWithTransientRetry_DefaultConfig(t *testing.T) {
+	calls := 0
+	err := DeleteWithTransientRetry(context.Background(), "r", func() error {
+		calls++
+		return nil
+	})
+	require.NoError(t, err)
+	assert.Equal(t, 1, calls)
+	assert.Equal(t, 6, defaultTransientDeleteRetryConfig().maxAttempts)
+}
+
+// A zero attempt count, a negative interval and a nil sleep function are
+// normalized to one attempt with no wait.
+func TestDeleteWithTransientRetry_NormalizesConfig(t *testing.T) {
+	calls := 0
+	err := deleteWithTransientRetryWithConfig(context.Background(), "r", func() error {
+		calls++
+		return errors.New("status code 503")
+	}, transientDeleteRetryConfig{maxAttempts: 0, retryInterval: -time.Second})
+	require.Error(t, err)
+	assert.Equal(t, 1, calls)
+}
+
+// The public create wrapper uses the default config and returns the response.
+func TestCreateWithTransientRetry_DefaultConfig(t *testing.T) {
+	calls := 0
+	_, err := CreateWithTransientRetry(context.Background(), "r", func() (proto.Message, error) {
+		calls++
+		return nil, nil
+	})
+	require.NoError(t, err)
+	assert.Equal(t, 1, calls)
+	assert.Equal(t, 6, defaultTransientCreateRetryConfig().maxAttempts)
+}
+
+// A zero attempt count, a negative interval and a nil sleep function are
+// normalized to one attempt with no wait.
+func TestCreateWithTransientRetry_NormalizesConfig(t *testing.T) {
+	calls := 0
+	_, err := createWithTransientRetryWithConfig(context.Background(), "r", func() (proto.Message, error) {
+		calls++
+		return nil, errors.New("status code 503")
+	}, transientCreateRetryConfig{maxAttempts: 0, retryInterval: -time.Second})
+	require.Error(t, err)
+	assert.Equal(t, 1, calls)
+}
+
+// The public initializer wait returns nil when nothing is pending.
+func TestWaitForPendingInitializers_DefaultConfig(t *testing.T) {
+	t.Parallel()
+	getter := func(context.Context, string, string) (*mockPendingResource, error) {
+		return &mockPendingResource{}, nil
+	}
+	require.NoError(t, WaitForPendingInitializers(context.Background(), "n", "ns", "uid", getter))
+	assert.Equal(t, 20, defaultWaitConfig().maxRetries)
+}
+
+// The public finalizer wait returns nil when the object is gone.
+func TestWaitForPendingFinalizers_DefaultConfig(t *testing.T) {
+	t.Parallel()
+	getter := func(context.Context, string, string) (*mockFinalizerResource, error) {
+		return nil, errors.New("status code 404")
+	}
+	require.NoError(t, WaitForPendingFinalizers(context.Background(), "n", "ns", "uid", getter))
+	assert.Equal(t, 30, defaultFinalizerWaitConfig().maxRetries)
+}
+
+// Backoff never exceeds maxBackoff, and a negative retry count skips polling.
+func TestWaitConfigs_BackoffCapAndNoRetries(t *testing.T) {
+	ctx := context.Background()
+	var sleeps []time.Duration
+	record := func(d time.Duration) { sleeps = append(sleeps, d) }
+
+	pending := func(context.Context, string, string) (*mockPendingResource, error) {
+		return &mockPendingResource{pending: [][]string{{"init"}}}, nil
+	}
+	initCfg := waitForPendingInitializersConfig{maxRetries: 2, initialBackoff: 2, maxBackoff: 1, sleep: record}
+	require.Error(t, waitForPendingInitializersWithConfig(ctx, "n", "ns", "uid", pending, initCfg))
+	assert.Equal(t, []time.Duration{2, 2, 1}, sleeps)
+
+	sleeps = nil
+	exists := func(context.Context, string, string) (*mockFinalizerResource, error) {
+		return &mockFinalizerResource{}, nil
+	}
+	finCfg := waitForPendingFinalizersConfig{maxRetries: 2, initialBackoff: 2, maxBackoff: 1, sleep: record}
+	require.Error(t, waitForPendingFinalizersWithConfig(ctx, "n", "ns", "uid", exists, finCfg))
+	assert.Equal(t, []time.Duration{2, 2, 1}, sleeps)
+
+	initCfg.maxRetries = -1
+	finCfg.maxRetries = -1
+	assert.NoError(t, waitForPendingInitializersWithConfig(ctx, "n", "ns", "uid", pending, initCfg))
+	assert.NoError(t, waitForPendingFinalizersWithConfig(ctx, "n", "ns", "uid", exists, finCfg))
+}
+
+// --- error sanitization ---
+
+// SanitizeAPIError falls back to the raw error when the status or body cannot
+// be parsed or the status is below 400, and uses a generic message for an
+// empty 4xx message.
+func TestSanitizeAPIError_Fallbacks(t *testing.T) {
+	ctx := context.Background()
+	tests := map[string]struct {
+		err  string
+		want string
+	}{
+		"status_overflow": {`status code 99999999999999999999, body {"code":1}`, "got error: status code 9999"},
+		"invalid_json":    {`status code 400, body {not-json}`, "got error: status code 400"},
+		"empty_4xx_msg":   {`status code 404, body {"code":5}`, "request rejected by API"},
+		"below_400":       {`status code 302, body {"code":0}`, "got error: status code 302"},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			got := SanitizeAPIError(ctx, "read", "foo", errors.New(tc.err))
+			assert.Contains(t, got, tc.want)
+		})
+	}
+}
+
+// --- enum and map helpers ---
+
+// Empty underscore-separated tokens are skipped; input with no tokens is
+// returned unchanged.
+func TestResolveEnumStateValue_EmptyTokens(t *testing.T) {
+	assert.Equal(t, "AB", ResolveEnumStateValue("A__B", true))
+	assert.Equal(t, "_", ResolveEnumStateValue("_", true))
+	assert.Equal(t, "Mixed_Case", ResolveEnumStateValue("Mixed_Case", true))
+}
+
+// A map whose elements are not strings cannot be converted.
+func TestTerraformMapToUint32Map_NonStringElements(t *testing.T) {
+	in := types.MapValueMust(types.Int64Type, map[string]attr.Value{"1": types.Int64Value(1)})
+	out, diags := TerraformMapToUint32Map(context.Background(), in)
+	assert.True(t, diags.HasError())
+	assert.Nil(t, out)
+}
+
+// MergeStringMaps returns the non-null side when the other is null or
+// unknown, lets override keys win, and keeps base on conversion errors.
+func TestMergeStringMaps(t *testing.T) {
+	base := types.MapValueMust(types.StringType, map[string]attr.Value{
+		"a": types.StringValue("1"), "b": types.StringValue("2"),
+	})
+	override := types.MapValueMust(types.StringType, map[string]attr.Value{
+		"b": types.StringValue("20"), "c": types.StringValue("3"),
+	})
+	intMap := types.MapValueMust(types.Int64Type, map[string]attr.Value{"x": types.Int64Value(1)})
+
+	got, diags := MergeStringMaps(base, types.MapNull(types.StringType))
+	require.False(t, diags.HasError())
+	assert.True(t, got.Equal(base))
+
+	got, diags = MergeStringMaps(types.MapUnknown(types.StringType), override)
+	require.False(t, diags.HasError())
+	assert.True(t, got.Equal(override))
+
+	got, diags = MergeStringMaps(base, override)
+	require.False(t, diags.HasError())
+	want := types.MapValueMust(types.StringType, map[string]attr.Value{
+		"a": types.StringValue("1"), "b": types.StringValue("20"), "c": types.StringValue("3"),
+	})
+	assert.True(t, got.Equal(want))
+
+	got, diags = MergeStringMaps(intMap, override)
+	assert.True(t, diags.HasError())
+	assert.True(t, got.Equal(intMap))
+
+	got, diags = MergeStringMaps(base, intMap)
+	assert.True(t, diags.HasError())
+	assert.True(t, got.Equal(base))
+}
+
+// --- struct conversion ---
+
+type covStruct struct {
+	A string `tfsdk:"a"`
+}
+
+// GoStructSliceToSetValue converts each struct into an object element and
+// returns a null set when an element does not match the attribute map.
+func TestGoStructSliceToSetValue(t *testing.T) {
+	ctx := context.Background()
+	attrs := map[string]attr.Type{"a": types.StringType}
+
+	set, diags := GoStructSliceToSetValue(ctx, attrs, []covStruct{{A: "x"}, {A: "y"}})
+	require.False(t, diags.HasError())
+	assert.Len(t, set.Elements(), 2)
+
+	empty, diags := GoStructSliceToSetValue[covStruct](ctx, attrs, nil)
+	require.False(t, diags.HasError())
+	assert.False(t, empty.IsNull())
+	assert.Empty(t, empty.Elements())
+
+	bad, diags := GoStructSliceToSetValue(ctx, map[string]attr.Type{"b": types.StringType}, []covStruct{{A: "x"}})
+	assert.True(t, diags.HasError())
+	assert.True(t, bad.IsNull())
+}
+
+// GoStructSliceToListValue returns a null list when an element does not match
+// the attribute map.
+func TestGoStructSliceToListValue_Mismatch(t *testing.T) {
+	list, diags := GoStructSliceToListValue(context.Background(), map[string]attr.Type{"b": types.StringType}, []covStruct{{A: "x"}})
+	assert.True(t, diags.HasError())
+	assert.True(t, list.IsNull())
+}
+
+// --- unknown detection and resolution ---
+
+// ValueContainsUnknown inspects set, map and tuple children and treats nil as
+// known.
+func TestValueContainsUnknown_Collections(t *testing.T) {
+	assert.False(t, ValueContainsUnknown(nil))
+
+	unknownSet := types.SetValueMust(types.StringType, []attr.Value{types.StringUnknown()})
+	knownSet := types.SetValueMust(types.StringType, []attr.Value{types.StringValue("x")})
+	unknownMap := types.MapValueMust(types.StringType, map[string]attr.Value{"k": types.StringUnknown()})
+	knownMap := types.MapValueMust(types.StringType, map[string]attr.Value{"k": types.StringValue("x")})
+	unknownTuple := types.TupleValueMust([]attr.Type{types.StringType}, []attr.Value{types.StringUnknown()})
+	knownTuple := types.TupleValueMust([]attr.Type{types.StringType}, []attr.Value{types.StringValue("x")})
+
+	assert.True(t, ValueContainsUnknown(unknownSet))
+	assert.False(t, ValueContainsUnknown(knownSet))
+	assert.True(t, ValueContainsUnknown(unknownMap))
+	assert.False(t, ValueContainsUnknown(knownMap))
+	assert.True(t, ValueContainsUnknown(unknownTuple))
+	assert.False(t, ValueContainsUnknown(knownTuple))
+}
+
+// ResolveUnknowns fills unknown set, map and tuple elements from the API value
+// and uses typed nulls when the API value is absent.
+func TestResolveUnknowns_SetMapTuple(t *testing.T) {
+	planSet := types.SetValueMust(types.StringType, []attr.Value{types.StringUnknown()})
+	gotSet := ResolveUnknowns(planSet, types.SetValueMust(types.StringType, []attr.Value{types.StringValue("x")}))
+	assert.True(t, gotSet.Equal(types.SetValueMust(types.StringType, []attr.Value{types.StringValue("x")})))
+	gotSet = ResolveUnknowns(planSet, types.SetNull(types.StringType))
+	assert.True(t, gotSet.Equal(types.SetValueMust(types.StringType, []attr.Value{types.StringNull()})))
+
+	planMap := types.MapValueMust(types.StringType, map[string]attr.Value{"k": types.StringUnknown()})
+	gotMap := ResolveUnknowns(planMap, types.MapValueMust(types.StringType, map[string]attr.Value{"k": types.StringValue("v")}))
+	assert.True(t, gotMap.Equal(types.MapValueMust(types.StringType, map[string]attr.Value{"k": types.StringValue("v")})))
+	gotMap = ResolveUnknowns(planMap, types.MapNull(types.StringType))
+	assert.True(t, gotMap.Equal(types.MapValueMust(types.StringType, map[string]attr.Value{"k": types.StringNull()})))
+
+	tupleTypes := []attr.Type{types.StringType}
+	planTuple := types.TupleValueMust(tupleTypes, []attr.Value{types.StringUnknown()})
+	gotTuple := ResolveUnknowns(planTuple, types.TupleValueMust(tupleTypes, []attr.Value{types.StringValue("x")}))
+	assert.True(t, gotTuple.Equal(types.TupleValueMust(tupleTypes, []attr.Value{types.StringValue("x")})))
+	gotTuple = ResolveUnknowns(planTuple, types.TupleNull(tupleTypes))
+	assert.True(t, gotTuple.Equal(types.TupleValueMust(tupleTypes, []attr.Value{types.StringNull()})))
+}
+
+// When a resolved child does not match the declared element type, the
+// collection keeps its plan value, so the unknown child remains.
+func TestResolveUnknowns_TypeMismatchKeepsPlan(t *testing.T) {
+	mt := mismatchNullType{}
+	u := unknownMismatch()
+
+	values := map[string]attr.Value{
+		"object": types.ObjectValueMust(map[string]attr.Type{"a": mt}, map[string]attr.Value{"a": u}),
+		"list":   types.ListValueMust(mt, []attr.Value{u}),
+		"set":    types.SetValueMust(mt, []attr.Value{u}),
+		"map":    types.MapValueMust(mt, map[string]attr.Value{"k": u}),
+		"tuple":  types.TupleValueMust([]attr.Type{mt}, []attr.Value{u}),
+	}
+	for name, v := range values {
+		t.Run(name, func(t *testing.T) {
+			got := ResolveUnknowns(v, nil)
+			assert.True(t, ValueContainsUnknown(got))
+			assert.True(t, got.Type(context.Background()).Equal(v.Type(context.Background())))
+		})
+	}
+
+	// The resolved null is not a mismatchNullValue, so the plan value is kept.
+	assert.True(t, ResolveUnknowns(u, u).IsUnknown())
+}
+
+// typedNull returns nil when no type is given or the type cannot build a null.
+func TestTypedNull_Failures(t *testing.T) {
+	ctx := context.Background()
+	assert.Nil(t, typedNull(ctx, nil))
+	assert.Nil(t, typedNull(ctx, failingNullType{}))
+}
+
+// --- RRSet fixtures ---
+
+func covRRSet(t *testing.T, desc types.String, ttl types.Int64, choice attr.Value) types.Object {
+	t.Helper()
+	return testRRSetObject(t, map[string]attr.Value{
+		"description":            desc,
+		"ttl":                    ttl,
+		"type_record_set_choice": choice,
+	})
+}
+
+func covNSChoice(t *testing.T, name types.String, values types.List) types.Object {
+	t.Helper()
+	return testRRSetTypeChoiceObject(t, map[string]attr.Value{
+		"a_record": types.ObjectNull(testARecordAttrTypes()),
+		"ns_record": testRRSetBranchObject(t, testNSRecordAttrTypes(), map[string]attr.Value{
+			"name":   name,
+			"values": values,
+		}),
+	})
+}
+
+func covEmptyChoice(t *testing.T) types.Object {
+	t.Helper()
+	return testRRSetTypeChoiceObject(t, map[string]attr.Value{
+		"a_record":  types.ObjectNull(testARecordAttrTypes()),
+		"ns_record": types.ObjectNull(testNSRecordAttrTypes()),
+	})
+}
+
+func covUnkeyableRRSet(t *testing.T) types.Object {
+	t.Helper()
+	return covRRSet(t, types.StringNull(), types.Int64Value(60), covEmptyChoice(t))
+}
+
+func covLBRRSet(t *testing.T, lbName, lbNamespace types.String) types.Object {
+	t.Helper()
+	choice := types.ObjectValueMust(testRRSetTypeChoiceWithLBAttrTypes(), map[string]attr.Value{
+		"a_record":  types.ObjectNull(testARecordAttrTypes()),
+		"ns_record": types.ObjectNull(testNSRecordAttrTypes()),
+		"lb_record": types.ObjectValueMust(testLBRecordAttrTypes(), map[string]attr.Value{
+			"name": types.StringValue("www"),
+			"value": types.ObjectValueMust(testLBRecordValueAttrTypes(), map[string]attr.Value{
+				"name":      lbName,
+				"namespace": lbNamespace,
+				"tenant":    types.StringNull(),
+			}),
+		}),
+	})
+	return types.ObjectValueMust(testRRSetWithLBAttrTypes(), map[string]attr.Value{
+		"description":            types.StringNull(),
+		"ttl":                    types.Int64Value(60),
+		"type_record_set_choice": choice,
+	})
+}
+
+var defaultNSValues = []string{"ns1.f5clouddns.com", "ns2.f5clouddns.com"}
+
+// --- RRSet helper edge cases ---
+
+// isBackendDefaultRRSet returns false for every malformed or incomplete
+// RRSet and true for a backend default with a null name.
+func TestIsBackendDefaultRRSet_EdgeCases(t *testing.T) {
+	ttl := types.Int64Value(86400)
+	defaults := testStringListValue(t, defaultNSValues...)
+	tcType := types.ObjectType{AttrTypes: testRRSetTypeChoiceAttrTypes()}
+
+	cases := map[string]attr.Value{
+		"not_object": types.StringValue("x"),
+		"null_rrset": types.ObjectNull(testRRSetAttrTypes()),
+		"no_choice": types.ObjectValueMust(map[string]attr.Type{"ttl": types.Int64Type},
+			map[string]attr.Value{"ttl": ttl}),
+		"null_choice":    covRRSet(t, types.StringNull(), ttl, types.ObjectNull(testRRSetTypeChoiceAttrTypes())),
+		"no_branch":      covRRSet(t, types.StringNull(), ttl, covEmptyChoice(t)),
+		"unknown_name":   covRRSet(t, types.StringNull(), ttl, covNSChoice(t, types.StringUnknown(), defaults)),
+		"null_ttl":       covRRSet(t, types.StringNull(), types.Int64Null(), covNSChoice(t, types.StringValue(""), defaults)),
+		"null_values":    covRRSet(t, types.StringNull(), ttl, covNSChoice(t, types.StringValue(""), types.ListNull(types.StringType))),
+		"unknown_values": covRRSet(t, types.StringNull(), ttl, covNSChoice(t, types.StringValue(""), types.ListValueMust(types.StringType, []attr.Value{types.StringUnknown()}))),
+		"no_ttl": types.ObjectValueMust(map[string]attr.Type{"type_record_set_choice": tcType},
+			map[string]attr.Value{"type_record_set_choice": covNSChoice(t, types.StringValue(""), defaults)}),
+	}
+	for name, v := range cases {
+		t.Run(name, func(t *testing.T) {
+			assert.False(t, isBackendDefaultRRSet(v))
+		})
+	}
+
+	assert.True(t, isBackendDefaultRRSet(covRRSet(t, types.StringNull(), ttl, covNSChoice(t, types.StringNull(), defaults))))
+}
+
+// stripBackendDefaultNSValues leaves malformed, named or valueless records
+// unchanged and removes default NS values from an apex record with a null name.
+func TestStripBackendDefaultNSValues_EdgeCases(t *testing.T) {
+	ttl := types.Int64Value(86400)
+	values := testStringListValue(t, "ns1.f5clouddns.com", "custom.example.com")
+
+	unchanged := map[string]attr.Value{
+		"not_object": types.StringValue("x"),
+		"no_choice": types.ObjectValueMust(map[string]attr.Type{"ttl": types.Int64Type},
+			map[string]attr.Value{"ttl": ttl}),
+		"null_choice":  covRRSet(t, types.StringNull(), ttl, types.ObjectNull(testRRSetTypeChoiceAttrTypes())),
+		"unknown_name": covRRSet(t, types.StringNull(), ttl, covNSChoice(t, types.StringUnknown(), values)),
+		"named":        covRRSet(t, types.StringNull(), ttl, covNSChoice(t, types.StringValue("sub"), values)),
+		"null_values":  covRRSet(t, types.StringNull(), ttl, covNSChoice(t, types.StringValue(""), types.ListNull(types.StringType))),
+	}
+	for name, v := range unchanged {
+		t.Run(name, func(t *testing.T) {
+			assert.True(t, stripBackendDefaultNSValues(nil, v).Equal(v))
+		})
+	}
+
+	api := covRRSet(t, types.StringNull(), ttl, covNSChoice(t, types.StringNull(), values))
+	want := covRRSet(t, types.StringNull(), ttl, covNSChoice(t, types.StringNull(), testStringListValue(t, "custom.example.com")))
+	assert.True(t, stripBackendDefaultNSValues(nil, api).Equal(want))
+}
+
+// preserveRRSetEmptyFields keeps the reference form of empty descriptions and
+// names, and clears a description the reference leaves unknown.
+func TestPreserveRRSetEmptyFields_EdgeCases(t *testing.T) {
+	ttl := types.Int64Value(3600)
+	values := testStringListValue(t, "ns.example.com")
+	target := covRRSet(t, types.StringValue("x"), ttl, covNSChoice(t, types.StringNull(), values))
+
+	assert.True(t, preserveRRSetEmptyFields(types.StringValue("x"), target).Equal(target))
+
+	ref := covRRSet(t, types.StringUnknown(), ttl, covNSChoice(t, types.StringNull(), values))
+	got := preserveRRSetEmptyFields(ref, target)
+	assert.True(t, got.Equal(covRRSet(t, types.StringNull(), ttl, covNSChoice(t, types.StringNull(), values))))
+
+	ref = covRRSet(t, types.StringValue(""), ttl, covNSChoice(t, types.StringValue(""), values))
+	target = covRRSet(t, types.StringNull(), ttl, covNSChoice(t, types.StringNull(), values))
+	got = preserveRRSetEmptyFields(ref, target)
+	assert.True(t, got.Equal(ref))
+}
+
+// sanitizeIndexShiftedDescriptions skips null API elements and keeps a
+// description that already matches the reference with the same key.
+func TestSanitizeIndexShiftedDescriptions_EdgeCases(t *testing.T) {
+	desc := types.StringValue("d")
+	a := testARecordRRSet(t, "a", "1.1.1.1", desc)
+	b := testARecordRRSet(t, "b", "2.2.2.2", desc)
+
+	api := []attr.Value{types.ObjectNull(testRRSetAttrTypes())}
+	assert.Equal(t, api, sanitizeIndexShiftedDescriptions([]attr.Value{a}, api))
+
+	api = []attr.Value{b, a}
+	got := sanitizeIndexShiftedDescriptions([]attr.Value{a, b}, api)
+	assert.True(t, got[0].Equal(b))
+	assert.True(t, got[1].Equal(a))
+}
+
+// preserveRRSetGroupMetadataEmptyFields leaves the target unchanged for a
+// non-object or unknown reference description.
+func TestPreserveRRSetGroupMetadataEmptyFields_EdgeCases(t *testing.T) {
+	metaTypes := testRRSetGroupMetaAttrTypes()
+	target := types.ObjectValueMust(metaTypes, map[string]attr.Value{"name": types.StringValue("g"), "description": types.StringNull()})
+	ref := types.ObjectValueMust(metaTypes, map[string]attr.Value{"name": types.StringValue("g"), "description": types.StringUnknown()})
+
+	assert.True(t, preserveRRSetGroupMetadataEmptyFields(types.StringValue("x"), target).Equal(target))
+	assert.True(t, preserveRRSetGroupMetadataEmptyFields(ref, target).Equal(target))
+}
+
+// newRRSetList returns a null list with diagnostics for mistyped elements.
+func TestNewRRSetList_TypeMismatch(t *testing.T) {
+	list, diags := newRRSetList(types.StringType, []attr.Value{types.Int64Value(1)})
+	assert.True(t, diags.HasError())
+	assert.True(t, list.IsNull())
+}
+
+// Group detection and keys reject nil types, non-object values and groups
+// without a known metadata name.
+func TestRRSetGroupDetectionAndKeys(t *testing.T) {
+	assert.False(t, isRRSetGroupType(nil))
+	assert.False(t, isRRSetGroupType(types.StringType))
+
+	group := testRRSetGroupObject(t, "g")
+	assert.True(t, isRRSetGroupElements([]attr.Value{types.ObjectNull(testRRSetAttrTypes()), group}))
+
+	nameOnly := map[string]attr.Type{"description": types.StringType}
+	metaNoName := types.ObjectValueMust(map[string]attr.Type{"metadata": types.ObjectType{AttrTypes: nameOnly}},
+		map[string]attr.Value{"metadata": types.ObjectValueMust(nameOnly, map[string]attr.Value{"description": types.StringNull()})})
+	metaNullName := types.ObjectValueMust(map[string]attr.Type{"metadata": types.ObjectType{AttrTypes: testRRSetGroupMetaAttrTypes()}},
+		map[string]attr.Value{"metadata": types.ObjectValueMust(testRRSetGroupMetaAttrTypes(),
+			map[string]attr.Value{"name": types.StringNull(), "description": types.StringNull()})})
+
+	for name, v := range map[string]attr.Value{
+		"not_object":  types.StringValue("x"),
+		"no_metadata": types.ObjectValueMust(map[string]attr.Type{"x": types.StringType}, map[string]attr.Value{"x": types.StringNull()}),
+		"no_name":     metaNoName,
+		"null_name":   metaNullName,
+	} {
+		t.Run(name, func(t *testing.T) {
+			_, ok := rrsetGroupAttrValueKey(v)
+			assert.False(t, ok)
+		})
+	}
+}
+
+// rrsetAttrValueKey rejects records whose identity is not fully known, and
+// selectedKnownRRSetBranch rejects choices with more than one branch.
+func TestRRSetAttrValueKey_EdgeCases(t *testing.T) {
+	ttl := types.Int64Value(60)
+	twoBranches := testRRSetTypeChoiceObject(t, map[string]attr.Value{
+		"a_record": testRRSetBranchObject(t, testARecordAttrTypes(), map[string]attr.Value{
+			"name": types.StringValue("a"), "values": testStringListValue(t, "1.1.1.1"),
+		}),
+		"ns_record": testRRSetBranchObject(t, testNSRecordAttrTypes(), map[string]attr.Value{
+			"name": types.StringValue("a"), "values": testStringListValue(t, "ns.example.com"),
+		}),
+	})
+
+	for name, v := range map[string]attr.Value{
+		"not_object":      types.StringValue("x"),
+		"null_choice":     covRRSet(t, types.StringNull(), ttl, types.ObjectNull(testRRSetTypeChoiceAttrTypes())),
+		"no_branch":       covUnkeyableRRSet(t),
+		"two_branches":    covRRSet(t, types.StringNull(), ttl, twoBranches),
+		"unknown_name":    covRRSet(t, types.StringNull(), ttl, covNSChoice(t, types.StringUnknown(), testStringListValue(t, "x"))),
+		"unknown_lb_name": covLBRRSet(t, types.StringUnknown(), types.StringValue("ns")),
+		"unknown_lb_ns":   covLBRRSet(t, types.StringValue("lb"), types.StringUnknown()),
+	} {
+		t.Run(name, func(t *testing.T) {
+			_, ok := rrsetAttrValueKey(v)
+			assert.False(t, ok)
+		})
+	}
+
+	key, ok := rrsetAttrValueKey(covLBRRSet(t, types.StringNull(), types.StringNull()))
+	require.True(t, ok)
+	assert.Equal(t, "LB:www:/", key)
+}
+
+// --- MergeRRSetListForApply ---
+
+// MergeRRSetListForApply handles null, unknown and unindexable inputs
+// without leaving unknown values in the result.
+func TestMergeRRSetListForApply_EdgeCases(t *testing.T) {
+	ctx := context.Background()
+	elemType := types.ObjectType{AttrTypes: testRRSetAttrTypes()}
+	knownA := testARecordRRSet(t, "a", "1.1.1.1", types.StringValue("x"))
+	unknownA := testARecordRRSet(t, "a", "1.1.1.1", types.StringUnknown())
+
+	t.Run("zero_plan_returns_null_list", func(t *testing.T) {
+		got, diags := MergeRRSetListForApply(ctx, types.List{}, testRRSetListValue(t, knownA))
+		require.False(t, diags.HasError())
+		assert.True(t, got.IsNull())
+	})
+	t.Run("unknown_plan_null_api", func(t *testing.T) {
+		got, diags := MergeRRSetListForApply(ctx, types.ListUnknown(elemType), types.ListNull(elemType))
+		require.False(t, diags.HasError())
+		assert.True(t, got.IsNull())
+	})
+	t.Run("null_api_keeps_plan", func(t *testing.T) {
+		planned := testRRSetListValue(t, unknownA)
+		got, diags := MergeRRSetListForApply(ctx, planned, types.ListNull(elemType))
+		require.False(t, diags.HasError())
+		assert.True(t, got.Equal(planned))
+	})
+	t.Run("unkeyable_plan_element", func(t *testing.T) {
+		planned := testRRSetListValue(t, unknownA, covUnkeyableRRSet(t))
+		got, diags := MergeRRSetListForApply(ctx, planned, testRRSetListValue(t, knownA))
+		require.False(t, diags.HasError())
+		assert.False(t, ValueContainsUnknown(got))
+	})
+	t.Run("plan_element_missing_from_api", func(t *testing.T) {
+		unknownNS := testNSRecordRRSet(t, "x", "ns.example.com", types.StringUnknown())
+		planned := testRRSetListValue(t, unknownA, unknownNS)
+		got, diags := MergeRRSetListForApply(ctx, planned, testRRSetListValue(t, knownA))
+		require.False(t, diags.HasError())
+		assert.False(t, ValueContainsUnknown(got))
+		assert.Len(t, got.Elements(), 2)
+	})
+}
+
+// Group apply keeps unkeyable and unmatched planned groups, and merges a
+// group whose API form has no rr_set attribute.
+func TestMergeRRSetListForApply_RRSetGroup_EdgeCases(t *testing.T) {
+	ctx := context.Background()
+	groupType := types.ObjectType{AttrTypes: testRRSetGroupWithLBAttrTypes()}
+	unknownRec := testLBRecordRRSet(t, "www", "lb", "ns", types.StringNull(), types.StringUnknown())
+
+	planned := types.ListValueMust(groupType, []attr.Value{
+		testUnkeyableRRSetGroupObject(t),
+		testRRSetGroupObject(t, "g1", unknownRec),
+	})
+	api := types.ListValueMust(groupType, []attr.Value{testRRSetGroupObject(t, "g2")})
+	got, diags := MergeRRSetListForApply(ctx, planned, api)
+	require.False(t, diags.HasError())
+	assert.Len(t, got.Elements(), 2)
+	assert.False(t, ValueContainsUnknown(got))
+
+	metaOnlyTypes := map[string]attr.Type{"metadata": types.ObjectType{AttrTypes: testRRSetGroupMetaAttrTypes()}}
+	metaG1 := types.ObjectValueMust(testRRSetGroupMetaAttrTypes(), map[string]attr.Value{
+		"name": types.StringValue("g1"), "description": types.StringNull(),
+	})
+	apiNoRRSet := types.ListValueMust(types.ObjectType{AttrTypes: metaOnlyTypes}, []attr.Value{
+		types.ObjectValueMust(metaOnlyTypes, map[string]attr.Value{"metadata": metaG1}),
+	})
+	planned = types.ListValueMust(groupType, []attr.Value{testRRSetGroupObject(t, "g1", unknownRec)})
+	got, diags = MergeRRSetListForApply(ctx, planned, apiNoRRSet)
+	require.False(t, diags.HasError())
+	assert.Len(t, got.Elements(), 1)
+}
+
+// Group apply reports diagnostics and resolves from the API when a nested
+// rr_set list cannot be built from API elements of a different type.
+func TestMergeRRSetListForApply_RRSetGroup_NestedTypeMismatch(t *testing.T) {
+	ctx := context.Background()
+	groupType := types.ObjectType{AttrTypes: testRRSetGroupWithLBAttrTypes()}
+	rrsetType := types.ObjectType{AttrTypes: testRRSetWithLBAttrTypes()}
+	meta := types.ObjectValueMust(testRRSetGroupMetaAttrTypes(), map[string]attr.Value{
+		"name": types.StringValue("g1"), "description": types.StringNull(),
+	})
+	planned := types.ListValueMust(groupType, []attr.Value{
+		types.ObjectValueMust(testRRSetGroupWithLBAttrTypes(), map[string]attr.Value{
+			"metadata": meta,
+			"rr_set":   types.ListUnknown(rrsetType),
+		}),
+	})
+
+	apiGroupTypes := map[string]attr.Type{
+		"metadata": types.ObjectType{AttrTypes: testRRSetGroupMetaAttrTypes()},
+		"rr_set":   types.ListType{ElemType: types.StringType},
+	}
+	api := types.ListValueMust(types.ObjectType{AttrTypes: apiGroupTypes}, []attr.Value{
+		types.ObjectValueMust(apiGroupTypes, map[string]attr.Value{
+			"metadata": meta,
+			"rr_set":   testStringListValue(t, "x"),
+		}),
+	})
+
+	_, diags := MergeRRSetListForApply(ctx, planned, api)
+	assert.True(t, diags.HasError())
+}
+
+// --- MergeRRSetListForRead ---
+
+// MergeRRSetListForRead handles a zero prior, a null API list, duplicate API
+// keys and unkeyable prior elements.
+func TestMergeRRSetListForRead_EdgeCases(t *testing.T) {
+	ctx := context.Background()
+	elemType := types.ObjectType{AttrTypes: testRRSetAttrTypes()}
+	a := testARecordRRSet(t, "a", "1.1.1.1", types.StringNull())
+
+	t.Run("zero_prior_uses_api", func(t *testing.T) {
+		got, diags := MergeRRSetListForRead(ctx, types.List{}, testRRSetListValue(t, a))
+		require.False(t, diags.HasError())
+		require.Len(t, got.Elements(), 1)
+		assert.True(t, got.Elements()[0].Equal(a))
+	})
+	t.Run("null_api_keeps_prior", func(t *testing.T) {
+		prior := testRRSetListValue(t, a)
+		got, diags := MergeRRSetListForRead(ctx, prior, types.ListNull(elemType))
+		require.False(t, diags.HasError())
+		assert.True(t, got.Equal(prior))
+	})
+	t.Run("duplicate_api_keys_keep_prior", func(t *testing.T) {
+		prior := testRRSetListValue(t, a)
+		got, diags := MergeRRSetListForRead(ctx, prior, testRRSetListValue(t, a, a))
+		require.False(t, diags.HasError())
+		assert.True(t, got.Equal(prior))
+	})
+	t.Run("unkeyable_prior_uses_api", func(t *testing.T) {
+		api := testRRSetListValue(t, a)
+		got, diags := MergeRRSetListForRead(ctx, testRRSetListValue(t, covUnkeyableRRSet(t)), api)
+		require.False(t, diags.HasError())
+		assert.True(t, got.Equal(api))
+	})
+}
+
+// Group read keeps prior state for a null API list, and reports diagnostics
+// when the API group has no rr_set attribute.
+func TestMergeRRSetListForRead_RRSetGroup_EdgeCases(t *testing.T) {
+	ctx := context.Background()
+	groupType := types.ObjectType{AttrTypes: testRRSetGroupWithLBAttrTypes()}
+	rec := testLBRecordRRSet(t, "www", "lb", "ns", types.StringNull(), types.StringNull())
+	prior := types.ListValueMust(groupType, []attr.Value{testRRSetGroupObject(t, "g1", rec)})
+
+	got, diags := mergeRRSetGroupListForRead(ctx, groupType, prior, types.ListNull(groupType))
+	require.False(t, diags.HasError())
+	assert.True(t, got.Equal(prior))
+
+	metaOnlyTypes := map[string]attr.Type{"metadata": types.ObjectType{AttrTypes: testRRSetGroupMetaAttrTypes()}}
+	metaG1 := types.ObjectValueMust(testRRSetGroupMetaAttrTypes(), map[string]attr.Value{
+		"name": types.StringValue("g1"), "description": types.StringNull(),
+	})
+	apiNoRRSet := types.ListValueMust(types.ObjectType{AttrTypes: metaOnlyTypes}, []attr.Value{
+		types.ObjectValueMust(metaOnlyTypes, map[string]attr.Value{"metadata": metaG1}),
+	})
+	got, diags = MergeRRSetListForRead(ctx, prior, apiNoRRSet)
+	assert.True(t, diags.HasError())
+	assert.True(t, got.Equal(prior))
 }

@@ -196,3 +196,95 @@ func TestRequiredIf_MarkdownDescription(t *testing.T) {
 		t.Error("expected non-empty markdown description")
 	}
 }
+
+// buildSiblingConfig returns a config with a "site_name" string attribute and
+// a "type" sibling of the given schema attribute and raw value.
+func buildSiblingConfig(t *testing.T, sibling schema.Attribute, siblingType tftypes.Type, siblingVal tftypes.Value) tfsdk.Config {
+	t.Helper()
+
+	rawType := tftypes.Object{AttributeTypes: map[string]tftypes.Type{
+		"type":      siblingType,
+		"site_name": tftypes.String,
+	}}
+	return tfsdk.Config{
+		Schema: schema.Schema{Attributes: map[string]schema.Attribute{
+			"type":      sibling,
+			"site_name": schema.StringAttribute{Optional: true},
+		}},
+		Raw: tftypes.NewValue(rawType, map[string]tftypes.Value{
+			"type":      siblingVal,
+			"site_name": tftypes.NewValue(tftypes.String, nil),
+		}),
+	}
+}
+
+// TestRequiredIf_ListSibling verifies that a list sibling triggers the
+// requirement only when a known string element matches, and that a sibling
+// that is neither a string nor a list never triggers it.
+func TestRequiredIf_ListSibling(t *testing.T) {
+	strList := tftypes.List{ElementType: tftypes.String}
+	intList := tftypes.List{ElementType: tftypes.Number}
+	strListAttr := schema.ListAttribute{ElementType: types.StringType, Optional: true}
+
+	tests := []struct {
+		name    string
+		cfg     tfsdk.Config
+		wantErr bool
+	}{
+		{
+			name: "list_match",
+			cfg: buildSiblingConfig(t, strListAttr, strList, tftypes.NewValue(strList, []tftypes.Value{
+				tftypes.NewValue(tftypes.String, nil),
+				tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
+				tftypes.NewValue(tftypes.String, "JWT"),
+			})),
+			wantErr: true,
+		},
+		{
+			name: "list_no_match",
+			cfg: buildSiblingConfig(t, strListAttr, strList, tftypes.NewValue(strList, []tftypes.Value{
+				tftypes.NewValue(tftypes.String, "OTHER"),
+			})),
+		},
+		{
+			name: "list_null",
+			cfg:  buildSiblingConfig(t, strListAttr, strList, tftypes.NewValue(strList, nil)),
+		},
+		{
+			name: "list_of_non_strings",
+			cfg: buildSiblingConfig(t, schema.ListAttribute{ElementType: types.Int64Type, Optional: true}, intList,
+				tftypes.NewValue(intList, []tftypes.Value{tftypes.NewValue(tftypes.Number, 1)})),
+		},
+		{
+			name: "bool_sibling",
+			cfg:  buildSiblingConfig(t, schema.BoolAttribute{Optional: true}, tftypes.Bool, tftypes.NewValue(tftypes.Bool, true)),
+		},
+	}
+
+	v := requiredifvalidator.RequiredIf("type", "JWT")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			resp := &validator.StringResponse{}
+			v.ValidateString(context.Background(), validator.StringRequest{
+				Path:        path.Root("site_name"),
+				Config:      tt.cfg,
+				ConfigValue: types.StringNull(),
+			}, resp)
+
+			if got := resp.Diagnostics.HasError(); got != tt.wantErr {
+				t.Errorf("HasError() = %v, want %v: %v", got, tt.wantErr, resp.Diagnostics)
+			}
+		})
+	}
+}
+
+// TestRequiredIf_MarkdownDescriptionList verifies that three or more values
+// are joined with commas and a final "or".
+func TestRequiredIf_MarkdownDescriptionList(t *testing.T) {
+	v := requiredifvalidator.RequiredIf("type", "A", "B", "C")
+
+	want := "This field is required when `type` is set to `A`, `B` or `C`."
+	if got := v.MarkdownDescription(context.Background()); got != want {
+		t.Errorf("MarkdownDescription() = %q, want %q", got, want)
+	}
+}

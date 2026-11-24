@@ -7,11 +7,13 @@ package hook
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/gogo/protobuf/proto"
+	"github.com/stretchr/testify/require"
 	"gopkg.volterra.us/stdlib/client/vesapi"
 
 	ves_io_schema_namespace "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/namespace"
@@ -241,3 +243,16 @@ func TestNetworkPolicyPreDeleteHook_CorrectURIsAndRPCFQNs(t *testing.T) {
 
 // Ensure the test file compiles even without the vesapi import being used directly.
 var _ vesapi.CallOpt
+
+// A non-404, non-400 GET error and a wrong response type fail the network policy hook.
+func TestNetworkPolicyPreDeleteHook_GetFailures(t *testing.T) {
+	stub := &stubCustomAPIClient{handler: func(_, _, _, _ string) (proto.Message, error) {
+		return nil, errors.New("status code 500")
+	}}
+	require.ErrorContains(t, NetworkPolicyPreDeleteHook(context.Background(), stub, "default", "p"), "failed to get active network policies")
+
+	stub = &stubCustomAPIClient{handler: func(_, _, _, _ string) (proto.Message, error) {
+		return &ves_io_schema_namespace.GetActiveServicePoliciesResponse{}, nil
+	}}
+	require.ErrorContains(t, NetworkPolicyPreDeleteHook(context.Background(), stub, "default", "p"), "unexpected response type")
+}

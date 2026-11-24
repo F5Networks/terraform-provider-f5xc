@@ -76,3 +76,43 @@ func TestAllowedInSkipsNullAndUnknown(t *testing.T) {
 		}
 	}
 }
+
+// TestAllowedIn_Description verifies that the description lists the allowed
+// categories in a fixed order and the markdown description is equal.
+func TestAllowedIn_Description(t *testing.T) {
+	ctx := context.Background()
+	v := AllowedIn("user", "system")
+
+	want := "namespace must belong to one of: system, user"
+	if got := v.Description(ctx); got != want {
+		t.Errorf("Description() = %q, want %q", got, want)
+	}
+	if got := v.MarkdownDescription(ctx); got != want {
+		t.Errorf("MarkdownDescription() = %q, want %q", got, want)
+	}
+}
+
+// TestAllowedIn_SuggestionAllAndNone verifies the suggestion text when all
+// categories are allowed and when no category is allowed.
+func TestAllowedIn_SuggestionAllAndNone(t *testing.T) {
+	tests := []struct {
+		name  string
+		types []string
+		want  string
+	}{
+		{"all", []string{"system", "shared", "user"}, "the system namespace, shared namespace, or a user-defined namespace instead."},
+		{"none", nil, "a namespace allowed by this resource instead."},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			v, ok := AllowedIn(tt.types...).(allowedInValidator)
+			if !ok {
+				t.Fatal("AllowedIn() does not return allowedInValidator")
+			}
+			if got := v.suggestion(); got != tt.want {
+				t.Errorf("suggestion() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}

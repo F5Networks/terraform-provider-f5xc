@@ -261,9 +261,9 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--origin_servers"></a>
@@ -337,9 +337,9 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--origin_servers--choice--consul_service--site_locator--choice--virtual_site"></a>
@@ -347,9 +347,9 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 
@@ -393,9 +393,9 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 
@@ -448,9 +448,9 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--origin_servers--choice--k8s_service--site_locator--choice--virtual_site"></a>
@@ -458,9 +458,9 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 
@@ -516,9 +516,9 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 
@@ -551,9 +551,9 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--origin_servers--choice--private_ip--site_locator--choice--virtual_site"></a>
@@ -561,9 +561,9 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 
@@ -620,9 +620,9 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 
@@ -646,9 +646,9 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--origin_servers--choice--private_name--site_locator--choice--virtual_site"></a>
@@ -656,9 +656,9 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 
@@ -728,9 +728,9 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--origin_servers--choice--vn_private_ip--virtual_network_ip_choice"></a>
@@ -756,9 +756,9 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 
@@ -891,9 +891,9 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 
@@ -926,9 +926,9 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 

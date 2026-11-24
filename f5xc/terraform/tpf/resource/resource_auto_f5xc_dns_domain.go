@@ -165,6 +165,10 @@ func (r *ResourceF5XCDnsDomain) Schema(ctx context.Context, request resource.Sch
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^\S+$`),
+						"must match pattern `^\\S+$`",
+					),
 					namespacetypevalidator.AllowedIn("system"),
 				},
 			},

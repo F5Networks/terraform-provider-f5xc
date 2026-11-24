@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 
@@ -150,6 +151,10 @@ func (r *ResourceF5XCProtectedDomain) Schema(ctx context.Context, request resour
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^\S+$`),
+						"must match pattern `^\\S+$`",
+					),
 					namespacetypevalidator.AllowedIn("system"),
 				},
 				PlanModifiers: []planmodifier.String{

@@ -341,6 +341,10 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^\S+$`),
+						"must match pattern `^\\S+$`",
+					),
 					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
@@ -524,22 +528,28 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 														NestedObject: schema.NestedAttributeObject{
 															Attributes: map[string]schema.Attribute{
 																"name": schema.StringAttribute{
-																	Description:         "",
-																	MarkdownDescription: "",
+																	Description:         "Name of the referenced object.",
+																	MarkdownDescription: "Name of the referenced object.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
 																},
 																"namespace": schema.StringAttribute{
-																	Description:         "",
-																	MarkdownDescription: "",
+																	Description:         "Namespace of the referenced object.",
+																	MarkdownDescription: "Namespace of the referenced object.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
+																	Validators: []validator.String{
+																		stringvalidator.RegexMatches(
+																			regexp.MustCompile(`^\S+$`),
+																			"must match pattern `^\\S+$`",
+																		),
+																	},
 																},
 																"tenant": schema.StringAttribute{
-																	Description:         "",
-																	MarkdownDescription: "",
+																	Description:         "Tenant of the referenced object.",
+																	MarkdownDescription: "Tenant of the referenced object.",
 																	Required:            false,
 																	Optional:            false,
 																	Computed:            true,
@@ -675,22 +685,28 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 														NestedObject: schema.NestedAttributeObject{
 															Attributes: map[string]schema.Attribute{
 																"name": schema.StringAttribute{
-																	Description:         "",
-																	MarkdownDescription: "",
+																	Description:         "Name of the referenced object.",
+																	MarkdownDescription: "Name of the referenced object.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
 																},
 																"namespace": schema.StringAttribute{
-																	Description:         "",
-																	MarkdownDescription: "",
+																	Description:         "Namespace of the referenced object.",
+																	MarkdownDescription: "Namespace of the referenced object.",
 																	Required:            true,
 																	Optional:            false,
 																	Computed:            false,
+																	Validators: []validator.String{
+																		stringvalidator.RegexMatches(
+																			regexp.MustCompile(`^\S+$`),
+																			"must match pattern `^\\S+$`",
+																		),
+																	},
 																},
 																"tenant": schema.StringAttribute{
-																	Description:         "",
-																	MarkdownDescription: "",
+																	Description:         "Tenant of the referenced object.",
+																	MarkdownDescription: "Tenant of the referenced object.",
 																	Required:            false,
 																	Optional:            false,
 																	Computed:            true,

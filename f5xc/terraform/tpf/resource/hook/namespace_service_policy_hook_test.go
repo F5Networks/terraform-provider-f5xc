@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/gogo/protobuf/proto"
+	"github.com/stretchr/testify/assert"
 	"gopkg.volterra.us/stdlib/client/vesapi"
 
 	ves_io_schema_namespace "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/namespace"
@@ -803,4 +804,24 @@ func TestParseReferringObjects(t *testing.T) {
 			}
 		})
 	}
+}
+
+// A blank namespace maps to the shared "_default" key in the active-policy registry.
+func TestHasActivePolicies(t *testing.T) {
+	assert.False(t, HasActivePolicies("cov-unmarked"))
+
+	MarkNamespaceActivePolicies(" ", true)
+	t.Cleanup(func() { MarkNamespaceActivePolicies("", false) })
+	assert.True(t, HasActivePolicies(""))
+	assert.True(t, HasActivePolicies("_default"))
+}
+
+// A blank namespace shares one lock per policy kind.
+func TestPolicyNamespaceLocks_BlankNamespace(t *testing.T) {
+	lockServicePolicyNamespace(" ")()
+	lockNetworkPolicyNamespace("")()
+	_, ok := servicePolicyNamespaceLocks.Load("_default")
+	assert.True(t, ok)
+	_, ok = networkPolicyNamespaceLocks.Load("_default")
+	assert.True(t, ok)
 }

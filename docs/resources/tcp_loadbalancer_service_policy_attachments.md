@@ -102,7 +102,7 @@ resource "f5xc_tcp_loadbalancer" "example" {
 resource "f5xc_tcp_loadbalancer_service_policy_attachments" "example" {
   namespace             = "terraform-acceptance-test"
   tcp_loadbalancer_name = f5xc_tcp_loadbalancer.example.name
-  service_policies      = [
+  service_policies = [
     f5xc_service_policy.sp1.name,
     f5xc_service_policy.sp2.name,
   ]

@@ -408,6 +408,10 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^\S+$`),
+						"must match pattern `^\\S+$`",
+					),
 					namespacetypevalidator.AllowedIn("system"),
 				},
 			},
@@ -430,22 +434,22 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"name": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
+							Description:         "Name of the referenced object.",
+							MarkdownDescription: "Name of the referenced object.",
 							Required:            false,
 							Optional:            false,
 							Computed:            true,
 						},
 						"namespace": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "<br>**Allowed Values (choose one):** `['system']`",
+							Description:         "Namespace of the referenced object.",
+							MarkdownDescription: "Namespace of the referenced object.<br>**Allowed Values (choose one):** `['system']`",
 							Required:            false,
 							Optional:            false,
 							Computed:            true,
 						},
 						"tenant": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
+							Description:         "Tenant of the referenced object.",
+							MarkdownDescription: "Tenant of the referenced object.",
 							Required:            false,
 							Optional:            false,
 							Computed:            true,
@@ -461,15 +465,15 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 				Computed:            false,
 				Attributes: map[string]schema.Attribute{
 					"name": schema.StringAttribute{
-						Description:         "",
-						MarkdownDescription: "",
+						Description:         "Name of the referenced object.",
+						MarkdownDescription: "Name of the referenced object.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
 					},
 					"namespace": schema.StringAttribute{
-						Description:         "",
-						MarkdownDescription: "<br>**Allowed Values (choose one):** `['system']`",
+						Description:         "Namespace of the referenced object.",
+						MarkdownDescription: "Namespace of the referenced object.<br>**Allowed Values (choose one):** `['system']`",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
@@ -478,11 +482,17 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 						},
 					},
 					"tenant": schema.StringAttribute{
-						Description:         "",
-						MarkdownDescription: "",
+						Description:         "Tenant of the referenced object.",
+						MarkdownDescription: "Tenant of the referenced object.",
 						Required:            true,
 						Optional:            false,
 						Computed:            false,
+						Validators: []validator.String{
+							stringvalidator.RegexMatches(
+								regexp.MustCompile(`\S`),
+								"must match pattern `\\S`",
+							),
+						},
 					},
 				},
 			},
@@ -627,15 +637,15 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 											Computed:            false,
 											Attributes: map[string]schema.Attribute{
 												"name": schema.StringAttribute{
-													Description:         "",
-													MarkdownDescription: "",
+													Description:         "Name of the referenced object.",
+													MarkdownDescription: "Name of the referenced object.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
 												},
 												"namespace": schema.StringAttribute{
-													Description:         "",
-													MarkdownDescription: "<br>**Allowed Values (choose one):** `['system']`",
+													Description:         "Namespace of the referenced object.",
+													MarkdownDescription: "Namespace of the referenced object.<br>**Allowed Values (choose one):** `['system']`",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -644,11 +654,17 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 													},
 												},
 												"tenant": schema.StringAttribute{
-													Description:         "",
-													MarkdownDescription: "",
+													Description:         "Tenant of the referenced object.",
+													MarkdownDescription: "Tenant of the referenced object.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
+													Validators: []validator.String{
+														stringvalidator.RegexMatches(
+															regexp.MustCompile(`\S`),
+															"must match pattern `\\S`",
+														),
+													},
 												},
 											},
 										},
@@ -711,22 +727,28 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 													NestedObject: schema.NestedAttributeObject{
 														Attributes: map[string]schema.Attribute{
 															"name": schema.StringAttribute{
-																Description:         "",
-																MarkdownDescription: "",
+																Description:         "Name of the referenced object.",
+																MarkdownDescription: "Name of the referenced object.",
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
 															},
 															"namespace": schema.StringAttribute{
-																Description:         "",
-																MarkdownDescription: "",
+																Description:         "Namespace of the referenced object.",
+																MarkdownDescription: "Namespace of the referenced object.",
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
+																Validators: []validator.String{
+																	stringvalidator.RegexMatches(
+																		regexp.MustCompile(`^\S+$`),
+																		"must match pattern `^\\S+$`",
+																	),
+																},
 															},
 															"tenant": schema.StringAttribute{
-																Description:         "",
-																MarkdownDescription: "",
+																Description:         "Tenant of the referenced object.",
+																MarkdownDescription: "Tenant of the referenced object.",
 																Required:            false,
 																Optional:            false,
 																Computed:            true,
@@ -768,15 +790,15 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 											Computed:            false,
 											Attributes: map[string]schema.Attribute{
 												"name": schema.StringAttribute{
-													Description:         "",
-													MarkdownDescription: "",
+													Description:         "Name of the referenced object.",
+													MarkdownDescription: "Name of the referenced object.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
 												},
 												"namespace": schema.StringAttribute{
-													Description:         "",
-													MarkdownDescription: "<br>**Allowed Values (choose one):** `['system']`",
+													Description:         "Namespace of the referenced object.",
+													MarkdownDescription: "Namespace of the referenced object.<br>**Allowed Values (choose one):** `['system']`",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
@@ -785,11 +807,17 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 													},
 												},
 												"tenant": schema.StringAttribute{
-													Description:         "",
-													MarkdownDescription: "",
+													Description:         "Tenant of the referenced object.",
+													MarkdownDescription: "Tenant of the referenced object.",
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
+													Validators: []validator.String{
+														stringvalidator.RegexMatches(
+															regexp.MustCompile(`\S`),
+															"must match pattern `\\S`",
+														),
+													},
 												},
 											},
 										},
@@ -855,22 +883,28 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 													NestedObject: schema.NestedAttributeObject{
 														Attributes: map[string]schema.Attribute{
 															"name": schema.StringAttribute{
-																Description:         "",
-																MarkdownDescription: "",
+																Description:         "Name of the referenced object.",
+																MarkdownDescription: "Name of the referenced object.",
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
 															},
 															"namespace": schema.StringAttribute{
-																Description:         "",
-																MarkdownDescription: "",
+																Description:         "Namespace of the referenced object.",
+																MarkdownDescription: "Namespace of the referenced object.",
 																Required:            true,
 																Optional:            false,
 																Computed:            false,
+																Validators: []validator.String{
+																	stringvalidator.RegexMatches(
+																		regexp.MustCompile(`^\S+$`),
+																		"must match pattern `^\\S+$`",
+																	),
+																},
 															},
 															"tenant": schema.StringAttribute{
-																Description:         "",
-																MarkdownDescription: "",
+																Description:         "Tenant of the referenced object.",
+																MarkdownDescription: "Tenant of the referenced object.",
 																Required:            false,
 																Optional:            false,
 																Computed:            true,

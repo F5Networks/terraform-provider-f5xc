@@ -141,3 +141,13 @@ func TestOneOfSizes_Description(t *testing.T) {
 		t.Errorf("MarkdownDescription = %q, want %q", mDesc, desc)
 	}
 }
+
+// TestOneOfSizes_DescriptionEmpty verifies that a validator without valid
+// sizes renders an empty allowed-size list.
+func TestOneOfSizes_DescriptionEmpty(t *testing.T) {
+	v := listsizevalidator.OneOfSizes(-1)
+
+	if got, want := v.Description(context.Background()), "list size must be one of: "; got != want {
+		t.Errorf("Description() = %q, want %q", got, want)
+	}
+}

@@ -8,6 +8,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework/function"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -117,5 +118,51 @@ func TestBytesAtLeast_Description(t *testing.T) {
 	desc := v.Description(context.Background())
 	if desc == "" {
 		t.Error("expected non-empty description")
+	}
+}
+
+// TestBytesAtLeast_ParameterString verifies that function parameter
+// validation matches attribute validation: null and unknown values pass, a
+// too-short value fails, and a negative minimum reports an error.
+func TestBytesAtLeast_ParameterString(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name      string
+		validator function.StringParameterValidator
+		value     types.String
+		wantErr   bool
+	}{
+		{"valid", bytesvalidator.BytesAtLeast(3), types.StringValue("hello"), false},
+		{"too_short", bytesvalidator.BytesAtLeast(10), types.StringValue("hi"), true},
+		{"null", bytesvalidator.BytesAtLeast(10), types.StringNull(), false},
+		{"unknown", bytesvalidator.BytesAtLeast(10), types.StringUnknown(), false},
+		{"invalid_usage", bytesvalidator.BytesAtLeast(-1), types.StringValue("x"), true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			req := function.StringParameterValidatorRequest{ArgumentPosition: 0, Value: tt.value}
+			resp := &function.StringParameterValidatorResponse{}
+			tt.validator.ValidateParameterString(context.Background(), req, resp)
+
+			if gotErr := resp.Error != nil; gotErr != tt.wantErr {
+				t.Errorf("ValidateParameterString() error = %v, wantErr %v", resp.Error, tt.wantErr)
+			}
+		})
+	}
+}
+
+// TestBytesAtLeast_MarkdownDescription verifies that the markdown description
+// equals the plain description.
+func TestBytesAtLeast_MarkdownDescription(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	v := bytesvalidator.BytesAtLeast(1)
+	if got, want := v.MarkdownDescription(ctx), v.Description(ctx); got != want || got == "" {
+		t.Errorf("MarkdownDescription() = %q, want %q", got, want)
 	}
 }

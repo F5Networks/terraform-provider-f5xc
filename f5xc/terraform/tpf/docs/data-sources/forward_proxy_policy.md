@@ -70,9 +70,9 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--proxy_choice--proxy_label_selector"></a>
@@ -298,9 +298,9 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--rule_choice--rule_list--rules--destination_choice--dst_ip_prefix_set"></a>
@@ -308,9 +308,9 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--rule_choice--rule_list--rules--destination_choice--dst_label_selector"></a>
@@ -445,9 +445,9 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--rule_choice--rule_list--rules--source_choice--label_selector"></a>
@@ -500,9 +500,9 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.
 
 
 
@@ -527,6 +527,6 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
+- `tenant` (String) Tenant of the referenced object.

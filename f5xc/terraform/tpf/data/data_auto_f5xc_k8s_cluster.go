@@ -715,19 +715,19 @@ func (r *DataSourceF5XCK8SCluster) Schema(ctx context.Context, request datasourc
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
 										"name": schema.StringAttribute{
-											Description: "",
+											Description: "Name of the referenced object.",
 											Required:    false,
 											Optional:    false,
 											Computed:    true,
 										},
 										"namespace": schema.StringAttribute{
-											Description: "",
+											Description: "Namespace of the referenced object.",
 											Required:    false,
 											Optional:    false,
 											Computed:    true,
 										},
 										"tenant": schema.StringAttribute{
-											Description: "",
+											Description: "Tenant of the referenced object.",
 											Required:    false,
 											Optional:    false,
 											Computed:    true,
@@ -765,19 +765,19 @@ func (r *DataSourceF5XCK8SCluster) Schema(ctx context.Context, request datasourc
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
 										"name": schema.StringAttribute{
-											Description: "",
+											Description: "Name of the referenced object.",
 											Required:    false,
 											Optional:    false,
 											Computed:    true,
 										},
 										"namespace": schema.StringAttribute{
-											Description: "",
+											Description: "Namespace of the referenced object.",
 											Required:    false,
 											Optional:    false,
 											Computed:    true,
 										},
 										"tenant": schema.StringAttribute{
-											Description: "",
+											Description: "Tenant of the referenced object.",
 											Required:    false,
 											Optional:    false,
 											Computed:    true,
@@ -925,19 +925,19 @@ func (r *DataSourceF5XCK8SCluster) Schema(ctx context.Context, request datasourc
 						Computed:    true,
 						Attributes: map[string]schema.Attribute{
 							"name": schema.StringAttribute{
-								Description: "",
+								Description: "Name of the referenced object.",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
 							},
 							"namespace": schema.StringAttribute{
-								Description: "",
+								Description: "Namespace of the referenced object.",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
 							},
 							"tenant": schema.StringAttribute{
-								Description: "",
+								Description: "Tenant of the referenced object.",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
@@ -972,19 +972,19 @@ func (r *DataSourceF5XCK8SCluster) Schema(ctx context.Context, request datasourc
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
 										"name": schema.StringAttribute{
-											Description: "",
+											Description: "Name of the referenced object.",
 											Required:    false,
 											Optional:    false,
 											Computed:    true,
 										},
 										"namespace": schema.StringAttribute{
-											Description: "",
+											Description: "Namespace of the referenced object.",
 											Required:    false,
 											Optional:    false,
 											Computed:    true,
 										},
 										"tenant": schema.StringAttribute{
-											Description: "",
+											Description: "Tenant of the referenced object.",
 											Required:    false,
 											Optional:    false,
 											Computed:    true,

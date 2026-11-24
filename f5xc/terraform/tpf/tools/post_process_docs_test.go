@@ -249,3 +249,258 @@ func TestResolveMetadata_AttachmentResourceInheritsSubcategoryAndParentLink(t *t
 		t.Fatalf("expected longest-prefix parent securemesh_site_v2 API URL, got %q", smMeta.APIURL)
 	}
 }
+
+func writeFile(t *testing.T, path, content string) {
+	t.Helper()
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
+
+const sampleDoc = "---\npage_title: \"x\"\ndescription: |-\n  x\n---\n\n# f5xc_origin_pool (Resource)\n\nManages an origin pool.\n"
+
+// TestMain_PostProcessesDocsTree verifies that main updates resource docs with
+// frontmatter, skips directories, non-Markdown files, and files without
+// frontmatter, reports unreadable docs, and continues when a docs target is
+// not a directory.
+func TestMain_PostProcessesDocsTree(t *testing.T) {
+	root := t.TempDir()
+	tools := filepath.Join(root, "tools")
+	writeFile(t, filepath.Join(tools, "categories.yaml"), "resources:\n  origin_pool:\n    subcategory: Pools\n    api_url: https://example.invalid/op\n")
+	writeFile(t, filepath.Join(tools, "docs_links.generated.yaml"), "resources: {}\n")
+
+	resources := filepath.Join(root, "docs", "resources")
+	writeFile(t, filepath.Join(resources, "origin_pool.md"), sampleDoc)
+	writeFile(t, filepath.Join(resources, "plain.md"), "no frontmatter\n")
+	writeFile(t, filepath.Join(resources, "notes.txt"), "ignored\n")
+	// A dangling symlink fails to read regardless of the user's privileges.
+	if err := os.Symlink(filepath.Join(root, "absent"), filepath.Join(resources, "dangling.md")); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(resources, "subdir.md"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	// A regular file in place of the data-sources directory makes ReadDir fail
+	// with an error other than "not exist".
+	writeFile(t, filepath.Join(root, "docs", "data-sources"), "not a dir")
+
+	t.Chdir(tools)
+	main()
+
+	got, err := os.ReadFile(filepath.Join(resources, "origin_pool.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{`subcategory: "Pools"`, "- [API documentation](https://example.invalid/op)"} {
+		if !strings.Contains(string(got), want) {
+			t.Errorf("updated doc does not contain %q:\n%s", want, got)
+		}
+	}
+}
+
+// TestMain_MissingDocsDirectories verifies that main succeeds when neither
+// docs directory exists.
+func TestMain_MissingDocsDirectories(t *testing.T) {
+	tools := filepath.Join(t.TempDir(), "tools")
+	writeFile(t, filepath.Join(tools, "categories.yaml"), "default_category: General\n")
+
+	t.Chdir(tools)
+	main()
+}
+
+// TestLoadLinksConfig_Errors verifies that read errors other than "not exist"
+// and invalid YAML are returned, and that empty sections become empty maps.
+func TestLoadLinksConfig_Errors(t *testing.T) {
+	dir := t.TempDir()
+
+	if _, err := loadLinksConfig(dir); err == nil {
+		t.Error("expected error when reading a directory")
+	}
+
+	bad := filepath.Join(dir, "bad.yaml")
+	writeFile(t, bad, "resources: [\n")
+	if _, err := loadLinksConfig(bad); err == nil {
+		t.Error("expected error for invalid YAML")
+	}
+
+	// Explicit null sections reset the preset maps to nil during decoding.
+	empty := filepath.Join(dir, "empty.yaml")
+	writeFile(t, empty, "resources: null\ndata_sources: null\n")
+	links, err := loadLinksConfig(empty)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if links.Resources == nil || links.DataSources == nil {
+		t.Errorf("expected non-nil maps, got %+v", links)
+	}
+}
+
+// TestMergeLinksConfig_NilInputsAndDataSources verifies that nil inputs act as
+// empty configs and that data source overrides replace base values.
+func TestMergeLinksConfig_NilInputsAndDataSources(t *testing.T) {
+	if got := mergeLinksConfig(nil, nil); len(got.Resources) != 0 || len(got.DataSources) != 0 {
+		t.Errorf("mergeLinksConfig(nil, nil) = %+v, want empty", got)
+	}
+
+	merged := mergeLinksConfig(
+		&LinksConfig{DataSources: map[string]string{"a": "base", "b": "keep"}},
+		&LinksConfig{DataSources: map[string]string{"a": "override"}},
+	)
+	if merged.DataSources["a"] != "override" || merged.DataSources["b"] != "keep" {
+		t.Errorf("unexpected data sources: %+v", merged.DataSources)
+	}
+}
+
+// TestLoadConfig_ErrorsAndDefaults verifies that a missing file and invalid
+// YAML return errors, and that an empty file yields non-nil maps and the
+// "General" default category.
+func TestLoadConfig_ErrorsAndDefaults(t *testing.T) {
+	dir := t.TempDir()
+
+	if _, err := loadConfig(filepath.Join(dir, "missing.yaml")); err == nil {
+		t.Error("expected error for missing file")
+	}
+
+	bad := filepath.Join(dir, "bad.yaml")
+	writeFile(t, bad, "resources: [\n")
+	if _, err := loadConfig(bad); err == nil {
+		t.Error("expected error for invalid YAML")
+	}
+
+	empty := filepath.Join(dir, "empty.yaml")
+	writeFile(t, empty, "{}\n")
+	cfg, err := loadConfig(empty)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Resources == nil || cfg.DataSources == nil || cfg.PrefixMappings == nil || cfg.DefaultCategory != "General" {
+		t.Errorf("unexpected defaults: %+v", cfg)
+	}
+}
+
+// TestNormalizeDocMetadataMap_APIURL verifies that an object entry keeps its
+// api_url and that entries of other types are dropped.
+func TestNormalizeDocMetadataMap_APIURL(t *testing.T) {
+	got := normalizeDocMetadataMap(map[string]interface{}{
+		"a": map[string]interface{}{"api_url": "https://example.invalid/a"},
+		"b": 42,
+	})
+
+	if got["a"].APIURL != "https://example.invalid/a" {
+		t.Errorf("APIURL = %q", got["a"].APIURL)
+	}
+	if _, ok := got["b"]; ok {
+		t.Error("expected unsupported entry to be dropped")
+	}
+}
+
+// TestResolveAttachmentParentAPIURL_Precedence verifies that empty and
+// self-referencing entries are skipped and that the longest matching parent
+// wins across links and config.
+func TestResolveAttachmentParentAPIURL_Precedence(t *testing.T) {
+	name := "http_loadbalancer_policy_attachments"
+	links := &LinksConfig{Resources: map[string]string{
+		name:   "https://example.invalid/self",
+		"http": "https://example.invalid/short",
+		"skip": " ",
+	}}
+	cfg := &Config{Resources: map[string]DocMetadata{
+		name:                {APIURL: "https://example.invalid/self"},
+		"empty":             {},
+		"http_loadbalancer": {APIURL: "https://example.invalid/long"},
+	}}
+
+	if got := resolveAttachmentParentAPIURL(name, cfg, links); got != "https://example.invalid/long" {
+		t.Errorf("resolveAttachmentParentAPIURL() = %q", got)
+	}
+}
+
+// TestResolveCategory_Precedence verifies the lookup order: resource entry,
+// data source entry, prefix mapping, configured default, then "General".
+func TestResolveCategory_Precedence(t *testing.T) {
+	cfg := &Config{
+		Resources:      map[string]DocMetadata{"r": {Subcategory: "R"}},
+		DataSources:    map[string]DocMetadata{"d": {Subcategory: "D"}},
+		PrefixMappings: map[string]string{"pre_": "P"},
+	}
+
+	tests := []struct{ name, def, want string }{
+		{"r", "", "R"},
+		{"d", "", "D"},
+		{"pre_x", "", "P"},
+		{"other", "Def", "Def"},
+		{"other", "", "General"},
+	}
+	for _, tt := range tests {
+		cfg.DefaultCategory = tt.def
+		if got := resolveCategory(tt.name, cfg); got != tt.want {
+			t.Errorf("resolveCategory(%q) = %q, want %q", tt.name, got, tt.want)
+		}
+	}
+}
+
+// TestUpdateDocFile_SkipsAndErrors verifies that missing or malformed
+// frontmatter leaves the file unchanged, that a missing description appends
+// the subcategory, and that read and write errors are returned.
+func TestUpdateDocFile_SkipsAndErrors(t *testing.T) {
+	dir := t.TempDir()
+	meta := DocMetadata{Subcategory: "S"}
+
+	if _, err := updateDocFile(filepath.Join(dir, "missing.md"), meta, false); err == nil {
+		t.Error("expected read error")
+	}
+
+	for name, content := range map[string]string{
+		"short.md":      "---\n",
+		"unclosed.md":   "---\na: b\nc: d\n",
+		"crlf_short.md": "---\r\n",
+	} {
+		p := filepath.Join(dir, name)
+		writeFile(t, p, content)
+		if updated, err := updateDocFile(p, meta, false); err != nil || updated {
+			t.Errorf("%s: updated=%v err=%v, want false, nil", name, updated, err)
+		}
+	}
+
+	noDesc := filepath.Join(dir, "nodesc.md")
+	writeFile(t, noDesc, "---\npage_title: x\n---\nbody\n")
+	if updated, err := updateDocFile(noDesc, meta, false); err != nil || !updated {
+		t.Fatalf("updated=%v err=%v, want true, nil", updated, err)
+	}
+	got, err := os.ReadFile(noDesc)
+	if err != nil {
+		t.Fatalf("read %s: %v", noDesc, err)
+	}
+	if !strings.Contains(string(got), "page_title: x\nsubcategory: \"S\"\n---") {
+		t.Errorf("subcategory not appended:\n%s", got)
+	}
+
+	if os.Geteuid() == 0 {
+		t.Skip("root ignores file permissions, so the write error cannot be produced")
+	}
+	readOnly := filepath.Join(dir, "readonly.md")
+	writeFile(t, readOnly, "---\npage_title: x\n---\nbody\n")
+	if err := os.Chmod(readOnly, 0o444); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := updateDocFile(readOnly, meta, false); err == nil {
+		t.Error("expected write error for read-only file")
+	}
+}
+
+// TestUpsertAPIReference_NoChange verifies that the body is unchanged when the
+// URL is empty, no title exists, or the title has no description.
+func TestUpsertAPIReference_NoChange(t *testing.T) {
+	for _, tt := range []struct{ body, url string }{
+		{"# T\n\ndesc\n", " "},
+		{"no title\n", "https://example.invalid"},
+		{"# T\n\n", "https://example.invalid"},
+	} {
+		if got := upsertAPIReference(tt.body, tt.url); got != tt.body {
+			t.Errorf("upsertAPIReference(%q) = %q, want unchanged", tt.body, got)
+		}
+	}
+}

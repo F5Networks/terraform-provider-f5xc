@@ -151,6 +151,10 @@ func (r *ResourceF5XCAllowedDomain) Schema(ctx context.Context, request resource
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^\S+$`),
+						"must match pattern `^\\S+$`",
+					),
 					namespacetypevalidator.AllowedIn("system"),
 				},
 				PlanModifiers: []planmodifier.String{

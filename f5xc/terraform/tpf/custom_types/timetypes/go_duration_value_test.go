@@ -14,7 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
-	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/custom_types/timetypes"
 )
 
 func TestDuration_Equals(t *testing.T) {
@@ -280,4 +280,66 @@ func TestDuration_ValueDuration(t *testing.T) {
 			}
 		})
 	}
+}
+
+// ValueGoDuration and ValueRFC3339Time report an error for a known value that does not parse.
+func TestValueConversionParseError(t *testing.T) {
+	d := timetypes.GoDuration{StringValue: basetypes.NewStringValue("bad")}
+	if _, diags := d.ValueGoDuration(); !diags.HasError() {
+		t.Error("ValueGoDuration: expected error")
+	}
+
+	r := timetypes.RFC3339{StringValue: basetypes.NewStringValue("bad")}
+	if _, diags := r.ValueRFC3339Time(); !diags.HasError() {
+		t.Error("ValueRFC3339Time: expected error")
+	}
+}
+
+// The GoDuration constructors produce null for nil input, known values for valid input, and errors or panics for invalid input.
+func TestGoDurationConstructors(t *testing.T) {
+	dur := 90 * time.Second
+
+	if got := timetypes.NewGoDurationValue(dur).ValueString(); got != "1m30s" {
+		t.Errorf("NewGoDurationValue = %q", got)
+	}
+	if !timetypes.NewGoDurationPointerValue(nil).IsNull() {
+		t.Error("NewGoDurationPointerValue(nil) must be null")
+	}
+	if got := timetypes.NewGoDurationPointerValue(&dur).ValueString(); got != "1m30s" {
+		t.Errorf("NewGoDurationPointerValue = %q", got)
+	}
+
+	if v, diags := timetypes.NewGoDurationValueFromString("5m"); diags.HasError() || v.ValueString() != "5m" {
+		t.Errorf("NewGoDurationValueFromString valid: %v %v", v, diags)
+	}
+	if v, diags := timetypes.NewGoDurationValueFromString("bad"); !diags.HasError() || !v.IsUnknown() {
+		t.Errorf("NewGoDurationValueFromString invalid: %v %v", v, diags)
+	}
+
+	if v, diags := timetypes.NewGoDurationValueFromPointerString(nil); diags.HasError() || !v.IsNull() {
+		t.Errorf("NewGoDurationValueFromPointerString(nil): %v %v", v, diags)
+	}
+	s := "1h"
+	if v, diags := timetypes.NewGoDurationValueFromPointerString(&s); diags.HasError() || v.ValueString() != "1h" {
+		t.Errorf("NewGoDurationValueFromPointerString: %v %v", v, diags)
+	}
+
+	if !timetypes.NewGoDurationValueFromPointerStringMust(nil).IsNull() {
+		t.Error("NewGoDurationValueFromPointerStringMust(nil) must be null")
+	}
+	if got := timetypes.NewGoDurationValueFromPointerStringMust(&s).ValueString(); got != "1h" {
+		t.Errorf("NewGoDurationValueFromPointerStringMust = %q", got)
+	}
+
+	assertPanics(t, "NewGoDurationValueFromStringMust", func() { timetypes.NewGoDurationValueFromStringMust("bad") })
+}
+
+func assertPanics(t *testing.T, name string, fn func()) {
+	t.Helper()
+	defer func() {
+		if recover() == nil {
+			t.Errorf("%s: expected panic", name)
+		}
+	}()
+	fn()
 }

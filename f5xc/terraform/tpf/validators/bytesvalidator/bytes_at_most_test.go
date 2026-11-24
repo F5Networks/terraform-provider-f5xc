@@ -8,6 +8,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework/function"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -117,5 +118,51 @@ func TestBytesAtMost_Description(t *testing.T) {
 	desc := v.Description(context.Background())
 	if desc == "" {
 		t.Error("expected non-empty description")
+	}
+}
+
+// TestBytesAtMost_ParameterString verifies that function parameter
+// validation matches attribute validation: null and unknown values pass, a
+// too-long value fails, and a negative maximum reports an error.
+func TestBytesAtMost_ParameterString(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name      string
+		validator function.StringParameterValidator
+		value     types.String
+		wantErr   bool
+	}{
+		{"valid", bytesvalidator.BytesAtMost(10), types.StringValue("hello"), false},
+		{"too_long", bytesvalidator.BytesAtMost(2), types.StringValue("hello"), true},
+		{"null", bytesvalidator.BytesAtMost(2), types.StringNull(), false},
+		{"unknown", bytesvalidator.BytesAtMost(2), types.StringUnknown(), false},
+		{"invalid_usage", bytesvalidator.BytesAtMost(-1), types.StringValue("x"), true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			req := function.StringParameterValidatorRequest{ArgumentPosition: 0, Value: tt.value}
+			resp := &function.StringParameterValidatorResponse{}
+			tt.validator.ValidateParameterString(context.Background(), req, resp)
+
+			if gotErr := resp.Error != nil; gotErr != tt.wantErr {
+				t.Errorf("ValidateParameterString() error = %v, wantErr %v", resp.Error, tt.wantErr)
+			}
+		})
+	}
+}
+
+// TestBytesAtMost_MarkdownDescription verifies that the markdown description
+// equals the plain description.
+func TestBytesAtMost_MarkdownDescription(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	v := bytesvalidator.BytesAtMost(2)
+	if got, want := v.MarkdownDescription(ctx), v.Description(ctx); got != want || got == "" {
+		t.Errorf("MarkdownDescription() = %q, want %q", got, want)
 	}
 }

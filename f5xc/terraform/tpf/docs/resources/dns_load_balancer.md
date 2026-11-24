@@ -175,9 +175,9 @@ Optional:
 
 Required:
 
-- `name` (String)
-- `namespace` (String) <br>**Allowed Values (choose one):** `['system']`
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.<br>**Allowed Values (choose one):** `['system']`
+- `tenant` (String) Tenant of the referenced object.
 
 
 
@@ -213,12 +213,12 @@ Required:
 
 Required:
 
-- `name` (String)
-- `namespace` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
 
 Read-Only:
 
-- `tenant` (String)
+- `tenant` (String) Tenant of the referenced object.
 
 
 
@@ -235,9 +235,9 @@ Required:
 
 Required:
 
-- `name` (String)
-- `namespace` (String) <br>**Allowed Values (choose one):** `['system']`
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.<br>**Allowed Values (choose one):** `['system']`
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--rule_list--rules--client_choice--ip_prefix_list"></a>
@@ -261,12 +261,12 @@ Required:
 
 Required:
 
-- `name` (String)
-- `namespace` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.
 
 Read-Only:
 
-- `tenant` (String)
+- `tenant` (String) Tenant of the referenced object.
 
 
 
@@ -278,9 +278,9 @@ Read-Only:
 
 Required:
 
-- `name` (String)
-- `namespace` (String) <br>**Allowed Values (choose one):** `['system']`
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.<br>**Allowed Values (choose one):** `['system']`
+- `tenant` (String) Tenant of the referenced object.
 
 
 <a id="nestedatt--response_cache"></a>
@@ -327,9 +327,9 @@ Optional:
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String) <br>**Allowed Values (choose one):** `['system']`
-- `tenant` (String)
+- `name` (String) Name of the referenced object.
+- `namespace` (String) Namespace of the referenced object.<br>**Allowed Values (choose one):** `['system']`
+- `tenant` (String) Tenant of the referenced object.
 ## Import
 
 In Terraform v1.5.0 and later, use an `import` block to import this resource by ID.
